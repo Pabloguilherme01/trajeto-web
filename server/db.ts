@@ -1,7 +1,9 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { consentEvents, fuelPriceSnapshots, InsertUser, redemptions, routeSearches, socialLinks, users } from "../drizzle/schema";
+import { consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeSearches, socialLinks, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
+import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -185,11 +187,50 @@ export async function createRedemption(input: {
   return { id: Number(result[0].insertId), code, status: "requested" as const };
 }
 
+export async function getPersonalOverview(userId: number) {
+  const db = await getDb();
+  if (!db) return { routes: [], redemptions: [], favorites: [] };
+  const [routes, userRedemptions, favorites] = await Promise.all([
+    db.select().from(routeSearches).where(eq(routeSearches.userId, userId)).orderBy(desc(routeSearches.createdAt)).limit(12),
+    db.select().from(redemptions).where(eq(redemptions.userId, userId)).orderBy(desc(redemptions.requestedAt)).limit(12),
+    db.select().from(favoriteStations).where(eq(favoriteStations.userId, userId)).orderBy(desc(favoriteStations.createdAt)).limit(24),
+  ]);
+  return { routes, redemptions: userRedemptions, favorites };
+}
+
+export async function getFavoritePlaceIds(userId: number, placeIds: string[]) {
+  const db = await getDb();
+  if (!db || placeIds.length === 0) return [];
+  const rows = await db.select({ placeId: favoriteStations.placeId }).from(favoriteStations).where(and(eq(favoriteStations.userId, userId), inArray(favoriteStations.placeId, placeIds)));
+  return rows.map(row => row.placeId);
+}
+
+export async function addFavoriteStation(userId: number, input: FavoriteStationInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  const values = favoriteStationValues(input);
+  await db.insert(favoriteStations).values({ userId, ...values }).onDuplicateKeyUpdate({ set: { stationName: values.stationName, stationAddress: values.stationAddress, lat: values.lat, lng: values.lng } });
+  return { favorited: true };
+}
+
+export async function removeFavoriteStation(userId: number, placeId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.delete(favoriteStations).where(and(eq(favoriteStations.userId, userId), eq(favoriteStations.placeId, placeId)));
+  return { favorited: false };
+}
+
+export async function createProductEvent(input: { event: ProductEventName; region?: string | null }) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(productEvents).values({ event: input.event, region: normalizeRegion(input.region) });
+}
+
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [] };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [] };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -197,6 +238,7 @@ export async function getOperationalOverview() {
     db.select().from(routeSearches).orderBy(desc(routeSearches.createdAt)).limit(8),
     db.select().from(redemptions).orderBy(desc(redemptions.requestedAt)).limit(8),
     db.select({ origin: routeSearches.origin, destination: routeSearches.destination, consultations: sql<number>`count(*)` }).from(routeSearches).groupBy(routeSearches.origin, routeSearches.destination).orderBy(desc(sql`count(*)`)).limit(6),
+    db.select({ event: productEvents.event, total: count() }).from(productEvents).groupBy(productEvents.event),
   ]);
 
   return {
@@ -204,5 +246,6 @@ export async function getOperationalOverview() {
     recentRoutes,
     recentRedemptions,
     topRoutes,
+    growthEvents,
   };
 }

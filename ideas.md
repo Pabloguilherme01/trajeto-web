@@ -103,3 +103,15 @@ Regiões funcionam como portais de rota: cartões coloridos, grandes e com respo
 ### Social Presence
 
 O layout terá uma zona própria para Instagram, WhatsApp e outras redes. Os links externos só serão ativados depois que os perfis oficiais forem fornecidos, evitando apontar visitantes para contas incorretas.
+
+## Área pessoal
+
+### Dados e privacidade
+
+- **Consultas**: exibem somente rotas pesquisadas depois que a pessoa entra na conta; consultas públicas anônimas não são retroativamente atribuídas.
+- **Resgates**: apresentam posto, código, data e status da solicitação registrada.
+- **Favoritos**: guardam o identificador do posto, nome, endereço e coordenadas exibidas publicamente, vinculados à conta e removíveis a qualquer momento.
+
+### Interação
+
+O visitante continua livre para consultar. Ao tocar em “Favoritar”, a experiência explica que uma conta integrada salva a escolha. Após entrar, a ação volta ao mesmo ponto e pode ser concluída sem preencher novos dados.

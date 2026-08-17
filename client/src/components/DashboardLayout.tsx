@@ -21,15 +21,17 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, MapPinned, PanelLeft } from "lucide-react";
+import { CircleUserRound, LayoutDashboard, LogOut, MapPinned, PanelLeft } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
+import { dashboardAccessCopy, type DashboardAccessCopy } from "@/lib/dashboardAccessCopy";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Operações", path: "/operacoes" },
+  { icon: CircleUserRound, label: "Minha conta", path: "/minha-conta" },
   { icon: MapPinned, label: "Planejador", path: "/planejar" },
+  { icon: LayoutDashboard, label: "Operações", path: "/operacoes" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -39,8 +41,10 @@ const MAX_WIDTH = 480;
 
 export default function DashboardLayout({
   children,
+  accessCopy = dashboardAccessCopy,
 }: {
   children: React.ReactNode;
+  accessCopy?: DashboardAccessCopy;
 }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
@@ -62,10 +66,10 @@ export default function DashboardLayout({
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Entre para acessar a operação
+              {accessCopy.title}
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              O painel operacional requer uma conta autenticada. Continue para iniciar o acesso.
+              {accessCopy.description}
             </p>
           </div>
           <Button

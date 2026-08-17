@@ -25,3 +25,24 @@
 - [x] Criar uma consulta pública de informações do posto, sem exigir login.
 - [x] Criar uma configuração autônoma de links sociais editável pelo painel operacional.
 - [x] Validar a nova experiência e salvar um checkpoint de entrega.
+- [x] Definir o histórico pessoal de consultas e resgates e o modelo de favoritos por usuário.
+- [x] Criar persistência e APIs protegidas para postos favoritos.
+- [x] Construir a área pessoal de histórico, resgates e favoritos.
+- [x] Conectar o botão de favorito na consulta pública aos dados da conta.
+- [ ] Publicar os links oficiais de Instagram e WhatsApp após receber os URLs confirmados.
+- [x] Validar e salvar a atualização da área pessoal.
+- [x] Diagnosticar e priorizar fricções da jornada de consulta móvel.
+- [x] Criar comparação mobile de postos com fonte, data, distância e ação de rota.
+- [x] Validar a comparação mobile selecionando até três postos, incluindo fonte, data, distância, CTA de rota e bloqueio do quarto item.
+- [x] Melhorar a conversão de consulta para conta, favorito e navegação externa.
+- [x] Carregar sob demanda as jornadas secundárias para reduzir o peso inicial no celular.
+- [x] Instrumentar eventos agregados de busca, mapa, rota, favorito e conversão de conta sem dados pessoais.
+- [x] Validar velocidade, responsividade e qualidade do fluxo de conversão, incluindo o tamanho do bundle inicial.
+- [x] Corrigir a mensagem de acesso não autenticado da área pessoal para não mencionar o painel operacional.
+- [ ] Salvar checkpoint com a atualização validada da área pessoal e das melhorias mobile.
+- [x] Separar as dependências do bundle inicial em chunks de produção cacheáveis.
+- [x] Validar explicitamente a responsividade e o fluxo de conversão mobile após a divisão de chunks.
+- [x] Registrar a evidência final de desempenho e experiência após o build otimizado.
+- [x] Confirmar o fluxo mobile pós-otimização entre consulta pública, CTA de conta e retorno à área pessoal.
+- [x] Confirmar que a ação de favorito permanece disponível e clara na consulta mobile autenticada.
+- [x] Restaurar a consulta de origem após a autenticação iniciada pela CTA de conta ou favorito.

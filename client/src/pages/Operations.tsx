@@ -7,6 +7,16 @@ import { useEffect, useState } from "react";
 
 const DEFAULT_ANP_SOURCE_URL = "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/arquivos-lpc/2026/revendas_lpc_2026-08-09_2026-08-15.xlsx";
 const socialPlatforms = ["instagram", "whatsapp", "tiktok", "youtube"] as const;
+const growthLabels: Record<string, string> = {
+  station_search: "Buscas de postos",
+  map_open: "Mapas abertos",
+  station_compare: "Comparações iniciadas",
+  route_open: "Rotas abertas",
+  favorite_intent: "Interesse em favorito",
+  favorite_saved: "Favoritos salvos",
+  account_cta: "Chamadas para conta",
+  redemption_requested: "Resgates solicitados",
+};
 
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
@@ -47,6 +57,8 @@ export default function Operations() {
               { label: "Consentimentos", value: data.totals.consentEvents, note: "decisões registradas", icon: ShieldCheck, accent: "#668B7D" },
             ].map(metric => <article key={metric.label} className="relative overflow-hidden border border-[#D7DFD8] bg-white p-5"><span className="absolute right-0 top-0 h-2 w-16" style={{ backgroundColor: metric.accent }} /><metric.icon className="size-5 text-[#58726E]" /><p className="mt-7 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#778A85]">{metric.label}</p><p className="font-display mt-2 text-5xl font-semibold tracking-[-0.075em]">{metric.value}</p><p className="mt-2 text-xs text-[#697D78]">{metric.note}</p></article>)}
           </section>
+
+          <section className="mt-8 border border-[#D7DFD8] bg-[#E5E9FF] p-6 sm:p-7"><div className="flex items-start justify-between gap-5"><div><p className="eyebrow">Sinais de conversão</p><h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">O que move a jornada.</h2><p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#506A64]">Eventos agregados da jornada pública. Eles não armazenam identificadores de pessoa, número de telefone ou conteúdo de busca detalhado.</p></div><Activity className="size-5 text-[#3E54E8]" /></div>{data.growthEvents.length ? <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{data.growthEvents.map(item => <div key={item.event} className="border-l-4 border-[#3E54E8] bg-white p-4"><p className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-[#607670]">{growthLabels[item.event] || item.event}</p><p className="font-display mt-2 text-4xl font-semibold tracking-[-0.07em]">{item.total}</p></div>)}</div> : <p className="mt-6 border-t border-dashed border-[#AAB8D5] pt-5 text-sm text-[#53656B]">Os sinais aparecerão aqui conforme visitantes pesquisarem, compararem e abrirem rotas.</p>}</section>
 
           <section className="mt-8 grid gap-7 xl:grid-cols-[1.08fr_0.92fr]">
             <article className="border border-[#D7DFD8] bg-white p-6 sm:p-7"><div className="flex items-start justify-between gap-5"><div><p className="eyebrow">Mais pesquisadas</p><h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Rotas que chamam atenção.</h2></div><BarChart3 className="size-5 text-[#BA5B45]" /></div>{data.topRoutes.length ? <div className="mt-7 divide-y divide-[#E0E6E0]">{data.topRoutes.map((route, index) => <div key={`${route.origin}-${route.destination}`} className="flex items-center gap-4 py-4"><span className="font-display text-2xl tracking-[-0.06em] text-[#BA5B45]">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{route.origin}</p><p className="my-1 flex items-center gap-1 text-xs text-[#71847F]"><ArrowRight className="size-3" /> {route.destination}</p></div><span className="border border-[#CBD8CF] px-2 py-1 text-xs font-bold text-[#45635C]">{route.consultations} {route.consultations === 1 ? "consulta" : "consultas"}</span></div>)}</div> : <div className="mt-7 flex min-h-48 flex-col justify-center border-y border-dashed border-[#CCD7CE] text-sm text-[#6D817C]"><MapPinned className="mb-3 size-5 text-[#BA5B45]" /><p className="font-bold text-[#42615A]">Ainda não há rotas registradas.</p><p className="mt-1">As primeiras pesquisas feitas no planejador aparecerão aqui.</p></div>}</article>

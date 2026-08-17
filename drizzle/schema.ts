@@ -1,4 +1,4 @@
-import { boolean, decimal, index, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, decimal, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -87,3 +87,21 @@ export const socialLinks = mysqlTable("social_links", {
   active: boolean("active").default(false).notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
+
+export const favoriteStations = mysqlTable("favorite_stations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  placeId: varchar("placeId", { length: 255 }).notNull(),
+  stationName: varchar("stationName", { length: 255 }).notNull(),
+  stationAddress: varchar("stationAddress", { length: 500 }).notNull(),
+  lat: decimal("lat", { precision: 10, scale: 7 }).notNull(),
+  lng: decimal("lng", { precision: 10, scale: 7 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => ({ userIdx: index("favorite_stations_user_idx").on(table.userId), userPlaceUnique: uniqueIndex("favorite_stations_user_place_unique").on(table.userId, table.placeId) }));
+
+export const productEvents = mysqlTable("product_events", {
+  id: int("id").autoincrement().primaryKey(),
+  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested"]).notNull(),
+  region: varchar("region", { length: 120 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => ({ eventCreatedIdx: index("product_events_event_created_idx").on(table.event, table.createdAt), regionCreatedIdx: index("product_events_region_created_idx").on(table.region, table.createdAt) }));

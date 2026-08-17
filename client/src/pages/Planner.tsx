@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import { useProductEvents } from "@/hooks/useProductEvents";
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleUserRound, Fuel, Loader2, MapPin, Route as RouteIcon, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -21,10 +22,11 @@ export default function Planner() {
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
   const [rescueMessage, setRescueMessage] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuth();
+  const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation({ onSuccess: setPlanned });
   const recordConsent = trpc.consent.record.useMutation();
   const requestRedemption = trpc.operations.requestRedemption.useMutation({
-    onSuccess: redemption => setRescueMessage(`Solicitação registrada. Seu código é ${redemption.code}.`),
+    onSuccess: redemption => { track("redemption_requested", destination || origin); setRescueMessage(`Solicitação registrada. Seu código é ${redemption.code}.`); },
     onError: error => {
       if (error.message.includes("Please login")) startLogin();
     },
@@ -101,7 +103,7 @@ export default function Planner() {
 
         <section className="mt-10 grid overflow-hidden border border-[#C7D2C9] bg-[#EAF0E9] lg:grid-cols-[0.74fr_1.26fr]">
           <div className="bg-[#14343C] p-7 text-white sm:p-9"><CircleUserRound className="size-7 text-[#FFC928]" /><p className="mt-12 text-[0.64rem] font-bold uppercase tracking-[0.16em] text-[#FFC928]">Ativação simples por conta</p><h2 className="font-display mt-4 max-w-sm text-4xl font-semibold leading-[0.92] tracking-[-0.06em]">Entre quando fizer sentido.</h2><p className="mt-5 max-w-md text-sm leading-relaxed text-white/70">A consulta de postos continua aberta. A conta integrada só é necessária para acompanhar suas solicitações e registrar resgates — sem SMS, aplicativo adicional ou credencial externa.</p></div>
-          <div className="p-7 sm:p-9">{isAuthenticated ? <><p className="eyebrow">Conta ativa</p><h3 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Tudo certo, {user?.name?.split(" ")[0] || "sua conta"}.</h3><p className="mt-5 max-w-lg text-sm leading-relaxed text-[#42635D]">Você já pode solicitar resgates nas paradas encontradas e acompanhar os dados da sua rota.</p><Button onClick={() => planned && planned.stops[0] && requestStop(planned.stops[0])} disabled={!planned?.stops.length || requestRedemption.isPending} className="mt-7 h-11 rounded-none bg-[#163840] px-5 font-bold text-white hover:bg-[#28545B]">Solicitar primeiro resgate</Button></> : <><p className="eyebrow">Apenas quando precisar</p><h3 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Ative sua conta em um passo.</h3><p className="mt-5 max-w-lg text-sm leading-relaxed text-[#42635D]">Use a conta integrada para salvar suas solicitações. O primeiro acesso cria seu cadastro automaticamente e você continua no mesmo fluxo.</p><Button onClick={startLogin} className="mt-7 h-11 rounded-none bg-[#163840] px-5 font-bold text-white hover:bg-[#28545B]">Entrar / criar conta <ArrowRight className="ml-2 size-4" /></Button></>}</div>
+          <div className="p-7 sm:p-9">{isAuthenticated ? <><p className="eyebrow">Conta ativa</p><h3 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Tudo certo, {user?.name?.split(" ")[0] || "sua conta"}.</h3><p className="mt-5 max-w-lg text-sm leading-relaxed text-[#42635D]">Você já pode solicitar resgates nas paradas encontradas e acompanhar os dados da sua rota.</p><Button onClick={() => planned && planned.stops[0] && requestStop(planned.stops[0])} disabled={!planned?.stops.length || requestRedemption.isPending} className="mt-7 h-11 rounded-none bg-[#163840] px-5 font-bold text-white hover:bg-[#28545B]">Solicitar primeiro resgate</Button></> : <><p className="eyebrow">Apenas quando precisar</p><h3 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Ative sua conta em um passo.</h3><p className="mt-5 max-w-lg text-sm leading-relaxed text-[#42635D]">Use a conta integrada para salvar suas solicitações. O primeiro acesso cria seu cadastro automaticamente e você continua no mesmo fluxo.</p><Button onClick={() => { track("account_cta", destination || origin); startLogin(); }} className="mt-7 h-11 rounded-none bg-[#163840] px-5 font-bold text-white hover:bg-[#28545B]">Entrar / criar conta <ArrowRight className="ml-2 size-4" /></Button></>}</div>
         </section>
 
         {rescueMessage && <div className="mt-8 flex items-center gap-3 border-l-4 border-[#FFC928] bg-[#EAF0E9] p-5 text-sm text-[#42645C]"><CheckCircle2 className="size-5 text-[#163840]" />{rescueMessage}</div>}
