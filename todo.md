@@ -3,3 +3,16 @@
 - [x] Construir a página responsiva com fluxo demonstrativo e conteúdo autoral.
 - [x] Validar no desktop e no celular, ajustando interações e acessibilidade.
 - [x] Salvar um checkpoint e entregar a versão final.
+- [x] Definir os provedores de dados de postos e rotas: Google Maps e dados oficiais periódicos da ANP.
+- [x] Definir o Twilio Verify como provedor de SMS e registrar as regras de consentimento.
+- [ ] Receber e validar credenciais seguras do Twilio Verify.
+- [ ] Ativar o envio e a validação de SMS após o recebimento das credenciais do Twilio Verify.
+- [x] Manter o consentimento explícito registrado sem simular o envio de SMS enquanto as credenciais não estiverem disponíveis.
+- [x] Preparar a interface de consentimento explícito para SMS com explicação de finalidade e sem mensagens promocionais.
+- [x] Habilitar banco de dados, autenticação e armazenamento seguro de dados operacionais.
+- [x] Conectar consultas reais de postos e rotas à experiência do usuário.
+- [x] Conectar consultas reais de postos e rotas à experiência do usuário.
+- [x] Implementar uma atualização manual de referências semanais oficiais da ANP para preços por posto.
+- [ ] Implementar verificação por SMS e registro explícito de consentimentos.
+- [x] Criar painel operacional para resgates e rotas consultadas.
+- [x] Validar os fluxos com dados reais e entregar a nova versão.

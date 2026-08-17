@@ -1,0 +1,81 @@
+import { boolean, decimal, index, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+
+/**
+ * Core user table backing auth flow.
+ * Extend this file with additional tables as your product grows.
+ * Columns use camelCase to match both database fields and generated types.
+ */
+export const users = mysqlTable("users", {
+  /**
+   * Surrogate primary key. Auto-incremented numeric value managed by the database.
+   * Use this for relations between tables.
+   */
+  id: int("id").autoincrement().primaryKey(),
+  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
+  openId: varchar("openId", { length: 64 }).notNull().unique(),
+  name: text("name"),
+  email: varchar("email", { length: 320 }),
+  loginMethod: varchar("loginMethod", { length: 64 }),
+  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+});
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+export const routeSearches = mysqlTable("route_searches", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  origin: varchar("origin", { length: 240 }).notNull(),
+  destination: varchar("destination", { length: 240 }).notNull(),
+  originLat: decimal("originLat", { precision: 10, scale: 7 }).notNull(),
+  originLng: decimal("originLng", { precision: 10, scale: 7 }).notNull(),
+  destinationLat: decimal("destinationLat", { precision: 10, scale: 7 }).notNull(),
+  destinationLng: decimal("destinationLng", { precision: 10, scale: 7 }).notNull(),
+  distanceMeters: int("distanceMeters").notNull(),
+  durationSeconds: int("durationSeconds").notNull(),
+  routeSummary: varchar("routeSummary", { length: 255 }),
+  overviewPolyline: text("overviewPolyline"),
+  locationConsent: boolean("locationConsent").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => ({ createdAtIdx: index("route_searches_created_at_idx").on(table.createdAt), userIdx: index("route_searches_user_idx").on(table.userId) }));
+
+export const fuelPriceSnapshots = mysqlTable("fuel_price_snapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  placeId: varchar("placeId", { length: 255 }).notNull(),
+  stationName: varchar("stationName", { length: 255 }).notNull(),
+  product: mysqlEnum("product", ["gasoline", "ethanol", "diesel_s10", "diesel_s500", "gnv"]).notNull(),
+  price: decimal("price", { precision: 8, scale: 3 }).notNull(),
+  municipality: varchar("municipality", { length: 120 }).notNull(),
+  state: varchar("state", { length: 2 }).notNull(),
+  source: mysqlEnum("source", ["anp"]).default("anp").notNull(),
+  sourceReference: varchar("sourceReference", { length: 500 }).notNull(),
+  collectedAt: timestamp("collectedAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => ({ placeCollectedIdx: index("fuel_price_place_collected_idx").on(table.placeId, table.collectedAt) }));
+
+export const redemptions = mysqlTable("redemptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  routeSearchId: int("routeSearchId").notNull(),
+  placeId: varchar("placeId", { length: 255 }).notNull(),
+  stationName: varchar("stationName", { length: 255 }).notNull(),
+  stationAddress: varchar("stationAddress", { length: 500 }).notNull(),
+  status: mysqlEnum("status", ["requested", "cancelled", "completed"]).default("requested").notNull(),
+  redemptionCode: varchar("redemptionCode", { length: 20 }).notNull().unique(),
+  requestedAt: timestamp("requestedAt").defaultNow().notNull(),
+  fulfilledAt: timestamp("fulfilledAt"),
+}, table => ({ requestedAtIdx: index("redemptions_requested_at_idx").on(table.requestedAt), routeIdx: index("redemptions_route_idx").on(table.routeSearchId) }));
+
+export const consentEvents = mysqlTable("consent_events", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  purpose: mysqlEnum("purpose", ["sms_auth", "route_alerts", "location"]).notNull(),
+  accepted: boolean("accepted").notNull(),
+  phoneDigest: varchar("phoneDigest", { length: 128 }),
+  phoneLast4: varchar("phoneLast4", { length: 4 }),
+  policyVersion: varchar("policyVersion", { length: 32 }).notNull(),
+  capturedAt: timestamp("capturedAt").defaultNow().notNull(),
+}, table => ({ capturedAtIdx: index("consent_events_captured_at_idx").on(table.capturedAt), userIdx: index("consent_events_user_idx").on(table.userId) }));

@@ -4,6 +4,7 @@
  * asymmetric route landmarks and clear privacy-first microcopy.
  */
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -43,26 +44,11 @@ const routeSteps = [
 ];
 
 export default function Home() {
-  const [phone, setPhone] = useState("");
-  const [receiveUpdates, setReceiveUpdates] = useState(true);
-  const [shareLocation, setShareLocation] = useState(false);
-  const [isRouteReady, setIsRouteReady] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  };
-
-  const handleDemoSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (phone.replace(/\D/g, "").length >= 10) setIsRouteReady(true);
-  };
+  const [, setLocation] = useLocation();
 
   const scrollToPlanner = () => {
-    document.getElementById("planejador")?.scrollIntoView({ behavior: "smooth" });
+    setLocation("/planejar");
     setShowMobileMenu(false);
   };
 
@@ -140,60 +126,17 @@ export default function Home() {
 
               <section id="planejador" className="relative border border-white/15 bg-[#F7F4EC] p-5 text-[#15343B] shadow-[0_28px_90px_rgba(0,0,0,0.28)] animate-route-in [animation-delay:170ms] sm:p-7" aria-labelledby="planner-title">
                 <div className="absolute -left-px -top-px h-3 w-16 bg-[#FFC928]" />
-                {!isRouteReady ? (
-                  <form onSubmit={handleDemoSubmit}>
+                <div>
                     <div className="mb-6 flex items-start justify-between gap-4">
                       <div>
-                        <p className="mb-2 text-[0.64rem] font-bold uppercase tracking-[0.15em] text-[#BA5B45]">Seu ponto de partida</p>
-                        <h2 id="planner-title" className="font-display text-3xl font-semibold tracking-[-0.055em]">Comece por aqui.</h2>
+                        <p className="mb-2 text-[0.64rem] font-bold uppercase tracking-[0.15em] text-[#BA5B45]">Dados reais, escolha clara</p>
+                        <h2 id="planner-title" className="font-display text-3xl font-semibold tracking-[-0.055em]">Planeje sua rota.</h2>
                       </div>
                       <div className="grid size-10 shrink-0 place-items-center rounded-full bg-[#163840] text-[#FFC928]"><Route className="size-5" /></div>
                     </div>
-                    <label className="block text-xs font-bold text-[#31525A]" htmlFor="phone">Seu celular</label>
-                    <input
-                      id="phone"
-                      value={formatPhone(phone)}
-                      onChange={(event) => setPhone(event.target.value)}
-                      inputMode="numeric"
-                      placeholder="(00) 00000-0000"
-                      className="mt-2 w-full rounded-none border-b border-[#9EB0AF] bg-transparent px-0 py-3 text-lg outline-none transition placeholder:text-[#97A5A1] focus:border-[#163840]"
-                      aria-describedby="phone-note"
-                    />
-                    <p id="phone-note" className="mt-2 text-xs leading-relaxed text-[#687D7C]">Nesta demonstração, o número fica apenas no seu navegador. Nenhum dado é enviado.</p>
-
-                    <div className="my-5 space-y-3">
-                      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#31525A]">
-                        <input checked={receiveUpdates} onChange={(event) => setReceiveUpdates(event.target.checked)} className="mt-0.5 size-4 accent-[#163840]" type="checkbox" />
-                        <span>Quero receber alertas úteis sobre a rota.</span>
-                      </label>
-                      <label className="flex cursor-pointer items-start gap-3 text-sm text-[#31525A]">
-                        <input checked={shareLocation} onChange={(event) => setShareLocation(event.target.checked)} className="mt-0.5 size-4 accent-[#163840]" type="checkbox" />
-                        <span>Usar minha localização somente para encontrar opções próximas.</span>
-                      </label>
-                    </div>
-                    <button type="submit" className="flex w-full items-center justify-center gap-2 bg-[#163840] px-5 py-4 text-sm font-bold text-white transition duration-200 hover:bg-[#24515A] active:scale-[0.98]">
-                      Ver meu percurso <ChevronRight className="size-4" />
-                    </button>
-                  </form>
-                ) : (
-                  <div className="py-2">
-                    <div className="mb-7 flex items-start justify-between">
-                      <div>
-                        <p className="mb-2 text-[0.64rem] font-bold uppercase tracking-[0.15em] text-[#BA5B45]">Próximo marco</p>
-                        <h2 id="planner-title" className="font-display text-3xl font-semibold tracking-[-0.055em]">Rota organizada.</h2>
-                      </div>
-                      <div className="grid size-10 place-items-center rounded-full bg-[#DCE8E6] text-[#163840]"><Check className="size-5" /></div>
-                    </div>
-                    <div className="border-y border-[#D7DFDA] py-5">
-                      <div className="flex gap-4">
-                        <div className="relative flex w-5 flex-col items-center"><span className="size-2 rounded-full bg-[#BA5B45]" /><span className="my-1 h-9 border-l border-dashed border-[#91A5A4]" /><span className="size-2 rounded-full bg-[#FFC928]" /></div>
-                        <div className="space-y-4 text-sm"><p><strong className="block text-[#163840]">Sua localização</strong><span className="text-[#687D7C]">Ponto de partida protegido</span></p><p><strong className="block text-[#163840]">Próxima parada</strong><span className="text-[#687D7C]">Opções disponíveis após integrar os dados</span></p></div>
-                      </div>
-                    </div>
-                    <div className="mt-6 rounded-sm bg-[#E8EEE8] p-4 text-sm leading-relaxed text-[#426168]"><strong className="text-[#163840]">A escolha ganha contexto.</strong> Integre ofertas, pontos parceiros e códigos de resgate quando sua operação estiver pronta.</div>
-                    <button type="button" onClick={() => setIsRouteReady(false)} className="mt-5 flex w-full items-center justify-center gap-2 border border-[#163840] px-5 py-3.5 text-sm font-bold text-[#163840] transition hover:bg-[#163840] hover:text-white active:scale-[0.98]">Começar outra rota</button>
+                    <div className="border-y border-[#D7DFDA] py-5 text-sm leading-relaxed text-[#5D7773]"><p><strong className="block text-[#163840]">1. Informe origem e destino</strong>A rota é calculada com distância e tempo estimado.</p><p className="mt-4"><strong className="block text-[#163840]">2. Veja postos próximos</strong>Os pontos encontrados vêm da base geográfica do Google Maps.</p><p className="mt-4"><strong className="block text-[#163840]">3. Solicite o resgate</strong>Entre com sua conta para registrar a solicitação.</p></div>
+                    <button type="button" onClick={scrollToPlanner} className="mt-6 flex w-full items-center justify-center gap-2 bg-[#163840] px-5 py-4 text-sm font-bold text-white transition duration-200 hover:bg-[#24515A] active:scale-[0.98]">Planejar rota real <ChevronRight className="size-4" /></button>
                   </div>
-                )}
               </section>
             </div>
           </div>
