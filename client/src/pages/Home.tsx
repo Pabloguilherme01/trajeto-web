@@ -1,239 +1,69 @@
 /**
- * Design reminder — Rota da Estrada Clara:
- * editorial wayfinding, petrol-blue orientation, route-yellow actions,
- * asymmetric route landmarks and clear privacy-first microcopy.
+ * Design reminder — Energia de Rota:
+ * a public mobility experience built from bolder color blocks, oversized type,
+ * region portals and clear actions for discovering open station information.
  */
-import { useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { startLogin } from "@/const";
+import { ArrowRight, ChevronRight, CircleUserRound, Fuel, LogIn, MapPinned, Search, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
-import {
-  ArrowDownRight,
-  ArrowRight,
-  Check,
-  ChevronRight,
-  CircleHelp,
-  Compass,
-  MapPinned,
-  Menu,
-  Navigation,
-  Route,
-  ShieldCheck,
-  Smartphone,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
-const routeSteps = [
-  {
-    number: "01",
-    title: "Defina o destino",
-    text: "Informe onde você quer chegar e encontre as opções que fazem sentido para a sua rota.",
-    icon: Navigation,
-  },
-  {
-    number: "02",
-    title: "Compare com calma",
-    text: "Condições, distância e conveniência aparecem juntas para a escolha ser realmente simples.",
-    icon: Compass,
-  },
-  {
-    number: "03",
-    title: "Abasteça com clareza",
-    text: "Apresente o código da oferta no ponto participante e conclua o pagamento normalmente.",
-    icon: ShieldCheck,
-  },
+const regions = [
+  { id: "df-entorno", kicker: "Rota 01", name: "DF + Entorno", query: "Brasília, DF", copy: "Brasília, Águas Lindas e cidades vizinhas", color: "bg-[#FFC928]", foreground: "text-[#183A42]", marker: "01" },
+  { id: "goias", kicker: "Rota 02", name: "Goiás", query: "Goiânia, GO", copy: "Goiânia, Anápolis e interior", color: "bg-[#D94F3D]", foreground: "text-white", marker: "02" },
+  { id: "sao-paulo", kicker: "Rota 03", name: "São Paulo", query: "São Paulo, SP", copy: "Capital, ABC e principais eixos", color: "bg-[#3E54E8]", foreground: "text-white", marker: "03" },
+  { id: "minas-gerais", kicker: "Rota 04", name: "Minas Gerais", query: "Belo Horizonte, MG", copy: "BH, Contagem e região metropolitana", color: "bg-[#123B40]", foreground: "text-[#F8F2E8]", marker: "04" },
 ];
 
 export default function Home() {
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated, loading } = useAuth();
+  const [search, setSearch] = useState("");
+  const [activeRegion, setActiveRegion] = useState(regions[0].id);
+  const socialLinks = trpc.social.publicLinks.useQuery();
 
-  const scrollToPlanner = () => {
-    setLocation("/planejar");
-    setShowMobileMenu(false);
+  const openRegion = (region = regions.find(item => item.id === activeRegion)!) => {
+    setLocation(`/postos?region=${region.id}&q=${encodeURIComponent(region.query)}`);
+  };
+
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const selected = regions.find(item => item.id === activeRegion)!;
+    const query = search.trim() || selected.query;
+    setLocation(`/postos?region=${selected.id}&q=${encodeURIComponent(query)}`);
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F7F4EC] text-[#16333B]">
-      <header className="relative z-30 border-b border-white/10 bg-[#14343C] text-white">
-        <div className="container flex h-[76px] items-center justify-between gap-5">
-          <a className="group flex items-center gap-3" href="#inicio" aria-label="Trajeto — início">
-            <img
-              className="h-10 w-10 rounded-xl bg-[#FFC928] object-contain p-1.5 shadow-[0_8px_20px_rgba(255,201,40,0.22)] transition-transform duration-200 group-hover:-rotate-6"
-              src="/manus-storage/trajeto-mark_78544e73.png"
-              alt="Símbolo da Trajeto"
-            />
-            <span className="brand-wordmark text-[1.38rem] text-white">trajeto</span>
-            <span className="hidden border-l border-white/20 pl-2 text-[0.58rem] font-bold tracking-[0.2em] text-[#FFC928] sm:inline-block">GUIA DE ROTA</span>
-          </a>
-
-          <nav className="hidden items-center gap-7 text-sm text-white/72 md:flex" aria-label="Navegação principal">
-            <a className="transition-colors hover:text-[#FFC928]" href="#como-funciona">Como funciona</a>
-            <a className="transition-colors hover:text-[#FFC928]" href="#seguranca">Privacidade</a>
-            <a className="transition-colors hover:text-[#FFC928]" href="#modelo">Estrutura</a>
-          </nav>
-
-          <button onClick={scrollToPlanner} className="hidden items-center gap-2 rounded-full bg-[#FFC928] px-4 py-2.5 text-xs font-bold text-[#15353D] transition duration-200 hover:bg-[#ffd454] active:scale-[0.97] md:flex">
-            Começar a rota <ArrowRight className="size-3.5" />
-          </button>
-
-          <button
-            onClick={() => setShowMobileMenu((value) => !value)}
-            aria-label="Abrir menu"
-            className="grid size-10 place-items-center rounded-full border border-white/15 text-white transition hover:bg-white/10 md:hidden"
-          >
-            {showMobileMenu ? <X className="size-4" /> : <Menu className="size-4" />}
-          </button>
+    <div className="min-h-screen overflow-x-hidden bg-[#F7F2E8] text-[#163840]">
+      <header className="relative z-30 border-b border-[#163840]/10 bg-[#163840] text-white">
+        <div className="container flex h-[76px] items-center justify-between gap-4">
+          <button onClick={() => setLocation("/")} className="flex items-center gap-3" aria-label="Trajeto — início"><img className="size-10 rounded-xl bg-[#FFC928] p-1.5 shadow-[0_0_0_5px_rgba(255,201,40,0.12)]" src="/manus-storage/trajeto-mark_78544e73.png" alt="" /><span className="brand-wordmark text-[1.4rem] text-white">trajeto</span><span className="hidden border-l border-white/20 pl-3 text-[0.6rem] font-bold tracking-[0.2em] text-[#FFC928] sm:block">POSTOS ABERTOS</span></button>
+          <nav className="hidden items-center gap-6 text-xs font-bold uppercase tracking-[0.12em] text-white/70 lg:flex"><button onClick={() => document.getElementById("regioes")?.scrollIntoView({ behavior: "smooth" })} className="transition hover:text-[#FFC928]">Regiões</button><button onClick={() => document.getElementById("como-usar")?.scrollIntoView({ behavior: "smooth" })} className="transition hover:text-[#FFC928]">Como usar</button><button onClick={() => document.getElementById("canais")?.scrollIntoView({ behavior: "smooth" })} className="transition hover:text-[#FFC928]">Canais</button></nav>
+          <div className="flex items-center gap-2">{isAuthenticated ? <button onClick={() => setLocation("/planejar")} className="inline-flex items-center gap-2 rounded-full bg-[#FFC928] px-4 py-2.5 text-xs font-bold text-[#163840] transition hover:bg-white"><CircleUserRound className="size-4" /> {user?.name?.split(" ")[0] || "Minha rota"}</button> : <button onClick={startLogin} disabled={loading} className="inline-flex items-center gap-2 rounded-full bg-[#FFC928] px-4 py-2.5 text-xs font-bold text-[#163840] transition hover:bg-white disabled:opacity-60"><LogIn className="size-4" /> Entrar / criar conta</button>}</div>
         </div>
-
-        {showMobileMenu && (
-          <nav className="container flex flex-col gap-4 border-t border-white/10 py-5 text-sm text-white/75 md:hidden" aria-label="Navegação móvel">
-            <a href="#como-funciona" onClick={() => setShowMobileMenu(false)}>Como funciona</a>
-            <a href="#seguranca" onClick={() => setShowMobileMenu(false)}>Privacidade</a>
-            <a href="#modelo" onClick={() => setShowMobileMenu(false)}>Estrutura</a>
-            <button onClick={scrollToPlanner} className="w-fit rounded-full bg-[#FFC928] px-4 py-2.5 text-xs font-bold text-[#15353D]">Começar a rota</button>
-          </nav>
-        )}
       </header>
 
-      <main id="inicio">
-        <section className="hero-shell relative isolate overflow-hidden bg-[#E8EEE8] pb-16 pt-12 text-[#163840] lg:pb-24 lg:pt-20">
-          <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(247,244,236,1)_0%,rgba(247,244,236,0.96)_40%,rgba(247,244,236,0.4)_68%,rgba(22,56,64,0.15)_100%)]" />
-          <img className="absolute inset-y-0 right-0 -z-30 h-full w-[68%] object-cover object-[67%_center] opacity-75" src="/manus-storage/trajeto-hero-route_1fc32299.jpg" alt="Rodovia com posto de serviço ao amanhecer" />
-          <div className="route-curve pointer-events-none absolute -right-28 -top-40 -z-10 size-[620px] rounded-full border-[70px] border-[#FFC928]/30" />
-          <div className="route-curve pointer-events-none absolute -bottom-80 left-[42%] -z-10 size-[630px] rounded-full border border-[#163840]/15" />
-
-          <div className="container">
-            <div className="mb-11 flex items-center gap-3 text-[0.66rem] font-bold uppercase tracking-[0.18em] text-[#BA5B45] animate-route-in">
-              <span className="h-px w-8 bg-[#BA5B45]" />
-              Rota 01 · economia em movimento
-            </div>
-            <div className="grid items-end gap-12 lg:grid-cols-[minmax(0,1.02fr)_460px]">
-              <div className="max-w-[720px]">
-                <p className="mb-5 text-sm text-[#49656A] animate-route-in [animation-delay:40ms]">Seu próximo abastecimento merece mais contexto antes de você chegar à bomba.</p>
-                <h1 className="font-display max-w-[720px] text-[clamp(3.45rem,8vw,7.6rem)] font-semibold leading-[0.83] tracking-[-0.075em] animate-route-in [animation-delay:90ms]">
-                  Seu caminho<br />
-                  <span className="text-[#BA5B45]">rende mais.</span>
-                </h1>
-                <div className="mt-9 flex max-w-[560px] flex-col gap-5 border-l border-[#FFC928] pl-5 text-[1.05rem] leading-relaxed text-[#426168] sm:flex-row sm:items-end sm:justify-between animate-route-in [animation-delay:150ms]">
-                  <p>Planeje a próxima parada com clareza, autonomia e contexto para decidir antes de abastecer.</p>
-                  <a href="#como-funciona" className="group inline-flex shrink-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#BA5B45] hover:text-[#163840]">Entenda o fluxo <ArrowDownRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:translate-y-0.5" /></a>
-                </div>
-                <div className="mt-9 flex max-w-[540px] divide-x divide-[#B9C6BD] border-y border-[#B9C6BD] animate-route-in [animation-delay:190ms]">
-                  <div className="py-4 pr-6"><strong className="font-display text-4xl tracking-[-0.08em]">04</strong><span className="mt-1 block text-[0.64rem] font-bold uppercase tracking-[0.12em] text-[#637773]">sinais para comparar</span></div>
-                  <div className="py-4 pl-6"><strong className="font-display text-4xl tracking-[-0.08em]">01</strong><span className="mt-1 block text-[0.64rem] font-bold uppercase tracking-[0.12em] text-[#637773]">escolha guiada</span></div>
-                </div>
-              </div>
-
-              <section id="planejador" className="relative border border-white/15 bg-[#F7F4EC] p-5 text-[#15343B] shadow-[0_28px_90px_rgba(0,0,0,0.28)] animate-route-in [animation-delay:170ms] sm:p-7" aria-labelledby="planner-title">
-                <div className="absolute -left-px -top-px h-3 w-16 bg-[#FFC928]" />
-                <div>
-                    <div className="mb-6 flex items-start justify-between gap-4">
-                      <div>
-                        <p className="mb-2 text-[0.64rem] font-bold uppercase tracking-[0.15em] text-[#BA5B45]">Dados reais, escolha clara</p>
-                        <h2 id="planner-title" className="font-display text-3xl font-semibold tracking-[-0.055em]">Planeje sua rota.</h2>
-                      </div>
-                      <div className="grid size-10 shrink-0 place-items-center rounded-full bg-[#163840] text-[#FFC928]"><Route className="size-5" /></div>
-                    </div>
-                    <div className="border-y border-[#D7DFDA] py-5 text-sm leading-relaxed text-[#5D7773]"><p><strong className="block text-[#163840]">1. Informe origem e destino</strong>A rota é calculada com distância e tempo estimado.</p><p className="mt-4"><strong className="block text-[#163840]">2. Veja postos próximos</strong>Os pontos encontrados vêm da base geográfica do Google Maps.</p><p className="mt-4"><strong className="block text-[#163840]">3. Solicite o resgate</strong>Entre com sua conta para registrar a solicitação.</p></div>
-                    <button type="button" onClick={scrollToPlanner} className="mt-6 flex w-full items-center justify-center gap-2 bg-[#163840] px-5 py-4 text-sm font-bold text-white transition duration-200 hover:bg-[#24515A] active:scale-[0.98]">Planejar rota real <ChevronRight className="size-4" /></button>
-                  </div>
-              </section>
-            </div>
+      <main>
+        <section className="relative isolate overflow-hidden bg-[#3E54E8] pb-12 pt-12 text-white lg:pb-20 lg:pt-20">
+          <div className="pointer-events-none absolute -left-24 top-16 size-72 rounded-full border-[44px] border-[#FFC928]" />
+          <div className="pointer-events-none absolute -bottom-40 -right-24 size-[520px] rounded-full bg-[#D94F3D]" />
+          <div className="pointer-events-none absolute right-[30%] top-8 h-full w-px rotate-[24deg] bg-white/20" />
+          <div className="container relative z-10 grid gap-11 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+            <div className="pt-2"><div className="mb-8 flex items-center gap-3 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#FFC928]"><Zap className="size-3.5 fill-current" /> Consulta pública de postos</div><h1 className="font-display max-w-[780px] text-[clamp(3.7rem,8.1vw,7.7rem)] font-semibold leading-[0.8] tracking-[-0.08em]">O posto que<br /><span className="text-[#FFC928]">você procura</span><br />está na rota.</h1><p className="mt-8 max-w-xl border-l-2 border-[#FFC928] pl-5 text-[1.05rem] leading-relaxed text-white/82">Informações públicas, localização e referências oficiais de preço para ajudar você a decidir antes de sair.</p><div className="mt-9 flex flex-wrap items-center gap-3 text-sm"><span className="inline-flex items-center gap-2 bg-white px-4 py-3 font-bold text-[#163840]"><ShieldCheck className="size-4 text-[#D94F3D]" /> Consulte sem cadastro</span><span className="inline-flex items-center gap-2 border border-white/35 px-4 py-3 font-bold text-white"><Sparkles className="size-4 text-[#FFC928]" /> Resgate com conta</span></div></div>
+            <section className="relative border-4 border-[#163840] bg-[#F7F2E8] p-5 text-[#163840] shadow-[12px_12px_0_#FFC928] sm:p-7" aria-labelledby="consulta-title"><div className="absolute -right-4 -top-4 grid size-12 place-items-center rounded-full bg-[#D94F3D] text-xs font-bold text-white">AO<br />VIVO</div><p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#D94F3D]">Encontre pelo lugar</p><h2 id="consulta-title" className="font-display mt-2 text-4xl font-semibold leading-[0.9] tracking-[-0.065em]">Comece a consulta.</h2><form onSubmit={submitSearch} className="mt-7"><label className="text-xs font-bold text-[#48635E]" htmlFor="home-search">Cidade, bairro ou posto</label><div className="mt-2 flex border-2 border-[#163840] bg-white"><Search className="ml-3 mt-3.5 size-5 text-[#D94F3D]" /><input id="home-search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Ex.: Águas Lindas de Goiás" className="min-w-0 flex-1 bg-transparent px-3 py-3 text-base outline-none placeholder:text-[#8B9B93]" /><button aria-label="Pesquisar postos" className="bg-[#FFC928] px-4 text-[#163840] transition hover:bg-[#D94F3D] hover:text-white"><ArrowRight className="size-5" /></button></div><div className="mt-5 flex items-center justify-between gap-3"><p className="text-xs leading-relaxed text-[#637872]">Selecione uma região ou pesquise livremente.</p><button type="button" onClick={() => document.getElementById("regioes")?.scrollIntoView({ behavior: "smooth" })} className="shrink-0 text-xs font-bold text-[#3E54E8] underline decoration-2 underline-offset-4">Ver regiões</button></div></form></section>
           </div>
         </section>
 
-        <section id="como-funciona" className="relative bg-[#F7F4EC] py-20 lg:py-28">
-          <div className="container">
-            <div className="grid gap-10 lg:grid-cols-[0.58fr_1.42fr] lg:gap-20">
-              <div>
-                <p className="eyebrow">Rota 02 · O percurso em três marcos</p>
-                <h2 className="section-title mt-4">Menos incerteza.<br /><em>Mais direção.</em></h2>
-                <p className="mt-6 max-w-sm text-[0.98rem] leading-relaxed text-[#60736F]">A jornada organiza informação antes, durante e depois da escolha, com espaço para conectar os dados reais da sua operação.</p>
-              </div>
-              <div className="relative grid gap-0 md:grid-cols-3">
-                <div className="route-dash absolute left-[16%] right-[16%] top-[31px] hidden border-t border-dashed border-[#98AAA3] md:block" />
-                {routeSteps.map((step, index) => {
-                  const Icon = step.icon;
-                  return (
-                    <article className="relative border-t border-[#C6D0CA] py-7 md:border-l md:border-t-0 md:px-6 md:py-0" key={step.number}>
-                      <div className="relative z-10 mb-8 grid size-16 place-items-center rounded-full border border-[#B7C5BD] bg-[#F7F4EC] text-[#163840]"><Icon className="size-5" /></div>
-                      <p className="mb-5 text-[0.65rem] font-bold tracking-[0.18em] text-[#BA5B45]">{step.number}</p>
-                      <h3 className="font-display text-[1.8rem] font-semibold leading-none tracking-[-0.05em]">{step.title}</h3>
-                      <p className="mt-4 text-sm leading-relaxed text-[#60736F]">{step.text}</p>
-                      {index < routeSteps.length - 1 && <span className="absolute right-3 top-6 hidden text-[#BA5B45] md:block"><ArrowRight className="size-4" /></span>}
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
+        <section id="regioes" className="relative bg-[#F7F2E8] py-16 lg:py-24"><div className="container"><div className="flex flex-col justify-between gap-6 border-b-2 border-[#163840] pb-7 md:flex-row md:items-end"><div><p className="eyebrow">Portais de consulta</p><h2 className="font-display mt-3 text-[clamp(3rem,5.4vw,5.5rem)] font-semibold leading-[0.86] tracking-[-0.07em]">Sua região já<br /><span className="text-[#D94F3D]">vem na frente.</span></h2></div><p className="max-w-md text-sm leading-relaxed text-[#5B716C]">Atalhos pensados para abrir a consulta pública onde as pessoas mais circulam. Você pode trocar de região ou escrever qualquer outro destino.</p></div><div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{regions.map(region => <button key={region.id} onClick={() => { setActiveRegion(region.id); openRegion(region); }} className={`group relative min-h-64 overflow-hidden p-6 text-left transition duration-200 hover:-translate-y-1 hover:shadow-[8px_8px_0_#163840] ${region.color} ${region.foreground}`}><span className="absolute right-5 top-3 font-display text-7xl font-semibold tracking-[-0.1em] opacity-20">{region.marker}</span><p className="relative text-[0.62rem] font-bold uppercase tracking-[0.17em] opacity-75">{region.kicker}</p><h3 className="relative font-display mt-12 text-4xl font-semibold leading-[0.88] tracking-[-0.065em]">{region.name}</h3><p className="relative mt-4 max-w-44 text-sm leading-relaxed opacity-80">{region.copy}</p><span className="relative mt-7 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em]">Explorar postos <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" /></span></button>)}</div><div className="mt-7 flex flex-col gap-4 border-2 border-[#163840] bg-white p-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><MapPinned className="size-6 text-[#D94F3D]" /><p className="text-sm leading-relaxed"><strong>Não encontrou a sua cidade?</strong> Escreva o nome da cidade na busca e comece uma consulta pública.</p></div><button onClick={() => openRegion()} className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#163840] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#3E54E8]">Explorar região selecionada <ArrowRight className="size-4" /></button></div></div></section>
 
-        <section id="modelo" className="bg-[#E4ECE7] py-8 lg:py-12">
-          <div className="container">
-            <div className="grid overflow-hidden bg-[#163840] text-white lg:grid-cols-[0.86fr_1.14fr]">
-              <div className="relative min-h-[330px] overflow-hidden p-8 sm:p-11">
-                <img className="absolute inset-0 h-full w-full object-cover opacity-55 mix-blend-luminosity" src="/manus-storage/trajeto-route-card_1132a0fe.jpg" alt="Mapa e objetos de planejamento de rota" />
-                <div className="absolute inset-0 bg-[linear-gradient(125deg,rgba(16,51,59,0.95),rgba(16,51,59,0.5))]" />
-                <div className="relative z-10 flex h-full flex-col justify-between">
-                  <MapPinned className="size-7 text-[#FFC928]" />
-                  <div><p className="eyebrow text-[#FFC928]">Rota 03 · informação que acompanha</p><h2 className="font-display mt-4 max-w-sm text-4xl font-semibold leading-[0.95] tracking-[-0.06em]">O que importa chega junto da sua rota.</h2></div>
-                </div>
-              </div>
-              <div className="p-8 text-[#17373D] sm:p-11">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {[
-                    ["Catálogo de postos", "Conecte os pontos participantes e seus dados operacionais."],
-                    ["Ofertas contextualizadas", "Exiba regras e condições conforme a estratégia da sua rede."],
-                    ["Código de resgate", "Inclua um código verificável no momento certo da jornada."],
-                    ["Painel de operação", "Transforme escolhas em indicadores claros para o negócio."],
-                  ].map(([title, copy], index) => (
-                    <div className="group border-l border-[#B5C6BD] pl-4" key={title}>
-                      <span className="text-[0.62rem] font-bold tracking-[0.18em] text-[#BA5B45]">0{index + 1}</span>
-                      <h3 className="mt-3 text-base font-bold">{title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-[#59716E]">{copy}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-9 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-[#BCD0C4] pt-6 text-sm text-[#59716E]"><Sparkles className="size-4 text-[#BA5B45]" /><span>Conecte dados, integrações e regras de negócio para transformar clareza em economia real.</span></div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <section id="como-usar" className="bg-[#D94F3D] py-16 text-white lg:py-20"><div className="container grid gap-10 lg:grid-cols-[0.74fr_1.26fr]"><div><p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#FFC928]">Informação antes da partida</p><h2 className="font-display mt-4 text-[clamp(3rem,5vw,5.25rem)] font-semibold leading-[0.84] tracking-[-0.075em]">Consulte. Compare. <span className="text-[#FFC928]">Siga.</span></h2></div><div className="grid gap-px bg-white/30 sm:grid-cols-3">{[["01", "Escolha a região", "Use um atalho ou digite um destino."], ["02", "Abra o posto", "Veja dados públicos e localização."], ["03", "Entre quando quiser", "Crie uma conta apenas para acompanhar e solicitar resgates."]].map(([number, title, copy]) => <article key={number} className="bg-[#D94F3D] p-6"><span className="font-display text-4xl text-[#FFC928]">{number}</span><h3 className="mt-9 text-lg font-bold">{title}</h3><p className="mt-3 text-sm leading-relaxed text-white/75">{copy}</p></article>)}</div></div></section>
 
-        <section id="seguranca" className="relative overflow-hidden bg-[#F7F4EC] py-20 lg:py-28">
-          <div className="container grid items-center gap-12 lg:grid-cols-[1fr_0.88fr] lg:gap-20">
-            <div className="order-2 lg:order-1">
-              <p className="eyebrow">Rota 04 · Privacidade como ponto de partida</p>
-              <h2 className="section-title mt-4">Só peça o que<br /><em>ajuda a rota.</em></h2>
-              <p className="mt-6 max-w-xl text-[1.04rem] leading-relaxed text-[#60736F]">A experiência foi desenhada para explicar permissões em linguagem humana. O visitante entende por que um dado é solicitado e continua no controle de cada escolha.</p>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="border-l-2 border-[#FFC928] bg-white/60 p-5"><Smartphone className="mb-4 size-5 text-[#163840]" /><h3 className="font-bold">Celular com contexto</h3><p className="mt-2 text-sm leading-relaxed text-[#60736F]">Use apenas para autenticação e comunicações que a pessoa realmente autorizou.</p></div>
-                <div className="border-l-2 border-[#BA5B45] bg-white/60 p-5"><CircleHelp className="mb-4 size-5 text-[#163840]" /><h3 className="font-bold">Localização opcional</h3><p className="mt-2 text-sm leading-relaxed text-[#60736F]">Deixe claro que ela serve para proximidade e pode ser desligada a qualquer momento.</p></div>
-              </div>
-            </div>
-            <div className="relative order-1 mx-auto w-full max-w-[430px] lg:order-2">
-              <div className="absolute -inset-8 rounded-full border border-[#D8C9A2]" />
-              <img className="relative z-10 w-full rounded-[44%_56%_49%_51%/55%_43%_57%_45%] shadow-[22px_24px_0_#FFC928]" src="/manus-storage/trajeto-privacy-visual_803f738e.jpg" alt="Ilustração de privacidade e mobilidade" />
-              <div className="absolute -bottom-5 -left-5 z-20 flex items-center gap-3 bg-[#163840] p-4 text-white shadow-xl"><ShieldCheck className="size-5 text-[#FFC928]" /><span className="max-w-36 text-xs leading-relaxed">Transparência em cada permissão.</span></div>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#BA5B45] px-4 py-4 sm:px-6">
-          <div className="mx-auto flex max-w-[1216px] flex-col items-start justify-between gap-7 border border-white/25 p-7 text-white sm:p-10 lg:flex-row lg:items-center">
-            <div><p className="mb-3 text-[0.66rem] font-bold uppercase tracking-[0.18em] text-[#FFD7C8]">Sua próxima parada começa antes da bomba</p><h2 className="font-display text-[clamp(2.15rem,4vw,4rem)] font-semibold leading-[0.9] tracking-[-0.06em]">Uma rota clara para<br />a próxima escolha.</h2></div>
-            <button onClick={scrollToPlanner} className="group flex shrink-0 items-center gap-3 bg-[#FFC928] px-6 py-4 text-sm font-bold text-[#163840] transition hover:bg-white active:scale-[0.98]">Começar o percurso <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></button>
-          </div>
-        </section>
+        <section id="canais" className="bg-[#123B40] py-14 text-white"><div className="container flex flex-col justify-between gap-9 lg:flex-row lg:items-end"><div><p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#FFC928]">Canais da Trajeto</p><h2 className="font-display mt-4 max-w-xl text-4xl font-semibold leading-[0.9] tracking-[-0.065em]">A rota também<br />continua fora do mapa.</h2></div><div className="max-w-xl border-l-2 border-[#FFC928] pl-5 text-sm leading-relaxed text-white/70">{socialLinks.data?.length ? <><p>Encontre os canais oficiais da Trajeto nos links abaixo.</p><div className="mt-5 flex flex-wrap gap-2">{socialLinks.data.map(link => <a key={link.platform} href={link.url ?? "#"} target="_blank" rel="noreferrer" className="border border-white/25 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#FFC928] transition hover:bg-[#FFC928] hover:text-[#163840]">{link.platform}</a>)}</div></> : <p>Os canais oficiais serão publicados aqui pelo painel operacional quando estiverem prontos. Nenhum perfil externo é exibido sem confirmação de titularidade.</p>}</div></div></section>
       </main>
 
-      <footer className="bg-[#14343C] py-10 text-white/65">
-        <div className="container flex flex-col gap-7 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-center gap-3"><img className="size-8 rounded-lg bg-[#FFC928] p-1" src="/manus-storage/trajeto-mark_78544e73.png" alt="" /><div><p className="brand-wordmark text-lg text-white">trajeto</p><p className="text-xs">Escolhas que acompanham a rota</p></div></div>
-          <p className="max-w-md text-xs leading-relaxed">Demonstração visual com fluxo local. Não exibe preços, postos ou condições comerciais reais e não envia dados pessoais.</p>
-        </div>
-      </footer>
+      <footer className="bg-[#0C292E] py-8 text-white/60"><div className="container flex flex-col justify-between gap-5 text-xs sm:flex-row sm:items-center"><div className="flex items-center gap-2"><img className="size-7 rounded-md bg-[#FFC928] p-1" src="/manus-storage/trajeto-mark_78544e73.png" alt="" /><span className="brand-wordmark text-base text-white">trajeto</span><span>· dados públicos em movimento</span></div><button onClick={isAuthenticated ? () => setLocation("/planejar") : startLogin} className="font-bold text-[#FFC928] transition hover:text-white">{isAuthenticated ? "Minha rota" : "Entrar / criar conta"} <ArrowRight className="ml-1 inline size-3" /></button></div></footer>
     </div>
   );
 }

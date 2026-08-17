@@ -82,3 +82,24 @@ Um símbolo sem texto formado por uma faixa de estrada curvada que revela uma pe
 - A economia precisa ser percebida por indicadores editoriais e comparações simples integrados ao percurso, sem usar preços ou benefícios comerciais inventados.
 - O sistema de wayfinding deve conectar seções, marcos e chamadas de ação como uma rota contínua.
 - A voz fala diretamente com quem vai abastecer, evitando vocabulário interno como “modelo”, “base” ou “protótipo” nas áreas principais.
+
+## Evolução: Energia de Rota
+
+### Design Movement
+
+**Public Mobility Pop.** A linguagem passa a usar blocos de alto contraste, amarelo rota, coral intenso e azul cobalto para tornar a consulta de postos imediata e convidativa, preservando a tipografia editorial da Trajeto como elemento de confiança.
+
+### Public Journey
+
+1. A home apresenta uma escolha evidente entre **Explorar postos** e **Entrar / Criar conta**.
+2. Atalhos regionais pré-selecionados levam diretamente à consulta pública, sem exigir login.
+3. A pesquisa pública mostra apenas informações abertas do estabelecimento: nome, endereço, horário, telefone, site e localização, quando disponíveis no Google Maps.
+4. O login é reservado para ações de acompanhamento e resgate; o primeiro acesso cria a conta automaticamente pela autenticação integrada.
+
+### Interaction Philosophy
+
+Regiões funcionam como portais de rota: cartões coloridos, grandes e com resposta tátil. A consulta permite trocar de região, buscar por texto e abrir detalhes sem criar uma barreira de cadastro.
+
+### Social Presence
+
+O layout terá uma zona própria para Instagram, WhatsApp e outras redes. Os links externos só serão ativados depois que os perfis oficiais forem fornecidos, evitando apontar visitantes para contas incorretas.

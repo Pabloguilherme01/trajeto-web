@@ -1,0 +1,34 @@
+import { StationMap } from "@/components/StationMap";
+import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
+import { ArrowLeft, ArrowRight, CircleCheck, Clock3, ExternalLink, Fuel, Globe2, Loader2, MapPinned, Phone, Search } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useLocation } from "wouter";
+
+function initialQuery() {
+  return new URLSearchParams(window.location.search).get("q") || "Brasília, DF";
+}
+
+export default function Stations() {
+  const [, setLocation] = useLocation();
+  const [input, setInput] = useState(initialQuery);
+  const [query, setQuery] = useState(initialQuery);
+  const stations = trpc.stationDirectory.search.useQuery({ query }, { enabled: query.trim().length >= 3, retry: 1 });
+
+  useEffect(() => {
+    const current = initialQuery();
+    setInput(current);
+    setQuery(current);
+  }, []);
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = input.trim();
+    if (!value) return;
+    setQuery(value);
+    setLocation(`/postos?q=${encodeURIComponent(value)}`);
+  };
+
+  const list = stations.data?.stations ?? [];
+  return <div className="min-h-screen bg-[#F7F2E8] text-[#163840]"><header className="border-b-4 border-[#163840] bg-[#FFC928]"><div className="container flex h-[74px] items-center justify-between"><Link href="/" className="flex items-center gap-3"><img className="size-10 rounded-xl bg-[#163840] p-1.5" src="/manus-storage/trajeto-mark_78544e73.png" alt="" /><span className="brand-wordmark text-[1.45rem] text-[#163840]">trajeto</span><span className="hidden border-l border-[#163840]/25 pl-3 text-[0.6rem] font-bold tracking-[0.18em] sm:block">CONSULTA PÚBLICA</span></Link><button onClick={() => setLocation("/")} className="inline-flex items-center gap-2 text-xs font-bold"><ArrowLeft className="size-4" /> Início</button></div></header><main className="container py-10 lg:py-14"><div className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr]"><section><p className="eyebrow">Postos perto do seu destino</p><h1 className="font-display mt-3 text-[clamp(3rem,6vw,5.7rem)] font-semibold leading-[0.83] tracking-[-0.075em]">Abra a<br /><span className="text-[#D94F3D]">informação.</span></h1><p className="mt-6 max-w-md text-[1rem] leading-relaxed text-[#5B716C]">Consulte dados públicos disponíveis para cada posto. Não é necessário criar conta para pesquisar.</p><form onSubmit={submit} className="mt-8 border-4 border-[#163840] bg-white p-4"><label className="text-xs font-bold text-[#48635E]" htmlFor="station-query">Onde você quer consultar?</label><div className="mt-2 flex border-2 border-[#163840]"><Search className="ml-3 mt-3 size-5 text-[#D94F3D]" /><input id="station-query" value={input} onChange={event => setInput(event.target.value)} className="min-w-0 flex-1 px-3 py-3 outline-none" placeholder="Cidade, bairro ou posto" /><Button type="submit" className="h-auto rounded-none bg-[#163840] px-4 hover:bg-[#3E54E8]" aria-label="Pesquisar"><ArrowRight className="size-5" /></Button></div></form><div className="mt-6 border-l-2 border-[#D94F3D] pl-4 text-sm leading-relaxed text-[#5F756E]"><strong className="text-[#163840]">Dados públicos, sem avaliações.</strong> A consulta inclui apenas identificação, endereço, horário, telefone, site e localização quando o estabelecimento os disponibiliza.</div></section><section>{stations.isLoading && <div className="grid min-h-[400px] place-items-center border-4 border-[#163840] bg-[#3E54E8] text-white"><div className="text-center"><Loader2 className="mx-auto size-8 animate-spin text-[#FFC928]" /><p className="mt-4 font-bold">Buscando postos públicos…</p></div></div>}{stations.isError && <div className="flex min-h-[400px] flex-col justify-center border-4 border-[#163840] bg-[#D94F3D] p-8 text-white"><Fuel className="size-7 text-[#FFC928]" /><h2 className="font-display mt-5 text-4xl font-semibold">Não encontramos esse destino.</h2><p className="mt-3 max-w-md text-sm leading-relaxed text-white/75">Revise o termo da busca, informe uma cidade mais específica ou tente novamente em alguns instantes.</p></div>}{stations.data && <StationMap stations={list} />}</section></div>{stations.data && <section className="mt-12"><div className="flex flex-wrap items-end justify-between gap-5 border-b-2 border-[#163840] pb-6"><div><p className="eyebrow">Resultado da consulta</p><h2 className="font-display mt-3 text-4xl font-semibold tracking-[-0.06em]">{list.length ? `${list.length} postos encontrados.` : "Nenhum posto encontrado."}</h2></div><p className="max-w-sm text-sm leading-relaxed text-[#60756F]">Resultados geográficos retornados para <strong>{stations.data.query}</strong>.</p></div><div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{list.map(station => <article key={station.placeId} className="flex min-h-72 flex-col border-2 border-[#163840] bg-white p-5"><div className="flex items-start justify-between gap-4"><div className="grid size-10 place-items-center bg-[#FFC928] text-[#163840]"><Fuel className="size-5" /></div>{station.isOpen === true && <span className="inline-flex items-center gap-1 bg-[#DDF0C8] px-2 py-1 text-[0.62rem] font-bold text-[#24502D]"><CircleCheck className="size-3" /> Aberto agora</span>}{station.isOpen === false && <span className="bg-[#F2D4CE] px-2 py-1 text-[0.62rem] font-bold text-[#7A3025]">Fechado agora</span>}</div><h3 className="mt-7 text-lg font-bold leading-tight">{station.name}</h3><p className="mt-2 text-sm leading-relaxed text-[#647973]">{station.address}</p><div className="mt-auto space-y-3 pt-6 text-xs text-[#536C65]">{station.phone && <p className="flex items-center gap-2"><Phone className="size-3.5 text-[#D94F3D]" />{station.phone}</p>}{station.openingHours[0] && <p className="flex items-start gap-2"><Clock3 className="mt-0.5 size-3.5 shrink-0 text-[#D94F3D]" />{station.openingHours[0]}</p>}<div className="flex flex-wrap gap-2">{station.website && <a href={station.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 border border-[#163840] px-2 py-2 font-bold text-[#163840] transition hover:bg-[#FFC928]"><Globe2 className="size-3" /> Site <ExternalLink className="size-3" /></a>}<a href={`https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(station.placeId)}&query=${encodeURIComponent(station.name)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 border border-[#163840] px-2 py-2 font-bold text-[#163840] transition hover:bg-[#3E54E8] hover:text-white"><MapPinned className="size-3" /> Mapa</a></div></div></article>)}</div></section>}</main><footer className="bg-[#163840] py-7 text-white/65"><div className="container text-xs">Informações públicas obtidas a partir do Google Maps. Confirme diretamente com o estabelecimento antes de se deslocar.</div></footer></div>;
+}

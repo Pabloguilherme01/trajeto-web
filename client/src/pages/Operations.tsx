@@ -1,11 +1,12 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Activity, ArrowRight, BarChart3, Clock3, Fuel, Loader2, MapPinned, Route as RouteIcon, ShieldCheck } from "lucide-react";
+import { Activity, ArrowRight, BarChart3, Clock3, Fuel, Loader2, MapPinned, Route as RouteIcon, Share2, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const DEFAULT_ANP_SOURCE_URL = "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/arquivos-lpc/2026/revendas_lpc_2026-08-09_2026-08-15.xlsx";
+const socialPlatforms = ["instagram", "whatsapp", "tiktok", "youtube"] as const;
 
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
@@ -15,8 +16,16 @@ export default function Operations() {
   const overview = trpc.operations.overview.useQuery();
   const [anpUrl, setAnpUrl] = useState(DEFAULT_ANP_SOURCE_URL);
   const [anpNotice, setAnpNotice] = useState<string | null>(null);
+  const [socialDraft, setSocialDraft] = useState<Record<(typeof socialPlatforms)[number], string>>({ instagram: "", whatsapp: "", tiktok: "", youtube: "" });
   const syncAnp = trpc.operations.syncAnp.useMutation({ onSuccess: result => { setAnpNotice(`${result.imported.toLocaleString("pt-BR")} referências ANP foram importadas.`); overview.refetch(); }, onError: () => setAnpNotice("Não foi possível importar a planilha. Confirme se a URL é uma planilha .xlsx oficial da ANP.") });
+  const social = trpc.social.all.useQuery();
+  const saveSocial = trpc.social.save.useMutation({ onSuccess: () => social.refetch() });
   const data = overview.data;
+
+  useEffect(() => {
+    if (!social.data) return;
+    setSocialDraft(current => ({ ...current, ...Object.fromEntries(social.data.map(link => [link.platform, link.url ?? ""])) }));
+  }, [social.data]);
 
   return (
     <DashboardLayout>
@@ -47,6 +56,7 @@ export default function Operations() {
 
           <section className="mt-8 border border-[#D7DFD8] bg-white p-6 sm:p-7"><div className="flex items-start justify-between gap-5"><div><p className="eyebrow">Últimas consultas</p><h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Percursos registrados.</h2></div><RouteIcon className="size-5 text-[#BA5B45]" /></div>{data.recentRoutes.length ? <div className="mt-7 overflow-x-auto"><table className="min-w-full text-left text-sm"><thead className="border-b border-[#D7DFD8] text-[0.62rem] uppercase tracking-[0.14em] text-[#748681]"><tr><th className="pb-3 pr-6 font-bold">Origem</th><th className="pb-3 pr-6 font-bold">Destino</th><th className="pb-3 pr-6 font-bold">Distância</th><th className="pb-3 font-bold">Consulta</th></tr></thead><tbody className="divide-y divide-[#E4EAE4]">{data.recentRoutes.map(route => <tr key={route.id}><td className="py-4 pr-6 font-semibold">{route.origin}</td><td className="py-4 pr-6 text-[#5C746E]">{route.destination}</td><td className="py-4 pr-6 text-[#5C746E]">{(route.distanceMeters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</td><td className="py-4 text-xs text-[#748681]">{formatDate(route.createdAt)}</td></tr>)}</tbody></table></div> : <p className="mt-7 border-t border-dashed border-[#CCD7CE] pt-6 text-sm text-[#6D817C]">Sem dados ainda. Use o planejador para fazer a primeira consulta.</p>}</section>
           <section className="mt-8 border border-[#D7DFD8] bg-[#EAF0E9] p-6 sm:p-7"><div className="flex items-start justify-between gap-5"><div><p className="eyebrow">Referências semanais da ANP</p><h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Atualize os preços pesquisados.</h2><p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5B716C]">Cole a URL da planilha “Preços por posto revendedor” publicada pela ANP. A importação mantém a origem e a data de coleta de cada referência, sem transformar o dado em preço em tempo real.</p></div><Fuel className="size-5 text-[#BA5B45]" /></div><div className="mt-6 flex flex-col gap-3 sm:flex-row"><input value={anpUrl} onChange={event => setAnpUrl(event.target.value)} aria-label="URL da planilha ANP" className="min-w-0 flex-1 border border-[#BFCFC4] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163840]" /><Button onClick={() => syncAnp.mutate({ sourceUrl: anpUrl })} disabled={syncAnp.isPending} className="rounded-none bg-[#163840] font-bold text-white hover:bg-[#28545B]">{syncAnp.isPending ? <Loader2 className="size-4 animate-spin" /> : "Importar ANP"}</Button></div>{anpNotice && <p className="mt-4 border-l-2 border-[#FFC928] pl-3 text-sm text-[#54706A]">{anpNotice}</p>}</section>
+          <section className="mt-8 border border-[#D7DFD8] bg-white p-6 sm:p-7"><div className="flex items-start justify-between gap-5"><div><p className="eyebrow">Canais oficiais</p><h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Vínculos sociais autônomos.</h2><p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5B716C]">Cole apenas URLs oficiais. O site mostra um canal publicamente somente depois que você salva um link HTTPS válido; nenhuma conta externa é conectada ou recebe permissões.</p></div><Share2 className="size-5 text-[#BA5B45]" /></div><div className="mt-6 grid gap-4 md:grid-cols-2">{socialPlatforms.map(platform => <label key={platform} className="block"><span className="mb-2 block text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#607670]">{platform}</span><input value={socialDraft[platform]} onChange={event => setSocialDraft(current => ({ ...current, [platform]: event.target.value }))} placeholder={`https://${platform === "whatsapp" ? "wa.me/" : `${platform}.com/`}`} className="w-full border border-[#BFCFC4] bg-[#F9FBF8] px-3 py-2.5 text-sm outline-none focus:border-[#163840]" /></label>)}</div><div className="mt-6 flex flex-wrap items-center gap-4"><Button onClick={() => saveSocial.mutate({ links: socialPlatforms.map(platform => ({ platform, url: socialDraft[platform].trim() || null, active: Boolean(socialDraft[platform].trim()) })) })} disabled={saveSocial.isPending} className="rounded-none bg-[#163840] font-bold text-white hover:bg-[#28545B]">{saveSocial.isPending ? <Loader2 className="size-4 animate-spin" /> : "Salvar canais"}</Button>{saveSocial.isSuccess && <p className="text-sm text-[#357044]">Canais atualizados. A home já exibirá apenas os links ativos.</p>}{saveSocial.isError && <p className="text-sm text-[#B13C2D]">Use URLs HTTPS completas e válidas para publicar um canal.</p>}</div></section>
         </>}
       </div>
     </DashboardLayout>

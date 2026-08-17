@@ -79,3 +79,11 @@ export const consentEvents = mysqlTable("consent_events", {
   policyVersion: varchar("policyVersion", { length: 32 }).notNull(),
   capturedAt: timestamp("capturedAt").defaultNow().notNull(),
 }, table => ({ capturedAtIdx: index("consent_events_captured_at_idx").on(table.capturedAt), userIdx: index("consent_events_user_idx").on(table.userId) }));
+
+export const socialLinks = mysqlTable("social_links", {
+  id: int("id").autoincrement().primaryKey(),
+  platform: mysqlEnum("platform", ["instagram", "whatsapp", "tiktok", "youtube"]).notNull().unique(),
+  url: varchar("url", { length: 500 }),
+  active: boolean("active").default(false).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});

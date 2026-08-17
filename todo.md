@@ -16,3 +16,9 @@
 - [ ] Implementar verificação por SMS e registro explícito de consentimentos.
 - [x] Criar painel operacional para resgates e rotas consultadas.
 - [x] Validar os fluxos com dados reais e entregar a nova versão.
+- [x] Adicionar ações claras de acesso e cadastro à home, usando a conta integrada do produto.
+- [x] Redesenhar a home com uma linguagem mais intensa, interativa e visualmente marcante.
+- [x] Criar atalhos de consulta pré-selecionados por região.
+- [x] Criar uma consulta pública de informações do posto, sem exigir login.
+- [x] Criar uma configuração autônoma de links sociais editável pelo painel operacional.
+- [x] Validar a nova experiência e salvar um checkpoint de entrega.

@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { consentEvents, fuelPriceSnapshots, InsertUser, redemptions, routeSearches, users } from "../drizzle/schema";
+import { consentEvents, fuelPriceSnapshots, InsertUser, redemptions, routeSearches, socialLinks, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -153,6 +153,26 @@ export async function createConsentEvent(input: {
   const db = await getDb();
   if (!db) return;
   await db.insert(consentEvents).values(input);
+}
+
+export async function getPublicSocialLinks() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialLinks).where(eq(socialLinks.active, true));
+}
+
+export async function getSocialLinks() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialLinks).orderBy(socialLinks.platform);
+}
+
+export async function upsertSocialLinks(links: Array<{ platform: "instagram" | "whatsapp" | "tiktok" | "youtube"; url: string | null; active: boolean }>) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  for (const link of links) {
+    await db.insert(socialLinks).values(link).onDuplicateKeyUpdate({ set: { url: link.url, active: link.active } });
+  }
 }
 
 export async function createRedemption(input: {
