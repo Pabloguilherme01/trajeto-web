@@ -1,0 +1,5 @@
+- [x] Definir a identidade visual e a arquitetura da landing page original.
+- [x] Gerar símbolo de marca e imagens hero próprias.
+- [x] Construir a página responsiva com fluxo demonstrativo e conteúdo autoral.
+- [x] Validar no desktop e no celular, ajustando interações e acessibilidade.
+- [x] Salvar um checkpoint e entregar a versão final.
