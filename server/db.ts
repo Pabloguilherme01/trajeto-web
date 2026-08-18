@@ -493,9 +493,16 @@ export async function createProductEvent(input: { event: ProductEventName; regio
   await db.insert(productEvents).values({ event: input.event, region: normalizeRegion(input.region) });
 }
 
+const conversionFunnelStages: Array<{ event: ProductEventName; label: string }> = [
+  { event: "route_open", label: "Rotas abertas" },
+  { event: "station_sheet_opened", label: "Fichas abertas" },
+  { event: "favorite_saved", label: "Favoritos salvos" },
+  { event: "station_navigation_confirmed", label: "Navegações confirmadas" },
+];
+
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
 
   const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
@@ -514,6 +521,7 @@ export async function getOperationalOverview() {
 
   const notificationTrend = aggregateDailyTimestamps(notificationTrendRows.map(row => row.issuedAt));
   const savedAlertTrend = aggregateDailyTimestamps(savedAlertTrendRows.map(row => row.createdAt));
+  const eventTotals = new Map(growthEvents.map(item => [item.event, Number(item.total)]));
 
   return {
     totals: { routeSearches: routeCount?.value ?? 0, redemptions: redemptionCount?.value ?? 0, pendingRedemptions: pendingCount?.value ?? 0, consentEvents: consentCount?.value ?? 0 },
@@ -521,6 +529,7 @@ export async function getOperationalOverview() {
     recentRedemptions,
     topRoutes,
     growthEvents,
+    conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: eventTotals.get(stage.event) ?? 0 })),
     weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
     anpAuthorizedSync,
     providerMetrics,
