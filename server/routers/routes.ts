@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createRouteSearch, getAuthorizedStationsForQuery, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById, getUserVehicleById } from "../db";
+import { createRouteSearch, getAuthorizedStationsForQuery, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById, getUserVehicleById, rememberGooglePlaceIds } from "../db";
 import { makeRequest, type DirectionsResult, type GeocodingResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
 import { normalizeStops, routeSummary } from "../lib/routePlanner";
@@ -50,6 +50,7 @@ export const routesRouter = router({
     ]);
 
     const stops = normalizeStops(nearby);
+    void rememberGooglePlaceIds(stops.map(stop => stop.placeId));
     const [anpReferences, authorizedByArea] = await Promise.all([
       getPriceReferencesByAreas([locality(originGeo), locality(destinationGeo)].filter((area): area is { municipality: string; state: string } => Boolean(area))),
       Promise.all([input.origin, input.destination].map(query => getAuthorizedStationsForQuery(query))),
@@ -70,7 +71,7 @@ export const routesRouter = router({
       tankLiters: vehicle.tankLiters ? Number(vehicle.tankLiters) : null,
     }) : null;
     const selectedEconomy = economy ? economy[economy.recommendedFuel] : null;
-    const saved = await createRouteSearch({
+    const routeSearchPersistence = createRouteSearch({
       userId: ctx.user?.id ?? null,
       origin: input.origin,
       destination: input.destination,
@@ -94,7 +95,7 @@ export const routesRouter = router({
       estimatedLiters: selectedEconomy?.litersNeeded ?? null,
     });
 
-    const traffic = await routeTrafficStatus(originPoint, destinationPoint);
+    const trafficPromise = routeTrafficStatus(originPoint, destinationPoint);
 
     const stopsWithPrice = verifiedPlannerPriceReferences(stops, authorizedStations, snapshots);
     const candidateStops = selectFuelRecommendationCandidates(stopsWithPrice, route.origin, route.destination, { priceWeight: input.recommendation.priceWeight });
@@ -109,8 +110,10 @@ export const routesRouter = router({
       return detourKm == null ? [] : [[candidateStops[index].placeId, detourKm]];
     }));
     const recommendation = recommendFuelStop(candidateStops, route.origin, route.destination, { priceWeight: input.recommendation.priceWeight, realDetoursKm });
+    void routeSearchPersistence.catch(error => console.warn("[Routes] Não foi possível registrar o histórico da rota:", error));
+    const traffic = await trafficPromise;
     return {
-      searchId: saved?.id ?? null,
+      searchId: null,
       route,
       stops: stopsWithPrice,
       priceCoverage: snapshots.length,

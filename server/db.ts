@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -180,6 +180,18 @@ export async function getLatestPriceSnapshots(placeIds: string[]) {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
+  });
+}
+
+export async function rememberGooglePlaceIds(placeIds: string[]) {
+  const db = await getDb();
+  const uniqueIds = Array.from(new Set(placeIds.filter(Boolean)));
+  if (!db || uniqueIds.length === 0) return;
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  await db.delete(googlePlaceIdCache).where(sql`${googlePlaceIdCache.expiresAt} < ${now}`);
+  await db.insert(googlePlaceIdCache).values(uniqueIds.map(placeId => ({ placeId, lastSeenAt: now, expiresAt }))).onDuplicateKeyUpdate({
+    set: { lastSeenAt: now, expiresAt },
   });
 }
 
@@ -404,10 +416,21 @@ export async function recordProviderMetric(input: ProviderMetricInput) {
   }
 }
 
-export async function getProviderMetricSummary(hours = 24) {
+export type ProviderMetricSummary = {
+  provider: "google_maps" | "tomtom" | "anp";
+  operation: string;
+  count: number;
+  successRate: number;
+  averageMs: number;
+  p95Ms: number;
+  latestAt: Date;
+  health: ReturnType<typeof classifyProviderHealth>;
+};
+
+export async function getProviderMetricSummary(hours = 24): Promise<{ since: Date; hours: number; samples: ProviderMetricSummary[] }> {
   const db = await getDb();
   const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-  if (!db) return { since, hours, samples: [] as Array<{ provider: "google_maps" | "tomtom" | "anp"; operation: string; count: number; successRate: number; averageMs: number; p95Ms: number; latestAt: Date }> };
+  if (!db) return { since, hours, samples: [] };
   const rows = (await db.select().from(providerMetricSamples).orderBy(desc(providerMetricSamples.createdAt)).limit(500)).filter(row => row.createdAt >= since);
   const grouped = new Map<string, typeof rows>();
   for (const row of rows) {
@@ -472,7 +495,7 @@ export async function createProductEvent(input: { event: ProductEventName; regio
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] } };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
 
   const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),

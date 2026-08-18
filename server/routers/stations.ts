@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { makeRequest, type DistanceMatrixResult, type PlaceDetailsResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
-import { getAuthorizedStationsForQuery } from "../db";
+import { getAuthorizedStationsForQuery, rememberGooglePlaceIds } from "../db";
 import { distanceMatrixBatches, mergeStationDistances } from "../lib/stationDistance";
 import { publicStationDetails, publicStationInfo, type PublicStation } from "../lib/stationDirectory";
 import { cacheStationSearch, getCachedStationSearch } from "../lib/stationSearchCache";
 import { resolveStationIdentity, type StationIdentityMatch } from "../lib/stationIdentityResolver";
+import { requestGoogleNextPage } from "../lib/googlePlacesPagination";
+import { dedupePlaceDetailsRequest } from "../lib/placeDetailsRequest";
 
 export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional() });
 const authorizedInput = z.object({ query: z.string().trim().min(3).max(240), neighborhood: z.string().trim().min(1).max(160).optional(), brand: z.string().trim().min(1).max(120).optional() });
@@ -23,24 +25,12 @@ export const stationsRouter = router({
       const cached = getCachedStationSearch<StationSearchPage>(input.query);
       if (cached) return cached;
     }
-    let search: PlacesSearchResult | undefined;
-    const attempts = input.cursor ? 4 : 1;
-    for (let attempt = 0; attempt < attempts; attempt += 1) {
-      if (input.cursor) {
-        // O token de continuação do Text Search pode levar alguns segundos para ficar ativo.
-        await new Promise(resolve => setTimeout(resolve, 1800));
-      }
-      const response = await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", input.cursor ? { pagetoken: input.cursor, query: `posto de combustíveis em ${input.query}`, type: "gas_station" } : { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
-      if (response.status === "OK" || response.status === "ZERO_RESULTS") {
-        search = response;
-        break;
-      }
-      if (!input.cursor || response.status !== "INVALID_REQUEST" || attempt === attempts - 1) {
-        throw new Error(`Google Maps não liberou o próximo lote (${response.status}).`);
-      }
-    }
-    if (!search) throw new Error("Não foi possível carregar o próximo lote de postos.");
+    const search = input.cursor
+      ? await requestGoogleNextPage(() => makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { pagetoken: input.cursor }))
+      : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
+    if (search.status !== "OK" && search.status !== "ZERO_RESULTS") throw new Error(`Google Maps não liberou o próximo lote (${search.status}).`);
     const candidates = search.results.slice(0, 20);
+    void rememberGooglePlaceIds(candidates.map(station => station.place_id));
     const stations = candidates.map(station => publicStationInfo(station));
     const authorizedStations = await getAuthorizedStationsForQuery(input.query);
     const distanceBatches = distanceMatrixBatches(candidates);
@@ -50,7 +40,7 @@ export const stationsRouter = router({
     return input.cursor ? result : cacheStationSearch(input.query, result);
   }),
   details: publicProcedure.input(detailsInput).query(async ({ input }) => {
-    const details = await makeRequest<PlaceDetailsResult>("/maps/api/place/details/json", { place_id: input.placeId, fields: "name,formatted_address,formatted_phone_number,website,opening_hours,geometry" });
+    const details = await dedupePlaceDetailsRequest(input.placeId, () => makeRequest<PlaceDetailsResult>("/maps/api/place/details/json", { place_id: input.placeId, fields: "name,formatted_address,formatted_phone_number,website,opening_hours,geometry" }));
     return publicStationDetails(input.placeId, details);
   }),
   authorizedSearch: publicProcedure.input(authorizedInput).query(async ({ input }) => {

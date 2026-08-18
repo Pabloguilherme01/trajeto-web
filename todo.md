@@ -199,3 +199,12 @@
 - [x] Classificar indicadores de provedor como saudável, atenção ou alerta a partir de p95, taxa de sucesso e tamanho de amostra.
 - [x] Cobrir pontuação ponderada, desvio real, alertas e controles de interface com testes automatizados.
 - [x] Validar planejador e painel em desktop e celular, executar build e salvar checkpoint da rodada.
+- [x] Gerar e entregar um pacote ZIP seguro do código-fonte atual para análise no Qwen Studio.
+- [x] Gerar e entregar um arquivo Markdown único do código e da arquitetura para upload direto no Qwen Studio.
+- [x] Auditar e otimizar a camada de dados, paginação e cache permitido de postos e rotas.
+- [ ] Refinar o carregamento do mapa, a divisão de bundle e a persistência assíncrona da rota.
+- [ ] Criar a experiência mobile do planejador com skeletons, ficha de posto e confirmação antes de navegação externa.
+- [ ] Ampliar o motor determinístico com scores explicáveis e economia líquida contextualizada.
+- [ ] Registrar eventos agregados da ficha e navegação e exibir o funil no painel operacional.
+- [ ] Adicionar testes de paginação, ficha, confirmação, economia e determinismo, com validação desktop e mobile.
+- [ ] Registrar benchmarks e checkpoints por marco da evolução mobile, velocidade e funcionalidade.

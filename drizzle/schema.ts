@@ -72,6 +72,12 @@ export const providerMetricSamples = mysqlTable("provider_metric_samples", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ providerCreatedIdx: index("provider_metric_samples_provider_created_idx").on(table.provider, table.createdAt) }));
 
+export const googlePlaceIdCache = mysqlTable("google_place_id_cache", {
+  placeId: varchar("placeId", { length: 255 }).primaryKey(),
+  lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+}, table => ({ expiresAtIdx: index("google_place_id_cache_expires_at_idx").on(table.expiresAt) }));
+
 export const fuelPriceSnapshots = mysqlTable("fuel_price_snapshots", {
   id: int("id").autoincrement().primaryKey(),
   placeId: varchar("placeId", { length: 255 }).notNull(),
