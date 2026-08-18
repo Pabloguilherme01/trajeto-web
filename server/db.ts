@@ -1,9 +1,10 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, users } from "../drizzle/schema";
+import { consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, trafficNotifications, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
+import { aggregateDailyTimestamps, buildWeeklyTrend } from "./lib/weeklyTrends";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -248,6 +249,46 @@ export async function removeRouteAlertPreference(userId: number, corridorId: str
   return { removed: true };
 }
 
+export type TrafficNotificationInput = {
+  userId: number;
+  corridorId: string;
+  corridorLabel: string;
+  incidentId: string;
+  title: string;
+  detail: string;
+  severity: "minor" | "moderate" | "major" | "unknown";
+};
+
+export async function createTrafficNotifications(inputs: TrafficNotificationInput[]) {
+  const db = await getDb();
+  if (!db || inputs.length === 0) return [];
+  const created: TrafficNotificationInput[] = [];
+  for (const input of inputs) {
+    const existing = await db.select({ id: trafficNotifications.id }).from(trafficNotifications).where(and(
+      eq(trafficNotifications.userId, input.userId),
+      eq(trafficNotifications.corridorId, input.corridorId),
+      eq(trafficNotifications.incidentId, input.incidentId),
+    )).limit(1);
+    if (existing.length) continue;
+    await db.insert(trafficNotifications).values(input).onDuplicateKeyUpdate({ set: { title: input.title, detail: input.detail, severity: input.severity } });
+    created.push(input);
+  }
+  return created;
+}
+
+export async function getTrafficNotifications(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(12);
+}
+
+export async function markTrafficNotificationsRead(userId: number, ids: number[]) {
+  const db = await getDb();
+  if (!db || ids.length === 0) return { updated: 0 };
+  const result = await db.update(trafficNotifications).set({ readAt: new Date() }).where(and(eq(trafficNotifications.userId, userId), inArray(trafficNotifications.id, ids)));
+  return { updated: result[0].affectedRows };
+}
+
 export async function createProductEvent(input: { event: ProductEventName; region?: string | null }) {
   const db = await getDb();
   if (!db) return;
@@ -256,9 +297,9 @@ export async function createProductEvent(input: { event: ProductEventName; regio
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [] };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })) };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -267,7 +308,12 @@ export async function getOperationalOverview() {
     db.select().from(redemptions).orderBy(desc(redemptions.requestedAt)).limit(8),
     db.select({ origin: routeSearches.origin, destination: routeSearches.destination, consultations: sql<number>`count(*)` }).from(routeSearches).groupBy(routeSearches.origin, routeSearches.destination).orderBy(desc(sql`count(*)`)).limit(6),
     db.select({ event: productEvents.event, total: count() }).from(productEvents).groupBy(productEvents.event),
+    db.select({ issuedAt: trafficNotifications.issuedAt }).from(trafficNotifications),
+    db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "alert_preference_saved")),
   ]);
+
+  const notificationTrend = aggregateDailyTimestamps(notificationTrendRows.map(row => row.issuedAt));
+  const savedAlertTrend = aggregateDailyTimestamps(savedAlertTrendRows.map(row => row.createdAt));
 
   return {
     totals: { routeSearches: routeCount?.value ?? 0, redemptions: redemptionCount?.value ?? 0, pendingRedemptions: pendingCount?.value ?? 0, consentEvents: consentCount?.value ?? 0 },
@@ -275,5 +321,6 @@ export async function getOperationalOverview() {
     recentRedemptions,
     topRoutes,
     growthEvents,
+    weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
   };
 }

@@ -91,3 +91,15 @@
 - [x] Exibir a frequência e a última atualização dos alertas automáticos na área pessoal.
 - [x] Confirmar a presença dos indicadores de alertas e ANP no painel operacional em desktop e mobile.
 - [x] Confirmar no painel operacional móvel os indicadores "Alertas de corredor salvos" e "Consultas ANP com VC" após os fluxos reais.
+- [x] Definir uma política de notificação de incidentes acionáveis para preferências de corredor em janela ativa.
+- [x] Persistir notificações de trânsito recentes e expor alertas não lidos na área pessoal.
+- [x] Filtrar incidentes encerrados, sem atraso e fora da janela de recência antes de exibi-los ou notificá-los.
+- [x] Criar tendências semanais de tráfego e alertas salvos no painel operacional com dados agregados.
+- [x] Validar em desktop e mobile os alertas acionáveis, a filtragem e o gráfico operacional.
+- [x] Salvar checkpoint da evolução de notificações e tendências.
+- [x] Implementar notificações do navegador somente durante o uso da área pessoal, com permissão explícita e sem envio em segundo plano.
+- [x] Exibir estados claros para notificações indisponíveis, negadas ou bloqueadas pelo navegador.
+- [x] Validar os estados de permissão das notificações locais na área pessoal.
+- [x] Cobrir em teste os estados padrão, concedido, negado e indisponível da Notification API.
+- [x] Registrar evidência verificável dos estados de notificação local não reproduzíveis no navegador de validação.
+- [x] Inspecionar explicitamente no celular os alertas acionáveis filtrados e o gráfico semanal da operação.

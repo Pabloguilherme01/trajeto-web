@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { corridorPresets } from "@/lib/corridorPresets";
+import { notificationStatusMessage, type BrowserNotificationStatus } from "@/lib/browserNotifications";
 import { trpc } from "@/lib/trpc";
-import { BellRing, Clock3, Loader2, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Bell, BellRing, CheckCheck, Clock3, Loader2, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type AlertPreference = {
   id: number;
@@ -19,12 +20,23 @@ const slots = [
   { value: "anytime", label: "Qualquer horário" },
 ] as const;
 
+const browserNotificationAvailable = () => typeof window !== "undefined" && "Notification" in window;
+
+function initialNotificationStatus(): BrowserNotificationStatus {
+  if (!browserNotificationAvailable()) return "unsupported";
+  return window.Notification.permission;
+}
+
 export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] }) {
   const [corridorId, setCorridorId] = useState(corridorPresets[0]?.id ?? "");
   const [timeSlot, setTimeSlot] = useState<(typeof slots)[number]["value"]>("morning");
+  const [browserAlertsEnabled, setBrowserAlertsEnabled] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("trajeto-traffic-browser-alerts") === "enabled");
+  const [notificationStatus, setNotificationStatus] = useState<BrowserNotificationStatus>(initialNotificationStatus);
+  const [permissionAttempted, setPermissionAttempted] = useState(false);
   const utils = trpc.useUtils();
   const save = trpc.personal.saveRouteAlert.useMutation({ onSuccess: () => utils.personal.overview.invalidate() });
   const remove = trpc.personal.removeRouteAlert.useMutation({ onSuccess: () => utils.personal.overview.invalidate() });
+  const markRead = trpc.personal.markTrafficNotificationsRead.useMutation({ onSuccess: () => { utils.personal.liveAlerts.invalidate(); utils.personal.trafficNotifications.invalidate(); } });
   const liveAlerts = trpc.personal.liveAlerts.useQuery(undefined, {
     enabled: alerts.length > 0,
     retry: 1,
@@ -33,13 +45,37 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
   });
   const selected = useMemo(() => corridorPresets.find(item => item.id === corridorId), [corridorId]);
   const lastUpdated = liveAlerts.data?.checkedAt ? new Date(liveAlerts.data.checkedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : null;
+  const notifications = liveAlerts.data?.notifications ?? [];
+  const unreadNotifications = notifications.filter(notification => !notification.readAt);
+  const notificationNotice = notificationStatusMessage(notificationStatus, browserAlertsEnabled, permissionAttempted);
+
+  useEffect(() => {
+    if (!browserAlertsEnabled || !browserNotificationAvailable() || window.Notification.permission !== "granted") return;
+    liveAlerts.data?.newNotifications.forEach(notification => {
+      new window.Notification(notification.title, { body: notification.detail, tag: `trajeto-${notification.corridorId}-${notification.incidentId}` });
+    });
+  }, [browserAlertsEnabled, liveAlerts.data?.newNotifications]);
+
+  async function enableBrowserAlerts() {
+    setPermissionAttempted(true);
+    if (!browserNotificationAvailable()) {
+      setNotificationStatus("unsupported");
+      return;
+    }
+    const permission = await window.Notification.requestPermission();
+    setNotificationStatus(permission);
+    if (permission === "granted") {
+      window.localStorage.setItem("trajeto-traffic-browser-alerts", "enabled");
+      setBrowserAlertsEnabled(true);
+    }
+  }
 
   return <section className="mt-8 overflow-hidden rounded-3xl border border-[#3DE3FF]/25 bg-[#0F1B20] p-6 text-white sm:p-7">
     <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Alertas de corredor</p>
         <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Escolha quando acompanhar.</h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#A8BBC3]">Guarde um corredor e horário. A Trajeto registra seu consentimento e atualiza ocorrências reais a cada cinco minutos enquanto esta área permanece aberta.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#A8BBC3]">Guarde um corredor e horário. A Trajeto registra seu consentimento, filtra incidentes encerrados ou antigos e atualiza ocorrências acionáveis a cada cinco minutos enquanto esta área permanece aberta.</p>
       </div>
       <BellRing className="size-7 text-[#C7FF3C]" />
     </div>
@@ -67,6 +103,13 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
           {liveAlerts.isFetching ? <Loader2 className="size-3.5 animate-spin" /> : "Atualizar agora"}
         </Button>
       </div>
+
+      <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-3"><Bell className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" /><div><p className="text-sm font-bold text-white">Notificações durante o uso</p><p className="mt-1 text-xs leading-relaxed text-[#A8BBC3]">Quando houver um incidente recente e acionável em uma janela ativa, o alerta aparece aqui e pode ser exibido pelo navegador. Nada é enviado com o site fechado.</p></div></div>
+        {notificationNotice ? <span className={`max-w-48 shrink-0 text-right text-xs leading-relaxed ${notificationNotice.tone === "active" ? "font-bold text-[#C7FF3C]" : notificationNotice.tone === "warning" ? "text-[#FFAA9C]" : "text-[#A8BBC3]"}`}>{notificationNotice.message}</span> : <Button onClick={enableBrowserAlerts} className="h-9 shrink-0 rounded-lg bg-[#C7FF3C] px-3 text-xs font-bold text-[#0B1014] hover:bg-white">Ativar neste navegador</Button>}
+      </div>
+
+      {unreadNotifications.length > 0 && <div className="mt-4 rounded-2xl border border-[#FF7D6A]/35 bg-[#FF7D6A]/[0.09] p-4"><div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm font-bold text-white">{unreadNotifications.length === 1 ? "1 alerta acionável recente" : `${unreadNotifications.length} alertas acionáveis recentes`}</p><Button onClick={() => markRead.mutate({ ids: unreadNotifications.map(notification => notification.id) })} disabled={markRead.isPending} className="h-8 rounded-lg border border-white/15 bg-transparent px-3 text-xs text-white hover:bg-white/10"><CheckCheck className="mr-1.5 size-3.5" />Marcar como lidos</Button></div><div className="mt-3 space-y-2">{unreadNotifications.slice(0, 3).map(notification => <p key={notification.id} className="border-l-2 border-[#FF7D6A] pl-3 text-xs leading-relaxed text-[#FFD0C6]"><strong>{notification.corridorLabel}:</strong> {notification.detail}</p>)}</div></div>}
 
       {liveAlerts.data && <div className="mt-4 grid gap-3">
         {liveAlerts.data.alerts.map(alert => <div key={alert.corridorId} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">

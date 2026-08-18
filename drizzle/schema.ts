@@ -110,6 +110,23 @@ export const routeAlertPreferences = mysqlTable("route_alert_preferences", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, table => ({ userIdx: index("route_alert_preferences_user_idx").on(table.userId), userCorridorUnique: uniqueIndex("route_alert_preferences_user_corridor_unique").on(table.userId, table.corridorId) }));
 
+export const trafficNotifications = mysqlTable("traffic_notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  corridorId: varchar("corridorId", { length: 80 }).notNull(),
+  corridorLabel: varchar("corridorLabel", { length: 120 }).notNull(),
+  incidentId: varchar("incidentId", { length: 180 }).notNull(),
+  title: varchar("title", { length: 180 }).notNull(),
+  detail: varchar("detail", { length: 500 }).notNull(),
+  severity: mysqlEnum("severity", ["minor", "moderate", "major", "unknown"]).default("unknown").notNull(),
+  issuedAt: timestamp("issuedAt").defaultNow().notNull(),
+  readAt: timestamp("readAt"),
+}, table => ({
+  userIssuedIdx: index("traffic_notifications_user_issued_idx").on(table.userId, table.issuedAt),
+  userReadIdx: index("traffic_notifications_user_read_idx").on(table.userId, table.readAt),
+  userCorridorIncidentUnique: uniqueIndex("traffic_notifications_user_corridor_incident_unique").on(table.userId, table.corridorId, table.incidentId),
+}));
+
 export const productEvents = mysqlTable("product_events", {
   id: int("id").autoincrement().primaryKey(),
   event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click", "alert_preference_saved", "anp_quality_open"]).notNull(),

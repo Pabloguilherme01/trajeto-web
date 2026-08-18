@@ -9,6 +9,7 @@ type TomTomIncident = {
     from?: string;
     to?: string;
     startTime?: string;
+    endTime?: string;
     lastReportTime?: string;
     events?: Array<{ description?: string }>;
   };
@@ -55,8 +56,31 @@ export function routeBoundingBox(origin: Point, destination: Point) {
   return `${boundedMinLng},${boundedMinLat},${boundedMaxLng},${boundedMaxLat}`;
 }
 
-function normalizeIncidents(items: TomTomIncident[]) {
-  return items.slice(0, 6).map((item, index): RouteTrafficIncident => {
+const ACTIONABLE_INCIDENT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function isClosedDescription(value: string | undefined) {
+  return /\b(encerrad[oa]|resolvid[oa]|conclu[ií]d[oa]|closed|cleared|resolved)\b/i.test(value ?? "");
+}
+
+function isRecent(value: string | undefined, now: Date) {
+  if (!value) return false;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) && timestamp <= now.getTime() + 5 * 60 * 1000 && timestamp >= now.getTime() - ACTIONABLE_INCIDENT_MAX_AGE_MS;
+}
+
+export function filterActionableTrafficItems(items: TomTomIncident[], now = new Date()) {
+  return items.filter(item => {
+    const properties = item.properties ?? {};
+    const description = properties.events?.find(event => event.description)?.description;
+    const reportedAt = properties.lastReportTime ?? properties.startTime;
+    const endedAt = properties.endTime ? new Date(properties.endTime).getTime() : null;
+    const noOperationalImpact = (properties.delay ?? 0) <= 0 && !properties.magnitudeOfDelay;
+    return !isClosedDescription(description) && !(endedAt && endedAt <= now.getTime()) && !noOperationalImpact && isRecent(reportedAt, now);
+  });
+}
+
+function normalizeIncidents(items: TomTomIncident[], now: Date) {
+  return filterActionableTrafficItems(items, now).slice(0, 6).map((item, index): RouteTrafficIncident => {
     const properties = item.properties ?? {};
     return {
       id: properties.id ?? `incident-${index}`,
@@ -83,11 +107,11 @@ export async function routeTrafficStatus(origin: Point, destination: Point) {
     url.searchParams.set("bbox", routeBoundingBox(origin, destination));
     url.searchParams.set("language", "pt-PT");
     url.searchParams.set("timeValidityFilter", "present");
-    url.searchParams.set("fields", "{incidents{type,geometry{type,coordinates},properties{id,iconCategory,magnitudeOfDelay,events{description},startTime,lastReportTime,from,to,delay}}}");
+    url.searchParams.set("fields", "{incidents{type,geometry{type,coordinates},properties{id,iconCategory,magnitudeOfDelay,events{description},startTime,endTime,lastReportTime,from,to,delay}}}");
     const response = await fetch(url, { signal: AbortSignal.timeout(8_000) });
     if (!response.ok) throw new Error(`Traffic API ${response.status}`);
     const payload = await response.json() as TomTomResponse;
-    const incidents = normalizeIncidents(payload.incidents ?? []);
+    const incidents = normalizeIncidents(payload.incidents ?? [], checkedAt);
     return {
       checkedAt,
       state: "active" as const,
