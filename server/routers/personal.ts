@@ -24,7 +24,7 @@ const alertInput = z.object({
 const stationSearchPreferencesInput = z.object({
   mappedBrand: z.string().trim().min(1).max(120).default("all"),
   hoursStatus: z.enum(["all", "open", "closed", "unknown"]).default("all"),
-  sortBy: z.enum(["distance", "brand", "hours"]).default("distance"),
+  sortBy: z.enum(["distance", "relevance", "brand", "hours"]).default("distance"),
   anpNeighborhood: z.string().trim().min(1).max(160).default("all"),
   anpBrand: z.string().trim().min(1).max(120).default("all"),
 });

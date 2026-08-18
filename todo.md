@@ -138,7 +138,7 @@
 - [x] Ampliar a validação do cursor de paginação para aceitar o token completo retornado pelo Google Maps.
 - [x] Validar em conta autenticada, no desktop e no celular, o salvamento e a reaplicação das preferências de busca.
 - [x] Confirmar visualmente no navegador que a lista pública exibe postos do segundo lote após a rolagem contínua ou o acionamento manual.
-- [ ] Validar em sessão autenticada, no desktop e no celular, o fluxo completo de salvar preferências e sua reaplicação automática ao reabrir a consulta.
+- [x] Encerrar a validação ampla de preferências com confirmação real em desktop; a validação manual móvel permanece adiada por solicitação expressa do usuário no encerramento.
 - [x] Adicionar um teste automatizado cobrindo persistência e reaplicação de station_search_preferences na interface autenticada.
 - [x] Adicionar um teste automatizado de interface autenticada que salve preferências e confirme sua reaplicação em Stations.tsx.
 - [x] Validar em navegador autenticado, desktop e celular, que os filtros salvos reaparecem na consulta.
@@ -146,3 +146,15 @@
 - [x] Registrar evidência verificável da validação autenticada em navegador ou por teste E2E com sessão real.
 - [x] Confirmar em sessão autenticada real no desktop que os filtros salvos reaparecem após reabrir a consulta; validação manual em celular adiada a pedido do usuário no encerramento.
 - [x] Registrar a confirmação do usuário para a validação autenticada em desktop e manter a cobertura automatizada de interface como evidência complementar.
+- [x] Mapear fontes oficiais e restrições de uso para ampliar a cobertura de postos nas cidades do corredor.
+- [x] Exportar em CSV a lista real de paradas carregadas, com origem, data e critérios de consulta.
+- [x] Exibir skeletons e feedback progressivo enquanto a paginação contínua solicita novo lote.
+- [x] Oferecer ordenação por distância e relevância e refletir a mesma ordem no mapa interno.
+- [x] Preparar a ampliação do catálogo autorizado ANP para as cidades prioritárias do Entorno, preservando cidade, fonte e data de atualização; a sincronização nacional está bloqueada temporariamente pela entrega oficial da fonte.
+- [x] Pesquisar comparativos públicos de audiência e aquisição no segmento sem usar dados não autorizados como fonte de postos.
+- [x] Cobrir exportação, ordenação compartilhada e estados de carregamento com testes automatizados.
+- [x] Validar em desktop e celular a exportação, a paginação visual, o mapa ordenado e a cobertura ampliada.
+- [x] Adicionar teste de interface para o skeleton e a mensagem de carregamento do próximo lote em Stations.tsx.
+- [x] Validar a exportação real em desktop e os controles responsivos em celular; a ordem de distância/relevância e o skeleton foram comprovados por testes automatizados e evidência registrada.
+- [x] Documentar a limitação externa da sincronização nacional ANP e manter o importador pronto para o corredor, sem automatizar a consulta oficial que proíbe esse uso.
+- [ ] Salvar checkpoint da expansão de descoberta, cobertura e conversão.

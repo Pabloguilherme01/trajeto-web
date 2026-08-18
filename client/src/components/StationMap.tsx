@@ -11,12 +11,13 @@ export function StationMap({ stations }: { stations: Station[] }) {
   useEffect(() => {
     if (!ready || !mapRef.current || !window.google || !stations.length) return;
     markers.current.forEach(marker => marker.map = null);
+    markers.current = [];
     const map = mapRef.current;
     const bounds = new window.google.maps.LatLngBounds();
-    stations.forEach(station => {
+    stations.forEach((station, index) => {
       bounds.extend(station);
-      const pin = new window.google.maps.marker.PinElement({ background: "#FFC928", borderColor: "#163840", glyphColor: "#163840" });
-      markers.current.push(new window.google.maps.marker.AdvancedMarkerElement({ map, position: station, title: station.name, content: pin.element }));
+      const pin = new window.google.maps.marker.PinElement({ background: "#FFC928", borderColor: "#163840", glyphColor: "#163840", glyph: String(index + 1) });
+      markers.current.push(new window.google.maps.marker.AdvancedMarkerElement({ map, position: station, title: `${index + 1}. ${station.name}`, content: pin.element }));
     });
     map.fitBounds(bounds, 40);
   }, [ready, stations]);

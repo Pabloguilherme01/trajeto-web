@@ -5,6 +5,20 @@ import { describe, expect, it, vi } from "vitest";
 
 const saved = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "CAMPING CLUBE", anpBrand: "BANDEIRA BRANCA" };
 const saveMutation = vi.fn();
+let isFetchingNextPage = false;
+
+class MockIntersectionObserver {
+  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
+  observe() {}
+  disconnect() {}
+  unobserve() {}
+  takeRecords() { return []; }
+  readonly root = null;
+  readonly rootMargin = "0px";
+  readonly thresholds = [];
+}
+
+vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ isAuthenticated: true }) }));
 vi.mock("@/const", () => ({ startLogin: vi.fn() }));
@@ -17,7 +31,7 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), message: vi.fn() } }));
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     stationDirectory: {
-      search: { useInfiniteQuery: () => ({ data: { pages: [{ query: "Águas Lindas de Goiás, GO", queriedAt: Date.now(), stations: [{ placeId: "shell-1", name: "Posto Shell", address: "Águas Lindas", lat: -15.74, lng: -48.28, phone: null, website: null, isOpen: true, openingHours: [], distanceMeters: 1200, distanceLabel: "1.2 km" }], nextCursor: null }] }, isLoading: false, isError: false, hasNextPage: false, isFetchingNextPage: false, isFetchNextPageError: false, fetchNextPage: vi.fn() }) },
+      search: { useInfiniteQuery: () => ({ data: { pages: [{ query: "Águas Lindas de Goiás, GO", queriedAt: Date.now(), stations: [{ placeId: "shell-1", name: "Posto Shell", address: "Águas Lindas", lat: -15.74, lng: -48.28, phone: null, website: null, isOpen: true, openingHours: [], distanceMeters: 1200, distanceLabel: "1.2 km" }], nextCursor: "next-token" }] }, isLoading: false, isError: false, hasNextPage: true, isFetchingNextPage, isFetchNextPageError: false, fetchNextPage: vi.fn() }) },
       authorizedSearch: { useQuery: () => ({ data: { stations: [], total: 1, neighborhoods: ["CAMPING CLUBE"], brands: ["BANDEIRA BRANCA"] } }) },
     },
     personal: {
@@ -48,5 +62,18 @@ describe("Stations com preferências autenticadas", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Salvar estes filtros" }));
     expect(saveMutation).toHaveBeenCalledWith(saved);
+  });
+
+  it("mostra skeletons e mensagem acessível enquanto recebe o próximo lote", () => {
+    isFetchingNextPage = true;
+    window.history.pushState({}, "", "/postos?q=%C3%81guas%20Lindas%20de%20Goi%C3%A1s%2C%20GO");
+    const { unmount } = render(<Stations />);
+
+    const loadingSection = screen.getByLabelText("Carregando próximo lote de paradas");
+    expect(loadingSection).toBeTruthy();
+    expect(screen.getByText("Carregando o próximo lote de postos…")).toBeTruthy();
+    expect(loadingSection.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(21);
+    unmount();
+    isFetchingNextPage = false;
   });
 });

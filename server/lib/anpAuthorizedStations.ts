@@ -16,8 +16,23 @@ export type AuthorizedStationImport = {
 
 const canonical = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
 
-export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, municipality = "AGUAS LINDAS DE GOIAS") {
-  const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(25_000) });
+export type AnpMunicipalityTarget = { municipality: string; state: "DF" | "GO" };
+
+export const CORRIDOR_ANP_MUNICIPALITIES: AnpMunicipalityTarget[] = [
+  { municipality: "Águas Lindas de Goiás", state: "GO" },
+  { municipality: "Ceilândia", state: "DF" },
+  { municipality: "Taguatinga", state: "DF" },
+  { municipality: "Brasília", state: "DF" },
+  { municipality: "Valparaíso de Goiás", state: "GO" },
+  { municipality: "Cidade Ocidental", state: "GO" },
+  { municipality: "Luziânia", state: "GO" },
+  { municipality: "Formosa", state: "GO" },
+  { municipality: "Planaltina", state: "GO" },
+  { municipality: "Santo Antônio do Descoberto", state: "GO" },
+];
+
+export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, targets = CORRIDOR_ANP_MUNICIPALITIES) {
+  const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(60_000) });
   if (!response.ok) throw new Error(`Cadastro ANP indisponível (${response.status})`);
   const raw = new TextDecoder("windows-1252").decode(await response.arrayBuffer());
   const lines = raw.split(/\r?\n/).filter(Boolean);
@@ -25,17 +40,17 @@ export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORI
   const expected = ["AUTORIZACAO", "RAZAOSOCIAL", "ENDERECO", "UF", "MUNICIPIO", "BANDEIRA"];
   if (!expected.every(header => headers.includes(header))) throw new Error("O arquivo cadastral da ANP não possui os campos esperados.");
   const indexOf = (header: string) => headers.indexOf(header);
-  const targetMunicipality = canonical(municipality);
+  const targetKeys = new Set(targets.map(target => `${canonical(target.state)}:${canonical(target.municipality)}`));
   const queriedAt = new Date();
-  const stations = lines.map(line => line.split(";")).filter(columns => canonical(columns[indexOf("UF")] ?? "") === "GO" && canonical(columns[indexOf("MUNICIPIO")] ?? "") === targetMunicipality).map(columns => ({
+  const stations = lines.map(line => line.split(";")).filter(columns => targetKeys.has(`${canonical(columns[indexOf("UF")] ?? "")}:${canonical(columns[indexOf("MUNICIPIO")] ?? "")}`)).map(columns => ({
     authorization: (columns[indexOf("AUTORIZACAO")] ?? "").trim(),
     legalName: (columns[indexOf("RAZAOSOCIAL")] ?? "").trim(),
     address: (columns[indexOf("ENDERECO")] ?? "").trim(),
     complement: (columns[indexOf("COMPLEMENTO")] ?? "").trim(),
     neighborhood: (columns[indexOf("BAIRRO")] ?? "").trim(),
     zipCode: (columns[indexOf("CEP")] ?? "").trim(),
-    municipality: targetMunicipality,
-    state: "GO",
+    municipality: canonical(columns[indexOf("MUNICIPIO")] ?? ""),
+    state: canonical(columns[indexOf("UF")] ?? "") as "DF" | "GO",
     brand: (columns[indexOf("BANDEIRA")] ?? "").trim() || "NÃO INFORMADA",
     sourceReference: sourceUrl,
     sourceUpdatedAt: queriedAt,
