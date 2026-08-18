@@ -206,5 +206,5 @@
 - [x] Criar a experiência mobile do planejador com skeletons, ficha de posto e confirmação antes de navegação externa.
 - [x] Ampliar o motor determinístico com scores explicáveis e economia líquida contextualizada.
 - [x] Registrar eventos agregados da ficha e navegação e exibir o funil no painel operacional.
-- [ ] Adicionar testes de paginação, ficha, confirmação, economia e determinismo, com validação desktop e mobile.
-- [ ] Registrar benchmarks e checkpoints por marco da evolução mobile, velocidade e funcionalidade.
+- [x] Adicionar testes de paginação, ficha, confirmação, economia e determinismo, com validação desktop e mobile.
+- [x] Registrar benchmarks e checkpoints por marco da evolução mobile, velocidade e funcionalidade.
