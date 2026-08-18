@@ -7,6 +7,7 @@ import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
 import { aggregateDailyTimestamps, buildWeeklyTrend } from "./lib/weeklyTrends";
 import type { AuthorizedStationImport } from "./lib/anpAuthorizedStations";
 import { normalizeStationSearchPreferences, stationSearchPreferenceDefaults, type StationSearchPreferenceInput } from "./lib/stationSearchPreferences";
+import { classifyProviderHealth } from "./lib/providerHealth";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -417,7 +418,8 @@ export async function getProviderMetricSummary(hours = 24) {
     const orderedDurations = group.map(row => row.durationMs).sort((a, b) => a - b);
     const averageMs = Math.round(orderedDurations.reduce((sum, value) => sum + value, 0) / orderedDurations.length);
     const p95Ms = orderedDurations[Math.min(orderedDurations.length - 1, Math.ceil(orderedDurations.length * 0.95) - 1)] ?? 0;
-    return { provider: group[0].provider, operation: group[0].operation, count: group.length, successRate: Math.round((group.filter(row => row.success).length / group.length) * 100), averageMs, p95Ms, latestAt: group[0].createdAt };
+    const successRate = Math.round((group.filter(row => row.success).length / group.length) * 100);
+    return { provider: group[0].provider, operation: group[0].operation, count: group.length, successRate, averageMs, p95Ms, latestAt: group[0].createdAt, health: classifyProviderHealth({ count: group.length, successRate, p95Ms }) };
   }).sort((a, b) => a.provider.localeCompare(b.provider) || a.operation.localeCompare(b.operation));
   return { since, hours, samples };
 }

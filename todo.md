@@ -193,3 +193,9 @@
 - [x] Cobrir pontuação, instrumentação e apresentação com testes, tipagem e build.
 - [x] Validar em desktop a recomendação e o painel de métricas; a responsividade segue as grades móveis existentes. Resta salvar o checkpoint da rodada.
 - [x] Salvar checkpoint da recomendação inteligente e das métricas de provedores.
+- [x] Auditar o fluxo de recomendação e os limites de chamadas Directions antes de substituir a estimativa geométrica.
+- [x] Calcular o desvio real de até três postos com preço referenciado e reclassificar a recomendação com rotas reais.
+- [x] Adicionar controle deslizante para ajustar a prioridade entre preço e desvio no planejador, com critérios legíveis.
+- [x] Classificar indicadores de provedor como saudável, atenção ou alerta a partir de p95, taxa de sucesso e tamanho de amostra.
+- [x] Cobrir pontuação ponderada, desvio real, alertas e controles de interface com testes automatizados.
+- [x] Validar planejador e painel em desktop e celular, executar build e salvar checkpoint da rodada.

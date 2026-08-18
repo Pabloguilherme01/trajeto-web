@@ -1,11 +1,13 @@
 import { z } from "zod";
-import { createRouteSearch, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById, getUserVehicleById } from "../db";
+import { createRouteSearch, getAuthorizedStationsForQuery, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById, getUserVehicleById } from "../db";
 import { makeRequest, type DirectionsResult, type GeocodingResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
 import { normalizeStops, routeSummary } from "../lib/routePlanner";
 import { routeTrafficStatus } from "../lib/routeTraffic";
 import { compareFuelPrices } from "../lib/fuelEconomy";
-import { recommendFuelStop } from "../lib/stationRecommendation";
+import { recommendFuelStop, selectFuelRecommendationCandidates } from "../lib/stationRecommendation";
+import { directionsWaypoint, realDetourKm } from "../lib/routeDetour";
+import { anpPricePlaceId, verifiedPlannerPriceReferences } from "../lib/plannerPriceReference";
 
 const plannerInput = z.object({
   origin: z.string().trim().min(3).max(240),
@@ -18,6 +20,9 @@ const plannerInput = z.object({
     gasolineKmPerLiter: z.number().finite().positive().lte(100),
     ethanolKmPerLiter: z.number().finite().positive().lte(100),
   }).optional(),
+  recommendation: z.object({
+    priceWeight: z.number().int().min(0).max(100).default(70),
+  }).default({ priceWeight: 70 }),
 });
 
 function locality(result: GeocodingResult) {
@@ -45,11 +50,16 @@ export const routesRouter = router({
     ]);
 
     const stops = normalizeStops(nearby);
-    const [snapshots, anpReferences] = await Promise.all([
-      getLatestPriceSnapshots(stops.map(stop => stop.placeId)),
+    const [anpReferences, authorizedByArea] = await Promise.all([
       getPriceReferencesByAreas([locality(originGeo), locality(destinationGeo)].filter((area): area is { municipality: string; state: string } => Boolean(area))),
+      Promise.all([input.origin, input.destination].map(query => getAuthorizedStationsForQuery(query))),
     ]);
-    const snapshotByPlace = new Map(snapshots.map(snapshot => [snapshot.placeId, snapshot]));
+    const authorizedStations = Array.from(new Map(authorizedByArea.flat().map(station => [station.authorization, station])).values());
+    const snapshotIds = Array.from(new Set([
+      ...stops.map(stop => stop.placeId),
+      ...authorizedStations.map(station => anpPricePlaceId(station.authorization)),
+    ]));
+    const snapshots = await getLatestPriceSnapshots(snapshotIds);
     const vehicle = input.economy && ctx.user ? await getUserVehicleById(ctx.user.id, input.economy.vehicleId) : null;
     const economy = input.economy && vehicle ? compareFuelPrices({
       distanceKm: route.distanceMeters / 1000,
@@ -86,8 +96,19 @@ export const routesRouter = router({
 
     const traffic = await routeTrafficStatus(originPoint, destinationPoint);
 
-    const stopsWithPrice = stops.map(stop => ({ ...stop, priceReference: snapshotByPlace.get(stop.placeId) ?? null }));
-    const recommendation = recommendFuelStop(stopsWithPrice, route.origin, route.destination);
+    const stopsWithPrice = verifiedPlannerPriceReferences(stops, authorizedStations, snapshots);
+    const candidateStops = selectFuelRecommendationCandidates(stopsWithPrice, route.origin, route.destination, { priceWeight: input.recommendation.priceWeight });
+    const detourResults = await Promise.allSettled(candidateStops.map(candidate => makeRequest<DirectionsResult>(
+      "/maps/api/directions/json",
+      { origin: input.origin, destination: input.destination, mode: "driving", departure_time: "now", waypoints: directionsWaypoint(candidate) },
+    )));
+    const realDetoursKm = Object.fromEntries(detourResults.flatMap((result, index) => {
+      if (result.status !== "fulfilled") return [];
+      const routeWithStop = routeSummary(result.value);
+      const detourKm = realDetourKm(route.distanceMeters, routeWithStop.distanceMeters);
+      return detourKm == null ? [] : [[candidateStops[index].placeId, detourKm]];
+    }));
+    const recommendation = recommendFuelStop(candidateStops, route.origin, route.destination, { priceWeight: input.recommendation.priceWeight, realDetoursKm });
     return {
       searchId: saved?.id ?? null,
       route,
@@ -97,6 +118,10 @@ export const routesRouter = router({
       traffic,
       economy,
       recommendation,
+      recommendationDiagnostics: {
+        requestedCandidates: candidateStops.length,
+        realDetoursCalculated: Object.keys(realDetoursKm).length,
+      },
     };
   }),
   byId: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => getRouteSearchById(input.id)),
