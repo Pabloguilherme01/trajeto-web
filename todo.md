@@ -170,3 +170,10 @@
 - [x] Cobrir em testes os novos contratos, fluxos críticos e regressões de consulta, mapa e preferências.
 - [x] Validar em desktop as áreas públicas e autenticadas, registrar limites de integrações externas e aprovar tipagem, testes e build; a validação manual móvel autenticada permanece futura.
 - [x] Salvar checkpoint da rodada de auditoria, desempenho, identidade ANP e economia de veículos.
+- [x] Auditar o planejador, a garagem e o importador ANP para definir contratos, estados e limites de tentativa seguros.
+- [x] Exibir no planejador a estimativa de combustível da rota usando veículo e parâmetros escolhidos pelo usuário.
+- [x] Refinar a garagem de veículos para fluxo móvel acessível, com campos, ações e resultados sem sobreposição horizontal.
+- [x] Implementar tentativas limitadas com atraso progressivo e fallback transparente para a importação oficial ANP.
+- [x] Cobrir cálculo por rota, tentativas de importação e layout móvel com testes automatizados.
+- [x] Validar em desktop e celular, executar tipagem, testes e build; resta salvar o checkpoint da rodada.
+- [ ] Salvar checkpoint da estimativa por rota, responsividade móvel e sincronização ANP resiliente.

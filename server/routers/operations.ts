@@ -18,8 +18,13 @@ export const operationsRouter = router({
     return { ...result, sourceUrl: input.sourceUrl };
   }),
   syncAuthorizedStations: adminProcedure.input(z.object({ sourceUrl: z.string().url().default(DEFAULT_ANP_AUTHORIZED_STATIONS_URL) })).mutation(async ({ input }) => {
-    const { stations, queriedAt } = await downloadAuthorizedStations(input.sourceUrl);
-    const result = await replaceAuthorizedStations(stations);
-    return { ...result, sourceUrl: input.sourceUrl, queriedAt };
+    try {
+      const { stations, queriedAt } = await downloadAuthorizedStations(input.sourceUrl);
+      const result = await replaceAuthorizedStations(stations);
+      return { status: "updated" as const, ...result, sourceUrl: input.sourceUrl, queriedAt };
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "Erro de origem desconhecida.";
+      return { status: "fallback" as const, imported: 0, sourceUrl: input.sourceUrl, queriedAt: null, message: `A fonte oficial não respondeu após tentativas limitadas. O catálogo já armazenado foi preservado. Detalhe: ${detail}` };
+    }
   }),
 });

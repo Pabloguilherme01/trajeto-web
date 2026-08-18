@@ -54,7 +54,7 @@ export default function Operations() {
   const [authorizedNotice, setAuthorizedNotice] = useState<string | null>(null);
   const [socialDraft, setSocialDraft] = useState<Record<(typeof socialPlatforms)[number], string>>({ instagram: "", whatsapp: "", tiktok: "", youtube: "" });
   const syncAnp = trpc.operations.syncAnp.useMutation({ onSuccess: result => { setAnpNotice(`${result.imported.toLocaleString("pt-BR")} referências ANP foram importadas.`); overview.refetch(); }, onError: () => setAnpNotice("Não foi possível importar a planilha. Confirme se a URL é uma planilha .xlsx oficial da ANP.") });
-  const syncAuthorizedStations = trpc.operations.syncAuthorizedStations.useMutation({ onSuccess: result => setAuthorizedNotice(`${result.imported.toLocaleString("pt-BR")} postos autorizados foram atualizados pelo cadastro oficial da ANP.`), onError: () => setAuthorizedNotice("Não foi possível atualizar o cadastro de revendedores agora.") });
+  const syncAuthorizedStations = trpc.operations.syncAuthorizedStations.useMutation({ onSuccess: result => setAuthorizedNotice(result.status === "updated" ? `${result.imported.toLocaleString("pt-BR")} postos autorizados foram atualizados pelo cadastro oficial da ANP.` : result.message), onError: () => setAuthorizedNotice("Não foi possível atualizar o cadastro de revendedores agora.") });
   const social = trpc.social.all.useQuery();
   const saveSocial = trpc.social.save.useMutation({ onSuccess: () => social.refetch() });
   const data = overview.data;

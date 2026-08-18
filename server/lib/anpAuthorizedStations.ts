@@ -31,9 +31,37 @@ export const CORRIDOR_ANP_MUNICIPALITIES: AnpMunicipalityTarget[] = [
   { municipality: "Santo Antônio do Descoberto", state: "GO" },
 ];
 
-export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, targets = CORRIDOR_ANP_MUNICIPALITIES) {
-  const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(60_000) });
-  if (!response.ok) throw new Error(`Cadastro ANP indisponível (${response.status})`);
+export type AuthorizedStationsDownloadOptions = {
+  maxAttempts?: number;
+  retryDelayMs?: number;
+  fetchImpl?: typeof fetch;
+  sleep?: (milliseconds: number) => Promise<void>;
+};
+
+const wait = (milliseconds: number) => new Promise<void>(resolve => setTimeout(resolve, milliseconds));
+
+export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, targets = CORRIDOR_ANP_MUNICIPALITIES, options: AuthorizedStationsDownloadOptions = {}) {
+  const maxAttempts = Math.min(3, Math.max(1, options.maxAttempts ?? 3));
+  const retryDelayMs = Math.max(100, options.retryDelayMs ?? 800);
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const sleep = options.sleep ?? wait;
+  let response: Response | null = null;
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const candidate = await fetchImpl(sourceUrl, { signal: AbortSignal.timeout(60_000) });
+      if (candidate.ok) {
+        response = candidate;
+        break;
+      }
+      lastError = new Error(`Cadastro ANP indisponível (${candidate.status})`);
+      if (![408, 429, 500, 502, 503, 504].includes(candidate.status)) break;
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt < maxAttempts) await sleep(retryDelayMs * attempt);
+  }
+  if (!response) throw lastError instanceof Error ? lastError : new Error("Cadastro ANP indisponível após tentativas limitadas.");
   const raw = new TextDecoder("windows-1252").decode(await response.arrayBuffer());
   const lines = raw.split(/\r?\n/).filter(Boolean);
   const headers = lines.shift()?.split(";") ?? [];
@@ -55,5 +83,5 @@ export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORI
     sourceReference: sourceUrl,
     sourceUpdatedAt: queriedAt,
   })).filter(station => station.authorization && station.legalName && station.address);
-  return { stations, queriedAt };
+  return { stations, queriedAt, attempts: maxAttempts };
 }

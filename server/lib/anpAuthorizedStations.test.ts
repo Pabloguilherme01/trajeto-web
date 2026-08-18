@@ -21,4 +21,20 @@ describe("downloadAuthorizedStations", () => {
       ["AGUAS LINDAS DE GOIAS", "GO"],
     ]);
   });
+
+  it("repete somente falhas transitórias e preserva a validação do arquivo recebido", async () => {
+    const csv = ["AUTORIZACAO;RAZAOSOCIAL;ENDERECO;COMPLEMENTO;BAIRRO;CEP;UF;MUNICIPIO;BANDEIRA", "PR/GO0002;POSTO GO;Q 2;LOTE 2;CENTRO;72900-000;GO;AGUAS LINDAS DE GOIAS;IPIRANGA"].join("\n");
+    const fetchImpl = vi.fn().mockResolvedValueOnce(new Response("temporário", { status: 503 })).mockResolvedValueOnce(new Response(csv, { status: 200 }));
+    const sleep = vi.fn(async () => undefined);
+    const result = await downloadAuthorizedStations("https://example.com/anp.csv", [{ municipality: "Águas Lindas de Goiás", state: "GO" }], { fetchImpl, sleep, retryDelayMs: 1 });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledWith(100);
+    expect(result.stations).toHaveLength(1);
+  });
+
+  it("não repete respostas de bloqueio e deixa o catálogo anterior para o fallback operacional", async () => {
+    const fetchImpl = vi.fn(async () => new Response("bloqueado", { status: 403 }));
+    await expect(downloadAuthorizedStations("https://example.com/anp.csv", [], { fetchImpl, retryDelayMs: 1 })).rejects.toThrow("403");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
 });
