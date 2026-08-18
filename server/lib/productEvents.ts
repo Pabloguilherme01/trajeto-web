@@ -1,4 +1,4 @@
-export const productEventNames = ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click"] as const;
+export const productEventNames = ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click", "alert_preference_saved", "anp_quality_open"] as const;
 
 export type ProductEventName = (typeof productEventNames)[number];
 

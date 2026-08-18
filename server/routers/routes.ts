@@ -3,6 +3,7 @@ import { createRouteSearch, getLatestPriceSnapshots, getPriceReferencesByAreas, 
 import { makeRequest, type DirectionsResult, type GeocodingResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
 import { normalizeStops, routeSummary } from "../lib/routePlanner";
+import { routeTrafficStatus } from "../lib/routeTraffic";
 
 const plannerInput = z.object({
   origin: z.string().trim().min(3).max(240),
@@ -61,6 +62,7 @@ export const routesRouter = router({
       stops: stops.map(stop => ({ ...stop, priceReference: snapshotByPlace.get(stop.placeId) ?? null })),
       priceCoverage: snapshots.length,
       anpReferences,
+      traffic: routeTrafficStatus(),
     };
   }),
   byId: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => getRouteSearchById(input.id)),

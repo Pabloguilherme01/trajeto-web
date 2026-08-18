@@ -99,9 +99,20 @@ export const favoriteStations = mysqlTable("favorite_stations", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ userIdx: index("favorite_stations_user_idx").on(table.userId), userPlaceUnique: uniqueIndex("favorite_stations_user_place_unique").on(table.userId, table.placeId) }));
 
+export const routeAlertPreferences = mysqlTable("route_alert_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  corridorId: varchar("corridorId", { length: 80 }).notNull(),
+  corridorLabel: varchar("corridorLabel", { length: 120 }).notNull(),
+  timeSlot: mysqlEnum("timeSlot", ["morning", "afternoon", "evening", "anytime"]).default("anytime").notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => ({ userIdx: index("route_alert_preferences_user_idx").on(table.userId), userCorridorUnique: uniqueIndex("route_alert_preferences_user_corridor_unique").on(table.userId, table.corridorId) }));
+
 export const productEvents = mysqlTable("product_events", {
   id: int("id").autoincrement().primaryKey(),
-  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click"]).notNull(),
+  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click", "alert_preference_saved", "anp_quality_open"]).notNull(),
   region: varchar("region", { length: 120 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ eventCreatedIdx: index("product_events_event_created_idx").on(table.event, table.createdAt), regionCreatedIdx: index("product_events_region_created_idx").on(table.region, table.createdAt) }));

@@ -18,6 +18,8 @@ const growthLabels: Record<string, string> = {
   redemption_requested: "Resgates solicitados",
   social_instagram_click: "Cliques no Instagram",
   social_whatsapp_click: "Cliques no WhatsApp",
+  alert_preference_saved: "Alertas de corredor salvos",
+  anp_quality_open: "Consultas ANP com VC",
 };
 
 function formatDate(value: Date | string) {

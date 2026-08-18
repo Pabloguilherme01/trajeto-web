@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeSearches, socialLinks, users } from "../drizzle/schema";
+import { consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -189,13 +189,14 @@ export async function createRedemption(input: {
 
 export async function getPersonalOverview(userId: number) {
   const db = await getDb();
-  if (!db) return { routes: [], redemptions: [], favorites: [] };
-  const [routes, userRedemptions, favorites] = await Promise.all([
+  if (!db) return { routes: [], redemptions: [], favorites: [], alerts: [] };
+  const [routes, userRedemptions, favorites, alerts] = await Promise.all([
     db.select().from(routeSearches).where(eq(routeSearches.userId, userId)).orderBy(desc(routeSearches.createdAt)).limit(12),
     db.select().from(redemptions).where(eq(redemptions.userId, userId)).orderBy(desc(redemptions.requestedAt)).limit(12),
     db.select().from(favoriteStations).where(eq(favoriteStations.userId, userId)).orderBy(desc(favoriteStations.createdAt)).limit(24),
+    getRouteAlertPreferences(userId),
   ]);
-  return { routes, redemptions: userRedemptions, favorites };
+  return { routes, redemptions: userRedemptions, favorites, alerts };
 }
 
 export async function getFavoritePlaceIds(userId: number, placeIds: string[]) {
@@ -218,6 +219,33 @@ export async function removeFavoriteStation(userId: number, placeId: string) {
   if (!db) throw new Error("Banco de dados indisponível.");
   await db.delete(favoriteStations).where(and(eq(favoriteStations.userId, userId), eq(favoriteStations.placeId, placeId)));
   return { favorited: false };
+}
+
+export type RouteAlertPreferenceInput = {
+  corridorId: string;
+  corridorLabel: string;
+  timeSlot: "morning" | "afternoon" | "evening" | "anytime";
+  active: boolean;
+};
+
+export async function getRouteAlertPreferences(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(routeAlertPreferences).where(eq(routeAlertPreferences.userId, userId)).orderBy(desc(routeAlertPreferences.updatedAt));
+}
+
+export async function upsertRouteAlertPreference(userId: number, input: RouteAlertPreferenceInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.insert(routeAlertPreferences).values({ userId, ...input }).onDuplicateKeyUpdate({ set: { corridorLabel: input.corridorLabel, timeSlot: input.timeSlot, active: input.active } });
+  return { saved: true };
+}
+
+export async function removeRouteAlertPreference(userId: number, corridorId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.delete(routeAlertPreferences).where(and(eq(routeAlertPreferences.userId, userId), eq(routeAlertPreferences.corridorId, corridorId)));
+  return { removed: true };
 }
 
 export async function createProductEvent(input: { event: ProductEventName; region?: string | null }) {

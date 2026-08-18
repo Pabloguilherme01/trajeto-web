@@ -55,8 +55,24 @@
 - [x] Aplicar transições e estados de hover acessíveis aos botões de redes sociais.
 - [x] Acrescentar recursos públicos funcionais que ampliem o valor da consulta de postos e rotas.
 - [x] Validar a nova experiência em desktop e mobile, incluindo eventos sociais e links de contato.
-- [ ] Salvar checkpoint da versão redesenhada da Trajeto.
+- [x] Salvar checkpoint da versão redesenhada da Trajeto.
 - [x] Adicionar foco visível por teclado aos botões sociais e revisar a acessibilidade de suas transições.
 - [x] Validar ponta a ponta os eventos agregados de clique no Instagram e WhatsApp no painel operacional.
 - [x] Clicar nos canais públicos e confirmar o registro agregado sem dados pessoais.
 - [x] Conferir visualmente no painel operacional os indicadores de cliques sociais.
+- [x] Pesquisar fontes oficiais de ocorrências viárias e os recursos públicos do ANP com VC.
+- [x] Definir a arquitetura de alertas de rota e horários, incluindo opção de atualização automática.
+- [x] Incluir corredores e rotas prioritárias para outras cidades do Entorno do DF.
+- [x] Integrar uma fonte oficial de ocorrências viárias com transparência de origem e horário.
+- [x] Aprimorar a integração com ANP com VC por posto, incluindo qualidade, fiscalização e encaminhamento oficial.
+- [x] Implementar preferências de alerta de rota e horários para usuários autenticados.
+- [ ] Validar dados, alertas, corredores e painel operacional em desktop e mobile.
+- [ ] Salvar checkpoint da expansão de alertas e integrações.
+- [x] Integrar o painel de situação de rota com fontes oficiais e horário de atualização.
+- [x] Adicionar corredores de Luziânia, Valparaíso, Cidade Ocidental, Formosa, Planaltina de Goiás e Santo Antônio do Descoberto.
+- [ ] Integrar o tráfego ao vivo com origem, horário e fallback explícitos — bloqueado até receber credencial válida da Traffic API.
+- [x] Implementar alertas por corredor e horário com consentimento granular.
+- [x] Criar a ficha de transparência e o encaminhamento enriqueccido para ANP com VC por posto.
+- [ ] Consumir uma fonte verificável de ocorrência ou interdição e exibir itens reais com origem e horário no planejador.
+- [ ] Usar as preferências de corredor e faixa horária para gerar alertas reais na área autenticada.
+- [ ] Validar ponta a ponta o salvamento, a consulta de rota correspondente e a exibição de alertas autenticados.
