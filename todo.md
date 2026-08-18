@@ -176,4 +176,4 @@
 - [x] Implementar tentativas limitadas com atraso progressivo e fallback transparente para a importação oficial ANP.
 - [x] Cobrir cálculo por rota, tentativas de importação e layout móvel com testes automatizados.
 - [x] Validar em desktop e celular, executar tipagem, testes e build; resta salvar o checkpoint da rodada.
-- [ ] Salvar checkpoint da estimativa por rota, responsividade móvel e sincronização ANP resiliente.
+- [x] Salvar checkpoint da estimativa por rota, responsividade móvel e sincronização ANP resiliente.
