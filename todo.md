@@ -66,13 +66,28 @@
 - [x] Integrar uma fonte oficial de ocorrências viárias com transparência de origem e horário.
 - [x] Aprimorar a integração com ANP com VC por posto, incluindo qualidade, fiscalização e encaminhamento oficial.
 - [x] Implementar preferências de alerta de rota e horários para usuários autenticados.
-- [ ] Validar dados, alertas, corredores e painel operacional em desktop e mobile.
-- [ ] Salvar checkpoint da expansão de alertas e integrações.
+- [x] Validar dados, alertas, corredores e painel operacional em desktop e mobile.
+- [x] Salvar checkpoint da expansão de alertas e integrações.
 - [x] Integrar o painel de situação de rota com fontes oficiais e horário de atualização.
 - [x] Adicionar corredores de Luziânia, Valparaíso, Cidade Ocidental, Formosa, Planaltina de Goiás e Santo Antônio do Descoberto.
-- [ ] Integrar o tráfego ao vivo com origem, horário e fallback explícitos — bloqueado até receber credencial válida da Traffic API.
+- [x] Integrar o tráfego ao vivo com origem, horário e fallback explícitos.
 - [x] Implementar alertas por corredor e horário com consentimento granular.
 - [x] Criar a ficha de transparência e o encaminhamento enriqueccido para ANP com VC por posto.
-- [ ] Consumir uma fonte verificável de ocorrência ou interdição e exibir itens reais com origem e horário no planejador.
-- [ ] Usar as preferências de corredor e faixa horária para gerar alertas reais na área autenticada.
-- [ ] Validar ponta a ponta o salvamento, a consulta de rota correspondente e a exibição de alertas autenticados.
+- [x] Consumir uma fonte verificável de ocorrência ou interdição e exibir itens reais com origem e horário no planejador.
+- [x] Usar as preferências de corredor e faixa horária para gerar alertas reais na área autenticada.
+- [x] Validar ponta a ponta o salvamento, a consulta de rota correspondente e a exibição de alertas autenticados.
+- [x] Validar a nova credencial da Traffic API e ativar a consulta real de ocorrências por rota.
+- [x] Concluir a entrega final de ocorrências ao vivo e alertas automáticos por corredor.
+- [x] Pesquisar alternativas gratuitas de tráfego e ocorrências caso a credencial TomTom não seja autorizada.
+- [x] Migrar a validação TomTom do endpoint de incidentes v4 depreciado para o endpoint v5 atual.
+- [x] Ajustar a área de consulta TomTom ao limite de 10.000 km² do endpoint de incidentes.
+- [x] Validar a nova credencial da Traffic API e ativar a consulta real de ocorrências por rota.
+- [x] Consultar incidentes TomTom reais por área da rota e retorná-los no planejador.
+- [x] Derivar o estado de trânsito da resposta real, exibindo fonte, horário e ocorrências.
+- [x] Validar a rota com incidentes no planejador e no fluxo de alertas autenticados.
+- [x] Atualizar automaticamente os alertas na área autenticada e informar a frequência de atualização.
+- [x] Validar visualmente os indicadores de alertas e ANP no painel operacional em desktop e mobile.
+- [x] Executar o fluxo autenticado completo de preferência, atualização e exibição de ocorrência real.
+- [x] Exibir a frequência e a última atualização dos alertas automáticos na área pessoal.
+- [x] Confirmar a presença dos indicadores de alertas e ANP no painel operacional em desktop e mobile.
+- [x] Confirmar no painel operacional móvel os indicadores "Alertas de corredor salvos" e "Consultas ANP com VC" após os fluxos reais.

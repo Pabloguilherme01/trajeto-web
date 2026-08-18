@@ -1,3 +1,21 @@
+type Point = { lat: number; lng: number };
+
+type TomTomIncident = {
+  properties?: {
+    id?: string;
+    iconCategory?: number;
+    magnitudeOfDelay?: number;
+    delay?: number;
+    from?: string;
+    to?: string;
+    startTime?: string;
+    lastReportTime?: string;
+    events?: Array<{ description?: string }>;
+  };
+};
+
+type TomTomResponse = { incidents?: TomTomIncident[] };
+
 export const officialRouteSources = [
   { label: "Detran-DF", detail: "interdições e serviços no Distrito Federal", url: "https://www.detran.df.gov.br/interdicoes-de-transito/" },
   { label: "PRF", detail: "notícias e dados abertos de rodovias federais", url: "https://www.gov.br/prf/pt-br/noticias" },
@@ -6,16 +24,80 @@ export const officialRouteSources = [
 
 export const anpComVcUrl = "https://anpcomvcpostos.anp.gov.br/";
 
-export function routeTrafficStatus() {
-  const liveEnabled = process.env.TOMTOM_TRAFFIC_ENABLED === "true";
-  return {
-    checkedAt: new Date(),
-    state: liveEnabled ? "active" as const : "pending" as const,
-    label: liveEnabled ? "Tráfego ao vivo ativo" : "Tráfego ao vivo aguardando ativação",
-    detail: liveEnabled
-      ? "A situação é atualizada pela fonte de tráfego conectada."
-      : "A duração foi calculada no momento da consulta. Ocorrências ao vivo serão exibidas quando a fonte for autorizada.",
-    officialSources: officialRouteSources,
-    anpComVcUrl,
-  };
+export type RouteTrafficIncident = {
+  id: string;
+  description: string;
+  severity: "minor" | "moderate" | "major" | "unknown";
+  delaySeconds: number | null;
+  from: string | null;
+  to: string | null;
+  reportedAt: string | null;
+};
+
+function severity(value: number | undefined): RouteTrafficIncident["severity"] {
+  if (value === 1) return "minor";
+  if (value === 2) return "moderate";
+  if (value === 3 || value === 4) return "major";
+  return "unknown";
+}
+
+export function routeBoundingBox(origin: Point, destination: Point) {
+  const minLng = Math.min(origin.lng, destination.lng);
+  const maxLng = Math.max(origin.lng, destination.lng);
+  const minLat = Math.min(origin.lat, destination.lat);
+  const maxLat = Math.max(origin.lat, destination.lat);
+  const paddingLng = Math.min(Math.max((maxLng - minLng) * 0.15, 0.08), 0.22);
+  const paddingLat = Math.min(Math.max((maxLat - minLat) * 0.15, 0.08), 0.22);
+  const boundedMinLng = Math.max(-180, minLng - paddingLng);
+  const boundedMaxLng = Math.min(180, maxLng + paddingLng);
+  const boundedMinLat = Math.max(-90, minLat - paddingLat);
+  const boundedMaxLat = Math.min(90, maxLat + paddingLat);
+  return `${boundedMinLng},${boundedMinLat},${boundedMaxLng},${boundedMaxLat}`;
+}
+
+function normalizeIncidents(items: TomTomIncident[]) {
+  return items.slice(0, 6).map((item, index): RouteTrafficIncident => {
+    const properties = item.properties ?? {};
+    return {
+      id: properties.id ?? `incident-${index}`,
+      description: properties.events?.find(event => event.description)?.description ?? "Ocorrência de trânsito reportada pela TomTom",
+      severity: severity(properties.magnitudeOfDelay),
+      delaySeconds: typeof properties.delay === "number" ? properties.delay : null,
+      from: properties.from ?? null,
+      to: properties.to ?? null,
+      reportedAt: properties.lastReportTime ?? properties.startTime ?? null,
+    };
+  });
+}
+
+export async function routeTrafficStatus(origin: Point, destination: Point) {
+  const checkedAt = new Date();
+  const apiKey = process.env.TOMTOM_API_KEY;
+  if (!apiKey) {
+    return { checkedAt, state: "pending" as const, label: "Tráfego ao vivo aguardando ativação", detail: "A duração foi calculada no momento da consulta. Ocorrências ao vivo serão exibidas quando a fonte for autorizada.", incidents: [] as RouteTrafficIncident[], officialSources: officialRouteSources, anpComVcUrl };
+  }
+
+  try {
+    const url = new URL("https://api.tomtom.com/traffic/services/5/incidentDetails");
+    url.searchParams.set("key", apiKey);
+    url.searchParams.set("bbox", routeBoundingBox(origin, destination));
+    url.searchParams.set("language", "pt-PT");
+    url.searchParams.set("timeValidityFilter", "present");
+    url.searchParams.set("fields", "{incidents{type,geometry{type,coordinates},properties{id,iconCategory,magnitudeOfDelay,events{description},startTime,lastReportTime,from,to,delay}}}");
+    const response = await fetch(url, { signal: AbortSignal.timeout(8_000) });
+    if (!response.ok) throw new Error(`Traffic API ${response.status}`);
+    const payload = await response.json() as TomTomResponse;
+    const incidents = normalizeIncidents(payload.incidents ?? []);
+    return {
+      checkedAt,
+      state: "active" as const,
+      label: incidents.length ? `${incidents.length} ocorrência(s) na área da rota` : "Sem ocorrências na área da rota",
+      detail: "Ocorrências e atrasos reportados pela TomTom Traffic API no momento da consulta.",
+      incidents,
+      officialSources: officialRouteSources,
+      anpComVcUrl,
+    };
+  } catch {
+    return { checkedAt, state: "unavailable" as const, label: "Fonte de trânsito indisponível", detail: "Não foi possível atualizar as ocorrências agora. A duração da rota continua sendo calculada no momento da consulta.", incidents: [] as RouteTrafficIncident[], officialSources: officialRouteSources, anpComVcUrl };
+  }
 }

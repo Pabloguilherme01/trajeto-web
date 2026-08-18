@@ -56,13 +56,15 @@ export const routesRouter = router({
       locationConsent: input.locationConsent,
     });
 
+    const traffic = await routeTrafficStatus(originPoint, destinationPoint);
+
     return {
       searchId: saved?.id ?? null,
       route,
       stops: stops.map(stop => ({ ...stop, priceReference: snapshotByPlace.get(stop.placeId) ?? null })),
       priceCoverage: snapshots.length,
       anpReferences,
-      traffic: routeTrafficStatus(),
+      traffic,
     };
   }),
   byId: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => getRouteSearchById(input.id)),
