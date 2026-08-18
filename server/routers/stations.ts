@@ -17,6 +17,7 @@ type StationSearchPage = {
   queriedAt: number;
   stations: Array<PublicStation & { distanceMeters: number | null; distanceLabel: string | null; anpMatch: StationIdentityMatch }>;
   nextCursor: string | null;
+  paginationWarning?: string | null;
 };
 
 export const stationsRouter = router({
@@ -28,6 +29,15 @@ export const stationsRouter = router({
     const search = input.cursor
       ? await requestGoogleNextPage(() => makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { pagetoken: input.cursor }))
       : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
+    if (search.status === "INVALID_REQUEST" && input.cursor) {
+      return {
+        query: input.query,
+        queriedAt: Date.now(),
+        stations: [],
+        nextCursor: null,
+        paginationWarning: "O Google Maps ainda não liberou este lote. Os postos já carregados permanecem disponíveis; tente carregar novamente em alguns instantes.",
+      } satisfies StationSearchPage;
+    }
     if (search.status !== "OK" && search.status !== "ZERO_RESULTS") throw new Error(`Google Maps não liberou o próximo lote (${search.status}).`);
     const candidates = search.results.slice(0, 20);
     void rememberGooglePlaceIds(candidates.map(station => station.place_id));
@@ -36,7 +46,7 @@ export const stationsRouter = router({
     const distanceBatches = distanceMatrixBatches(candidates);
     const matrices = await Promise.all(distanceBatches.map(batch => makeRequest<DistanceMatrixResult>("/maps/api/distancematrix/json", { origins: input.query, destinations: batch.map(station => `${station.geometry.location.lat},${station.geometry.location.lng}`).join("|"), mode: "driving", units: "metric" }).catch(() => null)));
     const distances = mergeStationDistances(matrices, stations.length);
-    const result: StationSearchPage = { query: input.query, queriedAt: Date.now(), stations: stations.map((station, index) => ({ ...station, ...distances[index], anpMatch: resolveStationIdentity(station, authorizedStations) })), nextCursor: search.next_page_token ?? null };
+    const result: StationSearchPage = { query: input.query, queriedAt: Date.now(), stations: stations.map((station, index) => ({ ...station, ...distances[index], anpMatch: resolveStationIdentity(station, authorizedStations) })), nextCursor: search.next_page_token ?? null, paginationWarning: null };
     return input.cursor ? result : cacheStationSearch(input.query, result);
   }),
   details: publicProcedure.input(detailsInput).query(async ({ input }) => {
