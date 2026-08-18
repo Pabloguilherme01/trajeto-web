@@ -83,6 +83,24 @@ export const stationSearchPreferences = mysqlTable("station_search_preferences",
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, table => ({ userIdx: index("station_search_preferences_user_idx").on(table.userId) }));
 
+export const userVehicles = mysqlTable("user_vehicles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  nickname: varchar("nickname", { length: 80 }).notNull(),
+  brand: varchar("brand", { length: 80 }),
+  model: varchar("model", { length: 120 }),
+  version: varchar("version", { length: 120 }),
+  year: int("year"),
+  fuelType: mysqlEnum("fuelType", ["gasoline", "ethanol", "flex", "diesel", "gnv", "electric", "other"]).default("flex").notNull(),
+  tankLiters: decimal("tankLiters", { precision: 6, scale: 2 }),
+  cityKmPerLiter: decimal("cityKmPerLiter", { precision: 6, scale: 2 }),
+  highwayKmPerLiter: decimal("highwayKmPerLiter", { precision: 6, scale: 2 }),
+  customKmPerLiter: decimal("customKmPerLiter", { precision: 6, scale: 2 }),
+  notes: varchar("notes", { length: 1000 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => ({ userUpdatedIdx: index("user_vehicles_user_updated_idx").on(table.userId, table.updatedAt) }));
+
 export const redemptions = mysqlTable("redemptions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),

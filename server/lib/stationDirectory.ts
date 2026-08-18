@@ -10,6 +10,7 @@ export type PublicStation = {
   website: string | null;
   isOpen: boolean | null;
   openingHours: string[];
+  source: "google_maps";
 };
 
 export function publicStationInfo(search: PlacesSearchResult["results"][number], details?: PlaceDetailsResult): PublicStation {
@@ -22,7 +23,24 @@ export function publicStationInfo(search: PlacesSearchResult["results"][number],
     lng: source?.geometry.location.lng || search.geometry.location.lng,
     phone: source?.formatted_phone_number ?? null,
     website: source?.website ?? null,
-    isOpen: source?.opening_hours?.open_now ?? null,
+    isOpen: source?.opening_hours?.open_now ?? search.opening_hours?.open_now ?? null,
     openingHours: source?.opening_hours?.weekday_text ?? [],
+    source: "google_maps",
+  };
+}
+
+export function publicStationDetails(placeId: string, details: PlaceDetailsResult): PublicStation {
+  const source = details.result;
+  return {
+    placeId,
+    name: source.name,
+    address: source.formatted_address,
+    lat: source.geometry.location.lat,
+    lng: source.geometry.location.lng,
+    phone: source.formatted_phone_number ?? null,
+    website: source.website ?? null,
+    isOpen: source.opening_hours?.open_now ?? null,
+    openingHours: source.opening_hours?.weekday_text ?? [],
+    source: "google_maps",
   };
 }

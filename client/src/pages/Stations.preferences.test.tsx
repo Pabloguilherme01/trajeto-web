@@ -32,6 +32,7 @@ vi.mock("@/lib/trpc", () => ({
   trpc: {
     stationDirectory: {
       search: { useInfiniteQuery: () => ({ data: { pages: [{ query: "Águas Lindas de Goiás, GO", queriedAt: Date.now(), stations: [{ placeId: "shell-1", name: "Posto Shell", address: "Águas Lindas", lat: -15.74, lng: -48.28, phone: null, website: null, isOpen: true, openingHours: [], distanceMeters: 1200, distanceLabel: "1.2 km" }], nextCursor: "next-token" }] }, isLoading: false, isError: false, hasNextPage: true, isFetchingNextPage, isFetchNextPageError: false, fetchNextPage: vi.fn() }) },
+      details: { useQuery: () => ({ data: undefined, isLoading: false }) },
       authorizedSearch: { useQuery: () => ({ data: { stations: [], total: 1, neighborhoods: ["CAMPING CLUBE"], brands: ["BANDEIRA BRANCA"] } }) },
     },
     personal: {

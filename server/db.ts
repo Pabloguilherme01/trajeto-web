@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, users } from "../drizzle/schema";
+import { authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -92,6 +92,51 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+export type UserVehicleInput = {
+  nickname: string; brand?: string | null; model?: string | null; version?: string | null; year?: number | null;
+  fuelType: "gasoline" | "ethanol" | "flex" | "diesel" | "gnv" | "electric" | "other";
+  tankLiters?: number | null; cityKmPerLiter?: number | null; highwayKmPerLiter?: number | null; customKmPerLiter?: number | null; notes?: string | null;
+};
+
+function userVehicleValues(input: UserVehicleInput) {
+  return {
+    ...input,
+    brand: input.brand || null, model: input.model || null, version: input.version || null, notes: input.notes || null,
+    year: input.year ?? null,
+    tankLiters: input.tankLiters == null ? null : String(input.tankLiters),
+    cityKmPerLiter: input.cityKmPerLiter == null ? null : String(input.cityKmPerLiter),
+    highwayKmPerLiter: input.highwayKmPerLiter == null ? null : String(input.highwayKmPerLiter),
+    customKmPerLiter: input.customKmPerLiter == null ? null : String(input.customKmPerLiter),
+  };
+}
+
+export async function getUserVehicles(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(userVehicles).where(eq(userVehicles.userId, userId)).orderBy(desc(userVehicles.updatedAt));
+}
+
+export async function createUserVehicle(userId: number, input: UserVehicleInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.insert(userVehicles).values({ userId, ...userVehicleValues(input) });
+  return getUserVehicles(userId);
+}
+
+export async function updateUserVehicle(userId: number, vehicleId: number, input: UserVehicleInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.update(userVehicles).set(userVehicleValues(input)).where(and(eq(userVehicles.id, vehicleId), eq(userVehicles.userId, userId)));
+  return getUserVehicles(userId);
+}
+
+export async function deleteUserVehicle(userId: number, vehicleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.delete(userVehicles).where(and(eq(userVehicles.id, vehicleId), eq(userVehicles.userId, userId)));
+  return { removed: true };
 }
 
 export async function createRouteSearch(input: {

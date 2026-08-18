@@ -158,3 +158,15 @@
 - [x] Validar a exportação real em desktop e os controles responsivos em celular; a ordem de distância/relevância e o skeleton foram comprovados por testes automatizados e evidência registrada.
 - [x] Documentar a limitação externa da sincronização nacional ANP e manter o importador pronto para o corredor, sem automatizar a consulta oficial que proíbe esse uso.
 - [x] Salvar checkpoint da expansão de descoberta, cobertura e conversão.
+- [x] Ler integralmente o escopo técnico anexado e auditar arquivos, contratos, tabelas, consultas, chamadas externas e funcionalidades parcialmente implementadas.
+- [x] Consolidar um diagnóstico priorizado de desempenho, custo, segurança e valor público sem recriar recursos já corretos.
+- [x] Profissionalizar a busca de postos com invalidação segura de páginas, estados resilientes e redução de custo por chamada externa.
+- [x] Aplicar cache TTL curto e seguro à primeira página normalizada de postos, sem reutilizar indevidamente cursores ou dados pessoais.
+- [x] Fortalecer identidade oficial ANP, busca combinável no backend e transparência de correspondência entre fontes.
+- [x] Criar um resolvedor de identidade Google × ANP com estados provável ou não resolvido, sem declarar confirmação sem identificador confiável.
+- [x] Implementar somente os recursos de maior impacto que tenham dados verificáveis e não exijam credenciais ou parcerias ausentes.
+- [x] Criar o módulo protegido de veículos e o motor local de economia, usando somente parâmetros informados pelo usuário e preços oficiais disponíveis.
+- [x] Permitir atualizar um veículo salvo sem expor placa ou forçar a recriação do cadastro.
+- [x] Cobrir em testes os novos contratos, fluxos críticos e regressões de consulta, mapa e preferências.
+- [x] Validar em desktop as áreas públicas e autenticadas, registrar limites de integrações externas e aprovar tipagem, testes e build; a validação manual móvel autenticada permanece futura.
+- [ ] Salvar checkpoint da rodada de auditoria, desempenho, identidade ANP e economia de veículos.
