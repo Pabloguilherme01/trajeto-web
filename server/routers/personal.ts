@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, getFavoritePlaceIds, getPersonalOverview, getRouteAlertPreferences, getTrafficNotifications, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, upsertRouteAlertPreference } from "../db";
+import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, getFavoritePlaceIds, getPersonalOverview, getRouteAlertPreferences, getStationSearchPreferences, getTrafficNotifications, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, upsertRouteAlertPreference, upsertStationSearchPreferences } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
 import { filterIncidentsByMinimumDelay, routeTrafficStatus } from "../lib/routeTraffic";
@@ -19,6 +19,14 @@ const alertInput = z.object({
   minimumDelayMinutes: z.union([z.literal(0), z.literal(5), z.literal(10), z.literal(15), z.literal(30)]).default(0),
   active: z.boolean().default(true),
   consent: z.literal(true),
+});
+
+const stationSearchPreferencesInput = z.object({
+  mappedBrand: z.string().trim().min(1).max(120).default("all"),
+  hoursStatus: z.enum(["all", "open", "closed", "unknown"]).default("all"),
+  sortBy: z.enum(["distance", "brand", "hours"]).default("distance"),
+  anpNeighborhood: z.string().trim().min(1).max(160).default("all"),
+  anpBrand: z.string().trim().min(1).max(120).default("all"),
 });
 
 export const personalRouter = router({
@@ -48,7 +56,9 @@ export const personalRouter = router({
   }),
   trafficNotifications: protectedProcedure.query(({ ctx }) => getTrafficNotifications(ctx.user.id)),
   markTrafficNotificationsRead: protectedProcedure.input(z.object({ ids: z.array(z.number().int().positive()).min(1).max(12) })).mutation(({ ctx, input }) => markTrafficNotificationsRead(ctx.user.id, input.ids)),
-  favoriteState: protectedProcedure.input(z.object({ placeIds: z.array(z.string().min(1).max(255)).max(50) })).query(({ ctx, input }) => getFavoritePlaceIds(ctx.user.id, input.placeIds)),
+  favoriteState: protectedProcedure.input(z.object({ placeIds: z.array(z.string().min(1).max(255)).max(100) })).query(({ ctx, input }) => getFavoritePlaceIds(ctx.user.id, input.placeIds)),
+  stationSearchPreferences: protectedProcedure.query(({ ctx }) => getStationSearchPreferences(ctx.user.id)),
+  saveStationSearchPreferences: protectedProcedure.input(stationSearchPreferencesInput).mutation(({ ctx, input }) => upsertStationSearchPreferences(ctx.user.id, input)),
   addFavorite: protectedProcedure.input(stationInput).mutation(({ ctx, input }) => addFavoriteStation(ctx.user.id, input)),
   removeFavorite: protectedProcedure.input(z.object({ placeId: z.string().trim().min(1).max(255) })).mutation(({ ctx, input }) => removeFavoriteStation(ctx.user.id, input.placeId)),
   saveRouteAlert: protectedProcedure.input(alertInput).mutation(async ({ ctx, input }) => {

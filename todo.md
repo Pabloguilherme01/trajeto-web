@@ -125,3 +125,16 @@
 - [x] Gerar um arquivo ZIP do projeto atualizado para análise.
 - [x] Salvar checkpoint da evolução de descoberta de postos.
 - [x] Ajustar a consulta autenticada de favoritos para aceitar até 50 placeIds, cobrindo a busca pública ampliada sem exceder a validação tRPC.
+- [x] Mapear integrações oficiais, públicas e dependentes de parceria para dados de mobilidade, abastecimento e veículos.
+- [x] Implementar paginação contínua de resultados reais de postos com carregamento sob demanda.
+- [x] Salvar preferências de filtro e ordenação por usuário autenticado e reaplicá-las em buscas futuras.
+- [x] Adicionar filtro avançado ao catálogo ANP por bairro e bandeira, com origem de dados explícita.
+- [x] Acrescentar uma etapa de decisão e transparência antes de encaminhar o usuário a serviços externos.
+- [x] Avaliar a possibilidade de consulta de veículo/FIPE sem tratar dados pessoais ou burlar acesso de terceiros.
+- [x] Validar a descoberta contínua, preferências e filtros em desktop e mobile.
+- [ ] Salvar checkpoint da expansão de busca contínua e preferências.
+- [x] Reforçar a rolagem contínua com gatilho de janela e aguardar a ativação do token da API antes de buscar o próximo lote.
+- [x] Tratar explicitamente a ativação assíncrona e o status do token de continuação do Google Maps para evitar páginas vazias.
+- [x] Ampliar a validação do cursor de paginação para aceitar o token completo retornado pelo Google Maps.
+- [ ] Validar em conta autenticada, no desktop e no celular, o salvamento e a reaplicação das preferências de busca.
+- [ ] Confirmar visualmente no navegador que a lista pública exibe postos do segundo lote após a rolagem contínua ou o acionamento manual.

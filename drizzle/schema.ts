@@ -72,6 +72,17 @@ export const authorizedFuelStations = mysqlTable("authorized_fuel_stations", {
   importedAt: timestamp("importedAt").defaultNow().notNull(),
 }, table => ({ municipalityStateIdx: index("authorized_fuel_stations_municipality_state_idx").on(table.municipality, table.state) }));
 
+export const stationSearchPreferences = mysqlTable("station_search_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  mappedBrand: varchar("mappedBrand", { length: 120 }).default("all").notNull(),
+  hoursStatus: varchar("hoursStatus", { length: 20 }).default("all").notNull(),
+  sortBy: varchar("sortBy", { length: 20 }).default("distance").notNull(),
+  anpNeighborhood: varchar("anpNeighborhood", { length: 160 }).default("all").notNull(),
+  anpBrand: varchar("anpBrand", { length: 120 }).default("all").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => ({ userIdx: index("station_search_preferences_user_idx").on(table.userId) }));
+
 export const redemptions = mysqlTable("redemptions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),

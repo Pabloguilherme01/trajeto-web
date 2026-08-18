@@ -1,11 +1,12 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, trafficNotifications, users } from "../drizzle/schema";
+import { authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
 import { aggregateDailyTimestamps, buildWeeklyTrend } from "./lib/weeklyTrends";
 import type { AuthorizedStationImport } from "./lib/anpAuthorizedStations";
+import { normalizeStationSearchPreferences, stationSearchPreferenceDefaults, type StationSearchPreferenceInput } from "./lib/stationSearchPreferences";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -208,6 +209,28 @@ export async function getFavoritePlaceIds(userId: number, placeIds: string[]) {
   return rows.map(row => row.placeId);
 }
 
+export async function getStationSearchPreferences(userId: number) {
+  const db = await getDb();
+  if (!db) return stationSearchPreferenceDefaults;
+  const preference = (await db.select().from(stationSearchPreferences).where(eq(stationSearchPreferences.userId, userId)).limit(1))[0];
+  if (!preference) return stationSearchPreferenceDefaults;
+  return normalizeStationSearchPreferences({
+    mappedBrand: preference.mappedBrand,
+    hoursStatus: preference.hoursStatus as "all" | "open" | "closed" | "unknown",
+    sortBy: preference.sortBy as "distance" | "brand" | "hours",
+    anpNeighborhood: preference.anpNeighborhood,
+    anpBrand: preference.anpBrand,
+  });
+}
+
+export async function upsertStationSearchPreferences(userId: number, input: StationSearchPreferenceInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  const values = normalizeStationSearchPreferences(input);
+  await db.insert(stationSearchPreferences).values({ userId, ...values }).onDuplicateKeyUpdate({ set: values });
+  return values;
+}
+
 export async function addFavoriteStation(userId: number, input: FavoriteStationInput) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível.");
@@ -266,11 +289,16 @@ const authorizedMunicipalityForQuery = (query: string) => {
   return null;
 };
 
-export async function getAuthorizedStationsForQuery(query: string) {
+export type AuthorizedStationFilters = { neighborhood?: string; brand?: string };
+
+export async function getAuthorizedStationsForQuery(query: string, filters: AuthorizedStationFilters = {}) {
   const db = await getDb();
   const municipality = authorizedMunicipalityForQuery(query);
   if (!db || !municipality) return [];
-  return db.select().from(authorizedFuelStations).where(eq(authorizedFuelStations.municipality, municipality)).orderBy(authorizedFuelStations.legalName).limit(50);
+  const rows = await db.select().from(authorizedFuelStations).where(eq(authorizedFuelStations.municipality, municipality)).orderBy(authorizedFuelStations.legalName).limit(100);
+  const neighborhood = filters.neighborhood?.trim().toLocaleLowerCase("pt-BR");
+  const brand = filters.brand?.trim().toLocaleLowerCase("pt-BR");
+  return rows.filter(row => (!neighborhood || neighborhood === "all" || row.neighborhood.toLocaleLowerCase("pt-BR") === neighborhood) && (!brand || brand === "all" || row.brand.toLocaleLowerCase("pt-BR") === brand));
 }
 
 export async function replaceAuthorizedStations(stations: AuthorizedStationImport[]) {
