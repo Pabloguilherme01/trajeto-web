@@ -208,9 +208,6 @@
 - [x] Registrar eventos agregados da ficha e navegação e exibir o funil no painel operacional.
 - [x] Adicionar testes de paginação, ficha, confirmação, economia e determinismo, com validação desktop e mobile.
 - [x] Registrar benchmarks e checkpoints por marco da evolução mobile, velocidade e funcionalidade.
-- [ ] Corrigir a paginação contínua do Google Maps para tratar INVALID_REQUEST sem quebrar resultados parciais.
-- [ ] Adicionar testes de regressão para cursor inválido, atraso insuficiente e fallback manual.
-- [ ] Validar a rota de Águas Lindas, tipagem, suíte e build antes do checkpoint da correção.
-
- ეს
-وده
+- [x] Corrigir a paginação contínua do Google Maps para tratar INVALID_REQUEST sem quebrar resultados parciais.
+- [x] Adicionar testes de regressão para cursor inválido, atraso insuficiente e fallback manual.
+- [x] Validar a rota de Águas Lindas, tipagem, suíte e build antes do checkpoint da correção.

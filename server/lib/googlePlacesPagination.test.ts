@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { requestGoogleNextPage, tokenRetryDelaysMs } from "./googlePlacesPagination";
+import { isGooglePageTokenUnavailable, requestGoogleNextPage, tokenRetryDelaysMs } from "./googlePlacesPagination";
 
 describe("requestGoogleNextPage", () => {
   it("usa backoff curto somente enquanto o token ainda não está ativo", async () => {
@@ -13,6 +13,20 @@ describe("requestGoogleNextPage", () => {
     expect(wait).toHaveBeenCalledTimes(2);
     expect(wait).toHaveBeenNthCalledWith(1, tokenRetryDelaysMs[0]);
     expect(wait).toHaveBeenNthCalledWith(2, tokenRetryDelaysMs[1]);
+  });
+
+  it("reconhece somente INVALID_REQUEST como token ainda indisponível", () => {
+    expect(isGooglePageTokenUnavailable("INVALID_REQUEST")).toBe(true);
+    expect(isGooglePageTokenUnavailable("REQUEST_DENIED")).toBe(false);
+  });
+
+  it("usa todos os atrasos limitados antes de devolver INVALID_REQUEST ao fallback do roteador", async () => {
+    const request = vi.fn().mockResolvedValue({ status: "INVALID_REQUEST" });
+    const wait = vi.fn().mockResolvedValue(undefined);
+
+    await expect(requestGoogleNextPage(request, wait)).resolves.toMatchObject({ status: "INVALID_REQUEST" });
+    expect(request).toHaveBeenCalledTimes(tokenRetryDelaysMs.length + 1);
+    expect(wait).toHaveBeenNthCalledWith(tokenRetryDelaysMs.length, tokenRetryDelaysMs.at(-1));
   });
 
   it("encerra imediatamente quando a API retorna um resultado final sem token inválido", async () => {
