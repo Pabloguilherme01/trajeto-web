@@ -169,4 +169,4 @@
 - [x] Permitir atualizar um veículo salvo sem expor placa ou forçar a recriação do cadastro.
 - [x] Cobrir em testes os novos contratos, fluxos críticos e regressões de consulta, mapa e preferências.
 - [x] Validar em desktop as áreas públicas e autenticadas, registrar limites de integrações externas e aprovar tipagem, testes e build; a validação manual móvel autenticada permanece futura.
-- [ ] Salvar checkpoint da rodada de auditoria, desempenho, identidade ANP e economia de veículos.
+- [x] Salvar checkpoint da rodada de auditoria, desempenho, identidade ANP e economia de veículos.
