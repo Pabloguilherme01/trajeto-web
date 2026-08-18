@@ -11,7 +11,7 @@ import { filterAndSortStations, inferredBrand } from "@/lib/stationListControls"
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, BadgeCheck, BadgeInfo, Check, ChevronRight, CircleCheck, Clock3, ExternalLink, Fuel, Globe2, Heart, ListFilter, Loader2, Map, Navigation, Phone, Search, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import React, { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
 
 const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";

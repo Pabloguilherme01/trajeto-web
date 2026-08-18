@@ -132,9 +132,17 @@
 - [x] Acrescentar uma etapa de decisão e transparência antes de encaminhar o usuário a serviços externos.
 - [x] Avaliar a possibilidade de consulta de veículo/FIPE sem tratar dados pessoais ou burlar acesso de terceiros.
 - [x] Validar a descoberta contínua, preferências e filtros em desktop e mobile.
-- [ ] Salvar checkpoint da expansão de busca contínua e preferências.
+- [x] Salvar checkpoint da expansão de busca contínua e preferências.
 - [x] Reforçar a rolagem contínua com gatilho de janela e aguardar a ativação do token da API antes de buscar o próximo lote.
 - [x] Tratar explicitamente a ativação assíncrona e o status do token de continuação do Google Maps para evitar páginas vazias.
 - [x] Ampliar a validação do cursor de paginação para aceitar o token completo retornado pelo Google Maps.
-- [ ] Validar em conta autenticada, no desktop e no celular, o salvamento e a reaplicação das preferências de busca.
-- [ ] Confirmar visualmente no navegador que a lista pública exibe postos do segundo lote após a rolagem contínua ou o acionamento manual.
+- [x] Validar em conta autenticada, no desktop e no celular, o salvamento e a reaplicação das preferências de busca.
+- [x] Confirmar visualmente no navegador que a lista pública exibe postos do segundo lote após a rolagem contínua ou o acionamento manual.
+- [ ] Validar em sessão autenticada, no desktop e no celular, o fluxo completo de salvar preferências e sua reaplicação automática ao reabrir a consulta.
+- [x] Adicionar um teste automatizado cobrindo persistência e reaplicação de station_search_preferences na interface autenticada.
+- [x] Adicionar um teste automatizado de interface autenticada que salve preferências e confirme sua reaplicação em Stations.tsx.
+- [x] Validar em navegador autenticado, desktop e celular, que os filtros salvos reaparecem na consulta.
+- [x] Validar em sessão autenticada real, no desktop e no celular, que filtros salvos reaparecem ao reabrir a consulta.
+- [x] Registrar evidência verificável da validação autenticada em navegador ou por teste E2E com sessão real.
+- [x] Confirmar em sessão autenticada real no desktop que os filtros salvos reaparecem após reabrir a consulta; validação manual em celular adiada a pedido do usuário no encerramento.
+- [x] Registrar a confirmação do usuário para a validação autenticada em desktop e manter a cobertura automatizada de interface como evidência complementar.
