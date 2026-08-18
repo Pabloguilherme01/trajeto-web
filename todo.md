@@ -113,3 +113,7 @@
 - [x] Validar de ponta a ponta a exportação CSV da tendência semanal, confirmando a geração real do arquivo e seu conteúdo básico.
 - [x] Confirmar no navegador conectado a presença do CSV baixado, após a limitação de leitura direta do histórico de downloads.
 - [x] Salvar um novo checkpoint da ampliação de fontes, cobertura ANP, limites por corredor e gráfico exportável após concluir a validação final.
+- [x] Identificar a consulta de distância que envia mais de 12 placeIds em uma única requisição.
+- [x] Dividir as consultas de distância em lotes compatíveis, preservando todos os postos mapeados.
+- [x] Cobrir com teste uma busca acima de 12 postos e validar a consulta pública sem erro tRPC.
+- [x] Salvar checkpoint da correção de lote da consulta de postos.
