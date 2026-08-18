@@ -1,0 +1,44 @@
+export const DEFAULT_ANP_AUTHORIZED_STATIONS_URL = "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos/dados-cadastrais-revendedores-varejistas-combustiveis-automoveis.csv";
+
+export type AuthorizedStationImport = {
+  authorization: string;
+  legalName: string;
+  address: string;
+  complement: string;
+  neighborhood: string;
+  zipCode: string;
+  municipality: string;
+  state: string;
+  brand: string;
+  sourceReference: string;
+  sourceUpdatedAt: Date;
+};
+
+const canonical = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
+
+export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, municipality = "AGUAS LINDAS DE GOIAS") {
+  const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(25_000) });
+  if (!response.ok) throw new Error(`Cadastro ANP indisponível (${response.status})`);
+  const raw = new TextDecoder("windows-1252").decode(await response.arrayBuffer());
+  const lines = raw.split(/\r?\n/).filter(Boolean);
+  const headers = lines.shift()?.split(";") ?? [];
+  const expected = ["AUTORIZACAO", "RAZAOSOCIAL", "ENDERECO", "UF", "MUNICIPIO", "BANDEIRA"];
+  if (!expected.every(header => headers.includes(header))) throw new Error("O arquivo cadastral da ANP não possui os campos esperados.");
+  const indexOf = (header: string) => headers.indexOf(header);
+  const targetMunicipality = canonical(municipality);
+  const queriedAt = new Date();
+  const stations = lines.map(line => line.split(";")).filter(columns => canonical(columns[indexOf("UF")] ?? "") === "GO" && canonical(columns[indexOf("MUNICIPIO")] ?? "") === targetMunicipality).map(columns => ({
+    authorization: (columns[indexOf("AUTORIZACAO")] ?? "").trim(),
+    legalName: (columns[indexOf("RAZAOSOCIAL")] ?? "").trim(),
+    address: (columns[indexOf("ENDERECO")] ?? "").trim(),
+    complement: (columns[indexOf("COMPLEMENTO")] ?? "").trim(),
+    neighborhood: (columns[indexOf("BAIRRO")] ?? "").trim(),
+    zipCode: (columns[indexOf("CEP")] ?? "").trim(),
+    municipality: targetMunicipality,
+    state: "GO",
+    brand: (columns[indexOf("BANDEIRA")] ?? "").trim() || "NÃO INFORMADA",
+    sourceReference: sourceUrl,
+    sourceUpdatedAt: queriedAt,
+  })).filter(station => station.authorization && station.legalName && station.address);
+  return { stations, queriedAt };
+}

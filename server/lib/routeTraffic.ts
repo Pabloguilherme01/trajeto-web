@@ -79,6 +79,11 @@ export function filterActionableTrafficItems(items: TomTomIncident[], now = new 
   });
 }
 
+export function filterIncidentsByMinimumDelay<T extends { delaySeconds: number | null }>(items: T[], minimumDelayMinutes: number) {
+  const thresholdSeconds = Math.max(0, minimumDelayMinutes) * 60;
+  return items.filter(item => (item.delaySeconds ?? 0) >= thresholdSeconds);
+}
+
 function normalizeIncidents(items: TomTomIncident[], now: Date) {
   return filterActionableTrafficItems(items, now).slice(0, 6).map((item, index): RouteTrafficIncident => {
     const properties = item.properties ?? {};

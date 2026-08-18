@@ -1,10 +1,11 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, trafficNotifications, users } from "../drizzle/schema";
+import { authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, trafficNotifications, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
 import { aggregateDailyTimestamps, buildWeeklyTrend } from "./lib/weeklyTrends";
+import type { AuthorizedStationImport } from "./lib/anpAuthorizedStations";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -226,6 +227,7 @@ export type RouteAlertPreferenceInput = {
   corridorId: string;
   corridorLabel: string;
   timeSlot: "morning" | "afternoon" | "evening" | "anytime";
+  minimumDelayMinutes: number;
   active: boolean;
 };
 
@@ -238,7 +240,7 @@ export async function getRouteAlertPreferences(userId: number) {
 export async function upsertRouteAlertPreference(userId: number, input: RouteAlertPreferenceInput) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível.");
-  await db.insert(routeAlertPreferences).values({ userId, ...input }).onDuplicateKeyUpdate({ set: { corridorLabel: input.corridorLabel, timeSlot: input.timeSlot, active: input.active } });
+  await db.insert(routeAlertPreferences).values({ userId, ...input }).onDuplicateKeyUpdate({ set: { corridorLabel: input.corridorLabel, timeSlot: input.timeSlot, minimumDelayMinutes: input.minimumDelayMinutes, active: input.active } });
   return { saved: true };
 }
 
@@ -247,6 +249,45 @@ export async function removeRouteAlertPreference(userId: number, corridorId: str
   if (!db) throw new Error("Banco de dados indisponível.");
   await db.delete(routeAlertPreferences).where(and(eq(routeAlertPreferences.userId, userId), eq(routeAlertPreferences.corridorId, corridorId)));
   return { removed: true };
+}
+
+const authorizedMunicipalityForQuery = (query: string) => {
+  const normalized = (normalizeRegion(query) ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (normalized.includes("aguas lindas")) return "AGUAS LINDAS DE GOIAS";
+  if (normalized.includes("ceilandia")) return "CEILANDIA";
+  if (normalized.includes("taguatinga")) return "TAGUATINGA";
+  if (normalized.includes("brasilia")) return "BRASILIA";
+  if (normalized.includes("valparaiso")) return "VALPARAISO DE GOIAS";
+  if (normalized.includes("cidade ocidental")) return "CIDADE OCIDENTAL";
+  if (normalized.includes("luziania")) return "LUZIANIA";
+  if (normalized.includes("formosa")) return "FORMOSA";
+  if (normalized.includes("planaltina")) return "PLANALTINA";
+  if (normalized.includes("santo antonio")) return "SANTO ANTONIO DO DESCOBERTO";
+  return null;
+};
+
+export async function getAuthorizedStationsForQuery(query: string) {
+  const db = await getDb();
+  const municipality = authorizedMunicipalityForQuery(query);
+  if (!db || !municipality) return [];
+  return db.select().from(authorizedFuelStations).where(eq(authorizedFuelStations.municipality, municipality)).orderBy(authorizedFuelStations.legalName).limit(50);
+}
+
+export async function replaceAuthorizedStations(stations: AuthorizedStationImport[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  if (stations.length === 0) return { imported: 0 };
+  await db.insert(authorizedFuelStations).values(stations).onDuplicateKeyUpdate({ set: {
+    legalName: sql`VALUES(${authorizedFuelStations.legalName})`,
+    address: sql`VALUES(${authorizedFuelStations.address})`,
+    complement: sql`VALUES(${authorizedFuelStations.complement})`,
+    neighborhood: sql`VALUES(${authorizedFuelStations.neighborhood})`,
+    zipCode: sql`VALUES(${authorizedFuelStations.zipCode})`,
+    brand: sql`VALUES(${authorizedFuelStations.brand})`,
+    sourceReference: sql`VALUES(${authorizedFuelStations.sourceReference})`,
+    sourceUpdatedAt: sql`VALUES(${authorizedFuelStations.sourceUpdatedAt})`,
+  } });
+  return { imported: stations.length };
 }
 
 export type TrafficNotificationInput = {

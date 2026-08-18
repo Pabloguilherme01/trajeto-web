@@ -56,6 +56,22 @@ export const fuelPriceSnapshots = mysqlTable("fuel_price_snapshots", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ placeCollectedIdx: index("fuel_price_place_collected_idx").on(table.placeId, table.collectedAt) }));
 
+export const authorizedFuelStations = mysqlTable("authorized_fuel_stations", {
+  id: int("id").autoincrement().primaryKey(),
+  authorization: varchar("authorization", { length: 32 }).notNull().unique(),
+  legalName: varchar("legalName", { length: 255 }).notNull(),
+  address: varchar("address", { length: 500 }).notNull(),
+  complement: varchar("complement", { length: 255 }).notNull(),
+  neighborhood: varchar("neighborhood", { length: 160 }).notNull(),
+  zipCode: varchar("zipCode", { length: 12 }).notNull(),
+  municipality: varchar("municipality", { length: 120 }).notNull(),
+  state: varchar("state", { length: 2 }).notNull(),
+  brand: varchar("brand", { length: 120 }).notNull(),
+  sourceReference: varchar("sourceReference", { length: 500 }).notNull(),
+  sourceUpdatedAt: timestamp("sourceUpdatedAt").notNull(),
+  importedAt: timestamp("importedAt").defaultNow().notNull(),
+}, table => ({ municipalityStateIdx: index("authorized_fuel_stations_municipality_state_idx").on(table.municipality, table.state) }));
+
 export const redemptions = mysqlTable("redemptions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -105,6 +121,7 @@ export const routeAlertPreferences = mysqlTable("route_alert_preferences", {
   corridorId: varchar("corridorId", { length: 80 }).notNull(),
   corridorLabel: varchar("corridorLabel", { length: 120 }).notNull(),
   timeSlot: mysqlEnum("timeSlot", ["morning", "afternoon", "evening", "anytime"]).default("anytime").notNull(),
+  minimumDelayMinutes: int("minimumDelayMinutes").default(0).notNull(),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

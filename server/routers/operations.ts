@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { createRedemption, getOperationalOverview, replaceAnpPriceSnapshots } from "../db";
+import { createRedemption, getOperationalOverview, replaceAnpPriceSnapshots, replaceAuthorizedStations } from "../db";
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { DEFAULT_ANP_SOURCE_URL, downloadAndParseAnp } from "../lib/anpImport";
+import { DEFAULT_ANP_AUTHORIZED_STATIONS_URL, downloadAuthorizedStations } from "../lib/anpAuthorizedStations";
 
 export const operationsRouter = router({
   requestRedemption: protectedProcedure.input(z.object({
@@ -15,5 +16,10 @@ export const operationsRouter = router({
     const rows = await downloadAndParseAnp(input.sourceUrl);
     const result = await replaceAnpPriceSnapshots(input.sourceUrl, rows);
     return { ...result, sourceUrl: input.sourceUrl };
+  }),
+  syncAuthorizedStations: adminProcedure.input(z.object({ sourceUrl: z.string().url().default(DEFAULT_ANP_AUTHORIZED_STATIONS_URL) })).mutation(async ({ input }) => {
+    const { stations, queriedAt } = await downloadAuthorizedStations(input.sourceUrl);
+    const result = await replaceAuthorizedStations(stations);
+    return { ...result, sourceUrl: input.sourceUrl, queriedAt };
   }),
 });

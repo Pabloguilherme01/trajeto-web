@@ -1,0 +1,1 @@
+ALTER TABLE `route_alert_preferences` ADD `minimumDelayMinutes` int DEFAULT 0 NOT NULL;

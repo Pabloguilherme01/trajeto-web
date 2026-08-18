@@ -2,7 +2,7 @@ import { z } from "zod";
 import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, getFavoritePlaceIds, getPersonalOverview, getRouteAlertPreferences, getTrafficNotifications, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, upsertRouteAlertPreference } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
-import { routeTrafficStatus } from "../lib/routeTraffic";
+import { filterIncidentsByMinimumDelay, routeTrafficStatus } from "../lib/routeTraffic";
 
 const stationInput = z.object({
   placeId: z.string().trim().min(1).max(255),
@@ -16,6 +16,7 @@ const alertInput = z.object({
   corridorId: z.string().trim().min(2).max(80),
   corridorLabel: z.string().trim().min(2).max(120),
   timeSlot: z.enum(["morning", "afternoon", "evening", "anytime"]),
+  minimumDelayMinutes: z.union([z.literal(0), z.literal(5), z.literal(10), z.literal(15), z.literal(30)]).default(0),
   active: z.boolean().default(true),
   consent: z.literal(true),
 });
@@ -29,7 +30,8 @@ export const personalRouter = router({
       const corridor = getAlertCorridor(preference.corridorId);
       if (!corridor) return { corridorId: preference.corridorId, corridorLabel: preference.corridorLabel, timeSlot: preference.timeSlot, inWindow: false, traffic: null };
       const traffic = await routeTrafficStatus(corridor.point, corridor.point);
-      return { corridorId: preference.corridorId, corridorLabel: preference.corridorLabel, timeSlot: preference.timeSlot, inWindow: isSlotActiveNow(preference.timeSlot), traffic };
+      const incidents = traffic.state === "active" ? filterIncidentsByMinimumDelay(traffic.incidents, preference.minimumDelayMinutes) : traffic.incidents;
+      return { corridorId: preference.corridorId, corridorLabel: preference.corridorLabel, timeSlot: preference.timeSlot, minimumDelayMinutes: preference.minimumDelayMinutes, inWindow: isSlotActiveNow(preference.timeSlot), traffic: { ...traffic, incidents, label: traffic.state === "active" ? (incidents.length ? `${incidents.length} ocorrência(s) acima do limite selecionado` : "Nenhuma ocorrência acima do limite selecionado") : traffic.label } };
     }));
     const notificationInputs = alerts.flatMap(alert => alert.inWindow && alert.traffic?.state === "active" ? alert.traffic.incidents.map(incident => ({
       userId: ctx.user.id,

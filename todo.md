@@ -103,3 +103,13 @@
 - [x] Cobrir em teste os estados padrão, concedido, negado e indisponível da Notification API.
 - [x] Registrar evidência verificável dos estados de notificação local não reproduzíveis no navegador de validação.
 - [x] Inspecionar explicitamente no celular os alertas acionáveis filtrados e o gráfico semanal da operação.
+- [x] Mapear fontes públicas, cobertura e regras de uso para ampliar a busca de postos em Águas Lindas e no Entorno.
+- [x] Ampliar a pesquisa de postos usando dados reais e fontes transparentes, sem duplicar ou inventar estabelecimentos.
+- [x] Criar limites de atraso configuráveis por corredor e aplicá-los aos alertas acionáveis do usuário.
+- [x] Exportar a tendência semanal operacional em arquivo CSV com metadados de período e fonte.
+- [x] Adicionar detalhes interativos acessíveis ao gráfico semanal em foco, toque e passagem do mouse.
+- [x] Validar em desktop e mobile a nova cobertura de postos, os limites, o CSV e o gráfico.
+- [x] Salvar checkpoint da ampliação de fontes e inteligência operacional.
+- [x] Validar de ponta a ponta a exportação CSV da tendência semanal, confirmando a geração real do arquivo e seu conteúdo básico.
+- [x] Confirmar no navegador conectado a presença do CSV baixado, após a limitação de leitura direta do histórico de downloads.
+- [x] Salvar um novo checkpoint da ampliação de fontes, cobertura ANP, limites por corredor e gráfico exportável após concluir a validação final.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterActionableTrafficItems, officialRouteSources, routeBoundingBox } from "./routeTraffic";
+import { filterActionableTrafficItems, filterIncidentsByMinimumDelay, officialRouteSources, routeBoundingBox } from "./routeTraffic";
 
 describe("route traffic status", () => {
   it("keeps official sources visible and bounds the route query to a compact area", () => {
@@ -17,5 +17,12 @@ describe("route traffic status", () => {
       { properties: { id: "no-delay", delay: 0, lastReportTime: "2026-08-18T11:50:00.000Z", events: [{ description: "Fluxo normal" }] } },
     ], now);
     expect(incidents.map(item => item.properties?.id)).toEqual(["recent"]);
+  });
+
+  it("applies a per-corridor minimum delay without hiding alerts when the user accepts any delay", () => {
+    const incidents = [{ delaySeconds: 180 }, { delaySeconds: 600 }, { delaySeconds: null }];
+    expect(filterIncidentsByMinimumDelay(incidents, 0)).toHaveLength(3);
+    expect(filterIncidentsByMinimumDelay(incidents, 5)).toEqual([{ delaySeconds: 600 }]);
+    expect(filterIncidentsByMinimumDelay(incidents, 15)).toEqual([]);
   });
 });
