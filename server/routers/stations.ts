@@ -21,6 +21,6 @@ export const stationsRouter = router({
       }
     })), Promise.all(distanceBatches.map(batch => makeRequest<DistanceMatrixResult>("/maps/api/distancematrix/json", { origins: input.query, destinations: batch.map(station => `${station.geometry.location.lat},${station.geometry.location.lng}`).join("|"), mode: "driving", units: "metric" }).catch(() => null))), getAuthorizedStationsForQuery(input.query)]);
     const distances = mergeStationDistances(matrices, details.length);
-    return { query: input.query, queriedAt: Date.now(), stations: details.map((station, index) => ({ ...station, ...distances[index] })), authorizedStations };
+    return { query: input.query, queriedAt: Date.now(), stations: details.map((station, index) => ({ ...station, ...distances[index] })), authorizedStations, hasMoreResults: Boolean(search.next_page_token) };
   }),
 });

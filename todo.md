@@ -117,3 +117,11 @@
 - [x] Dividir as consultas de distância em lotes compatíveis, preservando todos os postos mapeados.
 - [x] Cobrir com teste uma busca acima de 12 postos e validar a consulta pública sem erro tRPC.
 - [x] Salvar checkpoint da correção de lote da consulta de postos.
+- [x] Mapear os estados de carregamento e o limite de cobertura da busca de postos.
+- [x] Exibir carregamento progressivo dos lotes de postos na consulta pública.
+- [x] Adicionar filtros por bandeira e horário de funcionamento, com ordenação por distância, bandeira e horário.
+- [x] Informar visualmente quando a API tiver mais resultados disponíveis além dos exibidos.
+- [x] Validar a consulta aprimorada em desktop e mobile, incluindo filtros e ordenação.
+- [x] Gerar um arquivo ZIP do projeto atualizado para análise.
+- [x] Salvar checkpoint da evolução de descoberta de postos.
+- [x] Ajustar a consulta autenticada de favoritos para aceitar até 50 placeIds, cobrindo a busca pública ampliada sem exceder a validação tRPC.

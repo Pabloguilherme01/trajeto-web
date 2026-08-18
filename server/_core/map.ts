@@ -176,6 +176,7 @@ export type PlacesSearchResult = {
     business_status?: string;
     types: string[];
   }>;
+  next_page_token?: string;
   status: string;
 };
 
@@ -313,7 +314,6 @@ export type RoadsResult = {
  * Output: Image URL (not JSON) - use directly in <img src={url} />
  * Note: Construct URL manually with getMapsConfig() for auth
  */
-
 
 
 
