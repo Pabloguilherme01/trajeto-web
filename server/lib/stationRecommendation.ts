@@ -9,6 +9,7 @@ export type RecommendationCandidate = RouteStop & { priceReference?: PriceRefere
 export type RecommendationOptions = {
   priceWeight?: number;
   realDetoursKm?: Record<string, number | undefined>;
+  netSavings?: { routeDistanceKm: number; gasolineKmPerLiter: number };
 };
 
 export const RECOMMENDATION_CANDIDATE_LIMIT = 3;
@@ -62,10 +63,28 @@ function rankFuelStops(candidates: RecommendationCandidate[], origin: Point, des
   const maxDetour = Math.max(...detours);
   const priceRange = maxPrice - minPrice || 1;
   const detourRange = maxDetour - minDetour || 1;
-  return priced.map(candidate => ({
+  return priced.map(candidate => {
+    const priceScore = Number((((maxPrice - candidate.price) / priceRange) * 100).toFixed(1));
+    const detourScore = Number((((maxDetour - candidate.detourKm) / detourRange) * 100).toFixed(1));
+    return {
     ...candidate,
-    score: Number((((maxPrice - candidate.price) / priceRange) * priceWeight + ((maxDetour - candidate.detourKm) / detourRange) * detourWeight).toFixed(1)),
-  })).sort((left, right) => right.score - left.score || left.price - right.price || left.detourKm - right.detourKm);
+    score: Number(((priceScore * priceWeight / 100) + (detourScore * detourWeight / 100)).toFixed(1)),
+    scoreBreakdown: { price: priceScore, detour: detourScore, quality: null, operation: null },
+    netSavings: candidate.detourSource === "real" && options.netSavings && options.netSavings.routeDistanceKm > 0 && options.netSavings.gasolineKmPerLiter > 0
+      ? (() => {
+          const routeLiters = options.netSavings!.routeDistanceKm / options.netSavings!.gasolineKmPerLiter;
+          const grossFuelSaving = (maxPrice - candidate.price) * routeLiters;
+          const detourFuelCost = (candidate.detourKm / options.netSavings!.gasolineKmPerLiter) * candidate.price;
+          return {
+            grossFuelSaving: Number(grossFuelSaving.toFixed(2)),
+            detourFuelCost: Number(detourFuelCost.toFixed(2)),
+            value: Number((grossFuelSaving - detourFuelCost).toFixed(2)),
+            routeLiters: Number(routeLiters.toFixed(2)),
+          };
+        })()
+      : null,
+  };
+  }).sort((left, right) => right.score - left.score || left.price - right.price || left.detourKm - right.detourKm);
 }
 
 export function selectFuelRecommendationCandidates(candidates: RecommendationCandidate[], origin: Point, destination: Point, options: RecommendationOptions = {}) {
@@ -88,5 +107,8 @@ export function recommendFuelStop(candidates: RecommendationCandidate[], origin:
     method: allReal
       ? "O desvio é a distância adicional da rota calculada pelo Google Directions com este posto como parada intermediária."
       : "Parte dos desvios não pôde ser confirmada pela rota e usa uma aproximação geométrica identificada na interface.",
+    netSavingsMethod: best.netSavings
+      ? "A economia líquida compara esta referência de gasolina com a maior referência avaliada, descontando o combustível estimado para o desvio real com o consumo de gasolina informado."
+      : null,
   };
 }

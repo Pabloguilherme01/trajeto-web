@@ -109,7 +109,11 @@ export const routesRouter = router({
       const detourKm = realDetourKm(route.distanceMeters, routeWithStop.distanceMeters);
       return detourKm == null ? [] : [[candidateStops[index].placeId, detourKm]];
     }));
-    const recommendation = recommendFuelStop(candidateStops, route.origin, route.destination, { priceWeight: input.recommendation.priceWeight, realDetoursKm });
+    const recommendation = recommendFuelStop(candidateStops, route.origin, route.destination, {
+      priceWeight: input.recommendation.priceWeight,
+      realDetoursKm,
+      netSavings: input.economy ? { routeDistanceKm: route.distanceMeters / 1000, gasolineKmPerLiter: input.economy.gasolineKmPerLiter } : undefined,
+    });
     const [traffic, saved] = await Promise.all([
       trafficPromise,
       ctx.user ? routeSearchPersistence : Promise.resolve(null),
