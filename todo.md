@@ -203,7 +203,7 @@
 - [x] Gerar e entregar um arquivo Markdown único do código e da arquitetura para upload direto no Qwen Studio.
 - [x] Auditar e otimizar a camada de dados, paginação e cache permitido de postos e rotas.
 - [x] Refinar o carregamento do mapa, a divisão de bundle e a persistência assíncrona da rota.
-- [ ] Criar a experiência mobile do planejador com skeletons, ficha de posto e confirmação antes de navegação externa.
+- [x] Criar a experiência mobile do planejador com skeletons, ficha de posto e confirmação antes de navegação externa.
 - [ ] Ampliar o motor determinístico com scores explicáveis e economia líquida contextualizada.
 - [ ] Registrar eventos agregados da ficha e navegação e exibir o funil no painel operacional.
 - [ ] Adicionar testes de paginação, ficha, confirmação, economia e determinismo, com validação desktop e mobile.

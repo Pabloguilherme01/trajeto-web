@@ -6,6 +6,9 @@ export type RouteStop = {
   address: string;
   lat: number;
   lng: number;
+  rating?: number;
+  userRatingsTotal?: number;
+  isOpen?: boolean;
 };
 
 export function normalizeStops(searches: PlacesSearchResult[]): RouteStop[] {
@@ -20,6 +23,9 @@ export function normalizeStops(searches: PlacesSearchResult[]): RouteStop[] {
         address: place.formatted_address,
         lat: place.geometry.location.lat,
         lng: place.geometry.location.lng,
+        rating: place.rating,
+        userRatingsTotal: place.user_ratings_total,
+        isOpen: place.opening_hours?.open_now,
       });
     }
   }

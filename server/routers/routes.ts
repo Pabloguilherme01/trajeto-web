@@ -110,10 +110,13 @@ export const routesRouter = router({
       return detourKm == null ? [] : [[candidateStops[index].placeId, detourKm]];
     }));
     const recommendation = recommendFuelStop(candidateStops, route.origin, route.destination, { priceWeight: input.recommendation.priceWeight, realDetoursKm });
-    void routeSearchPersistence.catch(error => console.warn("[Routes] Não foi possível registrar o histórico da rota:", error));
-    const traffic = await trafficPromise;
+    const [traffic, saved] = await Promise.all([
+      trafficPromise,
+      ctx.user ? routeSearchPersistence : Promise.resolve(null),
+    ]);
+    if (!ctx.user) void routeSearchPersistence.catch(error => console.warn("[Routes] Não foi possível registrar o histórico da rota:", error));
     return {
-      searchId: null,
+      searchId: saved?.id ?? null,
       route,
       stops: stopsWithPrice,
       priceCoverage: snapshots.length,
