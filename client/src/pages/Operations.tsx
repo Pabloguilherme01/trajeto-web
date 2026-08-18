@@ -16,6 +16,8 @@ const growthLabels: Record<string, string> = {
   favorite_saved: "Favoritos salvos",
   account_cta: "Chamadas para conta",
   redemption_requested: "Resgates solicitados",
+  social_instagram_click: "Cliques no Instagram",
+  social_whatsapp_click: "Cliques no WhatsApp",
 };
 
 function formatDate(value: Date | string) {

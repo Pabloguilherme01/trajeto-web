@@ -62,20 +62,20 @@ export default function DashboardLayout({
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
+      <div className="flex min-h-screen items-center justify-center bg-[#0B1014] text-[#EAF0F2]">
+        <div className="flex w-full max-w-md flex-col items-center gap-8 rounded-3xl border border-white/10 bg-[#121B22] p-8">
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
               {accessCopy.title}
             </h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
+            <p className="max-w-sm text-center text-sm text-[#91A3AD]">
               {accessCopy.description}
             </p>
           </div>
           <Button
             onClick={() => startLogin()}
             size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+            className="w-full bg-[#C7FF3C] font-bold text-[#0B1014] shadow-lg transition-all hover:bg-white"
           >
               Entrar
           </Button>
@@ -158,21 +158,21 @@ function DashboardLayoutContent({
       <div className="relative" ref={sidebarRef}>
         <Sidebar
           collapsible="icon"
-          className="border-r-0"
+          className="border-r border-white/8 bg-[#10181F] text-[#EAF0F2]"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center">
+          <SidebarHeader className="h-16 justify-center border-b border-white/8">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
-                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                className="flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3DE3FF]"
                 aria-label="Toggle navigation"
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
               {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="brand-wordmark truncate text-lg font-semibold tracking-tight text-white">
                     trajeto
                   </span>
                 </div>
@@ -190,10 +190,10 @@ function DashboardLayoutContent({
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
                       tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
+                      className={`h-10 rounded-lg font-normal transition-all ${isActive ? "bg-[#C7FF3C]/10 text-[#D9FF91]" : "text-[#A9BAC2] hover:bg-white/7 hover:text-white"}`}
                     >
                       <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                        className={`size-4 ${isActive ? "text-[#C7FF3C]" : ""}`}
                       />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
@@ -205,18 +205,18 @@ function DashboardLayoutContent({
 
           <SidebarFooter className="p-3">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <Avatar className="h-9 w-9 border shrink-0">
-                    <AvatarFallback className="text-xs font-medium">
+            <DropdownMenuTrigger asChild>
+                <button className="flex w-full items-center gap-3 rounded-lg px-1 py-1 text-left transition-colors hover:bg-white/8 group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3DE3FF]">
+                  <Avatar className="size-9 shrink-0 border border-[#C7FF3C]/35">
+                    <AvatarFallback className="bg-[#C7FF3C] text-xs font-bold text-[#0B1014]">
                       {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-                    <p className="text-sm font-medium truncate leading-none">
+                    <p className="truncate text-sm font-medium leading-none text-white">
                       {user?.name || "-"}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate mt-1.5">
+                    <p className="mt-1.5 truncate text-xs text-[#91A3AD]">
                       {user?.email || "-"}
                     </p>
                   </div>
@@ -244,14 +244,14 @@ function DashboardLayoutContent({
         />
       </div>
 
-      <SidebarInset>
+      <SidebarInset className="bg-[#0B1014] text-[#EAF0F2]">
         {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
+          <div className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-white/8 bg-[#0B1014]/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
+              <SidebarTrigger className="size-9 rounded-lg bg-white/8 text-white" />
               <div className="flex items-center gap-3">
                 <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-foreground">
+                  <span className="tracking-tight text-white">
                     {activeMenuItem?.label ?? "Menu"}
                   </span>
                 </div>

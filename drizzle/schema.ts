@@ -101,7 +101,7 @@ export const favoriteStations = mysqlTable("favorite_stations", {
 
 export const productEvents = mysqlTable("product_events", {
   id: int("id").autoincrement().primaryKey(),
-  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested"]).notNull(),
+  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "favorite_intent", "favorite_saved", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click"]).notNull(),
   region: varchar("region", { length: 120 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ eventCreatedIdx: index("product_events_event_created_idx").on(table.event, table.createdAt), regionCreatedIdx: index("product_events_region_created_idx").on(table.region, table.createdAt) }));

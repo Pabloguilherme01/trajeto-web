@@ -47,3 +47,16 @@
 - [x] Confirmar que a ação de favorito permanece disponível e clara na consulta mobile autenticada.
 - [x] Restaurar a consulta de origem após a autenticação iniciada pela CTA de conta ou favorito.
 - [x] Publicar o Instagram @mpjstoryworks e o WhatsApp Business 61992903029 nos canais oficiais da Trajeto.
+- [x] Pesquisar referências de mobilidade, combustíveis e uso local para orientar o novo produto.
+- [x] Redesenhar integralmente a identidade visual, paleta e hierarquia da Trajeto com uma direção contemporânea.
+- [x] Priorizar Águas Lindas de Goiás, DF e Entorno com filtros e atalhos de localização úteis.
+- [x] Adicionar uma mensagem pré-preenchida ao WhatsApp Business para o primeiro contato.
+- [x] Rastrear cliques de Instagram e WhatsApp como eventos agregados no painel operacional.
+- [x] Aplicar transições e estados de hover acessíveis aos botões de redes sociais.
+- [x] Acrescentar recursos públicos funcionais que ampliem o valor da consulta de postos e rotas.
+- [x] Validar a nova experiência em desktop e mobile, incluindo eventos sociais e links de contato.
+- [ ] Salvar checkpoint da versão redesenhada da Trajeto.
+- [x] Adicionar foco visível por teclado aos botões sociais e revisar a acessibilidade de suas transições.
+- [x] Validar ponta a ponta os eventos agregados de clique no Instagram e WhatsApp no painel operacional.
+- [x] Clicar nos canais públicos e confirmar o registro agregado sem dados pessoais.
+- [x] Conferir visualmente no painel operacional os indicadores de cliques sociais.

@@ -1,0 +1,1 @@
+ALTER TABLE `product_events` MODIFY COLUMN `event` enum('station_search','map_open','station_compare','route_open','favorite_intent','favorite_saved','account_cta','redemption_requested','social_instagram_click','social_whatsapp_click') NOT NULL;
