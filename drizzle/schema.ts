@@ -39,8 +39,28 @@ export const routeSearches = mysqlTable("route_searches", {
   routeSummary: varchar("routeSummary", { length: 255 }),
   overviewPolyline: text("overviewPolyline"),
   locationConsent: boolean("locationConsent").default(false).notNull(),
+  vehicleId: int("vehicleId"),
+  vehicleNickname: varchar("vehicleNickname", { length: 80 }),
+  selectedFuel: mysqlEnum("selectedFuel", ["gasoline", "ethanol"]),
+  gasolinePrice: decimal("gasolinePrice", { precision: 8, scale: 3 }),
+  ethanolPrice: decimal("ethanolPrice", { precision: 8, scale: 3 }),
+  gasolineKmPerLiter: decimal("gasolineKmPerLiter", { precision: 6, scale: 2 }),
+  ethanolKmPerLiter: decimal("ethanolKmPerLiter", { precision: 6, scale: 2 }),
+  estimatedTripCost: decimal("estimatedTripCost", { precision: 10, scale: 2 }),
+  estimatedLiters: decimal("estimatedLiters", { precision: 8, scale: 2 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ createdAtIdx: index("route_searches_created_at_idx").on(table.createdAt), userIdx: index("route_searches_user_idx").on(table.userId) }));
+
+export const anpSyncRuns = mysqlTable("anp_sync_runs", {
+  id: int("id").autoincrement().primaryKey(),
+  dataset: mysqlEnum("dataset", ["authorized_stations", "price_references"]).notNull(),
+  status: mysqlEnum("status", ["updated", "fallback", "failed"]).notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 500 }).notNull(),
+  attempts: int("attempts").default(1).notNull(),
+  imported: int("imported").default(0).notNull(),
+  message: varchar("message", { length: 1000 }),
+  attemptedAt: timestamp("attemptedAt").defaultNow().notNull(),
+}, table => ({ datasetAttemptedIdx: index("anp_sync_runs_dataset_attempted_idx").on(table.dataset, table.attemptedAt) }));
 
 export const fuelPriceSnapshots = mysqlTable("fuel_price_snapshots", {
   id: int("id").autoincrement().primaryKey(),

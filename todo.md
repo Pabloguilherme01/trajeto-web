@@ -177,3 +177,10 @@
 - [x] Cobrir cálculo por rota, tentativas de importação e layout móvel com testes automatizados.
 - [x] Validar em desktop e celular, executar tipagem, testes e build; resta salvar o checkpoint da rodada.
 - [x] Salvar checkpoint da estimativa por rota, responsividade móvel e sincronização ANP resiliente.
+- [x] Auditar os contratos de economia, rotas, veículos e sincronização ANP contra o escopo anexado, preservando recursos já implantados.
+- [x] Comparar custos estimados de gasolina e etanol no planejador com parâmetros transparentes e regra de equilíbrio de consumo.
+- [x] Persistir no histórico a rota planejada, o veículo utilizado e os parâmetros de estimativa escolhidos pelo usuário.
+- [x] Registrar e exibir a última tentativa de sincronização ANP, seu status, data, origem e mensagem de fallback no painel operacional.
+- [x] Medir e documentar as métricas disponíveis da engine de postos sem alegar ganhos sem base comparativa.
+- [x] Cobrir os novos contratos com testes e validar tipagem, build e fluxos responsivos.
+- [ ] Salvar checkpoint da comparação de combustíveis, histórico vinculado e observabilidade ANP.

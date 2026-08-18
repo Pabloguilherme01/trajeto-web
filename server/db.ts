@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -118,6 +118,12 @@ export async function getUserVehicles(userId: number) {
   return db.select().from(userVehicles).where(eq(userVehicles.userId, userId)).orderBy(desc(userVehicles.updatedAt));
 }
 
+export async function getUserVehicleById(userId: number, vehicleId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  return (await db.select().from(userVehicles).where(and(eq(userVehicles.id, vehicleId), eq(userVehicles.userId, userId))).limit(1))[0] ?? null;
+}
+
 export async function createUserVehicle(userId: number, input: UserVehicleInput) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível.");
@@ -142,12 +148,17 @@ export async function deleteUserVehicle(userId: number, vehicleId: number) {
 export async function createRouteSearch(input: {
   userId: number | null; origin: string; destination: string; originLat: number; originLng: number; destinationLat: number; destinationLng: number;
   distanceMeters: number; durationSeconds: number; routeSummary: string | null; overviewPolyline: string | null; locationConsent: boolean;
+  vehicleId?: number | null; vehicleNickname?: string | null; selectedFuel?: "gasoline" | "ethanol" | null;
+  gasolinePrice?: number | null; ethanolPrice?: number | null; gasolineKmPerLiter?: number | null; ethanolKmPerLiter?: number | null; estimatedTripCost?: number | null; estimatedLiters?: number | null;
 }) {
   const db = await getDb();
   if (!db) return null;
   const result = await db.insert(routeSearches).values({
     ...input,
     originLat: String(input.originLat), originLng: String(input.originLng), destinationLat: String(input.destinationLat), destinationLng: String(input.destinationLng),
+    gasolinePrice: input.gasolinePrice == null ? null : String(input.gasolinePrice), ethanolPrice: input.ethanolPrice == null ? null : String(input.ethanolPrice),
+    gasolineKmPerLiter: input.gasolineKmPerLiter == null ? null : String(input.gasolineKmPerLiter), ethanolKmPerLiter: input.ethanolKmPerLiter == null ? null : String(input.ethanolKmPerLiter),
+    estimatedTripCost: input.estimatedTripCost == null ? null : String(input.estimatedTripCost), estimatedLiters: input.estimatedLiters == null ? null : String(input.estimatedLiters),
   });
   return { id: Number(result[0].insertId) };
 }
@@ -363,6 +374,23 @@ export async function replaceAuthorizedStations(stations: AuthorizedStationImpor
   return { imported: stations.length };
 }
 
+export async function recordAnpSyncRun(input: { dataset: "authorized_stations" | "price_references"; status: "updated" | "fallback" | "failed"; sourceUrl: string; attempts: number; imported: number; message?: string | null }) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.insert(anpSyncRuns).values(input);
+  return getLatestAnpSyncRun(input.dataset);
+}
+
+export async function getLatestAnpSyncRun(dataset: "authorized_stations" | "price_references" = "authorized_stations") {
+  const db = await getDb();
+  if (!db) return null;
+  const recorded = (await db.select().from(anpSyncRuns).where(eq(anpSyncRuns.dataset, dataset)).orderBy(desc(anpSyncRuns.attemptedAt)).limit(1))[0] ?? null;
+  if (recorded || dataset !== "authorized_stations") return recorded;
+  const legacyCatalog = (await db.select({ sourceReference: authorizedFuelStations.sourceReference, importedAt: authorizedFuelStations.importedAt }).from(authorizedFuelStations).orderBy(desc(authorizedFuelStations.importedAt)).limit(1))[0] ?? null;
+  if (!legacyCatalog) return null;
+  return { id: 0, dataset: "authorized_stations" as const, status: "updated" as const, sourceUrl: legacyCatalog.sourceReference, attempts: 0, imported: 0, message: "Data inferida do catálogo ANP já armazenado; a próxima atualização registrará tentativas e quantidade importada.", attemptedAt: legacyCatalog.importedAt };
+}
+
 export type TrafficNotificationInput = {
   userId: number;
   corridorId: string;
@@ -411,9 +439,9 @@ export async function createProductEvent(input: { event: ProductEventName; regio
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })) };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -424,6 +452,7 @@ export async function getOperationalOverview() {
     db.select({ event: productEvents.event, total: count() }).from(productEvents).groupBy(productEvents.event),
     db.select({ issuedAt: trafficNotifications.issuedAt }).from(trafficNotifications),
     db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "alert_preference_saved")),
+    getLatestAnpSyncRun("authorized_stations"),
   ]);
 
   const notificationTrend = aggregateDailyTimestamps(notificationTrendRows.map(row => row.issuedAt));
@@ -436,5 +465,6 @@ export async function getOperationalOverview() {
     topRoutes,
     growthEvents,
     weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
+    anpAuthorizedSync,
   };
 }

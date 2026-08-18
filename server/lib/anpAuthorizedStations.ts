@@ -47,7 +47,9 @@ export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORI
   const sleep = options.sleep ?? wait;
   let response: Response | null = null;
   let lastError: unknown = null;
+  let attempts = 0;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    attempts = attempt;
     try {
       const candidate = await fetchImpl(sourceUrl, { signal: AbortSignal.timeout(60_000) });
       if (candidate.ok) {
@@ -83,5 +85,5 @@ export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORI
     sourceReference: sourceUrl,
     sourceUpdatedAt: queriedAt,
   })).filter(station => station.authorization && station.legalName && station.address);
-  return { stations, queriedAt, attempts: maxAttempts };
+  return { stations, queriedAt, attempts };
 }

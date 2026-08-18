@@ -1,14 +1,22 @@
 import { z } from "zod";
-import { createRouteSearch, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById } from "../db";
+import { createRouteSearch, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById, getUserVehicleById } from "../db";
 import { makeRequest, type DirectionsResult, type GeocodingResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
 import { normalizeStops, routeSummary } from "../lib/routePlanner";
 import { routeTrafficStatus } from "../lib/routeTraffic";
+import { compareFuelPrices } from "../lib/fuelEconomy";
 
 const plannerInput = z.object({
   origin: z.string().trim().min(3).max(240),
   destination: z.string().trim().min(3).max(240),
   locationConsent: z.boolean().default(false),
+  economy: z.object({
+    vehicleId: z.number().int().positive(),
+    gasolinePrice: z.number().finite().positive().lte(100),
+    ethanolPrice: z.number().finite().positive().lte(100),
+    gasolineKmPerLiter: z.number().finite().positive().lte(100),
+    ethanolKmPerLiter: z.number().finite().positive().lte(100),
+  }).optional(),
 });
 
 function locality(result: GeocodingResult) {
@@ -41,6 +49,16 @@ export const routesRouter = router({
       getPriceReferencesByAreas([locality(originGeo), locality(destinationGeo)].filter((area): area is { municipality: string; state: string } => Boolean(area))),
     ]);
     const snapshotByPlace = new Map(snapshots.map(snapshot => [snapshot.placeId, snapshot]));
+    const vehicle = input.economy && ctx.user ? await getUserVehicleById(ctx.user.id, input.economy.vehicleId) : null;
+    const economy = input.economy && vehicle ? compareFuelPrices({
+      distanceKm: route.distanceMeters / 1000,
+      gasolinePrice: input.economy.gasolinePrice,
+      ethanolPrice: input.economy.ethanolPrice,
+      gasolineKmPerLiter: input.economy.gasolineKmPerLiter,
+      ethanolKmPerLiter: input.economy.ethanolKmPerLiter,
+      tankLiters: vehicle.tankLiters ? Number(vehicle.tankLiters) : null,
+    }) : null;
+    const selectedEconomy = economy ? economy[economy.recommendedFuel] : null;
     const saved = await createRouteSearch({
       userId: ctx.user?.id ?? null,
       origin: input.origin,
@@ -54,6 +72,15 @@ export const routesRouter = router({
       routeSummary: route.summary,
       overviewPolyline: route.polyline,
       locationConsent: input.locationConsent,
+      vehicleId: vehicle?.id ?? null,
+      vehicleNickname: vehicle?.nickname ?? null,
+      selectedFuel: economy?.recommendedFuel ?? null,
+      gasolinePrice: input.economy?.gasolinePrice ?? null,
+      ethanolPrice: input.economy?.ethanolPrice ?? null,
+      gasolineKmPerLiter: input.economy?.gasolineKmPerLiter ?? null,
+      ethanolKmPerLiter: input.economy?.ethanolKmPerLiter ?? null,
+      estimatedTripCost: selectedEconomy?.tripCost ?? null,
+      estimatedLiters: selectedEconomy?.litersNeeded ?? null,
     });
 
     const traffic = await routeTrafficStatus(originPoint, destinationPoint);
@@ -65,6 +92,7 @@ export const routesRouter = router({
       priceCoverage: snapshots.length,
       anpReferences,
       traffic,
+      economy,
     };
   }),
   byId: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => getRouteSearchById(input.id)),

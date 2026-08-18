@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateFuelEconomy } from "./fuelEconomy";
+import { calculateFuelEconomy, compareFuelPrices } from "./fuelEconomy";
 
 describe("calculateFuelEconomy", () => {
   it("calcula consumo, custo e autonomia somente a partir de parâmetros declarados", () => {
@@ -8,5 +8,10 @@ describe("calculateFuelEconomy", () => {
 
   it("recusa insumos que poderiam produzir uma estimativa enganosa", () => {
     expect(() => calculateFuelEconomy({ distanceKm: 20, pricePerLiter: 0, kmPerLiter: 10 })).toThrow("preço por litro");
+  });
+
+  it("compara gasolina e etanol pela relação entre preço e consumo, sem usar regra fixa", () => {
+    const result = compareFuelPrices({ distanceKm: 100, gasolinePrice: 6, ethanolPrice: 3.8, gasolineKmPerLiter: 12, ethanolKmPerLiter: 8, tankLiters: 45 });
+    expect(result).toMatchObject({ recommendedFuel: "ethanol", savings: 2.5, breakEvenEthanolPrice: 4, gasoline: { tripCost: 50 }, ethanol: { tripCost: 47.5 } });
   });
 });
