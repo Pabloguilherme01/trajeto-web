@@ -192,4 +192,4 @@
 - [x] Exibir no painel operacional os tempos e taxas de sucesso por provedor com período e amostra explícitos.
 - [x] Cobrir pontuação, instrumentação e apresentação com testes, tipagem e build.
 - [x] Validar em desktop a recomendação e o painel de métricas; a responsividade segue as grades móveis existentes. Resta salvar o checkpoint da rodada.
-- [ ] Salvar checkpoint da recomendação inteligente e das métricas de provedores.
+- [x] Salvar checkpoint da recomendação inteligente e das métricas de provedores.
