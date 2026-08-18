@@ -157,4 +157,4 @@
 - [x] Adicionar teste de interface para o skeleton e a mensagem de carregamento do próximo lote em Stations.tsx.
 - [x] Validar a exportação real em desktop e os controles responsivos em celular; a ordem de distância/relevância e o skeleton foram comprovados por testes automatizados e evidência registrada.
 - [x] Documentar a limitação externa da sincronização nacional ANP e manter o importador pronto para o corredor, sem automatizar a consulta oficial que proíbe esse uso.
-- [ ] Salvar checkpoint da expansão de descoberta, cobertura e conversão.
+- [x] Salvar checkpoint da expansão de descoberta, cobertura e conversão.
