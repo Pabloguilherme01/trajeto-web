@@ -184,3 +184,12 @@
 - [x] Medir e documentar as métricas disponíveis da engine de postos sem alegar ganhos sem base comparativa.
 - [x] Cobrir os novos contratos com testes e validar tipagem, build e fluxos responsivos.
 - [x] Salvar checkpoint da comparação de combustíveis, histórico vinculado e observabilidade ANP.
+- [x] Auditar os campos de preço, distância, rota e chamadas externas para definir uma recomendação sem inventar dados.
+- [x] Calcular e exibir uma recomendação determinística de posto que equilibre preço de referência e desvio conhecido da rota.
+- [x] Criar um pontuador puro de preço e distância estimada à linha da rota, rotulando aproximações e ausência de preço de forma explícita.
+- [x] Registrar métricas agregadas de latência e resultado para provedores de dados sem coletar dados pessoais.
+- [x] Criar a estrutura de amostras técnicas por provedor, operação, duração e resultado sem parâmetros de busca ou identidade do usuário.
+- [x] Exibir no painel operacional os tempos e taxas de sucesso por provedor com período e amostra explícitos.
+- [x] Cobrir pontuação, instrumentação e apresentação com testes, tipagem e build.
+- [x] Validar em desktop a recomendação e o painel de métricas; a responsividade segue as grades móveis existentes. Resta salvar o checkpoint da rodada.
+- [ ] Salvar checkpoint da recomendação inteligente e das métricas de provedores.

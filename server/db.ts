@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, InsertUser, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -391,6 +391,37 @@ export async function getLatestAnpSyncRun(dataset: "authorized_stations" | "pric
   return { id: 0, dataset: "authorized_stations" as const, status: "updated" as const, sourceUrl: legacyCatalog.sourceReference, attempts: 0, imported: 0, message: "Data inferida do catálogo ANP já armazenado; a próxima atualização registrará tentativas e quantidade importada.", attemptedAt: legacyCatalog.importedAt };
 }
 
+export type ProviderMetricInput = { provider: "google_maps" | "tomtom" | "anp"; operation: string; durationMs: number; success: boolean; statusCode?: number | null };
+
+export async function recordProviderMetric(input: ProviderMetricInput) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.insert(providerMetricSamples).values({ ...input, operation: input.operation.slice(0, 80), durationMs: Math.max(0, Math.round(input.durationMs)), statusCode: input.statusCode ?? null });
+  } catch (error) {
+    console.warn("[Provider metrics] Metric was not persisted:", error);
+  }
+}
+
+export async function getProviderMetricSummary(hours = 24) {
+  const db = await getDb();
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+  if (!db) return { since, hours, samples: [] as Array<{ provider: "google_maps" | "tomtom" | "anp"; operation: string; count: number; successRate: number; averageMs: number; p95Ms: number; latestAt: Date }> };
+  const rows = (await db.select().from(providerMetricSamples).orderBy(desc(providerMetricSamples.createdAt)).limit(500)).filter(row => row.createdAt >= since);
+  const grouped = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const key = `${row.provider}:${row.operation}`;
+    grouped.set(key, [...(grouped.get(key) ?? []), row]);
+  }
+  const samples = Array.from(grouped.values()).map(group => {
+    const orderedDurations = group.map(row => row.durationMs).sort((a, b) => a - b);
+    const averageMs = Math.round(orderedDurations.reduce((sum, value) => sum + value, 0) / orderedDurations.length);
+    const p95Ms = orderedDurations[Math.min(orderedDurations.length - 1, Math.ceil(orderedDurations.length * 0.95) - 1)] ?? 0;
+    return { provider: group[0].provider, operation: group[0].operation, count: group.length, successRate: Math.round((group.filter(row => row.success).length / group.length) * 100), averageMs, p95Ms, latestAt: group[0].createdAt };
+  }).sort((a, b) => a.provider.localeCompare(b.provider) || a.operation.localeCompare(b.operation));
+  return { since, hours, samples };
+}
+
 export type TrafficNotificationInput = {
   userId: number;
   corridorId: string;
@@ -439,9 +470,9 @@ export async function createProductEvent(input: { event: ProductEventName; regio
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] } };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -453,6 +484,7 @@ export async function getOperationalOverview() {
     db.select({ issuedAt: trafficNotifications.issuedAt }).from(trafficNotifications),
     db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "alert_preference_saved")),
     getLatestAnpSyncRun("authorized_stations"),
+    getProviderMetricSummary(24),
   ]);
 
   const notificationTrend = aggregateDailyTimestamps(notificationTrendRows.map(row => row.issuedAt));
@@ -466,5 +498,6 @@ export async function getOperationalOverview() {
     growthEvents,
     weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
     anpAuthorizedSync,
+    providerMetrics,
   };
 }

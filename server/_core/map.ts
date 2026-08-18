@@ -8,6 +8,7 @@
  */
 
 import { ENV } from "./env";
+import { recordProviderMetric } from "../db";
 
 // ============================================================================
 // Configuration
@@ -56,6 +57,9 @@ export async function makeRequest<T = unknown>(
   params: Record<string, unknown> = {},
   options: RequestOptions = {}
 ): Promise<T> {
+  const startedAt = Date.now();
+  const operation = endpoint.replace(/^\/maps\/api\//, "").replace(/\/json$/, "").slice(0, 80);
+  let metricRecorded = false;
   const { baseUrl, apiKey } = getMapsConfig();
 
   // Construct full URL: baseUrl + /v1/maps/proxy + endpoint
@@ -71,22 +75,32 @@ export async function makeRequest<T = unknown>(
     }
   });
 
-  const response = await fetch(url.toString(), {
-    method: options.method || "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  try {
+    const response = await fetch(url.toString(), {
+      method: options.method || "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Google Maps API request failed (${response.status} ${response.statusText}): ${errorText}`
-    );
+    if (!response.ok) {
+      metricRecorded = true;
+      void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false, statusCode: response.status });
+      const errorText = await response.text();
+      throw new Error(
+        `Google Maps API request failed (${response.status} ${response.statusText}): ${errorText}`
+      );
+    }
+
+    const payload = await response.json() as T;
+    metricRecorded = true;
+    void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
+    return payload;
+  } catch (error) {
+    if (!metricRecorded) void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false });
+    throw error;
   }
-
-  return (await response.json()) as T;
 }
 
 // ============================================================================
@@ -317,5 +331,4 @@ export type RoadsResult = {
  * Output: Image URL (not JSON) - use directly in <img src={url} />
  * Note: Construct URL manually with getMapsConfig() for auth
  */
-
 

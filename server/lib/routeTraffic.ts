@@ -1,5 +1,7 @@
 type Point = { lat: number; lng: number };
 
+import { recordProviderMetric } from "../db";
+
 type TomTomIncident = {
   properties?: {
     id?: string;
@@ -107,6 +109,7 @@ export async function routeTrafficStatus(origin: Point, destination: Point) {
   }
 
   try {
+    const startedAt = Date.now();
     const url = new URL("https://api.tomtom.com/traffic/services/5/incidentDetails");
     url.searchParams.set("key", apiKey);
     url.searchParams.set("bbox", routeBoundingBox(origin, destination));
@@ -114,8 +117,12 @@ export async function routeTrafficStatus(origin: Point, destination: Point) {
     url.searchParams.set("timeValidityFilter", "present");
     url.searchParams.set("fields", "{incidents{type,geometry{type,coordinates},properties{id,iconCategory,magnitudeOfDelay,events{description},startTime,endTime,lastReportTime,from,to,delay}}}");
     const response = await fetch(url, { signal: AbortSignal.timeout(8_000) });
-    if (!response.ok) throw new Error(`Traffic API ${response.status}`);
+    if (!response.ok) {
+      void recordProviderMetric({ provider: "tomtom", operation: "incident_details", durationMs: Date.now() - startedAt, success: false, statusCode: response.status });
+      throw new Error(`Traffic API ${response.status}`);
+    }
     const payload = await response.json() as TomTomResponse;
+    void recordProviderMetric({ provider: "tomtom", operation: "incident_details", durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
     const incidents = normalizeIncidents(payload.incidents ?? [], checkedAt);
     return {
       checkedAt,

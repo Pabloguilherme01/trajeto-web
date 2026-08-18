@@ -1,5 +1,7 @@
 export const DEFAULT_ANP_AUTHORIZED_STATIONS_URL = "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos/dados-cadastrais-revendedores-varejistas-combustiveis-automoveis.csv";
 
+import { recordProviderMetric } from "../db";
+
 export type AuthorizedStationImport = {
   authorization: string;
   legalName: string;
@@ -41,6 +43,7 @@ export type AuthorizedStationsDownloadOptions = {
 const wait = (milliseconds: number) => new Promise<void>(resolve => setTimeout(resolve, milliseconds));
 
 export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, targets = CORRIDOR_ANP_MUNICIPALITIES, options: AuthorizedStationsDownloadOptions = {}) {
+  const startedAt = Date.now();
   const maxAttempts = Math.min(3, Math.max(1, options.maxAttempts ?? 3));
   const retryDelayMs = Math.max(100, options.retryDelayMs ?? 800);
   const fetchImpl = options.fetchImpl ?? fetch;
@@ -63,7 +66,11 @@ export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORI
     }
     if (attempt < maxAttempts) await sleep(retryDelayMs * attempt);
   }
-  if (!response) throw lastError instanceof Error ? lastError : new Error("Cadastro ANP indisponível após tentativas limitadas.");
+  if (!response) {
+    void recordProviderMetric({ provider: "anp", operation: "authorized_stations_csv", durationMs: Date.now() - startedAt, success: false });
+    throw lastError instanceof Error ? lastError : new Error("Cadastro ANP indisponível após tentativas limitadas.");
+  }
+  void recordProviderMetric({ provider: "anp", operation: "authorized_stations_csv", durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
   const raw = new TextDecoder("windows-1252").decode(await response.arrayBuffer());
   const lines = raw.split(/\r?\n/).filter(Boolean);
   const headers = lines.shift()?.split(";") ?? [];

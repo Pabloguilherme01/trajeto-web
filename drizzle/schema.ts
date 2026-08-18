@@ -62,6 +62,16 @@ export const anpSyncRuns = mysqlTable("anp_sync_runs", {
   attemptedAt: timestamp("attemptedAt").defaultNow().notNull(),
 }, table => ({ datasetAttemptedIdx: index("anp_sync_runs_dataset_attempted_idx").on(table.dataset, table.attemptedAt) }));
 
+export const providerMetricSamples = mysqlTable("provider_metric_samples", {
+  id: int("id").autoincrement().primaryKey(),
+  provider: mysqlEnum("provider", ["google_maps", "tomtom", "anp"]).notNull(),
+  operation: varchar("operation", { length: 80 }).notNull(),
+  durationMs: int("durationMs").notNull(),
+  success: boolean("success").notNull(),
+  statusCode: int("statusCode"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => ({ providerCreatedIdx: index("provider_metric_samples_provider_created_idx").on(table.provider, table.createdAt) }));
+
 export const fuelPriceSnapshots = mysqlTable("fuel_price_snapshots", {
   id: int("id").autoincrement().primaryKey(),
   placeId: varchar("placeId", { length: 255 }).notNull(),

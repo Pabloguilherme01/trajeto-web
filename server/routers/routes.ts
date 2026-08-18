@@ -5,6 +5,7 @@ import { publicProcedure, router } from "../_core/trpc";
 import { normalizeStops, routeSummary } from "../lib/routePlanner";
 import { routeTrafficStatus } from "../lib/routeTraffic";
 import { compareFuelPrices } from "../lib/fuelEconomy";
+import { recommendFuelStop } from "../lib/stationRecommendation";
 
 const plannerInput = z.object({
   origin: z.string().trim().min(3).max(240),
@@ -85,14 +86,17 @@ export const routesRouter = router({
 
     const traffic = await routeTrafficStatus(originPoint, destinationPoint);
 
+    const stopsWithPrice = stops.map(stop => ({ ...stop, priceReference: snapshotByPlace.get(stop.placeId) ?? null }));
+    const recommendation = recommendFuelStop(stopsWithPrice, route.origin, route.destination);
     return {
       searchId: saved?.id ?? null,
       route,
-      stops: stops.map(stop => ({ ...stop, priceReference: snapshotByPlace.get(stop.placeId) ?? null })),
+      stops: stopsWithPrice,
       priceCoverage: snapshots.length,
       anpReferences,
       traffic,
       economy,
+      recommendation,
     };
   }),
   byId: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => getRouteSearchById(input.id)),
