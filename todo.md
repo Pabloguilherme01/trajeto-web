@@ -183,4 +183,4 @@
 - [x] Registrar e exibir a última tentativa de sincronização ANP, seu status, data, origem e mensagem de fallback no painel operacional.
 - [x] Medir e documentar as métricas disponíveis da engine de postos sem alegar ganhos sem base comparativa.
 - [x] Cobrir os novos contratos com testes e validar tipagem, build e fluxos responsivos.
-- [ ] Salvar checkpoint da comparação de combustíveis, histórico vinculado e observabilidade ANP.
+- [x] Salvar checkpoint da comparação de combustíveis, histórico vinculado e observabilidade ANP.
