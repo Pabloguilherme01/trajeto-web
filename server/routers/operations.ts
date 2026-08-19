@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createRedemption, getOperationalOverview, recordAnpSyncRun, replaceAnpPriceSnapshots, replaceAuthorizedStations, upsertPaginationAlertThreshold } from "../db";
+import { acknowledgeOperationalAlert, createRedemption, evaluateGooglePaginationOperationalAlerts, getOperationalAlerts, getOperationalOverview, getPaginationAlertThresholdHistory, recordAnpSyncRun, replaceAnpPriceSnapshots, replaceAuthorizedStations, upsertPaginationAlertThreshold } from "../db";
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { DEFAULT_ANP_SOURCE_URL, downloadAndParseAnp } from "../lib/anpImport";
 import { DEFAULT_ANP_AUTHORIZED_STATIONS_URL, downloadAuthorizedStations } from "../lib/anpAuthorizedStations";
@@ -12,6 +12,10 @@ export const operationsRouter = router({
     stationAddress: z.string().min(1).max(500),
   })).mutation(async ({ ctx, input }) => createRedemption({ ...input, userId: ctx.user.id })),
   overview: adminProcedure.query(async () => getOperationalOverview()),
+  paginationAlertHistory: adminProcedure.input(z.object({ region: z.string().trim().max(120).optional(), startAt: z.date().optional(), endAt: z.date().optional(), limit: z.number().int().min(1).max(100).default(24), offset: z.number().int().min(0).max(10_000).default(0) })).query(({ input }) => getPaginationAlertThresholdHistory(input)),
+  operationalAlerts: adminProcedure.input(z.object({ status: z.enum(["active", "acknowledged", "resolved"]).optional() }).default({})).query(({ input }) => getOperationalAlerts(input.status)),
+  refreshOperationalAlerts: adminProcedure.mutation(() => evaluateGooglePaginationOperationalAlerts()),
+  acknowledgeOperationalAlert: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ ctx, input }) => acknowledgeOperationalAlert(input.id, ctx.user.id)),
   savePaginationAlertThreshold: adminProcedure.input(z.object({ region: z.string().trim().min(2).max(120), threshold: z.number().int().min(1).max(100) })).mutation(({ ctx, input }) => upsertPaginationAlertThreshold({ ...input, changedByUserId: ctx.user.id })),
   syncAnp: adminProcedure.input(z.object({ sourceUrl: z.string().url().default(DEFAULT_ANP_SOURCE_URL) })).mutation(async ({ input }) => {
     try {

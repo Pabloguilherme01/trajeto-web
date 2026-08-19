@@ -1,6 +1,6 @@
-import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, paginationAlertThresholdHistory, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, operationalAlerts, operationalAutomationJobs, paginationAlertThresholdHistory, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -9,6 +9,8 @@ import type { AuthorizedStationImport } from "./lib/anpAuthorizedStations";
 import { normalizeStationSearchPreferences, stationSearchPreferenceDefaults, type StationSearchPreferenceInput } from "./lib/stationSearchPreferences";
 import { classifyProviderHealth } from "./lib/providerHealth";
 import { buildGoogleMapsWeeklyStability } from "./lib/googleMapsStability";
+import { evaluateRegionalPaginationAlerts, googlePaginationAlertType, shouldNotifyOperationalAlert } from "./lib/operationalAlerts";
+import { notifyOwner } from "./_core/notification";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -309,10 +311,94 @@ export async function getPaginationAlertThresholds() {
   return db.select().from(paginationAlertThresholds).orderBy(paginationAlertThresholds.region);
 }
 
-export async function getPaginationAlertThresholdHistory(limit = 24) {
+export type PaginationAlertThresholdHistoryFilters = { region?: string; startAt?: Date; endAt?: Date; limit?: number; offset?: number };
+
+export async function getPaginationAlertThresholdHistory(filters: PaginationAlertThresholdHistoryFilters = {}) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(paginationAlertThresholdHistory).orderBy(desc(paginationAlertThresholdHistory.changedAt)).limit(Math.min(100, Math.max(1, limit)));
+  const conditions = [
+    filters.region?.trim() ? eq(paginationAlertThresholdHistory.region, filters.region.trim().slice(0, 120)) : undefined,
+    filters.startAt ? gte(paginationAlertThresholdHistory.changedAt, filters.startAt) : undefined,
+    filters.endAt ? lte(paginationAlertThresholdHistory.changedAt, filters.endAt) : undefined,
+  ].filter(Boolean);
+  const query = db.select().from(paginationAlertThresholdHistory).orderBy(desc(paginationAlertThresholdHistory.changedAt)).limit(Math.min(100, Math.max(1, filters.limit ?? 24))).offset(Math.max(0, filters.offset ?? 0));
+  return conditions.length ? query.where(and(...conditions)) : query;
+}
+
+export async function getOperationalAlerts(status?: "active" | "acknowledged" | "resolved") {
+  const db = await getDb();
+  if (!db) return [];
+  const query = db.select().from(operationalAlerts).orderBy(desc(operationalAlerts.updatedAt)).limit(50);
+  return status ? query.where(eq(operationalAlerts.status, status)) : query;
+}
+
+export async function acknowledgeOperationalAlert(alertId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  const alert = (await db.select().from(operationalAlerts).where(eq(operationalAlerts.id, alertId)).limit(1))[0];
+  if (!alert) throw new Error("Alerta não encontrado.");
+  if (alert.status === "resolved") return alert;
+  await db.update(operationalAlerts).set({ status: "acknowledged", acknowledgedAt: new Date(), acknowledgedByUserId: userId }).where(eq(operationalAlerts.id, alertId));
+  return { ...alert, status: "acknowledged" as const, acknowledgedAt: new Date(), acknowledgedByUserId: userId };
+}
+
+export async function evaluateGooglePaginationOperationalAlerts(now = new Date()) {
+  const db = await getDb();
+  if (!db) return { evaluatedAt: now, active: 0, created: 0, resolved: 0, notified: 0 };
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const [events, thresholds, existingAlerts] = await Promise.all([
+    db.select({ region: productEvents.region, createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "google_page_token_invalid")).orderBy(desc(productEvents.createdAt)).limit(1_000),
+    getPaginationAlertThresholds(),
+    db.select().from(operationalAlerts).where(eq(operationalAlerts.alertType, googlePaginationAlertType)),
+  ]);
+  const evaluations = evaluateRegionalPaginationAlerts(events, thresholds, existingAlerts.map(alert => alert.region), now);
+  const existingByRegion = new Map(existingAlerts.map(alert => [alert.region, alert]));
+  let created = 0;
+  let resolved = 0;
+  let notified = 0;
+  let active = 0;
+  for (const evaluation of evaluations) {
+    const existing = existingByRegion.get(evaluation.region);
+    if (evaluation.critical) {
+      active += 1;
+      const shouldNotify = shouldNotifyOperationalAlert(existing?.lastNotifiedAt ?? null, now);
+      let notificationSent = false;
+      if (shouldNotify) {
+        try {
+          notificationSent = await notifyOwner({ title: `Trajeto: alerta crítico em ${evaluation.region}`, content: `${evaluation.observedCount} tokens de próximo lote aguardando liberação nas últimas 24 horas, acima do limite regional de ${evaluation.threshold}.` });
+        } catch (error) {
+          console.warn("[Operational alerts] Could not notify owner", error);
+        }
+      }
+      if (notificationSent) notified += 1;
+      if (!existing) {
+        await db.insert(operationalAlerts).values({ alertType: googlePaginationAlertType, region: evaluation.region, threshold: evaluation.threshold, observedCount: evaluation.observedCount, status: "active", firstDetectedAt: now, lastDetectedAt: now, recurrenceCount: 1, notificationCount: notificationSent ? 1 : 0, lastNotifiedAt: notificationSent ? now : null });
+        created += 1;
+      } else {
+        const status = existing.status === "resolved" ? "active" : existing.status;
+        await db.update(operationalAlerts).set({ threshold: evaluation.threshold, observedCount: evaluation.observedCount, status, lastDetectedAt: now, resolvedAt: null, recurrenceCount: existing.status === "resolved" ? existing.recurrenceCount + 1 : existing.recurrenceCount, notificationCount: existing.notificationCount + (notificationSent ? 1 : 0), lastNotifiedAt: notificationSent ? now : existing.lastNotifiedAt }).where(eq(operationalAlerts.id, existing.id));
+      }
+    } else if (existing && existing.status !== "resolved") {
+      await db.update(operationalAlerts).set({ observedCount: evaluation.observedCount, threshold: evaluation.threshold, status: "resolved", resolvedAt: now }).where(eq(operationalAlerts.id, existing.id));
+      resolved += 1;
+    }
+  }
+  return { evaluatedAt: now, active, created, resolved, notified };
+}
+
+export const operationalAlertAutomationJobKey = "google-pagination-alerts";
+
+export async function saveOperationalAlertAutomationTask(taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  await db.insert(operationalAutomationJobs).values({ jobKey: operationalAlertAutomationJobKey, scheduleCronTaskUid: taskUid }).onDuplicateKeyUpdate({ set: { scheduleCronTaskUid: taskUid } });
+}
+
+export async function isOperationalAlertAutomationTask(taskUid: string) {
+  const db = await getDb();
+  if (!db) return false;
+  const job = (await db.select().from(operationalAutomationJobs).where(and(eq(operationalAutomationJobs.jobKey, operationalAlertAutomationJobKey), eq(operationalAutomationJobs.scheduleCronTaskUid, taskUid))).limit(1))[0];
+  return Boolean(job);
 }
 
 export async function upsertPaginationAlertThreshold(input: { region: string; threshold: number; changedByUserId: number }) {

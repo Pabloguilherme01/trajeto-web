@@ -121,6 +121,7 @@ export default function Planner() {
           <p className="eyebrow">Rota com dados reais</p>
           <h1 className="font-display mt-4 text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.86] tracking-[-0.065em]">Compare o caminho<br /><span className="text-[#BA5B45]">antes de chegar.</span></h1>
           <p className="mt-6 max-w-2xl text-[1.05rem] leading-relaxed text-[#5A706D]">Pesquise uma rota de carro, veja distância e duração calculadas pelo Google Maps e encontre postos reais próximos ao início e ao destino.</p>
+          <div className="mt-5 grid gap-2 border-l-2 border-[#FFC928] bg-[#FFFBEF] p-4 text-xs leading-relaxed text-[#5A706D] sm:grid-cols-3"><p><strong className="text-[#163840]">Rota e distância:</strong> Google Maps na consulta atual.</p><p><strong className="text-[#163840]">Trânsito:</strong> TomTom quando houver ocorrência acionável.</p><p><strong className="text-[#163840]">Combustível:</strong> referências semanais datadas da ANP, não preço em tempo real.</p></div>
         </div>
 
         <section className="grid overflow-hidden border border-[#C7D2C9] bg-white lg:grid-cols-[0.74fr_1.26fr]">

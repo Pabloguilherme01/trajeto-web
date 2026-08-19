@@ -228,3 +228,10 @@
 - [x] Registrar e exibir o histórico auditável de alterações dos limites de tokens por região.
 - [x] Destacar no painel operacional um alerta visual priorizado para regiões acima do limite configurado.
 - [x] Cobrir exportação, auditoria e alertas com testes, validação desktop/mobile e checkpoint.
+- [x] Consolidar transparência de fontes, cobertura e atualização de dados na consulta pública e no planejador.
+- [x] Reforçar a jornada pública mobile com atalhos por intenção, recomendação explicada e compartilhamento seguro de consulta.
+- [x] Filtrar e exportar o histórico de limites por período e região, sem dados pessoais.
+- [x] Persistir, reconhecer e resolver alertas críticos regionais com avaliação de janela móvel e deduplicação.
+- [x] Adicionar central operacional de alertas persistentes e notificação controlada ao proprietário.
+- [ ] Preparar, publicar e ativar verificação automática periódica de criticidade.
+- [ ] Cobrir a evolução com testes, validação responsiva e checkpoint publicado.

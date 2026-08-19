@@ -137,6 +137,30 @@ export const paginationAlertThresholdHistory = mysqlTable("pagination_alert_thre
   changedAt: timestamp("changedAt").defaultNow().notNull(),
 }, table => ({ regionChangedIdx: index("pagination_alert_threshold_history_region_changed_idx").on(table.region, table.changedAt), changedByIdx: index("pagination_alert_threshold_history_changed_by_idx").on(table.changedByUserId, table.changedAt) }));
 
+export const operationalAlerts = mysqlTable("operational_alerts", {
+  id: int("id").autoincrement().primaryKey(),
+  alertType: varchar("alertType", { length: 80 }).notNull(),
+  region: varchar("region", { length: 120 }).notNull(),
+  threshold: int("threshold").notNull(),
+  observedCount: int("observedCount").notNull(),
+  status: mysqlEnum("status", ["active", "acknowledged", "resolved"]).default("active").notNull(),
+  firstDetectedAt: timestamp("firstDetectedAt").defaultNow().notNull(),
+  lastDetectedAt: timestamp("lastDetectedAt").defaultNow().notNull(),
+  acknowledgedAt: timestamp("acknowledgedAt"),
+  acknowledgedByUserId: int("acknowledgedByUserId"),
+  resolvedAt: timestamp("resolvedAt"),
+  recurrenceCount: int("recurrenceCount").default(1).notNull(),
+  notificationCount: int("notificationCount").default(0).notNull(),
+  lastNotifiedAt: timestamp("lastNotifiedAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => ({ typeRegionUnique: uniqueIndex("operational_alerts_type_region_unique").on(table.alertType, table.region), statusUpdatedIdx: index("operational_alerts_status_updated_idx").on(table.status, table.updatedAt) }));
+
+export const operationalAutomationJobs = mysqlTable("operational_automation_jobs", {
+  jobKey: varchar("jobKey", { length: 80 }).primaryKey(),
+  scheduleCronTaskUid: varchar("scheduleCronTaskUid", { length: 65 }).notNull().unique(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const userVehicles = mysqlTable("user_vehicles", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
