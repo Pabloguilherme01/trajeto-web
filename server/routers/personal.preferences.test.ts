@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const persisted = { current: { mappedBrand: "all", hoursStatus: "all", sortBy: "distance", anpNeighborhood: "all", anpBrand: "all" } };
+const persisted = { current: { mappedBrand: "all", hoursStatus: "all", sortBy: "distance", anpNeighborhood: "all", anpBrand: "all", resultsPerView: 10 as 5 | 10 | 20, economicMode: false } };
 const vehicles = { current: [] as Array<{ id: number; nickname: string; fuelType: string }> };
 
 vi.mock("../db", () => ({
@@ -37,13 +37,13 @@ import { personalRouter } from "./personal";
 
 describe("preferências de busca autenticadas", () => {
   beforeEach(() => {
-    persisted.current = { mappedBrand: "all", hoursStatus: "all", sortBy: "distance", anpNeighborhood: "all", anpBrand: "all" };
+    persisted.current = { mappedBrand: "all", hoursStatus: "all", sortBy: "distance", anpNeighborhood: "all", anpBrand: "all", resultsPerView: 10, economicMode: false };
     vehicles.current = [];
   });
 
   it("salva filtros do usuário e os devolve na próxima abertura da consulta", async () => {
     const caller = personalRouter.createCaller({ user: { id: 42 } } as never);
-    const chosen = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "CAMPING CLUBE", anpBrand: "BANDEIRA BRANCA" };
+    const chosen = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "CAMPING CLUBE", anpBrand: "BANDEIRA BRANCA", resultsPerView: 5 as const, economicMode: true };
 
     await caller.saveStationSearchPreferences(chosen);
 

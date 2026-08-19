@@ -116,8 +116,17 @@ export const stationSearchPreferences = mysqlTable("station_search_preferences",
   sortBy: varchar("sortBy", { length: 20 }).default("distance").notNull(),
   anpNeighborhood: varchar("anpNeighborhood", { length: 160 }).default("all").notNull(),
   anpBrand: varchar("anpBrand", { length: 120 }).default("all").notNull(),
+  resultsPerView: int("resultsPerView").default(10).notNull(),
+  economicMode: boolean("economicMode").default(false).notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, table => ({ userIdx: index("station_search_preferences_user_idx").on(table.userId) }));
+
+export const paginationAlertThresholds = mysqlTable("pagination_alert_thresholds", {
+  id: int("id").autoincrement().primaryKey(),
+  region: varchar("region", { length: 120 }).notNull().unique(),
+  threshold: int("threshold").default(3).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => ({ regionIdx: index("pagination_alert_thresholds_region_idx").on(table.region) }));
 
 export const userVehicles = mysqlTable("user_vehicles", {
   id: int("id").autoincrement().primaryKey(),

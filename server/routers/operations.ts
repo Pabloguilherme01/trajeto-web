@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createRedemption, getOperationalOverview, recordAnpSyncRun, replaceAnpPriceSnapshots, replaceAuthorizedStations } from "../db";
+import { createRedemption, getOperationalOverview, recordAnpSyncRun, replaceAnpPriceSnapshots, replaceAuthorizedStations, upsertPaginationAlertThreshold } from "../db";
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { DEFAULT_ANP_SOURCE_URL, downloadAndParseAnp } from "../lib/anpImport";
 import { DEFAULT_ANP_AUTHORIZED_STATIONS_URL, downloadAuthorizedStations } from "../lib/anpAuthorizedStations";
@@ -12,6 +12,7 @@ export const operationsRouter = router({
     stationAddress: z.string().min(1).max(500),
   })).mutation(async ({ ctx, input }) => createRedemption({ ...input, userId: ctx.user.id })),
   overview: adminProcedure.query(async () => getOperationalOverview()),
+  savePaginationAlertThreshold: adminProcedure.input(z.object({ region: z.string().trim().min(2).max(120), threshold: z.number().int().min(1).max(100) })).mutation(({ input }) => upsertPaginationAlertThreshold(input)),
   syncAnp: adminProcedure.input(z.object({ sourceUrl: z.string().url().default(DEFAULT_ANP_SOURCE_URL) })).mutation(async ({ input }) => {
     try {
       const rows = await downloadAndParseAnp(input.sourceUrl);

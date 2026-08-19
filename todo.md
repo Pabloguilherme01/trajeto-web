@@ -220,3 +220,7 @@
 - [x] Permitir selecionar quantidade de resultados por página, incluindo um modo econômico para redes lentas.
 - [x] Criar página de ajuda acessível sobre fontes de dados e estados de carregamento e conectá-la à navegação pública.
 - [x] Cobrir alertas, limites de resultados e a página de ajuda com testes, validação desktop/mobile e checkpoint.
+- [x] Permitir configurar o limite de alerta de tokens atrasados por região no painel operacional.
+- [x] Salvar e reaplicar por usuário a quantidade de resultados e o modo econômico da consulta.
+- [x] Exibir um resumo semanal agregado da estabilidade do Google Maps no painel administrativo.
+- [x] Cobrir configurações, persistência, estabilidade, desktop/mobile e checkpoint com testes e validações.

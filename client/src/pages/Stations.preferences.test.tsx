@@ -3,7 +3,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-const saved = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "CAMPING CLUBE", anpBrand: "BANDEIRA BRANCA" };
+const saved = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "CAMPING CLUBE", anpBrand: "BANDEIRA BRANCA", resultsPerView: 5 as const, economicMode: true };
 const saveMutation = vi.fn();
 let isFetchingNextPage = false;
 
@@ -59,10 +59,11 @@ describe("Stations com preferências autenticadas", () => {
       expect((screen.getByLabelText("Ordenar por") as HTMLSelectElement).value).toBe("hours");
       expect((screen.getByLabelText("Bairro ANP") as HTMLSelectElement).value).toBe("CAMPING CLUBE");
       expect((screen.getByLabelText("Bandeira ANP") as HTMLSelectElement).value).toBe("BANDEIRA BRANCA");
+      expect((screen.getByLabelText("Resultados por vez") as HTMLSelectElement).value).toBe("5");
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Salvar estes filtros" }));
-    expect(saveMutation).toHaveBeenCalledWith(saved);
+    expect(saveMutation).toHaveBeenCalledWith(saved, expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }));
   });
 
   it("mostra skeletons e mensagem acessível enquanto recebe o próximo lote", () => {

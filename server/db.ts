@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -8,6 +8,7 @@ import { aggregateDailyTimestamps, buildWeeklyTrend } from "./lib/weeklyTrends";
 import type { AuthorizedStationImport } from "./lib/anpAuthorizedStations";
 import { normalizeStationSearchPreferences, stationSearchPreferenceDefaults, type StationSearchPreferenceInput } from "./lib/stationSearchPreferences";
 import { classifyProviderHealth } from "./lib/providerHealth";
+import { buildGoogleMapsWeeklyStability } from "./lib/googleMapsStability";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -289,6 +290,8 @@ export async function getStationSearchPreferences(userId: number) {
     sortBy: preference.sortBy as "distance" | "brand" | "hours",
     anpNeighborhood: preference.anpNeighborhood,
     anpBrand: preference.anpBrand,
+    resultsPerView: preference.resultsPerView as 5 | 10 | 20,
+    economicMode: preference.economicMode,
   });
 }
 
@@ -298,6 +301,22 @@ export async function upsertStationSearchPreferences(userId: number, input: Stat
   const values = normalizeStationSearchPreferences(input);
   await db.insert(stationSearchPreferences).values({ userId, ...values }).onDuplicateKeyUpdate({ set: values });
   return values;
+}
+
+export async function getPaginationAlertThresholds() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(paginationAlertThresholds).orderBy(paginationAlertThresholds.region);
+}
+
+export async function upsertPaginationAlertThreshold(input: { region: string; threshold: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível.");
+  const region = input.region.trim().replace(/\s+/g, " ").slice(0, 120);
+  if (!region) throw new Error("Região obrigatória.");
+  const threshold = Math.min(100, Math.max(1, Math.round(input.threshold)));
+  await db.insert(paginationAlertThresholds).values({ region, threshold }).onDuplicateKeyUpdate({ set: { threshold } });
+  return { region, threshold };
 }
 
 export async function addFavoriteStation(userId: number, input: FavoriteStationInput) {
@@ -447,6 +466,18 @@ export async function getProviderMetricSummary(hours = 24): Promise<{ since: Dat
   return { since, hours, samples };
 }
 
+export async function getGoogleMapsWeeklyStability() {
+  const db = await getDb();
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  if (!db) return buildGoogleMapsWeeklyStability([], []);
+  const [metricRows, tokenRows] = await Promise.all([
+    db.select({ createdAt: providerMetricSamples.createdAt, success: providerMetricSamples.success, durationMs: providerMetricSamples.durationMs }).from(providerMetricSamples).where(eq(providerMetricSamples.provider, "google_maps")).orderBy(desc(providerMetricSamples.createdAt)).limit(1_000),
+    db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "google_page_token_invalid")).orderBy(desc(productEvents.createdAt)).limit(1_000),
+  ]);
+  const rows = metricRows.filter(row => row.createdAt >= since);
+  return buildGoogleMapsWeeklyStability(rows, tokenRows.filter(row => row.createdAt >= since));
+}
+
 export type TrafficNotificationInput = {
   userId: number;
   corridorId: string;
@@ -502,9 +533,9 @@ const conversionFunnelStages: Array<{ event: ProductEventName; label: string }> 
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), invalidPageTokensByRegion: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), invalidPageTokensByRegion: [], paginationAlertThresholds: [], googleMapsWeeklyStability: buildGoogleMapsWeeklyStability([], []), weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, invalidPageTokensByRegion, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, invalidPageTokensByRegion, paginationAlertThresholds, googleMapsWeeklyStability, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -514,6 +545,8 @@ export async function getOperationalOverview() {
     db.select({ origin: routeSearches.origin, destination: routeSearches.destination, consultations: sql<number>`count(*)` }).from(routeSearches).groupBy(routeSearches.origin, routeSearches.destination).orderBy(desc(sql`count(*)`)).limit(6),
     db.select({ event: productEvents.event, total: count() }).from(productEvents).groupBy(productEvents.event),
     db.select({ region: productEvents.region, total: count() }).from(productEvents).where(eq(productEvents.event, "google_page_token_invalid")).groupBy(productEvents.region).orderBy(desc(sql`count(*)`)).limit(10),
+    getPaginationAlertThresholds(),
+    getGoogleMapsWeeklyStability(),
     db.select({ issuedAt: trafficNotifications.issuedAt }).from(trafficNotifications),
     db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "alert_preference_saved")),
     getLatestAnpSyncRun("authorized_stations"),
@@ -532,6 +565,8 @@ export async function getOperationalOverview() {
     growthEvents,
     conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: eventTotals.get(stage.event) ?? 0 })),
     invalidPageTokensByRegion: invalidPageTokensByRegion.map(item => ({ region: item.region || "Sem região", total: Number(item.total) })),
+    paginationAlertThresholds,
+    googleMapsWeeklyStability,
     weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
     anpAuthorizedSync,
     providerMetrics,

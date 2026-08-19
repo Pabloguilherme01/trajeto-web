@@ -28,6 +28,8 @@ const stationSearchPreferencesInput = z.object({
   sortBy: z.enum(["distance", "relevance", "brand", "hours"]).default("distance"),
   anpNeighborhood: z.string().trim().min(1).max(160).default("all"),
   anpBrand: z.string().trim().min(1).max(120).default("all"),
+  resultsPerView: z.union([z.literal(5), z.literal(10), z.literal(20)]).default(10),
+  economicMode: z.boolean().default(false),
 });
 
 const vehicleInput = z.object({
