@@ -15,6 +15,7 @@ const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
 const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
+const Coverage = lazy(() => import("./pages/Coverage"));
 
 function RouteLoading() {
   return <div className="grid min-h-[65vh] place-items-center bg-[#F7F2E8] text-[#163840]"><div className="border-l-4 border-[#FFC928] bg-white px-5 py-4 text-sm font-bold shadow-sm">Preparando sua rota…</div></div>;
@@ -44,6 +45,7 @@ function Router() {
         <Route path="/operacoes" component={Operations} />
         <Route path="/postos" component={Stations} />
         <Route path="/ajuda" component={Help} />
+        <Route path="/cobertura" component={Coverage} />
         <Route path="/minha-conta" component={Personal} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

@@ -9,6 +9,7 @@ import type { AuthorizedStationImport } from "./lib/anpAuthorizedStations";
 import { normalizeStationSearchPreferences, stationSearchPreferenceDefaults, type StationSearchPreferenceInput } from "./lib/stationSearchPreferences";
 import { classifyProviderHealth } from "./lib/providerHealth";
 import { buildGoogleMapsWeeklyStability } from "./lib/googleMapsStability";
+import { toVehicleEconomyHistory } from "./lib/vehicleEconomyHistory";
 import { evaluateRegionalPaginationAlerts, googlePaginationAlertType, shouldNotifyOperationalAlert } from "./lib/operationalAlerts";
 import { notifyOwner } from "./_core/notification";
 
@@ -272,6 +273,35 @@ export async function getPersonalOverview(userId: number) {
     getRouteAlertPreferences(userId),
   ]);
   return { routes, redemptions: userRedemptions, favorites, alerts };
+}
+
+export async function getVehicleEconomyHistory(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select().from(routeSearches).where(eq(routeSearches.userId, userId)).orderBy(desc(routeSearches.createdAt)).limit(120);
+  return toVehicleEconomyHistory(rows);
+}
+
+const publicCoverageCities = [
+  { id: "aguas-lindas", label: "Águas Lindas de Goiás", municipality: "AGUAS LINDAS DE GOIAS", state: "GO", corridor: "BR-070 e Entorno" },
+  { id: "ceilandia", label: "Ceilândia", municipality: "CEILANDIA", state: "DF", corridor: "BR-070 e Entorno" },
+  { id: "taguatinga", label: "Taguatinga", municipality: "TAGUATINGA", state: "DF", corridor: "Eixo de trabalho" },
+  { id: "brasilia", label: "Brasília", municipality: "BRASILIA", state: "DF", corridor: "Plano Piloto" },
+  { id: "valparaiso", label: "Valparaíso de Goiás", municipality: "VALPARAISO DE GOIAS", state: "GO", corridor: "BR-040 e eixo sul" },
+  { id: "cidade-ocidental", label: "Cidade Ocidental", municipality: "CIDADE OCIDENTAL", state: "GO", corridor: "BR-040 e moradia" },
+  { id: "luziania", label: "Luziânia", municipality: "LUZIANIA", state: "GO", corridor: "BR-040 e trabalho" },
+  { id: "formosa", label: "Formosa", municipality: "FORMOSA", state: "GO", corridor: "BR-020 e ligação norte" },
+  { id: "planaltina", label: "Planaltina", municipality: "PLANALTINA", state: "GO", corridor: "BR-020 e Entorno norte" },
+  { id: "santo-antonio", label: "Santo Antônio do Descoberto", municipality: "SANTO ANTONIO DO DESCOBERTO", state: "GO", corridor: "BR-060 e acesso oeste" },
+] as const;
+
+export async function getPublicCoverage() {
+  const db = await getDb();
+  const latestSync = await getLatestAnpSyncRun("authorized_stations");
+  if (!db) return { sourceUpdatedAt: latestSync?.attemptedAt ?? null, cities: publicCoverageCities.map(city => ({ ...city, authorizedStations: 0, sourceUpdatedAt: null })) };
+  const rows = await db.select({ municipality: authorizedFuelStations.municipality, state: authorizedFuelStations.state, authorizedStations: count(), sourceUpdatedAt: sql<Date | null>`max(${authorizedFuelStations.sourceUpdatedAt})` }).from(authorizedFuelStations).groupBy(authorizedFuelStations.municipality, authorizedFuelStations.state);
+  const byPlace = new Map(rows.map(row => [`${row.municipality}:${row.state}`, { authorizedStations: Number(row.authorizedStations), sourceUpdatedAt: row.sourceUpdatedAt }]));
+  return { sourceUpdatedAt: latestSync?.attemptedAt ?? null, cities: publicCoverageCities.map(city => ({ ...city, ...(byPlace.get(`${city.municipality}:${city.state}`) ?? { authorizedStations: 0, sourceUpdatedAt: null }) })) };
 }
 
 export async function getFavoritePlaceIds(userId: number, placeIds: string[]) {

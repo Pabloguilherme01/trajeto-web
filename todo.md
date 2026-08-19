@@ -235,3 +235,7 @@
 - [x] Adicionar central operacional de alertas persistentes e notificação controlada ao proprietário.
 - [x] Preparar, publicar e ativar verificação automática periódica de criticidade.
 - [x] Cobrir a evolução com testes, validação responsiva e checkpoint publicado.
+- [x] Criar uma tela pública interativa de cobertura por cidade e corredor com dados datados e fonte explícita.
+- [x] Permitir que usuários autenticados assinem alertas de trânsito das rotas favoritas com consentimento claro.
+- [x] Exibir a evolução histórica da economia estimada agrupada por veículo na área pessoal.
+- [x] Cobrir cobertura, assinaturas, gráfico e responsividade com testes, validação visual e checkpoint.

@@ -83,9 +83,9 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
   return <section className="mt-8 overflow-hidden rounded-3xl border border-[#3DE3FF]/25 bg-[#0F1B20] p-6 text-white sm:p-7">
     <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Alertas de corredor</p>
-        <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Escolha quando acompanhar.</h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#A8BBC3]">Guarde um corredor e horário. A Trajeto registra seu consentimento, filtra incidentes encerrados ou antigos e atualiza ocorrências acionáveis a cada cinco minutos enquanto esta área permanece aberta.</p>
+        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Assinaturas de trânsito</p>
+        <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em]">Assine uma rota favorita.</h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#A8BBC3]">Escolha um corredor, a janela de uso e o atraso mínimo. Ao assinar, você autoriza o registro desta preferência; a Trajeto filtra incidentes encerrados ou antigos e atualiza ocorrências acionáveis a cada cinco minutos enquanto esta área permanece aberta.</p>
       </div>
       <BellRing className="size-7 text-[#C7FF3C]" />
     </div>
@@ -107,20 +107,20 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
         </select>
       </label>
       <Button onClick={() => selected && save.mutate({ corridorId: selected.id, corridorLabel: selected.label, timeSlot, minimumDelayMinutes, active: true, consent: true })} disabled={!selected || save.isPending} className="mt-5 h-11 rounded-xl bg-[#C7FF3C] px-5 font-bold text-[#0B1014] hover:bg-white">
-        {save.isPending ? <Loader2 className="size-4 animate-spin" /> : "Salvar alerta"}
+        {save.isPending ? <Loader2 className="size-4 animate-spin" /> : "Assinar rota"}
       </Button>
     </div>
 
     {alerts.length ? <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <div><p className="text-xs text-[#A8BBC3]">Atualização automática a cada 5 minutos enquanto a área estiver aberta.</p>{lastUpdated && <p className="mt-1 text-[0.68rem] text-[#6D858F]">Última atualização: {lastUpdated}.</p>}</div>
+        <div><p className="text-xs text-[#A8BBC3]">Assinaturas ativas são atualizadas a cada 5 minutos enquanto esta área estiver aberta.</p>{lastUpdated && <p className="mt-1 text-[0.68rem] text-[#6D858F]">Última atualização: {lastUpdated}.</p>}</div>
         <Button onClick={() => liveAlerts.refetch()} disabled={liveAlerts.isFetching} className="h-9 rounded-lg border border-[#3DE3FF]/50 bg-transparent px-3 text-xs font-bold text-[#3DE3FF] hover:bg-[#3DE3FF] hover:text-[#0B1014]">
           {liveAlerts.isFetching ? <Loader2 className="size-3.5 animate-spin" /> : "Atualizar agora"}
         </Button>
       </div>
 
       <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-3"><Bell className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" /><div><p className="text-sm font-bold text-white">Notificações durante o uso</p><p className="mt-1 text-xs leading-relaxed text-[#A8BBC3]">Quando houver um incidente recente e acionável em uma janela ativa, o alerta aparece aqui e pode ser exibido pelo navegador. Nada é enviado com o site fechado.</p></div></div>
+        <div className="flex gap-3"><Bell className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" /><div><p className="text-sm font-bold text-white">Receber neste navegador</p><p className="mt-1 text-xs leading-relaxed text-[#A8BBC3]">Quando houver um incidente recente e acionável em uma janela ativa, a assinatura aparece aqui e pode ser exibida pelo navegador. Nada é enviado com o site fechado e você pode remover a assinatura a qualquer momento.</p></div></div>
         {notificationNotice ? <span className={`max-w-48 shrink-0 text-right text-xs leading-relaxed ${notificationNotice.tone === "active" ? "font-bold text-[#C7FF3C]" : notificationNotice.tone === "warning" ? "text-[#FFAA9C]" : "text-[#A8BBC3]"}`}>{notificationNotice.message}</span> : <Button onClick={enableBrowserAlerts} className="h-9 shrink-0 rounded-lg bg-[#C7FF3C] px-3 text-xs font-bold text-[#0B1014] hover:bg-white">Ativar neste navegador</Button>}
       </div>
 
@@ -136,6 +136,6 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         {alerts.map(alert => <div key={alert.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4"><Clock3 className="size-4 text-[#3DE3FF]" /><div className="min-w-0 flex-1"><p className="font-bold text-white">{alert.corridorLabel}</p><p className="mt-1 text-xs text-[#A8BBC3]">{slots.find(slot => slot.value === alert.timeSlot)?.label ?? "Qualquer horário"} · {alert.minimumDelayMinutes ? `${alert.minimumDelayMinutes} min+` : "qualquer atraso"}</p></div><button onClick={() => remove.mutate({ corridorId: alert.corridorId })} disabled={remove.isPending} className="grid size-9 place-items-center rounded-lg border border-white/10 text-[#FFAA9C] transition hover:bg-[#FF7D6A]/15" aria-label={`Remover alerta de ${alert.corridorLabel}`}><Trash2 className="size-4" /></button></div>)}
       </div>
-    </> : <p className="mt-6 border-t border-dashed border-white/15 pt-5 text-sm text-[#A8BBC3]">Nenhum corredor salvo para alertas ainda.</p>}
+    </> : <p className="mt-6 border-t border-dashed border-white/15 pt-5 text-sm text-[#A8BBC3]">Nenhuma rota favorita assinada ainda. Escolha um corredor, horário e atraso mínimo para começar.</p>}
   </section>;
 }
