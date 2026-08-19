@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 const Planner = lazy(() => import("./pages/Planner"));
 const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
+const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
 
 function RouteLoading() {
@@ -42,6 +43,7 @@ function Router() {
         <Route path="/planejar" component={Planner} />
         <Route path="/operacoes" component={Operations} />
         <Route path="/postos" component={Stations} />
+        <Route path="/ajuda" component={Help} />
         <Route path="/minha-conta" component={Personal} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

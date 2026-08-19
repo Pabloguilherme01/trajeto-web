@@ -216,3 +216,7 @@
 - [x] Registrar métricas agregadas de tokens inválidos por região e cobrir os novos fluxos com testes.
 - [x] Simplificar o status de carregamento para leitores de tela, teclado e navegação móvel, sem mensagens técnicas ao público.
 - [x] Adicionar recuperação automática única e limitada antes de apresentar a ação manual de nova tentativa.
+- [x] Exibir alerta operacional quando uma região ultrapassar o limite de tokens atrasados do Google Maps.
+- [x] Permitir selecionar quantidade de resultados por página, incluindo um modo econômico para redes lentas.
+- [x] Criar página de ajuda acessível sobre fontes de dados e estados de carregamento e conectá-la à navegação pública.
+- [x] Cobrir alertas, limites de resultados e a página de ajuda com testes, validação desktop/mobile e checkpoint.
