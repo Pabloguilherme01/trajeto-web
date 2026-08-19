@@ -8,6 +8,7 @@ describe("product events", () => {
     expect(productEventNames).toContain("social_whatsapp_click");
     expect(productEventNames).toContain("station_sheet_opened");
     expect(productEventNames).toContain("station_navigation_confirmed");
+    expect(productEventNames).toContain("google_page_token_invalid");
     expect(normalizeRegion("  Brasília,   DF  ")).toBe("Brasília, DF");
     expect(normalizeRegion("   ")).toBeNull();
   });

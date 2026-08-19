@@ -72,7 +72,7 @@ describe("Stations com preferências autenticadas", () => {
 
     const loadingSection = screen.getByLabelText("Carregando próximo lote de paradas");
     expect(loadingSection).toBeTruthy();
-    expect(screen.getByText("Carregando o próximo lote de postos…")).toBeTruthy();
+    expect(screen.getByText("Preparando o próximo lote de postos…")).toBeTruthy();
     expect(loadingSection.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(21);
     unmount();
     isFetchingNextPage = false;

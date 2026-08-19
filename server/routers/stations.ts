@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { makeRequest, type DistanceMatrixResult, type PlaceDetailsResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
-import { getAuthorizedStationsForQuery, rememberGooglePlaceIds } from "../db";
+import { createProductEvent, getAuthorizedStationsForQuery, rememberGooglePlaceIds } from "../db";
 import { distanceMatrixBatches, mergeStationDistances } from "../lib/stationDistance";
 import { publicStationDetails, publicStationInfo, type PublicStation } from "../lib/stationDirectory";
 import { cacheStationSearch, getCachedStationSearch } from "../lib/stationSearchCache";
 import { resolveStationIdentity, type StationIdentityMatch } from "../lib/stationIdentityResolver";
-import { requestGoogleNextPage } from "../lib/googlePlacesPagination";
+import { isGooglePageTokenUnavailable, requestGoogleNextPage } from "../lib/googlePlacesPagination";
 import { dedupePlaceDetailsRequest } from "../lib/placeDetailsRequest";
+import { stationPaginationMetricRegion } from "../lib/stationPaginationMetrics";
 
 export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional() });
 const authorizedInput = z.object({ query: z.string().trim().min(3).max(240), neighborhood: z.string().trim().min(1).max(160).optional(), brand: z.string().trim().min(1).max(120).optional() });
@@ -26,15 +27,21 @@ export const stationsRouter = router({
       const cached = getCachedStationSearch<StationSearchPage>(input.query);
       if (cached) return cached;
     }
+    let sawUnavailableToken = false;
     const search = input.cursor
-      ? await requestGoogleNextPage(() => makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { pagetoken: input.cursor }))
+      ? await requestGoogleNextPage(async () => {
+        const page = await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { pagetoken: input.cursor! });
+        sawUnavailableToken ||= isGooglePageTokenUnavailable(page.status);
+        return page;
+      })
       : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
+    if (sawUnavailableToken) void createProductEvent({ event: "google_page_token_invalid", region: stationPaginationMetricRegion(input.query) });
     if (search.status === "INVALID_REQUEST" && input.cursor) {
       return {
         query: input.query,
         queriedAt: Date.now(),
         stations: [],
-        nextCursor: null,
+        nextCursor: input.cursor,
         paginationWarning: "O Google Maps ainda não liberou este lote. Os postos já carregados permanecem disponíveis; tente carregar novamente em alguns instantes.",
       } satisfies StationSearchPage;
     }

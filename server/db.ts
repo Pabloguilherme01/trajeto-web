@@ -502,9 +502,9 @@ const conversionFunnelStages: Array<{ event: ProductEventName; label: string }> 
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), invalidPageTokensByRegion: [], weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, invalidPageTokensByRegion, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -513,6 +513,7 @@ export async function getOperationalOverview() {
     db.select().from(redemptions).orderBy(desc(redemptions.requestedAt)).limit(8),
     db.select({ origin: routeSearches.origin, destination: routeSearches.destination, consultations: sql<number>`count(*)` }).from(routeSearches).groupBy(routeSearches.origin, routeSearches.destination).orderBy(desc(sql`count(*)`)).limit(6),
     db.select({ event: productEvents.event, total: count() }).from(productEvents).groupBy(productEvents.event),
+    db.select({ region: productEvents.region, total: count() }).from(productEvents).where(eq(productEvents.event, "google_page_token_invalid")).groupBy(productEvents.region).orderBy(desc(sql`count(*)`)).limit(10),
     db.select({ issuedAt: trafficNotifications.issuedAt }).from(trafficNotifications),
     db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "alert_preference_saved")),
     getLatestAnpSyncRun("authorized_stations"),
@@ -530,6 +531,7 @@ export async function getOperationalOverview() {
     topRoutes,
     growthEvents,
     conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: eventTotals.get(stage.event) ?? 0 })),
+    invalidPageTokensByRegion: invalidPageTokensByRegion.map(item => ({ region: item.region || "Sem região", total: Number(item.total) })),
     weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
     anpAuthorizedSync,
     providerMetrics,

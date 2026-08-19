@@ -211,3 +211,8 @@
 - [x] Corrigir a paginação contínua do Google Maps para tratar INVALID_REQUEST sem quebrar resultados parciais.
 - [x] Adicionar testes de regressão para cursor inválido, atraso insuficiente e fallback manual.
 - [x] Validar a rota de Águas Lindas, tipagem, suíte e build antes do checkpoint da correção.
+- [x] Adicionar botão de tentar novamente com feedback visual quando o próximo lote falhar.
+- [x] Exibir indicador animado enquanto o token do próximo lote aguarda liberação.
+- [x] Registrar métricas agregadas de tokens inválidos por região e cobrir os novos fluxos com testes.
+- [x] Simplificar o status de carregamento para leitores de tela, teclado e navegação móvel, sem mensagens técnicas ao público.
+- [x] Adicionar recuperação automática única e limitada antes de apresentar a ação manual de nova tentativa.
