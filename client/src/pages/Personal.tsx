@@ -2,6 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { RouteAlertPreferences } from "@/components/RouteAlertPreferences";
 import { VehicleGarage } from "@/components/VehicleGarage";
 import { VehicleEconomyHistory } from "@/components/VehicleEconomyHistory";
+import { WeeklyRouteAlertSummary } from "@/components/WeeklyRouteAlertSummary";
 import { Button } from "@/components/ui/button";
 import { personalAccessCopy } from "@/lib/dashboardAccessCopy";
 import { trpc } from "@/lib/trpc";
@@ -37,6 +38,8 @@ export default function Personal() {
         </section>
 
         <RouteAlertPreferences alerts={data.alerts} />
+
+        <WeeklyRouteAlertSummary />
 
         <VehicleGarage />
 

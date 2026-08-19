@@ -635,6 +635,25 @@ export async function getTrafficNotifications(userId: number) {
   return db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(12);
 }
 
+export async function getWeeklyRouteAlertSummary(userId: number) {
+  const db = await getDb();
+  if (!db) return { since: new Date(), routes: [] };
+  const since = new Date(Date.now() - 6 * 86_400_000);
+  const [preferences, notifications] = await Promise.all([
+    getRouteAlertPreferences(userId),
+    db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(120),
+  ]);
+  const notificationsInWeek = notifications.filter(notification => notification.issuedAt >= since);
+  const routeIds = new Set([...preferences.map(item => item.corridorId), ...notificationsInWeek.map(item => item.corridorId)]);
+  const routes = Array.from(routeIds).map(corridorId => {
+    const preference = preferences.find(item => item.corridorId === corridorId);
+    const routeNotifications = notificationsInWeek.filter(item => item.corridorId === corridorId);
+    const latest = routeNotifications[0];
+    return { corridorId, corridorLabel: preference?.corridorLabel ?? latest?.corridorLabel ?? corridorId, active: preference?.active ?? false, alerts: routeNotifications.length, unread: routeNotifications.filter(item => !item.readAt).length, lastAlertAt: latest?.issuedAt ?? null };
+  }).sort((a, b) => b.alerts - a.alerts || Number(b.active) - Number(a.active) || a.corridorLabel.localeCompare(b.corridorLabel, "pt-BR"));
+  return { since, routes };
+}
+
 export async function markTrafficNotificationsRead(userId: number, ids: number[]) {
   const db = await getDb();
   if (!db || ids.length === 0) return { updated: 0 };

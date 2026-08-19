@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, createUserVehicle, deleteUserVehicle, getFavoritePlaceIds, getPersonalOverview, getRouteAlertPreferences, getStationSearchPreferences, getTrafficNotifications, getUserVehicles, getVehicleEconomyHistory, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, updateUserVehicle, upsertRouteAlertPreference, upsertStationSearchPreferences } from "../db";
+import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, createUserVehicle, deleteUserVehicle, getFavoritePlaceIds, getPersonalOverview, getRouteAlertPreferences, getStationSearchPreferences, getTrafficNotifications, getUserVehicles, getVehicleEconomyHistory, getWeeklyRouteAlertSummary, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, updateUserVehicle, upsertRouteAlertPreference, upsertStationSearchPreferences } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { calculateFuelEconomy } from "../lib/fuelEconomy";
 import { getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
@@ -42,6 +42,7 @@ const fuelEconomyInput = z.object({ distanceKm: z.number().finite().gte(0).lte(2
 export const personalRouter = router({
   overview: protectedProcedure.query(({ ctx }) => getPersonalOverview(ctx.user.id)),
   vehicleEconomyHistory: protectedProcedure.query(({ ctx }) => getVehicleEconomyHistory(ctx.user.id)),
+  weeklyRouteAlertSummary: protectedProcedure.query(({ ctx }) => getWeeklyRouteAlertSummary(ctx.user.id)),
   liveAlerts: protectedProcedure.query(async ({ ctx }) => {
     const preferences = await getRouteAlertPreferences(ctx.user.id);
     const active = preferences.filter(preference => preference.active).slice(0, 4);

@@ -239,3 +239,7 @@
 - [x] Permitir que usuários autenticados assinem alertas de trânsito das rotas favoritas com consentimento claro.
 - [x] Exibir a evolução histórica da economia estimada agrupada por veículo na área pessoal.
 - [x] Cobrir cobertura, assinaturas, gráfico e responsividade com testes, validação visual e checkpoint.
+- [x] Exibir um mapa interativo de cobertura com cidades e corredores selecionáveis, sem alegar traçado de rota real.
+- [x] Exportar o histórico econômico por veículo em CSV com cenários, economia potencial e período.
+- [x] Resumir semanalmente as rotas mais alertadas a partir das preferências e notificações registradas.
+- [x] Cobrir mapa, exportação, resumo semanal e responsividade com testes, validação visual e checkpoint.
