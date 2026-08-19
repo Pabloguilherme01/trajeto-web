@@ -247,3 +247,7 @@
 - [x] Exibir a intensidade semanal dos alertas por faixa horária com base nas notificações registradas.
 - [x] Compartilhar a cobertura da cidade selecionada por link direto e compartilhamento nativo quando disponível.
 - [x] Cobrir filtros, intensidade, compartilhamento, responsividade e checkpoint com testes e validações.
+- [x] Comparar a economia potencial de dois veículos no mesmo período de histórico.
+- [x] Filtrar a intensidade semanal de alertas por corredor salvo pelo usuário.
+- [x] Criar cartões visuais de cobertura com imagem, resumo datado e link de cidade compartilhável.
+- [x] Cobrir comparações, filtros, cartões, responsividade e checkpoint com testes e validações.

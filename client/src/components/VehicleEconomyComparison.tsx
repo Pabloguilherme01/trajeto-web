@@ -1,0 +1,29 @@
+import { trpc } from "@/lib/trpc";
+import { ArrowRightLeft, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+
+type Period = "all" | "month" | "year";
+
+function filterRows<T extends { createdAt: Date | string }>(rows: T[], period: Period) {
+  const now = new Date();
+  const start = period === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : period === "year" ? new Date(now.getFullYear(), 0, 1) : null;
+  return rows.filter(row => !start || new Date(row.createdAt) >= start);
+}
+
+export function VehicleEconomyComparison() {
+  const history = trpc.personal.vehicleEconomyHistory.useQuery();
+  const rows = history.data ?? [];
+  const [firstId, setFirstId] = useState<number | null>(null);
+  const [secondId, setSecondId] = useState<number | null>(null);
+  const [period, setPeriod] = useState<Period>("all");
+  const vehicles = useMemo(() => Array.from(new Map(rows.map(row => [row.vehicleId, row.vehicleNickname])).entries()).map(([id, nickname]) => ({ id, nickname })), [rows]);
+  const primaryId = firstId && vehicles.some(vehicle => vehicle.id === firstId) ? firstId : vehicles[0]?.id ?? null;
+  const secondaryOptions = vehicles.filter(vehicle => vehicle.id !== primaryId);
+  const comparisonId = secondId && secondaryOptions.some(vehicle => vehicle.id === secondId) ? secondId : secondaryOptions[0]?.id ?? null;
+  const primary = vehicles.find(vehicle => vehicle.id === primaryId) ?? null;
+  const secondary = vehicles.find(vehicle => vehicle.id === comparisonId) ?? null;
+  const stats = (id: number | null) => { const relevant = filterRows(rows.filter(row => row.vehicleId === id), period); const total = relevant.reduce((sum, row) => sum + row.estimatedSavings, 0); return { total, count: relevant.length, average: relevant.length ? total / relevant.length : 0 }; };
+  const first = stats(primaryId); const second = stats(comparisonId); const delta = first.average - second.average;
+  const label = period === "month" ? "mês atual" : period === "year" ? "ano atual" : "todo o histórico";
+  return <section className="mt-4 rounded-3xl border border-[#C7FF3C]/25 bg-[#152014] p-5 text-white sm:p-6"><div className="flex gap-3"><ArrowRightLeft className="mt-0.5 size-5 shrink-0 text-[#C7FF3C]" /><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#C7FF3C]">Comparar veículos</p><h3 className="mt-2 font-display text-2xl font-semibold tracking-[-0.05em]">Mesmo período, dois históricos.</h3><p className="mt-2 text-sm leading-relaxed text-[#B9CDBB]">A comparação usa a média da economia potencial por rota registrada. Os veículos podem ter quantidades de rotas diferentes; veja a base de cada cálculo antes de concluir.</p></div></div>{history.isLoading ? <div className="mt-5 flex items-center text-sm text-[#B9CDBB]"><Loader2 className="mr-2 size-4 animate-spin" />Carregando veículos…</div> : vehicles.length >= 2 ? <><div className="mt-5 grid gap-3 sm:grid-cols-3"><label className="text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[#B9CDBB]">Veículo A<select value={primaryId ?? ""} onChange={event => setFirstId(Number(event.target.value))} className="mt-1 block min-h-10 w-full rounded-lg border border-white/15 bg-[#0B1014] px-3 text-sm normal-case text-white outline-none focus:border-[#C7FF3C]">{vehicles.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.nickname}</option>)}</select></label><label className="text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[#B9CDBB]">Veículo B<select value={comparisonId ?? ""} onChange={event => setSecondId(Number(event.target.value))} className="mt-1 block min-h-10 w-full rounded-lg border border-white/15 bg-[#0B1014] px-3 text-sm normal-case text-white outline-none focus:border-[#C7FF3C]">{secondaryOptions.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.nickname}</option>)}</select></label><label className="text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[#B9CDBB]">Período<select value={period} onChange={event => setPeriod(event.target.value as Period)} className="mt-1 block min-h-10 w-full rounded-lg border border-white/15 bg-[#0B1014] px-3 text-sm normal-case text-white outline-none focus:border-[#C7FF3C]"><option value="all">Todo o histórico</option><option value="month">Mês atual</option><option value="year">Ano atual</option></select></label></div><div className="mt-5 grid gap-3 sm:grid-cols-2"><article className="rounded-2xl border border-white/10 bg-black/15 p-4"><p className="text-xs font-bold text-white">{primary?.nickname}</p><p className="mt-3 font-display text-4xl font-semibold tracking-[-0.07em] text-[#C7FF3C]">{first.average.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p><p className="mt-1 text-xs text-[#B9CDBB]">média potencial por rota · {first.count} rota(s) em {label}</p></article><article className="rounded-2xl border border-white/10 bg-black/15 p-4"><p className="text-xs font-bold text-white">{secondary?.nickname}</p><p className="mt-3 font-display text-4xl font-semibold tracking-[-0.07em] text-[#3DE3FF]">{second.average.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p><p className="mt-1 text-xs text-[#B9CDBB]">média potencial por rota · {second.count} rota(s) em {label}</p></article></div><p className="mt-4 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.06] p-3 text-sm text-[#E5F5B6]">{delta === 0 ? "Os dois veículos têm a mesma média de economia potencial no período." : `${delta > 0 ? primary?.nickname : secondary?.nickname} tem média potencial ${Math.abs(delta).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} maior por rota neste período.`}</p></> : <p className="mt-5 text-sm text-[#B9CDBB]">Cadastre e use pelo menos dois veículos em comparações de combustível para visualizar este comparativo.</p>}</section>;
+}

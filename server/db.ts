@@ -636,7 +636,7 @@ export async function getTrafficNotifications(userId: number) {
   return db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(12);
 }
 
-export async function getWeeklyRouteAlertSummary(userId: number) {
+export async function getWeeklyRouteAlertSummary(userId: number, corridorId?: string) {
   const db = await getDb();
   if (!db) return { since: new Date(), routes: [], hourlyIntensity: buildAlertIntensityByHour([]) };
   const since = new Date(Date.now() - 6 * 86_400_000);
@@ -644,10 +644,11 @@ export async function getWeeklyRouteAlertSummary(userId: number) {
     getRouteAlertPreferences(userId),
     db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(120),
   ]);
-  const notificationsInWeek = notifications.filter(notification => notification.issuedAt >= since);
-  const routeIds = new Set([...preferences.map(item => item.corridorId), ...notificationsInWeek.map(item => item.corridorId)]);
+  const notificationsInWeek = notifications.filter(notification => notification.issuedAt >= since && (!corridorId || notification.corridorId === corridorId));
+  const filteredPreferences = preferences.filter(item => !corridorId || item.corridorId === corridorId);
+  const routeIds = new Set([...filteredPreferences.map(item => item.corridorId), ...notificationsInWeek.map(item => item.corridorId)]);
   const routes = Array.from(routeIds).map(corridorId => {
-    const preference = preferences.find(item => item.corridorId === corridorId);
+    const preference = filteredPreferences.find(item => item.corridorId === corridorId);
     const routeNotifications = notificationsInWeek.filter(item => item.corridorId === corridorId);
     const latest = routeNotifications[0];
     return { corridorId, corridorLabel: preference?.corridorLabel ?? latest?.corridorLabel ?? corridorId, active: preference?.active ?? false, alerts: routeNotifications.length, unread: routeNotifications.filter(item => !item.readAt).length, lastAlertAt: latest?.issuedAt ?? null };

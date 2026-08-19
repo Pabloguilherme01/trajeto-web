@@ -42,7 +42,7 @@ const fuelEconomyInput = z.object({ distanceKm: z.number().finite().gte(0).lte(2
 export const personalRouter = router({
   overview: protectedProcedure.query(({ ctx }) => getPersonalOverview(ctx.user.id)),
   vehicleEconomyHistory: protectedProcedure.query(({ ctx }) => getVehicleEconomyHistory(ctx.user.id)),
-  weeklyRouteAlertSummary: protectedProcedure.query(({ ctx }) => getWeeklyRouteAlertSummary(ctx.user.id)),
+  weeklyRouteAlertSummary: protectedProcedure.input(z.object({ corridorId: z.string().trim().min(2).max(80).optional() }).optional()).query(({ ctx, input }) => getWeeklyRouteAlertSummary(ctx.user.id, input?.corridorId)),
   liveAlerts: protectedProcedure.query(async ({ ctx }) => {
     const preferences = await getRouteAlertPreferences(ctx.user.id);
     const active = preferences.filter(preference => preference.active).slice(0, 4);
