@@ -233,5 +233,5 @@
 - [x] Filtrar e exportar o histórico de limites por período e região, sem dados pessoais.
 - [x] Persistir, reconhecer e resolver alertas críticos regionais com avaliação de janela móvel e deduplicação.
 - [x] Adicionar central operacional de alertas persistentes e notificação controlada ao proprietário.
-- [ ] Preparar, publicar e ativar verificação automática periódica de criticidade.
-- [ ] Cobrir a evolução com testes, validação responsiva e checkpoint publicado.
+- [x] Preparar, publicar e ativar verificação automática periódica de criticidade.
+- [x] Cobrir a evolução com testes, validação responsiva e checkpoint publicado.
