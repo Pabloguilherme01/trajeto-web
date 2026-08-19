@@ -656,6 +656,28 @@ export async function getWeeklyRouteAlertSummary(userId: number, corridorId?: st
   return { since, routes, hourlyIntensity: buildAlertIntensityByHour(notificationsInWeek.map(item => item.issuedAt)) };
 }
 
+export async function getMonthlyRouteAlertRanking(userId: number, month?: string) {
+  const db = await getDb();
+  const parsed = month && /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? month.split("-").map(Number) : [new Date().getFullYear(), new Date().getMonth() + 1];
+  const [year, monthNumber] = parsed;
+  const since = new Date(year, monthNumber - 1, 1);
+  const until = new Date(year, monthNumber, 1);
+  if (!db) return { month: `${year}-${String(monthNumber).padStart(2, "0")}`, since, until, routes: [] };
+  const [preferences, notifications] = await Promise.all([
+    getRouteAlertPreferences(userId),
+    db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(500),
+  ]);
+  const notificationsInMonth = notifications.filter(item => item.issuedAt >= since && item.issuedAt < until);
+  const corridorIds = Array.from(new Set(notificationsInMonth.map(item => item.corridorId)));
+  const routes = corridorIds.map(corridorId => {
+    const routeNotifications = notificationsInMonth.filter(item => item.corridorId === corridorId);
+    const preference = preferences.find(item => item.corridorId === corridorId);
+    const latest = routeNotifications[0];
+    return { corridorId, corridorLabel: preference?.corridorLabel ?? latest?.corridorLabel ?? corridorId, alerts: routeNotifications.length, unread: routeNotifications.filter(item => !item.readAt).length, latestAt: latest?.issuedAt ?? null };
+  }).sort((a, b) => b.alerts - a.alerts || a.corridorLabel.localeCompare(b.corridorLabel, "pt-BR"));
+  return { month: `${year}-${String(monthNumber).padStart(2, "0")}`, since, until, routes };
+}
+
 export async function markTrafficNotificationsRead(userId: number, ids: number[]) {
   const db = await getDb();
   if (!db || ids.length === 0) return { updated: 0 };

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, createUserVehicle, deleteUserVehicle, getFavoritePlaceIds, getPersonalOverview, getRouteAlertPreferences, getStationSearchPreferences, getTrafficNotifications, getUserVehicles, getVehicleEconomyHistory, getWeeklyRouteAlertSummary, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, updateUserVehicle, upsertRouteAlertPreference, upsertStationSearchPreferences } from "../db";
+import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, createUserVehicle, deleteUserVehicle, getFavoritePlaceIds, getMonthlyRouteAlertRanking, getPersonalOverview, getRouteAlertPreferences, getStationSearchPreferences, getTrafficNotifications, getUserVehicles, getVehicleEconomyHistory, getWeeklyRouteAlertSummary, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, updateUserVehicle, upsertRouteAlertPreference, upsertStationSearchPreferences } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { calculateFuelEconomy } from "../lib/fuelEconomy";
 import { getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
@@ -43,6 +43,7 @@ export const personalRouter = router({
   overview: protectedProcedure.query(({ ctx }) => getPersonalOverview(ctx.user.id)),
   vehicleEconomyHistory: protectedProcedure.query(({ ctx }) => getVehicleEconomyHistory(ctx.user.id)),
   weeklyRouteAlertSummary: protectedProcedure.input(z.object({ corridorId: z.string().trim().min(2).max(80).optional() }).optional()).query(({ ctx, input }) => getWeeklyRouteAlertSummary(ctx.user.id, input?.corridorId)),
+  monthlyRouteAlertRanking: protectedProcedure.input(z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).optional()).query(({ ctx, input }) => getMonthlyRouteAlertRanking(ctx.user.id, input?.month)),
   liveAlerts: protectedProcedure.query(async ({ ctx }) => {
     const preferences = await getRouteAlertPreferences(ctx.user.id);
     const active = preferences.filter(preference => preference.active).slice(0, 4);

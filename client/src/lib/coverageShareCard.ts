@@ -9,3 +9,14 @@ export function buildCoverageShareCardSvg(input: CoverageShareCardInput) {
 
 export const coverageShareCardUrl = (input: CoverageShareCardInput) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildCoverageShareCardSvg(input))}`;
 export const coverageShareCardFilename = (city: string) => `trajeto-cobertura-${city.toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")}.svg`;
+
+export async function downloadCoverageShareCardPng(dataUrl: string, filename: string) {
+  const image = new Image();
+  image.src = dataUrl;
+  await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error("Não foi possível preparar o cartão visual.")); });
+  const canvas = document.createElement("canvas"); canvas.width = image.naturalWidth || 1200; canvas.height = image.naturalHeight || 630;
+  const context = canvas.getContext("2d"); if (!context) throw new Error("Exportação PNG indisponível neste navegador.");
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png")); if (!blob) throw new Error("Não foi possível gerar o PNG.");
+  const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename.replace(/\.svg$/, ".png"); anchor.click(); URL.revokeObjectURL(url);
+}

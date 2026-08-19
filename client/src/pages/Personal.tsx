@@ -3,6 +3,8 @@ import { RouteAlertPreferences } from "@/components/RouteAlertPreferences";
 import { VehicleGarage } from "@/components/VehicleGarage";
 import { VehicleEconomyHistory } from "@/components/VehicleEconomyHistory";
 import { VehicleEconomyComparison } from "@/components/VehicleEconomyComparison";
+import { VehicleTripCostComparison } from "@/components/VehicleTripCostComparison";
+import { MonthlyRouteAlertRanking } from "@/components/MonthlyRouteAlertRanking";
 import { WeeklyRouteAlertSummary } from "@/components/WeeklyRouteAlertSummary";
 import { Button } from "@/components/ui/button";
 import { personalAccessCopy } from "@/lib/dashboardAccessCopy";
@@ -46,6 +48,8 @@ export default function Personal() {
 
         <VehicleEconomyHistory />
         <VehicleEconomyComparison />
+        <VehicleTripCostComparison />
+        <MonthlyRouteAlertRanking />
 
         <section className="mt-8 grid gap-7 xl:grid-cols-[1.05fr_0.95fr]">
           <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 sm:p-7"><div className="flex items-start justify-between gap-5"><div><p className="eyebrow">Postos favoritos</p><h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.055em] text-white">Suas paradas rápidas.</h2></div><Heart className="size-5 text-[#FF7D6A]" /></div>{data.favorites.length ? <div className="mt-7 divide-y divide-white/10">{data.favorites.map(station => <div key={station.id} className="flex items-center gap-4 py-4"><div className="grid size-9 shrink-0 place-items-center rounded-full bg-[#C7FF3C] text-[#0B1014]"><Fuel className="size-4" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold text-white">{station.stationName}</p><p className="mt-1 truncate text-xs text-[#97AAB2]">{station.stationAddress}</p></div><div className="flex gap-2"><a href={`https://www.google.com/maps/search/?api=1&query=${station.lat},${station.lng}`} target="_blank" rel="noreferrer" className="grid size-8 place-items-center rounded-lg border border-white/12 text-[#C7FF3C] transition hover:bg-white hover:text-[#0B1014]" aria-label="Abrir no mapa"><MapPinned className="size-3.5" /></a><button onClick={() => removeFavorite.mutate({ placeId: station.placeId })} disabled={removeFavorite.isPending} className="grid size-8 place-items-center rounded-lg border border-white/12 text-[#FFAA9C] transition hover:bg-[#FF7D6A]/15" aria-label="Remover favorito"><Heart className="size-3.5 fill-current" /></button></div></div>)}</div> : <div className="mt-7 flex min-h-40 flex-col justify-center border-y border-dashed border-white/15 text-sm text-[#9FB1BA]"><Heart className="mb-3 size-5 text-[#FF7D6A]" /><p className="font-bold text-white">Nenhum posto salvo ainda.</p><p className="mt-1">Use o coração na consulta pública para criar seus atalhos.</p></div>}</article>

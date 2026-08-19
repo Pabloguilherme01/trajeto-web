@@ -251,3 +251,7 @@
 - [x] Filtrar a intensidade semanal de alertas por corredor salvo pelo usuário.
 - [x] Criar cartões visuais de cobertura com imagem, resumo datado e link de cidade compartilhável.
 - [x] Cobrir comparações, filtros, cartões, responsividade e checkpoint com testes e validações.
+- [x] Comparar custos totais estimados de viagem entre veículos no mesmo período de histórico.
+- [x] Exportar o cartão visual de cobertura selecionado em PNG no navegador.
+- [x] Exibir ranking mensal interativo de corredores por notificações de alerta registradas.
+- [x] Cobrir custos, PNG, ranking, responsividade e checkpoint com testes e validações.
