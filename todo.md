@@ -255,3 +255,7 @@
 - [x] Exportar o cartão visual de cobertura selecionado em PNG no navegador.
 - [x] Exibir ranking mensal interativo de corredores por notificações de alerta registradas.
 - [x] Cobrir custos, PNG, ranking, responsividade e checkpoint com testes e validações.
+- [x] Comparar a distância total percorrida entre dois veículos no mesmo período de histórico.
+- [x] Exportar o ranking mensal de corredores em CSV com alertas, posição e período.
+- [x] Indicar subida, queda ou entrada no ranking em relação ao mês anterior.
+- [x] Cobrir distância, CSV, variação, responsividade e checkpoint com testes e validações.

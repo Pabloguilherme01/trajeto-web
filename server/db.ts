@@ -667,14 +667,21 @@ export async function getMonthlyRouteAlertRanking(userId: number, month?: string
     getRouteAlertPreferences(userId),
     db.select().from(trafficNotifications).where(eq(trafficNotifications.userId, userId)).orderBy(desc(trafficNotifications.issuedAt)).limit(500),
   ]);
+  const previousSince = new Date(year, monthNumber - 2, 1);
   const notificationsInMonth = notifications.filter(item => item.issuedAt >= since && item.issuedAt < until);
-  const corridorIds = Array.from(new Set(notificationsInMonth.map(item => item.corridorId)));
-  const routes = corridorIds.map(corridorId => {
-    const routeNotifications = notificationsInMonth.filter(item => item.corridorId === corridorId);
+  const previousNotifications = notifications.filter(item => item.issuedAt >= previousSince && item.issuedAt < since);
+  const rankRows = (items: typeof notifications) => Array.from(new Set(items.map(item => item.corridorId))).map(corridorId => {
+    const routeNotifications = items.filter(item => item.corridorId === corridorId);
     const preference = preferences.find(item => item.corridorId === corridorId);
     const latest = routeNotifications[0];
     return { corridorId, corridorLabel: preference?.corridorLabel ?? latest?.corridorLabel ?? corridorId, alerts: routeNotifications.length, unread: routeNotifications.filter(item => !item.readAt).length, latestAt: latest?.issuedAt ?? null };
   }).sort((a, b) => b.alerts - a.alerts || a.corridorLabel.localeCompare(b.corridorLabel, "pt-BR"));
+  const previousPositions = new Map(rankRows(previousNotifications).map((route, index) => [route.corridorId, index + 1]));
+  const routes = rankRows(notificationsInMonth).map((route, index) => {
+    const position = index + 1;
+    const previousPosition = previousPositions.get(route.corridorId) ?? null;
+    return { ...route, position, previousPosition, positionChange: previousPosition == null ? null : previousPosition - position };
+  });
   return { month: `${year}-${String(monthNumber).padStart(2, "0")}`, since, until, routes };
 }
 
