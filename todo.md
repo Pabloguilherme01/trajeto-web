@@ -243,3 +243,7 @@
 - [x] Exportar o histórico econômico por veículo em CSV com cenários, economia potencial e período.
 - [x] Resumir semanalmente as rotas mais alertadas a partir das preferências e notificações registradas.
 - [x] Cobrir mapa, exportação, resumo semanal e responsividade com testes, validação visual e checkpoint.
+- [x] Filtrar a exportação de economia por veículo por período mensal, anual ou intervalo personalizado.
+- [x] Exibir a intensidade semanal dos alertas por faixa horária com base nas notificações registradas.
+- [x] Compartilhar a cobertura da cidade selecionada por link direto e compartilhamento nativo quando disponível.
+- [x] Cobrir filtros, intensidade, compartilhamento, responsividade e checkpoint com testes e validações.

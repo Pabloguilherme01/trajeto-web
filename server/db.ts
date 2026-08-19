@@ -10,6 +10,7 @@ import { normalizeStationSearchPreferences, stationSearchPreferenceDefaults, typ
 import { classifyProviderHealth } from "./lib/providerHealth";
 import { buildGoogleMapsWeeklyStability } from "./lib/googleMapsStability";
 import { toVehicleEconomyHistory } from "./lib/vehicleEconomyHistory";
+import { buildAlertIntensityByHour } from "./lib/alertIntensity";
 import { evaluateRegionalPaginationAlerts, googlePaginationAlertType, shouldNotifyOperationalAlert } from "./lib/operationalAlerts";
 import { notifyOwner } from "./_core/notification";
 
@@ -637,7 +638,7 @@ export async function getTrafficNotifications(userId: number) {
 
 export async function getWeeklyRouteAlertSummary(userId: number) {
   const db = await getDb();
-  if (!db) return { since: new Date(), routes: [] };
+  if (!db) return { since: new Date(), routes: [], hourlyIntensity: buildAlertIntensityByHour([]) };
   const since = new Date(Date.now() - 6 * 86_400_000);
   const [preferences, notifications] = await Promise.all([
     getRouteAlertPreferences(userId),
@@ -651,7 +652,7 @@ export async function getWeeklyRouteAlertSummary(userId: number) {
     const latest = routeNotifications[0];
     return { corridorId, corridorLabel: preference?.corridorLabel ?? latest?.corridorLabel ?? corridorId, active: preference?.active ?? false, alerts: routeNotifications.length, unread: routeNotifications.filter(item => !item.readAt).length, lastAlertAt: latest?.issuedAt ?? null };
   }).sort((a, b) => b.alerts - a.alerts || Number(b.active) - Number(a.active) || a.corridorLabel.localeCompare(b.corridorLabel, "pt-BR"));
-  return { since, routes };
+  return { since, routes, hourlyIntensity: buildAlertIntensityByHour(notificationsInWeek.map(item => item.issuedAt)) };
 }
 
 export async function markTrafficNotificationsRead(userId: number, ids: number[]) {
