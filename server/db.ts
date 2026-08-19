@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, paginationAlertThresholdHistory, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, socialLinks, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
@@ -309,14 +309,22 @@ export async function getPaginationAlertThresholds() {
   return db.select().from(paginationAlertThresholds).orderBy(paginationAlertThresholds.region);
 }
 
-export async function upsertPaginationAlertThreshold(input: { region: string; threshold: number }) {
+export async function getPaginationAlertThresholdHistory(limit = 24) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(paginationAlertThresholdHistory).orderBy(desc(paginationAlertThresholdHistory.changedAt)).limit(Math.min(100, Math.max(1, limit)));
+}
+
+export async function upsertPaginationAlertThreshold(input: { region: string; threshold: number; changedByUserId: number }) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível.");
   const region = input.region.trim().replace(/\s+/g, " ").slice(0, 120);
   if (!region) throw new Error("Região obrigatória.");
   const threshold = Math.min(100, Math.max(1, Math.round(input.threshold)));
+  const existing = (await db.select({ threshold: paginationAlertThresholds.threshold }).from(paginationAlertThresholds).where(eq(paginationAlertThresholds.region, region)).limit(1))[0];
   await db.insert(paginationAlertThresholds).values({ region, threshold }).onDuplicateKeyUpdate({ set: { threshold } });
-  return { region, threshold };
+  if (existing?.threshold !== threshold) await db.insert(paginationAlertThresholdHistory).values({ region, previousThreshold: existing?.threshold ?? null, threshold, changedByUserId: input.changedByUserId });
+  return { region, threshold, changed: existing?.threshold !== threshold };
 }
 
 export async function addFavoriteStation(userId: number, input: FavoriteStationInput) {
@@ -533,9 +541,9 @@ const conversionFunnelStages: Array<{ event: ProductEventName; label: string }> 
 
 export async function getOperationalOverview() {
   const db = await getDb();
-  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), invalidPageTokensByRegion: [], paginationAlertThresholds: [], googleMapsWeeklyStability: buildGoogleMapsWeeklyStability([], []), weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
+  if (!db) return { totals: { routeSearches: 0, redemptions: 0, pendingRedemptions: 0, consentEvents: 0 }, recentRoutes: [], recentRedemptions: [], topRoutes: [], growthEvents: [], conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: 0 })), invalidPageTokensByRegion: [], paginationAlertThresholds: [], paginationAlertThresholdHistory: [], googleMapsWeeklyStability: buildGoogleMapsWeeklyStability([], []), weeklyTrend: buildWeeklyTrend([]).map(day => ({ ...day, savedAlerts: 0 })), anpAuthorizedSync: null, providerMetrics: { since: new Date(), hours: 24, samples: [] as ProviderMetricSummary[] } };
 
-  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, invalidPageTokensByRegion, paginationAlertThresholds, googleMapsWeeklyStability, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
+  const [[routeCount], [redemptionCount], [pendingCount], [consentCount], recentRoutes, recentRedemptions, topRoutes, growthEvents, invalidPageTokensByRegion, paginationAlertThresholds, paginationAlertThresholdHistory, googleMapsWeeklyStability, notificationTrendRows, savedAlertTrendRows, anpAuthorizedSync, providerMetrics] = await Promise.all([
     db.select({ value: count() }).from(routeSearches),
     db.select({ value: count() }).from(redemptions),
     db.select({ value: count() }).from(redemptions).where(eq(redemptions.status, "requested")),
@@ -546,6 +554,7 @@ export async function getOperationalOverview() {
     db.select({ event: productEvents.event, total: count() }).from(productEvents).groupBy(productEvents.event),
     db.select({ region: productEvents.region, total: count() }).from(productEvents).where(eq(productEvents.event, "google_page_token_invalid")).groupBy(productEvents.region).orderBy(desc(sql`count(*)`)).limit(10),
     getPaginationAlertThresholds(),
+    getPaginationAlertThresholdHistory(),
     getGoogleMapsWeeklyStability(),
     db.select({ issuedAt: trafficNotifications.issuedAt }).from(trafficNotifications),
     db.select({ createdAt: productEvents.createdAt }).from(productEvents).where(eq(productEvents.event, "alert_preference_saved")),
@@ -566,6 +575,7 @@ export async function getOperationalOverview() {
     conversionFunnel: conversionFunnelStages.map(stage => ({ ...stage, total: eventTotals.get(stage.event) ?? 0 })),
     invalidPageTokensByRegion: invalidPageTokensByRegion.map(item => ({ region: item.region || "Sem região", total: Number(item.total) })),
     paginationAlertThresholds,
+    paginationAlertThresholdHistory,
     googleMapsWeeklyStability,
     weeklyTrend: buildWeeklyTrend(notificationTrend).map((day, index) => ({ ...day, savedAlerts: buildWeeklyTrend(savedAlertTrend)[index]?.total ?? 0 })),
     anpAuthorizedSync,

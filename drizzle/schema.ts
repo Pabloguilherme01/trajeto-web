@@ -128,6 +128,15 @@ export const paginationAlertThresholds = mysqlTable("pagination_alert_thresholds
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, table => ({ regionIdx: index("pagination_alert_thresholds_region_idx").on(table.region) }));
 
+export const paginationAlertThresholdHistory = mysqlTable("pagination_alert_threshold_history", {
+  id: int("id").autoincrement().primaryKey(),
+  region: varchar("region", { length: 120 }).notNull(),
+  previousThreshold: int("previousThreshold"),
+  threshold: int("threshold").notNull(),
+  changedByUserId: int("changedByUserId").notNull(),
+  changedAt: timestamp("changedAt").defaultNow().notNull(),
+}, table => ({ regionChangedIdx: index("pagination_alert_threshold_history_region_changed_idx").on(table.region, table.changedAt), changedByIdx: index("pagination_alert_threshold_history_changed_by_idx").on(table.changedByUserId, table.changedAt) }));
+
 export const userVehicles = mysqlTable("user_vehicles", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),

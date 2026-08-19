@@ -224,3 +224,7 @@
 - [x] Salvar e reaplicar por usuário a quantidade de resultados e o modo econômico da consulta.
 - [x] Exibir um resumo semanal agregado da estabilidade do Google Maps no painel administrativo.
 - [x] Cobrir configurações, persistência, estabilidade, desktop/mobile e checkpoint com testes e validações.
+- [x] Exportar o resumo semanal do Google Maps em CSV com período e métricas explícitas.
+- [x] Registrar e exibir o histórico auditável de alterações dos limites de tokens por região.
+- [x] Destacar no painel operacional um alerta visual priorizado para regiões acima do limite configurado.
+- [x] Cobrir exportação, auditoria e alertas com testes, validação desktop/mobile e checkpoint.
