@@ -3,6 +3,7 @@ import { createRedemption, getOperationalOverview, recordAnpSyncRun, replaceAnpP
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { DEFAULT_ANP_SOURCE_URL, downloadAndParseAnp } from "../lib/anpImport";
 import { DEFAULT_ANP_AUTHORIZED_STATIONS_URL, downloadAuthorizedStations } from "../lib/anpAuthorizedStations";
+import { getMetricsSummary } from "../lib/productMetrics";
 
 export const operationsRouter = router({
   requestRedemption: protectedProcedure.input(z.object({
@@ -12,6 +13,10 @@ export const operationsRouter = router({
     stationAddress: z.string().min(1).max(500),
   })).mutation(async ({ ctx, input }) => createRedemption({ ...input, userId: ctx.user.id })),
   overview: adminProcedure.query(async () => getOperationalOverview()),
+  metrics: adminProcedure.input(z.object({ periodDays: z.number().int().positive().default(7) })).query(async ({ input }) => {
+    const periodDays = [7, 14, 30].includes(input.periodDays) ? input.periodDays : 7;
+    return getMetricsSummary(periodDays);
+  }),
   syncAnp: adminProcedure.input(z.object({ sourceUrl: z.string().url().default(DEFAULT_ANP_SOURCE_URL) })).mutation(async ({ input }) => {
     try {
       const rows = await downloadAndParseAnp(input.sourceUrl);

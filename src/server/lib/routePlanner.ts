@@ -35,19 +35,31 @@ export function normalizeStops(searches: PlacesSearchResult[]): RouteStop[] {
 
 export function routeSummary(result: DirectionsResult) {
   const route = result.routes[0];
-  const leg = route?.legs[0];
-  if (!route || !leg) {
+  if (!route || !route.legs || route.legs.length === 0) {
     throw new Error("Não foi possível calcular uma rota para os endereços informados.");
   }
 
+  // Somar distância e duração de todas as pernas
+  let totalDistanceMeters = 0;
+  let totalDurationSeconds = 0;
+  
+  for (const leg of route.legs) {
+    totalDistanceMeters += leg.distance.value;
+    totalDurationSeconds += leg.duration.value;
+  }
+
+  // Origem é a primeira perna, destino é a última perna
+  const firstLeg = route.legs[0];
+  const lastLeg = route.legs[route.legs.length - 1];
+
   return {
-    distanceMeters: leg.distance.value,
-    distanceLabel: leg.distance.text,
-    durationSeconds: leg.duration.value,
-    durationLabel: leg.duration.text,
+    distanceMeters: totalDistanceMeters,
+    distanceLabel: firstLeg.distance.text, // Usar label da primeira perna como referência
+    durationSeconds: totalDurationSeconds,
+    durationLabel: firstLeg.duration.text, // Usar label da primeira perna como referência
     summary: route.summary,
     polyline: route.overview_polyline.points,
-    origin: leg.start_location,
-    destination: leg.end_location,
+    origin: firstLeg.start_location,
+    destination: lastLeg.end_location,
   };
 }

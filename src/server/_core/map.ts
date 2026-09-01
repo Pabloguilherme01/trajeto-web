@@ -42,6 +42,8 @@ function getMapsConfig(): MapsConfig {
 interface RequestOptions {
   method?: "GET" | "POST";
   body?: Record<string, unknown>;
+  metricOperation?: string;
+  timeoutMs?: number;
 }
 
 /**
@@ -58,22 +60,23 @@ export async function makeRequest<T = unknown>(
   options: RequestOptions = {}
 ): Promise<T> {
   const startedAt = Date.now();
-  const operation = endpoint.replace(/^\/maps\/api\//, "").replace(/\/json$/, "").slice(0, 80);
+  const defaultOperation = endpoint.replace(/^\/maps\/api\//, "").replace(/\/json$/, "").slice(0, 80);
+  const operation = options.metricOperation ?? defaultOperation;
   let metricRecorded = false;
   const { baseUrl, apiKey } = getMapsConfig();
+  const timeoutMs = options.timeoutMs ?? 8000;
 
-  // Construct full URL: baseUrl + /v1/maps/proxy + endpoint
   const url = new URL(`${baseUrl}/v1/maps/proxy${endpoint}`);
-
-  // Add API key as query parameter (standard Google Maps API authentication)
   url.searchParams.append("key", apiKey);
 
-  // Add other query parameters
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
     }
   });
+
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
 
   try {
     const response = await fetch(url.toString(), {
@@ -82,7 +85,10 @@ export async function makeRequest<T = unknown>(
         "Content-Type": "application/json",
       },
       body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: abortController.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       metricRecorded = true;
@@ -98,7 +104,16 @@ export async function makeRequest<T = unknown>(
     void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
     return payload;
   } catch (error) {
-    if (!metricRecorded) void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false });
+    clearTimeout(timeoutId);
+    if (!metricRecorded) {
+      void recordProviderMetric({ 
+        provider: "google_maps", 
+        operation, 
+        durationMs: Date.now() - startedAt, 
+        success: false,
+        statusCode: error instanceof Error && error.name === "AbortError" ? 408 : undefined 
+      });
+    }
     throw error;
   }
 }
