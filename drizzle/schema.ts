@@ -211,7 +211,7 @@ export const trafficNotifications = mysqlTable("traffic_notifications", {
 
 export const productEvents = mysqlTable("product_events", {
   id: int("id").autoincrement().primaryKey(),
-  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "station_sheet_opened", "favorite_intent", "favorite_saved", "station_navigation_confirmed", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click", "alert_preference_saved", "anp_quality_open", "google_page_token_invalid"]).notNull(),
+  event: mysqlEnum("event", ["station_search", "map_open", "station_compare", "route_open", "station_sheet_opened", "favorite_intent", "favorite_saved", "station_navigation_confirmed", "account_cta", "redemption_requested", "social_instagram_click", "social_whatsapp_click", "alert_preference_saved", "anp_quality_open", "google_page_token_invalid", "recommendation_shown", "recommendation_requested", "anp_reference_used", "traffic_incidents_visible"]).notNull(),
   region: varchar("region", { length: 120 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => ({ eventCreatedIdx: index("product_events_event_created_idx").on(table.event, table.createdAt), regionCreatedIdx: index("product_events_region_created_idx").on(table.region, table.createdAt) }));

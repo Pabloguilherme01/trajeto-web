@@ -7,13 +7,13 @@ export default defineConfig({
   root: templateRoot,
   resolve: {
     alias: {
-      "@": path.resolve(templateRoot, "client", "src"),
-      "@shared": path.resolve(templateRoot, "shared"),
+      "@": path.resolve(templateRoot, "src", "client"),
+      "@shared": path.resolve(templateRoot, "src", "shared"),
       "@assets": path.resolve(templateRoot, "attached_assets"),
     },
   },
   test: {
     environment: "node",
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts", "client/src/**/*.test.ts", "client/src/**/*.spec.ts", "client/src/**/*.test.tsx", "client/src/**/*.spec.tsx"],
+    include: ["src/server/**/*.test.ts", "src/server/**/*.spec.ts", "src/client/**/*.test.ts", "src/client/**/*.spec.ts", "src/client/**/*.test.tsx", "src/client/**/*.spec.tsx"],
   },
 });
