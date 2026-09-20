@@ -1,0 +1,10 @@
+{
+  "name": "Trajeto",
+  "description": "Plataforma de rotas inteligentes, comparação e economia de combustível com postos autorizados da ANP",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

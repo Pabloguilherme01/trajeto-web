@@ -16,6 +16,19 @@ import { notifyOwner } from "./_core/notification";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
+// In-memory fallback stores when DATABASE_URL is not set (e.g. preview mode)
+const inMemoryVehicles = new Map<number, Array<any>>();
+const inMemoryFavorites = new Map<number, Array<any>>();
+const inMemoryRouteAlertPreferences = new Map<number, Array<any>>();
+const inMemoryStationPreferences = new Map<number, any>();
+const inMemoryRouteSearches = new Map<number, any>();
+const inMemoryRedemptions = new Map<number, Array<any>>();
+const inMemoryThresholds = new Map<string, number>();
+const inMemoryThresholdHistory: Array<any> = [];
+let nextVehicleId = 1;
+let nextRouteSearchId = 1;
+let nextRedemptionId = 1;
+
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
@@ -120,33 +133,50 @@ function userVehicleValues(input: UserVehicleInput) {
 
 export async function getUserVehicles(userId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) return inMemoryVehicles.get(userId) ?? [];
   return db.select().from(userVehicles).where(eq(userVehicles.userId, userId)).orderBy(desc(userVehicles.updatedAt));
 }
 
 export async function getUserVehicleById(userId: number, vehicleId: number) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) return (inMemoryVehicles.get(userId) ?? []).find(v => v.id === vehicleId) ?? null;
   return (await db.select().from(userVehicles).where(and(eq(userVehicles.id, vehicleId), eq(userVehicles.userId, userId))).limit(1))[0] ?? null;
 }
 
 export async function createUserVehicle(userId: number, input: UserVehicleInput) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
+  if (!db) {
+    const list = inMemoryVehicles.get(userId) ?? [];
+    const newVehicle = { id: nextVehicleId++, userId, ...userVehicleValues(input), createdAt: new Date(), updatedAt: new Date() };
+    list.unshift(newVehicle);
+    inMemoryVehicles.set(userId, list);
+    return list;
+  }
   await db.insert(userVehicles).values({ userId, ...userVehicleValues(input) });
   return getUserVehicles(userId);
 }
 
 export async function updateUserVehicle(userId: number, vehicleId: number, input: UserVehicleInput) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
+  if (!db) {
+    const list = inMemoryVehicles.get(userId) ?? [];
+    const idx = list.findIndex(v => v.id === vehicleId);
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], ...userVehicleValues(input), updatedAt: new Date() };
+    }
+    return list;
+  }
   await db.update(userVehicles).set(userVehicleValues(input)).where(and(eq(userVehicles.id, vehicleId), eq(userVehicles.userId, userId)));
   return getUserVehicles(userId);
 }
 
 export async function deleteUserVehicle(userId: number, vehicleId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
+  if (!db) {
+    const list = (inMemoryVehicles.get(userId) ?? []).filter(v => v.id !== vehicleId);
+    inMemoryVehicles.set(userId, list);
+    return { removed: true };
+  }
   await db.delete(userVehicles).where(and(eq(userVehicles.id, vehicleId), eq(userVehicles.userId, userId)));
   return { removed: true };
 }
@@ -158,7 +188,12 @@ export async function createRouteSearch(input: {
   gasolinePrice?: number | null; ethanolPrice?: number | null; gasolineKmPerLiter?: number | null; ethanolKmPerLiter?: number | null; estimatedTripCost?: number | null; estimatedLiters?: number | null;
 }) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    const id = nextRouteSearchId++;
+    const record = { id, ...input, createdAt: new Date() };
+    inMemoryRouteSearches.set(id, record);
+    return { id };
+  }
   const result = await db.insert(routeSearches).values({
     ...input,
     originLat: String(input.originLat), originLng: String(input.originLng), destinationLat: String(input.destinationLat), destinationLng: String(input.destinationLng),
@@ -171,7 +206,7 @@ export async function createRouteSearch(input: {
 
 export async function getRouteSearchById(id: number) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) return inMemoryRouteSearches.get(id) ?? null;
   return (await db.select().from(routeSearches).where(eq(routeSearches.id, id)).limit(1))[0] ?? null;
 }
 
@@ -258,15 +293,28 @@ export async function createRedemption(input: {
   userId: number; routeSearchId: number; placeId: string; stationName: string; stationAddress: string;
 }) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
   const code = `TRJ-${crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+  if (!db) {
+    const id = nextRedemptionId++;
+    const record = { id, ...input, redemptionCode: code, status: "requested" as const, requestedAt: new Date() };
+    const list = inMemoryRedemptions.get(input.userId) ?? [];
+    list.unshift(record);
+    inMemoryRedemptions.set(input.userId, list);
+    return { id, code, status: "requested" as const };
+  }
   const result = await db.insert(redemptions).values({ ...input, redemptionCode: code });
   return { id: Number(result[0].insertId), code, status: "requested" as const };
 }
 
 export async function getPersonalOverview(userId: number) {
   const db = await getDb();
-  if (!db) return { routes: [], redemptions: [], favorites: [], alerts: [] };
+  if (!db) {
+    const routes = Array.from(inMemoryRouteSearches.values()).filter(r => r.userId === userId).slice(0, 12);
+    const redemptionsList = (inMemoryRedemptions.get(userId) ?? []).slice(0, 12);
+    const favorites = (inMemoryFavorites.get(userId) ?? []).slice(0, 24);
+    const alerts = inMemoryRouteAlertPreferences.get(userId) ?? [];
+    return { routes, redemptions: redemptionsList, favorites, alerts };
+  }
   const [routes, userRedemptions, favorites, alerts] = await Promise.all([
     db.select().from(routeSearches).where(eq(routeSearches.userId, userId)).orderBy(desc(routeSearches.createdAt)).limit(12),
     db.select().from(redemptions).where(eq(redemptions.userId, userId)).orderBy(desc(redemptions.requestedAt)).limit(12),
@@ -307,14 +355,22 @@ export async function getPublicCoverage() {
 
 export async function getFavoritePlaceIds(userId: number, placeIds: string[]) {
   const db = await getDb();
-  if (!db || placeIds.length === 0) return [];
+  if (!db) {
+    const list = inMemoryFavorites.get(userId) ?? [];
+    return list.map(f => f.placeId).filter(id => placeIds.includes(id));
+  }
+  if (placeIds.length === 0) return [];
   const rows = await db.select({ placeId: favoriteStations.placeId }).from(favoriteStations).where(and(eq(favoriteStations.userId, userId), inArray(favoriteStations.placeId, placeIds)));
   return rows.map(row => row.placeId);
 }
 
 export async function getStationSearchPreferences(userId: number) {
   const db = await getDb();
-  if (!db) return stationSearchPreferenceDefaults;
+  if (!db) {
+    const pref = inMemoryStationPreferences.get(userId);
+    if (!pref) return stationSearchPreferenceDefaults;
+    return normalizeStationSearchPreferences(pref);
+  }
   const preference = (await db.select().from(stationSearchPreferences).where(eq(stationSearchPreferences.userId, userId)).limit(1))[0];
   if (!preference) return stationSearchPreferenceDefaults;
   return normalizeStationSearchPreferences({
@@ -330,15 +386,20 @@ export async function getStationSearchPreferences(userId: number) {
 
 export async function upsertStationSearchPreferences(userId: number, input: StationSearchPreferenceInput) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
   const values = normalizeStationSearchPreferences(input);
+  if (!db) {
+    inMemoryStationPreferences.set(userId, values);
+    return values;
+  }
   await db.insert(stationSearchPreferences).values({ userId, ...values }).onDuplicateKeyUpdate({ set: values });
   return values;
 }
 
 export async function getPaginationAlertThresholds() {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return Array.from(inMemoryThresholds.entries()).map(([region, threshold]) => ({ region, threshold }));
+  }
   return db.select().from(paginationAlertThresholds).orderBy(paginationAlertThresholds.region);
 }
 
@@ -434,10 +495,17 @@ export async function isOperationalAlertAutomationTask(taskUid: string) {
 
 export async function upsertPaginationAlertThreshold(input: { region: string; threshold: number; changedByUserId: number }) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
   const region = input.region.trim().replace(/\s+/g, " ").slice(0, 120);
   if (!region) throw new Error("Região obrigatória.");
   const threshold = Math.min(100, Math.max(1, Math.round(input.threshold)));
+  if (!db) {
+    const prev = inMemoryThresholds.get(region) ?? null;
+    inMemoryThresholds.set(region, threshold);
+    if (prev !== threshold) {
+      inMemoryThresholdHistory.unshift({ region, previousThreshold: prev, threshold, changedByUserId: input.changedByUserId, changedAt: new Date() });
+    }
+    return { region, threshold, changed: prev !== threshold };
+  }
   const existing = (await db.select({ threshold: paginationAlertThresholds.threshold }).from(paginationAlertThresholds).where(eq(paginationAlertThresholds.region, region)).limit(1))[0];
   await db.insert(paginationAlertThresholds).values({ region, threshold }).onDuplicateKeyUpdate({ set: { threshold } });
   if (existing?.threshold !== threshold) await db.insert(paginationAlertThresholdHistory).values({ region, previousThreshold: existing?.threshold ?? null, threshold, changedByUserId: input.changedByUserId });
@@ -446,15 +514,25 @@ export async function upsertPaginationAlertThreshold(input: { region: string; th
 
 export async function addFavoriteStation(userId: number, input: FavoriteStationInput) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
   const values = favoriteStationValues(input);
+  if (!db) {
+    const list = inMemoryFavorites.get(userId) ?? [];
+    const filtered = list.filter(f => f.placeId !== values.placeId);
+    filtered.unshift({ userId, ...values, createdAt: new Date() });
+    inMemoryFavorites.set(userId, filtered);
+    return { favorited: true };
+  }
   await db.insert(favoriteStations).values({ userId, ...values }).onDuplicateKeyUpdate({ set: { stationName: values.stationName, stationAddress: values.stationAddress, lat: values.lat, lng: values.lng } });
   return { favorited: true };
 }
 
 export async function removeFavoriteStation(userId: number, placeId: string) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
+  if (!db) {
+    const list = (inMemoryFavorites.get(userId) ?? []).filter(f => f.placeId !== placeId);
+    inMemoryFavorites.set(userId, list);
+    return { favorited: false };
+  }
   await db.delete(favoriteStations).where(and(eq(favoriteStations.userId, userId), eq(favoriteStations.placeId, placeId)));
   return { favorited: false };
 }
@@ -469,20 +547,30 @@ export type RouteAlertPreferenceInput = {
 
 export async function getRouteAlertPreferences(userId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) return inMemoryRouteAlertPreferences.get(userId) ?? [];
   return db.select().from(routeAlertPreferences).where(eq(routeAlertPreferences.userId, userId)).orderBy(desc(routeAlertPreferences.updatedAt));
 }
 
 export async function upsertRouteAlertPreference(userId: number, input: RouteAlertPreferenceInput) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
+  if (!db) {
+    const list = inMemoryRouteAlertPreferences.get(userId) ?? [];
+    const filtered = list.filter(p => p.corridorId !== input.corridorId);
+    filtered.unshift({ userId, ...input, updatedAt: new Date() });
+    inMemoryRouteAlertPreferences.set(userId, filtered);
+    return { saved: true };
+  }
   await db.insert(routeAlertPreferences).values({ userId, ...input }).onDuplicateKeyUpdate({ set: { corridorLabel: input.corridorLabel, timeSlot: input.timeSlot, minimumDelayMinutes: input.minimumDelayMinutes, active: input.active } });
   return { saved: true };
 }
 
 export async function removeRouteAlertPreference(userId: number, corridorId: string) {
   const db = await getDb();
-  if (!db) throw new Error("Banco de dados indisponível.");
+  if (!db) {
+    const list = (inMemoryRouteAlertPreferences.get(userId) ?? []).filter(p => p.corridorId !== corridorId);
+    inMemoryRouteAlertPreferences.set(userId, list);
+    return { removed: true };
+  }
   await db.delete(routeAlertPreferences).where(and(eq(routeAlertPreferences.userId, userId), eq(routeAlertPreferences.corridorId, corridorId)));
   return { removed: true };
 }
