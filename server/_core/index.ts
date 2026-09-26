@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { runOperationalAlertsSchedule } from "../scheduled/operationalAlerts";
+import { createMemoryRateLimiter } from "./rateLimit";
 
 async function startServer() {
   const app = express();
@@ -32,6 +33,14 @@ async function startServer() {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   app.post("/api/scheduled/operational-alerts", runOperationalAlertsSchedule);
+  // Bound expensive public integrations and anonymous telemetry without adding
+  // a runtime dependency. This is intentionally scoped to high-cost procedures.
+  app.use("/api/oauth/callback", createMemoryRateLimiter({ windowMs: 10 * 60_000, max: 20, name: "OAuth" }));
+  app.use("/api/trpc/routes.plan", createMemoryRateLimiter({ windowMs: 60_000, max: 30, name: "planejamento de rotas" }));
+  app.use("/api/trpc/stationDirectory.search", createMemoryRateLimiter({ windowMs: 60_000, max: 45, name: "busca de postos" }));
+  app.use("/api/trpc/stationDirectory.details", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "detalhes de posto" }));
+  app.use("/api/trpc/analytics.track", createMemoryRateLimiter({ windowMs: 60_000, max: 120, name: "telemetria" }));
+
   // tRPC API
   app.use(
     "/api/trpc",
