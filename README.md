@@ -1,49 +1,113 @@
 # Trajeto
 
-Plataforma web para planejamento de deslocamentos, consulta de postos, referências de combustível e contexto operacional no corredor Águas Lindas–DF.
+O Trajeto é uma ferramenta de decisão para quem se desloca de carro pelo Entorno do Distrito Federal.
 
-## Produto
+## Objetivo
 
-O Trajeto organiza a decisão do motorista em quatro camadas:
+**Ajudar o motorista a escolher onde parar e por onde seguir, gastando menos tempo, combustível e desvio.**
 
-1. **Descobrir**: buscar postos e localidades.
-2. **Planejar**: montar uma rota e avaliar desvios.
-3. **Comparar**: cruzar distância, trânsito e referências oficiais de preço quando disponíveis.
-4. **Acompanhar**: salvar veículos, favoritos, alertas e solicitações na conta.
+A plataforma começa pública e simples: o usuário informa uma cidade, bairro, posto ou destino e recebe opções de abastecimento, contexto de rota e referências de fonte. Cadastro é opcional e só entra quando traz valor recorrente.
 
-A aplicação distingue claramente dados de terceiros, referências oficiais e estimativas próprias. Preços da ANP são referências periódicas, não ofertas comerciais.
+O foco inicial é o corredor **Águas Lindas de Goiás ↔ Distrito Federal**. A expansão para outros corredores deve acontecer somente quando houver cobertura de dados e uso real.
+
+## O que o usuário ganha
+
+- encontra postos sem precisar abrir várias fontes;
+- compara distância e impacto do desvio;
+- entende quando um preço é referência oficial e quando é dado de terceiros;
+- calcula cenários de combustível quando informa veículo e consumo;
+- abre a navegação no aplicativo de mapas escolhido;
+- pode salvar favoritos, veículos, rotas e alertas quando isso fizer sentido para uso recorrente.
+
+## Princípio de produto
+
+Cada tela deve responder a uma pergunta prática:
+
+1. **Onde abastecer?**
+2. **Quanto vou desviar?**
+3. **O que realmente economizo?**
+4. **Posso confiar na origem desse dado?**
+
+Se uma funcionalidade não ajuda uma dessas decisões, não deve ganhar espaço na experiência principal.
+
+## Experiência pública
+
+A página inicial tem uma única chamada principal: **consultar uma parada ou destino**.
+
+O fluxo recomendado é:
+
+**buscar → comparar → decidir → navegar**
+
+Não exigimos cadastro para descobrir valor. A conta aparece depois, como ferramenta de retenção para quem quer histórico, favoritos, veículo ou alertas.
+
+## Crescimento
+
+O crescimento do Trajeto deve vir de utilidade repetível, não de excesso de funcionalidades:
+
+- buscas rápidas para os corredores mais usados;
+- resultados fáceis de compartilhar;
+- páginas que resolvem uma dúvida específica;
+- transparência sobre fontes e datas;
+- melhoria contínua baseada em eventos agregados de produto;
+- conteúdo útil para motoristas do Entorno.
+
+O objetivo é que alguém use o Trajeto em uma viagem e pense: **“isso resolveu minha próxima parada”**.
+
+## O que não é prioridade
+
+Não tratamos como objetivo principal:
+
+- dashboards públicos de operação;
+- páginas institucionais sem decisão prática;
+- mapas de cobertura que apenas repetem os corredores já disponíveis;
+- excesso de filtros antes da primeira resposta;
+- cadastro obrigatório;
+- métricas de vaidade;
+- recursos sociais sem utilidade direta para a viagem.
+
+Funcionalidades administrativas continuam disponíveis apenas para operação e qualidade interna.
+
+## Fontes e confiança
+
+O Trajeto separa:
+
+- **dados oficiais**, como referências da ANP;
+- **dados de terceiros**, como mapas e trânsito;
+- **estimativas próprias**, como cálculos de custo e impacto.
+
+Preço de referência da ANP não é apresentado como preço de bomba nem como oferta comercial.
 
 ## Arquitetura
 
-- **Frontend**: React 19 + Vite + TypeScript + Tailwind CSS.
-- **API**: tRPC 11 sobre Express.
-- **Dados**: MySQL + Drizzle ORM.
-- **Autenticação**: OAuth integrado e sessão JWT em cookie HTTP-only.
-- **Mapas e rotas**: integrações externas encapsuladas no servidor.
-- **Validação**: Zod na fronteira das procedures.
-- **Testes**: Vitest + Testing Library.
-- **CI**: typecheck, testes e build.
-- **Segurança**: headers básicos, limites de payload, validação de ambiente, auditoria de dependências e Dependabot.
+- **Frontend:** React 19 + Vite + TypeScript + Tailwind CSS.
+- **API:** tRPC 11 sobre Express.
+- **Dados:** MySQL + Drizzle ORM.
+- **Autenticação:** OAuth + sessão JWT em cookie HTTP-only.
+- **Mapas e rotas:** integrações externas encapsuladas no servidor.
+- **Validação:** Zod na fronteira das procedures.
+- **Testes:** Vitest + Testing Library.
+- **CI:** typecheck, testes e build.
+- **Segurança:** headers, limites de payload, validação de ambiente, rate limiting de endpoints de maior custo, timeouts de provedores e auditoria de dependências.
 
 ## Estrutura
 
-- client/src/pages: fluxos de produto.
-- client/src/components: componentes reutilizáveis.
-- client/src/lib: utilitários e integrações de apresentação.
-- server/routers: contratos de API e autorização.
-- server/lib: regras de negócio e integrações de domínio.
-- server/_core: infraestrutura HTTP, autenticação e runtime.
-- drizzle: modelo persistente.
-- shared: contratos compartilhados entre cliente e servidor.
+- `client/src/pages`: fluxos de produto.
+- `client/src/components`: componentes reutilizáveis.
+- `client/src/lib`: utilitários e regras de apresentação.
+- `server/routers`: contratos de API e autorização.
+- `server/lib`: regras de negócio e integrações de domínio.
+- `server/_core`: infraestrutura HTTP, autenticação e runtime.
+- `drizzle`: modelo persistente.
+- `shared`: contratos compartilhados.
 
 ## Desenvolvimento
 
 Requisitos:
 
-- Node 22 recomendado.
+- Node 22.
 - Variáveis de ambiente conforme o ambiente de execução.
 
-Comandos principais:
+Comandos:
 
 `npm install`
 
@@ -57,10 +121,6 @@ Comandos principais:
 
 `npm start`
 
-## Variáveis sensíveis
-
-Nunca versione segredos. Em produção, o servidor exige JWT_SECRET, VITE_APP_ID e OAUTH_SERVER_URL. Integrações externas podem exigir credenciais adicionais.
-
 ## Qualidade
 
 Toda alteração deve preservar:
@@ -68,19 +128,19 @@ Toda alteração deve preservar:
 - typecheck sem erros;
 - testes passando;
 - build de produção;
+- experiência mobile;
 - navegação por teclado;
-- comportamento mobile;
 - autorização server-side;
 - validação de entrada;
 - separação entre dado oficial, dado de terceiro e estimativa.
 
 ## Segurança
 
-Consulte SECURITY.md para o processo de reporte e os princípios de segurança do projeto.
+Consulte `SECURITY.md` para reporte responsável e princípios de segurança.
 
 ## Contribuição
 
-Consulte CONTRIBUTING.md antes de abrir um Pull Request.
+Consulte `CONTRIBUTING.md` antes de abrir um Pull Request.
 
 ## Licença
 
