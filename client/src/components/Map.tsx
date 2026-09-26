@@ -111,7 +111,7 @@ export function MapView({
   }, [init, shouldLoad]);
 
   return (
-    <div ref={mapContainer} role="img" aria-label="Mapa da rota" className={cn("relative w-full h-[500px] bg-[#EDF2EE]", className)}>
+    <div ref={mapContainer} role="region" aria-label="Mapa da rota" className={cn("relative w-full h-[500px] bg-[#EDF2EE]", className)}>
       {!shouldLoad && <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#EDF2EE_35%,#F8FBF7_50%,#EDF2EE_65%)]" aria-label="Mapa será carregado quando estiver próximo" />}
       {loadError && <div role="alert" className="absolute inset-0 grid place-items-center bg-[#0B1014]/95 p-6 text-center text-sm font-bold text-white"><div><p>O mapa não pôde ser carregado agora.</p><p className="mt-2 text-xs font-normal text-[#A5B5BC]">Os resultados da consulta continuam disponíveis abaixo.</p></div></div>}
     </div>
