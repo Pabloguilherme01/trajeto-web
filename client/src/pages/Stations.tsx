@@ -19,7 +19,6 @@ import { Link, useLocation } from "wouter";
 const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
 const googleMapsRoute = (placeId: string, name: string) => `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}&query=${encodeURIComponent(name)}`;
 const wazeRoute = (lat: number, lng: number) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
-const appleMapsRoute = (lat: number, lng: number) => `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
 function initialQuery() {
   return new URLSearchParams(window.location.search).get("q") || corridorPresets[0].query;
 }
