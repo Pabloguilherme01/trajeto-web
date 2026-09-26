@@ -1,52 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
-import { useLocation } from "wouter";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 export default function NotFound() {
-  const [, setLocation] = useLocation();
-
-  const handleGoHome = () => {
-    setLocation("/");
-  };
-
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-        <CardContent className="pt-8 pb-8 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-red-100 rounded-full animate-pulse" />
-              <AlertCircle className="relative h-16 w-16 text-red-500" />
-            </div>
-          </div>
-
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
-
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">
-            Page Not Found
-          </h2>
-
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Sorry, the page you are looking for doesn't exist.
-            <br />
-            It may have been moved or deleted.
+    <main className="min-h-screen w-full bg-[#0B1014] px-4 py-10 text-[#EAF0F2]">
+      <div className="mx-auto flex min-h-[80vh] max-w-xl items-center justify-center">
+        <section className="w-full rounded-3xl border border-white/10 bg-[#121B22] p-7 text-center shadow-2xl sm:p-10" aria-labelledby="not-found-title">
+          <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.18em] text-[#3DE3FF]">Trajeto</p>
+          <p className="mt-5 font-display text-7xl font-semibold tracking-[-0.08em] text-[#C7FF3C]">404</p>
+          <h1 id="not-found-title" className="mt-3 font-display text-3xl font-semibold tracking-[-0.055em] text-white">Página não encontrada.</h1>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#A5B5BC]">
+            A página que você tentou abrir não existe ou foi movida. Volte ao início para continuar sua consulta.
           </p>
-
-          <div
-            id="not-found-button-group"
-            className="flex flex-col sm:flex-row gap-3 justify-center"
-          >
-            <Button
-              onClick={handleGoHome}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Go Home
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          <Button asChild className="mt-7 min-h-11 bg-[#C7FF3C] px-5 text-sm font-extrabold text-[#0B1014] hover:bg-white">
+            <Link href="/"><ArrowLeft className="mr-2 size-4" />Voltar ao início</Link>
+          </Button>
+        </section>
+      </div>
+    </main>
   );
 }
