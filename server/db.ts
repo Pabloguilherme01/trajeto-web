@@ -183,7 +183,7 @@ export async function deleteUserVehicle(userId: number, vehicleId: number) {
 
 export async function createRouteSearch(input: {
   userId: number | null; origin: string; destination: string; originLat: number; originLng: number; destinationLat: number; destinationLng: number;
-  distanceMeters: number; durationSeconds: number; routeSummary: string | null; overviewPolyline: string | null; locationConsent: boolean;
+  distanceMeters: number; durationSeconds: number; routeSummary: string | null; overviewPolyline: string | null;
   vehicleId?: number | null; vehicleNickname?: string | null; selectedFuel?: "gasoline" | "ethanol" | null;
   gasolinePrice?: number | null; ethanolPrice?: number | null; gasolineKmPerLiter?: number | null; ethanolKmPerLiter?: number | null; estimatedTripCost?: number | null; estimatedLiters?: number | null;
 }) {
