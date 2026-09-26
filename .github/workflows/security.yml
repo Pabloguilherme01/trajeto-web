@@ -28,3 +28,17 @@ jobs:
         run: npm ci --omit=dev --legacy-peer-deps --ignore-scripts --no-audit --no-fund
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Check tracked files for private-key material
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '\.(pem|key|p12|pfx)$' >/dev/null; then
+            echo "Private-key-like file is tracked in the repository."
+            git ls-files | grep -E '\.(pem|key|p12|pfx)$'
+            exit 1
+          fi
+          if git grep -nE -- "-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----" >/dev/null 2>&1; then
+            echo "Private key material detected in the repository."
+            exit 1
+          fi

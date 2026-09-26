@@ -8,6 +8,7 @@ export type NotificationPayload = {
 
 const TITLE_MAX_LENGTH = 1200;
 const CONTENT_MAX_LENGTH = 20000;
+const UPSTREAM_ERROR_MAX_LENGTH = 300;
 
 const trimValue = (value: string): string => value.trim();
 const isNonEmptyString = (value: unknown): value is string =>
@@ -86,6 +87,7 @@ export async function notifyOwner(
 
   try {
     const response = await fetch(endpoint, {
+      signal: AbortSignal.timeout(10_000),
       method: "POST",
       headers: {
         accept: "application/json",
@@ -97,11 +99,9 @@ export async function notifyOwner(
     });
 
     if (!response.ok) {
-      const detail = await response.text().catch(() => "");
+      const detail = (await response.text().catch(() => "")).slice(0, UPSTREAM_ERROR_MAX_LENGTH);
       console.warn(
-        `[Notification] Failed to notify owner (${response.status} ${response.statusText})${
-          detail ? `: ${detail}` : ""
-        }`
+        `[Notification] Failed to notify owner (${response.status} ${response.statusText})${detail ? `: ${detail}` : ""}`
       );
       return false;
     }

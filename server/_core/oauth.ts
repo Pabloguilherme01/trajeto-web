@@ -15,14 +15,14 @@ export function registerOAuthRoutes(app: Express) {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
 
-    if (!code || !state) {
-      res.status(400).json({ error: "code and state are required" });
+    if (!code || !state || code.length > 4096 || state.length > 4096) {
+      res.status(400).json({ error: "invalid oauth callback" });
       return;
     }
 
-    const { nonce } = decodeOAuthState(state);
+    const { nonce, redirectUri } = decodeOAuthState(state);
     const expectedNonce = parseCookieHeader(req.headers.cookie ?? "")[OAUTH_STATE_COOKIE];
-    if (!nonce || nonce !== expectedNonce) {
+    if (!nonce || nonce !== expectedNonce || !redirectUri) {
       res.status(403).json({ error: "invalid oauth state" });
       return;
     }
@@ -31,7 +31,7 @@ export function registerOAuthRoutes(app: Express) {
     res.clearCookie(OAUTH_STATE_COOKIE, {
       path: "/",
       secure,
-      sameSite: secure ? "none" : "lax",
+      sameSite: "lax",
     });
 
     try {
@@ -39,7 +39,7 @@ export function registerOAuthRoutes(app: Express) {
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
 
       if (!userInfo.openId) {
-        res.status(400).json({ error: "openId missing from user info" });
+        res.status(400).json({ error: "invalid oauth identity" });
         return;
       }
 
@@ -53,15 +53,13 @@ export function registerOAuthRoutes(app: Express) {
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
-        expiresInMs: ONE_YEAR_MS,
       });
 
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-
       res.redirect(302, "/");
     } catch (error) {
-      console.error("[OAuth] Callback failed", error);
+      console.error("[OAuth] Callback failed", error instanceof Error ? error.message : "unknown error");
       res.status(500).json({ error: "OAuth callback failed" });
     }
   });
