@@ -4,6 +4,14 @@ import { cacheStationSearch, clearStationSearchCache, getCachedStationSearch } f
 describe("stationSearchCache", () => {
   afterEach(clearStationSearchCache);
 
+  it("limita o cache para evitar crescimento sem limite com consultas únicas", () => {
+    for (let index = 0; index < 101; index += 1) {
+      cacheStationSearch(`consulta-${index}`, { index }, 1_000);
+    }
+    expect(getCachedStationSearch("consulta-0", 1_001)).toBeNull();
+    expect(getCachedStationSearch<{ index: number }>("consulta-100", 1_001)).toEqual({ index: 100 });
+  });
+
   it("normaliza a chave da primeira busca e expira o resultado rapidamente", () => {
     cacheStationSearch("Águas  Lindas de Goiás", { stations: 20 }, 1_000);
     expect(getCachedStationSearch<{ stations: number }>("aguas lindas de goias", 1_001)).toEqual({ stations: 20 });
