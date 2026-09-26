@@ -1,11 +1,4 @@
-export type CorridorPreset = {
-  id: string;
-  label: string;
-  query: string;
-  detail: string;
-};
-
-export const corridorPresets: CorridorPreset[] = [
+export const corridorPresets = [
   { id: "aguas-lindas", label: "Águas Lindas", query: "Águas Lindas de Goiás, GO", detail: "saída e bairros" },
   { id: "ceilandia", label: "Ceilândia", query: "Ceilândia, DF", detail: "BR-070 e entorno" },
   { id: "taguatinga", label: "Taguatinga", query: "Taguatinga, DF", detail: "eixo de trabalho" },
@@ -16,4 +9,6 @@ export const corridorPresets: CorridorPreset[] = [
   { id: "formosa", label: "Formosa", query: "Formosa, GO", detail: "BR-020 e ligação norte" },
   { id: "planaltina-go", label: "Planaltina", query: "Planaltina de Goiás, GO", detail: "BR-020 e entorno norte" },
   { id: "santo-antonio", label: "Santo Antônio", query: "Santo Antônio do Descoberto, GO", detail: "BR-060 e acesso oeste" },
-];
+] as const;
+
+export type CorridorPreset = (typeof corridorPresets)[number];
