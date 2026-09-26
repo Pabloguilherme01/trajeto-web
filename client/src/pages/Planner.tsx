@@ -108,11 +108,6 @@ export default function Planner() {
     track("route_open", destination || origin);
   };
 
-  const openNavigation = (stop: PlannedRoute["stops"][number]) => {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stop.name)}&destination_place_id=${encodeURIComponent(stop.placeId)}`, "_blank", "noopener,noreferrer");
-    track("route_open", destination || origin);
-  };
-
   const shareRoute = async () => {
     if (!origin.trim() || !destination.trim()) return;
     const url = `${window.location.origin}/planejar?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}`;
