@@ -1,4 +1,5 @@
 const CACHE_TTL_MS = 60_000;
+const MAX_CACHE_ENTRIES = 100;
 const stationSearchCache = new Map<string, { expiresAt: number; value: unknown }>();
 
 function cacheKey(query: string) {
@@ -17,7 +18,14 @@ export function getCachedStationSearch<T>(query: string, now = Date.now()): T | 
 }
 
 export function cacheStationSearch<T>(query: string, value: T, now = Date.now()) {
-  stationSearchCache.set(cacheKey(query), { value, expiresAt: now + CACHE_TTL_MS });
+  const key = cacheKey(query);
+  stationSearchCache.delete(key);
+  stationSearchCache.set(key, { value, expiresAt: now + CACHE_TTL_MS });
+  while (stationSearchCache.size > MAX_CACHE_ENTRIES) {
+    const oldestKey = stationSearchCache.keys().next().value;
+    if (oldestKey === undefined) break;
+    stationSearchCache.delete(oldestKey);
+  }
   return value;
 }
 
