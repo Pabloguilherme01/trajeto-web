@@ -43,6 +43,16 @@ export type AuthorizedStationsDownloadOptions = {
 const wait = (milliseconds: number) => new Promise<void>(resolve => setTimeout(resolve, milliseconds));
 
 export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, targets = CORRIDOR_ANP_MUNICIPALITIES, options: AuthorizedStationsDownloadOptions = {}) {
+  const source = new URL(sourceUrl);
+  if (
+    source.protocol !== "https:" ||
+    source.hostname !== "www.gov.br" ||
+    !source.pathname.includes("/dados-abertos/arquivos/") ||
+    !source.pathname.toLowerCase().endsWith(".csv")
+  ) {
+    throw new Error("Use o cadastro CSV oficial da ANP hospedado em www.gov.br.");
+  }
+
   const startedAt = Date.now();
   const maxAttempts = Math.min(3, Math.max(1, options.maxAttempts ?? 3));
   const retryDelayMs = Math.max(100, options.retryDelayMs ?? 800);
