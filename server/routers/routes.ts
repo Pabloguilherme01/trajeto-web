@@ -85,7 +85,6 @@ export const routesRouter = router({
       durationSeconds: route.durationSeconds,
       routeSummary: route.summary,
       overviewPolyline: route.polyline,
-      locationConsent: false,
       vehicleId: vehicle?.id ?? null,
       vehicleNickname: vehicle?.nickname ?? null,
       selectedFuel: economy?.recommendedFuel ?? null,
