@@ -24,7 +24,7 @@ async function startServer() {
     res.setHeader("X-Frame-Options", "DENY");
     if (process.env.NODE_ENV === "production") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-      res.setHeader("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://forge.butterfly-effect.dev; connect-src 'self' https://forge.butterfly-effect.dev; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;");
+      res.setHeader("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com; connect-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com; frame-src https://*.google.com; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com;");
     }
     next();
   });
