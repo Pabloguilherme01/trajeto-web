@@ -68,6 +68,11 @@ export default function Stations() {
     if (ogTitle) ogTitle.setAttribute("content", title);
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) ogDescription.setAttribute("content", description);
+    const shareUrl = window.location.href;
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute("content", shareUrl);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute("href", shareUrl);
   }, [query]);
 
   useEffect(() => {
