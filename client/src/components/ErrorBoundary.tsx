@@ -1,6 +1,5 @@
-import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
-import { Component, ReactNode } from "react";
+import { Component, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -31,24 +30,18 @@ class ErrorBoundary extends Component<Props, State> {
               className="text-destructive mb-6 flex-shrink-0"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
-
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
-
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">Trajeto</p>
+            <h2 className="mb-3 mt-3 text-xl font-bold">Algo saiu do esperado.</h2>
+            <p className="mb-6 max-w-md text-center text-sm leading-relaxed text-muted-foreground">
+              A tela encontrou um erro inesperado. Seus dados salvos no servidor não foram apagados.
+              Tente recarregar a página.
+            </p>
             <button
               onClick={() => window.location.reload()}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg",
-                "bg-primary text-primary-foreground",
-                "hover:opacity-90 cursor-pointer"
-              )}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-bold text-primary-foreground transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
-              <RotateCcw size={16} />
-              Reload Page
+              <RotateCcw size={16} aria-hidden="true" />
+              Recarregar página
             </button>
           </div>
         </div>
