@@ -204,12 +204,6 @@ export async function createRouteSearch(input: {
   return { id: Number(result[0].insertId) };
 }
 
-export async function getRouteSearchById(id: number) {
-  const db = await getDb();
-  if (!db) return inMemoryRouteSearches.get(id) ?? null;
-  return (await db.select().from(routeSearches).where(eq(routeSearches.id, id)).limit(1))[0] ?? null;
-}
-
 export async function getLatestPriceSnapshots(placeIds: string[]) {
   const db = await getDb();
   if (!db || placeIds.length === 0) return [];
