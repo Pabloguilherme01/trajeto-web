@@ -2,7 +2,6 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { consentRouter } from "./routers/consent";
 import { operationsRouter } from "./routers/operations";
 import { routesRouter } from "./routers/routes";
 import { stationsRouter } from "./routers/stations";
@@ -23,7 +22,6 @@ export const appRouter = router({
     }),
   }),
   routes: routesRouter,
-  consent: consentRouter,
   operations: operationsRouter,
   stationDirectory: stationsRouter,
   personal: personalRouter,
