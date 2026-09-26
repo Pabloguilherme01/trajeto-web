@@ -145,3 +145,4 @@ Consulte `CONTRIBUTING.md` antes de abrir um Pull Request.
 ## Licença
 
 MIT
+
