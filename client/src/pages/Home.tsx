@@ -147,7 +147,7 @@ export default function Home() {
               <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.055em] text-white sm:text-4xl">Preço de referência não é preço de bomba.</h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#9BAEB7]">Quando houver vínculo verificável, o Trajeto mostra a referência da ANP com data e fonte. Dados de mapas e estimativas próprias ficam identificados separadamente.</p>
             </div>
-            <a href={anpQualityUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-extrabold text-white transition hover:border-[#C7FF3C] hover:text-[#C7FF3C]">
+            <a href={anpQualityUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-extrabold text-white transition hover:border-[#C7FF3C] hover:text-[#C7FF3C]">
               <BadgeCheck className="size-4" /> Ver fonte oficial
             </a>
           </div>
