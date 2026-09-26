@@ -2,6 +2,8 @@ import type { AlertTimeSlot } from "./routeAlerts";
 
 export type AlertCorridor = { id: string; label: string; point: { lat: number; lng: number } };
 
+export const ALERT_CORRIDOR_IDS = ["aguas-lindas", "ceilandia", "taguatinga", "brasilia", "valparaiso", "cidade-ocidental", "luziania", "formosa", "planaltina-go", "santo-antonio"] as const;
+
 const corridors: AlertCorridor[] = [
   { id: "aguas-lindas", label: "Águas Lindas", point: { lat: -15.761, lng: -48.281 } },
   { id: "ceilandia", label: "Ceilândia", point: { lat: -15.819, lng: -48.104 } },
