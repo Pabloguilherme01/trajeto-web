@@ -3,13 +3,14 @@
   "short_name": "Trajeto",
   "description": "Rotas, postos e economia em movimento.",
   "lang": "pt-BR",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0B1014",
   "theme_color": "#14343C",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
