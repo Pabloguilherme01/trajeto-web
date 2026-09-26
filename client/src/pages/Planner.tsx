@@ -31,6 +31,21 @@ export default function Planner() {
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
   const [rescueMessage, setRescueMessage] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
+  
+  useEffect(() => {
+    const routeLabel = origin.trim() && destination.trim() ? origin.trim() + " → " + destination.trim() : "Planejar rota";
+    const title = routeLabel + " · Trajeto";
+    const description = origin.trim() && destination.trim()
+      ? "Planeje " + origin.trim() + " → " + destination.trim() + " e compare distância, duração e opções de abastecimento."
+      : "Planeje uma rota, compare distância, duração e opções de abastecimento.";
+    document.title = title;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", description);
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute("content", title);
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) ogDescription.setAttribute("content", description);
+  }, [origin, destination]);
   const [pricePerLiter, setPricePerLiter] = useState("");
   const [gasolinePrice, setGasolinePrice] = useState("");
   const [ethanolPrice, setEthanolPrice] = useState("");
