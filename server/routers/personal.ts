@@ -3,7 +3,7 @@ import { addFavoriteStation, createConsentEvent, createProductEvent, createTraff
 import { protectedProcedure, router } from "../_core/trpc";
 import { calculateFuelEconomy } from "../lib/fuelEconomy";
 import { getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
-import { filterIncidentsByMinimumDelay, routeTrafficStatus } from "../lib/routeTraffic";
+import { filterIncidentsByMinimumDelay, routeTrafficAreaStatus } from "../lib/routeTraffic";
 
 const stationInput = z.object({
   placeId: z.string().trim().min(1).max(255),
@@ -50,7 +50,7 @@ export const personalRouter = router({
     const alerts = await Promise.all(active.map(async preference => {
       const corridor = getAlertCorridor(preference.corridorId);
       if (!corridor) return { corridorId: preference.corridorId, corridorLabel: preference.corridorLabel, timeSlot: preference.timeSlot, inWindow: false, traffic: null };
-      const traffic = await routeTrafficStatus(corridor.point, corridor.point);
+      const traffic = await routeTrafficAreaStatus(corridor.point);
       const incidents = traffic.state === "active" ? filterIncidentsByMinimumDelay(traffic.incidents, preference.minimumDelayMinutes) : traffic.incidents;
       return { corridorId: preference.corridorId, corridorLabel: preference.corridorLabel, timeSlot: preference.timeSlot, minimumDelayMinutes: preference.minimumDelayMinutes, inWindow: isSlotActiveNow(preference.timeSlot), traffic: { ...traffic, incidents, label: traffic.state === "active" ? (incidents.length ? `${incidents.length} ocorrência(s) acima do limite selecionado` : "Nenhuma ocorrência acima do limite selecionado") : traffic.label } };
     }));
