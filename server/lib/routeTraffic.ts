@@ -101,6 +101,31 @@ function normalizeIncidents(items: TomTomIncident[], now: Date) {
   });
 }
 
+export async function routeTrafficAreaStatus(center: Point, radiusKm = 6) {
+  const checkedAt = new Date();
+  const apiKey = process.env.TOMTOM_API_KEY;
+  if (!apiKey) {
+    return { checkedAt, state: "pending" as const, label: "Tráfego ao vivo aguardando ativação", detail: "A duração foi calculada no momento da consulta. Ocorrências ao vivo serão exibidas quando a fonte for autorizada.", incidents: [] as RouteTrafficIncident[], officialSources: officialRouteSources, anpComVcUrl };
+  }
+
+  const latDelta = Math.min(Math.max(radiusKm / 111, 0.01), 0.25);
+  const lngScale = Math.max(Math.cos((center.lat * Math.PI) / 180), 0.25);
+  const lngDelta = Math.min(Math.max(radiusKm / (111 * lngScale), 0.01), 0.25);
+  const origin = { lat: center.lat - latDelta, lng: center.lng - lngDelta };
+  const destination = { lat: center.lat + latDelta, lng: center.lng + lngDelta };
+  const status = await routeTrafficStatus(origin, destination);
+
+  if (status.state === "active") {
+    return {
+      ...status,
+      label: status.incidents.length ? `${status.incidents.length} ocorrência(s) na área do corredor` : "Sem ocorrências na área do corredor",
+      detail: `${status.detail} Área aproximada de ${radiusKm} km ao redor do corredor cadastrado.`,
+    };
+  }
+
+  return status;
+}
+
 export async function routeTrafficStatus(origin: Point, destination: Point) {
   const checkedAt = new Date();
   const apiKey = process.env.TOMTOM_API_KEY;
