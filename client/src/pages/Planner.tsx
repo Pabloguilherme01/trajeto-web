@@ -57,61 +57,6 @@ export default function Planner() {
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation({ onSuccess: result => { setPlanned(result); track("route_open", destination || origin); } });
   const recordConsent = trpc.consent.record.useMutation();
-  const requestRedemption = trpc.operations.requestRedemption.useMutation({
-    onSuccess: redemption => { track("redemption_requested", destination || origin); setRescueMessage(`Solicitação registrada. Seu código é ${redemption.code}.`); },
-    onError: error => {
-      if (error.message.includes("Please login")) startLogin();
-    },
-  });
-  const favoriteInput = useMemo(() => ({ placeIds: planned?.stops.map(stop => stop.placeId) ?? [] }), [planned]);
-  const favoriteState = trpc.personal.favoriteState.useQuery(favoriteInput, { enabled: isAuthenticated && Boolean(planned?.stops.length) });
-  const addFavorite = trpc.personal.addFavorite.useMutation({ onSuccess: () => { favoriteState.refetch(); track("favorite_saved", destination || origin); }, onError: error => { if (error.message.includes("Please login")) startLogin(); } });
-  const vehicles = trpc.personal.vehicles.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
-  const selectedVehicle = vehicles.data?.find(vehicle => vehicle.id === selectedVehicleId) ?? null;
-  const selectedConsumption = selectedVehicle ? Number(selectedVehicle.customKmPerLiter ?? selectedVehicle.highwayKmPerLiter ?? selectedVehicle.cityKmPerLiter ?? 0) : 0;
-  const fuelEconomyInput = useMemo(() => {
-    const price = Number(pricePerLiter.replace(",", "."));
-    if (!planned || !selectedVehicle || !Number.isFinite(price) || price <= 0 || selectedConsumption <= 0) return null;
-    return { distanceKm: planned.route.distanceMeters / 1000, pricePerLiter: price, kmPerLiter: selectedConsumption, tankLiters: selectedVehicle.tankLiters ? Number(selectedVehicle.tankLiters) : null };
-  }, [planned, selectedVehicle, selectedConsumption, pricePerLiter]);
-  const fuelEconomy = trpc.personal.fuelEconomy.useQuery(fuelEconomyInput ?? { distanceKm: 0, pricePerLiter: 1, kmPerLiter: 1 }, { enabled: Boolean(fuelEconomyInput) && isAuthenticated, retry: 0 });
-
-  useEffect(() => {
-    if (selectedVehicleId || !vehicles.data?.length) return;
-    setSelectedVehicleId(vehicles.data[0].id);
-  }, [selectedVehicleId, vehicles.data]);
-
-  useEffect(() => {
-    if (!selectedVehicle || selectedConsumption <= 0) return;
-    setGasolineKmPerLiter(current => current || String(selectedConsumption));
-    setEthanolKmPerLiter(current => current || String(selectedConsumption));
-  }, [selectedVehicle, selectedConsumption]);
-
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setRescueMessage(null);
-    if (locationConsent) {
-      await recordConsent.mutateAsync({ purpose: "location", accepted: true, policyVersion: "2026-08" });
-    }
-    const parse = (value: string) => Number(value.replace(",", "."));
-    const gasoline = parse(gasolinePrice);
-    const ethanol = parse(ethanolPrice);
-    const gasolineConsumption = parse(gasolineKmPerLiter);
-    const ethanolConsumption = parse(ethanolKmPerLiter);
-    const economy = selectedVehicle && [gasoline, ethanol, gasolineConsumption, ethanolConsumption].every(value => Number.isFinite(value) && value > 0)
-      ? { vehicleId: selectedVehicle.id, gasolinePrice: gasoline, ethanolPrice: ethanol, gasolineKmPerLiter: gasolineConsumption, ethanolKmPerLiter: ethanolConsumption }
-      : undefined;
-    await planRoute.mutateAsync({ origin, destination, locationConsent, economy, recommendation: { priceWeight } });
-  };
-
-  const requestStop = (stop: PlannedRoute["stops"][number]) => {
-    if (!planned?.searchId) {
-      setRescueMessage("A rota foi exibida, mas ainda não pôde ser registrada. Tente calcular novamente.");
-      return;
-    }
-    requestRedemption.mutate({ routeSearchId: planned.searchId, placeId: stop.placeId, stationName: stop.name, stationAddress: stop.address });
-  };
-
   const toggleFavorite = () => {
     if (!selectedStop) return;
     if (!isAuthenticated) return startLogin();
@@ -189,7 +134,7 @@ export default function Planner() {
         </section>
 
         {planned && <section className="mt-10"><div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">Paradas na rota</p><h2 className="font-display mt-3 text-4xl font-semibold tracking-[-0.06em]">Postos encontrados.</h2></div><div className="flex items-end gap-3"><p className="max-w-md text-sm leading-relaxed text-[#607570]">Preços são referências datadas; o desvio informado é real quando calculado pela rota.</p><button type="button" onClick={shareRoute} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-none border border-[#163840] px-4 py-2 text-xs font-bold text-[#163840] transition hover:bg-[#163840] hover:text-white"><Share2 className="size-4" /> Compartilhar rota</button></div></div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{planned.stops.map(stop => { const isRecommended = planned.recommendation?.placeId === stop.placeId; return <article key={stop.placeId} className={`flex min-h-60 flex-col border bg-white p-5 ${isRecommended ? "border-[#9EBF1F] ring-1 ring-[#D4E67F]" : "border-[#D4DDD5]"}`}><div className="flex items-start justify-between gap-4"><div className="grid size-11 place-items-center rounded-full bg-[#E8EEE8] text-[#163840]"><Fuel className="size-4" /></div><span className={`text-[0.6rem] font-bold uppercase tracking-[0.14em] ${isRecommended ? "text-[#668400]" : "text-[#748985]"}`}>{isRecommended ? "Melhor para sua prioridade" : "Posto próximo"}</span></div><h3 className="mt-6 text-lg font-bold leading-tight">{stop.name}</h3><p className="mt-2 text-sm leading-relaxed text-[#667A76]">{stop.address}</p><div className="mt-auto pt-5">{stop.priceReference ? <p className="mb-2 text-xs text-[#55736C]">Referência ANP: <strong>{Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> · {new Date(stop.priceReference.collectedAt).toLocaleDateString("pt-BR")}</p> : <p className="mb-2 text-xs text-[#788A86]">Preço oficial ainda não vinculado para este posto.</p>}{isRecommended && <p className="mb-4 text-xs leading-relaxed text-[#5D7200]">Desvio {planned.recommendation?.detourSource === "real" ? "real" : "estimado"}: {planned.recommendation?.detourKm.toLocaleString("pt-BR")} km.</p>}<div className="grid grid-cols-2 gap-2"><Button onClick={() => { setSelectedStop(stop); track("station_sheet_opened", destination || origin); }} variant="outline" className="min-h-11 rounded-none border-[#163840] text-[#163840] hover:bg-[#163840] hover:text-white">Ver ficha</Button><Button onClick={() => requestStop(stop)} disabled={requestRedemption.isPending} variant="outline" className="min-h-11 rounded-none border-[#163840] text-[#163840] hover:bg-[#163840] hover:text-white">Resgatar</Button></div></div></article>; })}</div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{planned.stops.map(stop => { const isRecommended = planned.recommendation?.placeId === stop.placeId; return <article key={stop.placeId} className={`flex min-h-60 flex-col border bg-white p-5 ${isRecommended ? "border-[#9EBF1F] ring-1 ring-[#D4E67F]" : "border-[#D4DDD5]"}`}><div className="flex items-start justify-between gap-4"><div className="grid size-11 place-items-center rounded-full bg-[#E8EEE8] text-[#163840]"><Fuel className="size-4" /></div><span className={`text-[0.6rem] font-bold uppercase tracking-[0.14em] ${isRecommended ? "text-[#668400]" : "text-[#748985]"}`}>{isRecommended ? "Melhor para sua prioridade" : "Posto próximo"}</span></div><h3 className="mt-6 text-lg font-bold leading-tight">{stop.name}</h3><p className="mt-2 text-sm leading-relaxed text-[#667A76]">{stop.address}</p><div className="mt-auto pt-5">{stop.priceReference ? <p className="mb-2 text-xs text-[#55736C]">Referência ANP: <strong>{Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> · {new Date(stop.priceReference.collectedAt).toLocaleDateString("pt-BR")}</p> : <p className="mb-2 text-xs text-[#788A86]">Preço oficial ainda não vinculado para este posto.</p>}{isRecommended && <p className="mb-4 text-xs leading-relaxed text-[#5D7200]">Desvio {planned.recommendation?.detourSource === "real" ? "real" : "estimado"}: {planned.recommendation?.detourKm.toLocaleString("pt-BR")} km.</p>}<div className="grid grid-cols-2 gap-2"><Button onClick={() => { setSelectedStop(stop); track("station_sheet_opened", destination || origin); }} variant="outline" className="min-h-11 rounded-none border-[#163840] text-[#163840] hover:bg-[#163840] hover:text-white">Ver ficha</Button><Button onClick={() => openNavigation(stop)} variant="outline" className="min-h-11 rounded-none border-[#163840] text-[#163840] hover:bg-[#163840] hover:text-white"><ExternalLink className="mr-2 size-3.5" />Navegar</Button></div></div></article>; })}</div>
         </section>}
 
         <StationSheet open={Boolean(selectedStop)} onOpenChange={open => !open && setSelectedStop(null)} stop={selectedStop} recommendation={selectedStop && planned?.recommendation?.placeId === selectedStop.placeId ? planned.recommendation : null} favorite={Boolean(selectedStop && favoriteState.data?.includes(selectedStop.placeId))} onFavorite={toggleFavorite} onNavigationConfirmed={() => track("station_navigation_confirmed", destination || origin)} />
