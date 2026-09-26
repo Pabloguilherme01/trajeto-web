@@ -56,6 +56,20 @@ export default function Stations() {
     setInput(current);
     setQuery(current);
   }, []);
+  
+  useEffect(() => {
+    const title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Encontrar postos · Trajeto";
+    const description = query.trim()
+      ? "Encontre postos em " + query.trim() + ", compare distância e desvio e abra a navegação. Dados e fontes identificados pelo Trajeto."
+      : "Encontre postos no caminho, compare distância e desvio e abra a navegação.";
+    document.title = title;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", description);
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute("content", title);
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) ogDescription.setAttribute("content", description);
+  }, [query]);
 
   useEffect(() => {
     setShowMap(false);
