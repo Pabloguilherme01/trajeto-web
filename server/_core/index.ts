@@ -12,9 +12,23 @@ import { runOperationalAlertsSchedule } from "../scheduled/operationalAlerts";
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Keep request payloads bounded and add baseline security headers without
+  // introducing a runtime dependency just for middleware.
+  app.disable("x-powered-by");
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+    res.setHeader("X-Frame-Options", "DENY");
+    next();
+  });
+  app.use(express.json({ limit: "2mb" }));
+  app.use(express.urlencoded({ limit: "2mb", extended: true }));
+
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({ ok: true, service: "trajeto-web", timestamp: new Date().toISOString() });
+  });
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   app.post("/api/scheduled/operational-alerts", runOperationalAlertsSchedule);
