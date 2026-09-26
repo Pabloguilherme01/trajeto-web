@@ -40,6 +40,8 @@ export type AuthorizedStationsDownloadOptions = {
   sleep?: (milliseconds: number) => Promise<void>;
 };
 
+const MAX_ANP_CSV_BYTES = 20 * 1024 * 1024;
+
 const wait = (milliseconds: number) => new Promise<void>(resolve => setTimeout(resolve, milliseconds));
 
 export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORIZED_STATIONS_URL, targets = CORRIDOR_ANP_MUNICIPALITIES, options: AuthorizedStationsDownloadOptions = {}) {
@@ -81,7 +83,11 @@ export async function downloadAuthorizedStations(sourceUrl = DEFAULT_ANP_AUTHORI
     throw lastError instanceof Error ? lastError : new Error("Cadastro ANP indisponível após tentativas limitadas.");
   }
   void recordProviderMetric({ provider: "anp", operation: "authorized_stations_csv", durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
-  const raw = new TextDecoder("windows-1252").decode(await response.arrayBuffer());
+  const contentLength = Number(response.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_ANP_CSV_BYTES) throw new Error("O cadastro CSV da ANP excede o tamanho máximo permitido.");
+  const body = await response.arrayBuffer();
+  if (body.byteLength > MAX_ANP_CSV_BYTES) throw new Error("O cadastro CSV da ANP excede o tamanho máximo permitido.");
+  const raw = new TextDecoder("windows-1252").decode(body);
   const lines = raw.split(/\r?\n/).filter(Boolean);
   const headers = lines.shift()?.split(";") ?? [];
   const expected = ["AUTORIZACAO", "RAZAOSOCIAL", "ENDERECO", "UF", "MUNICIPIO", "BANDEIRA"];
