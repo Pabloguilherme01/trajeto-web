@@ -85,5 +85,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-route-in { animation: none; }
   .social-link { transition: none; }
 }
