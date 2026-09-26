@@ -1,0 +1,41 @@
+import type { NextFunction, Request, Response } from "express";
+
+type Bucket = { count: number; resetAt: number };
+
+export function createMemoryRateLimiter(options: {
+  windowMs: number;
+  max: number;
+  name?: string;
+}) {
+  const buckets = new Map<string, Bucket>();
+  const name = options.name ?? "request";
+
+  return (req: Request, res: Response, next: NextFunction) => {
+    const now = Date.now();
+    const key = req.ip || req.socket.remoteAddress || "unknown";
+    const current = buckets.get(key);
+
+    if (!current || current.resetAt <= now) {
+      buckets.set(key, { count: 1, resetAt: now + options.windowMs });
+      return next();
+    }
+
+    current.count += 1;
+    if (current.count > options.max) {
+      const retryAfter = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
+      res.setHeader("Retry-After", String(retryAfter));
+      res.setHeader("RateLimit-Limit", String(options.max));
+      res.setHeader("RateLimit-Remaining", "0");
+      res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
+      return res.status(429).json({
+        error: "too_many_requests",
+        message: `Limite de requisições excedido para ${name}. Tente novamente em alguns segundos.`,
+      });
+    }
+
+    res.setHeader("RateLimit-Limit", String(options.max));
+    res.setHeader("RateLimit-Remaining", String(Math.max(0, options.max - current.count)));
+    res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
+    return next();
+  };
+}
