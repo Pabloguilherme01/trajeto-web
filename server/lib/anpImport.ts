@@ -69,7 +69,7 @@ export async function downloadAndParseAnp(sourceReference: string) {
   }
   const response = await fetch(sourceReference, { signal: AbortSignal.timeout(30_000) });
   if (!response.ok) throw new Error("Não foi possível baixar a planilha oficial da ANP informada.");
-  const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: "buffer", cellDates: true, dense: true });
+  const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: "buffer", cellDates: true });
   const sheet = workbook.Sheets[workbook.SheetNames[0] ?? ""];
   if (!sheet) throw new Error("A planilha oficial não contém uma aba de dados.");
   return parseAnpRows(XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: true, defval: null }), sourceReference);
