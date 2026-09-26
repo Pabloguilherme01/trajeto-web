@@ -24,6 +24,7 @@ async function startServer() {
     res.setHeader("X-Frame-Options", "DENY");
     if (process.env.NODE_ENV === "production") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+      res.setHeader("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://forge.butterfly-effect.dev; connect-src 'self' https://forge.butterfly-effect.dev; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;");
     }
     next();
   });
@@ -31,6 +32,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "2mb", extended: true }));
 
   app.get("/api/health", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.status(200).json({ ok: true, service: "trajeto-web", timestamp: new Date().toISOString() });
   });
   registerStorageProxy(app);
