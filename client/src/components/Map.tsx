@@ -111,7 +111,6 @@ function loadMapScript() {
       resolve();
     };
     script.onerror = () => {
-      console.error("Failed to load Google Maps script");
       mapScriptPromise = null;
       reject(new Error("Não foi possível carregar o Google Maps."));
     };
