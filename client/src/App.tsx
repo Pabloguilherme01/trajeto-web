@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { consumeStationReturn } from "@/lib/authReturn";
@@ -20,7 +20,7 @@ function RouteLoading() {
   return <div role="status" aria-live="polite" className="grid min-h-[65vh] place-items-center bg-[#0B1014] text-white"><div className="border-l-4 border-[#C7FF3C] bg-[#121B22] px-5 py-4 text-sm font-bold shadow-sm">Preparando sua rota…</div></div>;
 }
 
-function AdminOnly({ children }: { children: React.ReactNode }) {
+function AdminOnly({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth();
   if (loading) return <RouteLoading />;
   if (!user || user.role !== "admin") return <NotFound />;
