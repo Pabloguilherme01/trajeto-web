@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createRouteSearch, getAuthorizedStationsForQuery, getLatestPriceSnapshots, getPriceReferencesByAreas, getRouteSearchById, getUserVehicleById, rememberGooglePlaceIds } from "../db";
+import { createRouteSearch, getAuthorizedStationsForQuery, getLatestPriceSnapshots, getPriceReferencesByAreas, getUserVehicleById, rememberGooglePlaceIds } from "../db";
 import { makeRequest, type DirectionsResult, type GeocodingResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
 import { normalizeStops, routeSummary } from "../lib/routePlanner";
@@ -71,7 +71,7 @@ export const routesRouter = router({
       tankLiters: vehicle.tankLiters ? Number(vehicle.tankLiters) : null,
     }) : null;
     const selectedEconomy = economy ? economy[economy.recommendedFuel] : null;
-    const routeSearchPersistence = createRouteSearch({
+    const routeSearchPersistence = ctx.user ? createRouteSearch({
       userId: ctx.user?.id ?? null,
       origin: input.origin,
       destination: input.destination,
@@ -93,7 +93,7 @@ export const routesRouter = router({
       ethanolKmPerLiter: input.economy?.ethanolKmPerLiter ?? null,
       estimatedTripCost: selectedEconomy?.tripCost ?? null,
       estimatedLiters: selectedEconomy?.litersNeeded ?? null,
-    });
+    }) : null;
 
     const trafficPromise = routeTrafficStatus(originPoint, destinationPoint);
 
@@ -116,9 +116,8 @@ export const routesRouter = router({
     });
     const [traffic, saved] = await Promise.all([
       trafficPromise,
-      ctx.user ? routeSearchPersistence : Promise.resolve(null),
+      routeSearchPersistence,
     ]);
-    if (!ctx.user) void routeSearchPersistence.catch(error => console.warn("[Routes] Não foi possível registrar o histórico da rota:", error));
     return {
       searchId: saved?.id ?? null,
       route,
@@ -134,5 +133,4 @@ export const routesRouter = router({
       },
     };
   }),
-  byId: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => getRouteSearchById(input.id)),
 });
