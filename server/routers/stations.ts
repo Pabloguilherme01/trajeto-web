@@ -11,7 +11,6 @@ import { dedupePlaceDetailsRequest } from "../lib/placeDetailsRequest";
 import { stationPaginationMetricRegion } from "../lib/stationPaginationMetrics";
 
 export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional() });
-const authorizedInput = z.object({ query: z.string().trim().min(3).max(240), neighborhood: z.string().trim().min(1).max(160).optional(), brand: z.string().trim().min(1).max(120).optional() });
 const detailsInput = z.object({ placeId: z.string().trim().min(1).max(255) });
 type StationSearchPage = {
   query: string;
