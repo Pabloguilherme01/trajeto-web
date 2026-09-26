@@ -22,6 +22,12 @@ describe("downloadAuthorizedStations", () => {
     ]);
   });
 
+  it("recusa URLs que não sejam da fonte oficial da ANP", async () => {
+    const fetchImpl = vi.fn();
+    await expect(downloadAuthorizedStations("https://example.com/anp.csv", [], { fetchImpl })).rejects.toThrow("cadastro CSV oficial");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("repete somente falhas transitórias e preserva a validação do arquivo recebido", async () => {
     const csv = ["AUTORIZACAO;RAZAOSOCIAL;ENDERECO;COMPLEMENTO;BAIRRO;CEP;UF;MUNICIPIO;BANDEIRA", "PR/GO0002;POSTO GO;Q 2;LOTE 2;CENTRO;72900-000;GO;AGUAS LINDAS DE GOIAS;IPIRANGA"].join("\n");
     const fetchImpl = vi.fn().mockResolvedValueOnce(new Response("temporário", { status: 503 })).mockResolvedValueOnce(new Response(csv, { status: 200 }));
