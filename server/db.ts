@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, inArray, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { anpSyncRuns, authorizedFuelStations, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, operationalAlerts, operationalAutomationJobs, paginationAlertThresholdHistory, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
+import { anpSyncRuns, authorizedFuelStations, consentEvents, favoriteStations, fuelPriceSnapshots, googlePlaceIdCache, InsertUser, operationalAlerts, operationalAutomationJobs, paginationAlertThresholdHistory, paginationAlertThresholds, productEvents, providerMetricSamples, redemptions, routeAlertPreferences, routeSearches, stationSearchPreferences, trafficNotifications, userVehicles, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { favoriteStationValues, type FavoriteStationInput } from "./lib/favoriteStation";
 import { normalizeRegion, type ProductEventName } from "./lib/productEvents";
