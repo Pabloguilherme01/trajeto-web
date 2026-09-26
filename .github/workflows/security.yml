@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   audit:
@@ -34,9 +33,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -nEI -- \\.(pem|key|p12|pfx)$ >/dev/null 2>&1; then
-            echo "Private-key-like file reference found in tracked content."
-            git grep -nEI -- \\.(pem|key|p12|pfx)$
+          if git ls-files | grep -E '\.(pem|key|p12|pfx)$' >/dev/null; then
+            echo "Private-key-like file is tracked in the repository."
+            git ls-files | grep -E '\.(pem|key|p12|pfx)$'
             exit 1
           fi
           if git grep -nE -- "-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----" >/dev/null 2>&1; then
