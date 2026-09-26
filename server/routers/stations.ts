@@ -60,14 +60,4 @@ export const stationsRouter = router({
     const details = await dedupePlaceDetailsRequest(input.placeId, () => makeRequest<PlaceDetailsResult>("/maps/api/place/details/json", { place_id: input.placeId, fields: "name,formatted_address,formatted_phone_number,website,opening_hours,geometry" }));
     return publicStationDetails(input.placeId, details);
   }),
-  authorizedSearch: publicProcedure.input(authorizedInput).query(async ({ input }) => {
-    const all = await getAuthorizedStationsForQuery(input.query);
-    const stations = await getAuthorizedStationsForQuery(input.query, { neighborhood: input.neighborhood, brand: input.brand });
-    return {
-      stations,
-      total: all.length,
-      neighborhoods: Array.from(new Set(all.map(station => station.neighborhood).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-      brands: Array.from(new Set(all.map(station => station.brand).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    };
-  }),
 });
