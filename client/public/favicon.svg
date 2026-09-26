@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Trajeto">
+  <rect width="64" height="64" rx="16" fill="#C7FF3C"/>
+  <path d="M18 42c7-2 13-7 17-15 2-4 5-7 11-9-3 7-5 13-11 18-5 5-10 7-17 6Z" fill="#0B1014"/>
+  <circle cx="22" cy="42" r="5" fill="#0B1014"/>
+  <circle cx="44" cy="19" r="5" fill="#0B1014"/>
+</svg>
