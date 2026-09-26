@@ -12,7 +12,6 @@ import { anpPricePlaceId, verifiedPlannerPriceReferences } from "../lib/plannerP
 const plannerInput = z.object({
   origin: z.string().trim().min(3).max(240),
   destination: z.string().trim().min(3).max(240),
-  locationConsent: z.boolean().default(false),
   economy: z.object({
     vehicleId: z.number().int().positive(),
     gasolinePrice: z.number().finite().positive().lte(100),
@@ -86,7 +85,7 @@ export const routesRouter = router({
       durationSeconds: route.durationSeconds,
       routeSummary: route.summary,
       overviewPolyline: route.polyline,
-      locationConsent: input.locationConsent,
+      locationConsent: false,
       vehicleId: vehicle?.id ?? null,
       vehicleNickname: vehicle?.nickname ?? null,
       selectedFuel: economy?.recommendedFuel ?? null,
