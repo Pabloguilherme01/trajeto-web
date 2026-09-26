@@ -59,7 +59,9 @@
   * { @apply border-border outline-ring/50; }
   html { scroll-behavior: smooth; background: #0B1014; }
   body { @apply bg-background font-sans text-foreground antialiased; }
-  button, a { -webkit-tap-highlight-color: transparent; }\n  button, a, input, select, textarea { touch-action: manipulation; }\n  :focus-visible { outline: 3px solid #3DE3FF; outline-offset: 3px; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button, a, input, select, textarea { touch-action: manipulation; }
+  :focus-visible { outline: 3px solid #3DE3FF; outline-offset: 3px; }
   button:not(:disabled), [role="button"]:not([aria-disabled="true"]), [type="button"]:not(:disabled), [type="submit"]:not(:disabled), a[href], input[type="checkbox"]:not(:disabled) { @apply cursor-pointer; }
   ::selection { background: #C7FF3C; color: #0B1014; }
 }
@@ -71,10 +73,6 @@
   .section-title em { color: #6C3DDB; font-style: normal; }
   .brand-wordmark { font-family: "Sora", sans-serif; font-weight: 800; letter-spacing: -0.09em; line-height: 1; text-transform: lowercase; }
   .route-grid { background-color: #0B1014; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px), radial-gradient(circle at 72% 34%, rgba(61,227,255,.15), transparent 27rem); background-size: 34px 34px, 34px 34px, auto; }
-  .social-link { transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1); }
-  .social-link:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0,0,0,.26); }
-  .social-link:active { transform: scale(.97); }
-  .social-link:focus-visible { outline: 3px solid #3DE3FF; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(61,227,255,.18); }
   @media (min-width: 640px) { .container { padding-inline: 2rem; } }
   @media (min-width: 1024px) { .container { max-width: 1280px; padding-inline: 2rem; } }
 }
@@ -87,5 +85,4 @@
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .animate-route-in { animation: none; }
-  .social-link { transition: none; }
 }
