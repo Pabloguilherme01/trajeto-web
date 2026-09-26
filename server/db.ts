@@ -269,6 +269,10 @@ export async function createRedemption(input: {
   const db = await getDb();
   const code = `TRJ-${crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`;
   if (!db) {
+    const route = inMemoryRouteSearches.get(input.routeSearchId);
+    if (!route || route.userId !== input.userId) {
+      throw new Error("Rota não encontrada para este usuário.");
+    }
     const id = nextRedemptionId++;
     const record = { id, ...input, redemptionCode: code, status: "requested" as const, requestedAt: new Date() };
     const list = inMemoryRedemptions.get(input.userId) ?? [];
@@ -276,6 +280,15 @@ export async function createRedemption(input: {
     inMemoryRedemptions.set(input.userId, list);
     return { id, code, status: "requested" as const };
   }
+
+  const route = (await db.select({ id: routeSearches.id })
+    .from(routeSearches)
+    .where(and(eq(routeSearches.id, input.routeSearchId), eq(routeSearches.userId, input.userId)))
+    .limit(1))[0];
+  if (!route) {
+    throw new Error("Rota não encontrada para este usuário.");
+  }
+
   const result = await db.insert(redemptions).values({ ...input, redemptionCode: code });
   return { id: Number(result[0].insertId), code, status: "requested" as const };
 }
