@@ -15,6 +15,7 @@ const requiredInProduction = [
   ["JWT_SECRET", ENV.cookieSecret],
   ["VITE_APP_ID", ENV.appId],
   ["OAUTH_SERVER_URL", ENV.oAuthServerUrl],
+  ["DATABASE_URL", ENV.databaseUrl],
 ] as const;
 
 if (ENV.isProduction) {
