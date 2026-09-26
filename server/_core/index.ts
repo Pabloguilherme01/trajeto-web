@@ -52,6 +52,7 @@ async function startServer() {
     res.status(200).json({ ok: true });
   });
 
+  app.use("/manus-storage", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "proxy de armazenamento" }));
   registerStorageProxy(app);
   app.use("/api/oauth/callback", createMemoryRateLimiter({ windowMs: 10 * 60_000, max: 20, name: "OAuth" }));
   registerOAuthRoutes(app);
@@ -62,6 +63,10 @@ async function startServer() {
   // Public integrations are expensive, while the global limiter prevents
   // abuse of less expensive tRPC procedures that are otherwise easy to spam.
   app.use("/api/trpc", createMemoryRateLimiter({ windowMs: 60_000, max: 240, name: "API" }));
+  app.use("/api/trpc", (_req, res, next) => {
+    res.setHeader("Cache-Control", "no-store");
+    next();
+  });
   app.use("/api/trpc/routes.plan", createMemoryRateLimiter({ windowMs: 60_000, max: 30, name: "planejamento de rotas" }));
   app.use("/api/trpc/stationDirectory.search", createMemoryRateLimiter({ windowMs: 60_000, max: 45, name: "busca de postos" }));
   app.use("/api/trpc/stationDirectory.details", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "detalhes de posto" }));
