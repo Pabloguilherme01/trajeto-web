@@ -1,4 +1,4 @@
-/** Design reminder: Trajeto uses a light mineral canvas with dark-petrol navigation for clear wayfinding. */
+/** Trajeto prioritizes dark, high-contrast navigation and fast route decisions. */
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -17,7 +17,7 @@ const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
 
 function RouteLoading() {
-  return <div className="grid min-h-[65vh] place-items-center bg-[#F7F2E8] text-[#163840]"><div className="border-l-4 border-[#FFC928] bg-white px-5 py-4 text-sm font-bold shadow-sm">Preparando sua rota…</div></div>;
+  return <div role="status" aria-live="polite" className="grid min-h-[65vh] place-items-center bg-[#0B1014] text-white"><div className="border-l-4 border-[#C7FF3C] bg-[#121B22] px-5 py-4 text-sm font-bold shadow-sm">Preparando sua rota…</div></div>;
 }
 
 function AuthReturnHandler() {
