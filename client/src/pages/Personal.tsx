@@ -25,7 +25,7 @@ export default function Personal() {
       </header>
 
       {overview.isLoading && <div role="status" aria-live="polite" className="flex min-h-72 items-center justify-center text-[#AFC0C7]"><Loader2 className="mr-3 size-5 animate-spin" />Carregando sua rota…</div>}
-      {overview.isError && <div role="alert" className="rounded-2xl border border-[#FF7D6A]/30 bg-[#FF7D6A]/10 p-5 text-sm leading-relaxed text-[#FFC2B7]"><strong className="block text-white">Não foi possível carregar seus dados.</strong><span className="mt-1 block">Tente novamente em alguns instantes. Seus registros no servidor não são apagados por esta falha.</span></div>}
+      {overview.isError && <div role="alert" className="rounded-2xl border border-[#FF7D6A]/30 bg-[#FF7D6A]/10 p-5 text-sm leading-relaxed text-[#FFC2B7]"><strong className="block text-white">Não foi possível carregar seus dados.</strong><span className="mt-1 block">Tente novamente em alguns instantes. Seus registros no servidor não são apagados por esta falha.</span><Button type="button" onClick={() => overview.refetch()} disabled={overview.isFetching} className="mt-4 min-h-11 bg-[#C7FF3C] font-bold text-[#0B1014] hover:bg-white">{overview.isFetching ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}Tentar novamente</Button></div>}
       {data && <>
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[
