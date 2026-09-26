@@ -23,6 +23,9 @@ const plannerInput = z.object({
   recommendation: z.object({
     priceWeight: z.number().int().min(0).max(100).default(70),
   }).default({ priceWeight: 70 }),
+}).refine(input => input.origin.toLocaleLowerCase("pt-BR") !== input.destination.toLocaleLowerCase("pt-BR"), {
+  message: "Origem e destino precisam ser diferentes.",
+  path: ["destination"],
 });
 
 function locality(result: GeocodingResult) {
