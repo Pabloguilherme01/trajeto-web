@@ -167,7 +167,7 @@ function DashboardLayoutContent({
               <button
                 onClick={toggleSidebar}
                 className="flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3DE3FF]"
-                aria-label="Toggle navigation"
+                aria-label="Abrir ou fechar navegação"
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -239,10 +239,29 @@ function DashboardLayoutContent({
           </SidebarFooter>
         </Sidebar>
         <div
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Ajustar largura da navegação"
+          aria-valuemin={MIN_WIDTH}
+          aria-valuemax={MAX_WIDTH}
+          aria-valuenow={sidebarWidth}
+          tabIndex={isCollapsed ? -1 : 0}
+          className={`absolute top-0 right-0 w-2 h-full cursor-col-resize transition-colors hover:bg-[#C7FF3C]/15 focus-visible:bg-[#C7FF3C]/20 focus-visible:outline-none ${isCollapsed ? "hidden" : ""}`}
           onMouseDown={() => {
             if (isCollapsed) return;
             setIsResizing(true);
+          }}
+          onKeyDown={event => {
+            if (isCollapsed) return;
+            const step = event.shiftKey ? 32 : 16;
+            if (event.key === "ArrowLeft") {
+              event.preventDefault();
+              setSidebarWidth(Math.max(MIN_WIDTH, sidebarWidth - step));
+            }
+            if (event.key === "ArrowRight") {
+              event.preventDefault();
+              setSidebarWidth(Math.min(MAX_WIDTH, sidebarWidth + step));
+            }
           }}
           style={{ zIndex: 50 }}
         />
