@@ -26,7 +26,7 @@ export default function Personal() {
 
       {overview.isLoading && <div className="flex min-h-72 items-center justify-center text-[#AFC0C7]"><Loader2 className="mr-3 size-5 animate-spin" />Carregando sua rota…</div>}
       {data && <>
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[
             { label: "Consultas salvas", value: data.routes.length, icon: History, accent: "#C7FF3C" },
             { label: "Favoritos", value: data.favorites.length, icon: Heart, accent: "#BDA5FF" },
