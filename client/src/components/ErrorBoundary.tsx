@@ -1,5 +1,6 @@
-import { AlertTriangle, RotateCcw } from "lucide-react";
+import { AlertTriangle, Home, RotateCcw } from "lucide-react";
 import { Component, type ReactNode } from "react";
+import { Link } from "wouter";
 
 interface Props {
   children: ReactNode;
@@ -7,44 +8,41 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(): State {
+    return { hasError: true };
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen p-8 bg-background">
-          <div className="flex flex-col items-center w-full max-w-2xl p-8">
-            <AlertTriangle
-              size={48}
-              className="text-destructive mb-6 flex-shrink-0"
-            />
-
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">Trajeto</p>
-            <h2 className="mb-3 mt-3 text-xl font-bold">Algo saiu do esperado.</h2>
-            <p className="mb-6 max-w-md text-center text-sm leading-relaxed text-muted-foreground">
-              A tela encontrou um erro inesperado. Seus dados salvos no servidor não foram apagados.
-              Tente recarregar a página.
+        <main className="flex min-h-screen items-center justify-center bg-[#0B1014] px-4 py-10 text-white">
+          <section role="alert" aria-labelledby="app-error-title" className="w-full max-w-xl rounded-3xl border border-white/10 bg-[#121B22] p-7 text-center shadow-2xl sm:p-10">
+            <div className="mx-auto grid size-14 place-items-center rounded-full bg-[#FF7D6A]/10 text-[#FFAA9C]">
+              <AlertTriangle size={26} aria-hidden="true" />
+            </div>
+            <p className="mt-5 text-[0.65rem] font-extrabold uppercase tracking-[0.16em] text-[#3DE3FF]">Trajeto</p>
+            <h1 id="app-error-title" className="mt-3 font-display text-3xl font-semibold tracking-[-0.055em]">Algo saiu do esperado.</h1>
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#A5B5BC]">
+              Esta tela encontrou um erro inesperado. Tente recarregar ou volte ao início para continuar sua consulta.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 py-2.5 font-bold text-primary-foreground transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-              <RotateCcw size={16} aria-hidden="true" />
-              Recarregar página
-            </button>
-          </div>
-        </div>
+            <div className="mt-7 flex flex-col justify-center gap-2 sm:flex-row">
+              <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-5 py-2.5 font-bold text-[#0B1014] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DE3FF]">
+                <RotateCcw size={16} aria-hidden="true" /> Recarregar
+              </button>
+              <Link href="/" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-5 py-2.5 font-bold text-white transition hover:border-[#3DE3FF] hover:text-[#3DE3FF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DE3FF]">
+                <Home size={16} aria-hidden="true" /> Voltar ao início
+              </Link>
+            </div>
+          </section>
+        </main>
       );
     }
 
