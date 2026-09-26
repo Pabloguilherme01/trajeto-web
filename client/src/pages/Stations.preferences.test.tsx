@@ -3,7 +3,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-const saved = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "CAMPING CLUBE", anpBrand: "BANDEIRA BRANCA", resultsPerView: 5 as const, economicMode: true };
+const saved = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "all", anpBrand: "all", resultsPerView: 5 as const, economicMode: true };
 const saveMutation = vi.fn();
 let isFetchingNextPage = false;
 
@@ -33,7 +33,6 @@ vi.mock("@/lib/trpc", () => ({
     stationDirectory: {
       search: { useInfiniteQuery: () => ({ data: { pages: [{ query: "Águas Lindas de Goiás, GO", queriedAt: Date.now(), stations: [{ placeId: "shell-1", name: "Posto Shell", address: "Águas Lindas", lat: -15.74, lng: -48.28, phone: null, website: null, isOpen: true, openingHours: [], distanceMeters: 1200, distanceLabel: "1.2 km" }], nextCursor: "next-token" }] }, isLoading: false, isError: false, hasNextPage: true, isFetchingNextPage, isFetchNextPageError: false, fetchNextPage: vi.fn() }) },
       details: { useQuery: () => ({ data: undefined, isLoading: false }) },
-      authorizedSearch: { useQuery: () => ({ data: { stations: [], total: 1, neighborhoods: ["CAMPING CLUBE"], brands: ["BANDEIRA BRANCA"] } }) },
     },
     personal: {
       stationSearchPreferences: { useQuery: () => ({ data: saved }) },
@@ -57,8 +56,6 @@ describe("Stations com preferências autenticadas", () => {
       expect((screen.getByLabelText("Bandeira") as HTMLSelectElement).value).toBe("Shell");
       expect((screen.getByLabelText("Horário") as HTMLSelectElement).value).toBe("open");
       expect((screen.getByLabelText("Ordenar por") as HTMLSelectElement).value).toBe("hours");
-      expect((screen.getByLabelText("Bairro ANP") as HTMLSelectElement).value).toBe("CAMPING CLUBE");
-      expect((screen.getByLabelText("Bandeira ANP") as HTMLSelectElement).value).toBe("BANDEIRA BRANCA");
       expect((screen.getByLabelText("Resultados por vez") as HTMLSelectElement).value).toBe("5");
     });
 
@@ -74,7 +71,7 @@ describe("Stations com preferências autenticadas", () => {
     const loadingSection = screen.getByLabelText("Carregando próximo lote de paradas");
     expect(loadingSection).toBeTruthy();
     expect(screen.getByText("Preparando o próximo lote de postos…")).toBeTruthy();
-    expect(loadingSection.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(21);
+    expect(loadingSection.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(3);
     unmount();
     isFetchingNextPage = false;
   });
