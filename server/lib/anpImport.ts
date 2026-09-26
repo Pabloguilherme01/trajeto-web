@@ -15,6 +15,8 @@ export type AnpPriceRow = {
   collectedAt: Date;
 };
 
+const MAX_ANP_XLSX_BYTES = 15 * 1024 * 1024;
+
 const productMap: Record<string, AnpProduct | undefined> = {
   "GASOLINA COMUM": "gasoline",
   "ETANOL": "ethanol",
@@ -69,7 +71,11 @@ export async function downloadAndParseAnp(sourceReference: string) {
   }
   const response = await fetch(sourceReference, { signal: AbortSignal.timeout(30_000) });
   if (!response.ok) throw new Error("Não foi possível baixar a planilha oficial da ANP informada.");
-  const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: "buffer", cellDates: true });
+  const contentLength = Number(response.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_ANP_XLSX_BYTES) throw new Error("A planilha oficial da ANP excede o tamanho máximo permitido.");
+  const body = Buffer.from(await response.arrayBuffer());
+  if (body.byteLength > MAX_ANP_XLSX_BYTES) throw new Error("A planilha oficial da ANP excede o tamanho máximo permitido.");
+  const workbook = XLSX.read(body, { type: "buffer", cellDates: true });
   const sheet = workbook.Sheets[workbook.SheetNames[0] ?? ""];
   if (!sheet) throw new Error("A planilha oficial não contém uma aba de dados.");
   return parseAnpRows(XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: true, defval: null }), sourceReference);
