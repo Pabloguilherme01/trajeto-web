@@ -27,7 +27,6 @@ export default function Planner() {
   const [, setLocation] = useLocation();
   const [origin, setOrigin] = useState(() => new URLSearchParams(window.location.search).get("origem") || "");
   const [destination, setDestination] = useState(() => new URLSearchParams(window.location.search).get("destino") || "");
-  const [locationConsent, setLocationConsent] = useState(false);
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
@@ -61,7 +60,6 @@ export default function Planner() {
   const { isAuthenticated } = useAuth();
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation({ onSuccess: result => { setPlanned(result); track("route_open", destination || origin); } });
-  const recordConsent = trpc.consent.record.useMutation();
   const favoriteInput = useMemo(() => ({ placeIds: planned?.stops.map(stop => stop.placeId) ?? [] }), [planned]);
   const favoriteState = trpc.personal.favoriteState.useQuery(favoriteInput, { enabled: isAuthenticated && Boolean(planned?.stops.length) });
   const addFavorite = trpc.personal.addFavorite.useMutation({ onSuccess: () => { favoriteState.refetch(); track("favorite_saved", destination || origin); }, onError: error => { if (error.message.includes("Please login")) startLogin(); } });
@@ -89,9 +87,6 @@ export default function Planner() {
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setShareMessage(null);
-    if (locationConsent) {
-      await recordConsent.mutateAsync({ purpose: "location", accepted: true, policyVersion: "2026-09" });
-    }
     const parse = (value: string) => Number(value.replace(",", "."));
     const gasoline = parse(gasolinePrice);
     const ethanol = parse(ethanolPrice);
@@ -100,7 +95,7 @@ export default function Planner() {
     const economy = selectedVehicle && [gasoline, ethanol, gasolineConsumption, ethanolConsumption].every(value => Number.isFinite(value) && value > 0)
       ? { vehicleId: selectedVehicle.id, gasolinePrice: gasoline, ethanolPrice: ethanol, gasolineKmPerLiter: gasolineConsumption, ethanolKmPerLiter: ethanolConsumption }
       : undefined;
-    await planRoute.mutateAsync({ origin, destination, locationConsent, economy, recommendation: { priceWeight } });
+    await planRoute.mutateAsync({ origin, destination, locationConsent: false, economy, recommendation: { priceWeight } });
   };
 
   const toggleFavorite = () => {
@@ -157,7 +152,6 @@ export default function Planner() {
             <div className="relative mt-2"><MapPin className="absolute left-0 top-3.5 size-4 text-[#BA5B45]" /><input id="destination" required minLength={3} value={destination} onChange={event => setDestination(event.target.value)} placeholder="Ex.: Águas Lindas de Goiás, GO" className="w-full border-b border-white/25 bg-transparent py-3 pl-7 text-base outline-none placeholder:text-white/35 focus:border-[#FFC928]" /></div>
             <fieldset className="mt-7 border-t border-white/15 pt-5"><legend className="text-xs font-bold text-[#FFC928]">O que pesa mais na decisão</legend><div className="mt-3 flex items-center justify-between gap-3 text-xs"><span className="font-bold text-white/70">Menor desvio</span><output htmlFor="recommendation-weight" className="rounded-full bg-white/10 px-2.5 py-1 font-bold text-[#FFC928]">{priceWeight}% preço</output><span className="font-bold text-white/70">Menor preço</span></div><input id="recommendation-weight" type="range" min="0" max="100" step="5" value={priceWeight} onChange={event => setPriceWeight(Number(event.target.value))} aria-describedby="recommendation-weight-description" className="mt-3 h-2 w-full cursor-pointer accent-[#FFC928]" /><p id="recommendation-weight-description" className="mt-3 text-xs leading-relaxed text-white/60">Preço: <strong className="text-white">{priceWeight}%</strong> · desvio real: <strong className="text-white">{100 - priceWeight}%</strong>. O Trajeto mede o desvio real nos candidatos com referência de preço disponíveis para esta rota.</p></fieldset>
             {isAuthenticated && <fieldset className="mt-7 border-t border-white/15 pt-5"><legend className="text-xs font-bold text-[#FFC928]">Comparar combustíveis nesta rota</legend><p className="mt-2 text-xs leading-relaxed text-white/60">Opcional. Os valores escolhidos ficam vinculados ao histórico desta rota.</p><label className="mt-3 block text-xs font-bold text-white/75">Veículo<select value={selectedVehicleId ?? ""} onChange={event => setSelectedVehicleId(event.target.value ? Number(event.target.value) : null)} className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm"><option value="">Selecione</option>{vehicles.data?.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.nickname}</option>)}</select></label><div className="mt-3 grid grid-cols-2 gap-3"><label className="text-xs font-bold text-white/75">Gasolina R$/L<input value={gasolinePrice} onChange={event => setGasolinePrice(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label><label className="text-xs font-bold text-white/75">Etanol R$/L<input value={ethanolPrice} onChange={event => setEthanolPrice(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label><label className="text-xs font-bold text-white/75">Gasolina km/L<input value={gasolineKmPerLiter} onChange={event => setGasolineKmPerLiter(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label><label className="text-xs font-bold text-white/75">Etanol km/L<input value={ethanolKmPerLiter} onChange={event => setEthanolKmPerLiter(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label></div></fieldset>}
-            <label className="mt-7 flex cursor-pointer items-start gap-3 border-t border-white/15 pt-5 text-sm leading-relaxed text-white/75"><input checked={locationConsent} onChange={event => setLocationConsent(event.target.checked)} className="mt-0.5 size-4 accent-[#FFC928]" type="checkbox" /><span><strong className="block text-white">Autorizar o uso da localização</strong>O consentimento é opcional e registra sua autorização para usar a localização nesta consulta.</span></label>
             <div className="sticky bottom-0 z-10 -mx-6 mt-7 border-t border-white/15 bg-[#163840]/95 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0"><Button type="submit" disabled={planRoute.isPending} className="min-h-12 w-full rounded-none bg-[#FFC928] font-bold text-[#163840] hover:bg-white">{planRoute.isPending ? <><Loader2 className="mr-2 size-4 animate-spin" />Calculando rota…</> : <>Comparar rota e paradas <ArrowRight className="ml-2 size-4" /></>}</Button></div>
             {planRoute.isError && <p role="alert" className="mt-4 border-l-2 border-[#FFB5A1] pl-3 text-sm text-[#FFD1C3]">Não foi possível calcular a rota. Confira os endereços e tente novamente.</p>}
           </form>
