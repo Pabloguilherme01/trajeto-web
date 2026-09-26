@@ -18,8 +18,9 @@ function safeExternalUrl(value: string | null | undefined) {
   try {
     const url = new URL(value);
     if (url.protocol !== "https:" && url.protocol !== "http:") return null;
-    if (url.pathname === "/" && !url.search && !url.hash) url.pathname = "";
-    return url.toString();
+    const normalized = url.toString();
+    if (url.pathname === "/" && !url.search && !url.hash) return normalized.slice(0, -1);
+    return normalized;
   } catch {
     return null;
   }
