@@ -45,7 +45,7 @@ export default function Planner() {
     if (ogTitle) ogTitle.setAttribute("content", title);
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) ogDescription.setAttribute("content", description);
-    const shareUrl = window.location.href;
+    const shareUrl = `${window.location.origin}/planejar` + (origin.trim() && destination.trim() ? `?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}` : "");
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute("content", shareUrl);
     const canonical = document.querySelector('link[rel="canonical"]');
