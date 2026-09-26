@@ -98,6 +98,11 @@ function loadMapScript() {
   if (window.google?.maps) return Promise.resolve();
   if (mapScriptPromise) return mapScriptPromise;
   mapScriptPromise = new Promise((resolve, reject) => {
+    if (!API_KEY) {
+      reject(new Error("Google Maps não está configurado."));
+      mapScriptPromise = null;
+      return;
+    }
     const script = document.createElement("script");
     script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
     script.async = true;
