@@ -1,6 +1,5 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { corridorPresets } from "@/lib/corridorPresets";
-import { trpc } from "@/lib/trpc";
 import { ArrowRight, BadgeCheck, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
@@ -12,7 +11,6 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [activePresetId, setActivePresetId] = useState(corridorPresets[0]?.id ?? "");
   const track = useProductEvents();
-  const socialLinks = trpc.social.publicLinks.useQuery();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
   const openSearch = (query: string, presetId = activePreset?.id) => {
