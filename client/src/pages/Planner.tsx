@@ -29,7 +29,7 @@ export default function Planner() {
   const [destination, setDestination] = useState(() => new URLSearchParams(window.location.search).get("destino") || "");
   const [locationConsent, setLocationConsent] = useState(false);
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
-  const [rescueMessage, setRescueMessage] = useState<string | null>(null);
+  const [shareMessage, setRescueMessage] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
   
   useEffect(() => {
@@ -187,7 +187,7 @@ export default function Planner() {
 
         {planned && planned.anpReferences.length > 0 && <section className="mt-8 border border-[#D7DFD8] bg-white p-5 sm:p-6"><p className="eyebrow">Fonte de preço</p><h2 className="font-display mt-2 text-2xl font-semibold tracking-[-0.045em]">Referências semanais da ANP</h2><p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#607570]">Os preços mostrados nos cartões são referências datadas e só aparecem quando há vínculo com o posto. Esta fonte não representa o preço atual na bomba.</p><div className="mt-4 flex flex-wrap gap-2">{planned.anpReferences.slice(0, 4).map(reference => <span key={reference.id} className="border border-[#CBD8CF] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#45635C]">{reference.product} · {Number(reference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} · {new Date(reference.collectedAt).toLocaleDateString("pt-BR")}</span>)}</div></section>}
 
-        {rescueMessage && <div className="mt-8 flex items-center gap-3 border-l-4 border-[#FFC928] bg-[#EAF0E9] p-5 text-sm text-[#42645C]"><CheckCircle2 className="size-5 text-[#163840]" />{rescueMessage}</div>}
+        {shareMessage && <div className="mt-8 flex items-center gap-3 border-l-4 border-[#FFC928] bg-[#EAF0E9] p-5 text-sm text-[#42645C]"><CheckCircle2 className="size-5 text-[#163840]" />{shareMessage}</div>}
         <div className="mt-12 border-t border-[#D8DED5] pt-6 text-xs leading-relaxed text-[#667A76]">Dados geográficos e de rota: Google Maps. Preços, quando exibidos, são referências oficiais periódicas da ANP e não constituem oferta ou garantia de preço no posto.</div>
       </main>
     </div>
