@@ -133,9 +133,12 @@ export function MapView({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const [shouldLoad, setShouldLoad] = useState(!deferUntilVisible);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const init = usePersistFn(async () => {
-    await loadMapScript();
+    try {
+      setLoadError(null);
+      await loadMapScript();
     if (!mapContainer.current || map.current) {
       console.error("Map container not found");
       return;
@@ -151,6 +154,9 @@ export function MapView({
     });
     if (onMapReady) {
       onMapReady(map.current);
+    }
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Não foi possível carregar o mapa.");
     }
   });
 
@@ -176,8 +182,9 @@ export function MapView({
   }, [init, shouldLoad]);
 
   return (
-    <div ref={mapContainer} aria-label="Mapa da rota" className={cn("relative w-full h-[500px] bg-[#EDF2EE]", className)}>
+    <div ref={mapContainer} role="img" aria-label="Mapa da rota" className={cn("relative w-full h-[500px] bg-[#EDF2EE]", className)}>
       {!shouldLoad && <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#EDF2EE_35%,#F8FBF7_50%,#EDF2EE_65%)]" aria-label="Mapa será carregado quando estiver próximo" />}
+      {loadError && <div role="alert" className="absolute inset-0 grid place-items-center bg-[#0B1014]/95 p-6 text-center text-sm font-bold text-white"><div><p>O mapa não pôde ser carregado agora.</p><p className="mt-2 text-xs font-normal text-[#A5B5BC]">Os resultados da consulta continuam disponíveis abaixo.</p></div></div>}
     </div>
   );
 }
