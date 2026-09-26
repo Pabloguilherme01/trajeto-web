@@ -4,7 +4,15 @@ O Trajeto é uma ferramenta de decisão para quem se desloca de carro pelo Entor
 
 ## Objetivo
 
-**Ajudar o motorista a escolher onde parar e por onde seguir, gastando menos tempo, combustível e desvio.**
+**Ajudar quem dirige pelo Entorno a escolher onde parar e por onde seguir, economizando tempo, combustível e desvio.**
+
+A missão do produto é simples: transformar uma busca de posto ou rota em uma decisão prática. O Trajeto não tenta substituir o aplicativo de mapas; ele organiza contexto para responder **onde parar, quanto desviar, o que realmente pode ser economizado e de onde veio cada dado**.
+
+O fluxo principal é:
+
+**buscar → comparar → decidir → navegar**
+
+Toda nova funcionalidade deve justificar seu espaço por melhorar uma dessas quatro etapas. Se não melhorar a decisão ou o uso recorrente, fica fora da experiência principal.
 
 A plataforma começa pública e simples: o usuário informa uma cidade, bairro, posto ou destino e recebe opções de abastecimento, contexto de rota e referências de fonte. Cadastro é opcional e só entra quando traz valor recorrente.
 
@@ -45,13 +53,15 @@ Não exigimos cadastro para descobrir valor. A conta aparece depois, como ferram
 O crescimento do Trajeto deve vir de utilidade repetível, não de excesso de funcionalidades:
 
 - buscas rápidas para os corredores mais usados;
+- páginas compartilháveis para consultas e rotas concretas;
+- aquisição por necessidades reais, como “postos na BR-070” ou “onde parar entre Águas Lindas e Brasília”;
 - resultados fáceis de compartilhar;
 - páginas que resolvem uma dúvida específica;
 - transparência sobre fontes e datas;
 - melhoria contínua baseada em eventos agregados de produto;
 - conteúdo útil para motoristas do Entorno.
 
-O objetivo é que alguém use o Trajeto em uma viagem e pense: **“isso resolveu minha próxima parada”**.
+O objetivo de crescimento é que alguém use o Trajeto em uma viagem, resolva uma decisão concreta e tenha um motivo claro para voltar na próxima rota.
 
 ## O que não é prioridade
 
