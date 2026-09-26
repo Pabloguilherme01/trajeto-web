@@ -44,7 +44,7 @@ export const stationsRouter = router({
         paginationWarning: "O Google Maps ainda não liberou este lote. Os postos já carregados permanecem disponíveis; tente carregar novamente em alguns instantes.",
       } satisfies StationSearchPage;
     }
-    if (search.status !== "OK" && search.status !== "ZERO_RESULTS") throw new Error(`Google Maps não liberou o próximo lote (${search.status}).`);
+    if (search.status !== "OK" && search.status !== "ZERO_RESULTS") throw new Error("Não foi possível carregar mais postos agora.");
     const candidates = search.results.slice(0, 20);
     void rememberGooglePlaceIds(candidates.map(station => station.place_id));
     const stations = candidates.map(station => publicStationInfo(station));
