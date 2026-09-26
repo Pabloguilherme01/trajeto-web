@@ -19,9 +19,7 @@ function getMapsConfig(): MapsConfig {
   const apiKey = ENV.forgeApiKey;
 
   if (!baseUrl || !apiKey) {
-    throw new Error(
-      "Google Maps proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY"
-    );
+    throw new Error("Google Maps service is not configured");
   }
 
   return {
@@ -144,10 +142,7 @@ export async function makeRequest<T = unknown>(
     if (!response.ok) {
       metricRecorded = true;
       void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false, statusCode: response.status });
-      const errorText = await response.text().catch(() => "");
-      throw new Error(
-        `Google Maps API request failed (${response.status} ${response.statusText}): ${errorText.slice(0, 500)}`
-      );
+      throw new Error(`Google Maps API request failed (${response.status})`);
     }
 
     const payload = await response.json() as T;
