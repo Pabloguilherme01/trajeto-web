@@ -29,10 +29,10 @@ import { Button } from "./ui/button";
 import { dashboardAccessCopy, type DashboardAccessCopy } from "@/lib/dashboardAccessCopy";
 
 const menuItems = [
-  { icon: CircleUserRound, label: "Minha conta", path: "/minha-conta" },
-  { icon: MapPinned, label: "Planejador", path: "/planejar" },
-  { icon: LayoutDashboard, label: "Operações", path: "/operacoes" },
-];
+  { icon: CircleUserRound, label: "Minha conta", path: "/minha-conta", adminOnly: false },
+  { icon: MapPinned, label: "Planejador", path: "/planejar", adminOnly: false },
+  { icon: LayoutDashboard, label: "Operações", path: "/operacoes", adminOnly: true },
+] as const;
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -47,13 +47,14 @@ export default function DashboardLayout({
   accessCopy?: DashboardAccessCopy;
 }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
+    if (typeof window === "undefined") return DEFAULT_WIDTH;
+    const saved = Number.parseInt(window.localStorage.getItem(SIDEBAR_WIDTH_KEY) ?? "", 10);
+    return Number.isFinite(saved) ? Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, saved)) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
+    if (typeof window !== "undefined") window.localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
 
   if (loading) {
@@ -182,13 +183,16 @@ function DashboardLayoutContent({
 
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
+              {menuItems.filter(item => !item.adminOnly || user?.role === "admin").map(item => {
                 const isActive = location === item.path;
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => setLocation(item.path)}
+                      onClick={() => {
+                        setLocation(item.path);
+                        if (isMobile && state === "expanded") toggleSidebar();
+                      }}
                       tooltip={item.label}
                       className={`h-10 rounded-lg font-normal transition-all ${isActive ? "bg-[#C7FF3C]/10 text-[#D9FF91]" : "text-[#A9BAC2] hover:bg-white/7 hover:text-white"}`}
                     >
