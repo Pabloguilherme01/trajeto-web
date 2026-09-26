@@ -18,9 +18,9 @@ export function createMemoryRateLimiter(options: {
 
     if (!current || current.resetAt <= now) {
       if (buckets.size >= maxBuckets) {
-        for (const [bucketKey, bucket] of buckets) {
+        buckets.forEach((bucket, bucketKey) => {
           if (bucket.resetAt <= now) buckets.delete(bucketKey);
-        }
+        });
         if (buckets.size >= maxBuckets) {
           const oldestKey = buckets.keys().next().value;
           if (oldestKey) buckets.delete(oldestKey);
