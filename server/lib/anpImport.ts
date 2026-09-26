@@ -67,9 +67,9 @@ export async function downloadAndParseAnp(sourceReference: string) {
   if (source.protocol !== "https:" || source.hostname !== "www.gov.br" || !source.pathname.includes("/arquivos-lpc/") || !source.pathname.endsWith(".xlsx")) {
     throw new Error("Use uma planilha .xlsx oficial da ANP hospedada em www.gov.br/anp/pt-br/assuntos/.../arquivos-lpc/.");
   }
-  const response = await fetch(sourceReference);
+  const response = await fetch(sourceReference, { signal: AbortSignal.timeout(30_000) });
   if (!response.ok) throw new Error("Não foi possível baixar a planilha oficial da ANP informada.");
-  const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: "buffer", cellDates: true });
+  const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: "buffer", cellDates: true, dense: true });
   const sheet = workbook.Sheets[workbook.SheetNames[0] ?? ""];
   if (!sheet) throw new Error("A planilha oficial não contém uma aba de dados.");
   return parseAnpRows(XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: true, defval: null }), sourceReference);
