@@ -57,12 +57,6 @@ export default function Planner() {
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation({ onSuccess: result => { setPlanned(result); track("route_open", destination || origin); } });
   const recordConsent = trpc.consent.record.useMutation();
-  const requestRedemption = trpc.operations.requestRedemption.useMutation({
-    onSuccess: redemption => { track("redemption_requested", destination || origin); setRescueMessage(`Solicitação registrada. Seu código é ${redemption.code}.`); },
-    onError: error => {
-      if (error.message.includes("Please login")) startLogin();
-    },
-  });
   const favoriteInput = useMemo(() => ({ placeIds: planned?.stops.map(stop => stop.placeId) ?? [] }), [planned]);
   const favoriteState = trpc.personal.favoriteState.useQuery(favoriteInput, { enabled: isAuthenticated && Boolean(planned?.stops.length) });
   const addFavorite = trpc.personal.addFavorite.useMutation({ onSuccess: () => { favoriteState.refetch(); track("favorite_saved", destination || origin); }, onError: error => { if (error.message.includes("Please login")) startLogin(); } });
