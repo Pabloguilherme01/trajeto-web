@@ -11,6 +11,6 @@ export async function runOperationalAlertsSchedule(req: Request, res: Response) 
     return res.json({ ok: true, ...result });
   } catch (error) {
     console.error("[Operational alerts schedule] failed", error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : "unknown-error", timestamp: new Date().toISOString() });
+    return res.status(500).json({ error: "schedule execution failed", timestamp: new Date().toISOString() });
   }
 }
