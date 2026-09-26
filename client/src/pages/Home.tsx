@@ -43,7 +43,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 border-b border-white/8 bg-[#0B1014]/90 backdrop-blur-xl">
         <div className="container flex h-[70px] items-center justify-between gap-3">
           <button onClick={() => setLocation("/")} className="group flex items-center gap-2.5" aria-label="Trajeto — início">
-            <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5 transition duration-200 group-hover:rotate-6" src="/manus-storage/trajeto-mark_78544e73.png" alt="" />
+            <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5 transition duration-200 group-hover:rotate-6" src="/favicon.svg" alt="" />
             <span className="brand-wordmark text-[1.25rem] text-white">trajeto</span>
             <span className="hidden rounded-full border border-white/10 px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-[0.15em] text-[#8DA0AB] sm:block">Entorno em movimento</span>
           </button>
