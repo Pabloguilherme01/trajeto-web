@@ -1,5 +1,5 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
-import { corridorPresets } from "@/lib/corridorPresets";
+import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import { ArrowRight, BadgeCheck, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
@@ -10,7 +10,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [activePresetId, setActivePresetId] = useState(corridorPresets[0]?.id ?? "");
+  const [activePresetId, setActivePresetId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
