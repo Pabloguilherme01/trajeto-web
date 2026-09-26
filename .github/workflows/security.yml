@@ -21,6 +21,6 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install --omit=dev --legacy-peer-deps --force --no-audit --no-fund
+        run: npm install --omit=dev --legacy-peer-deps --force --ignore-scripts --no-audit --no-fund
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
