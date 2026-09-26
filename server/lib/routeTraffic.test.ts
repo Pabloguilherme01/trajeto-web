@@ -28,10 +28,14 @@ describe("route traffic status", () => {
 
   it("returns a non-live state instead of calling an unconfigured provider", async () => {
     const previous = process.env.TOMTOM_API_KEY;
-    delete process.env.TOMTOM_API_KEY;
-    const result = await routeTrafficAreaStatus({ lat: -15.76, lng: -48.28 });
-    if (previous) process.env.TOMTOM_API_KEY = previous;
-    expect(result.state).toBe("pending");
-    expect(result.incidents).toEqual([]);
+    try {
+      delete process.env.TOMTOM_API_KEY;
+      const result = await routeTrafficAreaStatus({ lat: -15.76, lng: -48.28 });
+      expect(result.state).toBe("pending");
+      expect(result.incidents).toEqual([]);
+    } finally {
+      if (previous === undefined) delete process.env.TOMTOM_API_KEY;
+      else process.env.TOMTOM_API_KEY = previous;
+    }
   });
 });
