@@ -29,7 +29,7 @@ export default function Planner() {
   const [destination, setDestination] = useState(() => new URLSearchParams(window.location.search).get("destino") || "");
   const [locationConsent, setLocationConsent] = useState(false);
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
-  const [shareMessage, setRescueMessage] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
   
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function Planner() {
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setRescueMessage(null);
+    setShareMessage(null);
     if (locationConsent) {
       await recordConsent.mutateAsync({ purpose: "location", accepted: true, policyVersion: "2026-08" });
     }
@@ -119,10 +119,10 @@ export default function Planner() {
     const text = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}. Veja distância, duração e opções de abastecimento.`;
     try {
       if (navigator.share) await navigator.share({ title: "Trajeto · rota", text, url });
-      else { await navigator.clipboard.writeText(`${text}\\n${url}`); setRescueMessage("Link da rota copiado para compartilhar."); }
+      else { await navigator.clipboard.writeText(`${text}\\n${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      setRescueMessage("Não foi possível preparar o compartilhamento agora.");
+      setShareMessage("Não foi possível preparar o compartilhamento agora.");
     }
   };
 
@@ -131,7 +131,7 @@ export default function Planner() {
       <header className="border-b border-[#D8DED5] bg-[#14343C] text-white">
         <div className="container flex h-[72px] items-center justify-between">
           <Link href="/" className="group flex items-center gap-3" aria-label="Voltar para início">
-            <img className="size-9 rounded-lg bg-[#FFC928] p-1" src="/manus-storage/trajeto-mark_78544e73.png" alt="" />
+            <img className="size-9 rounded-lg bg-[#FFC928] p-1" src="/favicon.svg" alt="" />
             <span className="brand-wordmark text-xl text-white">trajeto</span>
             <span className="hidden border-l border-white/20 pl-3 text-[0.62rem] font-bold tracking-[0.18em] text-[#FFC928] sm:block">PLANEJADOR</span>
           </Link>
