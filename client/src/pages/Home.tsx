@@ -9,13 +9,18 @@ const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
 export default function Home() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [activePresetId, setActivePresetId] = useState(corridorPresets[0]?.id ?? "");
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
   const openSearch = (query: string, presetId = activePreset?.id) => {
     const normalized = query.trim() || activePreset?.query || "";
-    if (!normalized) return;
+    if (normalized.length < 3) {
+      setSearchError("Digite pelo menos 3 caracteres para pesquisar.");
+      return;
+    }
+    setSearchError(null);
     track("station_search", normalized);
     setLocation(`/postos?region=${encodeURIComponent(presetId ?? "")}&q=${encodeURIComponent(normalized)}`);
   };
@@ -82,11 +87,11 @@ export default function Home() {
                 <Fuel className="size-6 text-[#C7FF3C]" />
               </div>
 
-              <form onSubmit={submitSearch} className="mt-7">
+              <form onSubmit={submitSearch} className="mt-7" noValidate>
                 <label htmlFor="home-search" className="text-xs font-bold text-[#A9BAC2]">Cidade, bairro, posto ou destino</label>
                 <div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]">
                   <Search className="ml-3 mt-3 size-5 shrink-0 text-[#3DE3FF]" />
-                  <input id="home-search" value={search} onChange={event => setSearch(event.target.value)} placeholder={activePreset?.query ?? "Ex.: Águas Lindas de Goiás"} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780]" />
+                  <input id="home-search" minLength={3} aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "home-search-error" : undefined} value={search} onChange={event => setSearch(event.target.value)} placeholder={activePreset?.query ?? "Ex.: Águas Lindas de Goiás"} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780]" />
                   <button type="submit" aria-label="Pesquisar postos" className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] transition hover:bg-white active:scale-95">
                     <ArrowRight className="size-5" />
                   </button>
