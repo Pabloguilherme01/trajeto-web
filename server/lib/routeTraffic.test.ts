@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterActionableTrafficItems, filterIncidentsByMinimumDelay, officialRouteSources, routeBoundingBox } from "./routeTraffic";
+import { filterActionableTrafficItems, filterIncidentsByMinimumDelay, officialRouteSources, routeBoundingBox, routeTrafficAreaStatus } from "./routeTraffic";
 
 describe("route traffic status", () => {
   it("keeps official sources visible and bounds the route query to a compact area", () => {
@@ -24,5 +24,14 @@ describe("route traffic status", () => {
     expect(filterIncidentsByMinimumDelay(incidents, 0)).toHaveLength(3);
     expect(filterIncidentsByMinimumDelay(incidents, 5)).toEqual([{ delaySeconds: 600 }]);
     expect(filterIncidentsByMinimumDelay(incidents, 15)).toEqual([]);
+  });
+
+  it("returns a non-live state instead of calling an unconfigured provider", async () => {
+    const previous = process.env.TOMTOM_API_KEY;
+    delete process.env.TOMTOM_API_KEY;
+    const result = await routeTrafficAreaStatus({ lat: -15.76, lng: -48.28 });
+    if (previous) process.env.TOMTOM_API_KEY = previous;
+    expect(result.state).toBe("pending");
+    expect(result.incidents).toEqual([]);
   });
 });
