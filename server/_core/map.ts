@@ -1,8 +1,4 @@
-/**
- * Google Maps API integration.
- *
- * The server injects the provider credential and keeps it out of the browser.
- */
+/** Google Maps server integration through the configured Forge proxy. */
 
 import { ENV } from "./env";
 import { recordProviderMetric } from "../db";
