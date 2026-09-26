@@ -20,6 +20,13 @@ function RouteLoading() {
   return <div role="status" aria-live="polite" className="grid min-h-[65vh] place-items-center bg-[#0B1014] text-white"><div className="border-l-4 border-[#C7FF3C] bg-[#121B22] px-5 py-4 text-sm font-bold shadow-sm">Preparando sua rota…</div></div>;
 }
 
+function AdminOnly({ children }: { children: React.ReactNode }) {
+  const { loading, user } = useAuth();
+  if (loading) return <RouteLoading />;
+  if (!user || user.role !== "admin") return <NotFound />;
+  return <>{children}</>;
+}
+
 function AuthReturnHandler() {
   const { isAuthenticated, loading } = useAuth();
   const [location, setLocation] = useLocation();
@@ -41,7 +48,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/planejar" component={Planner} />
-        <Route path="/operacoes" component={Operations} />
+        <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
         <Route path="/postos" component={Stations} />
         <Route path="/ajuda" component={Help} />
         <Route path="/minha-conta" component={Personal} />
