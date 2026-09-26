@@ -144,7 +144,6 @@ export function MapView({
       setLoadError(null);
       await loadMapScript();
     if (!mapContainer.current || map.current) {
-      console.error("Map container not found");
       return;
     }
     map.current = new window.google.maps.Map(mapContainer.current, {
