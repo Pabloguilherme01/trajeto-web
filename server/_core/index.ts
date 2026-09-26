@@ -20,11 +20,11 @@ async function startServer() {
   app.use((_req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     res.setHeader("X-Frame-Options", "DENY");
     if (process.env.NODE_ENV === "production") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-      res.setHeader("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://forge.butterfly-effect.dev; connect-src 'self' https://forge.butterfly-effect.dev; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;");
+      res.setHeader("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;");
     }
     next();
   });
@@ -36,11 +36,12 @@ async function startServer() {
     res.status(200).json({ ok: true, service: "trajeto-web", timestamp: new Date().toISOString() });
   });
   registerStorageProxy(app);
+  // The limiter must precede the callback route so it cannot be bypassed.
+  app.use("/api/oauth/callback", createMemoryRateLimiter({ windowMs: 10 * 60_000, max: 20, name: "OAuth" }));
   registerOAuthRoutes(app);
   app.post("/api/scheduled/operational-alerts", runOperationalAlertsSchedule);
   // Bound expensive public integrations and anonymous telemetry without adding
   // a runtime dependency. This is intentionally scoped to high-cost procedures.
-  app.use("/api/oauth/callback", createMemoryRateLimiter({ windowMs: 10 * 60_000, max: 20, name: "OAuth" }));
   app.use("/api/trpc/routes.plan", createMemoryRateLimiter({ windowMs: 60_000, max: 30, name: "planejamento de rotas" }));
   app.use("/api/trpc/stationDirectory.search", createMemoryRateLimiter({ windowMs: 60_000, max: 45, name: "busca de postos" }));
   app.use("/api/trpc/stationDirectory.details", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "detalhes de posto" }));
