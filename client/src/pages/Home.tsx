@@ -133,7 +133,7 @@ export default function Home() {
               </article>
               <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
                 <span className="text-xs font-black text-[#52636C]">03</span>
-                <h3 className="mt-8 text-xl font-extrabold">Economize tempo ou dinheiro</h3>
+                <h3 className="mt-8 text-xl font-extrabold">Entenda o impacto</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#617179]">Quando houver dados suficientes, estime o custo da rota sem confundir referência com preço de bomba.</p>
               </article>
             </div>
