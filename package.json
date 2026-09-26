@@ -1,5 +1,5 @@
 {
-  "name": "nabomba-base",
+  "name": "trajeto-web",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -109,5 +109,8 @@
   },
   "overrides": {
     "nanoid": "3.3.7"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   }
 }
