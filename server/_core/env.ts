@@ -1,10 +1,29 @@
+const readEnv = (name: string) => process.env[name] ?? "";
+
 export const ENV = {
-  appId: process.env.VITE_APP_ID ?? "",
-  cookieSecret: process.env.JWT_SECRET ?? "",
-  databaseUrl: process.env.DATABASE_URL ?? "",
-  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
-  ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
+  appId: readEnv("VITE_APP_ID"),
+  cookieSecret: readEnv("JWT_SECRET"),
+  databaseUrl: readEnv("DATABASE_URL"),
+  oAuthServerUrl: readEnv("OAUTH_SERVER_URL"),
+  ownerOpenId: readEnv("OWNER_OPEN_ID"),
   isProduction: process.env.NODE_ENV === "production",
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  forgeApiUrl: readEnv("BUILT_IN_FORGE_API_URL"),
+  forgeApiKey: readEnv("BUILT_IN_FORGE_API_KEY"),
 };
+
+const requiredInProduction = [
+  ["JWT_SECRET", ENV.cookieSecret],
+  ["VITE_APP_ID", ENV.appId],
+  ["OAUTH_SERVER_URL", ENV.oAuthServerUrl],
+] as const;
+
+if (ENV.isProduction) {
+  const missing = requiredInProduction.filter(([, value]) => !value).map(([name]) => name);
+  if (missing.length > 0) {
+    throw new Error(`Missing required production environment variables: ${missing.join(", ")}`);
+  }
+
+  if (ENV.cookieSecret.length < 32) {
+    throw new Error("JWT_SECRET must contain at least 32 characters in production");
+  }
+}
