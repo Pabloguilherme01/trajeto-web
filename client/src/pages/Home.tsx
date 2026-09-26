@@ -51,7 +51,7 @@ export default function Home() {
                 Pare melhor.<br /><span className="text-[#C7FF3C]">Chegue melhor.</span>
               </h1>
               <p className="mt-7 max-w-xl text-base leading-relaxed text-[#B7C4CA] sm:text-lg">
-                Encontre postos no caminho, compare distância e desvio e consulte referências oficiais de combustível. Sem cadastro para começar.
+                Encontre onde parar, compare distância e desvio e planeje a próxima viagem com referências de combustível. Sem cadastro para começar.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -117,7 +117,7 @@ export default function Home() {
             <div className="max-w-2xl">
               <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Uma decisão por vez</p>
               <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Descubra → compare → <em>decida.</em></h2>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">O Trajeto não precisa que você entenda a plataforma. Você informa para onde vai e recebe as opções que realmente importam para a próxima parada.</p>
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">O Trajeto não precisa que você entenda a plataforma. Você informa onde está indo e recebe o contexto necessário para escolher a próxima parada.</p>
             </div>
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
@@ -129,12 +129,12 @@ export default function Home() {
               <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
                 <span className="text-xs font-black text-[#52636C]">02</span>
                 <h3 className="mt-8 text-xl font-extrabold">Meça o desvio</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">No planejador, compare a parada pelo efeito que ela tem na viagem, não apenas pelo preço.</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Veja o efeito da parada na viagem e compare o desvio antes de decidir.</p>
               </article>
               <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
                 <span className="text-xs font-black text-[#52636C]">03</span>
                 <h3 className="mt-8 text-xl font-extrabold">Economize tempo ou dinheiro</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Use referências de combustível e seus dados de consumo para estimar o custo da rota.</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Quando houver dados suficientes, estime o custo da rota sem confundir referência com preço de bomba.</p>
               </article>
             </div>
           </div>
