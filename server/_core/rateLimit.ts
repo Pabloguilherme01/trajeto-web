@@ -9,14 +9,28 @@ export function createMemoryRateLimiter(options: {
 }) {
   const buckets = new Map<string, Bucket>();
   const name = options.name ?? "request";
+  const maxBuckets = 5_000;
 
   return (req: Request, res: Response, next: NextFunction) => {
     const now = Date.now();
     const key = req.ip || req.socket.remoteAddress || "unknown";
-    const current = buckets.get(key);
+    let current = buckets.get(key);
 
     if (!current || current.resetAt <= now) {
-      buckets.set(key, { count: 1, resetAt: now + options.windowMs });
+      if (buckets.size >= maxBuckets) {
+        for (const [bucketKey, bucket] of buckets) {
+          if (bucket.resetAt <= now) buckets.delete(bucketKey);
+        }
+        if (buckets.size >= maxBuckets) {
+          const oldestKey = buckets.keys().next().value;
+          if (oldestKey) buckets.delete(oldestKey);
+        }
+      }
+      current = { count: 1, resetAt: now + options.windowMs };
+      buckets.set(key, current);
+      res.setHeader("RateLimit-Limit", String(options.max));
+      res.setHeader("RateLimit-Remaining", String(Math.max(0, options.max - current.count)));
+      res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
       return next();
     }
 
