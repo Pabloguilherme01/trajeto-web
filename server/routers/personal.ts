@@ -2,7 +2,7 @@ import { z } from "zod";
 import { addFavoriteStation, createConsentEvent, createProductEvent, createTrafficNotifications, createUserVehicle, deleteUserVehicle, getFavoritePlaceIds, getMonthlyRouteAlertRanking, getPersonalOverview, getRouteAlertPreferences, getStationSearchPreferences, getTrafficNotifications, getUserVehicles, getVehicleEconomyHistory, getWeeklyRouteAlertSummary, markTrafficNotificationsRead, removeFavoriteStation, removeRouteAlertPreference, updateUserVehicle, upsertRouteAlertPreference, upsertStationSearchPreferences } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { calculateFuelEconomy } from "../lib/fuelEconomy";
-import { getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
+import { ALERT_CORRIDOR_IDS, getAlertCorridor, isSlotActiveNow } from "../lib/alertCorridors";
 import { filterIncidentsByMinimumDelay, routeTrafficAreaStatus } from "../lib/routeTraffic";
 
 const stationInput = z.object({
@@ -14,7 +14,7 @@ const stationInput = z.object({
 });
 
 const alertInput = z.object({
-  corridorId: z.string().trim().min(2).max(80),
+  corridorId: z.enum(ALERT_CORRIDOR_IDS),
   corridorLabel: z.string().trim().min(2).max(120),
   timeSlot: z.enum(["morning", "afternoon", "evening", "anytime"]),
   minimumDelayMinutes: z.union([z.literal(0), z.literal(5), z.literal(10), z.literal(15), z.literal(30)]).default(0),
@@ -80,9 +80,12 @@ export const personalRouter = router({
   addFavorite: protectedProcedure.input(stationInput).mutation(({ ctx, input }) => addFavoriteStation(ctx.user.id, input)),
   removeFavorite: protectedProcedure.input(z.object({ placeId: z.string().trim().min(1).max(255) })).mutation(({ ctx, input }) => removeFavoriteStation(ctx.user.id, input.placeId)),
   saveRouteAlert: protectedProcedure.input(alertInput).mutation(async ({ ctx, input }) => {
-    await upsertRouteAlertPreference(ctx.user.id, input);
+    const corridor = getAlertCorridor(input.corridorId);
+    if (!corridor) throw new Error("Corredor de alerta inválido.");
+    const canonicalInput = { ...input, corridorLabel: corridor.label };
+    await upsertRouteAlertPreference(ctx.user.id, canonicalInput);
     await createConsentEvent({ userId: ctx.user.id, purpose: "route_alerts", accepted: true, phoneDigest: null, phoneLast4: null, policyVersion: "2026-09" });
-    await createProductEvent({ event: "alert_preference_saved", region: input.corridorLabel });
+    await createProductEvent({ event: "alert_preference_saved", region: corridor.label });
     return { saved: true };
   }),
   removeRouteAlert: protectedProcedure.input(z.object({ corridorId: z.string().trim().min(2).max(80) })).mutation(({ ctx, input }) => removeRouteAlertPreference(ctx.user.id, input.corridorId)),
