@@ -13,6 +13,11 @@ import { createMemoryRateLimiter } from "./rateLimit";
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  // Bound connection lifetimes to reduce slow-client resource exhaustion while
+  // leaving enough time for the longest upstream integrations used by the app.
+  server.requestTimeout = 60_000;
+  server.headersTimeout = 15_000;
+  server.keepAliveTimeout = 5_000;
 
   // Keep request payloads bounded and add baseline security headers without
   // introducing a runtime dependency just for middleware.
@@ -64,6 +69,19 @@ async function startServer() {
   }
 
   const port = parseInt(process.env.PORT || "3000");
+  const shutdown = (signal: string) => {
+    console.log(`[server] ${signal} received; shutting down gracefully`);
+    server.close(error => {
+      if (error) {
+        console.error("[server] graceful shutdown failed", error);
+        process.exitCode = 1;
+      }
+    });
+  };
+
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
+  process.once("SIGINT", () => shutdown("SIGINT"));
+
   server.listen(port, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${port}/`);
   });
