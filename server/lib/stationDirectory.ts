@@ -17,7 +17,9 @@ function safeExternalUrl(value: string | null | undefined) {
   if (!value) return null;
   try {
     const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    if (url.pathname === "/" && !url.search && !url.hash) url.pathname = "";
+    return url.toString();
   } catch {
     return null;
   }
