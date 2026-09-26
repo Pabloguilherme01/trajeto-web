@@ -81,7 +81,7 @@ export const personalRouter = router({
   removeFavorite: protectedProcedure.input(z.object({ placeId: z.string().trim().min(1).max(255) })).mutation(({ ctx, input }) => removeFavoriteStation(ctx.user.id, input.placeId)),
   saveRouteAlert: protectedProcedure.input(alertInput).mutation(async ({ ctx, input }) => {
     await upsertRouteAlertPreference(ctx.user.id, input);
-    await createConsentEvent({ userId: ctx.user.id, purpose: "route_alerts", accepted: true, phoneDigest: null, phoneLast4: null, policyVersion: "2026-08" });
+    await createConsentEvent({ userId: ctx.user.id, purpose: "route_alerts", accepted: true, phoneDigest: null, phoneLast4: null, policyVersion: "2026-09" });
     await createProductEvent({ event: "alert_preference_saved", region: input.corridorLabel });
     return { saved: true };
   }),
