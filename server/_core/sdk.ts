@@ -268,7 +268,8 @@ class SDKServer {
     if (!sessionToken) {
       const authHeader = req.headers.authorization;
       if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
-        sessionToken = authHeader.slice(7);
+        const bearer = authHeader.slice(7).trim();
+        if (bearer.length <= 4096) sessionToken = bearer;
       }
     }
 
