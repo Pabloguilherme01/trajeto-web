@@ -39,6 +39,7 @@ async function startServer() {
   // The limiter must precede the callback route so it cannot be bypassed.
   app.use("/api/oauth/callback", createMemoryRateLimiter({ windowMs: 10 * 60_000, max: 20, name: "OAuth" }));
   registerOAuthRoutes(app);
+  app.use("/api/scheduled/operational-alerts", createMemoryRateLimiter({ windowMs: 60_000, max: 10, name: "alertas operacionais" }));
   app.post("/api/scheduled/operational-alerts", runOperationalAlertsSchedule);
   // Bound expensive public integrations and anonymous telemetry without adding
   // a runtime dependency. This is intentionally scoped to high-cost procedures.
