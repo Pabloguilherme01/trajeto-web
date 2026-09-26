@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { corridorPresets } from "@/lib/corridorPresets";
+import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import { notificationStatusMessage, type BrowserNotificationStatus } from "@/lib/browserNotifications";
 import { trpc } from "@/lib/trpc";
 import { Bell, BellRing, CheckCheck, Clock3, Loader2, Trash2 } from "lucide-react";
@@ -37,7 +37,7 @@ function initialNotificationStatus(): BrowserNotificationStatus {
 }
 
 export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] }) {
-  const [corridorId, setCorridorId] = useState(corridorPresets[0]?.id ?? "");
+  const [corridorId, setCorridorId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
   const [timeSlot, setTimeSlot] = useState<(typeof slots)[number]["value"]>("morning");
   const [minimumDelayMinutes, setMinimumDelayMinutes] = useState<(typeof delayLimits)[number]["value"]>(0);
   const [browserAlertsEnabled, setBrowserAlertsEnabled] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("trajeto-traffic-browser-alerts") === "enabled");
@@ -92,7 +92,7 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
 
     <div className="mt-6 grid gap-3 md:grid-cols-3 xl:grid-cols-[1fr_1fr_1fr_auto]">
       <label className="text-xs font-bold text-[#B8C9CF]">Corredor
-        <select value={corridorId} onChange={event => setCorridorId(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-white/15 bg-[#0B1014] px-3 text-sm text-white outline-none focus:border-[#3DE3FF]">
+        <select value={corridorId} onChange={event => setCorridorId(event.target.value as CorridorPreset["id"])} className="mt-2 h-11 w-full rounded-xl border border-white/15 bg-[#0B1014] px-3 text-sm text-white outline-none focus:border-[#3DE3FF]">
           {corridorPresets.map(item => <option key={item.id} value={item.id}>{item.label} · {item.detail}</option>)}
         </select>
       </label>
