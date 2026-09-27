@@ -15,9 +15,11 @@ export default function MobileTravelHub() {
   const [batterySaver, setBatterySaver] = useState(false);
   const [economyMode, setEconomyModeState] = useState(getEconomyMode);
   const [networkType, setNetworkType] = useState<string | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
+    setIsStandalone(window.matchMedia("(display-mode: standalone)").matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
     const connection = (navigator as Navigator & { connection?: { effectiveType?: string; addEventListener?: (type: string, listener: () => void) => void; removeEventListener?: (type: string, listener: () => void) => void } }).connection;
     const updateNetwork = () => setNetworkType(connection?.effectiveType ?? null);
     updateNetwork();
@@ -77,7 +79,7 @@ export default function MobileTravelHub() {
             </div>
             <div className="flex items-center gap-2">{networkType && online && <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.1em] text-[#7F919A] sm:inline">{networkType}</span>}<div className={online ? "text-[#C7FF3C]" : "text-[#FFB86B]"}>{online ? <Wifi className="size-5" /> : <CloudOff className="size-5" />}</div></div>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${online ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/8 text-[#DFFF9D]" : "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]"}`}><Signal className="size-3" /> {online ? (networkType ? networkType : "online") : "offline"}</span>{battery !== null && <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${battery <= 20 ? "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]" : "border-white/10 bg-white/[0.03] text-[#A9BAC2]"}`}><Battery className="size-3" /> {battery}%</span>}<span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.58rem] font-bold text-[#A9BAC2]"><ShieldCheck className="size-3 text-[#BDA5FF]" /> local</span></div>
+          <div className="mt-4 flex flex-wrap gap-2"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${online ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/8 text-[#DFFF9D]" : "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]"}`}><Signal className="size-3" /> {online ? (networkType ? networkType : "online") : "offline"}</span>{battery !== null && <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${battery <= 20 ? "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]" : "border-white/10 bg-white/[0.03] text-[#A9BAC2]"}`}><Battery className="size-3" /> {battery}%</span>}<span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.58rem] font-bold text-[#A9BAC2]"><ShieldCheck className="size-3 text-[#BDA5FF]" /> {isStandalone ? "app instalado" : "web app"}</span></div>
           <div className="mt-3 grid grid-cols-3 gap-2">
             <div className="rounded-xl border border-white/6 bg-white/[0.035] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></div>
             <div className="rounded-xl bg-white/[0.04] p-3"><Battery className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Bateria</p><p className="text-sm font-extrabold text-white">{battery === null ? "—" : battery + "%"}</p></div>
