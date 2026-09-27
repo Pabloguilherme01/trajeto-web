@@ -27,7 +27,7 @@ export default function TripPrepCard() {
   const ready = progress === defaults.length;
 
   return (
-    <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] sm:p-6">
+    <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] sm:p-6">
       <div className="flex items-start gap-3">
         <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF0F2]"><CheckCircle2 className="size-5 text-[#326575]" /></div>
         <div className="min-w-0">
@@ -38,7 +38,7 @@ export default function TripPrepCard() {
       </div>
       <div className="mt-5 space-y-2">
         {defaults.map(([id, label]) => (
-          <label key={id} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-[#D8E0E3] px-3 py-2">
+          <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-[#D8E0E3] bg-[#FCFDFD] px-3 py-2 transition-colors has-[:checked]:border-[#326575]/40 has-[:checked]:bg-[#F2F5F6]">
             <input type="checkbox" checked={Boolean(checked[id])} onChange={() => toggle(id)} className="size-5 accent-[#326575]" />
             <span className={checked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}</span>
           </label>
