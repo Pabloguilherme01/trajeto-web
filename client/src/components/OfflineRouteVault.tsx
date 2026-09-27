@@ -97,7 +97,7 @@ export default function OfflineRouteVault() {
   };
 
   return (
-    <section aria-labelledby="saved-routes-title" className="mt-8 rounded-3xl border border-[#CFD9DD] bg-[#0F171D] p-5 text-white sm:p-6">
+    <section id="saved-routes" aria-labelledby="saved-routes-title" className="mt-8 rounded-3xl border border-[#CFD9DD] bg-[#0F171D] p-5 text-white sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/15 text-[#3DE3FF]">
