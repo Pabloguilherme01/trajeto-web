@@ -30,6 +30,12 @@ function initialQuery() {
 
 export default function Stations() {
   const [location, setLocation] = useLocation();
+  const locationParams = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lat = Number(params.get("lat"));
+    const lng = Number(params.get("lng"));
+    return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : {};
+  }, [location]);
   const [input, setInput] = useState(initialQuery);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [query, setQuery] = useState(initialQuery);
@@ -53,12 +59,7 @@ export default function Stations() {
   const [localFavorites, setLocalFavorites] = useState<MobileStation[]>(listMobileStationFavorites);
   const [cachedStationSnapshot, setCachedStationSnapshot] = useState(() => getCachedStations(initialQuery(), locationParams.lat, locationParams.lng));
   const [showSavedOnly, setShowSavedOnly] = useState(() => new URLSearchParams(window.location.search).get("salvos") === "1");
-  const locationParams = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const lat = Number(params.get("lat"));
-    const lng = Number(params.get("lng"));
-    return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : {};
-  }, []);
+
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     { query, ...locationParams },
