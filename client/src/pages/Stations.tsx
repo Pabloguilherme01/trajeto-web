@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { openNavigation, vibration } from "@/lib/mobileTools";
-import { getEconomyMode, getRecentSearches, rememberSearch } from "@/lib/mobilePreferences";
+import { getEconomyMode, getRecentSearches, rememberSearch, rememberIntent } from "@/lib/mobilePreferences";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import MobileDataMode from "@/components/MobileDataMode";
 import { AUTH_RETURN_KEY } from "@/lib/authReturn";
@@ -143,6 +143,7 @@ export default function Stations() {
   }, [paginationWarning, stationPages.isFetchingNextPage, stationPages.fetchNextPage]);
 
   const navigateToQuery = (value: string, region?: string) => {
+    rememberIntent("stations");
     const trimmed = value.trim();
     if (trimmed.length < 3) {
       setSearchError("Digite pelo menos 3 caracteres para pesquisar.");
@@ -280,6 +281,7 @@ ${url}`); toast.success("Link da consulta copiado para compartilhar."); }
   };
 
   const findNearbyStations = () => {
+    rememberIntent("nearby");
     if (locatingNearby) return;
     if (!navigator.geolocation) {
       toast.message("Seu navegador não disponibiliza localização. Pesquise por cidade ou destino.");
