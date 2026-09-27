@@ -4,6 +4,7 @@ import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import TripPrepCard from "@/components/TripPrepCard";
 import MobileTravelHub from "@/components/MobileTravelHub";
 import RecentTripsCard from "@/components/RecentTripsCard";
+import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
@@ -218,7 +219,7 @@ export default function Home() {
                 <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>
               </div>
             </div>
-            <div className="space-y-4"><RecentTripsCard /><TripPrepCard /></div>
+            <div className="space-y-4"><MobileTripShortcuts /><RecentTripsCard /><TripPrepCard /></div>
           </div>
         </section>
 
