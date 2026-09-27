@@ -168,7 +168,7 @@ export default function Stations() {
   useEffect(() => {
     if (liveList.length > 0) {
       cacheStations(query, liveList as unknown as MobileStation[], locationParams.lat, locationParams.lng);
-      setCachedStationSnapshot(getCachedStations(query));
+      setCachedStationSnapshot(getCachedStations(query, locationParams.lat, locationParams.lng));
     }
   }, [liveList, query]);
   const firstPage = stationPages.data?.pages[0];
