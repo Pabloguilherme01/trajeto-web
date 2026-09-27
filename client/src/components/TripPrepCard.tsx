@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
 const KEY = "trajeto-trip-checklist";
 
@@ -14,6 +14,12 @@ const defaults = [
   ["offline", "Rota disponível sem internet"],
 ] as const;
 
+const routeTarget = (route: OfflineRoute) =>
+  appUrl("/planejar") +
+  "?rota=" + encodeURIComponent(route.id) +
+  "&origem=" + encodeURIComponent(route.origin) +
+  "&destino=" + encodeURIComponent(route.destination);
+
 export default function TripPrepCard() {
   const [checked, setChecked] = useState<Record<string, boolean>>(() => {
     try {
@@ -22,6 +28,7 @@ export default function TripPrepCard() {
     } catch { return {}; }
   });
   const [savedRoutes, setSavedRoutes] = useState(0);
+  const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [, setLocation] = useLocation();
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
@@ -32,7 +39,15 @@ export default function TripPrepCard() {
 
   useEffect(() => {
     const refresh = () => {
-      void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => {});
+      void listOfflineRoutes()
+        .then(routes => {
+          setSavedRoutes(routes.length);
+          setLatestOfflineRoute(routes[0] ?? null);
+        })
+        .catch(() => {
+          setSavedRoutes(0);
+          setLatestOfflineRoute(null);
+        });
       setLastTrip(getLastTrip());
     };
     refresh();
@@ -52,7 +67,7 @@ export default function TripPrepCard() {
     };
   }, []);
 
-  const localRouteReady = savedRoutes > 0;
+  const localRouteReady = Boolean(latestOfflineRoute);
   const hasTrip = Boolean(lastTrip);
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
   const smartChecked: Record<string, boolean> = {
@@ -64,9 +79,16 @@ export default function TripPrepCard() {
   const ready = progress === defaults.length;
 
   const openPreparedTrip = () => {
-    if (!lastTrip) return;
     if (!online) {
-      setLocation(appUrl("/planejar") + "?salvos=1");
+      if (latestOfflineRoute) {
+        setLocation(routeTarget(latestOfflineRoute));
+      } else {
+        setLocation(appUrl("/planejar?salvos=1"));
+      }
+      return;
+    }
+    if (!lastTrip) {
+      setLocation(latestOfflineRoute ? routeTarget(latestOfflineRoute) : appUrl("/planejar"));
       return;
     }
     setLocation(
@@ -82,8 +104,8 @@ export default function TripPrepCard() {
         <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF0F2]"><CheckCircle2 className="size-5 text-[#326575]" /></div>
         <div className="min-w-0">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Antes de sair</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Checklist rápido da viagem.</h2>
-          <p className="mt-2 text-xs leading-relaxed text-[#617179]">{progress}/{defaults.length} itens preparados. Rota e offline são reconhecidos automaticamente quando já estão prontos neste aparelho.</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Deixe a próxima viagem pronta.</h2>
+          <p className="mt-2 text-xs leading-relaxed text-[#617179]">{progress}/{defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#E3E9EB]" aria-hidden="true"><div className="h-full rounded-full bg-[#326575] transition-all" style={{ width: `${(progress / defaults.length) * 100}%` }} /></div>
         </div>
       </div>
@@ -92,7 +114,7 @@ export default function TripPrepCard() {
         <div className={`rounded-xl border p-3 ${hasTrip ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
           <Navigation className="size-4 text-[#326575]" />
           <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#617179]">Próxima viagem</p>
-          <p className="mt-1 truncate text-xs font-extrabold">{hasTrip ? lastTrip?.destination : "Nenhuma definida"}</p>
+          <p className="mt-1 truncate text-xs font-extrabold">{hasTrip ? lastTrip?.destination : latestOfflineRoute?.destination ?? "Nenhuma definida"}</p>
         </div>
         <div className={`rounded-xl border p-3 ${localRouteReady ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
           <Smartphone className="size-4 text-[#326575]" />
@@ -125,28 +147,25 @@ export default function TripPrepCard() {
       <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#D8E0E3] bg-[#F8FAFA] px-3 py-2.5">
         <span className="flex min-w-0 items-center gap-2 text-[0.62rem] font-bold text-[#617179]">
           <span className={online ? "size-2 rounded-full bg-[#326575]" : "size-2 rounded-full bg-[#C77B3C]"} />
-          {online ? "Internet disponível para novas consultas." : "Offline: use as rotas já salvas."}
+          {online ? "Online: pronto para novas consultas." : latestOfflineRoute ? "Offline: uma rota pronta para continuar." : "Offline: nenhuma rota salva pronta."}
         </span>
-        {!online && savedRoutes > 0 && <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">Abrir salvos</button>}
+        {!online && latestOfflineRoute && (
+          <button type="button" onClick={openPreparedTrip} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">
+            Continuar
+          </button>
+        )}
       </div>
 
-      {ready && hasTrip && (
-        <div className="mt-3 grid grid-cols-[1fr_auto] gap-2 rounded-2xl border border-[#326575]/25 bg-[#163840] p-3 text-white shadow-[0_10px_28px_rgba(22,56,64,.14)]">
-          <div className="min-w-0">
-            <p className="text-[0.56rem] font-bold uppercase tracking-[0.12em] text-[#C7FF3C]">{online ? "Pronto para sair" : "Preparado neste aparelho"}</p>
-            <p className="mt-1 truncate text-xs font-extrabold">{lastTrip?.origin} → {lastTrip?.destination}</p>
-          </div>
-          <button type="button" onClick={openPreparedTrip} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-extrabold text-[#0B1014] active:scale-[.98]">{online ? "Iniciar" : "Abrir salvos"}</button>
-        </div>
-      )}
-      {ready && !hasTrip && localRouteReady && (
-        <div role="status" className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3">
-          <span className="text-[0.62rem] font-bold text-[#52636C]">Você já tem rotas disponíveis sem internet.</span>
-          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-10 rounded-xl bg-[#163840] px-3 text-[0.62rem] font-extrabold text-white">Abrir rotas</button>
-        </div>
-      )}
       {ready && (
-        <div role="status" className="mt-4 flex items-center gap-2 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] p-3 text-xs font-bold text-[#326575]"><Sparkles className="size-4" /> {online ? "Tudo preparado. Você pode iniciar a viagem." : "Tudo preparado. Continue uma rota salva sem internet."}</div>
+        <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#326575]">
+            <Sparkles className="size-4 shrink-0" />
+            <span>{online ? "Tudo preparado. O próximo passo é sair." : "Tudo preparado. O próximo passo é continuar uma rota salva."}</span>
+          </div>
+          <button type="button" onClick={openPreparedTrip} disabled={!online && !latestOfflineRoute} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40">
+            {online ? "Iniciar próxima viagem" : latestOfflineRoute ? "Continuar rota salva" : "Sem rota salva"}
+          </button>
+        </div>
       )}
     </section>
   );
