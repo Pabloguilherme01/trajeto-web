@@ -40,7 +40,11 @@ export default function TripPrepCard() {
           </label>
         ))}
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3">\n        <span className="text-[0.65rem] font-bold text-[#617179]">{progress === defaults.length ? "Tudo pronto para sair." : "Marque o que já está resolvido."}</span>\n        <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>\n      </div>\n      <div className="mt-4 grid grid-cols-3 gap-2 text-[0.62rem] font-bold text-[#617179]">
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <span className="text-[0.65rem] font-bold text-[#617179]">{progress === defaults.length ? "Tudo pronto para sair." : "Marque o que já está resolvido."}</span>
+        <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-[0.62rem] font-bold text-[#617179]">
         <span className="flex items-center gap-1 rounded-lg bg-[#F2F5F6] p-2"><Fuel className="size-3.5" /> combustível</span>
         <span className="flex items-center gap-1 rounded-lg bg-[#F2F5F6] p-2"><WifiOff className="size-3.5" /> offline</span>
         <span className="flex items-center gap-1 rounded-lg bg-[#F2F5F6] p-2"><ShieldCheck className="size-3.5" /> segurança</span>
