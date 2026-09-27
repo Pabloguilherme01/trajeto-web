@@ -30,7 +30,7 @@ function isValidPayload(payload: unknown) {
   const route = payload.route;
   return (
     typeof route.distanceLabel === "string" &&
-    Number.isFinite(route.durationSeconds) &&
+    typeof route.durationSeconds === "number" && Number.isFinite(route.durationSeconds) &&
     Array.isArray(payload.stops) &&
     Array.isArray(payload.anpReferences)
   );
