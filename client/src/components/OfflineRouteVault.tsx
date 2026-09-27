@@ -163,8 +163,8 @@ export default function OfflineRouteVault() {
         </div>
       ) : storageError ? (
         <div className="mt-5 rounded-2xl border border-[#FFB5A1]/30 bg-[#FFB5A1]/[0.06] p-5">
-          <p className="text-sm font-bold text-white">Não foi possível abrir o cofre offline.</p>
-          <p className="mt-1 text-xs leading-relaxed text-[#B8A7A2]">O navegador não conseguiu acessar o armazenamento local. Tente novamente; nenhuma rota será removida automaticamente.</p>
+          <p className="text-sm font-bold text-white">Não foi possível acessar suas rotas offline.</p>
+          <p className="mt-1 text-xs leading-relaxed text-[#B8A7A2]">O navegador não conseguiu acessar o armazenamento local. Tente novamente antes de sair; nenhuma rota será removida automaticamente.</p>
           <button type="button" onClick={() => void refresh()} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-xs font-black text-white">Tentar novamente <RotateCw className="size-4" /></button>
         </div>
       ) : !items.length ? (
