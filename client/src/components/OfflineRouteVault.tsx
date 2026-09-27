@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
+import { externalNavigationUrl, listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 
 function formatAge(savedAt: string) {
   const time = Date.parse(savedAt);
@@ -73,7 +73,7 @@ export default function OfflineRouteVault() {
       setFeedback("A navegação externa precisa de internet. A rota salva continua disponível offline.");
       return;
     }
-    const url = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(route.destination);
+    const url = externalNavigationUrl(route);
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
