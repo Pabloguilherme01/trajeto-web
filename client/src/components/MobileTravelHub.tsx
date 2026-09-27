@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getEconomyMode, getLastStation, getLastTrip, getRecentSearches, setEconomyMode, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { getFavoriteDestination, getDestinationUsage, getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 
 export default function MobileTravelHub() {
   const [, setLocation] = useLocation();
@@ -20,6 +21,7 @@ export default function MobileTravelHub() {
   const [lastStation, setLastStation] = useState(() => getLastStation());
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [autoEconomyApplied, setAutoEconomyApplied] = useState(false);
+  const [favoriteDestination, setFavoriteDestination] = useState<MobileDestination | null>(() => getFavoriteDestination());
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -36,12 +38,15 @@ export default function MobileTravelHub() {
       setLastTrip(getLastTrip());
       setRecentSearch(getRecentSearches()[0] ?? null);
       setLastStation(getLastStation());
+    setFavoriteDestination(getFavoriteDestination());
       setEconomyModeState(getEconomyMode());
+      setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), getDestinationUsage()));
     };
 
     window.addEventListener("focus", refreshRoutes);
     window.addEventListener(mobilePreferenceEvent, refreshRoutes);
     window.addEventListener(offlineRouteEvent, refreshRoutes);
+    window.addEventListener(mobileDestinationEvent, refreshRoutes);
 
     let mounted = true;
     void listOfflineRoutes().then(routes => { if (mounted) setSavedRoutes(routes.length); }).catch(() => {});
@@ -76,6 +81,7 @@ export default function MobileTravelHub() {
       window.removeEventListener("focus", refreshRoutes);
       window.removeEventListener(mobilePreferenceEvent, refreshRoutes);
       window.removeEventListener(offlineRouteEvent, refreshRoutes);
+      window.removeEventListener(mobileDestinationEvent, refreshRoutes);
       connection?.removeEventListener?.("change", updateNetwork);
       batteryDevice?.removeEventListener("levelchange", updateBattery);
       if (batteryDevice && updateBatterySaver) batteryDevice.removeEventListener("levelchange", updateBatterySaver);
@@ -150,6 +156,29 @@ export default function MobileTravelHub() {
               </button>
             </div>
           </div>
+
+          {favoriteDestination && (
+            <div className="mt-3 rounded-2xl border border-[#C7FF3C]/20 bg-[linear-gradient(135deg,rgba(199,255,60,.08),rgba(61,227,255,.04))] p-3">
+              <div className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.58rem] font-extrabold uppercase tracking-[0.14em] text-[#C7FF3C]">Seu destino</p>
+                  <p className="mt-1 truncate text-xs font-extrabold text-white">{favoriteDestination.label}</p>
+                  <p className="mt-0.5 truncate text-[0.62rem] text-[#9EC8D2]">{favoriteDestination.value}</p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button type="button" onClick={() => {
+                    const updated = rememberDestinationUsage(favoriteDestination);
+                    setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated));
+                    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(favoriteDestination.value));
+                  }} className="min-h-10 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] active:scale-[.98]">Ir agora</button>
+                  <button type="button" onClick={() => {
+                    const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(favoriteDestination.value);
+                    window.open(url, "_blank", "noopener,noreferrer");
+                  }} className="min-h-10 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-[0.62rem] font-bold text-white active:scale-[.98]">Navegar</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3">
             <div className="flex items-center justify-between gap-3">
