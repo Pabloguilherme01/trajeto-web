@@ -1,9 +1,15 @@
 import { Gauge, Leaf, Zap } from "lucide-react";
-import { useState } from "react";
-import { getEconomyMode, setEconomyMode } from "@/lib/mobilePreferences";
+import { useEffect, useState } from "react";
+import { getEconomyMode, setEconomyMode, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 
 export default function MobileDataMode({ onChange }: { onChange?: (enabled: boolean) => void }) {
   const [enabled, setEnabled] = useState(getEconomyMode);
+
+  useEffect(() => {
+    const sync = () => setEnabled(getEconomyMode());
+    window.addEventListener(mobilePreferenceEvent, sync);
+    return () => window.removeEventListener(mobilePreferenceEvent, sync);
+  }, []);
 
   const toggle = () => {
     const next = !enabled;
