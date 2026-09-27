@@ -34,7 +34,7 @@ export default function MobileTravelHub() {
     const nav = navigator as Navigator & {
       getBattery?: () => Promise<{ level: number; addEventListener: (type: string, listener: () => void) => void; removeEventListener: (type: string, listener: () => void) => void }>;
     };
-    let batteryDevice: Awaited<ReturnType<NonNullable<typeof nav.getBattery>>> | undefined;
+    let batteryDevice: Awaited<ReturnType<NonNullable<typeof nav.getBattery>> | undefined;
     let updateBatterySaver: (() => void) | undefined;
     const updateBattery = () => { if (batteryDevice && mounted) setBattery(Math.round(batteryDevice.level * 100)); };
     if (nav.getBattery) void nav.getBattery().then(device => {
