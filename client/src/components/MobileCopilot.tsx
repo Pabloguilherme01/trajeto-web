@@ -87,7 +87,7 @@ export default function MobileCopilot() {
     window.addEventListener(mobileDestinationEvent, refresh);
     window.addEventListener(offlineRouteEvent, refresh);
 
-    void listOfflineRoutes().then(routes => setOfflineRoutes(routes.length)).catch(() => {});
+    refresh();
 
     return () => {
       window.removeEventListener("online", refreshNetwork);
