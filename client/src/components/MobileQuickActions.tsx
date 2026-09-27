@@ -38,6 +38,10 @@ export default function MobileQuickActions() {
     }, () => setLocating(false), { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
 
+  const shareMessage = lastTrip
+    ? `Minha próxima viagem no Trajeto: ${lastTrip.origin} → ${lastTrip.destination}.`
+    : "Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.";
+
   const actions = [
     { label: lastTrip ? "Retomar" : "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => {
       vibration();
@@ -50,7 +54,7 @@ export default function MobileQuickActions() {
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
-    { label: "Compartilhar", short: shareState === "done" ? "Enviado" : "Enviar", icon: Share2, path: "", run: () => { vibration(); void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto").then(() => { setShareState("done"); window.setTimeout(() => setShareState("idle"), 1800); }).catch(() => {}); } },
+    { label: "Compartilhar", short: shareState === "done" ? "Enviado" : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => { vibration(); void shareText(shareMessage, window.location.href, "Trajeto").then(() => { setShareState("done"); window.setTimeout(() => setShareState("idle"), 1800); }).catch(() => {}); } },
   ];
 
   return (
