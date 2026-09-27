@@ -1,4 +1,4 @@
-import { CheckCircle2, Fuel, ShieldCheck, WifiOff } from "lucide-react";
+import { CheckCircle2, Fuel, ShieldCheck, WifiOff, BatteryLow, Route, Sparkles } from "lucide-react";
 import { RotateCcw, useEffect, useState } from "react";
 
 const KEY = "trajeto-trip-checklist";
@@ -20,7 +20,7 @@ export default function TripPrepCard() {
   }, [checked]);
 
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
-  const progress = defaults.filter(([id]) => checked[id]).length;
+  const progress = defaults.filter(([id]) => checked[id]).length;\n  const ready = progress === defaults.length;
 
   return (
     <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] sm:p-6">
@@ -41,7 +41,7 @@ export default function TripPrepCard() {
         ))}
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-[0.65rem] font-bold text-[#617179]">{progress === defaults.length ? "Tudo pronto para sair." : "Marque o que já está resolvido."}</span>
+        <span className="text-[0.65rem] font-bold text-[#617179]">{ready ? "Tudo pronto para sair." : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
         <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-2 text-[0.62rem] font-bold text-[#617179]">
