@@ -1,6 +1,7 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
+import TripPrepCard from "@/components/TripPrepCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
@@ -198,6 +199,22 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-[#F4F6F3] py-10 text-[#0B1014] sm:py-14">
+          <div className="container grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+            <div>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Preparação inteligente</p>
+              <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] sm:text-4xl">Antes de sair, deixe o celular pronto.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#617179]">Guarde a rota, confirme os itens essenciais e não dependa de uma conexão perfeita no momento da viagem.</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Rota salva</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Reabra o roteiro armazenado no aparelho.</p></div>
+                <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Localização</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Encontre postos próximos com um toque.</p></div>
+                <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>
+              </div>
+            </div>
+            <TripPrepCard />
           </div>
         </section>
 
