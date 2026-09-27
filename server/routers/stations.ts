@@ -10,7 +10,7 @@ import { isGooglePageTokenUnavailable, requestGoogleNextPage } from "../lib/goog
 import { dedupePlaceDetailsRequest } from "../lib/placeDetailsRequest";
 import { stationPaginationMetricRegion } from "../lib/stationPaginationMetrics";
 
-export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional() });
+export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional(), lat: z.number().finite().min(-90).max(90).optional(), lng: z.number().finite().min(-180).max(180).optional() });
 const detailsInput = z.object({ placeId: z.string().trim().min(1).max(255) });
 type StationSearchPage = {
   query: string;
@@ -33,7 +33,7 @@ export const stationsRouter = router({
         sawUnavailableToken ||= isGooglePageTokenUnavailable(page.status);
         return page;
       })
-      : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
+      : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", input.lat != null && input.lng != null ? { query: "posto de combustíveis", type: "gas_station", location: `${input.lat},${input.lng}`, radius: 25_000 } : { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
     if (sawUnavailableToken) void createProductEvent({ event: "google_page_token_invalid", region: stationPaginationMetricRegion(input.query) });
     if (search.status === "INVALID_REQUEST" && input.cursor) {
       return {
@@ -50,10 +50,10 @@ export const stationsRouter = router({
     const stations = candidates.map(station => publicStationInfo(station));
     const authorizedStations = await getAuthorizedStationsForQuery(input.query);
     const distanceBatches = distanceMatrixBatches(candidates);
-    const matrices = await Promise.all(distanceBatches.map(batch => makeRequest<DistanceMatrixResult>("/maps/api/distancematrix/json", { origins: input.query, destinations: batch.map(station => `${station.geometry.location.lat},${station.geometry.location.lng}`).join("|"), mode: "driving", units: "metric" }).catch(() => null)));
+    const matrices = await Promise.all(distanceBatches.map(batch => makeRequest<DistanceMatrixResult>("/maps/api/distancematrix/json", { origins: input.lat != null && input.lng != null ? `${input.lat},${input.lng}` : input.query, destinations: batch.map(station => `${station.geometry.location.lat},${station.geometry.location.lng}`).join("|"), mode: "driving", units: "metric" }).catch(() => null)));
     const distances = mergeStationDistances(matrices, stations.length);
     const result: StationSearchPage = { query: input.query, queriedAt: Date.now(), stations: stations.map((station, index) => ({ ...station, ...distances[index], anpMatch: resolveStationIdentity(station, authorizedStations) })), nextCursor: search.next_page_token ?? null, paginationWarning: null };
-    return input.cursor ? result : cacheStationSearch(input.query, result);
+    return input.cursor ? result : cacheStationSearch(input.query, result, Date.now(), input.lat, input.lng);
   }),
   details: publicProcedure.input(detailsInput).query(async ({ input }) => {
     const details = await dedupePlaceDetailsRequest(input.placeId, () => makeRequest<PlaceDetailsResult>("/maps/api/place/details/json", { place_id: input.placeId, fields: "name,formatted_address,formatted_phone_number,website,opening_hours,geometry" }));
