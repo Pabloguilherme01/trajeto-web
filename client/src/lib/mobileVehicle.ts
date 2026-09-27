@@ -27,11 +27,14 @@ export function getMobileVehicle(): MobileVehicle | null {
 }
 
 export function saveMobileVehicle(vehicle: MobileVehicle) {
+  const consumption = Number(vehicle.consumption);
+  const tank = Number(vehicle.tank);
+  if (!Number.isFinite(consumption) || !Number.isFinite(tank) || consumption <= 0 || tank <= 0) return false;
   const normalized: MobileVehicle = {
     name: vehicle.name.trim().slice(0, 40) || "Meu carro",
     fuel: vehicle.fuel,
-    consumption: Math.min(50, Math.max(1, Number(vehicle.consumption))),
-    tank: Math.min(200, Math.max(10, Number(vehicle.tank))),
+    consumption: Math.min(50, Math.max(1, consumption)),
+    tank: Math.min(200, Math.max(10, tank)),
   };
   try {
     localStorage.setItem(VEHICLE_KEY, JSON.stringify(normalized));
