@@ -19,6 +19,7 @@ export default function Home() {
   const [locating, setLocating] = useState(false);
   const [activePresetId, setActivePresetId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
   const [recentSearches, setRecentSearches] = useState<string[]>(() => getRecentSearches());
+  const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
@@ -47,10 +48,11 @@ export default function Home() {
   const useMyLocation = () => {
     if (!navigator.geolocation || locating) { if (!navigator.geolocation) setSearchError("Seu navegador não oferece localização."); return; }
     setSearchError(null);
+    setLocationMessage(null);
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      position => { setLocating(false); setLocation(`${appUrl("/postos")}?lat=${position.coords.latitude}&lng=${position.coords.longitude}&q=${encodeURIComponent("postos próximos")}`); },
-      () => { setLocating(false); setSearchError("Não foi possível obter sua localização. Verifique a permissão do navegador."); },
+      position => { setLocating(false); setLocationMessage("Localização encontrada. Abrindo postos próximos."); setLocation(`${appUrl("/postos")}?lat=${position.coords.latitude}&lng=${position.coords.longitude}&q=${encodeURIComponent("postos próximos")}`); },
+      () => { setLocating(false); setLocationMessage("Localização indisponível. Você ainda pode pesquisar por cidade ou destino."); setSearchError("Não foi possível obter sua localização. Verifique a permissão do navegador."); },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
   };
@@ -141,6 +143,8 @@ export default function Home() {
                   </button>
                 </div>
               </form>
+
+              {locationMessage && <p role="status" aria-live="polite" className="mt-2 rounded-xl border border-white/8 bg-white/[0.025] px-3 py-2 text-[0.62rem] font-bold text-[#8FA3AC]">{locationMessage}</p>}
 
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF] active:scale-[.98]" disabled={locating}>
