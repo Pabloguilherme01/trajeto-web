@@ -14,6 +14,7 @@ import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import MobileTravelMode from "@/components/MobileTravelMode";
 import MobileRouteDock from "@/components/MobileRouteDock";
+import TripDecisionSummary from "@/components/TripDecisionSummary";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -258,6 +259,27 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
             )}
           </div>
         </section>
+
+        {planned && <TripDecisionSummary
+          distance={planned.route.distanceLabel}
+          duration={minutes(planned.route.durationSeconds)}
+          recommendationName={planned.recommendation?.name ?? null}
+          detourKm={planned.recommendation?.detourKm ?? null}
+          detourSource={planned.recommendation?.detourSource === "real" ? "real" : "estimated"}
+          fuelCost={fuelEconomy.data?.tripCost ?? null}
+          litersNeeded={fuelEconomy.data?.litersNeeded ?? null}
+          autonomyKm={fuelEconomy.data?.autonomyKm ?? null}
+          offline={offline}
+          onNavigate={openDestinationNavigation}
+          onShare={shareRoute}
+          onSave={() => void saveOfflineRoute({
+            id: origin.trim().toLowerCase() + "::" + destination.trim().toLowerCase(),
+            origin: origin.trim(),
+            destination: destination.trim(),
+            savedAt: new Date().toISOString(),
+            payload: planned,
+          }).then(() => setShareMessage("Rota salva neste aparelho para acesso offline."))}
+        />}
 
         {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveOfflineRoute({
   id: `${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`,
