@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Heart, MapPin, Navigation, Star, Phone, Share2, Copy } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { shareText, vibration } from "@/lib/mobileTools";
+import { rememberStation } from "@/lib/mobilePreferences";
 
 export type StationSheetStop = {
   placeId: string;
@@ -43,6 +44,10 @@ export function StationSheet({ open, onOpenChange, stop, recommendation, favorit
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [provider, setProvider] = useState<"google" | "waze">("google");
   const [feedback, setFeedback] = useState<string | null>(null);
+  useEffect(() => {
+    if (!stop || !open) return;
+    rememberStation({ placeId: stop.placeId, name: stop.name, address: stop.address, query: stop.name });
+  }, [open, stop]);
   if (!stop) return null;
   const anp = stop.anpMatch?.status === "probable" ? stop.anpMatch : null;
   const price = stop.priceReference ? Number(stop.priceReference.price) : null;
