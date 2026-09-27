@@ -1,13 +1,16 @@
 {
-  "name": "Trajeto",
+  "name": "Trajeto · Rotas e Postos",
   "short_name": "Trajeto",
-  "description": "Rotas, postos e economia em movimento.",
+  "description": "Planeje rotas, encontre postos e continue consultando mesmo sem internet.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0B1014",
-  "theme_color": "#14343C",
+  "theme_color": "#0B1014",
+  "categories": ["navigation", "travel"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "./favicon.svg",
