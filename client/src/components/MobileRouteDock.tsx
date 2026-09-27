@@ -75,7 +75,7 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1.5 p-2">
-          <button type="button" aria-label="Abrir navegação para o destino" onClick={() => { vibration(); onNavigate(); }} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97]"><Navigation className="size-4" />Navegar</button>
+          <button type="button" aria-label="Abrir navegação para o destino" onClick={() => { vibration(); onNavigate(); }} disabled={!online} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-4" />Navegar</button>
           <button type="button" aria-live="polite" aria-label={saved ? "Rota salva neste aparelho" : "Salvar rota para usar offline"} onClick={handleSave} disabled={busy || saved} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97] disabled:cursor-default disabled:opacity-80">
             <span className="grid size-4 place-items-center">{saved ? <Check className="size-4 text-[#C7FF3C]" /> : <Save className="size-4" />}</span>{busy ? "Salvando…" : saved ? "Salva" : "Salvar"}
           </button>
@@ -85,7 +85,7 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
         {actionMessage && <p role="status" aria-live="polite" className="border-t border-white/10 px-3 py-2 text-center text-[0.58rem] font-bold text-white/75">{actionMessage}</p>}
         {!online && !saved && <p role="status" className="border-t border-[#FFB86B]/20 bg-[#FFB86B]/[0.05] px-3 py-2 text-center text-[0.56rem] font-bold text-[#FFD49C]">Salve esta rota agora para continuar mesmo sem internet.</p>}
         {saveError && <p role="alert" className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.58rem] font-bold text-[#FFD49C]"><AlertCircle className="size-3.5" /> Não foi possível salvar. Tente novamente.</p>}
-        <p className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.52rem] font-semibold text-white/45"><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C]" : "bg-[#FFB86B]"}`} /> {online ? "Online · navegação e consultas externas disponíveis." : "Offline · a rota salva continua disponível neste aparelho."}</p>
+        <p className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.52rem] font-semibold text-white/45"><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C]" : "bg-[#FFB86B]"}`} /> {online ? "Online · dados externos e navegação disponíveis." : saved ? "Offline · esta rota continua disponível neste aparelho." : "Offline · salve a rota antes de sair."}</p>
       </div>
     </section>
   );
