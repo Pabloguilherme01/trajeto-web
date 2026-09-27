@@ -11,7 +11,7 @@ const defaults = [
   ["combustivel", "Combustível suficiente para o primeiro trecho"],
   ["documentos", "CNH e documentos do veículo"],
   ["rota", "Rota da viagem salva neste aparelho"],
-  ["offline", "Rota disponível sem internet"],
+  ["offline", "Conexão ou rota offline pronta"],
 ] as const;
 
 const routeTarget = (route: OfflineRoute) =>
@@ -75,8 +75,8 @@ export default function TripPrepCard() {
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
   const smartChecked: Record<string, boolean> = {
     ...checked,
-    rota: checked.rota || hasTrip,
-    offline: checked.offline || localRouteReady,
+    rota: checked.rota || localRouteReady,
+    offline: checked.offline || (!online ? localRouteReady : false),
   };
   const progress = defaults.filter(([id]) => smartChecked[id]).length;
   const ready = progress === defaults.length;
