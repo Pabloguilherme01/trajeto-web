@@ -105,4 +105,3 @@
   ::-webkit-scrollbar { width: 0; height: 0; }
   .mobile-card { border-radius: 1.35rem; box-shadow: 0 14px 40px rgba(0,0,0,.16); }
 }
-.trajeto-mobile-safe { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
