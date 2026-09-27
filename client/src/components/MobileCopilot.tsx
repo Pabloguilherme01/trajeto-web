@@ -256,16 +256,7 @@ export default function MobileCopilot() {
           icon: Bookmark,
         },
       ]
-    : [
-        {
-          title: "Salvos",
-          detail: offlineRoutes ? `${offlineRoutes} rota(s) prontas para continuar` : "Nenhuma rota pronta",
-          label: "Abrir",
-          href: appUrl("/planejar?salvos=1"),
-          intent: "saved",
-          icon: Bookmark,
-        },
-      ];
+    : [];
 
   return (
     <section className="border-y border-white/8 bg-[#0F171D] py-5 md:hidden" aria-labelledby="mobile-copilot-title">
@@ -324,7 +315,7 @@ export default function MobileCopilot() {
                   Economia ativa
                 </button>
               )}
-              {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Sem conexão</span>}
+              {!online && latestOfflineRoute && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Cópia local pronta</span>}
             </div>
           </div>
         </div>
