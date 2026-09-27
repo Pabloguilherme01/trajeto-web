@@ -1,5 +1,5 @@
 import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles, RotateCcw, Navigation, Smartphone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";\nimport { useLocation } from "wouter";\nimport { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
@@ -19,7 +19,7 @@ export default function TripPrepCard() {
       return stored && typeof stored === "object" && !Array.isArray(stored) ? stored as Record<string, boolean> : {};
     } catch { return {}; }
   });
-  const [savedRoutes, setSavedRoutes] = useState(0);
+  const [savedRoutes, setSavedRoutes] = useState(0);\n  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);\n  const [, setLocation] = useLocation();
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
 
   useEffect(() => {
@@ -32,11 +32,11 @@ export default function TripPrepCard() {
       setLastTrip(getLastTrip());
     };
     refresh();
-    window.addEventListener("focus", refresh);
+    const handleOnline = () => setOnline(true);\n    const handleOffline = () => setOnline(false);\n    window.addEventListener("online", handleOnline);\n    window.addEventListener("offline", handleOffline);\n    window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener(offlineRouteEvent, refresh);
     return () => {
-      window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", handleOnline);\n      window.removeEventListener("offline", handleOffline);\n      window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener(offlineRouteEvent, refresh);
     };
@@ -90,6 +90,14 @@ export default function TripPrepCard() {
       <div className="mt-4 flex items-center justify-between gap-3">
         <span className="text-[0.65rem] font-bold text-[#617179]">{ready ? "Tudo pronto para sair." : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
         <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#D8E0E3] bg-[#F8FAFA] px-3 py-2.5">
+        <span className="flex min-w-0 items-center gap-2 text-[0.62rem] font-bold text-[#617179]">
+          <span className={online ? "size-2 rounded-full bg-[#326575]" : "size-2 rounded-full bg-[#C77B3C]"} />
+          {online ? "Internet disponível para novas consultas." : "Offline: use as rotas já salvas."}
+        </span>
+        {!online && savedRoutes > 0 && <button type="button" onClick={() => setLocation(appUrl("/postos") + "?salvos=1")} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">Abrir salvos</button>}
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-[0.62rem] font-bold text-[#617179]">
