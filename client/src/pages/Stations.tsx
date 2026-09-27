@@ -185,6 +185,15 @@ export default function Stations() {
   const searchedAt = firstPage ? new Date(firstPage.queriedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
   const cachedAt = cachedStationSnapshot ? new Date(cachedStationSnapshot.savedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "";
   const usingCachedStations = offline && liveList.length === 0 && Boolean(cachedStationSnapshot?.stations.length);
+  const cachedAgeLabel = cachedStationSnapshot
+    ? (() => {
+        const ageMinutes = Math.max(0, Math.round((Date.now() - Date.parse(cachedStationSnapshot.savedAt)) / 60000));
+        if (ageMinutes < 1) return "agora";
+        if (ageMinutes < 60) return `há ${ageMinutes} min`;
+        const ageHours = Math.round(ageMinutes / 60);
+        return ageHours === 1 ? "há 1 h" : `há ${ageHours} h`;
+      })()
+    : null;
   const availableBrands = useMemo(() => Array.from(new Set(list.map(station => inferredBrand(station.name)))).sort((a, b) => a.localeCompare(b, "pt-BR")), [list]);
   const sortedStations = useMemo(() => filterAndSortStations(list, brandFilter, hoursFilter, sortBy), [list, brandFilter, hoursFilter, sortBy]);
   const displayedStations = useMemo(() => visibleStationResults(sortedStations, visibleResultCount), [sortedStations, visibleResultCount]);
@@ -285,6 +294,16 @@ ${url}`); toast.success("Link do posto copiado para compartilhar."); }
   return <div className="min-h-screen bg-[#0B1014] text-[#EAF0F2]">
     <header className="sticky top-0 z-40 border-b border-white/8 bg-[#0B1014]/90 backdrop-blur-xl"><div className="container flex h-[68px] items-center justify-between"><Link href="/" className="flex items-center gap-2.5"><img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" /><span className="brand-wordmark text-[1.25rem] text-white">trajeto</span><span className="hidden rounded-full border border-white/10 px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8DA0AB] sm:block">Consulta pública</span></Link><div className="flex items-center gap-2"><Link href="/ajuda"><span className="inline-flex min-h-10 items-center rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#C9F7FF] transition hover:bg-white hover:text-[#0B1014]">Ajuda</span></Link><button onClick={() => setLocation("/")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#C7FF3C] transition hover:bg-white hover:text-[#0B1014]"><ArrowLeft className="size-4" /> <span className="hidden sm:inline">Início</span></button></div></div></header>
     <main className="container pb-28 pt-7 lg:pt-10">
+      {cachedStationSnapshot && (
+        <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3.5 py-3 text-[0.68rem] font-semibold text-[#A9BAC2]">
+          <Clock3 className="size-4 shrink-0 text-[#3DE3FF]" />
+          <span className="min-w-0 flex-1">
+            {usingCachedStations
+              ? <>Sem internet · mostrando dados salvos {cachedAgeLabel}.</>
+              : <>Último resultado local salvo {cachedAgeLabel}. Atualizado automaticamente quando houver conexão.</>}
+          </span>
+          {usingCachedStations && <span className="shrink-0 rounded-full border border-[#FFB86B]/30 bg-[#FFB86B]/8 px-2 py-1 text-[0.55rem] font-extrabold uppercase tracking-[0.08em] text-[#FFD49C]">offline</span>}
+        </div>
       <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#121B22]"><div className="grid lg:grid-cols-[0.86fr_1.14fr]"><div className="route-grid relative p-6 sm:p-8"><p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#3DE3FF]">Consulta de parada · Entorno</p><h1 className="mt-5 font-display text-[clamp(3.1rem,6vw,5.4rem)] font-semibold leading-[0.84] tracking-[-0.075em] text-white">Pare melhor.<br /><span className="text-[#C7FF3C]">Desvie menos.</span></h1><p className="mt-6 max-w-md text-sm leading-relaxed text-[#A5B5BC]">Encontre postos reais, compare distância e desvio e escolha a próxima parada sem cadastro.</p><a href={anpQualityUrl} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 text-xs font-bold text-[#BDA5FF] transition hover:text-white"><BadgeCheck className="size-4" /> Ver qualidade na fonte oficial da ANP <ExternalLink className="size-3.5" /></a></div>
         <section className="p-5 sm:p-8"><p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#7F919A]">Localização e destino</p><h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] text-white">Abra sua consulta.</h2><form onSubmit={submit} className="mt-6" noValidate><label className="text-xs font-bold text-[#A5B5BC]" htmlFor="station-query">Cidade, bairro ou posto</label><div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]"><Search className="ml-3 mt-3 size-5 text-[#3DE3FF]" /><input id="station-query" minLength={3} aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "station-query-error" : undefined} value={input} onChange={event => { setInput(event.target.value); if (searchError) setSearchError(null); }} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#64747C]" placeholder="Ex.: Águas Lindas de Goiás" /><Button type="submit" className="size-11 rounded-xl bg-[#C7FF3C] p-0 text-[#0B1014] hover:bg-white" aria-label="Pesquisar postos"><ArrowRight className="size-5" /></Button></div>{searchError && <p id="station-query-error" role="alert" className="mt-2 text-xs font-semibold text-[#FFB5A1]">{searchError}</p>}</form><div className="mt-5"><MobileDataMode onChange={enabled => { setResultsPerView(enabled ? 5 : 10); setVisibleResultCount(enabled ? 5 : 10); }} /></div>
         {recentSearches.length > 0 && <div className="mt-5"><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BDA5FF]">Pesquisas recentes</p><div className="mt-2 flex gap-2 overflow-x-auto pb-1">{recentSearches.map(item => <button key={item} type="button" onClick={() => navigateToQuery(item)} className="min-h-10 shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C9D7DC]">{item}</button>)}</div></div>}
