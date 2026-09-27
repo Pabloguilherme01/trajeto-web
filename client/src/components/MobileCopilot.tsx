@@ -116,7 +116,7 @@ export default function MobileCopilot() {
       return {
         title: "Verifique as rotas salvas",
         detail: "O aparelho não conseguiu acessar o armazenamento offline agora.",
-        label: "Abrir salvos",
+        label: "Tentar novamente",
         href: appUrl("/planejar?salvos=1"),
         intent: "saved",
         icon: CloudOff,
@@ -127,7 +127,7 @@ export default function MobileCopilot() {
       return {
         title: "Continue uma rota salva",
         detail: offlineRoutes + (offlineRoutes === 1 ? " rota pronta" : " rotas prontas") + " no aparelho. Abra sem recalcular.",
-        label: "Abrir salvos",
+        label: "Continuar",
         href: appUrl("/planejar?salvos=1"),
         intent: "saved",
         icon: Bookmark,
