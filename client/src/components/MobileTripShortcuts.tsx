@@ -3,40 +3,35 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-
-type Place = { id: "casa" | "trabalho" | "outro"; label: string; value: string };
-
-const KEY = "trajeto-mobile-destinations";
-const USAGE_KEY = "trajeto-mobile-destination-usage";
-
-type Usage = Record<Place["id"], { count: number; lastUsed: number }>;
-
-function readUsage(): Partial<Usage> {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(USAGE_KEY) || "{}");
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch { return {}; }
-}
-
-function readPlaces(): Place[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch { return []; }
-}
+import {
+  getDestinationUsage,
+  getFavoriteDestination,
+  getMobileDestinations,
+  mobileDestinationEvent,
+  rememberDestinationUsage,
+  removeMobileDestination,
+  saveMobileDestination,
+  type DestinationId,
+  type MobileDestination,
+} from "@/lib/mobileDestinations";
 
 export default function MobileTripShortcuts() {
   const [, setLocation] = useLocation();
-  const [places, setPlaces] = useState<Place[]>(readPlaces);
-  const [editing, setEditing] = useState<Place["id"] | null>(null);
+  const [places, setPlaces] = useState<MobileDestination[]>(getMobileDestinations);
+  const [editing, setEditing] = useState<DestinationId | null>(null);
   const [value, setValue] = useState("");
-  const [locating, setLocating] = useState<Place["id"] | null>(null);
+  const [locating, setLocating] = useState<DestinationId | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [usage, setUsage] = useState<Partial<Usage>>(readUsage);
+  const [usage, setUsage] = useState(getDestinationUsage);
 
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(places)); } catch {}
-  }, [places]);
+    const refresh = () => {
+      setPlaces(getMobileDestinations());
+      setUsage(getDestinationUsage());
+    };
+    window.addEventListener(mobileDestinationEvent, refresh);
+    return () => window.removeEventListener(mobileDestinationEvent, refresh);
+  }, []);
 
   useEffect(() => {
     if (!feedback) return;
@@ -47,37 +42,34 @@ export default function MobileTripShortcuts() {
   const save = () => {
     const trimmed = value.trim();
     if (trimmed.length < 3 || !editing) return;
-    setPlaces(current => {
-      const without = current.filter(item => item.id !== editing);
-      return [...without, { id: editing, label: editing === "casa" ? "Casa" : editing === "trabalho" ? "Trabalho" : "Destino", value: trimmed }];
-    });
+    if (!saveMobileDestination(editing, trimmed)) {
+      setFeedback("Não foi possível salvar este destino neste aparelho.");
+      return;
+    }
+    setPlaces(getMobileDestinations());
+    setUsage(getDestinationUsage());
     setValue("");
     setEditing(null);
+    setFeedback("Destino salvo.");
   };
 
-  const rememberUsage = (place: Place) => {
-    setUsage(current => {
-      const previous = current[place.id];
-      const updated = { ...current, [place.id]: { count: (previous?.count ?? 0) + 1, lastUsed: Date.now() } };
-      try { localStorage.setItem(USAGE_KEY, JSON.stringify(updated)); } catch {}
-      return updated;
-    });
+  const rememberUsage = (place: MobileDestination) => {
+    setUsage(rememberDestinationUsage(place));
   };
 
-  const open = (place: Place) => {
+  const open = (place: MobileDestination) => {
     rememberUsage(place);
     setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
   };
 
-  const navigateTo = (place: Place) => {
+  const navigateTo = (place: MobileDestination) => {
     rememberUsage(place);
-    const query = encodeURIComponent(place.value);
-    const google = "https://www.google.com/maps/search/?api=1&query=" + query;
+    const google = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place.value);
     window.open(google, "_blank", "noopener,noreferrer");
     setFeedback("Abrindo a navegação para " + place.label + ".");
   };
 
-  const sharePlace = async (place: Place) => {
+  const sharePlace = async (place: MobileDestination) => {
     try {
       await shareText(
         place.label + ": " + place.value,
@@ -90,18 +82,27 @@ export default function MobileTripShortcuts() {
     }
   };
 
-  const openFromHere = (place: Place) => {
+  const openFromHere = (place: MobileDestination) => {
     if (locating) return;
     rememberUsage(place);
     setFeedback(null);
     setLocating(place.id);
+
     if (!navigator.geolocation) {
       setLocating(null);
       setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
       return;
     }
+
     navigator.geolocation.getCurrentPosition(
-      position => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(place.value)); },
+      position => {
+        setLocating(null);
+        setLocation(
+          appUrl("/planejar") +
+          "?origem=" + encodeURIComponent(position.coords.latitude + ", " + position.coords.longitude) +
+          "&destino=" + encodeURIComponent(place.value),
+        );
+      },
       () => {
         setLocating(null);
         setFeedback("GPS indisponível. Abrindo o destino sem sua localização.");
@@ -111,45 +112,80 @@ export default function MobileTripShortcuts() {
     );
   };
 
-  const favoritePlace = places.length
-    ? [...places].sort((a, b) => {
-        const aUsage = usage[a.id];
-        const bUsage = usage[b.id];
-        return (bUsage?.count ?? 0) - (aUsage?.count ?? 0) || (bUsage?.lastUsed ?? 0) - (aUsage?.lastUsed ?? 0);
-      })[0]
-    : null;
+  const favoritePlace = getFavoriteDestination(places, usage);
 
   return (
     <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] shadow-[0_12px_35px_rgba(11,16,20,.06)] sm:p-6">
       <div>
         <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Atalhos pessoais</p>
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
-        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p><div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]"><LocateFixed className="size-3.5 text-[#326575]" /> Use “Daqui” para transformar o destino em uma rota com sua posição atual.</div>
-      </div>
-      {favoritePlace && <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[#C7FF3C]/45 bg-[linear-gradient(135deg,#163840,#1E4B50)] p-3 text-white shadow-[0_12px_28px_rgba(22,56,64,.16)]">
-        <div className="min-w-0 flex-1">
-          <p className="text-[0.58rem] font-extrabold uppercase tracking-[0.14em] text-[#C7FF3C]">Atalho inteligente</p>
-          <p className="mt-1 truncate text-sm font-extrabold">{favoritePlace.label} · {favoritePlace.value}</p>
-          <p className="mt-1 text-[0.62rem] text-white/65">{(usage[favoritePlace.id]?.count ?? 0) > 1 ? "Destino recorrente neste aparelho." : "Último destino pronto para reutilizar."}</p>
+        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p>
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">
+          <LocateFixed className="size-3.5 text-[#326575]" />
+          Use “Daqui” para transformar o destino em uma rota com sua posição atual.
         </div>
-        <button type="button" onClick={() => openFromHere(favoritePlace)} disabled={Boolean(locating)} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014] active:scale-[.98]">{locating === favoritePlace.id ? "GPS…" : "Ir agora"}</button>
-      </div>}
-      {feedback && <p role="status" aria-live="polite" className="mt-3 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}
+      </div>
+
+      {favoritePlace && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[#C7FF3C]/45 bg-[linear-gradient(135deg,#163840,#1E4B50)] p-3 text-white shadow-[0_12px_28px_rgba(22,56,64,.16)]">
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.58rem] font-extrabold uppercase tracking-[0.14em] text-[#C7FF3C]">Atalho inteligente</p>
+            <p className="mt-1 truncate text-sm font-extrabold">{favoritePlace.label} · {favoritePlace.value}</p>
+            <p className="mt-1 text-[0.62rem] text-white/65">
+              {(usage[favoritePlace.id]?.count ?? 0) > 1 ? "Destino recorrente neste aparelho." : "Último destino pronto para reutilizar."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => openFromHere(favoritePlace)}
+            disabled={Boolean(locating)}
+            className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014] active:scale-[.98]"
+          >
+            {locating === favoritePlace.id ? "GPS…" : "Ir agora"}
+          </button>
+        </div>
+      )}
+
+      {feedback && (
+        <p role="status" aria-live="polite" className="mt-3 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">
+          {feedback}
+        </p>
+      )}
+
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {(["casa", "trabalho", "outro"] as const).map(id => {
           const place = places.find(item => item.id === id);
           const Icon = id === "casa" ? Home : id === "trabalho" ? BriefcaseBusiness : MapPin;
           const isFavorite = favoritePlace?.id === id;
           const usageCount = usage[id]?.count ?? 0;
+
           return (
             <div key={id} className="rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-3 shadow-[0_8px_24px_rgba(11,16,20,.04)]">
               {place ? (
                 <>
-                  <button type="button" onClick={() => open(place)} aria-label={"Planejar rota para " + place.label + (usageCount ? ", usado " + usageCount + " vezes" : "")} className="group flex min-h-12 w-full items-center gap-2 rounded-xl text-left active:scale-[.99]">
+                  <button
+                    type="button"
+                    onClick={() => open(place)}
+                    aria-label={"Planejar rota para " + place.label + (usageCount ? ", usado " + usageCount + " vezes" : "")}
+                    className="group flex min-h-12 w-full items-center gap-2 rounded-xl text-left active:scale-[.99]"
+                  >
                     <Icon className="size-4 text-[#326575]" />
-                    <span className="min-w-0 flex-1"><strong className="flex items-center gap-1.5 text-xs">{place.label}{isFavorite && <span className="rounded-full bg-[#EAF6B7] px-1.5 py-0.5 text-[0.48rem] font-extrabold uppercase tracking-[0.08em] text-[#365000]">Mais usado</span>}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
+                    <span className="min-w-0 flex-1">
+                      <strong className="flex items-center gap-1.5 text-xs">
+                        {place.label}
+                        {isFavorite && <span className="rounded-full bg-[#EAF6B7] px-1.5 py-0.5 text-[0.48rem] font-extrabold uppercase tracking-[0.08em] text-[#365000]">Mais usado</span>}
+                      </strong>
+                      <span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span>
+                    </span>
+                    <ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => navigateTo(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Navegar</button><button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button>
+                    <button type="button" onClick={() => navigateTo(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Navegar</button>
+                    <button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button>
+                    <button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button>
+                    <button type="button" onClick={() => removeMobileDestination(id)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button>
+                  </div>
                 </>
               ) : (
                 <button type="button" onClick={() => { setEditing(id); setValue(""); }} className="flex min-h-16 w-full items-center justify-center gap-2 rounded-xl text-xs font-bold text-[#52636C]">
@@ -160,13 +196,24 @@ export default function MobileTripShortcuts() {
           );
         })}
       </div>
-      {editing && <div className="mt-3 rounded-2xl border border-[#326575]/25 bg-[#F2F5F6] p-3">
-        <label className="text-xs font-bold" htmlFor="mobile-destination">Endereço ou local</label>
-        <div className="mt-2 flex gap-2">
-          <input id="mobile-destination" value={value} onChange={event => setValue(event.target.value)} onKeyDown={event => { if (event.key === "Enter") save(); }} placeholder="Ex.: Brasília, DF" className="min-w-0 flex-1 rounded-xl border border-[#C7D2D6] bg-white px-3 py-3 text-sm outline-none focus:border-[#326575]" />
-          <button type="button" onClick={() => { setEditing(null); setValue(""); }} className="min-h-11 rounded-xl border border-[#C7D2D6] bg-white px-3 text-xs font-bold text-[#52636C]">Cancelar</button><button type="button" onClick={save} className="min-h-11 rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white">Salvar</button>
+
+      {editing && (
+        <div className="mt-3 rounded-2xl border border-[#326575]/25 bg-[#F2F5F6] p-3">
+          <label className="text-xs font-bold" htmlFor="mobile-destination">Endereço ou local</label>
+          <div className="mt-2 flex gap-2">
+            <input
+              id="mobile-destination"
+              value={value}
+              onChange={event => setValue(event.target.value)}
+              onKeyDown={event => { if (event.key === "Enter") save(); }}
+              placeholder="Ex.: Brasília, DF"
+              className="min-w-0 flex-1 rounded-xl border border-[#C7D2D6] bg-white px-3 py-3 text-sm outline-none focus:border-[#326575]"
+            />
+            <button type="button" onClick={() => { setEditing(null); setValue(""); }} className="min-h-11 rounded-xl border border-[#C7D2D6] bg-white px-3 text-xs font-bold text-[#52636C]">Cancelar</button>
+            <button type="button" onClick={save} className="min-h-11 rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white">Salvar</button>
+          </div>
         </div>
-      </div>}
+      )}
     </section>
   );
 }
