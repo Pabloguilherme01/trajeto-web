@@ -9,10 +9,7 @@
   "orientation": "portrait",
   "background_color": "#0B1014",
   "theme_color": "#0B1014",
-  "categories": [
-    "navigation",
-    "travel"
-  ],
+  "categories": ["navigation", "travel"],
   "prefer_related_applications": false,
   "icons": [
     {
@@ -24,37 +21,35 @@
   ],
   "shortcuts": [
     {
-      "name": "Planejar rota",
-      "short_name": "Planejar",
-      "description": "Abrir o planejador de viagem",
+      "name": "Retomar última rota",
+      "short_name": "Retomar",
+      "description": "Abrir rapidamente o planejador e continuar a última viagem salva",
       "url": "./planejar",
-      "icons": [
-        {
-          "src": "./favicon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
+      "id": "retomar-rota",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Encontrar postos",
       "short_name": "Postos",
-      "description": "Encontrar postos próximos",
+      "description": "Abrir a busca de postos",
       "url": "./postos",
-      "icons": [
-        {
-          "src": "./favicon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
-    }
-  ,
+      "id": "postos",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Perto de mim",
+      "short_name": "Perto",
+      "description": "Abrir rapidamente a busca de postos próximos",
+      "url": "./postos?q=postos%20pr%C3%B3ximos",
+      "id": "perto",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
     {
       "name": "Salvos no aparelho",
       "short_name": "Salvos",
-      "description": "Abrir postos salvos neste dispositivo",
+      "description": "Abrir locais e recursos salvos neste dispositivo",
       "url": "./postos?salvos=1",
+      "id": "salvos",
       "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
