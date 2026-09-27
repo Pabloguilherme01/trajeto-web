@@ -126,7 +126,7 @@ export default function Home() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Objetivo: preparar e continuar a viagem</p>
-                <p className="mt-1 text-sm font-bold text-white">{online ? "Prepare a rota antes de sair e deixe uma cópia no celular para quando a conexão falhar." : savedRoutes > 0 ? `Sem internet: ${savedRoutes} rota${savedRoutes === 1 ? "" : "s"} pronta${savedRoutes === 1 ? "" : "s"} para continuar neste aparelho.` : "Sem internet: abra uma rota já salva neste aparelho."}</p>
+                <p className="mt-1 text-sm font-bold text-white">{online ? "Prepare a rota antes de sair e deixe uma cópia no celular para quando a conexão falhar." : savedRoutes > 0 ? `Sem internet: ${savedRoutes} rota${savedRoutes === 1 ? "" : "s"} pronta${savedRoutes === 1 ? "" : "s"} para continuar neste aparelho.` : "Sem internet: não há uma rota pronta para continuar neste aparelho."}</p>
               </div>
               {online ? <a href={appUrl("/planejar")} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
                 <Navigation className="size-4" /> Planejar agora
@@ -173,7 +173,7 @@ export default function Home() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Comece aqui</p>
-                  <h2 id="search-title" className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] text-white">Onde você vai passar?</h2>
+                  <h2 id="search-title" className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] text-white">{online ? "Onde você vai passar?" : "Continue sua viagem"}</h2>
                 </div>
                 <Fuel className="size-6 text-[#C7FF3C]" />
               </div>
@@ -223,7 +223,7 @@ export default function Home() {
               </div>
 
               <p className="mt-5 border-t border-white/8 pt-4 text-xs leading-relaxed text-[#7F919A]">
-                Consulta pública. Entre somente se quiser salvar favoritos, veículos, rotas ou alertas.
+                {online ? "Consulta pública. Entre somente se quiser salvar favoritos, veículos, rotas ou alertas." : latestSavedRoute ? "Esta rota já está no aparelho. Abra e continue sem recalcular." : "Quando a conexão voltar, prepare uma rota e salve-a para uso offline."}
               </p>
             </section>
           </div>
