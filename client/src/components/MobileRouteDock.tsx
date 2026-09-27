@@ -43,6 +43,12 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
     return () => { active = false; };
   }, [routeId]);
 
+  useEffect(() => {
+    if (!actionMessage) return;
+    const timeout = window.setTimeout(() => setActionMessage(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [actionMessage]);
+
   const handleSave = () => {
     vibration();
     if (busy || saved) return;
