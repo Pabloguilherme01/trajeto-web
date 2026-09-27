@@ -87,6 +87,24 @@ export default function MobileTravelHub() {
             </div>
             <div className="flex items-center gap-2">{networkType && online && <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.1em] text-[#7F919A] sm:inline">{networkType}</span>}<div className={online ? "text-[#C7FF3C]" : "text-[#FFB86B]"}>{online ? <Wifi className="size-5" /> : <CloudOff className="size-5" />}</div></div>
           </div>
+          <div className="mt-4 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[0.05] p-3">
+            <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Próxima ação</p>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-extrabold text-white">{!online && savedRoutes > 0 ? "Use uma rota salva sem internet." : batterySaver && !economyMode ? "Ative a economia antes de sair." : lastTrip ? "Retome sua última viagem." : recentSearch ? "Reabra sua última pesquisa." : "Encontre postos perto de você."}</p>
+                <p className="mt-1 text-[0.62rem] leading-relaxed text-[#9EC8D2]">{!online && savedRoutes > 0 ? "O conteúdo local continua disponível neste aparelho." : batterySaver && !economyMode ? "Reduza consultas e carregamento de dados no celular." : lastTrip ? lastTrip.destination : recentSearch ?? "Use o GPS para começar."}</p>
+              </div>
+              <button type="button" onClick={() => {
+                if (!online && savedRoutes > 0) return setLocation(appUrl("/postos") + "?salvos=1");
+                if (batterySaver && !economyMode) { setEconomyMode(true); setEconomyModeState(true); return; }
+                if (lastTrip) return setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
+                if (recentSearch) return setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(recentSearch));
+                locate();
+              }} className="min-h-10 shrink-0 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-extrabold text-[#0B1014] active:scale-[.98]">
+                {!online && savedRoutes > 0 ? "Abrir" : batterySaver && !economyMode ? "Ativar" : "Continuar"}
+              </button>
+            </div>
+          </div>
           <div className="mt-4 flex flex-wrap gap-2"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${online ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/8 text-[#DFFF9D]" : "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]"}`}><Signal className="size-3" /> {online ? (networkType ? networkType : "online") : "offline"}</span>{battery !== null && <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${battery <= 20 ? "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]" : "border-white/10 bg-white/[0.03] text-[#A9BAC2]"}`}><Battery className="size-3" /> {battery}%</span>}<span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.58rem] font-bold text-[#A9BAC2]"><ShieldCheck className="size-3 text-[#BDA5FF]" /> {isStandalone ? "app instalado" : "web app"}</span></div>
           <div className="mt-3 grid grid-cols-3 gap-2">
             <button type="button" onClick={() => setLocation(appUrl("/postos") + "?salvos=1")} className="rounded-xl border border-white/6 bg-white/[0.035] p-3 text-left transition active:scale-[.98]"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></button>
