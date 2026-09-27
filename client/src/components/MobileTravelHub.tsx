@@ -1,4 +1,4 @@
-import { Battery, CloudOff, Compass, Gauge, LocateFixed, Navigation, Wifi } from "lucide-react";
+import { Battery, CloudOff, Compass, Gauge, LocateFixed, Navigation, Wifi, Signal, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -14,9 +14,14 @@ export default function MobileTravelHub() {
   const [locating, setLocating] = useState(false);
   const [batterySaver, setBatterySaver] = useState(false);
   const [economyMode, setEconomyModeState] = useState(getEconomyMode);
+  const [networkType, setNetworkType] = useState<string | null>(null);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
+    const connection = (navigator as Navigator & { connection?: { effectiveType?: string; addEventListener?: (type: string, listener: () => void) => void; removeEventListener?: (type: string, listener: () => void) => void } }).connection;
+    const updateNetwork = () => setNetworkType(connection?.effectiveType ?? null);
+    updateNetwork();
+    connection?.addEventListener?.("change", updateNetwork);
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     const refreshRoutes = () => { void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => {}); };
@@ -46,6 +51,7 @@ export default function MobileTravelHub() {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
       window.removeEventListener("focus", refreshRoutes);
+      connection?.removeEventListener?.("change", updateNetwork);
       batteryDevice?.removeEventListener("levelchange", updateBattery);
       if (batteryDevice && updateBatterySaver) batteryDevice.removeEventListener("levelchange", updateBatterySaver);
     };
@@ -69,9 +75,10 @@ export default function MobileTravelHub() {
               <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Painel de viagem</p>
               <p className="mt-1 text-sm font-extrabold text-white">{online ? "Conectado e pronto" : "Modo offline ativo"}</p>
             </div>
-            <div className={online ? "text-[#C7FF3C]" : "text-[#FFB86B]"}>{online ? <Wifi className="size-5" /> : <CloudOff className="size-5" />}</div>
+            <div className="flex items-center gap-2">{networkType && online && <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.1em] text-[#7F919A] sm:inline">{networkType}</span>}<div className={online ? "text-[#C7FF3C]" : "text-[#FFB86B]"}>{online ? <Wifi className="size-5" /> : <CloudOff className="size-5" />}</div></div>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-4 flex flex-wrap gap-2"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${online ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/8 text-[#DFFF9D]" : "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]"}`}><Signal className="size-3" /> {online ? (networkType ? networkType : "online") : "offline"}</span>{battery !== null && <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${battery <= 20 ? "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]" : "border-white/10 bg-white/[0.03] text-[#A9BAC2]"}`}><Battery className="size-3" /> {battery}%</span>}<span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.58rem] font-bold text-[#A9BAC2]"><ShieldCheck className="size-3 text-[#BDA5FF]" /> local</span></div>
+          <div className="mt-3 grid grid-cols-3 gap-2">
             <div className="rounded-xl border border-white/6 bg-white/[0.035] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></div>
             <div className="rounded-xl bg-white/[0.04] p-3"><Battery className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Bateria</p><p className="text-sm font-extrabold text-white">{battery === null ? "—" : battery + "%"}</p></div>
             <div className="rounded-xl bg-white/[0.04] p-3"><Compass className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Modo</p><p className="text-sm font-extrabold text-white">{online ? "Online" : "Offline"}</p></div>
