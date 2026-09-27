@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 type WakeLockSentinelLike = { release: () => Promise<void>; addEventListener?: (type: string, listener: () => void) => void; };
 
 export default function MobileTravelMode() {
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(() => { try { return localStorage.getItem("trajeto-travel-mode") === "1"; } catch { return false; } });
   const [supported, setSupported] = useState(false);
   const lockRef = useRef<WakeLockSentinelLike | null>(null);
 
@@ -17,7 +17,7 @@ export default function MobileTravelMode() {
         const wakeLock = await (navigator as Navigator & { wakeLock: { request: (type: "screen") => Promise<WakeLockSentinelLike> } }).wakeLock.request("screen");
         lockRef.current = wakeLock;
         wakeLock.addEventListener?.("release", () => setActive(false));
-      } catch { setActive(false); }
+      } catch { setActive(false); try { localStorage.setItem("trajeto-travel-mode", "0"); } catch {} }
     };
     document.addEventListener("visibilitychange", reacquire);
     return () => {
@@ -38,7 +38,7 @@ export default function MobileTravelMode() {
       const wakeLock = await (navigator as Navigator & { wakeLock: { request: (type: "screen") => Promise<WakeLockSentinelLike> } }).wakeLock.request("screen");
       lockRef.current = wakeLock;
       wakeLock.addEventListener?.("release", () => setActive(false));
-      setActive(true);
+      setActive(true);\n      try { localStorage.setItem("trajeto-travel-mode", "1"); } catch {}
     } catch {
       setActive(false);
     }
