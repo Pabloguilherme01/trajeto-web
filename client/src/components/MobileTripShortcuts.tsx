@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
+import { listOfflineRoutes } from "@/lib/offlineStore";
 import {
   getDestinationUsage,
   getFavoriteDestination,
@@ -64,6 +65,10 @@ export default function MobileTripShortcuts() {
 
   const navigateTo = (place: MobileDestination) => {
     rememberUsage(place);
+    if (!navigator.onLine) {
+      setFeedback("Sem internet: abra uma rota salva para continuar a viagem.");
+      return;
+    }
     const google = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place.value);
     window.open(google, "_blank", "noopener,noreferrer");
     setFeedback("Abrindo a navegação para " + place.label + ".");
@@ -86,6 +91,20 @@ export default function MobileTripShortcuts() {
     if (locating) return;
     rememberUsage(place);
     setFeedback(null);
+
+    if (!navigator.onLine) {
+      void listOfflineRoutes().then(routes => {
+        const target = place.value.trim().toLocaleLowerCase("pt-BR");
+        const saved = routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target);
+        if (saved) {
+          setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination));
+          return;
+        }
+        setFeedback("Esse destino não tem uma rota salva. Sem internet, salve a rota antes de sair.");
+      }).catch(() => setFeedback("Não foi possível consultar suas rotas salvas."));
+      return;
+    }
+
     setLocating(place.id);
 
     if (!navigator.geolocation) {
@@ -181,7 +200,7 @@ export default function MobileTripShortcuts() {
                   </button>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                     <button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button>
-                    <button type="button" onClick={() => navigateTo(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Navegar</button>
+                    <button type="button" onClick={() => navigateTo(place)} disabled={!navigator.onLine} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-3" /> Navegar</button>
                     <button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button>
                     <button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button>
                     <button type="button" onClick={() => removeMobileDestination(id)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button>
