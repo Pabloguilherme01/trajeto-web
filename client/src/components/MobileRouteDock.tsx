@@ -15,7 +15,7 @@ type Props = {
   onStations: () => void;
 };
 
-export default function MobileRouteDock({ distance, duration, routeId, snapshot = false, onShare, onNavigate, onSave, onStations }: Props) {
+export default function MobileRouteDock({ distance, duration, routeId, snapshot = false, onShare, onNavigate, onRefresh, onSave, onStations }: Props) {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -77,7 +77,7 @@ export default function MobileRouteDock({ distance, duration, routeId, snapshot 
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1.5 p-2">
-          <button type="button" aria-label={snapshot && online && onRefresh ? "Atualizar esta rota com dados atuais" : "Abrir navegação para o destino"} onClick={() => { vibration(); if (snapshot && online && onRefresh) onRefresh(); else onNavigate(); }} disabled={!online} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-4" />{snapshot && online && onRefresh ? "Atualizar" : "Navegar"}</button>
+          <button type="button" aria-label={snapshot && online && onRefresh ? "Recalcular esta rota com dados atuais" : "Abrir navegação para o destino"} onClick={() => { vibration(); if (snapshot && online && onRefresh) onRefresh(); else onNavigate(); }} disabled={!online} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-4" />{snapshot && online && onRefresh ? "Recalcular" : "Navegar"}</button>
           <button type="button" aria-live="polite" aria-label={saved ? "Rota salva neste aparelho" : "Salvar rota para usar offline"} onClick={handleSave} disabled={busy || saved} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97] disabled:cursor-default disabled:opacity-80">
             <span className="grid size-4 place-items-center">{saved ? <Check className="size-4 text-[#C7FF3C]" /> : <Save className="size-4" />}</span>{busy ? "Salvando…" : saved ? "Salva" : "Salvar"}
           </button>
