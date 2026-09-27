@@ -69,7 +69,7 @@ export default function Planner() {
       setPlanned(payload as PlannedRoute);
       setLoadedFromOffline(true);
       setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
-    }).catch(() => {});
+    }).catch(() => setShareMessage("Não foi possível abrir as rotas salvas agora."));
   }, [offline, origin, destination, planned]);
 
   useEffect(() => {
@@ -295,7 +295,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
   destination: destination.trim(),
   savedAt: new Date().toISOString(),
   payload: planned,
-}).then(() => setShareMessage("Rota salva neste aparelho para acesso offline."))} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
+}).then(() => setShareMessage("Rota salva neste aparelho para acesso offline.")).catch(() => setShareMessage("Não foi possível salvar a rota offline. Tente novamente."))} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
 
         {planned && <div className="mt-4 md:hidden"><MobileTravelMode /></div>}
 
