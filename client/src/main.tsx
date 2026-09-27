@@ -7,6 +7,7 @@ import superjson from "superjson";
 import App from "./App";
 import { startLogin } from "./const";
 import "./index.css";
+import { installOfflinePersistence, registerServiceWorker } from "./pwa";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,6 +77,9 @@ const trpcClient = trpc.createClient({
     }),
   ],
 });
+
+registerServiceWorker();
+installOfflinePersistence();
 
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
