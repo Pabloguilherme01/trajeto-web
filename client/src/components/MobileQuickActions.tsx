@@ -17,6 +17,7 @@ export default function MobileQuickActions() {
   const [lastIntent, setLastIntent] = useState(getLastIntent);
   const [shareLabel, setShareLabel] = useState("Compartilhar");
   const [dismissedStatus, setDismissedStatus] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   useEffect(() => {
     const onOnline = () => { setOnline(true); vibration(8); };
@@ -34,6 +35,22 @@ export default function MobileQuickActions() {
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
+    };
+  }, []);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const updateKeyboard = () => {
+      if (!viewport) return setKeyboardOpen(false);
+      const obscuredHeight = window.innerHeight - viewport.height;
+      setKeyboardOpen(obscuredHeight > 140);
+    };
+    updateKeyboard();
+    viewport?.addEventListener("resize", updateKeyboard);
+    viewport?.addEventListener("scroll", updateKeyboard);
+    return () => {
+      viewport?.removeEventListener("resize", updateKeyboard);
+      viewport?.removeEventListener("scroll", updateKeyboard);
     };
   }, []);
 
@@ -108,6 +125,8 @@ export default function MobileQuickActions() {
       });
     } },
   ];
+
+  if (keyboardOpen) return null;
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
