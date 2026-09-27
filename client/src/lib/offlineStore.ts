@@ -125,14 +125,13 @@ export async function saveOfflineRoute(route: OfflineRoute) {
   await withStore("readwrite", store => store.put(route));
   const routes = await listOfflineRoutes();
   if (routes.length > MAX_SAVED_ROUTES) {
-    const excessIds = new Set(routes.slice(MAX_SAVED_ROUTES).map(item => item.id));
+    const excessIds = routes.slice(MAX_SAVED_ROUTES).map(item => item.id);
     await withStore("readwrite", store => {
-      const request = store.openCursor();
+      const request = store.getAllKeys();
       request.onsuccess = () => {
-        const cursor = request.result;
-        if (!cursor) return;
-        if (excessIds.has(String(cursor.key))) cursor.delete();
-        cursor.continue();
+        for (const key of request.result) {
+          if (excessIds.includes(String(key))) store.delete(key);
+        }
       };
       return request;
     });
