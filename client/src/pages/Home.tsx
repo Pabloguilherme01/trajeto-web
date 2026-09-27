@@ -5,7 +5,7 @@ import TripPrepCard from "@/components/TripPrepCard";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
-import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
+import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
@@ -133,9 +133,13 @@ export default function Home() {
               </div>
               {online ? <a href={appUrl("/planejar")} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
                 <Navigation className="size-4" /> Planejar agora
-              </a> : <button type="button" onClick={offlineStorageError ? () => window.location.reload() : openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
-                <Navigation className="size-4" /> {savedRoutes > 0 ? "Continuar última rota" : offlineStorageError ? "Tentar novamente" : "Preparar quando voltar"}
-              </button>}
+              </a> : offlineStorageError ? <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
+                <Navigation className="size-4" /> Tentar novamente
+              </button> : savedRoutes > 0 ? <button type="button" onClick={openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
+                <Navigation className="size-4" /> Continuar última rota
+              </button> : <span className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-extrabold text-[#7F919A] sm:w-auto">
+                <WifiOff className="size-4" /> Sem rota salva
+              </span>}
             </div>
           </div>
         </section>
