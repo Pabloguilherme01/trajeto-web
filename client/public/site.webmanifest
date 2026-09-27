@@ -9,7 +9,10 @@
   "orientation": "portrait",
   "background_color": "#0B1014",
   "theme_color": "#0B1014",
-  "categories": ["navigation", "travel"],
+  "categories": [
+    "navigation",
+    "travel"
+  ],
   "prefer_related_applications": false,
   "icons": [
     {
@@ -18,5 +21,36 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Planejar rota",
+      "short_name": "Planejar",
+      "description": "Abrir o planejador de viagem",
+      "url": "./planejar",
+      "icons": [
+        {
+          "src": "./favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Encontrar postos",
+      "short_name": "Postos",
+      "description": "Encontrar postos próximos",
+      "url": "./postos",
+      "icons": [
+        {
+          "src": "./favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }
