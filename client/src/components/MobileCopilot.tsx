@@ -6,7 +6,6 @@ import {
   History,
   MapPin,
   Route,
-  Share2,
   Sparkles,
   Wifi,
 } from "lucide-react";
@@ -31,7 +30,7 @@ import {
   rememberDestinationUsage,
 } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
-import { shareText, vibration } from "@/lib/mobileTools";
+import { vibration } from "@/lib/mobileTools";
 
 type Action = {
   title: string;
@@ -215,16 +214,6 @@ export default function MobileCopilot() {
     };
   }, [online, offlineRoutes, latestOfflineRoute, state, setLocation]);
 
-  const shareDecision = () => {
-    const destination = state.favoriteDestination;
-    const text = destination
-      ? `Meu destino mais usado no Trajeto: ${destination.label} · ${destination.value}`
-      : state.lastTrip
-        ? `Minha rota no Trajeto: ${state.lastTrip.origin} → ${state.lastTrip.destination}`
-        : "Estou usando o Trajeto para planejar minhas paradas e viagens.";
-    void shareText(text, window.location.href, "Trajeto");
-  };
-
   const actions: Action[] = [
     {
       title: "Planejar",
@@ -300,14 +289,11 @@ export default function MobileCopilot() {
                 </button>
               )}
               {offlineRoutes > 0 && (
-                <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#AABBC2]">
+                <a href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#AABBC2]">
                   <Bookmark className="size-3.5" /> {offlineRoutes} offline
-                </span>
+                </a>
               )}
               {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Sem conexão</span>}
-              <button type="button" onClick={shareDecision} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#D3DEE2]">
-                <Share2 className="size-3.5" /> Compartilhar
-              </button>
             </div>
           </div>
         </div>
