@@ -47,7 +47,8 @@ export function StationSheet({ open, onOpenChange, stop, recommendation, favorit
   const anp = stop.anpMatch?.status === "probable" ? stop.anpMatch : null;
   const price = stop.priceReference ? Number(stop.priceReference.price) : null;
   const copyAddress = async () => { try { await navigator.clipboard.writeText(stop.address); vibration(); setFeedback("Endereço copiado."); } catch { setFeedback("Não foi possível copiar o endereço."); } };
-  const shareStation = async () => { try { await shareText(`${stop.name}\n${stop.address}`, navigationUrl(stop, "google"), "Posto no Trajeto"); setFeedback("Posto preparado para compartilhar."); } catch { setFeedback("Não foi possível compartilhar agora."); } };
+  const shareStation = async () => { try { await shareText(`${stop.name}
+${stop.address}`, navigationUrl(stop, "google"), "Posto no Trajeto"); setFeedback("Posto preparado para compartilhar."); } catch { setFeedback("Não foi possível compartilhar agora."); } };
 
   return <Drawer open={open} onOpenChange={onOpenChange}>
     <DrawerContent className="max-h-[88vh] overflow-y-auto rounded-t-[1.5rem] border-[#C7D2C9] bg-[#F7F4EC] text-[#163840]">
