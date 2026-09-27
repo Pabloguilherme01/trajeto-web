@@ -13,7 +13,7 @@ export default function MobileDataMode({ onChange }: { onChange?: (enabled: bool
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+    <div className={`rounded-2xl border p-3 ${enabled ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.04]" : "border-white/10 bg-white/[0.035]"}`}>
       <div className="flex items-center gap-3">
         <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
           {enabled ? <Leaf className="size-4" /> : <Gauge className="size-4" />}
