@@ -2,7 +2,10 @@ const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
 const LAST_STATION_KEY = "trajeto-last-station";
+const LAST_INTENT_KEY = "trajeto-last-intent";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
+
+export type MobileIntent = "route" | "stations" | "nearby" | "saved";
 
 function notifyPreferenceChange() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(PREFERENCE_EVENT));
@@ -50,7 +53,7 @@ export function getLastTrip(): { origin: string; destination: string } | null {
 export function rememberTrip(origin: string, destination: string) {
   if (origin.trim().length < 3 || destination.trim().length < 3) return;
   try { localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: origin.trim(), destination: destination.trim() })); } catch {}
-  notifyPreferenceChange();
+  rememberIntent("route");
 }
 
 export type LastStation = { placeId: string; name: string; address: string; query: string };
@@ -74,6 +77,18 @@ export function rememberStation(station: LastStation) {
       query: station.query.trim(),
     }));
   } catch {}
+  rememberIntent("stations");
+}
+
+export function getLastIntent(): MobileIntent | null {
+  try {
+    const value = localStorage.getItem(LAST_INTENT_KEY);
+    return value === "route" || value === "stations" || value === "nearby" || value === "saved" ? value : null;
+  } catch { return null; }
+}
+
+export function rememberIntent(intent: MobileIntent) {
+  try { localStorage.setItem(LAST_INTENT_KEY, intent); } catch {}
   notifyPreferenceChange();
 }
 
