@@ -23,18 +23,6 @@ function formatAge(savedAt: string) {
   return `salva em ${new Date(time).toLocaleDateString("pt-BR")}`;
 }
 
-function routeUrl(route: OfflineRoute) {
-  return (
-    window.location.origin +
-    appUrl("/planejar") +
-    "?rota=" +
-    encodeURIComponent(route.id) +
-    "&origem=" +
-    encodeURIComponent(route.origin) +
-    "&destino=" +
-    encodeURIComponent(route.destination)
-  );
-}
 
 export default function OfflineRouteVault() {
   const [, setLocation] = useLocation();
@@ -81,6 +69,10 @@ export default function OfflineRouteVault() {
   };
 
   const navigateExternally = (route: OfflineRoute) => {
+    if (!isOnline) {
+      setFeedback("A navegação externa precisa de internet. A rota salva continua disponível offline.");
+      return;
+    }
     const url = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(route.destination);
     window.open(url, "_blank", "noopener,noreferrer");
   };
@@ -183,6 +175,7 @@ export default function OfflineRouteVault() {
                 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.65rem] text-[#7F919A]">
                   <span className="inline-flex items-center gap-1"><Clock3 className="size-3" />{formatAge(route.savedAt)}</span>
                   <span>{new Date(route.savedAt).toLocaleString("pt-BR")}</span>
+                  <span className="text-[#657780]">snapshot da viagem</span>
                 </p>
               </button>
 
@@ -190,7 +183,7 @@ export default function OfflineRouteVault() {
                 <button type="button" onClick={() => openRoute(route)} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">
                   <ArrowRight className="size-3.5" /> Abrir
                 </button>
-                <button type="button" onClick={() => navigateExternally(route)} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-[0.62rem] font-bold text-white">
+                <button type="button" onClick={() => navigateExternally(route)} disabled={!isOnline} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-[0.62rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-45">
                   <ExternalLink className="size-3.5" /> Navegar
                 </button>
                 <button type="button" onClick={() => void shareRoute(route)} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-[0.62rem] font-bold text-white">
