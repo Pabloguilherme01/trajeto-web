@@ -149,7 +149,7 @@ export default function OfflineRouteVault() {
             <div className="min-w-0 flex-1">
               <p className="text-[0.56rem] font-extrabold uppercase tracking-[0.14em] text-[#C7FF3C]">Próxima ação</p>
               <p className="mt-1 truncate text-sm font-extrabold text-white">{items[0].origin} → {items[0].destination}</p>
-              <p className="mt-0.5 text-[0.62rem] text-[#9FB1B8]">Última rota salva · abre sem recalcular</p>
+              <p className="mt-0.5 text-[0.62rem] text-[#9FB1B8]">Última rota salva · {formatAge(items[0].savedAt)} · abre sem recalcular</p>
             </div>
             <button type="button" onClick={() => openRoute(items[0])} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
               Continuar <ArrowRight className="size-3.5" />
