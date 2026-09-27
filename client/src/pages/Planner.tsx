@@ -153,7 +153,7 @@ export default function Planner() {
             <span className="brand-wordmark text-xl text-white">trajeto</span>
             <span className="hidden border-l border-white/20 pl-3 text-[0.62rem] font-bold tracking-[0.18em] text-[#FFC928] sm:block">PLANEJADOR</span>
           </Link>
-          <button onClick={() => setLocation("/")} className="inline-flex items-center gap-2 text-xs font-bold text-white/70 transition hover:text-[#FFC928]"><ArrowLeft className="size-4" /> Início</button>
+          <button onClick={() => setLocation(appUrl("/"))} className="inline-flex items-center gap-2 text-xs font-bold text-white/70 transition hover:text-[#FFC928]"><ArrowLeft className="size-4" /> Início</button>
         </div>
       </header>
 
