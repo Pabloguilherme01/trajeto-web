@@ -8,6 +8,7 @@ import MobileVehicleCard from "@/components/MobileVehicleCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { useLocation } from "wouter";
 
 const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
@@ -20,21 +21,39 @@ export default function Home() {
   const [activePresetId, setActivePresetId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
   const [recentSearches, setRecentSearches] = useState<string[]>(() => getRecentSearches());
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [savedRoutes, setSavedRoutes] = useState(0);
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
   useEffect(() => {
-    const refresh = () => setRecentSearches(getRecentSearches());
+    const refresh = () => {
+      setRecentSearches(getRecentSearches());
+      void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => setSavedRoutes(0));
+    };
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+    refresh();
     window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener(offlineRouteEvent, refresh);
     window.addEventListener("focus", refresh);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
     return () => {
       window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener(offlineRouteEvent, refresh);
       window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
     };
   }, []);
 
   const openSearch = (query: string, presetId = activePreset?.id) => {
     const normalized = query.trim() || activePreset?.query || "";
+    if (!online) {
+      setSearchError(savedRoutes > 0 ? "Sem internet. Abra uma rota salva para continuar neste aparelho." : "Sem internet. Prepare uma rota quando a conexão voltar.");
+      return;
+    }
     if (normalized.length < 3) {
       setSearchError("Digite pelo menos 3 caracteres para pesquisar.");
       return;
@@ -46,6 +65,10 @@ export default function Home() {
   };
 
   const useMyLocation = () => {
+    if (!online) {
+      setSearchError(savedRoutes > 0 ? "Sem internet. A localização ao vivo precisa de conexão. Abra uma rota salva." : "Sem internet. A localização ao vivo precisa de conexão.");
+      return;
+    }
     if (!navigator.geolocation || locating) { if (!navigator.geolocation) setSearchError("Seu navegador não oferece localização."); return; }
     setSearchError(null);
     setLocationMessage(null);
@@ -61,6 +84,8 @@ export default function Home() {
     event.preventDefault();
     openSearch(search);
   };
+
+  const openSavedRoutes = () => setLocation(appUrl("/planejar?salvos=1"));
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0B1014] text-[#EAF0F2]">
@@ -82,12 +107,14 @@ export default function Home() {
           <div className="container py-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">App para celular</p>
-                <p className="mt-1 text-sm font-bold text-white">Instale o Trajeto na tela inicial e consulte o que já foi salvo mesmo sem internet.</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Objetivo: preparar e continuar a viagem</p>
+                <p className="mt-1 text-sm font-bold text-white">{online ? "Prepare a rota antes de sair e deixe uma cópia no celular para quando a conexão falhar." : savedRoutes > 0 ? `Sem internet: ${savedRoutes} rota${savedRoutes === 1 ? "" : "s"} pronta${savedRoutes === 1 ? "" : "s"} para continuar neste aparelho.` : "Sem internet: abra uma rota já salva neste aparelho."}</p>
               </div>
-              <a href="#instalar-app" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/45 px-4 py-2 text-xs font-extrabold text-[#DFFF9D] sm:w-auto">
+              {online ? <a href="#instalar-app" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/45 px-4 py-2 text-xs font-extrabold text-[#DFFF9D] sm:w-auto">
                 <Download className="size-4" /> Como instalar
-              </a>
+              </a> : <button type="button" onClick={openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
+                <Navigation className="size-4" /> {savedRoutes > 0 ? "Abrir rotas salvas" : "Abrir planejador"}
+              </button>}
             </div>
           </div>
         </section>
@@ -138,7 +165,7 @@ export default function Home() {
                 <div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]">
                   <Search className="ml-3 mt-3 size-5 shrink-0 text-[#3DE3FF]" />
                   <input id="home-search" minLength={3} aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "home-search-error" : undefined} value={search} onChange={event => { setSearch(event.target.value); if (searchError) setSearchError(null); }} placeholder={activePreset?.query ?? "Ex.: Águas Lindas de Goiás"} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780]" />
-                  <button type="submit" aria-label="Pesquisar postos" className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] transition hover:bg-white active:scale-95">
+                  <button type="submit" aria-label={online ? "Pesquisar postos" : "Buscar quando houver internet"} disabled={!online} className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] transition hover:bg-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-40">
                     <ArrowRight className="size-5" />
                   </button>
                 </div>
