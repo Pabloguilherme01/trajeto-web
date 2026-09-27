@@ -1,7 +1,8 @@
-import { Trash2, WifiOff } from "lucide-react";
+import { Trash2, WifiOff, Navigation, Clock3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { listOfflineRoutes, removeOfflineRoute } from "@/lib/offlineStore";
 import { Link } from "wouter";
+import { appUrl } from "@/lib/appUrl";
 
 type Item = { id: string; origin: string; destination: string; savedAt: string };
 
@@ -35,9 +36,9 @@ export default function OfflineRouteVault() {
       <div className="mt-5 space-y-2">
         {items.map(item => (
           <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-            <Link href={`/planejar?origem=${encodeURIComponent(item.origin)}&destino=${encodeURIComponent(item.destination)}`} className="min-w-0 flex-1">
+            <Link href={appUrl(`/planejar?origem=${encodeURIComponent(item.origin)}&destino=${encodeURIComponent(item.destination)}`)} className="min-w-0 flex-1 rounded-xl p-1.5 active:bg-white/5">
               <p className="truncate text-sm font-bold text-white">{item.origin} → {item.destination}</p>
-              <p className="mt-1 text-[0.65rem] text-[#7F919A]">{new Date(item.savedAt).toLocaleString("pt-BR")}</p>
+              <p className="mt-1 flex items-center gap-1 text-[0.65rem] text-[#7F919A]"><Clock3 className="size-3" />{new Date(item.savedAt).toLocaleString("pt-BR")}</p>
             </Link>
             <button type="button" onClick={async () => { await removeOfflineRoute(item.id); await refresh(); }} className="grid size-10 place-items-center rounded-xl border border-white/10 text-[#FFB5A1]" aria-label={`Excluir rota ${item.origin} para ${item.destination}`}>
               <Trash2 className="size-4" />
