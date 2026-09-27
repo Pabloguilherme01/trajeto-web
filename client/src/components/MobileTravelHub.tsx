@@ -17,6 +17,8 @@ export default function MobileTravelHub() {
     const update = () => setOnline(navigator.onLine);
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
+    const refreshRoutes = () => { void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => {}); };
+    window.addEventListener("focus", refreshRoutes);
 
     let mounted = true;
     void listOfflineRoutes().then(routes => { if (mounted) setSavedRoutes(routes.length); }).catch(() => {});
@@ -37,6 +39,7 @@ export default function MobileTravelHub() {
       mounted = false;
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
+      window.removeEventListener("focus", refreshRoutes);
       batteryDevice?.removeEventListener("levelchange", updateBattery);
     };
   }, []);
