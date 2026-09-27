@@ -2,7 +2,7 @@ import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation, ArrowRight, 
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { shareText } from "@/lib/mobileTools";
+import { openNavigation, shareText } from "@/lib/mobileTools";
 
 type Place = { id: "casa" | "trabalho" | "outro"; label: string; value: string };
 
@@ -46,6 +46,12 @@ export default function MobileTripShortcuts() {
 
   const open = (place: Place) => {
     setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
+  };
+
+  const navigateTo = (place: Place) => {
+    const destination = openNavigation(0, 0, place.value);
+    window.open(destination.google, "_blank", "noopener,noreferrer");
+    setFeedback("Abrindo a navegação para " + place.label + ".");
   };
 
   const sharePlace = async (place: Place) => {
@@ -96,7 +102,7 @@ export default function MobileTripShortcuts() {
                     <Icon className="size-4 text-[#326575]" />
                     <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => navigateTo(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Navegar</button><button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
                 </>
               ) : (
                 <button type="button" onClick={() => { setEditing(id); setValue(""); }} className="flex min-h-16 w-full items-center justify-center gap-2 rounded-xl text-xs font-bold text-[#52636C]">
@@ -110,8 +116,8 @@ export default function MobileTripShortcuts() {
       {editing && <div className="mt-3 rounded-2xl border border-[#326575]/25 bg-[#F2F5F6] p-3">
         <label className="text-xs font-bold" htmlFor="mobile-destination">Endereço ou local</label>
         <div className="mt-2 flex gap-2">
-          <input id="mobile-destination" value={value} onChange={event => setValue(event.target.value)} placeholder="Ex.: Brasília, DF" className="min-w-0 flex-1 rounded-xl border border-[#C7D2D6] bg-white px-3 py-3 text-sm outline-none focus:border-[#326575]" />
-          <button type="button" onClick={save} className="min-h-11 rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white">Salvar</button>
+          <input id="mobile-destination" value={value} onChange={event => setValue(event.target.value)} onKeyDown={event => { if (event.key === "Enter") save(); }} placeholder="Ex.: Brasília, DF" className="min-w-0 flex-1 rounded-xl border border-[#C7D2D6] bg-white px-3 py-3 text-sm outline-none focus:border-[#326575]" />
+          <button type="button" onClick={() => { setEditing(null); setValue(""); }} className="min-h-11 rounded-xl border border-[#C7D2D6] bg-white px-3 text-xs font-bold text-[#52636C]">Cancelar</button><button type="button" onClick={save} className="min-h-11 rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white">Salvar</button>
         </div>
       </div>}
     </section>
