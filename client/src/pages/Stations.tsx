@@ -210,7 +210,7 @@ export default function Stations() {
     savePreferences.mutate({ mappedBrand: brandFilter, hoursStatus: hoursFilter, sortBy, anpNeighborhood: "all", anpBrand: "all", resultsPerView: next, economicMode: next === 5 }, { onError: () => toast.error("A escolha de exibição continua nesta tela, mas não foi salva na conta.") });
   };
   const shareCurrentSearch = async () => {
-    const url = `${window.location.origin}/postos?q=${encodeURIComponent(query)}`;
+    const url = `${window.location.origin}${appUrl("/postos")}?q=${encodeURIComponent(query)}`;
     const text = `Consulta Trajeto: postos em ${query}. Localização, distância e horários consultados no Google Maps; referências oficiais da ANP quando disponíveis.`;
     try {
       if (navigator.share) await navigator.share({ title: "Trajeto · consulta de postos", text, url });
@@ -221,7 +221,7 @@ export default function Stations() {
     }
   };
   const navigateStation = (station: typeof list[number]) => {\n    vibration();\n    const urls = openNavigation(station.lat, station.lng, station.name);\n    const waze = window.confirm("Abrir no Waze?\n\nCancelar abre o Google Maps.");\n    window.open(waze ? urls.waze : urls.google, "_blank", "noopener,noreferrer");\n  };\n\n  const shareStation = async (station: typeof list[number]) => {
-    const url = `${window.location.origin}/postos?q=${encodeURIComponent(query)}&station=${encodeURIComponent(station.placeId)}`;
+    const url = `${window.location.origin}${appUrl("/postos")}?q=${encodeURIComponent(query)}&station=${encodeURIComponent(station.placeId)}`;
     const text = `Encontrei ${station.name} no Trajeto. ${station.distanceLabel ? `Distância: ${station.distanceLabel}. ` : ""}Veja os dados e a navegação:`;
     try {
       if (navigator.share) await navigator.share({ title: `Trajeto · ${station.name}`, text, url });
