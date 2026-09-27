@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getEconomyMode, getLastStation, getLastTrip, getRecentSearches, setEconomyMode, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { openNavigation } from "@/lib/mobileTools";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
 export default function MobileTravelHub() {
@@ -190,7 +191,7 @@ export default function MobileTravelHub() {
 
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]" disabled={locating}><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />{locating ? "Localizando…" : "Perto de mim"}</button>
-            <button type="button" onClick={() => lastStation ? setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(lastStation.query) + "&station=" + encodeURIComponent(lastStation.placeId)) : setLocation(appUrl("/postos") + "?salvos=1")} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] px-2 text-xs font-bold text-white transition active:scale-[.98]"><Bookmark className="mr-2 inline size-4 text-[#3DE3FF]" />{lastStation ? "Último posto" : "Salvos"}</button>
+            <button type="button" onClick={() => { if (!lastStation) return setLocation(appUrl("/postos") + "?salvos=1"); const urls = openNavigation(0, 0, lastStation.address); window.open(urls.google, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] px-2 text-xs font-bold text-white transition active:scale-[.98]"><Bookmark className="mr-2 inline size-4 text-[#3DE3FF]" />{lastStation ? "Navegar ao último posto" : "Salvos"}</button>
             <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014] shadow-[0_8px_20px_rgba(199,255,60,.12)] transition active:scale-[.98]"><Navigation className="mr-2 inline size-4" />Planejar</button>
           </div>
         </div>
