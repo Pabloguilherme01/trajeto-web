@@ -23,6 +23,7 @@ export default function Home() {
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [savedRoutes, setSavedRoutes] = useState(0);
+  const [offlineStorageError, setOfflineStorageError] = useState(false);
   const [latestSavedRoute, setLatestSavedRoute] = useState<OfflineRoute | null>(null);
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
@@ -31,9 +32,11 @@ export default function Home() {
     const refresh = () => {
       setRecentSearches(getRecentSearches());
       void listOfflineRoutes().then(routes => {
+        setOfflineStorageError(false);
         setSavedRoutes(routes.length);
         setLatestSavedRoute(routes[0] ?? null);
       }).catch(() => {
+        setOfflineStorageError(true);
         setSavedRoutes(0);
         setLatestSavedRoute(null);
       });
@@ -130,8 +133,8 @@ export default function Home() {
               </div>
               {online ? <a href={appUrl("/planejar")} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
                 <Navigation className="size-4" /> Planejar agora
-              </a> : <button type="button" onClick={openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
-                <Navigation className="size-4" /> {savedRoutes > 0 ? "Continuar última rota" : "Abrir planejador"}
+              </a> : <button type="button" onClick={offlineStorageError ? () => window.location.reload() : openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
+                <Navigation className="size-4" /> {savedRoutes > 0 ? "Continuar última rota" : offlineStorageError ? "Tentar novamente" : "Preparar quando voltar"}
               </button>}
             </div>
           </div>
