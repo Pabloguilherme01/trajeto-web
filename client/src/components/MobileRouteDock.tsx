@@ -47,7 +47,7 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
             <p className="text-[0.56rem] font-bold uppercase tracking-[0.14em] text-[#C7FF3C]">Rota pronta</p>
             <p className="mt-1 truncate text-xs font-bold text-white/75">{saved ? "Salva neste aparelho e disponível offline." : "Sua viagem está calculada e pode ser salva neste aparelho."}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-3 text-right">
+          <div className={`flex shrink-0 items-center gap-3 rounded-xl px-2 py-1.5 text-right ${saved ? "bg-[#C7FF3C]/10" : "bg-white/[0.04]"}`}>
             <div><p className="text-[0.52rem] uppercase tracking-[0.1em] text-white/45">Distância</p><p className="text-sm font-black">{distance}</p></div>
             <div><p className="text-[0.52rem] uppercase tracking-[0.1em] text-white/45">Tempo</p><p className="text-sm font-black">{duration}</p></div>
           </div>
