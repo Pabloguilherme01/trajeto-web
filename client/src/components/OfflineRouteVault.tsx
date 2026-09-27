@@ -111,7 +111,7 @@ export default function OfflineRouteVault() {
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Salvos no aparelho</p>
             <h2 id="saved-routes-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Continue quando quiser.</h2>
             <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#94A8B0]">
-              Prepare uma vez, continue depois. A rota fica no aparelho para reabrir sem recalcular; navegação externa e dados ao vivo dependem de internet.
+              Prepare uma vez, continue depois. A rota fica no aparelho para reabrir sem recalcular. {isOnline ? "Você pode atualizar os dados e abrir a navegação externa." : "Sem internet, abra a rota salva e continue com a cópia local."}
             </p>
           </div>
         </div>
@@ -130,8 +130,7 @@ export default function OfflineRouteVault() {
         <span className={`rounded-full px-2.5 py-1 ${isOnline ? "bg-[#C7FF3C]/15 text-[#C7FF3C]" : "bg-[#3DE3FF]/10 text-[#8FEAFF]"}`}>
           {isOnline ? "Internet disponível" : "Sem internet"}
         </span>
-        <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[#91A4AC]">Rota pronta no aparelho
-        </span>
+        <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[#91A4AC]">{items.length === 1 ? "1 rota pronta" : `${items.length} rotas prontas`}</span>
       </div>
 
       {feedback && (
