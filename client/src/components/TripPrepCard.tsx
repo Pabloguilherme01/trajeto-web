@@ -11,7 +11,7 @@ const defaults = [
 ] as const;
 
 export default function TripPrepCard() {
-  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
+  const [checked, setChecked] = useState<Record<string, boolean>(() => {
     try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
   });
 
