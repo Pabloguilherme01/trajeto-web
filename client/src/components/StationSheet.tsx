@@ -13,6 +13,7 @@ export type StationSheetStop = {
   lng: number;
   rating?: number;
   userRatingsTotal?: number;
+  phone?: string | null;
   isOpen?: boolean;
   priceReference?: { price: string | number; collectedAt: Date | string } | null;
   anpMatch?: { status: "probable" | "unresolved"; confidence: number; legalName: string | null; brand: string | null; authorization: string | null };
