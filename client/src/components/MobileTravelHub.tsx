@@ -70,6 +70,14 @@ export default function MobileTravelHub() {
     };
   }, []);
 
+  const readiness = [
+    online,
+    savedRoutes > 0 || Boolean(lastTrip),
+    economyMode || !batterySaver,
+    isStandalone,
+  ].filter(Boolean).length;
+  const readinessLabel = readiness === 4 ? "Pronto para sair" : readiness >= 3 ? "Quase pronto" : "Prepare o celular";
+
   const locate = () => {
     if (!navigator.geolocation || locating) return;
     setLocating(true);
@@ -107,6 +115,19 @@ export default function MobileTravelHub() {
                 {!online && savedRoutes > 0 ? "Abrir" : batterySaver && !economyMode ? "Ativar" : "Continuar"}
               </button>
             </div>
+          </div>
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Prontidão da viagem</p>
+                <p className="mt-1 text-xs font-extrabold text-white">{readinessLabel}</p>
+              </div>
+              <span className="text-sm font-black text-[#C7FF3C]">{readiness}/4</span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+              <div className="h-full rounded-full bg-[#C7FF3C] transition-all" style={{ width: `${(readiness / 4) * 100}%` }} />
+            </div>
+            <p className="mt-2 text-[0.6rem] leading-relaxed text-[#7F919A]">Conexão, rota local, economia e acesso rápido avaliados neste aparelho.</p>
           </div>
           <div className="mt-4 flex flex-wrap gap-2"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${online ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/8 text-[#DFFF9D]" : "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]"}`}><Signal className="size-3" /> {online ? (networkType ? networkType : "online") : "offline"}</span>{battery !== null && <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${battery <= 20 ? "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]" : "border-white/10 bg-white/[0.03] text-[#A9BAC2]"}`}><Battery className="size-3" /> {battery}%</span>}<span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.58rem] font-bold text-[#A9BAC2]"><ShieldCheck className="size-3 text-[#BDA5FF]" /> {isStandalone ? "app instalado" : "web app"}</span></div>
           <div className="mt-3 grid grid-cols-3 gap-2">
