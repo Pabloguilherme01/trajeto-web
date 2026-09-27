@@ -27,6 +27,12 @@ export default function MobileTripShortcuts() {
     try { localStorage.setItem(KEY, JSON.stringify(places)); } catch {}
   }, [places]);
 
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
   const save = () => {
     const trimmed = value.trim();
     if (trimmed.length < 3 || !editing) return;
@@ -40,6 +46,19 @@ export default function MobileTripShortcuts() {
 
   const open = (place: Place) => {
     setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
+  };
+
+  const sharePlace = async (place: Place) => {
+    try {
+      await shareText(
+        place.label + ": " + place.value,
+        window.location.origin + appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value),
+        "Destino no Trajeto",
+      );
+      setFeedback("Destino preparado para compartilhar.");
+    } catch {
+      setFeedback("Não foi possível compartilhar agora.");
+    }
   };
 
   const openFromHere = (place: Place) => {
@@ -77,7 +96,7 @@ export default function MobileTripShortcuts() {
                     <Icon className="size-4 text-[#326575]" />
                     <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => void shareText(`${place.label}: ${place.value}`, `${window.location.origin}${appUrl("/planejar")}?destino=${encodeURIComponent(place.value)}`, "Destino no Trajeto")} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
                 </>
               ) : (
                 <button type="button" onClick={() => { setEditing(id); setValue(""); }} className="flex min-h-16 w-full items-center justify-center gap-2 rounded-xl text-xs font-bold text-[#52636C]">
