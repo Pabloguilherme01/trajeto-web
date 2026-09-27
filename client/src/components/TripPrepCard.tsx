@@ -1,4 +1,4 @@
-import { CheckCircle2, Fuel, ShieldCheck, WifiOff, BatteryLow, Route, Sparkles } from "lucide-react";
+import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles } from "lucide-react";
 import { RotateCcw, useEffect, useState } from "react";
 
 const KEY = "trajeto-trip-checklist";
@@ -20,7 +20,8 @@ export default function TripPrepCard() {
   }, [checked]);
 
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
-  const progress = defaults.filter(([id]) => checked[id]).length;\n  const ready = progress === defaults.length;
+  const progress = defaults.filter(([id]) => checked[id]).length;
+  const ready = progress === defaults.length;
 
   return (
     <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] sm:p-6">
