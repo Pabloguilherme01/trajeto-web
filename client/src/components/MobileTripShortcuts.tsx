@@ -2,7 +2,7 @@ import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation, ArrowRight, 
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { openNavigation, shareText } from "@/lib/mobileTools";
+import { shareText } from "@/lib/mobileTools";
 
 type Place = { id: "casa" | "trabalho" | "outro"; label: string; value: string };
 
@@ -49,8 +49,9 @@ export default function MobileTripShortcuts() {
   };
 
   const navigateTo = (place: Place) => {
-    const destination = openNavigation(0, 0, place.value);
-    window.open(destination.google, "_blank", "noopener,noreferrer");
+    const query = encodeURIComponent(place.value);
+    const google = "https://www.google.com/maps/search/?api=1&query=" + query;
+    window.open(google, "_blank", "noopener,noreferrer");
     setFeedback("Abrindo a navegação para " + place.label + ".");
   };
 
