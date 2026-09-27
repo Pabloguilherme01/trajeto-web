@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
+import { getLastTrip } from "@/lib/mobilePreferences";
 
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
@@ -11,15 +12,19 @@ export default function MobileQuickActions() {
   const [locating, setLocating] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "done">("idle");
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
 
   useEffect(() => {
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
+    const refreshTrip = () => setLastTrip(getLastTrip());
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
+    window.addEventListener("focus", refreshTrip);
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("focus", refreshTrip);
     };
   }, []);
 
@@ -34,7 +39,14 @@ export default function MobileQuickActions() {
   };
 
   const actions = [
-    { label: "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => { vibration(); setLocation(appUrl("/planejar")); } },
+    { label: lastTrip ? "Retomar" : "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => {
+      vibration();
+      if (lastTrip) {
+        setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
+      } else {
+        setLocation(appUrl("/planejar"));
+      }
+    } },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
