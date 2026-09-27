@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
 import { getLastIntent, getLastTrip, mobilePreferenceEvent, rememberIntent } from "@/lib/mobilePreferences";
+import { getFavoriteDestination, getDestinationUsage, getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
@@ -18,6 +19,7 @@ export default function MobileQuickActions() {
   const [shareLabel, setShareLabel] = useState("Compartilhar");
   const [dismissedStatus, setDismissedStatus] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [favoriteDestination, setFavoriteDestination] = useState<MobileDestination | null>(() => getFavoriteDestination());
 
   useEffect(() => {
     const onOnline = () => { setOnline(true); vibration(8); };
@@ -25,16 +27,19 @@ export default function MobileQuickActions() {
     const refresh = () => {
       setLastTrip(getLastTrip());
       setLastIntent(getLastIntent());
+      setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), getDestinationUsage()));
     };
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener(mobileDestinationEvent, refresh);
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener(mobileDestinationEvent, refresh);
     };
   }, []);
 
@@ -107,8 +112,9 @@ export default function MobileQuickActions() {
     ? `Minha próxima viagem no Trajeto: ${lastTrip.origin} → ${lastTrip.destination}.`
     : "Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.";
 
+  const smartDestination = favoriteDestination && !lastIntent ? favoriteDestination : null;
   const actions = [
-    { label: resumeLabel, short: resumeLabel, icon: lastIntent === "nearby" ? LocateFixed : lastIntent === "saved" ? Bookmark : lastIntent === "route" ? Navigation : Fuel, path: "", run: resumeAction, smart: true },
+    { label: smartDestination ? smartDestination.label : resumeLabel, short: smartDestination ? "Destino" : resumeLabel, icon: smartDestination ? Navigation : lastIntent === "nearby" ? LocateFixed : lastIntent === "saved" ? Bookmark : lastIntent === "route" ? Navigation : Fuel, path: "", run: () => { if (!smartDestination) return resumeAction(); vibration(); const updated = rememberDestinationUsage(smartDestination); setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated)); setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(smartDestination.value)); }, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/postos") + "?salvos=1"); } },
