@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Navigation, Share2, LocateFixed } from "lucide-react";
+import { Bookmark, Fuel, Navigation, Share2, LocateFixed, WifiOff } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
@@ -59,7 +59,7 @@ export default function MobileQuickActions() {
             );
           })}
         </div>
-        {!online && <p role="status" className="px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-[#FFD49C]">Offline · ações salvas continuam disponíveis</p>}
+        {!online && <p role="status" className="flex items-center justify-center gap-1 px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-[#FFD49C]"><WifiOff className="size-3" /> Offline · ações salvas continuam disponíveis</p>}
       </div>
     </nav>
   );
