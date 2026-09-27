@@ -15,8 +15,8 @@ export default function MobileQuickActions() {
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
 
   useEffect(() => {
-    const onOnline = () => setOnline(true);
-    const onOffline = () => setOnline(false);
+    const onOnline = () => { setOnline(true); vibration(8); };
+    const onOffline = () => { setOnline(false); vibration([8, 30, 8]); };
     const refreshTrip = () => setLastTrip(getLastTrip());
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
@@ -36,8 +36,12 @@ export default function MobileQuickActions() {
     setLocating(true);
     navigator.geolocation.getCurrentPosition(position => {
       setLocating(false);
+      vibration(18);
       setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
-    }, () => setLocating(false), { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
+    }, () => {
+      setLocating(false);
+      vibration([8, 25, 8]);
+    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
 
   const shareMessage = lastTrip
@@ -56,12 +60,23 @@ export default function MobileQuickActions() {
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
-    { label: "Compartilhar", short: shareState === "done" ? "Enviado" : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => { vibration(); void shareText(shareMessage, window.location.href, "Trajeto").then(() => { setShareState("done"); window.setTimeout(() => setShareState("idle"), 1800); }).catch(() => {}); } },
+    { label: "Compartilhar", short: shareState === "done" ? "Enviado" : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => {
+      vibration();
+      void shareText(shareMessage, window.location.href, "Trajeto").then(() => {
+        setShareState("done");
+        vibration(18);
+        window.setTimeout(() => setShareState("idle"), 1800);
+      }).catch(() => {});
+    } },
   ];
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
-      <div className={`mx-auto max-w-md rounded-[1.35rem] border p-1.5 shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
+      <div className={`mx-auto max-w-md rounded-[1.4rem] border p-1.5 shadow-[0_20px_55px_rgba(0,0,0,.48)] backdrop-blur-2xl transition-colors ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
+        <div className="mb-1 flex items-center justify-between px-2 pt-0.5">
+          <span className="text-[0.5rem] font-extrabold uppercase tracking-[0.14em] text-[#71828B]">Acesso rápido</span>
+          <span className={`inline-flex items-center gap-1 text-[0.5rem] font-bold ${online ? "text-[#B9D979]" : "text-[#FFD49C]"}`}><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C] shadow-[0_0_8px_rgba(199,255,60,.75)]" : "bg-[#FFB86B]"}`} aria-hidden="true" />{online ? "online" : "offline"}</span>
+        </div>
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run }) => {
             const active = label === "Salvos" ? current === appUrl("/postos") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
