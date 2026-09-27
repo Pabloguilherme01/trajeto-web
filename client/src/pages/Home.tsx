@@ -2,6 +2,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import TripPrepCard from "@/components/TripPrepCard";
+import MobileTravelHub from "@/components/MobileTravelHub";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
@@ -151,6 +152,8 @@ export default function Home() {
             </section>
           </div>
         </section>
+
+        <MobileTravelHub />
 
         <section className="bg-[#EAF0F2] py-14 text-[#0B1014] sm:py-18">
           <div className="container">
