@@ -18,13 +18,13 @@ export default function RecentTripsCard() {
     setItems(routes.slice(0, 3).map(route => ({
       id: route.id, origin: route.origin, destination: route.destination, savedAt: route.savedAt,
     })));
-  };
+  }, []);
 
   useEffect(() => {
     void refresh();
     window.addEventListener(offlineRouteEvent, refresh);
     return () => window.removeEventListener(offlineRouteEvent, refresh);
-  }, []);
+  }, [refresh]);
 
   const openFromHere = (item: Item) => {
     if (!navigator.geolocation || locating) return;
