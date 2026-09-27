@@ -70,13 +70,14 @@ export default function MobileCopilot() {
   const [, setLocation] = useLocation();
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [offlineRoutes, setOfflineRoutes] = useState(0);
+  const [offlineStorageError, setOfflineStorageError] = useState(false);
   const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [state, setState] = useState(readState);
 
   useEffect(() => {
     const refresh = () => {
       setState(readState());
-      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); setLatestOfflineRoute(routes[0] ?? null); }).catch(() => setLatestOfflineRoute(null));
+      void listOfflineRoutes().then(routes => { setOfflineStorageError(false); setOfflineRoutes(routes.length); setLatestOfflineRoute(routes[0] ?? null); }).catch(() => { setOfflineStorageError(true); setOfflineRoutes(0); setLatestOfflineRoute(null); });
     };
     const refreshNetwork = () => setOnline(navigator.onLine);
 
@@ -106,6 +107,17 @@ export default function MobileCopilot() {
         detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination + " · " + formatAge(latestOfflineRoute.savedAt),
         label: "Abrir",
         href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination),
+        intent: "saved",
+        icon: CloudOff,
+      };
+    }
+
+    if (!online && offlineStorageError) {
+      return {
+        title: "Verifique as rotas salvas",
+        detail: "O aparelho não conseguiu acessar o armazenamento offline agora.",
+        label: "Abrir salvos",
+        href: appUrl("/planejar?salvos=1"),
         intent: "saved",
         icon: CloudOff,
       };
@@ -160,7 +172,7 @@ export default function MobileCopilot() {
     if (intent === "saved" && offlineRoutes > 0) {
       return {
         title: "Continuar uma viagem salva",
-        detail: offlineRoutes === 1 ? "1 rota pronta para reabrir." : `${offlineRoutes} rotas prontas para reabrir.`,
+        detail: offlineStorageError ? "O armazenamento offline precisa ser verificado." : offlineRoutes === 1 ? "1 rota pronta para reabrir." : `${offlineRoutes} rotas prontas para reabrir.`,
         label: "Continuar",
         href: appUrl("/planejar?salvos=1"),
         intent: "saved",
