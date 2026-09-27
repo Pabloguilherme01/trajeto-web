@@ -1,7 +1,7 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
-import { ArrowRight, BadgeCheck, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset } from "lucide-react";
+import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 
@@ -47,6 +47,20 @@ export default function Home() {
       </header>
 
       <main>
+        <section className="border-b border-[#C7FF3C]/15 bg-[#0F171D]">
+          <div className="container py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">App para celular</p>
+                <p className="mt-1 text-sm font-bold text-white">Instale o Trajeto na tela inicial e consulte o que já foi salvo mesmo sem internet.</p>
+              </div>
+              <a href="#instalar-app" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/45 px-4 py-2 text-xs font-extrabold text-[#DFFF9D] sm:w-auto">
+                <Download className="size-4" /> Como instalar
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section className="border-b border-white/8">
           <div className="container grid gap-12 py-14 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
             <div className="max-w-3xl">
