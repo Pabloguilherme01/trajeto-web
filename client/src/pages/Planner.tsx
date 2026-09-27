@@ -120,7 +120,8 @@ export default function Planner() {
       setFormError("Sem internet: abra uma rota já salva neste aparelho. Uma rota nova precisa de conexão para calcular distância, trânsito e postos reais.");
       return;
     }
-    rememberTrip(normalizedOrigin, normalizedDestination);\n    await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
+    rememberTrip(normalizedOrigin, normalizedDestination);
+    await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
   };
 
   const toggleFavorite = () => {
@@ -139,7 +140,8 @@ export default function Planner() {
     const text = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}. Veja distância, duração e opções de abastecimento.`;
     try {
       if (navigator.share) await navigator.share({ title: "Trajeto · rota", text, url });
-      else { await navigator.clipboard.writeText(`${text}\n${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
+      else { await navigator.clipboard.writeText(`${text}
+${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       setShareMessage("Não foi possível preparar o compartilhamento agora.");
