@@ -111,4 +111,9 @@
   ::-webkit-scrollbar { width: 0; height: 0; }
   .mobile-card { border-radius: 1.35rem; box-shadow: 0 14px 40px rgba(0,0,0,.16); }
   .mobile-section-title { text-wrap: balance; }
+  .mobile-card { content-visibility: auto; contain-intrinsic-size: 420px; }
+  .mobile-card button, .mobile-card a { min-height: 44px; }
+  @media (prefers-reduced-motion: reduce) {
+    button:active, a:active { transform: none; }
+  }
 }
