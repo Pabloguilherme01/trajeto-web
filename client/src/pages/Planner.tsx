@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
-import { getOfflineRoute, saveOfflineRoute } from "@/lib/offlineStore";
+import { getOfflineRoute, offlineRouteId, saveOfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import MobileTravelMode from "@/components/MobileTravelMode";
@@ -51,20 +51,36 @@ export default function Planner() {
   }, []);
 
   useEffect(() => {
-    if (!offline || planned) return;
+    if (planned) return;
     const params = new URLSearchParams(window.location.search);
+    const savedRouteId = params.get("rota")?.trim();
     const savedOrigin = params.get("origem")?.trim() || origin.trim();
     const savedDestination = params.get("destino")?.trim() || destination.trim();
-    if (savedOrigin.length < 3 || savedDestination.length < 3) return;
-    const id = savedOrigin.toLowerCase() + "::" + savedDestination.toLowerCase();
+    if (!savedRouteId && (savedOrigin.length < 3 || savedDestination.length < 3)) return;
+
+    const id = savedRouteId || offlineRouteId(savedOrigin, savedDestination);
     void getOfflineRoute(id).then(route => {
-      if (!route) return;
+      if (!route) {
+        if (savedRouteId) {
+          setShareMessage(offline
+            ? "Esta rota salva não está disponível neste aparelho."
+            : "Esta rota salva não foi encontrada neste aparelho.");
+        }
+        return;
+      }
+
       setOrigin(route.origin);
       setDestination(route.destination);
       setPlanned(route.payload as PlannedRoute);
       setLoadedFromOffline(true);
-      setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
-    }).catch(() => {});
+      setShareMessage(
+        offline
+          ? "Rota salva aberta sem internet. Trânsito e dados ao vivo podem estar desatualizados."
+          : "Rota salva aberta imediatamente. Você pode recalculá-la quando quiser.",
+      );
+    }).catch(() => {
+      setShareMessage("Não foi possível abrir esta rota salva. Ela pode estar corrompida.");
+    });
   }, [offline, origin, destination, planned]);
 
   useEffect(() => {
@@ -276,7 +292,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
           onSave={() => void saveOfflineRoute({
-            id: origin.trim().toLowerCase() + "::" + destination.trim().toLowerCase(),
+            id: offlineRouteId(origin, destination),
             origin: origin.trim(),
             destination: destination.trim(),
             savedAt: new Date().toISOString(),
@@ -285,7 +301,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
         />}
 
         {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveOfflineRoute({
-  id: `${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`,
+  id: offlineRouteId(origin, destination),
   origin: origin.trim(),
   destination: destination.trim(),
   savedAt: new Date().toISOString(),
