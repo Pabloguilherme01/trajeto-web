@@ -103,7 +103,7 @@ export default function Home() {
                 Decida a parada.<br /><span className="text-[#C7FF3C]">Siga melhor.</span>
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#B7C4CA] sm:mt-7 sm:text-lg">
-                O Trajeto organiza a próxima decisão da viagem: destino, parada, desvio e navegação. Comece sem cadastro e deixe o app lembrar o que você usa com mais frequência.
+                O Trajeto transforma uma viagem em próximos passos simples: escolha o destino, decida onde parar, navegue e deixe o celular lembrar o caminho para a próxima vez. Sem cadastro para começar.
               </p>
 
               <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
@@ -191,8 +191,8 @@ export default function Home() {
           <div className="container">
             <div className="max-w-2xl">
               <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Seu copiloto de deslocamento</p>
-              <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Detecte → decida → <em>navegue.</em></h2>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa o destino e o Trajeto organiza o próximo passo. O uso recorrente fica mais rápido porque destinos, viagens, buscas e rotas salvas ganham prioridade automaticamente.</p>
+              <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Detecte → decida → navegue → <em>volte mais rápido.</em></h2>
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa para onde vai. O Trajeto organiza o que vem depois. Destinos, viagens, buscas e rotas salvas ficam no aparelho para reduzir o trabalho na próxima saída, inclusive quando a conexão falhar.</p>
             </div>
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
