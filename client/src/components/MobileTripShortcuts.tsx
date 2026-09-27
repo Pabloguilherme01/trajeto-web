@@ -20,6 +20,8 @@ export default function MobileTripShortcuts() {
   const [places, setPlaces] = useState<Place[]>(readPlaces);
   const [editing, setEditing] = useState<Place["id"] | null>(null);
   const [value, setValue] = useState("");
+  const [locating, setLocating] = useState<Place["id"] | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(places)); } catch {}
@@ -41,13 +43,16 @@ export default function MobileTripShortcuts() {
   };
 
   const openFromHere = (place: Place) => {
+    if (locating) return;
+    setFeedback(null);
+    setLocating(place.id);
     if (!navigator.geolocation) {
       open(place);
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      position => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(place.value)),
-      () => open(place),
+      position => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(place.value)); },
+      () => { setLocating(null); setFeedback("GPS indisponível. Abrindo o destino sem sua localização."); open(place); },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
     );
   };
@@ -59,7 +64,7 @@ export default function MobileTripShortcuts() {
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
         <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p><div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]"><LocateFixed className="size-3.5 text-[#326575]" /> Use “Daqui” para transformar o destino em uma rota com sua posição atual.</div>
       </div>
-      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+      {feedback && <p role="status" aria-live="polite" className="mt-3 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}\n      <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {(["casa", "trabalho", "outro"] as const).map(id => {
           const place = places.find(item => item.id === id);
           const Icon = id === "casa" ? Home : id === "trabalho" ? BriefcaseBusiness : MapPin;
