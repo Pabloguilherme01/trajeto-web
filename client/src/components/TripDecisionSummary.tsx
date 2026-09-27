@@ -66,8 +66,8 @@ export default function TripDecisionSummary({
 
       {hasAutonomy && <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs text-white/70"><Fuel className="size-4 text-[#C7FF3C]" /><span>Autonomia estimada: <strong className="text-white">{autonomyKm!.toLocaleString("pt-BR")} km</strong>.</span></div>}
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" onClick={onNavigate} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] sm:flex-none">Começar viagem <ArrowRight className="size-4" /></button>
+      <div className="mt-4 flex flex-wrap gap-2">{offline && <p role="status" className="basis-full rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[0.06] px-3 py-2 text-xs font-bold text-[#FFD4AE]">Rota disponível offline. Salve e abra a viagem normalmente; a navegação externa será liberada quando houver internet.</p>}
+        <button type="button" onClick={onNavigate} disabled={offline} aria-disabled={offline} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-45 sm:flex-none">Começar viagem <ArrowRight className="size-4" /></button>
         <button type="button" onClick={onSave} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-bold text-white hover:border-white/30"><Route className="size-4" /> Salvar offline</button>
         <button type="button" onClick={onShare} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-bold text-white hover:border-white/30"><Share2 className="size-4" /> Compartilhar</button>
       </div>
