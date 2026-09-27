@@ -289,8 +289,8 @@ export default function Home() {
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#617179]">Guarde a rota, confirme os itens essenciais e não dependa de uma conexão perfeita no momento da viagem.</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Rota salva</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Reabra o roteiro armazenado no aparelho.</p></div>
-                <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Localização</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Encontre postos próximos com um toque.</p></div>
-                <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>
+                {online && <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Localização</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Encontre postos próximos com um toque.</p></div>}
+                {online && <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>}
               </div>
             </div>
             <div className="space-y-4"><MobileTripShortcuts /><MobileVehicleCard /><TripPrepCard /></div>
