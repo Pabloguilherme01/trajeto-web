@@ -20,22 +20,15 @@ function formatAge(usedAt: string) {
 export default function RecentTripsCard() {
   const [, setLocation] = useLocation();
   const [trips, setTrips] = useState<RecentTrip[]>(getRecentTrips);
-  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const refresh = () => setTrips(getRecentTrips());
-    const onOnline = () => setOnline(true);
-    const onOffline = () => setOnline(false);
     window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener("focus", refresh);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
     return () => {
       window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener("focus", refresh);
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
     };
   }, []);
 
