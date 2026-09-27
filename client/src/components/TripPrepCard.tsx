@@ -50,6 +50,7 @@ export default function TripPrepCard() {
         <span className="flex items-center gap-1 rounded-lg bg-[#F2F5F6] p-2"><WifiOff className="size-3.5" /> offline</span>
         <span className="flex items-center gap-1 rounded-lg bg-[#F2F5F6] p-2"><ShieldCheck className="size-3.5" /> segurança</span>
       </div>
+      {ready && <div role="status" className="mt-4 flex items-center gap-2 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] p-3 text-xs font-bold text-[#326575]"><Sparkles className="size-4" /> Checklist concluído. Você pode iniciar a viagem.</div>}
     </section>
   );
 }
