@@ -6,7 +6,8 @@ import MobileTravelHub from "@/components/MobileTravelHub";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
 import { useLocation } from "wouter";
 
 const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
@@ -17,8 +18,19 @@ export default function Home() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
   const [activePresetId, setActivePresetId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => getRecentSearches());
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
+
+  useEffect(() => {
+    const refresh = () => setRecentSearches(getRecentSearches());
+    window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
 
   const openSearch = (query: string, presetId = activePreset?.id) => {
     const normalized = query.trim() || activePreset?.query || "";
@@ -27,6 +39,7 @@ export default function Home() {
       return;
     }
     setSearchError(null);
+    rememberSearch(normalized);
     track("station_search", normalized);
     setLocation(`${appUrl("/postos")}?region=${encodeURIComponent(presetId ?? "")}&q=${encodeURIComponent(normalized)}`);
   };
@@ -137,6 +150,16 @@ export default function Home() {
                   <Navigation className="size-4 text-[#C7FF3C]" /> Planejar viagem
                 </a>
               </div>
+
+              {recentSearches.length > 0 && <div className="mt-5 border-t border-white/8 pt-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Pesquisas recentes</p>
+                  <span className="text-[0.58rem] font-semibold text-[#5F727B]">só neste aparelho</span>
+                </div>
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                  {recentSearches.map(query => <button key={query} type="button" onClick={() => openSearch(query)} className="min-h-10 shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-3.5 text-xs font-bold text-[#D7E0E4] transition hover:border-[#3DE3FF] hover:bg-[#3DE3FF]/8 active:scale-[.98]">{query}</button>)}
+                </div>
+              </div>}
 
               <div className="mt-6">
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Atalhos mais usados</p>
