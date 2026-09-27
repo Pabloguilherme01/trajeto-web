@@ -1,6 +1,6 @@
 import { Bookmark, Fuel, Navigation, Share2, LocateFixed } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
 
@@ -10,6 +10,9 @@ export default function MobileQuickActions() {
   const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
   const [locating, setLocating] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "done">("idle");
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  useEffect(() => { const onOnline = () => setOnline(true); const onOffline = () => setOnline(false); window.addEventListener("online", onOnline); window.addEventListener("offline", onOffline); return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); }; }, []);
+
   const locate = () => {
     if (!navigator.geolocation || locating) return;
     vibration();
