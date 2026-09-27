@@ -1,4 +1,4 @@
-import { BatteryCharging, CheckCircle2, Fuel, Gauge, ShieldCheck, WifiOff } from "lucide-react";
+import { CheckCircle2, Fuel, ShieldCheck, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const KEY = "trajeto-trip-checklist";
