@@ -227,22 +227,33 @@ export default function MobileCopilot() {
     };
   }, [online, offlineRoutes, latestOfflineRoute, state, setLocation]);
 
-  const actions: Action[] = [
-    {
-      title: "Planejar",
-      detail: "Destino e parada",
-      label: "Abrir",
-      href: appUrl("/planejar"),
-      icon: Route,
-    },
-    {
-      title: "Salvos",
-      detail: offlineRoutes ? `${offlineRoutes} rota(s) prontas` : "Rotas preparadas",
-      label: "Abrir",
-      href: appUrl("/planejar?salvos=1"),
-      icon: Bookmark,
-    },
-  ];
+  const actions: Action[] = online
+    ? [
+        {
+          title: "Planejar",
+          detail: "Destino e parada",
+          label: "Abrir",
+          href: appUrl("/planejar"),
+          icon: Route,
+        },
+        {
+          title: "Salvos",
+          detail: offlineRoutes ? `${offlineRoutes} rota(s) prontas` : "Rotas preparadas",
+          label: "Abrir",
+          href: appUrl("/planejar?salvos=1"),
+          icon: Bookmark,
+        },
+      ]
+    : [
+        {
+          title: "Salvos",
+          detail: offlineRoutes ? `${offlineRoutes} rota(s) prontas para continuar` : "Nenhuma rota pronta",
+          label: "Abrir",
+          href: appUrl("/planejar?salvos=1"),
+          intent: "saved",
+          icon: Bookmark,
+        },
+      ];
 
   return (
     <section className="border-y border-white/8 bg-[#0F171D] py-5 md:hidden" aria-labelledby="mobile-copilot-title">
@@ -255,7 +266,7 @@ export default function MobileCopilot() {
                   <Sparkles className="size-3.5" /> Copiloto de deslocamento
                 </p>
                 <h2 id="mobile-copilot-title" className="mt-1.5 font-display text-2xl font-semibold tracking-[-0.055em] text-white">
-                  Qual é o próximo passo?
+                  {online ? "Qual é o próximo passo?" : "Continue sem internet."}
                 </h2>
               </div>
               <div className={online ? "rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/8 p-2 text-[#C7FF3C]" : "rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/8 p-2 text-[#FFB86B]"} aria-label={online ? "Conectado" : "Offline"}>
@@ -285,7 +296,7 @@ export default function MobileCopilot() {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className={`mt-3 grid gap-2 ${actions.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
               {actions.map(action => (
                 <a key={action.title} href={action.href} className="min-w-0 rounded-xl border border-white/10 bg-white/[0.035] p-3 text-left transition active:scale-[.98]">
                   <action.icon className="size-4 text-[#3DE3FF]" />
