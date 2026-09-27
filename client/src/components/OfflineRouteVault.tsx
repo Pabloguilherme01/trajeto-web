@@ -173,9 +173,15 @@ export default function OfflineRouteVault() {
           <p className="mt-1 text-xs leading-relaxed text-[#8FA3AC]">
             Planeje uma viagem e toque em “Salvar offline”. A rota calculada ficará disponível neste aparelho.
           </p>
-          <a href={appUrl("/planejar")} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-black text-[#0B1014]">
-            Planejar uma rota <ArrowRight className="size-4" />
-          </a>
+          {isOnline ? (
+            <a href={appUrl("/planejar")} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-black text-[#0B1014]">
+              Planejar uma rota <ArrowRight className="size-4" />
+            </a>
+          ) : (
+            <p className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-white/10 px-4 py-2 text-xs font-bold text-[#AFC0C7]">
+              Volte quando houver internet para preparar a primeira rota.
+            </p>
+          )}
         </div>
       ) : (
         <div className="mt-5 space-y-3">
