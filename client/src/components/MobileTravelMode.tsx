@@ -12,6 +12,10 @@ export default function MobileTravelMode() {
   useEffect(() => {
     const available = typeof navigator !== "undefined" && "wakeLock" in navigator;
     setSupported(available);
+    if (!available) {
+      setActive(false);
+      try { localStorage.setItem("trajeto-travel-mode", "0"); } catch {}
+    }
     const nav = navigator as Navigator & { getBattery?: () => Promise<{ level: number; addEventListener: (type: string, listener: () => void) => void; removeEventListener: (type: string, listener: () => void) => void }> };
     let batteryDevice: Awaited<ReturnType<NonNullable<typeof nav.getBattery>>> | undefined;
     const updateBattery = () => { if (batteryDevice) setBattery(Math.round(batteryDevice.level * 100)); };
