@@ -5,6 +5,7 @@ import TripPrepCard from "@/components/TripPrepCard";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
+import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
@@ -300,7 +301,7 @@ export default function Home() {
                 {online && <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>}
               </div>
             </div>
-            <div className="space-y-4"><MobileTripShortcuts /><MobileVehicleCard /><TripPrepCard /></div>
+            <div className="space-y-4"><MobileTripShortcuts /><RecentTripsCard /><MobileVehicleCard /><TripPrepCard /></div>
           </div>
         </section>
 
