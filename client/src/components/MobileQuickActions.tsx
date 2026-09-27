@@ -7,6 +7,7 @@ import { shareText, vibration } from "@/lib/mobileTools";
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
   const current = location.split("?")[0];
+  const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
   const [locating, setLocating] = useState(false);
   const locate = () => {
     if (!navigator.geolocation || locating) return;
@@ -30,7 +31,7 @@ export default function MobileQuickActions() {
       <div className="mx-auto max-w-md rounded-[1.35rem] border border-white/12 bg-[#080D11]/95 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl">
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run }) => {
-            const active = path && current === appUrl(path);
+            const active = label === "Salvos" ? current === appUrl("/postos") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
             return (
               <button key={label} type="button" onClick={run} aria-current={active ? "page" : undefined}
                 className={active
