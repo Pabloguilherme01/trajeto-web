@@ -13,7 +13,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import MobileDataMode from "@/components/MobileDataMode";
 import { AUTH_RETURN_KEY } from "@/lib/authReturn";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
-import { filterAndSortStations, inferredBrand } from "@/lib/stationListControls";
+import { applyStationSearchPreferences, filterAndSortStations, inferredBrand } from "@/lib/stationListControls";
 import { nextVisibleStationCount, stationResultsPageSizes, type StationResultsPageSize, visibleStationResults } from "@/lib/stationResultsPager";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -138,12 +138,12 @@ export default function Stations() {
 
   useEffect(() => {
     if (!savedPreferences.data || preferencesApplied.current) return;
-    setBrandFilter(savedPreferences.data.mappedBrand);
-    setHoursFilter(savedPreferences.data.hoursStatus);
-    setSortBy(savedPreferences.data.sortBy);
-    const savedResultsPerView = savedPreferences.data.economicMode ? 5 : savedPreferences.data.resultsPerView;
-    setResultsPerView(savedResultsPerView);
-    setVisibleResultCount(savedResultsPerView);
+    const preferences = applyStationSearchPreferences(savedPreferences.data);
+    setBrandFilter(preferences.brandFilter);
+    setHoursFilter(preferences.hoursFilter);
+    setSortBy(preferences.sortBy);
+    setResultsPerView(preferences.resultsPerView);
+    setVisibleResultCount(preferences.visibleResultCount);
     preferencesApplied.current = true;
   }, [savedPreferences.data]);
 
