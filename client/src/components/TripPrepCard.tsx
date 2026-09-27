@@ -63,6 +63,19 @@ export default function TripPrepCard() {
   const progress = defaults.filter(([id]) => smartChecked[id]).length;
   const ready = progress === defaults.length;
 
+  const openPreparedTrip = () => {
+    if (!lastTrip) return;
+    if (!online) {
+      setLocation(appUrl("/planejar") + "?salvos=1");
+      return;
+    }
+    setLocation(
+      appUrl("/planejar") +
+        "?origem=" + encodeURIComponent(lastTrip.origin) +
+        "&destino=" + encodeURIComponent(lastTrip.destination),
+    );
+  };
+
   return (
     <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] sm:p-6">
       <div className="flex items-start gap-3">
@@ -117,9 +130,24 @@ export default function TripPrepCard() {
         {!online && savedRoutes > 0 && <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">Abrir salvos</button>}
       </div>
 
-      {ready && hasTrip && <div className="mt-3 grid grid-cols-[1fr_auto] gap-2 rounded-2xl border border-[#326575]/25 bg-[#163840] p-3 text-white shadow-[0_10px_28px_rgba(22,56,64,.14)]"><div className="min-w-0"><p className="text-[0.56rem] font-bold uppercase tracking-[0.12em] text-[#C7FF3C]">Pronto para sair</p><p className="mt-1 truncate text-xs font-extrabold">{lastTrip?.origin} → {lastTrip?.destination}</p></div><button type="button" onClick={() => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip!.origin) + "&destino=" + encodeURIComponent(lastTrip!.destination))} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-extrabold text-[#0B1014] active:scale-[.98]">Iniciar</button></div>}
-      {ready && !hasTrip && localRouteReady && <div role="status" className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3"><span className="text-[0.62rem] font-bold text-[#52636C]">Você já tem rotas disponíveis sem internet.</span><button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-10 rounded-xl bg-[#163840] px-3 text-[0.62rem] font-extrabold text-white">Abrir rotas</button></div>
-      {ready && <div role="status" className="mt-4 flex items-center gap-2 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] p-3 text-xs font-bold text-[#326575]"><Sparkles className="size-4" /> {online ? "Tudo preparado. Você pode iniciar a viagem." : "Tudo preparado. Continue uma rota salva sem internet."}</div>}
+      {ready && hasTrip && (
+        <div className="mt-3 grid grid-cols-[1fr_auto] gap-2 rounded-2xl border border-[#326575]/25 bg-[#163840] p-3 text-white shadow-[0_10px_28px_rgba(22,56,64,.14)]">
+          <div className="min-w-0">
+            <p className="text-[0.56rem] font-bold uppercase tracking-[0.12em] text-[#C7FF3C]">{online ? "Pronto para sair" : "Preparado neste aparelho"}</p>
+            <p className="mt-1 truncate text-xs font-extrabold">{lastTrip?.origin} → {lastTrip?.destination}</p>
+          </div>
+          <button type="button" onClick={openPreparedTrip} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-extrabold text-[#0B1014] active:scale-[.98]">{online ? "Iniciar" : "Abrir salvos"}</button>
+        </div>
+      )}
+      {ready && !hasTrip && localRouteReady && (
+        <div role="status" className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3">
+          <span className="text-[0.62rem] font-bold text-[#52636C]">Você já tem rotas disponíveis sem internet.</span>
+          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-10 rounded-xl bg-[#163840] px-3 text-[0.62rem] font-extrabold text-white">Abrir rotas</button>
+        </div>
+      )}
+      {ready && (
+        <div role="status" className="mt-4 flex items-center gap-2 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] p-3 text-xs font-bold text-[#326575]"><Sparkles className="size-4" /> {online ? "Tudo preparado. Você pode iniciar a viagem." : "Tudo preparado. Continue uma rota salva sem internet."}</div>
+      )}
     </section>
   );
 }
