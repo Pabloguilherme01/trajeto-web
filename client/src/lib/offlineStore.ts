@@ -58,3 +58,16 @@ export async function removeOfflineRoute(id: string) {
   });
   db.close();
 }
+
+export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
+  if (!("indexedDB" in window)) return null;
+  const db = await openDb();
+  const route = await new Promise<OfflineRoute | null>((resolve, reject) => {
+    const tx = db.transaction(STORE, "readonly");
+    const request = tx.objectStore(STORE).get(id);
+    request.onsuccess = () => resolve((request.result as OfflineRoute | undefined) ?? null);
+    request.onerror = () => reject(request.error);
+  });
+  db.close();
+  return route;
+}
