@@ -143,7 +143,7 @@ export default function TripPrepCard() {
       </details>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-[0.65rem] font-bold text-[#617179]">{ready ? "Tudo pronto para sair." : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
+        <span className="text-[0.65rem] font-bold text-[#617179]">{ready ? (online ? "Tudo pronto para sair." : "Tudo pronto para continuar.") : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
         <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
       </div>
 
@@ -169,7 +169,7 @@ export default function TripPrepCard() {
         <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[#326575]">
             <Sparkles className="size-4 shrink-0" />
-            <span>{online ? "Tudo preparado. O próximo passo é sair." : "Tudo preparado. O próximo passo é continuar uma rota salva."}</span>
+            <span>{online ? "Tudo preparado. O próximo passo é sair." : latestOfflineRoute ? "Tudo preparado. O próximo passo é continuar a rota salva." : "Salve uma rota quando estiver online para habilitar a continuidade offline."}</span>
           </div>
           <button type="button" onClick={openPreparedTrip} disabled={!online && !latestOfflineRoute} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40">
             {online ? "Iniciar próxima viagem" : latestOfflineRoute ? "Continuar rota salva" : "Sem rota salva"}
