@@ -42,6 +42,19 @@ type Action = {
   icon: typeof ArrowRight;
 };
 
+function formatAge(savedAt: string) {
+  const time = Date.parse(savedAt);
+  if (!Number.isFinite(time)) return "data indisponível";
+  const diff = Math.max(0, Date.now() - time);
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "salva agora";
+  if (minutes < 60) return `salva há ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `salva há ${hours} h`;
+  const days = Math.floor(hours / 24);
+  return days < 30 ? `salva há ${days} d` : `salva em ${new Date(time).toLocaleDateString("pt-BR")}`;
+}
+
 function readState() {
   return {
     economy: getEconomyMode(),
@@ -90,7 +103,7 @@ export default function MobileCopilot() {
     if (!online && latestOfflineRoute) {
       return {
         title: "Continue sua última rota",
-        detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination,
+        detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination + " · " + formatAge(latestOfflineRoute.savedAt),
         label: "Abrir",
         href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination),
         intent: "saved",
@@ -101,7 +114,7 @@ export default function MobileCopilot() {
     if (!online && offlineRoutes > 0) {
       return {
         title: "Continue uma rota salva",
-        detail: offlineRoutes + (offlineRoutes === 1 ? " rota pronta" : " rotas prontas") + " no aparelho.",
+        detail: offlineRoutes + (offlineRoutes === 1 ? " rota pronta" : " rotas prontas") + " no aparelho. Abra sem recalcular.",
         label: "Abrir salvos",
         href: appUrl("/planejar?salvos=1"),
         intent: "saved",
@@ -290,7 +303,7 @@ export default function MobileCopilot() {
               )}
               {offlineRoutes > 0 && (
                 <a href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#AABBC2]">
-                  <Bookmark className="size-3.5" /> {offlineRoutes} offline
+                  <Bookmark className="size-3.5" /> {offlineRoutes} offline · {latestOfflineRoute ? formatAge(latestOfflineRoute.savedAt) : "prontas"}
                 </a>
               )}
               {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Sem conexão</span>}
