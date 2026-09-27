@@ -35,7 +35,7 @@ export default function RecentTripsCard() {
   if (!items.length) return null;
 
   return (
-    <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] sm:p-6">
+    <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Acesso rápido</p>
@@ -46,7 +46,7 @@ export default function RecentTripsCard() {
       </div>
       <div className="mt-4 space-y-2">
         {items.map(item => (
-          <div key={item.id} className="flex items-center gap-2 rounded-xl border border-[#D8E0E3] p-2">
+          <div key={item.id} className="flex items-center gap-2 rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-2 shadow-[0_8px_24px_rgba(11,16,20,.04)]">
             <div className="min-w-0 flex-1 p-2">
               <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(item.origin) + "&destino=" + encodeURIComponent(item.destination))} className="block w-full rounded-lg text-left">
                 <p className="truncate text-sm font-bold">{item.origin} → {item.destination}</p>
