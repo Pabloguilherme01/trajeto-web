@@ -313,8 +313,8 @@ export default function Home() {
         <section className="border-t border-white/8 bg-[#0B1014] py-12">
           <div className="container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-extrabold text-white">Gostou da consulta?</p>
-              <p className="mt-1 text-xs text-[#7F919A]">Compartilhe uma rota ou decisão útil com quem faz esse caminho com você.</p>
+              <p className="text-sm font-extrabold text-white">Próximo passo</p>
+              <p className="mt-1 text-xs text-[#7F919A]">Prepare uma rota antes de sair ou abra uma rota salva para continuar.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <a href={appUrl("/postos")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014]">Consultar postos <ArrowRight className="size-4" /></a>
