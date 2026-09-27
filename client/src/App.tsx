@@ -9,6 +9,7 @@ import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileQuickActions from "./components/MobileQuickActions";
+import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -73,6 +74,7 @@ export default function App() {
         <TooltipProvider>
           <Toaster />
           <InstallAppPrompt />
+          <PwaUpdatePrompt />
           <MobileQuickActions />
           <AuthReturnHandler />
           <Router />
