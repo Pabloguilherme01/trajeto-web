@@ -2,7 +2,7 @@ import { Battery, CloudOff, Compass, Gauge, LocateFixed, Navigation, Wifi, Signa
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { getEconomyMode, getLastTrip, setEconomyMode } from "@/lib/mobilePreferences";
+import { getEconomyMode, getLastTrip, getRecentSearches, setEconomyMode } from "@/lib/mobilePreferences";
 import { listOfflineRoutes } from "@/lib/offlineStore";
 
 export default function MobileTravelHub() {
@@ -16,6 +16,7 @@ export default function MobileTravelHub() {
   const [economyMode, setEconomyModeState] = useState(getEconomyMode);
   const [networkType, setNetworkType] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [recentSearch, setRecentSearch] = useState<string | null>(() => getRecentSearches()[0] ?? null);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -26,12 +27,19 @@ export default function MobileTravelHub() {
     connection?.addEventListener?.("change", updateNetwork);
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
-    const refreshRoutes = () => { void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => {}); };
+    const refreshRoutes = () => {
+      void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => {});
+      setLastTrip(getLastTrip());
+      setRecentSearch(getRecentSearches()[0] ?? null);
+    };
     window.addEventListener("focus", refreshRoutes);
 
     let mounted = true;
     void listOfflineRoutes().then(routes => { if (mounted) setSavedRoutes(routes.length); }).catch(() => {});
-    if (mounted) setLastTrip(getLastTrip());
+    if (mounted) {
+      setLastTrip(getLastTrip());
+      setRecentSearch(getRecentSearches()[0] ?? null);
+    }
 
     const nav = navigator as Navigator & {
       getBattery?: () => Promise<{ level: number; addEventListener: (type: string, listener: () => void) => void; removeEventListener: (type: string, listener: () => void) => void }>;
@@ -87,6 +95,7 @@ export default function MobileTravelHub() {
           </div>
           {lastTrip && <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination))} className="mt-3 flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[0.06] px-3 text-left transition active:scale-[.99]"><span className="min-w-0"><span className="block text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[#C7FF3C]">Continuar viagem</span><span className="mt-1 block truncate text-xs font-bold text-white">{lastTrip.origin} → {lastTrip.destination}</span><span className="mt-1 block text-[0.58rem] font-semibold text-[#8FA3AA]">Retomar planejamento</span></span><Navigation className="size-4 shrink-0 text-[#C7FF3C]" /></button>}
           {batterySaver && <div role="status" className="mt-3 flex items-center gap-3 rounded-xl border border-[#FFB86B]/25 bg-[#FFB86B]/[0.06] px-3 py-2 text-[0.65rem] font-bold leading-relaxed text-[#FFD49C]"><span className="min-w-0 flex-1">Bateria abaixo de 20%. Reduza o carregamento durante a viagem.</span><button type="button" onClick={() => { setEconomyMode(true); setEconomyModeState(true); }} disabled={economyMode} className="min-h-9 shrink-0 rounded-lg border border-[#FFB86B]/40 px-2.5 text-[0.6rem] font-extrabold text-[#FFD49C]">{economyMode ? "Ativo" : "Ativar"}</button></div>}
+          {recentSearch && <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(recentSearch))} className="mt-3 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[0.05] px-3 text-left transition active:scale-[.99]"><span className="min-w-0"><span className="block text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#3DE3FF]">Última busca</span><span className="mt-1 block truncate text-xs font-bold text-white">{recentSearch}</span></span><Compass className="size-4 shrink-0 text-[#3DE3FF]" /></button>}
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]" disabled={locating}><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />{locating ? "Localizando…" : "Perto de mim"}</button>
             <button type="button" onClick={() => { const next = !economyMode; setEconomyMode(next); setEconomyModeState(next); }} className={`min-h-11 rounded-xl border text-xs font-bold transition active:scale-[.98] ${economyMode ? "border-[#C7FF3C]/45 bg-[#C7FF3C]/10 text-[#DFFF9D]" : "border-white/12 bg-white/[0.025] text-white"}`}><Gauge className="mr-2 inline size-4 text-[#C7FF3C]" />{economyMode ? "Economia ativa" : "Economizar dados"}</button>
