@@ -1,4 +1,4 @@
-import { Compass, Download, Fuel, Map, Navigation, Share2 } from "lucide-react";
+import { Download, Fuel, Navigation, Share2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
