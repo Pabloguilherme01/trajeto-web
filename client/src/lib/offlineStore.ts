@@ -1,13 +1,9 @@
 const DB_NAME = "trajeto-offline";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "routes";
 const OFFLINE_ROUTE_EVENT = "trajeto-offline-route-change";
 
-function notifyOfflineRouteChange() {
-  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(OFFLINE_ROUTE_EVENT));
-}
-
-type OfflineRoute = {
+export type OfflineRoute = {
   id: string;
   origin: string;
   destination: string;
@@ -15,68 +11,151 @@ type OfflineRoute = {
   payload: unknown;
 };
 
+function notifyOfflineRouteChange() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(OFFLINE_ROUTE_EVENT));
+  }
+}
+
+function hasIndexedDb() {
+  return typeof window !== "undefined" && "indexedDB" in window;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isValidPayload(payload: unknown) {
+  if (!isRecord(payload) || !isRecord(payload.route)) return false;
+  const route = payload.route;
+  return (
+    typeof route.distanceLabel === "string" &&
+    Number.isFinite(route.durationSeconds) &&
+    Array.isArray(payload.stops) &&
+    Array.isArray(payload.anpReferences)
+  );
+}
+
+function isValidRoute(value: unknown): value is OfflineRoute {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.id === "string" &&
+    value.id.length > 0 &&
+    typeof value.origin === "string" &&
+    value.origin.trim().length >= 2 &&
+    typeof value.destination === "string" &&
+    value.destination.trim().length >= 2 &&
+    typeof value.savedAt === "string" &&
+    Number.isFinite(Date.parse(value.savedAt)) &&
+    isValidPayload(value.payload)
+  );
+}
+
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
+    if (!hasIndexedDb()) {
+      reject(new Error("IndexedDB indisponível neste navegador."));
+      return;
+    }
+
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onerror = () => reject(request.error);
+
+    request.onerror = () => reject(request.error ?? new Error("Não foi possível abrir o armazenamento offline."));
     request.onupgradeneeded = () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "id" });
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: "id" });
+      }
     };
     request.onsuccess = () => resolve(request.result);
   });
 }
 
-export async function saveOfflineRoute(route: OfflineRoute) {
-  if (!("indexedDB" in window)) return;
+async function withStore<T>(
+  mode: IDBTransactionMode,
+  operation: (store: IDBObjectStore) => IDBRequest<T>,
+): Promise<T> {
   const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).put(route);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-  db.close();
+  try {
+    return await new Promise<T>((resolve, reject) => {
+      const tx = db.transaction(STORE, mode);
+      const request = operation(tx.objectStore(STORE));
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error ?? new Error("Operação offline falhou."));
+      tx.onerror = () => reject(tx.error ?? new Error("Transação offline falhou."));
+    });
+  } finally {
+    db.close();
+  }
+}
+
+export async function saveOfflineRoute(route: OfflineRoute) {
+  if (!isValidRoute(route)) {
+    throw new Error("Não foi possível salvar: os dados da rota estão incompletos.");
+  }
+  if (!hasIndexedDb()) return false;
+
+  await withStore("readwrite", store => store.put(route));
   notifyOfflineRouteChange();
+  return true;
 }
 
 export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
-  if (!("indexedDB" in window)) return [];
+  if (!hasIndexedDb()) return [];
+
   const db = await openDb();
-  const routes = await new Promise<OfflineRoute[]>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readonly");
-    const request = tx.objectStore(STORE).getAll();
-    request.onsuccess = () => resolve((request.result as OfflineRoute[]).sort((a, b) => b.savedAt.localeCompare(a.savedAt)));
-    request.onerror = () => reject(request.error);
-  });
-  db.close();
-  return routes;
+  try {
+    return await new Promise<OfflineRoute[]>((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      const store = tx.objectStore(STORE);
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const valid: OfflineRoute[] = [];
+        for (const candidate of request.result as unknown[]) {
+          if (isValidRoute(candidate)) {
+            valid.push(candidate);
+          } else if (isRecord(candidate) && typeof candidate.id === "string") {
+            store.delete(candidate.id);
+          }
+        }
+
+        valid.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
+        resolve(valid);
+      };
+
+      request.onerror = () => reject(request.error ?? new Error("Não foi possível ler as rotas salvas."));
+      tx.onerror = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
+    });
+  } finally {
+    db.close();
+  }
 }
 
 export async function removeOfflineRoute(id: string) {
-  if (!("indexedDB" in window)) return;
-  const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-  db.close();
+  if (!hasIndexedDb()) return false;
+
+  await withStore("readwrite", store => store.delete(id));
   notifyOfflineRouteChange();
+  return true;
 }
 
 export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
-  if (!("indexedDB" in window)) return null;
-  const db = await openDb();
-  const route = await new Promise<OfflineRoute | null>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readonly");
-    const request = tx.objectStore(STORE).get(id);
-    request.onsuccess = () => resolve((request.result as OfflineRoute | undefined) ?? null);
-    request.onerror = () => reject(request.error);
-  });
-  db.close();
+  if (!hasIndexedDb()) return null;
+
+  const route = await withStore<unknown>("readonly", store => store.get(id));
+  if (!isValidRoute(route)) {
+    if (isRecord(route) && typeof route.id === "string") {
+      await removeOfflineRoute(route.id);
+    }
+    return null;
+  }
+
   return route;
+}
+
+export function offlineRouteId(origin: string, destination: string) {
+  return origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
 }
 
 export const offlineRouteEvent = OFFLINE_ROUTE_EVENT;
