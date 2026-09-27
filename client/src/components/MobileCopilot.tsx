@@ -40,6 +40,7 @@ type Action = {
   label: string;
   href?: string;
   onClick?: () => void;
+  intent?: "route" | "stations" | "nearby" | "saved";
   icon: typeof ArrowRight;
 };
 
@@ -90,6 +91,7 @@ export default function MobileCopilot() {
         detail: offlineRoutes === 1 ? "Você tem 1 rota salva neste aparelho." : `Você tem ${offlineRoutes} rotas salvas neste aparelho.`,
         label: "Abrir rotas",
         href: appUrl("/planejar?salvos=1"),
+        intent: "saved",
         icon: CloudOff,
       };
     }
@@ -103,6 +105,7 @@ export default function MobileCopilot() {
         detail: `${state.lastTrip.origin} → ${state.lastTrip.destination}`,
         label: "Retomar",
         href: appUrl("/planejar") + "?origem=" + encodeURIComponent(state.lastTrip.origin) + "&destino=" + encodeURIComponent(state.lastTrip.destination),
+        intent: "route",
         icon: Route,
       };
     }
@@ -113,6 +116,7 @@ export default function MobileCopilot() {
         detail: state.lastStation.name,
         label: "Abrir",
         href: appUrl("/postos") + "?q=" + encodeURIComponent(state.lastStation.query) + "&station=" + encodeURIComponent(state.lastStation.placeId),
+        intent: "stations",
         icon: Fuel,
       };
     }
@@ -123,6 +127,7 @@ export default function MobileCopilot() {
         detail: "Use sua localização para encontrar a próxima parada.",
         label: "Perto de mim",
         href: appUrl("/postos") + "?q=" + encodeURIComponent("postos próximos"),
+        intent: "nearby",
         icon: MapPin,
       };
     }
@@ -133,6 +138,7 @@ export default function MobileCopilot() {
         detail: offlineRoutes === 1 ? "1 rota disponível neste aparelho." : `${offlineRoutes} rotas disponíveis neste aparelho.`,
         label: "Abrir salvos",
         href: appUrl("/planejar?salvos=1"),
+        intent: "saved",
         icon: Bookmark,
       };
     }
@@ -148,6 +154,7 @@ export default function MobileCopilot() {
           rememberIntent("route");
           setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination.value));
         },
+        intent: "route",
         icon: Route,
       };
     }
@@ -168,6 +175,7 @@ export default function MobileCopilot() {
         detail: state.lastStation.name,
         label: "Abrir",
         href: appUrl("/postos") + "?q=" + encodeURIComponent(state.lastStation.query) + "&station=" + encodeURIComponent(state.lastStation.placeId),
+        intent: "stations",
         icon: Fuel,
       };
     }
@@ -178,6 +186,7 @@ export default function MobileCopilot() {
         detail: state.recentSearch,
         label: "Continuar",
         href: appUrl("/postos") + "?q=" + encodeURIComponent(state.recentSearch),
+        intent: "stations",
         icon: History,
       };
     }
@@ -187,6 +196,7 @@ export default function MobileCopilot() {
       detail: "Pesquise postos, compare a distância e abra a navegação.",
       label: "Encontrar postos",
       href: appUrl("/postos"),
+      intent: "stations",
       icon: MapPin,
     };
   }, [online, offlineRoutes, state, setLocation]);
