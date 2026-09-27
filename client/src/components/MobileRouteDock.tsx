@@ -7,13 +7,14 @@ type Props = {
   distance: string;
   duration: string;
   routeId?: string;
+  snapshot?: boolean;
   onShare: () => void;
   onNavigate: () => void;
   onSave: () => void | Promise<void>;
   onStations: () => void;
 };
 
-export default function MobileRouteDock({ distance, duration, routeId, onShare, onNavigate, onSave, onStations }: Props) {
+export default function MobileRouteDock({ distance, duration, routeId, snapshot = false, onShare, onNavigate, onSave, onStations }: Props) {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -66,8 +67,8 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
       <div className="overflow-hidden rounded-[1.35rem] border border-[#C7D2C9] bg-[#163840] text-white shadow-[0_16px_38px_rgba(22,56,64,.16)]">
         <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3">
           <div className="min-w-0">
-            <p className="text-[0.56rem] font-bold uppercase tracking-[0.14em] text-[#C7FF3C]">Rota pronta</p>
-            <p className="mt-1 truncate text-xs font-bold text-white/75">{saved ? "Salva neste aparelho e disponível offline." : "Sua viagem está calculada e pode ser salva neste aparelho."}</p>
+            <p className="text-[0.56rem] font-bold uppercase tracking-[0.14em] text-[#C7FF3C]">{snapshot ? "Rota salva" : "Rota pronta"}</p>
+            <p className="mt-1 truncate text-xs font-bold text-white/75">{snapshot ? (online ? "Snapshot local aberto. Recalcule para buscar dados atuais." : "Snapshot local aberto e disponível sem internet.") : saved ? "Salva neste aparelho e disponível offline." : "Sua viagem está calculada e pode ser salva neste aparelho."}</p>
           </div>
           <div className={`flex shrink-0 items-center gap-3 rounded-xl border px-2 py-1.5 text-right ${saved ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[0.04]"}`}>
             <div><p className="text-[0.52rem] uppercase tracking-[0.1em] text-white/45">Distância</p><p className="text-sm font-black">{distance}</p></div>
@@ -75,7 +76,7 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1.5 p-2">
-          <button type="button" aria-label="Abrir navegação para o destino" onClick={() => { vibration(); onNavigate(); }} disabled={!online} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-4" />Navegar</button>
+          <button type="button" aria-label={snapshot && online ? "Recalcular a rota com dados atuais" : "Abrir navegação para o destino"} onClick={() => { vibration(); onNavigate(); }} disabled={!online} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-4" />Navegar</button>
           <button type="button" aria-live="polite" aria-label={saved ? "Rota salva neste aparelho" : "Salvar rota para usar offline"} onClick={handleSave} disabled={busy || saved} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97] disabled:cursor-default disabled:opacity-80">
             <span className="grid size-4 place-items-center">{saved ? <Check className="size-4 text-[#C7FF3C]" /> : <Save className="size-4" />}</span>{busy ? "Salvando…" : saved ? "Salva" : "Salvar"}
           </button>
@@ -85,7 +86,7 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
         {actionMessage && <p role="status" aria-live="polite" className="border-t border-white/10 px-3 py-2 text-center text-[0.58rem] font-bold text-white/75">{actionMessage}</p>}
         {!online && !saved && <p role="status" className="border-t border-[#FFB86B]/20 bg-[#FFB86B]/[0.05] px-3 py-2 text-center text-[0.56rem] font-bold text-[#FFD49C]">Salve esta rota agora para continuar mesmo sem internet.</p>}
         {saveError && <p role="alert" className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.58rem] font-bold text-[#FFD49C]"><AlertCircle className="size-3.5" /> Não foi possível salvar. Tente novamente.</p>}
-        <p className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.52rem] font-semibold text-white/45"><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C]" : "bg-[#FFB86B]"}`} /> {online ? "Online · dados externos e navegação disponíveis." : saved ? "Offline · esta rota continua disponível neste aparelho." : "Offline · salve a rota antes de sair."}</p>
+        <p className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.52rem] font-semibold text-white/45"><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C]" : "bg-[#FFB86B]"}`} /> {online ? (snapshot ? "Online · esta rota é um snapshot. Recalcule antes de sair." : "Online · dados externos e navegação disponíveis.") : saved ? "Offline · esta rota continua disponível neste aparelho." : "Offline · salve a rota antes de sair."}</p>
       </div>
     </section>
   );
