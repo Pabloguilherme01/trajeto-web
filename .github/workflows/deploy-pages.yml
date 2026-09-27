@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       VITE_BASE_PATH: /trajeto-web/
     steps:
@@ -29,10 +29,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: package.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+        run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
       - name: Build static client
         run: npm run build:client
@@ -46,6 +46,7 @@ jobs:
           test -f dist/public/robots.txt
           test -f dist/public/favicon.svg
           cp dist/public/index.html dist/public/404.html
+          printf '%s\n' "GitHub Pages artifact validated."
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
