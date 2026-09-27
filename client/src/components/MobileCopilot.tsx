@@ -255,7 +255,7 @@ export default function MobileCopilot() {
                   <p className="mt-0.5 truncate text-[0.68rem] text-[#A8C8CF]">{primary.detail}</p>
                 </div>
                 {primary.href ? (
-                  <a href={primary.href} onClick={() => rememberIntent("route")} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.65rem] font-black text-[#0B1014] active:scale-[.98]">
+                  <a href={primary.href} onClick={() => rememberIntent(primary.intent ?? "route")} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.65rem] font-black text-[#0B1014] active:scale-[.98]">
                     {primary.label}<ArrowRight className="size-3.5" />
                   </a>
                 ) : (
