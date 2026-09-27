@@ -6,9 +6,17 @@ import { shareText, vibration } from "@/lib/mobileTools";
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
   const current = location.split("?")[0];
-  const locate = () => {\n    if (!navigator.geolocation) return;\n    vibration();\n    navigator.geolocation.getCurrentPosition(position => {\n      setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));\n    });\n  };\n  const actions = [
+  const locate = () => {
+    if (!navigator.geolocation) return;
+    vibration();
+    navigator.geolocation.getCurrentPosition(position => {
+      setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
+    });
+  };
+  const actions = [
     { label: "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => { vibration(); setLocation(appUrl("/planejar")); } },
-    { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },\n    { label: "Perto de mim", short: "GPS", icon: LocateFixed, path: "", run: locate },
+    { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
+    { label: "Perto de mim", short: "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Instalar", short: "App", icon: Download, path: "", run: () => document.getElementById("instalar-app")?.scrollIntoView({ behavior: "smooth", block: "center" }) },
     { label: "Compartilhar", short: "Enviar", icon: Share2, path: "", run: () => { void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto"); } },
   ];
