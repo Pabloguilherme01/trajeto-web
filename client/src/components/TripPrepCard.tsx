@@ -1,5 +1,5 @@
 import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles, RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 
 const KEY = "trajeto-trip-checklist";
 
@@ -11,8 +11,11 @@ const defaults = [
 ] as const;
 
 export default function TripPrepCard() {
-  const [checked, setChecked] = useState<Record<string, boolean>(() => {
-    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
+  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(KEY) || "{}");
+      return stored && typeof stored === "object" && !Array.isArray(stored) ? stored as Record<string, boolean> : {};
+    } catch { return {}; }
   });
 
   useEffect(() => {
