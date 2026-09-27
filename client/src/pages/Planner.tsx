@@ -84,6 +84,14 @@ export default function Planner() {
   }, [offline, origin, destination, planned]);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("salvos") !== "1") return;
+    const timer = window.setTimeout(() => {
+      document.getElementById("saved-routes")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     const refreshLastTrip = () => setLastTrip(getLastTrip());
     window.addEventListener("focus", refreshLastTrip);
     return () => window.removeEventListener("focus", refreshLastTrip);
