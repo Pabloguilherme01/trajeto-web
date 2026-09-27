@@ -128,8 +128,8 @@ export default function Home() {
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Objetivo: preparar e continuar a viagem</p>
                 <p className="mt-1 text-sm font-bold text-white">{online ? "Prepare a rota antes de sair e deixe uma cópia no celular para quando a conexão falhar." : savedRoutes > 0 ? `Sem internet: ${savedRoutes} rota${savedRoutes === 1 ? "" : "s"} pronta${savedRoutes === 1 ? "" : "s"} para continuar neste aparelho.` : "Sem internet: abra uma rota já salva neste aparelho."}</p>
               </div>
-              {online ? <a href="#instalar-app" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/45 px-4 py-2 text-xs font-extrabold text-[#DFFF9D] sm:w-auto">
-                <Download className="size-4" /> Como instalar
+              {online ? <a href={appUrl("/planejar")} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
+                <Navigation className="size-4" /> Planejar agora
               </a> : <button type="button" onClick={openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
                 <Navigation className="size-4" /> {savedRoutes > 0 ? "Continuar última rota" : "Abrir planejador"}
               </button>}
