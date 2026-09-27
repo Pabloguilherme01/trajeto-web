@@ -1,0 +1,260 @@
+import {
+  ArrowRight,
+  BatteryLow,
+  Bookmark,
+  CloudOff,
+  Fuel,
+  History,
+  MapPin,
+  Navigation,
+  Route,
+  Share2,
+  Sparkles,
+  Wifi,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
+import { appUrl } from "@/lib/appUrl";
+import {
+  getEconomyMode,
+  getLastIntent,
+  getLastStation,
+  getLastTrip,
+  getRecentSearches,
+  mobilePreferenceEvent,
+  rememberIntent,
+  setEconomyMode,
+} from "@/lib/mobilePreferences";
+import {
+  getDestinationUsage,
+  getFavoriteDestination,
+  getMobileDestinations,
+  mobileDestinationEvent,
+  rememberDestinationUsage,
+  type MobileDestination,
+} from "@/lib/mobileDestinations";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { shareText, vibration } from "@/lib/mobileTools";
+
+type Action = {
+  title: string;
+  detail: string;
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  icon: typeof Navigation;
+};
+
+function readState() {
+  return {
+    economy: getEconomyMode(),
+    lastTrip: getLastTrip(),
+    lastStation: getLastStation(),
+    recentSearch: getRecentSearches()[0] ?? null,
+    intent: getLastIntent(),
+    favoriteDestination: getFavoriteDestination(getMobileDestinations(), getDestinationUsage()),
+  };
+}
+
+export default function MobileCopilot() {
+  const [, setLocation] = useLocation();
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [offlineRoutes, setOfflineRoutes] = useState(0);
+  const [state, setState] = useState(readState);
+
+  useEffect(() => {
+    const refresh = () => setState(readState());
+    const refreshNetwork = () => setOnline(navigator.onLine);
+
+    window.addEventListener("online", refreshNetwork);
+    window.addEventListener("offline", refreshNetwork);
+    window.addEventListener("focus", refresh);
+    window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener(mobileDestinationEvent, refresh);
+    window.addEventListener(offlineRouteEvent, refresh);
+
+    void listOfflineRoutes().then(routes => setOfflineRoutes(routes.length)).catch(() => {});
+
+    return () => {
+      window.removeEventListener("online", refreshNetwork);
+      window.removeEventListener("offline", refreshNetwork);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener(mobileDestinationEvent, refresh);
+      window.removeEventListener(offlineRouteEvent, refresh);
+    };
+  }, []);
+
+  const primary = useMemo<Action>(() => {
+    if (!online && offlineRoutes > 0) {
+      return {
+        title: "Continue sem internet",
+        detail: offlineRoutes === 1 ? "Você tem 1 rota salva neste aparelho." : `Você tem ${offlineRoutes} rotas salvas neste aparelho.`,
+        label: "Abrir rotas",
+        href: appUrl("/planejar?salvos=1"),
+        icon: CloudOff,
+      };
+    }
+
+    if (state.favoriteDestination) {
+      const destination = state.favoriteDestination;
+      return {
+        title: `Ir para ${destination.label.toLowerCase()}`,
+        detail: destination.value,
+        label: "Ir agora",
+        onClick: () => {
+          vibration();
+          rememberDestinationUsage(destination);
+          rememberIntent("route");
+          setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination.value));
+        },
+        icon: Navigation,
+      };
+    }
+
+    if (state.lastTrip) {
+      return {
+        title: "Retomar sua última viagem",
+        detail: `${state.lastTrip.origin} → ${state.lastTrip.destination}`,
+        label: "Retomar",
+        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(state.lastTrip.origin) + "&destino=" + encodeURIComponent(state.lastTrip.destination),
+        icon: Route,
+      };
+    }
+
+    if (state.lastStation) {
+      return {
+        title: "Voltar ao último posto",
+        detail: state.lastStation.name,
+        label: "Abrir",
+        href: appUrl("/postos") + "?q=" + encodeURIComponent(state.lastStation.query) + "&station=" + encodeURIComponent(state.lastStation.placeId),
+        icon: Fuel,
+      };
+    }
+
+    if (state.recentSearch) {
+      return {
+        title: "Continuar sua última busca",
+        detail: state.recentSearch,
+        label: "Continuar",
+        href: appUrl("/postos") + "?q=" + encodeURIComponent(state.recentSearch),
+        icon: History,
+      };
+    }
+
+    return {
+      title: "Encontre a próxima parada",
+      detail: "Pesquise postos, compare a distância e abra a navegação.",
+      label: "Encontrar postos",
+      href: appUrl("/postos"),
+      icon: MapPin,
+    };
+  }, [online, offlineRoutes, state, setLocation]);
+
+  const shareDecision = () => {
+    const destination = state.favoriteDestination;
+    const text = destination
+      ? `Meu destino mais usado no Trajeto: ${destination.label} · ${destination.value}`
+      : state.lastTrip
+        ? `Minha rota no Trajeto: ${state.lastTrip.origin} → ${state.lastTrip.destination}`
+        : "Estou usando o Trajeto para planejar minhas paradas e viagens.";
+    void shareText(text, window.location.href, "Trajeto");
+  };
+
+  const actions: Action[] = [
+    {
+      title: "Postos",
+      detail: "Encontrar e comparar",
+      label: "Abrir",
+      href: appUrl("/postos"),
+      icon: Fuel,
+    },
+    {
+      title: "Planejar",
+      detail: "Origem, destino e parada",
+      label: "Abrir",
+      href: appUrl("/planejar"),
+      icon: Route,
+    },
+    {
+      title: "Salvos",
+      detail: offlineRoutes ? `${offlineRoutes} rota(s) offline` : "Rotas e preferências",
+      label: "Abrir",
+      href: appUrl("/planejar?salvos=1"),
+      icon: Bookmark,
+    },
+  ];
+
+  return (
+    <section className="border-y border-white/8 bg-[#0F171D] py-5 md:hidden" aria-labelledby="mobile-copilot-title">
+      <div className="container">
+        <div className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#111A21] shadow-[0_18px_50px_rgba(0,0,0,.22)]">
+          <div className="p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="flex items-center gap-1.5 text-[0.6rem] font-extrabold uppercase tracking-[0.15em] text-[#3DE3FF]">
+                  <Sparkles className="size-3.5" /> Copiloto de deslocamento
+                </p>
+                <h2 id="mobile-copilot-title" className="mt-1.5 font-display text-2xl font-semibold tracking-[-0.055em] text-white">
+                  O que você precisa fazer agora?
+                </h2>
+              </div>
+              <div className={online ? "rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/8 p-2 text-[#C7FF3C]" : "rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/8 p-2 text-[#FFB86B]"} aria-label={online ? "Conectado" : "Offline"}>
+                {online ? <Wifi className="size-4" /> : <CloudOff className="size-4" />}
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-[#C7FF3C]/20 bg-[linear-gradient(135deg,rgba(199,255,60,.08),rgba(61,227,255,.04))] p-3.5">
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]">
+                  <primary.icon className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.58rem] font-extrabold uppercase tracking-[0.13em] text-[#C7FF3C]">Próxima ação</p>
+                  <p className="mt-1 text-sm font-extrabold text-white">{primary.title}</p>
+                  <p className="mt-0.5 truncate text-[0.68rem] text-[#A8C8CF]">{primary.detail}</p>
+                </div>
+                {primary.href ? (
+                  <a href={primary.href} onClick={() => rememberIntent("route")} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.65rem] font-black text-[#0B1014] active:scale-[.98]">
+                    {primary.label}<ArrowRight className="size-3.5" />
+                  </a>
+                ) : (
+                  <button type="button" onClick={primary.onClick} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.65rem] font-black text-[#0B1014] active:scale-[.98]">
+                    {primary.label}<ArrowRight className="size-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {actions.map(action => (
+                <a key={action.title} href={action.href} className="min-w-0 rounded-xl border border-white/10 bg-white/[0.035] p-3 text-left transition active:scale-[.98]">
+                  <action.icon className="size-4 text-[#3DE3FF]" />
+                  <p className="mt-2 truncate text-xs font-extrabold text-white">{action.title}</p>
+                  <p className="mt-0.5 truncate text-[0.58rem] text-[#7F919A]">{action.detail}</p>
+                </a>
+              ))}
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {state.economy && (
+                <button type="button" onClick={() => { setEconomyMode(false); setState(readState()); }} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/6 px-3 text-[0.6rem] font-bold text-[#A9DCE5]">
+                  Economia ativa
+                </button>
+              )}
+              {offlineRoutes > 0 && (
+                <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#AABBC2]">
+                  <Bookmark className="size-3.5" /> {offlineRoutes} offline
+                </span>
+              )}
+              {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]"><BatteryLow className="size-3.5" /> Sem conexão</span>}
+              <button type="button" onClick={shareDecision} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#D3DEE2]">
+                <Share2 className="size-3.5" /> Compartilhar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
