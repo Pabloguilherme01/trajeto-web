@@ -43,7 +43,7 @@ export default function Planner() {
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
-  }, []
+  }, []);
 
   useEffect(() => {
     if (!offline || planned) return;
@@ -59,7 +59,7 @@ export default function Planner() {
       setPlanned(route.payload as PlannedRoute);
       setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
     }).catch(() => {});
-  }, [offline]););
+  }, [offline]);
 
   useEffect(() => {
     const routeLabel = origin.trim() && destination.trim() ? origin.trim() + " → " + destination.trim() : "Planejar rota";
