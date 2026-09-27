@@ -11,6 +11,7 @@ export default function MobileTravelHub() {
   const [battery, setBattery] = useState<number | null>(null);
   const [savedRoutes, setSavedRoutes] = useState(0);
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(null);
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -41,10 +42,12 @@ export default function MobileTravelHub() {
   }, []);
 
   const locate = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation || locating) return;
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(position => {
+      setLocating(false);
       setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
-    }, undefined, { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
+    }, () => setLocating(false), { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
 
   return (
@@ -64,7 +67,7 @@ export default function MobileTravelHub() {
             <div className="rounded-xl bg-white/[0.04] p-3"><Compass className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Modo</p><p className="text-sm font-extrabold text-white">{online ? "Online" : "Offline"}</p></div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]"><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />Perto de mim</button>
+            <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]" disabled={locating}><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />{locating ? "Localizando…" : "Perto de mim"}</button>
             <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014] shadow-[0_8px_20px_rgba(199,255,60,.12)] transition active:scale-[.98]"><Gauge className="mr-2 inline size-4" />Planejar</button>
           </div>
         </div>
