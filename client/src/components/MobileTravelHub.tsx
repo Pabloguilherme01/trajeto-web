@@ -45,9 +45,9 @@ export default function MobileTravelHub() {
   };
 
   return (
-    <section className="border-y border-white/8 bg-[#0F171D] py-5 md:hidden">
+    <section className="border-y border-white/8 bg-[linear-gradient(180deg,#101A21_0%,#0B1014_100%)] py-5 md:hidden">
       <div className="container">
-        <div className="rounded-2xl border border-white/10 bg-[#121B22] p-4">
+        <div className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#111A21] p-4 shadow-[0_18px_50px_rgba(0,0,0,.2)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Painel de viagem</p>
@@ -56,13 +56,13 @@ export default function MobileTravelHub() {
             <div className={online ? "text-[#C7FF3C]" : "text-[#FFB86B]"}>{online ? <Wifi className="size-5" /> : <CloudOff className="size-5" />}</div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-white/[0.04] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></div>
+            <div className="rounded-xl border border-white/6 bg-white/[0.035] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></div>
             <div className="rounded-xl bg-white/[0.04] p-3"><Battery className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Bateria</p><p className="text-sm font-extrabold text-white">{battery === null ? "—" : battery + "%"}</p></div>
             <div className="rounded-xl bg-white/[0.04] p-3"><Compass className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Modo</p><p className="text-sm font-extrabold text-white">{online ? "Online" : "Offline"}</p></div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/10 text-xs font-bold text-white"><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />Perto de mim</button>
-            <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014]"><Gauge className="mr-2 inline size-4" />Planejar</button>
+            <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]"><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />Perto de mim</button>
+            <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014] shadow-[0_8px_20px_rgba(199,255,60,.12)] transition active:scale-[.98]"><Gauge className="mr-2 inline size-4" />Planejar</button>
           </div>
         </div>
       </div>
