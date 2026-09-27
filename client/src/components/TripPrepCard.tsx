@@ -71,7 +71,6 @@ export default function TripPrepCard() {
   }, []);
 
   const localRouteReady = Boolean(latestOfflineRoute);
-  const localStorageKnown = !storageError;
   const hasTrip = Boolean(lastTrip);
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
   const smartChecked: Record<string, boolean> = {
