@@ -101,7 +101,7 @@ export default function OfflineRouteVault() {
   };
 
   return (
-    <section id="saved-routes" aria-labelledby="saved-routes-title" className="mt-8 rounded-3xl border border-[#CFD9DD] bg-[#0F171D] p-5 text-white sm:p-6">
+    <section id="saved-routes" aria-labelledby="saved-routes-title" className="mt-8 scroll-mt-24 rounded-3xl border border-[#CFD9DD] bg-[#0F171D] p-5 text-white sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/15 text-[#3DE3FF]">
@@ -111,7 +111,7 @@ export default function OfflineRouteVault() {
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Salvos no aparelho</p>
             <h2 id="saved-routes-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Continue quando quiser.</h2>
             <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#94A8B0]">
-              O que você já preparou fica no aparelho. Reabra a viagem sem recalcular; navegação externa e dados ao vivo dependem de internet.
+              Prepare uma vez, continue depois. A rota fica no aparelho para reabrir sem recalcular; navegação externa e dados ao vivo dependem de internet.
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function OfflineRouteVault() {
         <span className={`rounded-full px-2.5 py-1 ${isOnline ? "bg-[#C7FF3C]/15 text-[#C7FF3C]" : "bg-[#3DE3FF]/10 text-[#8FEAFF]"}`}>
           {isOnline ? "Internet disponível" : "Sem internet"}
         </span>
-        <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[#91A4AC]">Rota salva localmente
+        <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[#91A4AC]">Rota pronta no aparelho
         </span>
       </div>
 
