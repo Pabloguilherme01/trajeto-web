@@ -2,7 +2,7 @@ import { Battery, CloudOff, Compass, Gauge, LocateFixed, Navigation, Wifi } from
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { getLastTrip } from "@/lib/mobilePreferences";
+import { getEconomyMode, getLastTrip, setEconomyMode } from "@/lib/mobilePreferences";
 import { listOfflineRoutes } from "@/lib/offlineStore";
 
 export default function MobileTravelHub() {
@@ -13,6 +13,7 @@ export default function MobileTravelHub() {
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(null);
   const [locating, setLocating] = useState(false);
   const [batterySaver, setBatterySaver] = useState(false);
+  const [economyMode, setEconomyModeState] = useState(getEconomyMode);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -34,8 +35,10 @@ export default function MobileTravelHub() {
       batteryDevice = device;
       updateBattery();
       setBatterySaver(device.level <= 0.2);
+      const updateBatterySaver = () => setBatterySaver(device.level <= 0.2);
       device.addEventListener("levelchange", updateBattery);
-      device.addEventListener("levelchange", () => setBatterySaver(device.level <= 0.2));
+      device.addEventListener("levelchange", updateBatterySaver);
+      batteryDevice = { ...device, removeEventListener: (type: string, listener: () => void) => device.removeEventListener(type, listener) };
     }).catch(() => {});
 
     return () => {
@@ -73,7 +76,7 @@ export default function MobileTravelHub() {
             <div className="rounded-xl bg-white/[0.04] p-3"><Compass className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Modo</p><p className="text-sm font-extrabold text-white">{online ? "Online" : "Offline"}</p></div>
           </div>
           {lastTrip && <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination))} className="mt-3 flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[0.06] px-3 text-left transition active:scale-[.99]"><span className="min-w-0"><span className="block text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[#C7FF3C]">Continuar viagem</span><span className="mt-1 block truncate text-xs font-bold text-white">{lastTrip.origin} → {lastTrip.destination}</span></span><Navigation className="size-4 shrink-0 text-[#C7FF3C]" /></button>}
-          {batterySaver && <p role="status" className="mt-3 rounded-xl border border-[#FFB86B]/25 bg-[#FFB86B]/[0.06] px-3 py-2 text-[0.65rem] font-bold leading-relaxed text-[#FFD49C]">Bateria abaixo de 20%. Prefira Economia de dados e mantenha apenas as ações necessárias durante a viagem.</p>}
+          {batterySaver && <div role="status" className="mt-3 flex items-center gap-3 rounded-xl border border-[#FFB86B]/25 bg-[#FFB86B]/[0.06] px-3 py-2 text-[0.65rem] font-bold leading-relaxed text-[#FFD49C]"><span className="min-w-0 flex-1">Bateria abaixo de 20%. Reduza o carregamento durante a viagem.</span><button type="button" onClick={() => { setEconomyMode(true); setEconomyModeState(true); }} disabled={economyMode} className="min-h-9 shrink-0 rounded-lg border border-[#FFB86B]/40 px-2.5 text-[0.6rem] font-extrabold text-[#FFD49C]">{economyMode ? "Ativo" : "Ativar"}</button></div>}
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]" disabled={locating}><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />{locating ? "Localizando…" : "Perto de mim"}</button>
             <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014] shadow-[0_8px_20px_rgba(199,255,60,.12)] transition active:scale-[.98]"><Gauge className="mr-2 inline size-4" />Planejar</button>
