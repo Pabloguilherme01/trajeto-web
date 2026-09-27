@@ -2,7 +2,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import TripPrepCard from "@/components/TripPrepCard";
-import MobileTravelHub from "@/components/MobileTravelHub";
+import MobileCopilot from "@/components/MobileCopilot";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
@@ -100,10 +100,10 @@ export default function Home() {
                 <Navigation className="size-3.5" /> Águas Lindas · DF · Entorno
               </div>
               <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
-                Pare melhor.<br /><span className="text-[#C7FF3C]">Chegue melhor.</span>
+                Decida a parada.<br /><span className="text-[#C7FF3C]">Siga melhor.</span>
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#B7C4CA] sm:mt-7 sm:text-lg">
-                Encontre onde parar, compare distância e desvio e planeje a próxima viagem com referências de combustível. Sem cadastro para começar.
+                O Trajeto organiza a próxima decisão da viagem: destino, parada, desvio e navegação. Comece sem cadastro e deixe o app lembrar o que você usa com mais frequência.
               </p>
 
               <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
@@ -185,14 +185,14 @@ export default function Home() {
           </div>
         </section>
 
-        <MobileTravelHub />
+        <MobileCopilot />
 
         <section className="bg-[#EAF0F2] py-14 text-[#0B1014] sm:py-18">
           <div className="container">
             <div className="max-w-2xl">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Uma decisão por vez</p>
-              <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Descubra → compare → <em>decida.</em></h2>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">O Trajeto não precisa que você entenda a plataforma. Você informa onde está indo e recebe o contexto necessário para escolher a próxima parada.</p>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Seu copiloto de deslocamento</p>
+              <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Detecte → decida → <em>navegue.</em></h2>
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa o destino e o Trajeto organiza o próximo passo. O uso recorrente fica mais rápido porque destinos, viagens, buscas e rotas salvas ganham prioridade automaticamente.</p>
             </div>
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
@@ -270,7 +270,7 @@ export default function Home() {
           <div className="container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-extrabold text-white">Gostou da consulta?</p>
-              <p className="mt-1 text-xs text-[#7F919A]">Compartilhe a página com quem faz esse caminho todos os dias.</p>
+              <p className="mt-1 text-xs text-[#7F919A]">Compartilhe uma rota ou decisão útil com quem faz esse caminho com você.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <a href={appUrl("/postos")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014]">Consultar postos <ArrowRight className="size-4" /></a>
