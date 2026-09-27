@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3, ExternalLink, RotateCw, Share2, Trash2, WifiOff } from "lucide-react";
+import { ArrowRight, Clock3, ExternalLink, RotateCw, Share2, Trash2, WifiOff, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -109,9 +109,9 @@ export default function OfflineRouteVault() {
           </div>
           <div className="min-w-0">
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Salvos no aparelho</p>
-            <h2 id="saved-routes-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Rotas salvas.</h2>
+            <h2 id="saved-routes-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Continue quando quiser.</h2>
             <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#94A8B0]">
-              Abra a rota calculada sem refazer a consulta. Navegação externa e dados ao vivo dependem de internet.
+              O que você já preparou fica no aparelho. Reabra a viagem sem recalcular; navegação externa e dados ao vivo dependem de internet.
             </p>
           </div>
         </div>
@@ -138,6 +138,24 @@ export default function OfflineRouteVault() {
         <p role="status" aria-live="polite" className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[0.65rem] font-bold text-[#B9C9CE]">
           {feedback}
         </p>
+      )}
+
+      {!loading && !storageError && items.length > 0 && (
+        <div className="mt-5 rounded-2xl border border-[#C7FF3C]/20 bg-[linear-gradient(135deg,rgba(199,255,60,.09),rgba(61,227,255,.04))] p-3.5">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]">
+              <Zap className="size-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.56rem] font-extrabold uppercase tracking-[0.14em] text-[#C7FF3C]">Próxima ação</p>
+              <p className="mt-1 truncate text-sm font-extrabold text-white">{items[0].origin} → {items[0].destination}</p>
+              <p className="mt-0.5 text-[0.62rem] text-[#9FB1B8]">Última rota salva · abre sem recalcular</p>
+            </div>
+            <button type="button" onClick={() => openRoute(items[0])} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
+              Continuar <ArrowRight className="size-3.5" />
+            </button>
+          </div>
+        </div>
       )}
 
       {loading ? (
