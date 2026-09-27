@@ -1,7 +1,7 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
-import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset } from "lucide-react";
+import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 
@@ -24,6 +24,16 @@ export default function Home() {
     setSearchError(null);
     track("station_search", normalized);
     setLocation(`${appUrl("/postos")}?region=${encodeURIComponent(presetId ?? "")}&q=${encodeURIComponent(normalized)}`);
+  };
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) { setSearchError("Seu navegador não oferece localização."); return; }
+    setSearchError(null);
+    navigator.geolocation.getCurrentPosition(
+      position => setLocation(`${appUrl("/postos")}?lat=${position.coords.latitude}&lng=${position.coords.longitude}&q=${encodeURIComponent("postos próximos")}`),
+      () => setSearchError("Não foi possível obter sua localização. Verifique a permissão do navegador."),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+    );
   };
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -112,6 +122,15 @@ export default function Home() {
                   </button>
                 </div>
               </form>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF]">
+                  <LocateFixed className="size-4 text-[#3DE3FF]" /> Usar minha localização
+                </button>
+                <a href={appUrl("/planejar")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#C7FF3C]">
+                  <Navigation className="size-4 text-[#C7FF3C]" /> Planejar viagem
+                </a>
+              </div>
 
               <div className="mt-6">
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Atalhos mais usados</p>
