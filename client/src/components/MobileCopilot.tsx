@@ -62,7 +62,10 @@ export default function MobileCopilot() {
   const [state, setState] = useState(readState);
 
   useEffect(() => {
-    const refresh = () => setState(readState());
+    const refresh = () => {
+      setState(readState());
+      void listOfflineRoutes().then(routes => setOfflineRoutes(routes.length)).catch(() => {});
+    };
     const refreshNetwork = () => setOnline(navigator.onLine);
 
     window.addEventListener("online", refreshNetwork);
