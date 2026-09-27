@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Navigation, Save, Share2, Fuel, AlertCircle } from "lucide-react";
+import { Check, Navigation, Save, Share2, Fuel, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { vibration } from "@/lib/mobileTools";
 import { getOfflineRoute } from "@/lib/offlineStore";
@@ -63,13 +63,13 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
             <p className="text-[0.56rem] font-bold uppercase tracking-[0.14em] text-[#C7FF3C]">Rota pronta</p>
             <p className="mt-1 truncate text-xs font-bold text-white/75">{saved ? "Salva neste aparelho e disponível offline." : "Sua viagem está calculada e pode ser salva neste aparelho."}</p>
           </div>
-          <div className={`flex shrink-0 items-center gap-3 rounded-xl px-2 py-1.5 text-right ${saved ? "bg-[#C7FF3C]/10" : "bg-white/[0.04]"}`}>
+          <div className={`flex shrink-0 items-center gap-3 rounded-xl border px-2 py-1.5 text-right ${saved ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[0.04]"}`}>
             <div><p className="text-[0.52rem] uppercase tracking-[0.1em] text-white/45">Distância</p><p className="text-sm font-black">{distance}</p></div>
             <div><p className="text-[0.52rem] uppercase tracking-[0.1em] text-white/45">Tempo</p><p className="text-sm font-black">{duration}</p></div>
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1.5 p-2">
-          <button type="button" aria-label="Abrir navegação para o destino" onClick={() => { vibration(); onNavigate(); }} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] active:scale-[.97]"><Navigation className="size-4" />Navegar</button>
+          <button type="button" aria-label="Abrir navegação para o destino" onClick={() => { vibration(); onNavigate(); }} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-[#C7FF3C] px-1 text-[0.56rem] font-extrabold text-[#0B1014] shadow-[0_8px_18px_rgba(199,255,60,.14)] active:scale-[.97]"><Navigation className="size-4" />Navegar</button>
           <button type="button" aria-live="polite" aria-label={saved ? "Rota salva neste aparelho" : "Salvar rota para usar offline"} onClick={handleSave} disabled={busy || saved} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97] disabled:cursor-default disabled:opacity-80">
             <span className="grid size-4 place-items-center">{saved ? <Check className="size-4 text-[#C7FF3C]" /> : <Save className="size-4" />}</span>{busy ? "Salvando…" : saved ? "Salva" : "Salvar"}
           </button>
@@ -77,6 +77,7 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
           <button type="button" aria-label="Compartilhar esta rota" onClick={() => { vibration(); onShare(); }} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97]"><Share2 className="size-4" />Enviar</button>
         </div>
         {actionMessage && <p role="status" aria-live="polite" className="border-t border-white/10 px-3 py-2 text-center text-[0.58rem] font-bold text-white/75">{actionMessage}</p>}
+        {!online && !saved && <p role="status" className="border-t border-[#FFB86B]/20 bg-[#FFB86B]/[0.05] px-3 py-2 text-center text-[0.56rem] font-bold text-[#FFD49C]">Salve esta rota agora para continuar mesmo sem internet.</p>}
         {saveError && <p role="alert" className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.58rem] font-bold text-[#FFD49C]"><AlertCircle className="size-3.5" /> Não foi possível salvar. Tente novamente.</p>}
         <p className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.52rem] font-semibold text-white/45"><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C]" : "bg-[#FFB86B]"}`} /> {online ? "Online · navegação e consultas externas disponíveis." : "Offline · a rota salva continua disponível neste aparelho."}</p>
       </div>
