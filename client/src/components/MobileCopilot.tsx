@@ -40,7 +40,7 @@ type Action = {
   label: string;
   href?: string;
   onClick?: () => void;
-  icon: typeof Navigation;
+  icon: typeof ArrowRight;
 };
 
 function readState() {
