@@ -178,7 +178,7 @@ export default function Home() {
                 <Fuel className="size-6 text-[#C7FF3C]" />
               </div>
 
-              <form onSubmit={submitSearch} className="mt-5" noValidate>
+              <form onSubmit={submitSearch} className={online ? "mt-5" : "hidden"} noValidate>
                 <label htmlFor="home-search" className="text-xs font-bold text-[#A9BAC2]">Cidade, bairro, posto ou destino</label>
                 <div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]">
                   <Search className="ml-3 mt-3 size-5 shrink-0 text-[#3DE3FF]" />
@@ -191,7 +191,7 @@ export default function Home() {
 
               {locationMessage && <p role="status" aria-live="polite" className="mt-2 rounded-xl border border-white/8 bg-white/[0.025] px-3 py-2 text-[0.62rem] font-bold text-[#8FA3AC]">{locationMessage}</p>}
 
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className={online ? "mt-2 grid grid-cols-2 gap-2" : "hidden"}>
                 <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF] active:scale-[.98]" disabled={locating}>
                   <LocateFixed className="size-4 text-[#3DE3FF]" /> {locating ? "Localizando…" : "Usar minha localização"}
                 </button>
@@ -200,7 +200,7 @@ export default function Home() {
                 </a>
               </div>
 
-              {recentSearches.length > 0 && <div className="mt-5 border-t border-white/8 pt-4">
+              {online && recentSearches.length > 0 && <div className="mt-5 border-t border-white/8 pt-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Pesquisas recentes</p>
                   <span className="text-[0.58rem] font-semibold text-[#5F727B]">só neste aparelho</span>
