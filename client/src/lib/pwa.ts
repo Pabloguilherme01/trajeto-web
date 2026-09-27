@@ -25,13 +25,15 @@ export function registerServiceWorker() {
 }
 
 export function applyServiceWorkerUpdate() {
-  const registration = navigator.serviceWorker.controller ? undefined : undefined;
-  void navigator.serviceWorker.ready.then(ready => {
-    if (ready.waiting) {
-      ready.waiting.postMessage({ type: "SKIP_WAITING" });
+  void navigator.serviceWorker.ready.then(registration => {
+    if (!registration.waiting) {
+      window.location.reload();
       return;
     }
-    window.location.reload();
+
+    const reload = () => window.location.reload();
+    navigator.serviceWorker.addEventListener("controllerchange", reload, { once: true });
+    registration.waiting.postMessage({ type: "SKIP_WAITING" });
   });
 }
 
