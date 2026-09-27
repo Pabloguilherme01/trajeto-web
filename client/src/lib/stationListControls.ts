@@ -23,3 +23,23 @@ export function filterAndSortStations<T extends StationListItem>(stations: T[], 
     })
     .map(({ station }) => station);
 }
+
+
+export type StationSearchPreferenceValues = {
+  mappedBrand: string;
+  hoursStatus: StationHoursFilter;
+  sortBy: StationSort;
+  resultsPerView: 5 | 10 | 20;
+  economicMode: boolean;
+};
+
+export function applyStationSearchPreferences(preferences: StationSearchPreferenceValues) {
+  const resultsPerView = preferences.economicMode ? 5 : preferences.resultsPerView;
+  return {
+    brandFilter: preferences.mappedBrand,
+    hoursFilter: preferences.hoursStatus,
+    sortBy: preferences.sortBy,
+    resultsPerView,
+    visibleResultCount: resultsPerView,
+  };
+}
