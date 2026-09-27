@@ -10,7 +10,7 @@ const KEY = "trajeto-trip-checklist";
 const defaults = [
   ["combustivel", "Combustível suficiente para o primeiro trecho"],
   ["documentos", "CNH e documentos do veículo"],
-  ["rota", "Rota principal e rota alternativa salvas"],
+  ["rota", "Rota da viagem salva neste aparelho"],
   ["offline", "Rota disponível sem internet"],
 ] as const;
 
