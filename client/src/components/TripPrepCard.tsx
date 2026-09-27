@@ -107,7 +107,7 @@ export default function TripPrepCard() {
           <span className={online ? "size-2 rounded-full bg-[#326575]" : "size-2 rounded-full bg-[#C77B3C]"} />
           {online ? "Internet disponível para novas consultas." : "Offline: use as rotas já salvas."}
         </span>
-        {!online && savedRoutes > 0 && <button type="button" onClick={() => setLocation(appUrl("/postos") + "?salvos=1")} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">Abrir salvos</button>}
+        {!online && savedRoutes > 0 && <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">Abrir salvos</button>}
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-[0.62rem] font-bold text-[#617179]">
