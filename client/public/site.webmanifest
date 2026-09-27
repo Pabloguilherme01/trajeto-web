@@ -49,6 +49,14 @@
         }
       ]
     }
+  ,
+    {
+      "name": "Salvos no aparelho",
+      "short_name": "Salvos",
+      "description": "Abrir postos salvos neste dispositivo",
+      "url": "./postos?salvos=1",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
   ],
   "launch_handler": {
     "client_mode": "navigate-existing"
