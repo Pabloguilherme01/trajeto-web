@@ -285,7 +285,7 @@ export default function MobileCopilot() {
                   <p className="mt-0.5 truncate text-[0.68rem] text-[#A8C8CF]">{primary.detail}</p>
                 </div>
                 {primary.href ? (
-                  <a href={primary.href} onClick={() => rememberIntent(primary.intent ?? "route")} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.65rem] font-black text-[#0B1014] active:scale-[.98]">
+                  <a href={primary.href} onClick={() => rememberIntent(primary.intent ?? "route")} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#C7FF3C] px-3 text-[0.65rem] font-black text-[#0B1014] active:scale-[.98]">
                     {primary.label}<ArrowRight className="size-3.5" />
                   </a>
                 ) : (
@@ -298,7 +298,7 @@ export default function MobileCopilot() {
 
             <div className={`mt-3 grid gap-2 ${actions.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
               {actions.map(action => (
-                <a key={action.title} href={action.href} className="min-w-0 rounded-xl border border-white/10 bg-white/[0.035] p-3 text-left transition active:scale-[.98]">
+                <a key={action.title} href={action.href} className="min-h-16 min-w-0 rounded-xl border border-white/10 bg-white/[0.035] p-3 text-left transition active:scale-[.98]">
                   <action.icon className="size-4 text-[#3DE3FF]" />
                   <p className="mt-2 truncate text-xs font-extrabold text-white">{action.title}</p>
                   <p className="mt-0.5 truncate text-[0.58rem] text-[#7F919A]">{action.detail}</p>
@@ -311,11 +311,6 @@ export default function MobileCopilot() {
                 <button type="button" onClick={() => { setEconomyMode(false); setState(readState()); }} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/6 px-3 text-[0.6rem] font-bold text-[#A9DCE5]">
                   Economia ativa
                 </button>
-              )}
-              {offlineRoutes > 0 && (
-                <a href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#AABBC2]">
-                  <Bookmark className="size-3.5" /> {offlineRoutes} offline · {latestOfflineRoute ? formatAge(latestOfflineRoute.savedAt) : "prontas"}
-                </a>
               )}
               {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Sem conexão</span>}
             </div>
