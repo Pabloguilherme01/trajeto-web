@@ -217,11 +217,19 @@ export default function Planner() {
 
   const openDestinationNavigation = () => {
     if (!destination.trim()) return;
+    if (offline || loadedFromOffline && !navigator.onLine) {
+      setShareMessage("A navegação externa precisa de internet. A rota salva continua disponível neste aparelho.");
+      return;
+    }
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination.trim())}`, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
 
   const openNavigation = (stop: PlannedRoute["stops"][number]) => {
+    if (offline || loadedFromOffline && !navigator.onLine) {
+      setShareMessage("A navegação externa precisa de internet. A rota salva continua disponível neste aparelho.");
+      return;
+    }
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stop.name)}&destination_place_id=${encodeURIComponent(stop.placeId)}`, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
