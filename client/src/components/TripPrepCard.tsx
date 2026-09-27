@@ -42,6 +42,8 @@ export default function TripPrepCard() {
     };
   }, []);
 
+  const localRouteReady = savedRoutes > 0;
+  const hasTrip = Boolean(lastTrip);
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
   const smartChecked: Record<string, boolean> = {
     ...checked,
@@ -50,8 +52,6 @@ export default function TripPrepCard() {
   };
   const progress = defaults.filter(([id]) => smartChecked[id]).length;
   const ready = progress === defaults.length;
-  const localRouteReady = savedRoutes > 0;
-  const hasTrip = Boolean(lastTrip);
 
   return (
     <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] sm:p-6">
@@ -81,8 +81,8 @@ export default function TripPrepCard() {
       <div className="mt-4 space-y-2">
         {defaults.map(([id, label]) => (
           <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-[#D8E0E3] bg-[#FCFDFD] px-3 py-2 transition-colors has-[:checked]:border-[#326575]/40 has-[:checked]:bg-[#F2F5F6]">
-            <input type="checkbox" checked={Boolean(smartChecked[id])} onChange={() => toggle(id)} className="size-5 accent-[#326575]" />
-            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}</span>
+            <input type="checkbox" checked={Boolean(smartChecked[id])} onChange={() => toggle(id)} disabled={(id === "rota" && hasTrip) || (id === "offline" && localRouteReady)} className="size-5 accent-[#326575]" />
+            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}{((id === "rota" && hasTrip) || (id === "offline" && localRouteReady)) && <span className="ml-1 text-[0.58rem] font-bold text-[#326575]">(auto)</span>}</span>
           </label>
         ))}
       </div>
