@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPin, Route as RouteIcon, Share2, ShieldCheck, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
@@ -45,7 +46,7 @@ export default function Planner() {
     if (ogTitle) ogTitle.setAttribute("content", title);
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) ogDescription.setAttribute("content", description);
-    const shareUrl = `${window.location.origin}/planejar` + (origin.trim() && destination.trim() ? `?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}` : "");
+    const shareUrl = `${window.location.origin}${appUrl("/planejar")}` + (origin.trim() && destination.trim() ? `?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}` : "");
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute("content", shareUrl);
     const canonical = document.querySelector('link[rel="canonical"]');
@@ -134,7 +135,7 @@ export default function Planner() {
       <header className="border-b border-[#D8DED5] bg-[#14343C] text-white">
         <div className="container flex h-[72px] items-center justify-between">
           <Link href="/" className="group flex items-center gap-3" aria-label="Voltar para início">
-            <img className="size-9 rounded-lg bg-[#FFC928] p-1" src="/favicon.svg" alt="" />
+            <img className="size-9 rounded-lg bg-[#FFC928] p-1" src={appUrl("/favicon.svg")} alt="" />
             <span className="brand-wordmark text-xl text-white">trajeto</span>
             <span className="hidden border-l border-white/20 pl-3 text-[0.62rem] font-bold tracking-[0.18em] text-[#FFC928] sm:block">PLANEJADOR</span>
           </Link>
