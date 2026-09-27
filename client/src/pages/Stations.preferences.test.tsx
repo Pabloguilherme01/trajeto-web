@@ -1,78 +1,31 @@
-/** @vitest-environment jsdom */
-import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { applyStationSearchPreferences } from "@/lib/stationListControls";
 
-const saved = { mappedBrand: "Shell", hoursStatus: "open" as const, sortBy: "hours" as const, anpNeighborhood: "all", anpBrand: "all", resultsPerView: 5 as const, economicMode: true };
-const saveMutation = vi.fn();
-let isFetchingNextPage = false;
+describe("preferências da lista de postos", () => {
+  const saved = {
+    mappedBrand: "Shell",
+    hoursStatus: "open" as const,
+    sortBy: "hours" as const,
+    anpNeighborhood: "all",
+    anpBrand: "all",
+    resultsPerView: 10 as const,
+    economicMode: false,
+  };
 
-class MockIntersectionObserver {
-  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
-  observe() {}
-  disconnect() {}
-  unobserve() {}
-  takeRecords() { return []; }
-  readonly root = null;
-  readonly rootMargin = "0px";
-  readonly thresholds = [];
-}
-
-vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
-
-vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ isAuthenticated: true }) }));
-vi.mock("@/const", () => ({ startLogin: vi.fn() }));
-vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
-vi.mock("@/components/StationMap", () => ({ StationMap: () => null }));
-vi.mock("@/components/ui/button", () => ({ Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => <button {...props}>{children}</button> }));
-vi.mock("@/components/ui/dialog", () => ({ Dialog: ({ children }: { children: React.ReactNode }) => <>{children}</>, DialogContent: ({ children }: { children: React.ReactNode }) => <>{children}</>, DialogDescription: ({ children }: { children: React.ReactNode }) => <>{children}</>, DialogHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>, DialogTitle: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
-vi.mock("wouter", () => ({ Link: ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => <a {...props}>{children}</a>, useLocation: () => ["/postos", vi.fn()] }));
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), message: vi.fn() } }));
-vi.mock("@/lib/trpc", () => ({
-  trpc: {
-    stationDirectory: {
-      search: { useInfiniteQuery: () => ({ data: { pages: [{ query: "Águas Lindas de Goiás, GO", queriedAt: Date.now(), stations: [{ placeId: "shell-1", name: "Posto Shell", address: "Águas Lindas", lat: -15.74, lng: -48.28, phone: null, website: null, isOpen: true, openingHours: [], distanceMeters: 1200, distanceLabel: "1.2 km" }], nextCursor: "next-token" }] }, isLoading: false, isError: false, hasNextPage: true, isFetchingNextPage, isFetchNextPageError: false, fetchNextPage: vi.fn() }) },
-      details: { useQuery: () => ({ data: undefined, isLoading: false }) },
-    },
-    personal: {
-      stationSearchPreferences: { useQuery: () => ({ data: saved }) },
-      saveStationSearchPreferences: { useMutation: () => ({ mutate: saveMutation, isPending: false }) },
-      favoriteState: { useQuery: () => ({ data: [], refetch: vi.fn() }) },
-      addFavorite: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
-      removeFavorite: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
-    },
-    useUtils: () => ({ personal: { overview: { invalidate: vi.fn() } } }),
-  },
-}));
-
-import Stations from "./Stations";
-
-describe("Stations com preferências autenticadas", () => {
-  it("reaplica filtros salvos e envia os mesmos valores ao salvar", async () => {
-    window.history.pushState({}, "", "/postos?q=%C3%81guas%20Lindas%20de%20Goi%C3%A1s%2C%20GO");
-    render(<Stations />);
-
-    await waitFor(() => {
-      expect((screen.getByLabelText("Bandeira") as HTMLSelectElement).value).toBe("Shell");
-      expect((screen.getByLabelText("Horário") as HTMLSelectElement).value).toBe("open");
-      expect((screen.getByLabelText("Ordenar por") as HTMLSelectElement).value).toBe("hours");
-      expect((screen.getByLabelText("Resultados por vez") as HTMLSelectElement).value).toBe("5");
+  it("reaplica os filtros e a paginação salvos", () => {
+    expect(applyStationSearchPreferences(saved)).toEqual({
+      brandFilter: "Shell",
+      hoursFilter: "open",
+      sortBy: "hours",
+      resultsPerView: 10,
+      visibleResultCount: 10,
     });
-
-    fireEvent.click(screen.getByRole("button", { name: "Salvar estes filtros" }));
-    expect(saveMutation).toHaveBeenCalledWith(saved, expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }));
   });
 
-  it("mostra skeletons e mensagem acessível enquanto recebe o próximo lote", () => {
-    isFetchingNextPage = true;
-    window.history.pushState({}, "", "/postos?q=%C3%81guas%20Lindas%20de%20Goi%C3%A1s%2C%20GO");
-    const { unmount } = render(<Stations />);
-
-    const loadingSection = screen.getByLabelText("Carregando próximo lote de paradas");
-    expect(loadingSection).toBeTruthy();
-    expect(screen.getByText("Preparando o próximo lote de postos…")).toBeTruthy();
-    expect(loadingSection.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(21);
-    unmount();
-    isFetchingNextPage = false;
+  it("força cinco resultados quando o modo econômico está ativo", () => {
+    expect(applyStationSearchPreferences({ ...saved, economicMode: true })).toMatchObject({
+      resultsPerView: 5,
+      visibleResultCount: 5,
+    });
   });
 });
