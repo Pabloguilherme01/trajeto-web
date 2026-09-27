@@ -18,6 +18,66 @@ A plataforma começa pública e simples: o usuário informa uma cidade, bairro, 
 
 O foco inicial é o corredor **Águas Lindas de Goiás ↔ Distrito Federal**. A expansão para outros corredores deve acontecer somente quando houver cobertura de dados e uso real.
 
+## Nova narrativa de produto
+
+O Trajeto evolui de uma ferramenta para encontrar postos para um **copiloto de deslocamento**.
+
+A promessa passa a ser:
+
+> **Decida onde parar. Saiba por onde seguir.**
+
+O produto deve reduzir o número de decisões durante uma viagem e manter a próxima ação pronta no celular.
+
+### Loop principal
+
+**Detectar → Decidir → Navegar → Lembrar → Compartilhar → Reutilizar**
+
+- Detectar o contexto disponível no aparelho, como destino recorrente, última viagem, último posto, conexão e disponibilidade offline.
+- Decidir com contexto de distância, desvio, preço de referência e origem dos dados.
+- Navegar por Google Maps ou Waze quando o usuário escolher.
+- Lembrar rotas, destinos e preferências de uso recorrente localmente.
+- Compartilhar a decisão, não apenas um link ou nome de posto.
+- Reutilizar o que já funcionou na próxima viagem.
+
+### Objetivos
+
+1. Tornar a primeira decisão útil possível em poucos toques.
+2. Transformar uso ocasional em hábito de viagem recorrente.
+3. Preservar transparência entre dados oficiais, dados de terceiros e estimativas.
+4. Funcionar bem com conexão lenta, pouca bateria e períodos sem internet.
+5. Criar compartilhamento natural de resultados concretos, especialmente rotas e decisões de parada.
+6. Manter cadastro opcional e usar armazenamento local quando isso for suficiente.
+
+### Recursos estratégicos
+
+- **Próxima ação:** uma ação principal contextual em vez de um painel de funcionalidades.
+- **Destinos inteligentes:** Casa, Trabalho e Destino com frequência e recência local.
+- **Painel de viagem:** última viagem, último posto, rotas offline, economia e estado de conexão.
+- **Perfil local do veículo:** consumo, combustível, tanque e autonomia estimada sem exigir login.
+- **Kit de viagem:** checklist automático para saber se a viagem está preparada.
+- **Decisão compartilhável:** compartilhamento com posto, contexto, preço de referência, desvio e justificativa.
+- **Atalhos adaptativos:** o acesso rápido prioriza o comportamento recorrente do aparelho.
+- **PWA e offline:** continuidade do fluxo mesmo quando serviços externos não estão disponíveis.
+- **Navegação externa:** Google Maps e Waze como destinos de execução, sem tentar substituir mapas.
+
+### Loop de crescimento por utilidade
+
+O Trajeto não deve depender de gamificação vazia.
+
+O mecanismo de crescimento é:
+
+**decisão útil → compartilhamento → descoberta → primeira consulta → salvamento → retorno**
+
+Uma página compartilhável deve resolver uma pergunta real, como:
+
+- onde parar neste caminho;
+- quanto vou desviar;
+- qual parada vale considerar;
+- qual rota já está salva;
+- como abrir a navegação.
+
+Cada recurso novo deve economizar **tempo, toques, dados ou dinheiro**. Recursos que não melhoram uma decisão concreta ficam fora do fluxo principal.
+
 ## O que o usuário ganha
 
 - encontra postos sem precisar abrir várias fontes;
