@@ -57,7 +57,7 @@ export default function MobileTripShortcuts() {
       <div>
         <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Atalhos pessoais</p>
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
-        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p>
+        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p><div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]"><LocateFixed className="size-3.5 text-[#326575]" /> Use “Daqui” para transformar o destino em uma rota com sua posição atual.</div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {(["casa", "trabalho", "outro"] as const).map(id => {
