@@ -21,7 +21,7 @@ export type MobileStation = {
 const FAVORITES_KEY = "trajeto-mobile-station-favorites";
 const CACHE_KEY = "trajeto-mobile-station-cache";
 const MAX_FAVORITES = 20;
-const MAX_CACHED = 30;\nconst CACHE_RETENTION_MS = 24 * 60 * 60 * 1000;
+const MAX_CACHED = 30;const CACHE_RETENTION_MS = 24 * 60 * 60 * 1000;
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -72,7 +72,7 @@ export function getCachedStations(query: string, lat?: number, lng?: number): St
     item.query.trim().toLocaleLowerCase("pt-BR") === normalized &&
     (locationKey === "" ? item.lat == null && item.lng == null : item.lat != null && item.lng != null && `${item.lat.toFixed(4)},${item.lng.toFixed(4)}` === locationKey)
   ) as StationCache | undefined;
-  if (!match || !Array.isArray(match.stations)) return null;\n  const savedAt = Date.parse(match.savedAt);\n  if (!Number.isFinite(savedAt) || Date.now() - savedAt > CACHE_RETENTION_MS) return null;\n  return match;
+  if (!match || !Array.isArray(match.stations)) return null;  const savedAt = Date.parse(match.savedAt);  if (!Number.isFinite(savedAt) || Date.now() - savedAt > CACHE_RETENTION_MS) return null;  return match;
 }
 
 export function cacheStations(query: string, stations: MobileStation[], lat?: number, lng?: number) {
