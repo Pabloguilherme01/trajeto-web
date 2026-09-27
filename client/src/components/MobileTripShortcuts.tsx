@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Home, MapPin, Plus, Trash2 } from "lucide-react";
+import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -40,7 +40,7 @@ export default function MobileTripShortcuts() {
   };
 
   return (
-    <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] sm:p-6">
+    <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] shadow-[0_12px_35px_rgba(11,16,20,.06)] sm:p-6">
       <div>
         <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Atalhos pessoais</p>
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
@@ -54,9 +54,9 @@ export default function MobileTripShortcuts() {
             <div key={id} className="rounded-2xl border border-[#D8E0E3] p-3">
               {place ? (
                 <>
-                  <button type="button" onClick={() => open(place)} className="flex min-h-11 w-full items-center gap-2 text-left">
+                  <button type="button" onClick={() => open(place)} className="group flex min-h-12 w-full items-center gap-2 rounded-xl text-left active:scale-[.99]">
                     <Icon className="size-4 text-[#326575]" />
-                    <span className="min-w-0"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span>
+                    <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><Navigation className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
                   <button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="mt-1 inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button>
                 </>
