@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { listOfflineRoutes } from "@/lib/offlineStore";
+import { findOfflineRouteByDestination, listOfflineRoutes } from "@/lib/offlineStore";
 import {
   getDestinationUsage,
   getFavoriteDestination,
@@ -62,8 +62,7 @@ export default function MobileTripShortcuts() {
     rememberUsage(place);
     if (!navigator.onLine) {
       void listOfflineRoutes().then(routes => {
-        const target = place.value.trim().toLocaleLowerCase("pt-BR");
-        const saved = routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target);
+        const saved = findOfflineRouteByDestination(routes, place.value);
         if (saved) {
           setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination));
           return;
@@ -106,8 +105,7 @@ export default function MobileTripShortcuts() {
 
     if (!navigator.onLine) {
       void listOfflineRoutes().then(routes => {
-        const target = place.value.trim().toLocaleLowerCase("pt-BR");
-        const saved = routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target);
+        const saved = findOfflineRouteByDestination(routes, place.value);
         if (saved) {
           setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination));
           return;
