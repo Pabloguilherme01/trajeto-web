@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
-import { getLastTrip } from "@/lib/mobilePreferences";
+import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
@@ -21,10 +21,12 @@ export default function MobileQuickActions() {
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     window.addEventListener("focus", refreshTrip);
+    window.addEventListener(mobilePreferenceEvent, refreshTrip);
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("focus", refreshTrip);
+      window.removeEventListener(mobilePreferenceEvent, refreshTrip);
     };
   }, []);
 
