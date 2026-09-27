@@ -18,6 +18,7 @@ export default function MobileTravelHub() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [recentSearch, setRecentSearch] = useState<string | null>(() => getRecentSearches()[0] ?? null);
   const [lastStation, setLastStation] = useState(() => getLastStation());
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -88,8 +89,9 @@ export default function MobileTravelHub() {
     setLocating(true);
     navigator.geolocation.getCurrentPosition(position => {
       setLocating(false);
+      setStatusMessage("Localização encontrada. Abrindo postos próximos.");
       setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
-    }, () => setLocating(false), { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
+    }, () => { setLocating(false); setStatusMessage("Não foi possível obter a localização. Você pode continuar com sua última busca."); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
 
   return (
@@ -135,6 +137,7 @@ export default function MobileTravelHub() {
             </div>
             <p className="mt-2 text-[0.6rem] leading-relaxed text-[#7F919A]">Conexão, rota local, economia e acesso rápido avaliados neste aparelho.</p>
           </div>
+          {statusMessage && <p role="status" aria-live="polite" className="mt-3 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[0.05] px-3 py-2 text-[0.62rem] font-bold text-[#C9F7FF]">{statusMessage}</p>}
           <div className="mt-4 flex flex-wrap gap-2"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${online ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/8 text-[#DFFF9D]" : "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]"}`}><Signal className="size-3" /> {online ? (networkType ? networkType : "online") : "offline"}</span>{battery !== null && <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.58rem] font-bold ${battery <= 20 ? "border-[#FFB86B]/30 bg-[#FFB86B]/8 text-[#FFD49C]" : "border-white/10 bg-white/[0.03] text-[#A9BAC2]"}`}><Battery className="size-3" /> {battery}%</span>}<span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[0.58rem] font-bold text-[#A9BAC2]"><ShieldCheck className="size-3 text-[#BDA5FF]" /> {isStandalone ? "app instalado" : "web app"}</span></div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button type="button" onClick={() => lastTrip ? setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)) : recentSearch ? setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(recentSearch)) : locate()} className="min-h-11 rounded-xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[0.06] px-3 text-left text-xs font-extrabold text-[#DFFF9D] transition active:scale-[.98]">
