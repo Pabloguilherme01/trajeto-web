@@ -239,7 +239,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           </div>
         </section>
 
-        {planned && <MobileRouteDock distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveOfflineRoute({
+        {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveOfflineRoute({
   id: `${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`,
   origin: origin.trim(),
   destination: destination.trim(),
