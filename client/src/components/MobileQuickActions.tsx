@@ -15,6 +15,7 @@ export default function MobileQuickActions() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
   const [shareLabel, setShareLabel] = useState("Compartilhar");
+  const [dismissedStatus, setDismissedStatus] = useState(false);
 
   useEffect(() => {
     const onOnline = () => { setOnline(true); vibration(8); };
@@ -31,6 +32,13 @@ export default function MobileQuickActions() {
       window.removeEventListener(mobilePreferenceEvent, refreshTrip);
     };
   }, []);
+
+  useEffect(() => {
+    if (!statusMessage) return;
+    setDismissedStatus(false);
+    const timer = window.setTimeout(() => setDismissedStatus(true), 4000);
+    return () => window.clearTimeout(timer);
+  }, [statusMessage]);
 
   const locate = () => {
     if (!navigator.geolocation || locating) return;
@@ -101,7 +109,7 @@ export default function MobileQuickActions() {
           })}
         </div>
         {!online && <p role="status" className="flex items-center justify-center gap-1 px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-[#FFD49C]"><WifiOff className="size-3" /> Offline · ações salvas continuam disponíveis</p>}
-        {statusMessage && <p role="status" aria-live="polite" className="px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-white/70">{statusMessage}</p>}
+        {statusMessage && !dismissedStatus && <p role="status" aria-live="polite" className="px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-white/70">{statusMessage}</p>}
       </div>
     </nav>
   );
