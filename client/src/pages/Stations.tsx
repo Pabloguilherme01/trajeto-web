@@ -71,13 +71,16 @@ export default function Stations() {
 
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine);
+    const refreshCache = () => setCachedStationSnapshot(getCachedStations(query, locationParams.lat, locationParams.lng));
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
+    window.addEventListener("focus", refreshCache);
     return () => {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
+      window.removeEventListener("focus", refreshCache);
     };
-  }, []);
+  }, [query, locationParams.lat, locationParams.lng]);
 
   useEffect(() => {
     const current = initialQuery();
