@@ -7,6 +7,7 @@ import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
+import InstallAppPrompt from "./components/InstallAppPrompt";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -70,6 +71,7 @@ export default function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
+          <InstallAppPrompt />
           <AuthReturnHandler />
           <Router />
         </TooltipProvider>
