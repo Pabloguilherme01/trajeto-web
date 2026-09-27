@@ -20,6 +20,7 @@ export default function MobileTravelMode() {
       } catch { setActive(false); try { localStorage.setItem("trajeto-travel-mode", "0"); } catch {} }
     };
     document.addEventListener("visibilitychange", reacquire);
+    void reacquire();
     return () => {
       document.removeEventListener("visibilitychange", reacquire);
       void lockRef.current?.release();
