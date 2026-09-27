@@ -165,6 +165,7 @@ export default function MobileCopilot() {
         detail: `${state.lastTrip.origin} → ${state.lastTrip.destination}`,
         label: "Retomar",
         href: appUrl("/planejar") + "?origem=" + encodeURIComponent(state.lastTrip.origin) + "&destino=" + encodeURIComponent(state.lastTrip.destination),
+        intent: "route",
         icon: Route,
       };
     }
