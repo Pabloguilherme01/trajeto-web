@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getEconomyMode, getLastTrip, getRecentSearches, setEconomyMode, mobilePreferenceEvent } from "@/lib/mobilePreferences";
-import { listOfflineRoutes } from "@/lib/offlineStore";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
 export default function MobileTravelHub() {
   const [, setLocation] = useLocation();
@@ -35,6 +35,7 @@ export default function MobileTravelHub() {
     };
     window.addEventListener("focus", refreshRoutes);
     window.addEventListener(mobilePreferenceEvent, refreshRoutes);
+    window.addEventListener(offlineRouteEvent, refreshRoutes);
 
     let mounted = true;
     void listOfflineRoutes().then(routes => { if (mounted) setSavedRoutes(routes.length); }).catch(() => {});
@@ -64,6 +65,7 @@ export default function MobileTravelHub() {
       window.removeEventListener("offline", update);
       window.removeEventListener("focus", refreshRoutes);
       window.removeEventListener(mobilePreferenceEvent, refreshRoutes);
+      window.removeEventListener(offlineRouteEvent, refreshRoutes);
       connection?.removeEventListener?.("change", updateNetwork);
       batteryDevice?.removeEventListener("levelchange", updateBattery);
       if (batteryDevice && updateBatterySaver) batteryDevice.removeEventListener("levelchange", updateBatterySaver);
