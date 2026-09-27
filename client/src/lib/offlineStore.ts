@@ -1,6 +1,11 @@
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 1;
 const STORE = "routes";
+const OFFLINE_ROUTE_EVENT = "trajeto-offline-route-change";
+
+function notifyOfflineRouteChange() {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(OFFLINE_ROUTE_EVENT));
+}
 
 type OfflineRoute = {
   id: string;
@@ -32,6 +37,7 @@ export async function saveOfflineRoute(route: OfflineRoute) {
     tx.onerror = () => reject(tx.error);
   });
   db.close();
+  notifyOfflineRouteChange();
 }
 
 export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
@@ -57,6 +63,7 @@ export async function removeOfflineRoute(id: string) {
     tx.onerror = () => reject(tx.error);
   });
   db.close();
+  notifyOfflineRouteChange();
 }
 
 export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
@@ -71,3 +78,5 @@ export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> 
   db.close();
   return route;
 }
+
+export const offlineRouteEvent = OFFLINE_ROUTE_EVENT;
