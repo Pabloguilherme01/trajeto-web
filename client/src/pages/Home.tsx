@@ -53,7 +53,7 @@ export default function Home() {
             <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" />
             <span className="brand-wordmark text-xl text-white">trajeto</span>
           </a>
-          <nav className="flex items-center gap-2 text-xs font-bold">
+          <nav className="hidden items-center gap-2 text-xs font-bold sm:flex">
             <a href={appUrl("/ajuda")} className="rounded-full px-3 py-2 text-[#9FB0B8] transition hover:bg-white/5 hover:text-white">Como funciona</a>
             <a href={appUrl("/planejar")} className="rounded-full bg-[#C7FF3C] px-4 py-2.5 text-[#0B1014] transition hover:bg-white">Planejar rota</a>
           </nav>
@@ -76,19 +76,19 @@ export default function Home() {
         </section>
 
         <section className="border-b border-white/8">
-          <div className="container grid gap-12 py-14 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
+          <div className="container grid gap-7 py-8 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/8 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#D9FF91]">
                 <Navigation className="size-3.5" /> Águas Lindas · DF · Entorno
               </div>
-              <h1 className="mt-6 font-display text-[clamp(3.3rem,7vw,7rem)] font-semibold leading-[0.84] tracking-[-0.075em] text-white">
+              <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
                 Pare melhor.<br /><span className="text-[#C7FF3C]">Chegue melhor.</span>
               </h1>
-              <p className="mt-7 max-w-xl text-base leading-relaxed text-[#B7C4CA] sm:text-lg">
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#B7C4CA] sm:mt-7 sm:text-lg">
                 Encontre onde parar, compare distância e desvio e planeje a próxima viagem com referências de combustível. Sem cadastro para começar.
               </p>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
                 <div className="border border-white/10 bg-white/[0.035] p-4">
                   <MapPinned className="size-5 text-[#3DE3FF]" />
                   <p className="mt-4 text-sm font-extrabold text-white">Postos reais</p>
@@ -107,7 +107,7 @@ export default function Home() {
               </div>
             </div>
 
-            <section className="rounded-[1.75rem] border border-white/10 bg-[#121B22] p-5 shadow-[0_24px_80px_rgba(0,0,0,.3)] sm:p-7" aria-labelledby="search-title">
+            <section className="rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Comece aqui</p>
@@ -116,7 +116,7 @@ export default function Home() {
                 <Fuel className="size-6 text-[#C7FF3C]" />
               </div>
 
-              <form onSubmit={submitSearch} className="mt-7" noValidate>
+              <form onSubmit={submitSearch} className="mt-5" noValidate>
                 <label htmlFor="home-search" className="text-xs font-bold text-[#A9BAC2]">Cidade, bairro, posto ou destino</label>
                 <div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]">
                   <Search className="ml-3 mt-3 size-5 shrink-0 text-[#3DE3FF]" />
@@ -127,7 +127,7 @@ export default function Home() {
                 </div>
               </form>
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF]">
                   <LocateFixed className="size-4 text-[#3DE3FF]" /> Usar minha localização
                 </button>
