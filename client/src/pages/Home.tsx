@@ -15,6 +15,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
   const [activePresetId, setActivePresetId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
@@ -31,11 +32,12 @@ export default function Home() {
   };
 
   const useMyLocation = () => {
-    if (!navigator.geolocation) { setSearchError("Seu navegador não oferece localização."); return; }
+    if (!navigator.geolocation || locating) { if (!navigator.geolocation) setSearchError("Seu navegador não oferece localização."); return; }
     setSearchError(null);
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      position => setLocation(`${appUrl("/postos")}?lat=${position.coords.latitude}&lng=${position.coords.longitude}&q=${encodeURIComponent("postos próximos")}`),
-      () => setSearchError("Não foi possível obter sua localização. Verifique a permissão do navegador."),
+      position => { setLocating(false); setLocation(`${appUrl("/postos")}?lat=${position.coords.latitude}&lng=${position.coords.longitude}&q=${encodeURIComponent("postos próximos")}`); },
+      () => { setLocating(false); setSearchError("Não foi possível obter sua localização. Verifique a permissão do navegador."); },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
   };
@@ -128,8 +130,8 @@ export default function Home() {
               </form>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF]">
-                  <LocateFixed className="size-4 text-[#3DE3FF]" /> Usar minha localização
+                <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF] active:scale-[.98]" disabled={locating}>
+                  <LocateFixed className="size-4 text-[#3DE3FF]" /> {locating ? "Localizando…" : "Usar minha localização"}
                 </button>
                 <a href={appUrl("/planejar")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#C7FF3C]">
                   <Navigation className="size-4 text-[#C7FF3C]" /> Planejar viagem
