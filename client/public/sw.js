@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v3";
+const VERSION = "trajeto-v4";
 const STATIC_CACHE = `${VERSION}-static`;
 const DATA_CACHE = `${VERSION}-data`;
 
@@ -8,7 +8,6 @@ const STATIC_SHELL = [
   "./site.webmanifest",
   "./favicon.svg",
   "./robots.txt",
-  "./favicon.svg",
 ];
 
 self.addEventListener("install", event => {
@@ -35,14 +34,11 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  // Never fabricate API responses. Keep the last successful GET response available
-  // offline, and let mutations fail normally when no network exists.
   if (url.pathname.includes("/api/")) {
     event.respondWith(networkFirst(request, DATA_CACHE));
     return;
   }
 
-  // App shell and assets use cache-first, with a network fallback for first visit.
   event.respondWith(cacheFirst(request, STATIC_CACHE));
 });
 
