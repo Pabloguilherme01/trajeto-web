@@ -145,7 +145,7 @@ export default function MobileTravelHub() {
                 <p className="mt-1 text-[0.62rem] leading-relaxed text-[#9EC8D2]">{!online && savedRoutes > 0 ? "O conteúdo local continua disponível neste aparelho." : batterySaver && !economyMode ? "Reduza consultas e carregamento de dados no celular." : lastTrip ? lastTrip.destination : lastStation ? lastStation.name : recentSearch ?? "Use o GPS para começar."}</p>
               </div>
               <button type="button" onClick={() => {
-                if (!online && savedRoutes > 0) return setLocation(appUrl("/postos") + "?salvos=1");
+                if (!online && savedRoutes > 0) return setLocation(appUrl("/planejar") + "?salvos=1");
                 if (batterySaver && !economyMode) { setEconomyMode(true); setEconomyModeState(true); return; }
                 if (lastTrip) return setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
                 if (lastStation) return setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(lastStation.query) + "&station=" + encodeURIComponent(lastStation.placeId));
@@ -206,20 +206,20 @@ export default function MobileTravelHub() {
             <button type="button" onClick={() => lastTrip ? setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)) : recentSearch ? setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(recentSearch)) : locate()} className="min-h-11 rounded-xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[0.06] px-3 text-left text-xs font-extrabold text-[#DFFF9D] transition active:scale-[.98]">
               <Navigation className="mr-2 inline size-4 text-[#C7FF3C]" /> {lastTrip ? "Retomar viagem" : recentSearch ? "Reabrir busca" : "Começar agora"}
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/postos") + "?salvos=1")} className="min-h-11 rounded-xl border border-white/10 bg-white/[0.035] px-3 text-left text-xs font-bold text-white transition active:scale-[.98]">
+            <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="min-h-11 rounded-xl border border-white/10 bg-white/[0.035] px-3 text-left text-xs font-bold text-white transition active:scale-[.98]">
               <Bookmark className="mr-2 inline size-4 text-[#3DE3FF]" /> Rotas e locais salvos
             </button>
           </div>
 
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <button type="button" onClick={() => setLocation(appUrl("/postos") + "?salvos=1")} className="rounded-xl border border-white/6 bg-white/[0.035] p-3 text-left transition active:scale-[.98]"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></button>
+            <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="rounded-xl border border-white/6 bg-white/[0.035] p-3 text-left transition active:scale-[.98]"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Rotas salvas</p><p className="text-sm font-extrabold text-white">{savedRoutes}</p></button>
             <button type="button" onClick={() => { const next = !economyMode; setEconomyMode(next); setEconomyModeState(next); setAutoEconomyApplied(false); }} className="rounded-xl bg-white/[0.04] p-3 text-left transition active:scale-[.98]"><Gauge className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Economia</p><p className="text-sm font-extrabold text-white">{economyMode ? "Ativa" : "Normal"}</p></button>
             <div className="rounded-xl bg-white/[0.04] p-3"><Compass className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.65rem] text-[#7F919A]">Modo</p><p className="text-sm font-extrabold text-white">{online ? "Online" : "Offline"}</p></div>
           </div>
 
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]" disabled={locating}><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />{locating ? "Localizando…" : "Perto de mim"}</button>
-            <button type="button" onClick={() => { if (!lastStation) return setLocation(appUrl("/postos") + "?salvos=1"); const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(lastStation.address); window.open(url, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] px-2 text-xs font-bold text-white transition active:scale-[.98]"><Bookmark className="mr-2 inline size-4 text-[#3DE3FF]" />{lastStation ? "Navegar ao último posto" : "Salvos"}</button>
+            <button type="button" onClick={() => { if (!lastStation) return setLocation(appUrl("/planejar") + "?salvos=1"); const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(lastStation.address); window.open(url, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] px-2 text-xs font-bold text-white transition active:scale-[.98]"><Bookmark className="mr-2 inline size-4 text-[#3DE3FF]" />{lastStation ? "Navegar ao último posto" : "Salvos"}</button>
             <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014] shadow-[0_8px_20px_rgba(199,255,60,.12)] transition active:scale-[.98]"><Navigation className="mr-2 inline size-4" />Planejar</button>
           </div>
         </div>
