@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { listOfflineRoutes, removeOfflineRoute } from "@/lib/offlineStore";
+import { listOfflineRoutes, removeOfflineRoute, offlineRouteEvent } from "@/lib/offlineStore";
 
 type Item = { id: string; origin: string; destination: string; savedAt: string };
 
@@ -20,7 +20,11 @@ export default function RecentTripsCard() {
     })));
   };
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+    window.addEventListener(offlineRouteEvent, refresh);
+    return () => window.removeEventListener(offlineRouteEvent, refresh);
+  }, []);
 
   const openFromHere = (item: Item) => {
     if (!navigator.geolocation || locating) return;
