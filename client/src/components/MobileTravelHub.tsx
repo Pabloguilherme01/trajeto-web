@@ -30,15 +30,15 @@ export default function MobileTravelHub() {
       getBattery?: () => Promise<{ level: number; addEventListener: (type: string, listener: () => void) => void; removeEventListener: (type: string, listener: () => void) => void }>;
     };
     let batteryDevice: Awaited<ReturnType<NonNullable<typeof nav.getBattery>>> | undefined;
+    let updateBatterySaver: (() => void) | undefined;
     const updateBattery = () => { if (batteryDevice && mounted) setBattery(Math.round(batteryDevice.level * 100)); };
     if (nav.getBattery) void nav.getBattery().then(device => {
       batteryDevice = device;
       updateBattery();
       setBatterySaver(device.level <= 0.2);
-      const updateBatterySaver = () => setBatterySaver(device.level <= 0.2);
+      updateBatterySaver = () => setBatterySaver(device.level <= 0.2);
       device.addEventListener("levelchange", updateBattery);
       device.addEventListener("levelchange", updateBatterySaver);
-      batteryDevice = { ...device, removeEventListener: (type: string, listener: () => void) => device.removeEventListener(type, listener) };
     }).catch(() => {});
 
     return () => {
@@ -47,6 +47,7 @@ export default function MobileTravelHub() {
       window.removeEventListener("offline", update);
       window.removeEventListener("focus", refreshRoutes);
       batteryDevice?.removeEventListener("levelchange", updateBattery);
+      if (batteryDevice && updateBatterySaver) batteryDevice.removeEventListener("levelchange", updateBatterySaver);
     };
   }, []);
 
