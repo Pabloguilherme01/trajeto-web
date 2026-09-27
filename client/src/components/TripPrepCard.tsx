@@ -72,6 +72,7 @@ export default function TripPrepCard() {
 
   const localRouteReady = Boolean(latestOfflineRoute);
   const hasTrip = Boolean(lastTrip);
+  const activeOfflineDestination = !online && latestOfflineRoute ? latestOfflineRoute.destination : null;
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
   const smartChecked: Record<string, boolean> = {
     ...checked,
@@ -117,7 +118,7 @@ export default function TripPrepCard() {
         <div className={`rounded-xl border p-3 ${hasTrip ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
           <Navigation className="size-4 text-[#326575]" />
           <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#617179]">Próxima viagem</p>
-          <p className="mt-1 truncate text-xs font-extrabold">{hasTrip ? lastTrip?.destination : latestOfflineRoute?.destination ?? "Nenhuma definida"}</p>
+          <p className="mt-1 truncate text-xs font-extrabold">{activeOfflineDestination ?? (hasTrip ? lastTrip?.destination : "Nenhuma definida")}</p>
         </div>
         <div className={`rounded-xl border p-3 ${localRouteReady ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
           <Smartphone className="size-4 text-[#326575]" />
@@ -135,8 +136,8 @@ export default function TripPrepCard() {
         <div className="mt-2 space-y-2">
         {defaults.map(([id, label]) => (
           <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-[#D8E0E3] bg-[#FCFDFD] px-3 py-2 transition-colors has-[:checked]:border-[#326575]/40 has-[:checked]:bg-[#F2F5F6]">
-            <input type="checkbox" checked={Boolean(smartChecked[id])} onChange={() => toggle(id)} disabled={(id === "rota" && hasTrip) || (id === "offline" && localRouteReady)} className="size-5 accent-[#326575]" />
-            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}{((id === "rota" && hasTrip) || (id === "offline" && localRouteReady)) && <span className="ml-1 text-[0.58rem] font-bold text-[#326575]">(auto)</span>}</span>
+            <input type="checkbox" checked={Boolean(smartChecked[id])} onChange={() => toggle(id)} disabled={(id === "rota" && localRouteReady) || (id === "offline" && localRouteReady)} className="size-5 accent-[#326575]" />
+            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}{((id === "rota" && localRouteReady) || (id === "offline" && localRouteReady)) && <span className="ml-1 text-[0.58rem] font-bold text-[#326575]">(auto)</span>}</span>
           </label>
         ))}
         </div>
