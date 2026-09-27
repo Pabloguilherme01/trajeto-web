@@ -17,4 +17,11 @@ describe("stationSearchCache", () => {
     expect(getCachedStationSearch<{ stations: number }>("aguas lindas de goias", 1_001)).toEqual({ stations: 20 });
     expect(getCachedStationSearch("Águas Lindas de Goiás", 61_000)).toBeNull();
   });
+
+  it("isola resultados de GPS por localização aproximada", () => {
+    cacheStationSearch("postos", { marker: "A" }, 1_000, -15.83, -48.95);
+    cacheStationSearch("postos", { marker: "B" }, 1_000, -15.84, -48.96);
+    expect(getCachedStationSearch<{ marker: string }>("postos", -15.83, -48.95, 1_001)).toEqual({ marker: "A" });
+    expect(getCachedStationSearch<{ marker: string }>("postos", -15.84, -48.96, 1_001)).toEqual({ marker: "B" });
+  });
 });
