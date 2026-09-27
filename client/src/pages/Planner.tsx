@@ -11,6 +11,7 @@ import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
 import { saveOfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
+import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -28,8 +29,8 @@ function RouteResultSkeleton() {
 
 export default function Planner() {
   const [, setLocation] = useLocation();
-  const [origin, setOrigin] = useState(() => new URLSearchParams(window.location.search).get("origem") || "");
-  const [destination, setDestination] = useState(() => new URLSearchParams(window.location.search).get("destino") || "");
+  const [origin, setOrigin] = useState(() => new URLSearchParams(window.location.search).get("origem") || getLastTrip()?.origin || "");
+  const [destination, setDestination] = useState(() => new URLSearchParams(window.location.search).get("destino") || getLastTrip()?.destination || "");
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -118,7 +119,7 @@ export default function Planner() {
       setFormError("Sem internet: abra uma rota já salva neste aparelho. Uma rota nova precisa de conexão para calcular distância, trânsito e postos reais.");
       return;
     }
-    await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
+    rememberTrip(normalizedOrigin, normalizedDestination);\n    await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
   };
 
   const toggleFavorite = () => {
