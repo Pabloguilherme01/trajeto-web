@@ -1,4 +1,5 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
+import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import { ArrowRight, BadgeCheck, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset } from "lucide-react";
 import { useState, type FormEvent } from "react";
@@ -22,7 +23,7 @@ export default function Home() {
     }
     setSearchError(null);
     track("station_search", normalized);
-    setLocation(`/postos?region=${encodeURIComponent(presetId ?? "")}&q=${encodeURIComponent(normalized)}`);
+    setLocation(`${appUrl("/postos")}?region=${encodeURIComponent(presetId ?? "")}&q=${encodeURIComponent(normalized)}`);
   };
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -34,13 +35,13 @@ export default function Home() {
     <div className="min-h-screen overflow-x-hidden bg-[#0B1014] text-[#EAF0F2]">
       <header className="border-b border-white/8 bg-[#0B1014]">
         <div className="container flex h-[68px] items-center justify-between gap-4">
-          <a href="/" className="flex items-center gap-2.5" aria-label="Trajeto — início">
-            <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src="/favicon.svg" alt="" />
+          <a href={appUrl("/")} className="flex items-center gap-2.5" aria-label="Trajeto — início">
+            <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" />
             <span className="brand-wordmark text-xl text-white">trajeto</span>
           </a>
           <nav className="flex items-center gap-2 text-xs font-bold">
-            <a href="/ajuda" className="rounded-full px-3 py-2 text-[#9FB0B8] transition hover:bg-white/5 hover:text-white">Como funciona</a>
-            <a href="/planejar" className="rounded-full bg-[#C7FF3C] px-4 py-2.5 text-[#0B1014] transition hover:bg-white">Planejar rota</a>
+            <a href={appUrl("/ajuda")} className="rounded-full px-3 py-2 text-[#9FB0B8] transition hover:bg-white/5 hover:text-white">Como funciona</a>
+            <a href={appUrl("/planejar")} className="rounded-full bg-[#C7FF3C] px-4 py-2.5 text-[#0B1014] transition hover:bg-white">Planejar rota</a>
           </nav>
         </div>
       </header>
@@ -165,8 +166,8 @@ export default function Home() {
               <p className="mt-1 text-xs text-[#7F919A]">Compartilhe a página com quem faz esse caminho todos os dias.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <a href="/postos" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014]">Consultar postos <ArrowRight className="size-4" /></a>
-              <a href="/planejar" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-xs font-extrabold text-white">Planejar rota <Navigation className="size-4" /></a>
+              <a href={appUrl("/postos")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014]">Consultar postos <ArrowRight className="size-4" /></a>
+              <a href={appUrl("/planejar")} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-xs font-extrabold text-white">Planejar rota <Navigation className="size-4" /></a>
             </div>
           </div>
         </section>
@@ -175,7 +176,7 @@ export default function Home() {
       <footer className="border-t border-white/8 bg-[#070B0E] py-6">
         <div className="container flex flex-col gap-2 text-xs text-[#71828B] sm:flex-row sm:items-center sm:justify-between">
           <span>Trajeto · informação para quem se move no Entorno.</span>
-          <a href="/ajuda" className="hover:text-white">Como funciona e fontes</a>
+          <a href={appUrl("/ajuda")} className="hover:text-white">Como funciona e fontes</a>
         </div>
       </footer>
     </div>
