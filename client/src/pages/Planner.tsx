@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
-import { getOfflineRoute, offlineRouteId, saveOfflineRoute } from "@/lib/offlineStore";
+import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import MobileTravelMode from "@/components/MobileTravelMode";
@@ -41,6 +41,7 @@ export default function Planner() {
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [loadedFromOffline, setLoadedFromOffline] = useState(false);
   const [offlineSavedAt, setOfflineSavedAt] = useState<string | null>(null);
+  const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   
@@ -61,10 +62,25 @@ export default function Planner() {
   };
 
   useEffect(() => {
+    const loadOfflineRoute = () => {
+      void listOfflineRoutes()
+        .then(routes => setLatestOfflineRoute(routes[0] ?? null))
+        .catch(() => setLatestOfflineRoute(null));
+    };
     const update = () => setOffline(!navigator.onLine);
+    loadOfflineRoute();
+    window.addEventListener("focus", loadOfflineRoute);
+    window.addEventListener("online", loadOfflineRoute);
+    window.addEventListener("offline", loadOfflineRoute);
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
-    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+    return () => {
+      window.removeEventListener("focus", loadOfflineRoute);
+      window.removeEventListener("online", loadOfflineRoute);
+      window.removeEventListener("offline", loadOfflineRoute);
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
   }, []);
 
   useEffect(() => {
@@ -219,6 +235,10 @@ export default function Planner() {
     addFavorite.mutate({ placeId: selectedStop.placeId, stationName: selectedStop.name, stationAddress: selectedStop.address, lat: selectedStop.lat, lng: selectedStop.lng });
   };
   const useCurrentLocation = () => {
+    if (offline) {
+      setFormError("Sem internet: a localização ao vivo não está disponível. Abra uma rota salva para continuar.");
+      return;
+    }
     if (!navigator.geolocation || locatingOrigin) return;
     setLocatingOrigin(true);
     navigator.geolocation.getCurrentPosition(position => {
@@ -278,7 +298,20 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
       </header>
 
       <main className="container py-10 lg:py-14">
-        {offline && <section role="status" aria-live="polite" className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]"><WifiOff className="mt-0.5 size-4 shrink-0" /><p className="min-w-0 flex-1"><strong className="text-[#163840]">Modo offline.</strong> Continue uma rota salva neste aparelho. Novas rotas, trânsito e consultas de postos precisam de internet.</p><Link href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-[#163840] px-3 py-2 text-[0.62rem] font-extrabold text-white">Abrir salvos</Link></section>}
+        {offline && <section role="status" aria-live="polite" className="mb-6 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]">
+          <div className="flex items-start gap-3">
+            <WifiOff className="mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <strong className="text-[#163840]">Continue sem internet.</strong>
+              <p className="mt-1">{latestOfflineRoute ? latestOfflineRoute.origin + " → " + latestOfflineRoute.destination + " está pronta neste aparelho." : "Nenhuma rota salva foi encontrada neste aparelho."}</p>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            {latestOfflineRoute && <Link href={appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#163840] px-4 py-2 text-[0.65rem] font-extrabold text-white">Continuar última rota <ArrowRight className="size-3.5" /></Link>}
+            <Link href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#163840]/20 px-4 py-2 text-[0.65rem] font-extrabold text-[#163840]">Ver rotas salvas</Link>
+          </div>
+          <p className="mt-3 text-[0.68rem]">Novas rotas, trânsito, localização ao vivo e consultas de postos precisam de internet.</p>
+        </section>}
         <div className="mb-10 max-w-3xl">
           <p className="eyebrow">Rota com dados reais</p>
           <h1 className="font-display mt-4 text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.86] tracking-[-0.065em]">Escolha melhor<br /><span className="text-[#BA5B45]">antes de sair.</span></h1>
@@ -296,7 +329,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
                 <button type="button" onClick={() => { setOrigin(lastTrip.origin); setDestination(lastTrip.destination); setPlanned(null); setFormError(null); setShareMessage(null); }} className="min-h-10 shrink-0 rounded-xl bg-[#FFC928] px-3 text-[0.62rem] font-extrabold text-[#163840] active:scale-[.98]">Retomar</button>
               </div>
             </div>}
-            <div className="flex items-center justify-between gap-3"><label className="text-xs font-bold text-white/75" htmlFor="origin">Origem</label><button type="button" onClick={useCurrentLocation} disabled={locatingOrigin} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/15 px-2.5 text-[0.62rem] font-extrabold text-[#D9FF91] transition hover:border-[#FFC928] disabled:opacity-60"><LocateFixed className="size-3.5" />{locatingOrigin ? "Localizando…" : "Usar minha localização"}</button></div>
+            <div className="flex items-center justify-between gap-3"><label className="text-xs font-bold text-white/75" htmlFor="origin">Origem</label><button type="button" onClick={useCurrentLocation} disabled={locatingOrigin || offline} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/15 px-2.5 text-[0.62rem] font-extrabold text-[#D9FF91] transition hover:border-[#FFC928] disabled:opacity-60"><LocateFixed className="size-3.5" />{locatingOrigin ? "Localizando…" : "Usar minha localização"}</button></div>
             <div className="relative mt-2"><MapPin className="absolute left-0 top-3.5 size-4 text-[#FFC928]" /><input id="origin" required minLength={3} value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); setLoadedFromOffline(false); if (formError) setFormError(null); }} placeholder="Ex.: Brasília, DF ou use GPS" className="w-full border-b border-white/25 bg-transparent py-3 pl-7 text-base outline-none placeholder:text-white/35 focus:border-[#FFC928]" /></div>
             <div className="mt-3 flex justify-between gap-2">
               <button type="button" onClick={() => { setOrigin(""); setDestination(""); setPlanned(null); setFormError(null); setShareMessage(null); }} disabled={!origin.trim() && !destination.trim()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-bold text-white/55 transition hover:border-white/30 hover:text-white disabled:opacity-40">Limpar</button>
