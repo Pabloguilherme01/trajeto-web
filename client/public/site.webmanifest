@@ -48,7 +48,7 @@
       "name": "Salvos no aparelho",
       "short_name": "Salvos",
       "description": "Abrir locais e recursos salvos neste dispositivo",
-      "url": "./postos?salvos=1",
+      "url": "./planejar?salvos=1",
       "id": "salvos",
       "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
