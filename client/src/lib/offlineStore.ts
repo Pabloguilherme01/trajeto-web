@@ -2,6 +2,9 @@ const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
 const OFFLINE_ROUTE_EVENT = "trajeto-offline-route-change";
+const MAX_SAVED_ROUTES = 30;
+const MAX_TEXT_LENGTH = 500;
+const MAX_PAYLOAD_BYTES = 900_000;
 
 export type OfflineRoute = {
   id: string;
@@ -27,6 +30,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isValidPayload(payload: unknown) {
   if (!isRecord(payload) || !isRecord(payload.route)) return false;
+  try {
+    if (JSON.stringify(payload).length > MAX_PAYLOAD_BYTES) return false;
+  } catch {
+    return false;
+  }
   const route = payload.route;
   if (
     typeof route.distanceLabel !== "string" ||
@@ -60,8 +68,10 @@ function isValidRoute(value: unknown): value is OfflineRoute {
     value.id.length > 0 &&
     typeof value.origin === "string" &&
     value.origin.trim().length >= 2 &&
+    value.origin.length <= MAX_TEXT_LENGTH &&
     typeof value.destination === "string" &&
     value.destination.trim().length >= 2 &&
+    value.destination.length <= MAX_TEXT_LENGTH &&
     typeof value.savedAt === "string" &&
     Number.isFinite(Date.parse(value.savedAt)) &&
     isValidPayload(value.payload)
@@ -113,6 +123,20 @@ export async function saveOfflineRoute(route: OfflineRoute) {
   if (!hasIndexedDb()) return false;
 
   await withStore("readwrite", store => store.put(route));
+  const routes = await listOfflineRoutes();
+  if (routes.length > MAX_SAVED_ROUTES) {
+    const excessIds = new Set(routes.slice(MAX_SAVED_ROUTES).map(item => item.id));
+    await withStore("readwrite", store => {
+      const request = store.openCursor();
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        if (excessIds.has(String(cursor.key))) cursor.delete();
+        cursor.continue();
+      };
+      return request;
+    });
+  }
   notifyOfflineRouteChange();
   return true;
 }
