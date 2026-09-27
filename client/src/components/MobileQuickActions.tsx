@@ -11,6 +11,7 @@ export default function MobileQuickActions() {
   const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
   const [locating, setLocating] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "done">("idle");
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
 
@@ -37,9 +38,11 @@ export default function MobileQuickActions() {
     navigator.geolocation.getCurrentPosition(position => {
       setLocating(false);
       vibration(18);
+      setStatusMessage("Localização encontrada. Abrindo postos próximos.");
       setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
     }, () => {
       setLocating(false);
+      setStatusMessage("Não foi possível obter sua localização. Verifique a permissão do navegador.");
       vibration([8, 25, 8]);
     }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
@@ -66,7 +69,10 @@ export default function MobileQuickActions() {
         setShareState("done");
         vibration(18);
         window.setTimeout(() => setShareState("idle"), 1800);
-      }).catch(() => {});
+      }).catch(() => {
+        setStatusMessage("Não foi possível compartilhar agora.");
+        vibration([8, 25, 8]);
+      });
     } },
   ];
 
@@ -93,6 +99,7 @@ export default function MobileQuickActions() {
           })}
         </div>
         {!online && <p role="status" className="flex items-center justify-center gap-1 px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-[#FFD49C]"><WifiOff className="size-3" /> Offline · ações salvas continuam disponíveis</p>}
+        {statusMessage && <p role="status" aria-live="polite" className="px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-white/70">{statusMessage}</p>}
       </div>
     </nav>
   );
