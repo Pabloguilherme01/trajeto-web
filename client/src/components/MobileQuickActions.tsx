@@ -1,4 +1,4 @@
-import { Download, Fuel, Navigation, Share2 } from "lucide-react";
+import { Download, Fuel, Navigation, Share2, LocateFixed } from "lucide-react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
@@ -6,9 +6,9 @@ import { shareText, vibration } from "@/lib/mobileTools";
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
   const current = location.split("?")[0];
-  const actions = [
+  const locate = () => {\n    if (!navigator.geolocation) return;\n    vibration();\n    navigator.geolocation.getCurrentPosition(position => {\n      setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));\n    });\n  };\n  const actions = [
     { label: "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => { vibration(); setLocation(appUrl("/planejar")); } },
-    { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
+    { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },\n    { label: "Perto de mim", short: "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Instalar", short: "App", icon: Download, path: "", run: () => document.getElementById("instalar-app")?.scrollIntoView({ behavior: "smooth", block: "center" }) },
     { label: "Compartilhar", short: "Enviar", icon: Share2, path: "", run: () => { void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto"); } },
   ];
@@ -16,7 +16,7 @@ export default function MobileQuickActions() {
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
       <div className="mx-auto max-w-md rounded-[1.35rem] border border-white/12 bg-[#080D11]/95 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl">
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run }) => {
             const active = path && current === appUrl(path);
             return (
