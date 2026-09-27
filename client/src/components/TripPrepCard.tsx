@@ -29,6 +29,7 @@ export default function TripPrepCard() {
   });
   const [savedRoutes, setSavedRoutes] = useState(0);
   const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
+  const [storageError, setStorageError] = useState(false);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [, setLocation] = useLocation();
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
@@ -41,10 +42,12 @@ export default function TripPrepCard() {
     const refresh = () => {
       void listOfflineRoutes()
         .then(routes => {
+          setStorageError(false);
           setSavedRoutes(routes.length);
           setLatestOfflineRoute(routes[0] ?? null);
         })
         .catch(() => {
+          setStorageError(true);
           setSavedRoutes(0);
           setLatestOfflineRoute(null);
         });
@@ -68,6 +71,7 @@ export default function TripPrepCard() {
   }, []);
 
   const localRouteReady = Boolean(latestOfflineRoute);
+  const localStorageKnown = !storageError;
   const hasTrip = Boolean(lastTrip);
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
   const smartChecked: Record<string, boolean> = {
@@ -119,7 +123,7 @@ export default function TripPrepCard() {
         <div className={`rounded-xl border p-3 ${localRouteReady ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
           <Smartphone className="size-4 text-[#326575]" />
           <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#617179]">Rotas locais</p>
-          <p className="mt-1 text-xs font-extrabold">{savedRoutes} salvas no aparelho</p>
+          <p className="mt-1 text-xs font-extrabold">{storageError ? "Armazenamento indisponível" : savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas")}</p>
         </div>
       </div>
 
@@ -141,22 +145,28 @@ export default function TripPrepCard() {
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <span className="text-[0.65rem] font-bold text-[#617179]">{ready ? "Tudo pronto para sair." : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
-        <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
+        <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#D8E0E3] bg-[#F8FAFA] px-3 py-2.5">
         <span className="flex min-w-0 items-center gap-2 text-[0.62rem] font-bold text-[#617179]">
           <span className={online ? "size-2 rounded-full bg-[#326575]" : "size-2 rounded-full bg-[#C77B3C]"} />
-          {online ? "Online: pronto para novas consultas." : latestOfflineRoute ? "Offline: uma rota pronta para continuar." : "Offline: nenhuma rota salva pronta."}
+          {storageError ? "Não foi possível verificar as rotas deste aparelho." : online ? "Online: pronto para novas consultas." : latestOfflineRoute ? "Offline: uma rota pronta para continuar." : "Offline: nenhuma rota salva pronta."}
         </span>
-        {!online && latestOfflineRoute && (
+        {!online && latestOfflineRoute && !storageError && (
           <button type="button" onClick={openPreparedTrip} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">
             Continuar
           </button>
         )}
       </div>
 
-      {ready && (
+      {storageError && (
+        <div role="alert" className="mt-4 rounded-xl border border-[#FFB5A1]/30 bg-[#FFF5F2] px-3 py-2 text-xs font-bold text-[#8C4A3C]">
+          O navegador não conseguiu acessar as rotas salvas. Tente novamente antes de sair.
+        </div>
+      )}
+
+      {ready && !storageError && (
         <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[#326575]">
             <Sparkles className="size-4 shrink-0" />
