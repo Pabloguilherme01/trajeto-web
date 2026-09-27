@@ -44,8 +44,17 @@ export function getDestinationUsage(): Partial<DestinationUsage> {
   if (typeof window === "undefined") return {};
   try {
     const parsed = JSON.parse(localStorage.getItem(USAGE_KEY) || "{}");
-    if (!parsed || typeof parsed !== "object") return {};
-    return parsed;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    const result: Partial<DestinationUsage> = {};
+    for (const id of ["casa", "trabalho", "outro"] as const) {
+      const value = (parsed as Record<string, unknown>)[id];
+      if (!value || typeof value !== "object" || Array.isArray(value)) continue;
+      const record = value as Record<string, unknown>;
+      const count = typeof record.count === "number" && Number.isFinite(record.count) && record.count >= 0 ? Math.floor(record.count) : 0;
+      const lastUsed = typeof record.lastUsed === "number" && Number.isFinite(record.lastUsed) && record.lastUsed >= 0 ? record.lastUsed : 0;
+      result[id] = { count, lastUsed };
+    }
+    return result;
   } catch {
     return {};
   }
