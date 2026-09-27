@@ -129,6 +129,12 @@ export default function Planner() {
     if (!isAuthenticated) return startLogin();
     addFavorite.mutate({ placeId: selectedStop.placeId, stationName: selectedStop.name, stationAddress: selectedStop.address, lat: selectedStop.lat, lng: selectedStop.lng });
   };
+  const openDestinationNavigation = () => {
+    if (!destination.trim()) return;
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination.trim())}`, "_blank", "noopener,noreferrer");
+    track("route_open", destination || origin);
+  };
+
   const openNavigation = (stop: PlannedRoute["stops"][number]) => {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stop.name)}&destination_place_id=${encodeURIComponent(stop.placeId)}`, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
@@ -212,7 +218,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           </div>
         </section>
 
-        {planned && <div className="mt-4 md:hidden"><div className="grid grid-cols-2 gap-2 rounded-2xl border border-[#D8DED5] bg-white p-2 shadow-sm"><button type="button" onClick={shareRoute} className="min-h-12 rounded-xl border border-[#163840]/15 text-xs font-extrabold text-[#163840] active:scale-[.98]"><Share2 className="mr-2 inline size-4" />Enviar rota</button><button type="button" onClick={() => planned?.stops[0] && openNavigation(planned.stops[0])} disabled={!planned?.stops.length} className="min-h-12 rounded-xl bg-[#163840] text-xs font-extrabold text-white active:scale-[.98]"><ExternalLink className="mr-2 inline size-4" />Navegar agora</button></div></div>}
+        {planned && <div className="mt-4 md:hidden"><div className="grid grid-cols-2 gap-2 rounded-2xl border border-[#D8DED5] bg-white p-2 shadow-sm"><button type="button" onClick={shareRoute} className="min-h-12 rounded-xl border border-[#163840]/15 text-xs font-extrabold text-[#163840] active:scale-[.98]"><Share2 className="mr-2 inline size-4" />Enviar rota</button><button type="button" onClick={openDestinationNavigation} disabled={!destination.trim()} className="min-h-12 rounded-xl bg-[#163840] text-xs font-extrabold text-white active:scale-[.98]"><ExternalLink className="mr-2 inline size-4" />Navegar agora</button></div></div>}
 
         {planned && <div className="mt-4 md:hidden"><MobileTravelMode /></div>}
 
