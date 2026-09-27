@@ -51,7 +51,7 @@ export default function Stations() {
   const [economyMode, setEconomyModeState] = useState(getEconomyMode);
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches);
   const [localFavorites, setLocalFavorites] = useState<MobileStation[]>(listMobileStationFavorites);
-  const [cachedStationSnapshot, setCachedStationSnapshot] = useState(() => getCachedStations(initialQuery()));
+  const [cachedStationSnapshot, setCachedStationSnapshot] = useState(() => getCachedStations(initialQuery(), locationParams.lat, locationParams.lng));
   const [showSavedOnly, setShowSavedOnly] = useState(() => new URLSearchParams(window.location.search).get("salvos") === "1");
   const locationParams = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -161,12 +161,12 @@ export default function Stations() {
   const list = useMemo(() => showSavedOnly ? localFavorites as typeof liveList : (liveList.length > 0 ? liveList : (cachedStationSnapshot?.stations ?? []) as typeof liveList), [showSavedOnly, localFavorites, liveList, cachedStationSnapshot]);
 
   useEffect(() => {
-    setCachedStationSnapshot(getCachedStations(query));
+    setCachedStationSnapshot(getCachedStations(query, locationParams.lat, locationParams.lng));
   }, [query]);
 
   useEffect(() => {
     if (liveList.length > 0) {
-      cacheStations(query, liveList as unknown as MobileStation[]);
+      cacheStations(query, liveList as unknown as MobileStation[], locationParams.lat, locationParams.lng);
       setCachedStationSnapshot(getCachedStations(query));
     }
   }, [liveList, query]);
