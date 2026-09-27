@@ -1,7 +1,7 @@
 import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles, RotateCcw, Navigation, Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
-import { listOfflineRoutes } from "@/lib/offlineStore";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
 const KEY = "trajeto-trip-checklist";
 
@@ -34,14 +34,21 @@ export default function TripPrepCard() {
     refresh();
     window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener(offlineRouteEvent, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
 
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
-  const progress = defaults.filter(([id]) => checked[id]).length;
+  const smartChecked: Record<string, boolean> = {
+    ...checked,
+    rota: checked.rota || hasTrip,
+    offline: checked.offline || localRouteReady,
+  };
+  const progress = defaults.filter(([id]) => smartChecked[id]).length;
   const ready = progress === defaults.length;
   const localRouteReady = savedRoutes > 0;
   const hasTrip = Boolean(lastTrip);
@@ -74,8 +81,8 @@ export default function TripPrepCard() {
       <div className="mt-4 space-y-2">
         {defaults.map(([id, label]) => (
           <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-[#D8E0E3] bg-[#FCFDFD] px-3 py-2 transition-colors has-[:checked]:border-[#326575]/40 has-[:checked]:bg-[#F2F5F6]">
-            <input type="checkbox" checked={Boolean(checked[id])} onChange={() => toggle(id)} className="size-5 accent-[#326575]" />
-            <span className={checked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}</span>
+            <input type="checkbox" checked={Boolean(smartChecked[id])} onChange={() => toggle(id)} className="size-5 accent-[#326575]" />
+            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}</span>
           </label>
         ))}
       </div>
