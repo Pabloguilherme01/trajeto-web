@@ -28,11 +28,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isValidPayload(payload: unknown) {
   if (!isRecord(payload) || !isRecord(payload.route)) return false;
   const route = payload.route;
-  return (
-    typeof route.distanceLabel === "string" &&
-    typeof route.durationSeconds === "number" && Number.isFinite(route.durationSeconds) &&
-    Array.isArray(payload.stops) &&
-    Array.isArray(payload.anpReferences)
+  if (
+    typeof route.distanceLabel !== "string" ||
+    typeof route.distanceMeters !== "number" ||
+    !Number.isFinite(route.distanceMeters) ||
+    typeof route.durationSeconds !== "number" ||
+    !Number.isFinite(route.durationSeconds) ||
+    route.distanceMeters < 0 ||
+    route.durationSeconds < 0 ||
+    !Array.isArray(payload.stops) ||
+    !Array.isArray(payload.anpReferences)
+  ) {
+    return false;
+  }
+
+  return payload.stops.every(stop =>
+    isRecord(stop) &&
+    typeof stop.placeId === "string" &&
+    stop.placeId.length > 0 &&
+    typeof stop.name === "string" &&
+    stop.name.length > 0 &&
+    typeof stop.address === "string" &&
+    stop.address.length > 0,
   );
 }
 
