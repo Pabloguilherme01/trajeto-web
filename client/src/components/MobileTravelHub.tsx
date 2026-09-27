@@ -2,7 +2,7 @@ import { Battery, CloudOff, Compass, Gauge, LocateFixed, Navigation, Wifi, Signa
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { getEconomyMode, getLastTrip, getRecentSearches, setEconomyMode } from "@/lib/mobilePreferences";
+import { getEconomyMode, getLastTrip, getRecentSearches, setEconomyMode, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes } from "@/lib/offlineStore";
 
 export default function MobileTravelHub() {
@@ -31,8 +31,10 @@ export default function MobileTravelHub() {
       void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => {});
       setLastTrip(getLastTrip());
       setRecentSearch(getRecentSearches()[0] ?? null);
+      setEconomyModeState(getEconomyMode());
     };
     window.addEventListener("focus", refreshRoutes);
+    window.addEventListener(mobilePreferenceEvent, refreshRoutes);
 
     let mounted = true;
     void listOfflineRoutes().then(routes => { if (mounted) setSavedRoutes(routes.length); }).catch(() => {});
@@ -61,6 +63,7 @@ export default function MobileTravelHub() {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
       window.removeEventListener("focus", refreshRoutes);
+      window.removeEventListener(mobilePreferenceEvent, refreshRoutes);
       connection?.removeEventListener?.("change", updateNetwork);
       batteryDevice?.removeEventListener("levelchange", updateBattery);
       if (batteryDevice && updateBatterySaver) batteryDevice.removeEventListener("levelchange", updateBatterySaver);
@@ -87,7 +90,7 @@ export default function MobileTravelHub() {
             </div>
             <div className="flex items-center gap-2">{networkType && online && <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.1em] text-[#7F919A] sm:inline">{networkType}</span>}<div className={online ? "text-[#C7FF3C]" : "text-[#FFB86B]"}>{online ? <Wifi className="size-5" /> : <CloudOff className="size-5" />}</div></div>
           </div>
-          <div className="mt-4 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[0.05] p-3">
+          <div className="mt-4 rounded-2xl border border-[#3DE3FF]/20 bg-[linear-gradient(135deg,rgba(61,227,255,.08),rgba(199,255,60,.035))] p-3 shadow-[0_12px_35px_rgba(0,0,0,.12)]">
             <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Próxima ação</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="min-w-0 flex-1">
