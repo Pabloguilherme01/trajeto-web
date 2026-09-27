@@ -206,3 +206,24 @@ export function findOfflineRouteByDestination(routes: OfflineRoute[], destinatio
   if (!target) return null;
   return routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target) ?? null;
 }
+
+export function findOfflineRouteByTrip(routes: OfflineRoute[], origin: string, destination: string) {
+  const normalizedOrigin = origin.trim().toLocaleLowerCase("pt-BR");
+  const normalizedDestination = destination.trim().toLocaleLowerCase("pt-BR");
+  if (!normalizedOrigin || !normalizedDestination) return null;
+
+  return routes.find(route =>
+    route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
+    route.destination.trim().toLocaleLowerCase("pt-BR") === normalizedDestination,
+  ) ?? null;
+}
+
+export function externalNavigationUrl(route: Pick<OfflineRoute, "origin" | "destination">) {
+  return "https://www.google.com/maps/dir/?api=1&origin=" +
+    encodeURIComponent(route.origin) +
+    "&destination=" +
+    encodeURIComponent(route.destination) +
+    "&travelmode=driving";
+}
+
+export const offlineRouteEvent = OFFLINE_ROUTE_EVENT;
