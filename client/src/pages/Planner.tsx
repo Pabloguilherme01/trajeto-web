@@ -39,6 +39,7 @@ export default function Planner() {
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
+  const [loadedFromOffline, setLoadedFromOffline] = useState(false);
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   
@@ -61,6 +62,7 @@ export default function Planner() {
       setOrigin(route.origin);
       setDestination(route.destination);
       setPlanned(route.payload as PlannedRoute);
+      setLoadedFromOffline(true);
       setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
     }).catch(() => {});
   }, [offline, origin, destination, planned]);
@@ -151,6 +153,7 @@ export default function Planner() {
       return;
     }
     const result = await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
+    setLoadedFromOffline(false);
     if (result) rememberTrip(normalizedOrigin, normalizedDestination);
   };
 
@@ -269,7 +272,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           fuelCost={fuelEconomy.data?.tripCost ?? null}
           litersNeeded={fuelEconomy.data?.litersNeeded ?? null}
           autonomyKm={fuelEconomy.data?.autonomyKm ?? null}
-          offline={offline}
+          offline={offline || loadedFromOffline}
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
           onSave={() => void saveOfflineRoute({
