@@ -1,5 +1,5 @@
-import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles } from "lucide-react";
-import { RotateCcw, useEffect, useState } from "react";
+import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles, RotateCcw } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const KEY = "trajeto-trip-checklist";
 
