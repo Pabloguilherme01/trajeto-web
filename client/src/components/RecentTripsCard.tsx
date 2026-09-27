@@ -27,6 +27,12 @@ export default function RecentTripsCard() {
     return () => window.removeEventListener(offlineRouteEvent, refresh);
   }, [refresh]);
 
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
   const openFromHere = (item: Item) => {
     if (!navigator.geolocation || locating) return;
     setFeedback(null);
@@ -50,6 +56,7 @@ export default function RecentTripsCard() {
         </div>
         <div className="flex items-center gap-2"><button type="button" onClick={() => void refresh()} aria-label="Atualizar últimas rotas" className="grid size-9 place-items-center rounded-xl border border-[#D8E0E3] text-[#326575] active:scale-95"><RotateCw className="size-4" /></button><Navigation className="size-5 text-[#326575]" /></div>
       </div>
+      {feedback && <p role="status" aria-live="polite" className="mt-3 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}
       <div className="mt-4 space-y-2">
         {items.map(item => (
           <div key={item.id} className="flex items-center gap-2 rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-2 shadow-[0_8px_24px_rgba(11,16,20,.04)]">
@@ -60,7 +67,13 @@ export default function RecentTripsCard() {
               </button>
               <button type="button" onClick={() => openFromHere(item)} disabled={locating === item.id} className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-lg bg-[#326575] px-2.5 text-[0.62rem] font-extrabold text-white active:scale-[.98] disabled:opacity-60"><LocateFixed className="size-3" />{locating === item.id ? "Localizando…" : "Daqui agora"}</button>
             </div>
-            <button type="button" onClick={() => void shareText(`${item.origin} → ${item.destination}`, `${window.location.origin}${appUrl("/planejar")}?origem=${encodeURIComponent(item.origin)}&destino=${encodeURIComponent(item.destination)}`, "Rota no Trajeto")} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#326575]" aria-label="Compartilhar rota"><Share2 className="size-4" /></button><button type="button" onClick={async () => { await removeOfflineRoute(item.id); await refresh(); }} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#9B6258]" aria-label="Excluir rota salva"><Trash2 className="size-4" /></button>
+            <button type="button" onClick={() => {
+              void shareText(
+                item.origin + " → " + item.destination,
+                window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(item.origin) + "&destino=" + encodeURIComponent(item.destination),
+                "Rota no Trajeto",
+              ).then(() => setFeedback("Rota preparada para compartilhar.")).catch(() => setFeedback("Não foi possível compartilhar agora."));
+            }} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#326575]" aria-label="Compartilhar rota"><Share2 className="size-4" /></button><button type="button" onClick={async () => { await removeOfflineRoute(item.id); await refresh(); }} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#9B6258]" aria-label="Excluir rota salva"><Trash2 className="size-4" /></button>
           </div>
         ))}
       </div>
