@@ -12,6 +12,7 @@ export default function RecentTripsCard() {
   const [items, setItems] = useState<Item[]>([]);
 
   const [locating, setLocating] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const routes = await listOfflineRoutes();
@@ -28,10 +29,11 @@ export default function RecentTripsCard() {
 
   const openFromHere = (item: Item) => {
     if (!navigator.geolocation || locating) return;
+    setFeedback(null);
     setLocating(item.id);
     navigator.geolocation.getCurrentPosition(
       position => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(item.destination)); },
-      () => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(item.origin) + "&destino=" + encodeURIComponent(item.destination)); },
+      () => { setLocating(null); setFeedback("GPS indisponível. Usando a origem salva."); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(item.origin) + "&destino=" + encodeURIComponent(item.destination)); },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
     );
   };
