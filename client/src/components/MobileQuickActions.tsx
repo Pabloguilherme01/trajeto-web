@@ -117,7 +117,7 @@ export default function MobileQuickActions() {
     { label: smartDestination ? smartDestination.label : resumeLabel, short: smartDestination ? "Destino" : resumeLabel, icon: smartDestination ? Navigation : lastIntent === "nearby" ? LocateFixed : lastIntent === "saved" ? Bookmark : lastIntent === "route" ? Navigation : Fuel, path: "", run: () => { if (!smartDestination) return resumeAction(); vibration(); const updated = rememberDestinationUsage(smartDestination); setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated)); setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(smartDestination.value)); }, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
-    { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
+    { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/planejar", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
     { label: "Compartilhar", short: shareState === "done" ? shareLabel : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => {
       vibration();
       void shareText(shareMessage, window.location.href, "Trajeto").then(() => {
@@ -143,7 +143,7 @@ export default function MobileQuickActions() {
         </div>
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run, smart }) => {
-            const active = label === "Salvos" ? current === appUrl("/postos") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
+            const active = label === "Salvos" ? current === appUrl("/planejar") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
             return (
               <button key={label} type="button" onClick={run} aria-current={active ? "page" : undefined} className={smart ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014] shadow-[0_5px_16px_rgba(199,255,60,.16)] active:scale-[.97]" : active ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014]" : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#9EADB4] transition active:scale-[.97] active:bg-white/10"}>
                 <Icon className="size-[1.05rem]" strokeWidth={smart || active ? 2.6 : 2} />
