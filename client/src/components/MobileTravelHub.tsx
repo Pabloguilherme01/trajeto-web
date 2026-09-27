@@ -82,7 +82,7 @@ export default function MobileTravelHub() {
             <button type="button" onClick={locate} className="min-h-11 rounded-xl border border-white/12 bg-white/[0.025] text-xs font-bold text-white transition active:scale-[.98]" disabled={locating}><LocateFixed className="mr-2 inline size-4 text-[#3DE3FF]" />{locating ? "Localizando…" : "Perto de mim"}</button>
             <button type="button" onClick={() => { const next = !economyMode; setEconomyMode(next); setEconomyModeState(next); }} className={`min-h-11 rounded-xl border text-xs font-bold transition active:scale-[.98] ${economyMode ? "border-[#C7FF3C]/45 bg-[#C7FF3C]/10 text-[#DFFF9D]" : "border-white/12 bg-white/[0.025] text-white"}`}><Gauge className="mr-2 inline size-4 text-[#C7FF3C]" />{economyMode ? "Economia ativa" : "Economizar dados"}</button>
             <button type="button" onClick={() => setLocation(appUrl("/planejar"))} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-extrabold text-[#0B1014] shadow-[0_8px_20px_rgba(199,255,60,.12)] transition active:scale-[.98]"><Navigation className="mr-2 inline size-4" />Planejar</button>
-          </div>>
+          </div>
         </div>
       </div>
     </section>
