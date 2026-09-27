@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { clearRecentTrips, getRecentTrips, mobilePreferenceEvent, removeRecentTrip, type RecentTrip } from "@/lib/mobilePreferences";
-import { listOfflineRoutes } from "@/lib/offlineStore";
+import { findOfflineRouteByTrip, listOfflineRoutes } from "@/lib/offlineStore";
 
 function formatAge(usedAt: string) {
   const time = Date.parse(usedAt);
@@ -19,15 +19,15 @@ function formatAge(usedAt: string) {
 
 export default function RecentTripsCard() {
   const [, setLocation] = useLocation();
-  const [trips, setTrips] = useState<RecentTrip[]>(getRecentTrips);
+  const [trips, setTrips] = useState<RecentTrip[]>(getRecentTrips);\n  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);\n  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
-    const refresh = () => setTrips(getRecentTrips());
+    const refresh = () => setTrips(getRecentTrips());\n    const onOnline = () => setOnline(true);\n    const onOffline = () => setOnline(false);
     window.addEventListener(mobilePreferenceEvent, refresh);
-    window.addEventListener("focus", refresh);
+    window.addEventListener("focus", refresh);\n    window.addEventListener("online", onOnline);\n    window.addEventListener("offline", onOffline);
     return () => {
       window.removeEventListener(mobilePreferenceEvent, refresh);
-      window.removeEventListener("focus", refresh);
+      window.removeEventListener("focus", refresh);\n      window.removeEventListener("online", onOnline);\n      window.removeEventListener("offline", onOffline);
     };
   }, []);
 
@@ -65,7 +65,7 @@ export default function RecentTripsCard() {
         </div>
         <History className="mt-1 size-5 text-[#326575]" aria-hidden="true" />
       </div>
-      <div className="mt-4 space-y-2">
+      {feedback && <p role="status" aria-live="polite" className="mt-4 rounded-xl border border-[#D8E0E3] bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}\n      <div className="mt-4 space-y-2">
         {trips.map((trip, index) => (
           <div key={trip.origin + "::" + trip.destination} className="flex items-center gap-2 rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-3">
             <div className="min-w-0 flex-1">
