@@ -1,5 +1,7 @@
 import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles, RotateCcw, Navigation, Smartphone } from "lucide-react";
-import { useEffect, useState } from "react";\nimport { useLocation } from "wouter";\nimport { appUrl } from "@/lib/appUrl";
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
@@ -19,7 +21,9 @@ export default function TripPrepCard() {
       return stored && typeof stored === "object" && !Array.isArray(stored) ? stored as Record<string, boolean> : {};
     } catch { return {}; }
   });
-  const [savedRoutes, setSavedRoutes] = useState(0);\n  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);\n  const [, setLocation] = useLocation();
+  const [savedRoutes, setSavedRoutes] = useState(0);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [, setLocation] = useLocation();
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
 
   useEffect(() => {
@@ -32,11 +36,17 @@ export default function TripPrepCard() {
       setLastTrip(getLastTrip());
     };
     refresh();
-    const handleOnline = () => setOnline(true);\n    const handleOffline = () => setOnline(false);\n    window.addEventListener("online", handleOnline);\n    window.addEventListener("offline", handleOffline);\n    window.addEventListener("focus", refresh);
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener(offlineRouteEvent, refresh);
     return () => {
-      window.removeEventListener("online", handleOnline);\n      window.removeEventListener("offline", handleOffline);\n      window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener(offlineRouteEvent, refresh);
     };
