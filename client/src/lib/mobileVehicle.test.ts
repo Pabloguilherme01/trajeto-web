@@ -21,6 +21,11 @@ describe("mobileVehicle", () => {
     });
   });
 
+  it("rejeita valores inválidos", () => {
+    expect(saveMobileVehicle({ name: "Carro", fuel: "gasolina", consumption: NaN, tank: 45 })).toBe(false);
+    expect(getMobileVehicle()).toBeNull();
+  });
+
   it("remove o perfil local", () => {
     saveMobileVehicle({
       name: "Carro",
