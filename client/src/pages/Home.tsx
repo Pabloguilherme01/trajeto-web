@@ -8,7 +8,7 @@ import MobileVehicleCard from "@/components/MobileVehicleCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { useLocation } from "wouter";
 
 const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
@@ -23,13 +23,20 @@ export default function Home() {
   const [locationMessage, setLocationMessage] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [savedRoutes, setSavedRoutes] = useState(0);
+  const [latestSavedRoute, setLatestSavedRoute] = useState<OfflineRoute | null>(null);
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
   useEffect(() => {
     const refresh = () => {
       setRecentSearches(getRecentSearches());
-      void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => setSavedRoutes(0));
+      void listOfflineRoutes().then(routes => {
+        setSavedRoutes(routes.length);
+        setLatestSavedRoute(routes[0] ?? null);
+      }).catch(() => {
+        setSavedRoutes(0);
+        setLatestSavedRoute(null);
+      });
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
@@ -85,7 +92,18 @@ export default function Home() {
     openSearch(search);
   };
 
-  const openSavedRoutes = () => setLocation(appUrl("/planejar?salvos=1"));
+  const openSavedRoutes = () => {
+    if (latestSavedRoute) {
+      setLocation(
+        appUrl("/planejar") +
+        "?rota=" + encodeURIComponent(latestSavedRoute.id) +
+        "&origem=" + encodeURIComponent(latestSavedRoute.origin) +
+        "&destino=" + encodeURIComponent(latestSavedRoute.destination),
+      );
+      return;
+    }
+    setLocation(appUrl("/planejar?salvos=1"));
+  };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0B1014] text-[#EAF0F2]">
@@ -113,7 +131,7 @@ export default function Home() {
               {online ? <a href="#instalar-app" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/45 px-4 py-2 text-xs font-extrabold text-[#DFFF9D] sm:w-auto">
                 <Download className="size-4" /> Como instalar
               </a> : <button type="button" onClick={openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
-                <Navigation className="size-4" /> {savedRoutes > 0 ? "Abrir rotas salvas" : "Abrir planejador"}
+                <Navigation className="size-4" /> {savedRoutes > 0 ? "Continuar última rota" : "Abrir planejador"}
               </button>}
             </div>
           </div>
