@@ -1,6 +1,8 @@
 const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
+const RECENT_TRIPS_KEY = "trajeto-recent-trips";
+const MAX_RECENT_TRIPS = 8;
 const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
@@ -50,9 +52,56 @@ export function getLastTrip(): { origin: string; destination: string } | null {
   } catch { return null; }
 }
 
+export type RecentTrip = { origin: string; destination: string; usedAt: string };
+
+function isRecentTrip(value: unknown): value is RecentTrip {
+  return Boolean(
+    value && typeof value === "object" &&
+    typeof (value as RecentTrip).origin === "string" && (value as RecentTrip).origin.trim().length >= 3 &&
+    typeof (value as RecentTrip).destination === "string" && (value as RecentTrip).destination.trim().length >= 3 &&
+    typeof (value as RecentTrip).usedAt === "string" && Number.isFinite(Date.parse((value as RecentTrip).usedAt)),
+  );
+}
+
+export function getRecentTrips(): RecentTrip[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(RECENT_TRIPS_KEY) || "[]");
+    if (!Array.isArray(value)) return [];
+    return value.filter(isRecentTrip).sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt)).slice(0, MAX_RECENT_TRIPS);
+  } catch { return []; }
+}
+
+export function removeRecentTrip(origin: string, destination: string) {
+  const normalizedOrigin = origin.trim().toLocaleLowerCase("pt-BR");
+  const normalizedDestination = destination.trim().toLocaleLowerCase("pt-BR");
+  try {
+    const next = getRecentTrips().filter(item =>
+      item.origin.trim().toLocaleLowerCase("pt-BR") !== normalizedOrigin ||
+      item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination,
+    );
+    localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
+  } catch {}
+  notifyPreferenceChange();
+}
+
+export function clearRecentTrips() {
+  try { localStorage.removeItem(RECENT_TRIPS_KEY); } catch {}
+  notifyPreferenceChange();
+}
+
 export function rememberTrip(origin: string, destination: string) {
-  if (origin.trim().length < 3 || destination.trim().length < 3) return;
-  try { localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: origin.trim(), destination: destination.trim() })); } catch {}
+  const normalizedOrigin = origin.trim();
+  const normalizedDestination = destination.trim();
+  if (normalizedOrigin.length < 3 || normalizedDestination.length < 3) return;
+  const trip: RecentTrip = { origin: normalizedOrigin, destination: normalizedDestination, usedAt: new Date().toISOString() };
+  try {
+    const next = [trip, ...getRecentTrips().filter(item =>
+      item.origin.trim().toLocaleLowerCase("pt-BR") !== normalizedOrigin.toLocaleLowerCase("pt-BR") ||
+      item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination.toLocaleLowerCase("pt-BR"),
+    )].slice(0, MAX_RECENT_TRIPS);
+    localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
+    localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: normalizedOrigin, destination: normalizedDestination }));
+  } catch {}
   rememberIntent("route");
 }
 
