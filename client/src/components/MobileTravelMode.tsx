@@ -1,4 +1,4 @@
-import { Moon, Smartphone } from "lucide-react";
+import { MonitorUp, Smartphone } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type WakeLockSentinelLike = { release: () => Promise<void>; addEventListener?: (type: string, listener: () => void) => void; };
@@ -42,7 +42,7 @@ export default function MobileTravelMode() {
           <p className="mt-1 text-[0.68rem] leading-relaxed text-[#9EC8D2]">{active ? "A tela permanecerá ativa enquanto você mantém esta página aberta." : "Evite que a tela apague durante a preparação da viagem."}</p>
         </div>
         <button type="button" onClick={() => void toggle()} className={`min-h-11 shrink-0 rounded-xl border px-3 py-2 text-xs font-bold transition ${active ? "border-[#C7FF3C] bg-[#C7FF3C] text-[#0B1014]" : "border-[#3DE3FF]/40 text-[#C9F7FF] hover:bg-[#3DE3FF] hover:text-[#0B1014]"}`} aria-pressed={active}>
-          <Moon className="mr-1.5 inline size-3.5" />{active ? "Ativo" : "Ativar"}
+          <MonitorUp className="mr-1.5 inline size-3.5" />{active ? "Ativo" : "Ativar"}
         </button>
       </div>
     </section>
