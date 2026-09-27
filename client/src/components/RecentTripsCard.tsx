@@ -1,4 +1,4 @@
-import { Clock3, Navigation, Trash2 } from "lucide-react";
+import { Clock3, Navigation, Trash2, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -29,7 +29,7 @@ export default function RecentTripsCard() {
           <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Suas últimas rotas.</h2>
           <p className="mt-2 text-xs leading-relaxed text-[#617179]">Guardadas no aparelho para você retomar sem refazer a consulta.</p>
         </div>
-        <Navigation className="size-5 text-[#326575]" />
+        <div className="flex items-center gap-2"><button type="button" onClick={() => void refresh()} aria-label="Atualizar últimas rotas" className="grid size-9 place-items-center rounded-xl border border-[#D8E0E3] text-[#326575] active:scale-95"><RotateCw className="size-4" /></button><Navigation className="size-5 text-[#326575]" /></div>
       </div>
       <div className="mt-4 space-y-2">
         {items.map(item => (
