@@ -11,7 +11,17 @@ export default function MobileQuickActions() {
   const [locating, setLocating] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "done">("idle");
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
-  useEffect(() => { const onOnline = () => setOnline(true); const onOffline = () => setOnline(false); window.addEventListener("online", onOnline); window.addEventListener("offline", onOffline); return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); }; }, []);
+
+  useEffect(() => {
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
 
   const locate = () => {
     if (!navigator.geolocation || locating) return;
@@ -22,6 +32,7 @@ export default function MobileQuickActions() {
       setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
     }, () => setLocating(false), { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
+
   const actions = [
     { label: "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => { vibration(); setLocation(appUrl("/planejar")); } },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
@@ -32,7 +43,7 @@ export default function MobileQuickActions() {
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
-      <div className={`mx-auto max-w-md rounded-[1.35rem] border p-1.5 ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}> shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl">
+      <div className={`mx-auto max-w-md rounded-[1.35rem] border p-1.5 shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run }) => {
             const active = label === "Salvos" ? current === appUrl("/postos") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
@@ -48,6 +59,7 @@ export default function MobileQuickActions() {
             );
           })}
         </div>
+        {!online && <p role="status" className="px-2 pb-1 pt-1 text-center text-[0.55rem] font-bold text-[#FFD49C]">Offline · ações salvas continuam disponíveis</p>}
       </div>
     </nav>
   );
