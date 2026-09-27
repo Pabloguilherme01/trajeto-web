@@ -14,6 +14,7 @@ export default function MobileQuickActions() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(() => getLastTrip());
+  const [shareLabel, setShareLabel] = useState("Compartilhar");
 
   useEffect(() => {
     const onOnline = () => { setOnline(true); vibration(8); };
@@ -63,12 +64,13 @@ export default function MobileQuickActions() {
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
-    { label: "Compartilhar", short: shareState === "done" ? "Enviado" : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => {
+    { label: "Compartilhar", short: shareState === "done" ? shareLabel : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => {
       vibration();
       void shareText(shareMessage, window.location.href, "Trajeto").then(() => {
         setShareState("done");
+        setShareLabel("Enviado");
         vibration(18);
-        window.setTimeout(() => setShareState("idle"), 1800);
+        window.setTimeout(() => { setShareState("idle"); setShareLabel(lastTrip ? "Viagem" : "Enviar"); }, 1800);
       }).catch(() => {
         setStatusMessage("Não foi possível compartilhar agora.");
         vibration([8, 25, 8]);
