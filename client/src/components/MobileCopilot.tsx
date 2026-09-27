@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  BatteryLow,
   Bookmark,
   CloudOff,
   Fuel,
@@ -217,22 +216,15 @@ export default function MobileCopilot() {
 
   const actions: Action[] = [
     {
-      title: "Postos",
-      detail: "Encontrar e comparar",
-      label: "Abrir",
-      href: appUrl("/postos"),
-      icon: Fuel,
-    },
-    {
       title: "Planejar",
-      detail: "Origem, destino e parada",
+      detail: "Destino e parada",
       label: "Abrir",
       href: appUrl("/planejar"),
       icon: Route,
     },
     {
       title: "Salvos",
-      detail: offlineRoutes ? `${offlineRoutes} rota(s) offline` : "Rotas e preferências",
+      detail: offlineRoutes ? `${offlineRoutes} rota(s) prontas` : "Rotas preparadas",
       label: "Abrir",
       href: appUrl("/planejar?salvos=1"),
       icon: Bookmark,
@@ -280,7 +272,7 @@ export default function MobileCopilot() {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-2">
               {actions.map(action => (
                 <a key={action.title} href={action.href} className="min-w-0 rounded-xl border border-white/10 bg-white/[0.035] p-3 text-left transition active:scale-[.98]">
                   <action.icon className="size-4 text-[#3DE3FF]" />
@@ -301,7 +293,7 @@ export default function MobileCopilot() {
                   <Bookmark className="size-3.5" /> {offlineRoutes} offline
                 </span>
               )}
-              {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]"><BatteryLow className="size-3.5" /> Sem conexão</span>}
+              {!online && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Sem conexão</span>}
               <button type="button" onClick={shareDecision} className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.035] px-3 text-[0.6rem] font-bold text-[#D3DEE2]">
                 <Share2 className="size-3.5" /> Compartilhar
               </button>
