@@ -9,9 +9,22 @@ export default function MobileTravelMode() {
   const lockRef = useRef<WakeLockSentinelLike | null>(null);
 
   useEffect(() => {
-    setSupported(typeof navigator !== "undefined" && "wakeLock" in navigator);
-    return () => { void lockRef.current?.release(); };
-  }, []);
+    const available = typeof navigator !== "undefined" && "wakeLock" in navigator;
+    setSupported(available);
+    const reacquire = async () => {
+      if (!available || !active || document.visibilityState !== "visible") return;
+      try {
+        const wakeLock = await (navigator as Navigator & { wakeLock: { request: (type: "screen") => Promise<WakeLockSentinelLike> } }).wakeLock.request("screen");
+        lockRef.current = wakeLock;
+        wakeLock.addEventListener?.("release", () => setActive(false));
+      } catch { setActive(false); }
+    };
+    document.addEventListener("visibilitychange", reacquire);
+    return () => {
+      document.removeEventListener("visibilitychange", reacquire);
+      void lockRef.current?.release();
+    };
+  }, [active]);
 
   const toggle = async () => {
     if (!supported) return;
@@ -34,7 +47,7 @@ export default function MobileTravelMode() {
   if (!supported) return null;
 
   return (
-    <section className="rounded-2xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/8 p-4 text-[#D8F6FF]">
+    <section className={`rounded-2xl border p-4 text-[#D8F6FF] ${active ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/[0.06]" : "border-[#3DE3FF]/25 bg-[#3DE3FF]/8"}`}>
       <div className="flex items-center gap-3">
         <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/15"><Smartphone className="size-4 text-[#3DE3FF]" /></div>
         <div className="min-w-0 flex-1">
