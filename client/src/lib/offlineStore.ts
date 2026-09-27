@@ -199,3 +199,10 @@ export function offlineRouteId(origin: string, destination: string) {
 }
 
 export const offlineRouteEvent = OFFLINE_ROUTE_EVENT;
+
+
+export function findOfflineRouteByDestination(routes: OfflineRoute[], destination: string) {
+  const target = destination.trim().toLocaleLowerCase("pt-BR");
+  if (!target) return null;
+  return routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target) ?? null;
+}
