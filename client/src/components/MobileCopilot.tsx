@@ -30,7 +30,7 @@ import {
   mobileDestinationEvent,
   rememberDestinationUsage,
 } from "@/lib/mobileDestinations";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { shareText, vibration } from "@/lib/mobileTools";
 
 type Action = {
@@ -58,12 +58,13 @@ export default function MobileCopilot() {
   const [, setLocation] = useLocation();
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [offlineRoutes, setOfflineRoutes] = useState(0);
+  const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [state, setState] = useState(readState);
 
   useEffect(() => {
     const refresh = () => {
       setState(readState());
-      void listOfflineRoutes().then(routes => setOfflineRoutes(routes.length)).catch(() => {});
+      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); setLatestOfflineRoute(routes[0] ?? null); }).catch(() => setLatestOfflineRoute(null));
     };
     const refreshNetwork = () => setOnline(navigator.onLine);
 
@@ -87,17 +88,27 @@ export default function MobileCopilot() {
   }, []);
 
   const primary = useMemo<Action>(() => {
-    if (!online && offlineRoutes > 0) {
+    if (!online && latestOfflineRoute) {
       return {
-        title: "Continue sua viagem",
-        detail: offlineRoutes === 1 ? "1 rota já está pronta no aparelho, sem precisar recalcular." : `${offlineRoutes} rotas já estão prontas no aparelho, sem precisar recalcular.`,
-        label: "Continuar",
-        href: appUrl("/planejar?salvos=1"),
+        title: "Continue sua última rota",
+        detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination,
+        label: "Abrir",
+        href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination),
         intent: "saved",
         icon: CloudOff,
       };
     }
 
+    if (!online && offlineRoutes > 0) {
+      return {
+        title: "Continue uma rota salva",
+        detail: offlineRoutes + (offlineRoutes === 1 ? " rota pronta" : " rotas prontas") + " no aparelho.",
+        label: "Abrir salvos",
+        href: appUrl("/planejar?salvos=1"),
+        intent: "saved",
+        icon: Bookmark,
+      };
+    }
     const destination = state.favoriteDestination;
     const intent = state.intent;
 
@@ -202,7 +213,7 @@ export default function MobileCopilot() {
       intent: "stations",
       icon: MapPin,
     };
-  }, [online, offlineRoutes, state, setLocation]);
+  }, [online, offlineRoutes, latestOfflineRoute, state, setLocation]);
 
   const shareDecision = () => {
     const destination = state.favoriteDestination;
