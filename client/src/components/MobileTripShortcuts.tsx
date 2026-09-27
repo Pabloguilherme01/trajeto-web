@@ -7,6 +7,16 @@ import { shareText } from "@/lib/mobileTools";
 type Place = { id: "casa" | "trabalho" | "outro"; label: string; value: string };
 
 const KEY = "trajeto-mobile-destinations";
+const USAGE_KEY = "trajeto-mobile-destination-usage";
+
+type Usage = Record<Place["id"], { count: number; lastUsed: number }>;
+
+function readUsage(): Partial<Usage> {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(USAGE_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch { return {}; }
+}
 
 function readPlaces(): Place[] {
   try {
@@ -22,6 +32,7 @@ export default function MobileTripShortcuts() {
   const [value, setValue] = useState("");
   const [locating, setLocating] = useState<Place["id"] | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [usage, setUsage] = useState<Partial<Usage>>(readUsage);
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(places)); } catch {}
@@ -44,11 +55,22 @@ export default function MobileTripShortcuts() {
     setEditing(null);
   };
 
+  const rememberUsage = (place: Place) => {
+    setUsage(current => {
+      const previous = current[place.id];
+      const updated = { ...current, [place.id]: { count: (previous?.count ?? 0) + 1, lastUsed: Date.now() } };
+      try { localStorage.setItem(USAGE_KEY, JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
   const open = (place: Place) => {
+    rememberUsage(place);
     setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
   };
 
   const navigateTo = (place: Place) => {
+    rememberUsage(place);
     const query = encodeURIComponent(place.value);
     const google = "https://www.google.com/maps/search/?api=1&query=" + query;
     window.open(google, "_blank", "noopener,noreferrer");
@@ -70,6 +92,7 @@ export default function MobileTripShortcuts() {
 
   const openFromHere = (place: Place) => {
     if (locating) return;
+    rememberUsage(place);
     setFeedback(null);
     setLocating(place.id);
     if (!navigator.geolocation) {
@@ -83,6 +106,14 @@ export default function MobileTripShortcuts() {
     );
   };
 
+  const favoritePlace = places.length
+    ? [...places].sort((a, b) => {
+        const aUsage = usage[a.id];
+        const bUsage = usage[b.id];
+        return (bUsage?.count ?? 0) - (aUsage?.count ?? 0) || (bUsage?.lastUsed ?? 0) - (aUsage?.lastUsed ?? 0);
+      })[0]
+    : null;
+
   return (
     <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] shadow-[0_12px_35px_rgba(11,16,20,.06)] sm:p-6">
       <div>
@@ -90,6 +121,14 @@ export default function MobileTripShortcuts() {
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
         <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p><div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]"><LocateFixed className="size-3.5 text-[#326575]" /> Use “Daqui” para transformar o destino em uma rota com sua posição atual.</div>
       </div>
+      {favoritePlace && <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[#C7FF3C]/45 bg-[linear-gradient(135deg,#163840,#1E4B50)] p-3 text-white shadow-[0_12px_28px_rgba(22,56,64,.16)]">
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.58rem] font-extrabold uppercase tracking-[0.14em] text-[#C7FF3C]">Atalho inteligente</p>
+          <p className="mt-1 truncate text-sm font-extrabold">{favoritePlace.label} · {favoritePlace.value}</p>
+          <p className="mt-1 text-[0.62rem] text-white/65">{(usage[favoritePlace.id]?.count ?? 0) > 1 ? "Destino recorrente neste aparelho." : "Último destino pronto para reutilizar."}</p>
+        </div>
+        <button type="button" onClick={() => openFromHere(favoritePlace)} disabled={Boolean(locating)} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014] active:scale-[.98]">{locating === favoritePlace.id ? "GPS…" : "Ir agora"}</button>
+      </div>}
       {feedback && <p role="status" aria-live="polite" className="mt-3 rounded-xl border border-[#326575]/20 bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {(["casa", "trabalho", "outro"] as const).map(id => {
