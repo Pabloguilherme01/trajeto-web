@@ -24,3 +24,15 @@ export function rememberSearch(query: string) {
     localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
   } catch {}
 }
+
+const LAST_TRIP_KEY = "trajeto-last-trip";
+export function getLastTrip(): { origin: string; destination: string } | null {
+  try {
+    const value = JSON.parse(localStorage.getItem(LAST_TRIP_KEY) || "null");
+    return value && typeof value.origin === "string" && typeof value.destination === "string" ? value : null;
+  } catch { return null; }
+}
+export function rememberTrip(origin: string, destination: string) {
+  if (origin.trim().length < 3 || destination.trim().length < 3) return;
+  try { localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: origin.trim(), destination: destination.trim() })); } catch {}
+}
