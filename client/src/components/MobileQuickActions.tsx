@@ -1,4 +1,4 @@
-import { Download, Fuel, Navigation, Share2, LocateFixed } from "lucide-react";
+import { Bookmark, Fuel, Navigation, Share2, LocateFixed } from "lucide-react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
@@ -17,7 +17,7 @@ export default function MobileQuickActions() {
     { label: "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => { vibration(); setLocation(appUrl("/planejar")); } },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: "GPS", icon: LocateFixed, path: "", run: locate },
-    { label: "Instalar", short: "App", icon: Download, path: "", run: () => document.getElementById("instalar-app")?.scrollIntoView({ behavior: "smooth", block: "center" }) },
+    { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
     { label: "Compartilhar", short: "Enviar", icon: Share2, path: "", run: () => { void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto"); } },
   ];
 
