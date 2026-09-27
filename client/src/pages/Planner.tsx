@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
-import { saveOfflineRoute } from "@/lib/offlineStore";
+import { getOfflineRoute, saveOfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import MobileTravelMode from "@/components/MobileTravelMode";
@@ -43,7 +43,23 @@ export default function Planner() {
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
-  }, []);
+  }, []
+
+  useEffect(() => {
+    if (!offline || planned) return;
+    const params = new URLSearchParams(window.location.search);
+    const savedOrigin = params.get("origem")?.trim() || origin.trim();
+    const savedDestination = params.get("destino")?.trim() || destination.trim();
+    if (savedOrigin.length < 3 || savedDestination.length < 3) return;
+    const id = savedOrigin.toLowerCase() + "::" + savedDestination.toLowerCase();
+    void getOfflineRoute(id).then(route => {
+      if (!route) return;
+      setOrigin(route.origin);
+      setDestination(route.destination);
+      setPlanned(route.payload as PlannedRoute);
+      setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
+    }).catch(() => {});
+  }, [offline]););
 
   useEffect(() => {
     const routeLabel = origin.trim() && destination.trim() ? origin.trim() + " → " + destination.trim() : "Planejar rota";
@@ -120,8 +136,8 @@ export default function Planner() {
       setFormError("Sem internet: abra uma rota já salva neste aparelho. Uma rota nova precisa de conexão para calcular distância, trânsito e postos reais.");
       return;
     }
-    rememberTrip(normalizedOrigin, normalizedDestination);
-    await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
+    const result = await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
+    if (result) rememberTrip(normalizedOrigin, normalizedDestination);
   };
 
   const toggleFavorite = () => {
