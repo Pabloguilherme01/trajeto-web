@@ -9,6 +9,12 @@ function cacheKey(query: string, lat?: number, lng?: number) {
 }
 
 export function getCachedStationSearch<T>(query: string, lat?: number, lng?: number, now = Date.now()): T | null {
+  // Antes do suporte geográfico, o segundo argumento era o relógio de teste.
+  // Mantemos essa forma para não quebrar chamadas legadas.
+  if (lng == null && lat != null) {
+    now = lat;
+    lat = undefined;
+  }
   const key = cacheKey(query, lat, lng);
   const cached = stationSearchCache.get(key);
   if (!cached) return null;
