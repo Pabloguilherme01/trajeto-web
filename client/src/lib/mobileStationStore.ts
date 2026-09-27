@@ -53,32 +53,40 @@ export function toggleMobileStationFavorite(station: MobileStation) {
 
 export type StationCache = {
   query: string;
+  lat?: number;
+  lng?: number;
   savedAt: string;
   stations: MobileStation[];
 };
 
-export function getCachedStations(query: string): StationCache | null {
+export function getCachedStations(query: string, lat?: number, lng?: number): StationCache | null {
   const all = readJson<unknown>(CACHE_KEY, []);
   if (!Array.isArray(all)) return null;
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
+  const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
   const match = all.find(item =>
     item &&
     typeof item === "object" &&
     "query" in item &&
     typeof item.query === "string" &&
-    item.query.trim().toLocaleLowerCase("pt-BR") === normalized
+    item.query.trim().toLocaleLowerCase("pt-BR") === normalized &&
+    (locationKey === "" ? item.lat == null && item.lng == null : item.lat != null && item.lng != null && `${item.lat.toFixed(4)},${item.lng.toFixed(4)}` === locationKey)
   ) as StationCache | undefined;
   return match && Array.isArray(match.stations) ? match : null;
 }
 
-export function cacheStations(query: string, stations: MobileStation[]) {
+export function cacheStations(query: string, stations: MobileStation[], lat?: number, lng?: number) {
   if (stations.length === 0) return;
   const all = readJson<unknown>(CACHE_KEY, []);
   const current = Array.isArray(all) ? all.filter(item => item && typeof item === "object") as StationCache[] : [];
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
+  const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
   const next = [
-    { query: query.trim(), savedAt: new Date().toISOString(), stations: stations.slice(0, MAX_CACHED) },
-    ...current.filter(item => item.query.trim().toLocaleLowerCase("pt-BR") !== normalized),
+    { query: query.trim(), lat, lng, savedAt: new Date().toISOString(), stations: stations.slice(0, MAX_CACHED) },
+    ...current.filter(item => {
+      const itemLocation = item.lat != null && item.lng != null ? `${item.lat.toFixed(4)},${item.lng.toFixed(4)}` : "";
+      return !(item.query.trim().toLocaleLowerCase("pt-BR") === normalized && itemLocation === locationKey);
+    }),
   ].slice(0, 5);
   try { localStorage.setItem(CACHE_KEY, JSON.stringify(next)); } catch {}
 }
