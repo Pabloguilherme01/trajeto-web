@@ -12,6 +12,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:server": "vitest run server --maxWorkers=1 --minWorkers=1",
+    "test:client": "vitest run client/src --maxWorkers=1 --minWorkers=1",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
