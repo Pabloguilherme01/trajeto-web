@@ -96,12 +96,17 @@ export default function MobileTripShortcuts() {
     setFeedback(null);
     setLocating(place.id);
     if (!navigator.geolocation) {
-      open(place);
+      setLocating(null);
+      setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
       return;
     }
     navigator.geolocation.getCurrentPosition(
       position => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(place.value)); },
-      () => { setLocating(null); setFeedback("GPS indisponível. Abrindo o destino sem sua localização."); open(place); },
+      () => {
+        setLocating(null);
+        setFeedback("GPS indisponível. Abrindo o destino sem sua localização.");
+        setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
+      },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
     );
   };
@@ -134,13 +139,15 @@ export default function MobileTripShortcuts() {
         {(["casa", "trabalho", "outro"] as const).map(id => {
           const place = places.find(item => item.id === id);
           const Icon = id === "casa" ? Home : id === "trabalho" ? BriefcaseBusiness : MapPin;
+          const isFavorite = favoritePlace?.id === id;
+          const usageCount = usage[id]?.count ?? 0;
           return (
             <div key={id} className="rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-3 shadow-[0_8px_24px_rgba(11,16,20,.04)]">
               {place ? (
                 <>
-                  <button type="button" onClick={() => open(place)} className="group flex min-h-12 w-full items-center gap-2 rounded-xl text-left active:scale-[.99]">
+                  <button type="button" onClick={() => open(place)} aria-label={"Planejar rota para " + place.label + (usageCount ? ", usado " + usageCount + " vezes" : "")} className="group flex min-h-12 w-full items-center gap-2 rounded-xl text-left active:scale-[.99]">
                     <Icon className="size-4 text-[#326575]" />
-                    <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
+                    <span className="min-w-0 flex-1"><strong className="flex items-center gap-1.5 text-xs">{place.label}{isFavorite && <span className="rounded-full bg-[#EAF6B7] px-1.5 py-0.5 text-[0.48rem] font-extrabold uppercase tracking-[0.08em] text-[#365000]">Mais usado</span>}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => navigateTo(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Navegar</button><button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
                 </>
