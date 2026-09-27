@@ -43,8 +43,11 @@ jobs:
       - name: Client library tests
         run: npm run test:client-lib
 
-      - name: Client UI tests
-        run: npm run test:client-ui
+      - name: Station sheet UI test
+        run: npm run test:client-station-sheet
+
+      - name: Stations page UI test
+        run: npm run test:client-stations-page
 
       - name: Production build
         run: npm run build
