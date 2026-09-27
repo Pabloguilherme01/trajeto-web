@@ -39,7 +39,8 @@ export default function MobileTravelMode() {
       const wakeLock = await (navigator as Navigator & { wakeLock: { request: (type: "screen") => Promise<WakeLockSentinelLike> } }).wakeLock.request("screen");
       lockRef.current = wakeLock;
       wakeLock.addEventListener?.("release", () => setActive(false));
-      setActive(true);\n      try { localStorage.setItem("trajeto-travel-mode", "1"); } catch {}
+      setActive(true);
+      try { localStorage.setItem("trajeto-travel-mode", "1"); } catch {}
     } catch {
       setActive(false);
     }
