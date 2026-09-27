@@ -98,10 +98,17 @@
 }
 
 @media (max-width: 767px) {
-  body { padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
+  html { overscroll-behavior-x: none; }
+  body {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color: transparent;
+  }
   :focus-visible { outline: 2px solid #C7FF3C; outline-offset: 3px; }
   .trajeto-mobile-safe { padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
   input, select, textarea { font-size: 16px !important; }
+  button, a { touch-action: manipulation; }
+  button:active, a:active { transform: translateY(1px); }
   ::-webkit-scrollbar { width: 0; height: 0; }
   .mobile-card { border-radius: 1.35rem; box-shadow: 0 14px 40px rgba(0,0,0,.16); }
+  .mobile-section-title { text-wrap: balance; }
 }
