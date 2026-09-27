@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StationSheet } from "@/components/StationSheet";
 import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
-import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPin, Route as RouteIcon, Share2, ShieldCheck, Sparkles, WifiOff, ArrowDownUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPin, Route as RouteIcon, Share2, ShieldCheck, Sparkles, WifiOff, ArrowDownUp, LocateFixed } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
@@ -36,7 +36,7 @@ export default function Planner() {
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
-  const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
+  const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);\n  const [locatingOrigin, setLocatingOrigin] = useState(false);
   
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine);
@@ -145,7 +145,7 @@ export default function Planner() {
     if (!isAuthenticated) return startLogin();
     addFavorite.mutate({ placeId: selectedStop.placeId, stationName: selectedStop.name, stationAddress: selectedStop.address, lat: selectedStop.lat, lng: selectedStop.lng });
   };
-  const openDestinationNavigation = () => {
+  const useCurrentLocation = () => {\n    if (!navigator.geolocation || locatingOrigin) return;\n    setLocatingOrigin(true);\n    navigator.geolocation.getCurrentPosition(position => {\n      setLocatingOrigin(false);\n      setOrigin(`${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}`);\n      setFormError(null);\n    }, () => {\n      setLocatingOrigin(false);\n      setFormError("Não foi possível obter sua localização. Verifique a permissão do navegador.");\n    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 });\n  };\n\n  const openDestinationNavigation = () => {
     if (!destination.trim()) return;
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination.trim())}`, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
