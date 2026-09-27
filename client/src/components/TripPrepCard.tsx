@@ -1,4 +1,4 @@
-import { CheckCircle2, Fuel, ShieldCheck, WifiOff, Sparkles, RotateCcw, Navigation, Smartphone } from "lucide-react";
+import { CheckCircle2, ShieldCheck, WifiOff, Sparkles, RotateCcw, Navigation, Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
