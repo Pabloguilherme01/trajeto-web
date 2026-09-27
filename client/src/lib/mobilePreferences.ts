@@ -2,7 +2,13 @@ const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
 
 export function getEconomyMode() {
-  try { return localStorage.getItem(ECONOMY_KEY) === "1"; } catch { return false; }
+  try {
+    const saved = localStorage.getItem(ECONOMY_KEY);
+    if (saved === "1") return true;
+    if (saved === "0") return false;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    return Boolean(connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g");
+  } catch { return false; }
 }
 
 export function setEconomyMode(enabled: boolean) {
