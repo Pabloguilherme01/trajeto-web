@@ -60,6 +60,18 @@ export default function MobileTripShortcuts() {
 
   const open = (place: MobileDestination) => {
     rememberUsage(place);
+    if (!navigator.onLine) {
+      void listOfflineRoutes().then(routes => {
+        const target = place.value.trim().toLocaleLowerCase("pt-BR");
+        const saved = routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target);
+        if (saved) {
+          setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination));
+          return;
+        }
+        setFeedback("Sem internet: este destino só pode ser aberto se houver uma rota salva correspondente.");
+      }).catch(() => setFeedback("Não foi possível consultar suas rotas salvas."));
+      return;
+    }
     setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
   };
 
@@ -138,7 +150,7 @@ export default function MobileTripShortcuts() {
       <div>
         <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Atalhos pessoais</p>
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
-        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta.</p>
+        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta. Quando houver uma rota salva para o destino, o atalho também funciona sem internet.</p>
         <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">
           <LocateFixed className="size-3.5 text-[#326575]" />
           Use “Daqui” para transformar o destino em uma rota com sua posição atual.
