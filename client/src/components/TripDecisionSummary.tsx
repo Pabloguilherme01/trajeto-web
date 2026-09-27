@@ -27,7 +27,7 @@ export default function TripDecisionSummary({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#FFC928]">Minha viagem</p>
-          <h2 id="trip-decision-title" className="font-display mt-2 text-3xl font-semibold tracking-[-0.055em]">Pronto para sair.</h2>
+          <h2 id="trip-decision-title" className="font-display mt-2 text-3xl font-semibold tracking-[-0.055em]">{offline ? "Rota pronta no aparelho." : "Pronto para sair."}</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/65">Rota, próxima parada e dados do veículo reunidos em uma única decisão.</p>
         </div>
         {offline ? (
