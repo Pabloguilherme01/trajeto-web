@@ -6,7 +6,6 @@ import {
   Fuel,
   History,
   MapPin,
-  Navigation,
   Route,
   Share2,
   Sparkles,
@@ -31,7 +30,6 @@ import {
   getMobileDestinations,
   mobileDestinationEvent,
   rememberDestinationUsage,
-  type MobileDestination,
 } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { shareText, vibration } from "@/lib/mobileTools";
@@ -96,8 +94,50 @@ export default function MobileCopilot() {
       };
     }
 
-    if (state.favoriteDestination) {
-      const destination = state.favoriteDestination;
+    const destination = state.favoriteDestination;
+    const intent = state.intent;
+
+    if (intent === "route" && state.lastTrip) {
+      return {
+        title: "Retomar sua última viagem",
+        detail: `${state.lastTrip.origin} → ${state.lastTrip.destination}`,
+        label: "Retomar",
+        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(state.lastTrip.origin) + "&destino=" + encodeURIComponent(state.lastTrip.destination),
+        icon: Route,
+      };
+    }
+
+    if (intent === "stations" && state.lastStation) {
+      return {
+        title: "Voltar ao último posto",
+        detail: state.lastStation.name,
+        label: "Abrir",
+        href: appUrl("/postos") + "?q=" + encodeURIComponent(state.lastStation.query) + "&station=" + encodeURIComponent(state.lastStation.placeId),
+        icon: Fuel,
+      };
+    }
+
+    if (intent === "nearby") {
+      return {
+        title: "Encontrar postos por perto",
+        detail: "Use sua localização para encontrar a próxima parada.",
+        label: "Perto de mim",
+        href: appUrl("/postos") + "?q=" + encodeURIComponent("postos próximos"),
+        icon: MapPin,
+      };
+    }
+
+    if (intent === "saved" && offlineRoutes > 0) {
+      return {
+        title: "Abrir suas rotas salvas",
+        detail: offlineRoutes === 1 ? "1 rota disponível neste aparelho." : `${offlineRoutes} rotas disponíveis neste aparelho.`,
+        label: "Abrir salvos",
+        href: appUrl("/planejar?salvos=1"),
+        icon: Bookmark,
+      };
+    }
+
+    if (destination) {
       return {
         title: `Ir para ${destination.label.toLowerCase()}`,
         detail: destination.value,
@@ -108,7 +148,7 @@ export default function MobileCopilot() {
           rememberIntent("route");
           setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination.value));
         },
-        icon: Navigation,
+        icon: Route,
       };
     }
 
