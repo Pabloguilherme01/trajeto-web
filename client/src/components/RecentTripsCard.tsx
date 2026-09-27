@@ -14,10 +14,14 @@ export default function RecentTripsCard() {
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const routes = await listOfflineRoutes();
-    setItems(routes.slice(0, 3).map(route => ({
-      id: route.id, origin: route.origin, destination: route.destination, savedAt: route.savedAt,
-    })));
+    try {
+      const routes = await listOfflineRoutes();
+      setItems(routes.slice(0, 3).map(route => ({
+        id: route.id, origin: route.origin, destination: route.destination, savedAt: route.savedAt,
+      })));
+    } catch {
+      setFeedback("Não foi possível ler suas rotas salvas agora.");
+    }
   }, []);
 
   useEffect(() => {
