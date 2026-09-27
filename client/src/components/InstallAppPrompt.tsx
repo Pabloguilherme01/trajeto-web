@@ -39,9 +39,9 @@ export default function InstallAppPrompt() {
   };
 
   return (
-    <aside className="fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-white/15 bg-[#121B22]/95 p-4 text-white shadow-2xl backdrop-blur-xl supports-[padding:max(0px)]:pb-[max(1rem,env(safe-area-inset-bottom))]" aria-label="Instalar Trajeto">
+    <aside className="fixed inset-x-3 bottom-[max(5.6rem,calc(5rem + env(safe-area-inset-bottom)))] z-50 mx-auto max-w-md rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#0D151A]/96 p-4 text-white shadow-[0_20px_60px_rgba(0,0,0,.5)] backdrop-blur-2xl md:bottom-4" aria-label="Instalar Trajeto">
       <div className="flex items-start gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]">
+        <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C] text-[#0B1014]">
           <Download className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ export default function InstallAppPrompt() {
             Instale como aplicativo para abrir mais rápido e continuar acessando o que já foi salvo mesmo sem conexão.
           </p>
           {isIOS && !event && <p className="mt-2 text-xs font-semibold text-[#DFFF9D]">No iPhone: Compartilhar → Adicionar à Tela de Início.</p>}
-          {event && <button type="button" onClick={install} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014]">Instalar app</button>}
+          {event && <button type="button" onClick={install} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] active:scale-[.98]">Instalar app</button>}
         </div>
         <button type="button" onClick={() => { setVisible(false); try { localStorage.setItem("trajeto-install-dismissed-until", String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch {} }} className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/10 text-[#9FB0B8]" aria-label="Fechar aviso de instalação">
           <X className="size-4" />
