@@ -41,13 +41,18 @@ export default function OfflineRouteVault() {
   const [items, setItems] = useState<OfflineRoute[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState(false);
+  const [isOnline, setIsOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setStorageError(false);
     try {
       setItems(await listOfflineRoutes());
     } catch {
-      setFeedback("Não foi possível ler as rotas salvas neste aparelho.");
+      setItems([]);
+      setStorageError(true);
+      setFeedback("Não foi possível acessar as rotas salvas. Seus dados locais não foram alterados.");
     } finally {
       setLoading(false);
     }
@@ -55,8 +60,15 @@ export default function OfflineRouteVault() {
 
   useEffect(() => {
     void refresh();
+    const updateConnection = () => setIsOnline(navigator.onLine);
     window.addEventListener(offlineRouteEvent, refresh);
-    return () => window.removeEventListener(offlineRouteEvent, refresh);
+    window.addEventListener("online", updateConnection);
+    window.addEventListener("offline", updateConnection);
+    return () => {
+      window.removeEventListener(offlineRouteEvent, refresh);
+      window.removeEventListener("online", updateConnection);
+      window.removeEventListener("offline", updateConnection);
+    };
   }, [refresh]);
 
   const openRoute = (route: OfflineRoute) => {
@@ -77,10 +89,10 @@ export default function OfflineRouteVault() {
     try {
       await shareText(
         `Rota salva no Trajeto: ${route.origin} → ${route.destination}.`,
-        routeUrl(route),
+        window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(route.origin) + "&destino=" + encodeURIComponent(route.destination),
         "Rota salva no Trajeto",
       );
-      setFeedback("Rota preparada para compartilhar.");
+      setFeedback("Origem e destino preparados para compartilhar. O destinatário precisará de internet para recalcular a rota.");
     } catch {
       setFeedback("Não foi possível compartilhar esta rota agora.");
     }
@@ -122,6 +134,14 @@ export default function OfflineRouteVault() {
         </button>
       </div>
 
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-[0.58rem] font-bold">
+        <span className={`rounded-full px-2.5 py-1 ${isOnline ? "bg-[#C7FF3C]/15 text-[#C7FF3C]" : "bg-[#3DE3FF]/10 text-[#8FEAFF]"}`}>
+          {isOnline ? "Internet disponível" : "Sem internet"}
+        </span>
+        <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[#91A4AC]">Rota salva localmente
+        </span>
+      </div>
+
       {feedback && (
         <p role="status" aria-live="polite" className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[0.65rem] font-bold text-[#B9C9CE]">
           {feedback}
@@ -131,6 +151,12 @@ export default function OfflineRouteVault() {
       {loading ? (
         <div role="status" aria-label="Carregando rotas salvas" className="mt-5 space-y-2">
           {[1, 2].map(item => <div key={item} className="h-24 animate-pulse rounded-2xl bg-white/[0.05]" />)}
+        </div>
+      ) : storageError ? (
+        <div className="mt-5 rounded-2xl border border-[#FFB5A1]/30 bg-[#FFB5A1]/[0.06] p-5">
+          <p className="text-sm font-bold text-white">Não foi possível abrir o cofre offline.</p>
+          <p className="mt-1 text-xs leading-relaxed text-[#B8A7A2]">O navegador não conseguiu acessar o armazenamento local. Tente novamente; nenhuma rota será removida automaticamente.</p>
+          <button type="button" onClick={() => void refresh()} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-xs font-black text-white">Tentar novamente <RotateCw className="size-4" /></button>
         </div>
       ) : !items.length ? (
         <div className="mt-5 rounded-2xl border border-dashed border-white/12 bg-white/[0.025] p-5">
