@@ -97,7 +97,7 @@ export default function Planner() {
     }).catch(() => {
       setShareMessage("Não foi possível abrir esta rota salva. Ela pode estar corrompida.");
     });
-  }, [offline, origin, destination, planned]);
+  }, []);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("salvos") !== "1") return;
