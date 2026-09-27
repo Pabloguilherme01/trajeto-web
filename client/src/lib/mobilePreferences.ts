@@ -1,5 +1,11 @@
 const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
+const LAST_TRIP_KEY = "trajeto-last-trip";
+const PREFERENCE_EVENT = "trajeto-preferences-change";
+
+function notifyPreferenceChange() {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(PREFERENCE_EVENT));
+}
 
 export function getEconomyMode() {
   try {
@@ -13,6 +19,7 @@ export function getEconomyMode() {
 
 export function setEconomyMode(enabled: boolean) {
   try { localStorage.setItem(ECONOMY_KEY, enabled ? "1" : "0"); } catch {}
+  notifyPreferenceChange();
 }
 
 export function getRecentSearches(): string[] {
@@ -29,16 +36,20 @@ export function rememberSearch(query: string) {
     const next = [normalized, ...getRecentSearches().filter(item => item.toLowerCase() !== normalized.toLowerCase())].slice(0, 5);
     localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
   } catch {}
+  notifyPreferenceChange();
 }
 
-const LAST_TRIP_KEY = "trajeto-last-trip";
 export function getLastTrip(): { origin: string; destination: string } | null {
   try {
     const value = JSON.parse(localStorage.getItem(LAST_TRIP_KEY) || "null");
     return value && typeof value.origin === "string" && typeof value.destination === "string" ? value : null;
   } catch { return null; }
 }
+
 export function rememberTrip(origin: string, destination: string) {
   if (origin.trim().length < 3 || destination.trim().length < 3) return;
   try { localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: origin.trim(), destination: destination.trim() })); } catch {}
+  notifyPreferenceChange();
 }
+
+export const mobilePreferenceEvent = PREFERENCE_EVENT;
