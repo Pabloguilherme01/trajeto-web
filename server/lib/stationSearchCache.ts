@@ -3,7 +3,9 @@ const MAX_CACHE_ENTRIES = 100;
 const stationSearchCache = new Map<string, { expiresAt: number; value: unknown }>();
 
 function cacheKey(query: string, lat?: number, lng?: number) {
-  return query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR");
+  const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR");
+  if (lat == null || lng == null) return normalizedQuery;
+  return `${normalizedQuery}|gps:${lat.toFixed(3)},${lng.toFixed(3)}`;
 }
 
 export function getCachedStationSearch<T>(query: string, lat?: number, lng?: number, now = Date.now()): T | null {
