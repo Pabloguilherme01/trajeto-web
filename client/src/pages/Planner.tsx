@@ -265,7 +265,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
       </header>
 
       <main className="container py-10 lg:py-14">
-        {offline && <section role="status" aria-live="polite" className="mb-6 flex items-start gap-3 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]"><WifiOff className="mt-0.5 size-4 shrink-0" /><p><strong className="text-[#163840]">Modo offline.</strong> Você pode abrir rotas salvas neste aparelho. Novas rotas, trânsito e consultas de postos precisam de internet.</p></section>}
+        {offline && <section role="status" aria-live="polite" className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]"><WifiOff className="mt-0.5 size-4 shrink-0" /><p className="min-w-0 flex-1"><strong className="text-[#163840]">Modo offline.</strong> Continue uma rota salva neste aparelho. Novas rotas, trânsito e consultas de postos precisam de internet.</p><Link href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-[#163840] px-3 py-2 text-[0.62rem] font-extrabold text-white">Abrir salvos</Link></section>}
         <div className="mb-10 max-w-3xl">
           <p className="eyebrow">Rota com dados reais</p>
           <h1 className="font-display mt-4 text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.86] tracking-[-0.065em]">Escolha melhor<br /><span className="text-[#BA5B45]">antes de sair.</span></h1>
