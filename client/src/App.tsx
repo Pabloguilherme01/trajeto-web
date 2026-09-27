@@ -8,6 +8,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
+import MobileQuickActions from "./components/MobileQuickActions";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -72,6 +73,7 @@ export default function App() {
         <TooltipProvider>
           <Toaster />
           <InstallAppPrompt />
+          <MobileQuickActions />
           <AuthReturnHandler />
           <Router />
         </TooltipProvider>
