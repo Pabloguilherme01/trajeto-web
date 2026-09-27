@@ -1,6 +1,7 @@
 const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
+const LAST_STATION_KEY = "trajeto-last-station";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
 
 function notifyPreferenceChange() {
@@ -49,6 +50,30 @@ export function getLastTrip(): { origin: string; destination: string } | null {
 export function rememberTrip(origin: string, destination: string) {
   if (origin.trim().length < 3 || destination.trim().length < 3) return;
   try { localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: origin.trim(), destination: destination.trim() })); } catch {}
+  notifyPreferenceChange();
+}
+
+export type LastStation = { placeId: string; name: string; address: string; query: string };
+
+export function getLastStation(): LastStation | null {
+  try {
+    const value = JSON.parse(localStorage.getItem(LAST_STATION_KEY) || "null");
+    return value && typeof value.placeId === "string" && typeof value.name === "string" && typeof value.address === "string" && typeof value.query === "string"
+      ? value
+      : null;
+  } catch { return null; }
+}
+
+export function rememberStation(station: LastStation) {
+  if (!station.placeId || station.name.trim().length < 2 || station.address.trim().length < 2) return;
+  try {
+    localStorage.setItem(LAST_STATION_KEY, JSON.stringify({
+      placeId: station.placeId,
+      name: station.name.trim(),
+      address: station.address.trim(),
+      query: station.query.trim(),
+    }));
+  } catch {}
   notifyPreferenceChange();
 }
 
