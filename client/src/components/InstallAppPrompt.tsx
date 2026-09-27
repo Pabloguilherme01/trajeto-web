@@ -17,6 +17,8 @@ export default function InstallAppPrompt() {
       setVisible(true);
     };
 
+    const dismissedUntil = Number(localStorage.getItem("trajeto-install-dismissed-until") || "0");
+    if (dismissedUntil > Date.now()) return () => window.removeEventListener("beforeinstallprompt", handler);
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
