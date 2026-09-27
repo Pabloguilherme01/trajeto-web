@@ -90,9 +90,9 @@ export default function MobileCopilot() {
   const primary = useMemo<Action>(() => {
     if (!online && offlineRoutes > 0) {
       return {
-        title: "Continue sem internet",
-        detail: offlineRoutes === 1 ? "Você tem 1 rota salva neste aparelho." : `Você tem ${offlineRoutes} rotas salvas neste aparelho.`,
-        label: "Abrir rotas",
+        title: "Continue sua viagem",
+        detail: offlineRoutes === 1 ? "1 rota já está pronta no aparelho, sem precisar recalcular." : `${offlineRoutes} rotas já estão prontas no aparelho, sem precisar recalcular.`,
+        label: "Continuar",
         href: appUrl("/planejar?salvos=1"),
         intent: "saved",
         icon: CloudOff,
@@ -137,9 +137,9 @@ export default function MobileCopilot() {
 
     if (intent === "saved" && offlineRoutes > 0) {
       return {
-        title: "Abrir suas rotas salvas",
-        detail: offlineRoutes === 1 ? "1 rota disponível neste aparelho." : `${offlineRoutes} rotas disponíveis neste aparelho.`,
-        label: "Abrir salvos",
+        title: "Continuar uma viagem salva",
+        detail: offlineRoutes === 1 ? "1 rota pronta para reabrir." : `${offlineRoutes} rotas prontas para reabrir.`,
+        label: "Continuar",
         href: appUrl("/planejar?salvos=1"),
         intent: "saved",
         icon: Bookmark,
@@ -250,7 +250,7 @@ export default function MobileCopilot() {
                   <Sparkles className="size-3.5" /> Copiloto de deslocamento
                 </p>
                 <h2 id="mobile-copilot-title" className="mt-1.5 font-display text-2xl font-semibold tracking-[-0.055em] text-white">
-                  O que você precisa fazer agora?
+                  Qual é o próximo passo?
                 </h2>
               </div>
               <div className={online ? "rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/8 p-2 text-[#C7FF3C]" : "rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/8 p-2 text-[#FFB86B]"} aria-label={online ? "Conectado" : "Offline"}>
