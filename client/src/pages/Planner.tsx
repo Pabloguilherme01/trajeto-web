@@ -310,7 +310,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
             {latestOfflineRoute && <Link href={appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#163840] px-4 py-2 text-[0.65rem] font-extrabold text-white">Continuar última rota <ArrowRight className="size-3.5" /></Link>}
             <Link href={appUrl("/planejar?salvos=1")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#163840]/20 px-4 py-2 text-[0.65rem] font-extrabold text-[#163840]">Ver rotas salvas</Link>
           </div>
-          <p className="mt-3 text-[0.68rem]">Novas rotas, trânsito, localização ao vivo e consultas de postos precisam de internet.</p>
+          <p className="mt-3 text-[0.68rem]">{latestOfflineRoute ? "Abra a rota salva para continuar. Novas rotas, trânsito, localização ao vivo e consultas de postos precisam de internet." : "Sem rota salva: novas rotas, localização ao vivo e consultas de postos ficam disponíveis quando a conexão voltar."}</p>
         </section>}
         <div className="mb-10 max-w-3xl">
           <p className="eyebrow">Rota com dados reais</p>
@@ -320,7 +320,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
         </div>
 
         <section className="grid overflow-hidden border border-[#C7D2C9] bg-white lg:grid-cols-[0.74fr_1.26fr]">
-          <form onSubmit={submit} className="relative bg-[#163840] p-6 text-white sm:p-8">
+          <form onSubmit={submit} className={`${offline ? "hidden " : ""}relative bg-[#163840] p-6 text-white sm:p-8`}>
             <div className="absolute left-0 top-0 h-2 w-24 bg-[#FFC928]" />
             <div className="mb-8 flex items-start justify-between gap-5"><div><p className="text-[0.64rem] font-bold uppercase tracking-[0.16em] text-[#FFC928]">Seu ponto de partida</p><h2 className="font-display mt-3 text-3xl font-semibold leading-none tracking-[-0.055em]">Desenhe a rota.</h2></div><RouteIcon className="size-6 text-[#FFC928]" /></div>
             {lastTrip && <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.06] p-3">
