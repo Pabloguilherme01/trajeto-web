@@ -40,8 +40,11 @@ jobs:
       - name: Server tests
         run: npm run test:server
 
-      - name: Client tests
-        run: npm run test:client
+      - name: Client library tests
+        run: npm run test:client-lib
+
+      - name: Client UI tests
+        run: npm run test:client-ui
 
       - name: Production build
         run: npm run build
