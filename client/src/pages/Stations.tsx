@@ -150,7 +150,14 @@ export default function Stations() {
     setQuery(trimmed);
     rememberSearch(trimmed);
     setRecentSearches(getRecentSearches());
-    setLocation(`${appUrl("/postos")}${region ? `?region=${encodeURIComponent(region)}&` : "?"}q=${encodeURIComponent(trimmed)}`);
+    const params = new URLSearchParams();
+    if (region) params.set("region", region);
+    if (locationParams.lat != null && locationParams.lng != null) {
+      params.set("lat", String(locationParams.lat));
+      params.set("lng", String(locationParams.lng));
+    }
+    params.set("q", trimmed);
+    setLocation(`${appUrl("/postos")}?${params.toString()}`);
   };
   const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); navigateToQuery(input); };
   const selectCorridor = (preset: CorridorPreset) => navigateToQuery(preset.query, preset.id);
@@ -163,7 +170,7 @@ export default function Stations() {
 
   useEffect(() => {
     setCachedStationSnapshot(getCachedStations(query, locationParams.lat, locationParams.lng));
-  }, [query]);
+  }, [query, locationParams.lat, locationParams.lng]);
 
   useEffect(() => {
     if (liveList.length > 0) {
