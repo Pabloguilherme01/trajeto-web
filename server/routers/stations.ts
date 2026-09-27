@@ -33,7 +33,7 @@ export const stationsRouter = router({
         sawUnavailableToken ||= isGooglePageTokenUnavailable(page.status);
         return page;
       })
-      : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", input.lat != null && input.lng != null ? { query: "posto de combustíveis", type: "gas_station", location: `${input.lat},${input.lng}`, radius: 25_000 } : { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
+      : await makeRequest<PlacesSearchResult>("/maps/api/place/textsearch/json", input.lat != null && input.lng != null ? { query: input.query, type: "gas_station", location: `${input.lat},${input.lng}`, radius: 25_000 } : { query: `posto de combustíveis em ${input.query}`, type: "gas_station" });
     if (sawUnavailableToken) void createProductEvent({ event: "google_page_token_invalid", region: stationPaginationMetricRegion(input.query) });
     if (search.status === "INVALID_REQUEST" && input.cursor) {
       return {
