@@ -32,7 +32,7 @@ export default function MobileQuickActions() {
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
-      <div className="mx-auto max-w-md rounded-[1.35rem] border border-white/12 bg-[#080D11]/95 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl">
+      <div className={`mx-auto max-w-md rounded-[1.35rem] border p-1.5 ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}> shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-2xl">
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run }) => {
             const active = label === "Salvos" ? current === appUrl("/postos") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
