@@ -160,6 +160,28 @@ export default function Home() {
           </div>
         </section>
 
+        <section id="instalar-app" className="border-b border-white/8 bg-[#10181F] py-10 sm:py-14">
+          <div className="container">
+            <div className="rounded-3xl border border-[#C7FF3C]/20 bg-[#121B22] p-5 sm:p-7">
+              <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+                <div>
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Funciona como aplicativo</p>
+                  <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] text-white">Instale o Trajeto no celular.</h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#A8B9C0]">Na primeira visita com internet, abra o menu de instalação do navegador. O Trajeto salva o aplicativo e os recursos necessários para reabrir a interface sem conexão.</p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs leading-relaxed text-[#9FB0B8]"><strong className="block text-white">Android / Chrome</strong>Use “Instalar app” ou “Adicionar à tela inicial”.</div>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs leading-relaxed text-[#9FB0B8]"><strong className="block text-white">iPhone / Safari</strong>Use Compartilhar → “Adicionar à Tela de Início”.</div>
+                  </div>
+                  <p className="mt-4 text-xs leading-relaxed text-[#74878F]">Sem conexão, a interface e os dados que já foram armazenados no aparelho continuam acessíveis. Consultas novas a Google Maps e outros serviços exigem internet.</p>
+                </div>
+                <div className="hidden lg:grid size-24 place-items-center rounded-3xl bg-[#C7FF3C] text-[#0B1014]">
+                  <Download className="size-10" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="border-t border-white/8 bg-[#10181F] py-14 sm:py-18">
           <div className="container grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
