@@ -324,6 +324,11 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
           onSave={() => void saveCurrentRouteOffline()}
+          onRefresh={loadedFromOffline && !offline ? () => {
+            setLoadedFromOffline(false);
+            setPlanned(null);
+            setShareMessage("Rota salva encerrada. Calcule novamente para buscar dados atuais.");
+          } : undefined}
         />}
 
         {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveCurrentRouteOffline()} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
