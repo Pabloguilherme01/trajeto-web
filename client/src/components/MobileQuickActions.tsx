@@ -1,22 +1,26 @@
 import { Bookmark, Fuel, Navigation, Share2, LocateFixed } from "lucide-react";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
 
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
   const current = location.split("?")[0];
+  const [locating, setLocating] = useState(false);
   const locate = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation || locating) return;
     vibration();
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(position => {
+      setLocating(false);
       setLocation(appUrl("/postos") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude + "&q=" + encodeURIComponent("postos próximos"));
-    });
+    }, () => setLocating(false), { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 });
   };
   const actions = [
     { label: "Planejar", short: "Rota", icon: Navigation, path: "/planejar", run: () => { vibration(); setLocation(appUrl("/planejar")); } },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
-    { label: "Perto de mim", short: "GPS", icon: LocateFixed, path: "", run: locate },
+    { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
     { label: "Compartilhar", short: "Enviar", icon: Share2, path: "", run: () => { void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto"); } },
   ];
