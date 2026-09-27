@@ -59,9 +59,14 @@ export default function Planner() {
     const id = savedOrigin.toLowerCase() + "::" + savedDestination.toLowerCase();
     void getOfflineRoute(id).then(route => {
       if (!route) return;
+      const payload = route.payload as Partial<PlannedRoute>;
+      if (!payload.route || !Array.isArray(payload.stops)) {
+        setShareMessage("Esta rota salva está incompleta e não pode ser aberta. Salve uma nova rota quando estiver online.");
+        return;
+      }
       setOrigin(route.origin);
       setDestination(route.destination);
-      setPlanned(route.payload as PlannedRoute);
+      setPlanned(payload as PlannedRoute);
       setLoadedFromOffline(true);
       setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
     }).catch(() => {});
@@ -281,7 +286,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
             destination: destination.trim(),
             savedAt: new Date().toISOString(),
             payload: planned,
-          }).then(() => setShareMessage("Rota salva neste aparelho para acesso offline."))}
+          }).then(() => setShareMessage("Rota salva neste aparelho para acesso offline.")).catch(() => setShareMessage("Não foi possível salvar a rota offline. Tente novamente."))}
         />}
 
         {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveOfflineRoute({
