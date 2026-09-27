@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation } from "lucide-react";
+import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation, ArrowRight, LocateFixed } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -57,9 +57,9 @@ export default function MobileTripShortcuts() {
                 <>
                   <button type="button" onClick={() => open(place)} className="group flex min-h-12 w-full items-center gap-2 rounded-xl text-left active:scale-[.99]">
                     <Icon className="size-4 text-[#326575]" />
-                    <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><Navigation className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
+                    <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
-                  <div className="mt-1 flex items-center gap-3"><button type="button" onClick={() => void shareText(`${place.label}: ${place.value}`, `${window.location.origin}${appUrl("/planejar")}?destino=${encodeURIComponent(place.value)}`, "Destino no Trajeto")} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Enviar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
+                  <div className="mt-1 flex items-center gap-3"><button type="button" onClick={() => open(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#163840]"><Navigation className="size-3" /> Planejar</button><button type="button" onClick={() => void shareText(`${place.label}: ${place.value}`, `${window.location.origin}${appUrl("/planejar")}?destino=${encodeURIComponent(place.value)}`, "Destino no Trajeto")} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Enviar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
                 </>
               ) : (
                 <button type="button" onClick={() => { setEditing(id); setValue(""); }} className="flex min-h-16 w-full items-center justify-center gap-2 rounded-xl text-xs font-bold text-[#52636C]">
