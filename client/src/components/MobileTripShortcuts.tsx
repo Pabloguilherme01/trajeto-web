@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation, ArrowRight, LocateFixed } from "lucide-react";
+import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation, ArrowRight, LocateFixed, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -40,6 +40,18 @@ export default function MobileTripShortcuts() {
     setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.value));
   };
 
+  const openFromHere = (place: Place) => {
+    if (!navigator.geolocation) {
+      open(place);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      position => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(place.value)),
+      () => open(place),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
+    );
+  };
+
   return (
     <section className="rounded-3xl border border-[#CFD9DD] bg-white p-5 text-[#0B1014] shadow-[0_12px_35px_rgba(11,16,20,.06)] sm:p-6">
       <div>
@@ -59,7 +71,7 @@ export default function MobileTripShortcuts() {
                     <Icon className="size-4 text-[#326575]" />
                     <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
-                  <div className="mt-1 flex items-center gap-3"><button type="button" onClick={() => open(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#163840]"><Navigation className="size-3" /> Planejar</button><button type="button" onClick={() => void shareText(`${place.label}: ${place.value}`, `${window.location.origin}${appUrl("/planejar")}?destino=${encodeURIComponent(place.value)}`, "Destino no Trajeto")} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Enviar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1"><button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#163840]"><LocateFixed className="size-3" /> Daqui</button><button type="button" onClick={() => void shareText(`${place.label}: ${place.value}`, `${window.location.origin}${appUrl("/planejar")}?destino=${encodeURIComponent(place.value)}`, "Destino no Trajeto")} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
                 </>
               ) : (
                 <button type="button" onClick={() => { setEditing(id); setValue(""); }} className="flex min-h-16 w-full items-center justify-center gap-2 rounded-xl text-xs font-bold text-[#52636C]">
