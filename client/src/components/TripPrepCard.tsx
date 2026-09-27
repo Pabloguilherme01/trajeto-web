@@ -107,8 +107,8 @@ export default function TripPrepCard() {
         <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF0F2]"><CheckCircle2 className="size-5 text-[#326575]" /></div>
         <div className="min-w-0">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Antes de sair</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Deixe a próxima viagem pronta.</h2>
-          <p className="mt-2 text-xs leading-relaxed text-[#617179]">{progress}/{defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">{online ? "Deixe a próxima viagem pronta." : latestOfflineRoute ? "Sua viagem continua pronta." : "Prepare uma rota para usar offline."}</h2>
+          <p className="mt-2 text-xs leading-relaxed text-[#617179]">{online ? `${progress}/${defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.` : latestOfflineRoute ? "A rota salva pode ser reaberta neste aparelho sem recalcular." : "Sem uma rota salva, o modo offline não consegue preparar uma nova viagem."}</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#E3E9EB]" aria-hidden="true"><div className="h-full rounded-full bg-[#326575] transition-all" style={{ width: `${(progress / defaults.length) * 100}%` }} /></div>
         </div>
       </div>
