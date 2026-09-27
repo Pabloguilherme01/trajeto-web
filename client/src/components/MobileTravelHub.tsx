@@ -2,6 +2,7 @@ import { Battery, CloudOff, Compass, Gauge, LocateFixed, Navigation, Wifi } from
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
+import { getLastTrip } from "@/lib/mobilePreferences";
 import { listOfflineRoutes } from "@/lib/offlineStore";
 
 export default function MobileTravelHub() {
@@ -9,6 +10,7 @@ export default function MobileTravelHub() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [battery, setBattery] = useState<number | null>(null);
   const [savedRoutes, setSavedRoutes] = useState(0);
+  const [lastTrip, setLastTrip] = useState<{ origin: string; destination: string } | null>(null);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -17,6 +19,7 @@ export default function MobileTravelHub() {
 
     let mounted = true;
     void listOfflineRoutes().then(routes => { if (mounted) setSavedRoutes(routes.length); }).catch(() => {});
+    if (mounted) setLastTrip(getLastTrip());
 
     const nav = navigator as Navigator & {
       getBattery?: () => Promise<{ level: number; addEventListener: (type: string, listener: () => void) => void; removeEventListener: (type: string, listener: () => void) => void }>;
