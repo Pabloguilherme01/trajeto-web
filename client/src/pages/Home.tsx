@@ -102,7 +102,7 @@ export default function Home() {
                 Decida a parada.<br /><span className="text-[#C7FF3C]">Siga melhor.</span>
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#B7C4CA] sm:mt-7 sm:text-lg">
-                O Trajeto transforma uma viagem em próximos passos simples: escolha o destino, decida onde parar, navegue e deixe o celular lembrar o caminho para a próxima vez. Sem cadastro para começar.
+                O Trajeto transforma deslocamento em uma sequência simples: escolha o destino, decida onde parar, salve o plano e saia. Na próxima vez, o celular já lembra o caminho. Sem cadastro para começar.
               </p>
 
               <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
@@ -191,24 +191,24 @@ export default function Home() {
             <div className="max-w-2xl">
               <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Seu copiloto de deslocamento</p>
               <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Detecte → decida → navegue → <em>volte mais rápido.</em></h2>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa para onde vai. O Trajeto organiza o que vem depois. Destinos, viagens, buscas e rotas salvas ficam no aparelho para reduzir o trabalho na próxima saída, inclusive quando a conexão falhar.</p>
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa para onde vai. O Trajeto organiza o próximo passo. O que você repete fica no aparelho: destinos, viagens, buscas e rotas salvas. Se a conexão cair, o que já foi preparado continua acessível.</p>
             </div>
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
               <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
                 <span className="text-xs font-black text-[#52636C]">01</span>
-                <h3 className="mt-8 text-xl font-extrabold">Ache o posto</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Veja opções próximas e abra a navegação no aplicativo de mapas escolhido.</p>
+                <h3 className="mt-8 text-xl font-extrabold">Encontre</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Encontre postos no caminho e veja distância, referência e opções de parada.</p>
               </article>
               <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
                 <span className="text-xs font-black text-[#52636C]">02</span>
-                <h3 className="mt-8 text-xl font-extrabold">Meça o desvio</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Veja o efeito da parada na viagem e compare o desvio antes de decidir.</p>
+                <h3 className="mt-8 text-xl font-extrabold">Decida</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Compare a parada com o impacto na viagem antes de sair do caminho.</p>
               </article>
               <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
                 <span className="text-xs font-black text-[#52636C]">03</span>
-                <h3 className="mt-8 text-xl font-extrabold">Entenda o impacto</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Quando houver dados suficientes, estime o custo da rota sem confundir referência com preço de bomba.</p>
+                <h3 className="mt-8 text-xl font-extrabold">Continue</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Salve a rota no aparelho. Depois, você pode reabri-la mesmo sem conexão.</p>
               </article>
             </div>
           </div>
