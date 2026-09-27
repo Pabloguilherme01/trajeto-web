@@ -1,4 +1,4 @@
-import { Clock3, Navigation, Trash2, RotateCw, Share2 } from "lucide-react";
+import { Clock3, Navigation, Trash2, RotateCw, Share2, LocateFixed } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -11,6 +11,8 @@ export default function RecentTripsCard() {
   const [, setLocation] = useLocation();
   const [items, setItems] = useState<Item[]>([]);
 
+  const [locating, setLocating] = useState<string | null>(null);
+
   const refresh = async () => {
     const routes = await listOfflineRoutes();
     setItems(routes.slice(0, 3).map(route => ({
@@ -19,6 +21,16 @@ export default function RecentTripsCard() {
   };
 
   useEffect(() => { void refresh(); }, []);
+
+  const openFromHere = (item: Item) => {
+    if (!navigator.geolocation || locating) return;
+    setLocating(item.id);
+    navigator.geolocation.getCurrentPosition(
+      position => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(`${position.coords.latitude}, ${position.coords.longitude}`) + "&destino=" + encodeURIComponent(item.destination)); },
+      () => { setLocating(null); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(item.origin) + "&destino=" + encodeURIComponent(item.destination)); },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
+    );
+  };
 
   if (!items.length) return null;
 
