@@ -1,5 +1,6 @@
 import { Check, ExternalLink, Navigation, Save, Share2, Fuel, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";\nimport { vibration } from "@/lib/mobileTools";
+import { useEffect, useState } from "react";
+import { vibration } from "@/lib/mobileTools";
 import { getOfflineRoute } from "@/lib/offlineStore";
 
 type Props = {
@@ -15,7 +16,9 @@ type Props = {
 export default function MobileRouteDock({ distance, duration, routeId, onShare, onNavigate, onSave, onStations }: Props) {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [saveError, setSaveError] = useState(false);\n  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);\n  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState(false);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const onOnline = () => setOnline(true);
@@ -40,10 +43,12 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
     return () => { active = false; };
   }, [routeId]);
 
-  const handleSave = () => {\n    vibration();
+  const handleSave = () => {
+    vibration();
     if (busy || saved) return;
     setBusy(true);
-    setSaveError(false);\n    setActionMessage(null);
+    setSaveError(false);
+    setActionMessage(null);
     Promise.resolve(onSave())
       .then(() => { setSaved(true); setActionMessage("Rota salva neste aparelho."); vibration(18); })
       .catch(() => { setSaveError(true); setActionMessage("Não foi possível salvar a rota."); })
@@ -71,7 +76,8 @@ export default function MobileRouteDock({ distance, duration, routeId, onShare, 
           <button type="button" aria-label="Ver postos encontrados na rota" onClick={() => { vibration(); onStations(); }} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97]"><Fuel className="size-4" />Postos</button>
           <button type="button" aria-label="Compartilhar esta rota" onClick={() => { vibration(); onShare(); }} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl bg-white/10 px-1 text-[0.56rem] font-extrabold text-white active:scale-[.97]"><Share2 className="size-4" />Enviar</button>
         </div>
-        {actionMessage && <p role="status" aria-live="polite" className="border-t border-white/10 px-3 py-2 text-center text-[0.58rem] font-bold text-white/75">{actionMessage}</p>}\n        {saveError && <p role="alert" className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.58rem] font-bold text-[#FFD49C]"><AlertCircle className="size-3.5" /> Não foi possível salvar. Tente novamente.</p>}
+        {actionMessage && <p role="status" aria-live="polite" className="border-t border-white/10 px-3 py-2 text-center text-[0.58rem] font-bold text-white/75">{actionMessage}</p>}
+        {saveError && <p role="alert" className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.58rem] font-bold text-[#FFD49C]"><AlertCircle className="size-3.5" /> Não foi possível salvar. Tente novamente.</p>}
         <p className="flex items-center justify-center gap-1 border-t border-white/10 px-3 py-2 text-[0.52rem] font-semibold text-white/45"><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C]" : "bg-[#FFB86B]"}`} /> {online ? "Online · navegação e consultas externas disponíveis." : "Offline · a rota salva continua disponível neste aparelho."}</p>
       </div>
     </section>
