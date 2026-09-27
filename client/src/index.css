@@ -96,3 +96,9 @@
   html { scroll-behavior: auto; }
   .animate-route-in { animation: none; }
 }
+
+@media (max-width: 767px) {
+  body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  :focus-visible { outline: 2px solid #C7FF3C; outline-offset: 3px; }
+}
+.trajeto-mobile-safe { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
