@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v2";
+const VERSION = "trajeto-v3";
 const STATIC_CACHE = `${VERSION}-static`;
 const DATA_CACHE = `${VERSION}-data`;
 
@@ -8,6 +8,7 @@ const STATIC_SHELL = [
   "./site.webmanifest",
   "./favicon.svg",
   "./robots.txt",
+  "./favicon.svg",
 ];
 
 self.addEventListener("install", event => {
