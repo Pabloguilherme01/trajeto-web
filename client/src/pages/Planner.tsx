@@ -337,7 +337,12 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           } : undefined}
         />}
 
-        {planned && <MobileRouteDock snapshot={loadedFromOffline} routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveCurrentRouteOffline()} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
+        {planned && <MobileRouteDock snapshot={loadedFromOffline} routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onRefresh={loadedFromOffline && !offline ? () => {
+            setLoadedFromOffline(false);
+            setOfflineSavedAt(null);
+            setPlanned(null);
+            setShareMessage("Rota salva encerrada. Calcule novamente para buscar dados atuais.");
+          } : undefined} onSave={() => void saveCurrentRouteOffline()} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
 
         {planned && <div className="mt-4 md:hidden"><MobileTravelMode /></div>}
 
