@@ -172,16 +172,14 @@ export default function Planner() {
     setEthanolKmPerLiter(current => current || String(selectedConsumption));
   }, [selectedVehicle, selectedConsumption]);
 
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setShareMessage(null);
-    setFormError(null);
+  const calculateCurrentRoute = async () => {
     const normalizedOrigin = origin.trim();
     const normalizedDestination = destination.trim();
     if (normalizedOrigin.toLocaleLowerCase("pt-BR") === normalizedDestination.toLocaleLowerCase("pt-BR")) {
       setFormError("Origem e destino precisam ser diferentes.");
-      return;
+      return null;
     }
+
     const parse = (value: string) => Number(value.replace(",", "."));
     const gasoline = parse(gasolinePrice);
     const ethanol = parse(ethanolPrice);
@@ -190,14 +188,29 @@ export default function Planner() {
     const economy = selectedVehicle && [gasoline, ethanol, gasolineConsumption, ethanolConsumption].every(value => Number.isFinite(value) && value > 0)
       ? { vehicleId: selectedVehicle.id, gasolinePrice: gasoline, ethanolPrice: ethanol, gasolineKmPerLiter: gasolineConsumption, ethanolKmPerLiter: ethanolConsumption }
       : undefined;
+
     if (offline) {
       setFormError("Sem internet: abra uma rota já salva neste aparelho. Uma rota nova precisa de conexão para calcular distância, trânsito e postos reais.");
-      return;
+      return null;
     }
-    const result = await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
+
+    const result = await planRoute.mutateAsync({
+      origin: normalizedOrigin,
+      destination: normalizedDestination,
+      economy,
+      recommendation: { priceWeight },
+    });
     setLoadedFromOffline(false);
     setOfflineSavedAt(null);
     if (result) rememberTrip(normalizedOrigin, normalizedDestination);
+    return result;
+  };
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setShareMessage(null);
+    setFormError(null);
+    await calculateCurrentRoute();
   };
 
   const toggleFavorite = () => {
@@ -330,18 +343,18 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           onShare={shareRoute}
           onSave={() => void saveCurrentRouteOffline()}
           onRefresh={loadedFromOffline && !offline ? () => {
-            setLoadedFromOffline(false);
-            setOfflineSavedAt(null);
-            setPlanned(null);
-            setShareMessage("Rota salva encerrada. Calcule novamente para buscar dados atuais.");
+            setShareMessage("Buscando dados atuais da rota…");
+            void calculateCurrentRoute().catch(() => {
+              setShareMessage("Não foi possível atualizar os dados agora. A rota salva continua disponível neste aparelho.");
+            });
           } : undefined}
         />}
 
         {planned && <MobileRouteDock snapshot={loadedFromOffline} routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onRefresh={loadedFromOffline && !offline ? () => {
-            setLoadedFromOffline(false);
-            setOfflineSavedAt(null);
-            setPlanned(null);
-            setShareMessage("Rota salva encerrada. Calcule novamente para buscar dados atuais.");
+            setShareMessage("Buscando dados atuais da rota…");
+            void calculateCurrentRoute().catch(() => {
+              setShareMessage("Não foi possível atualizar os dados agora. A rota salva continua disponível neste aparelho.");
+            });
           } : undefined} onSave={() => void saveCurrentRouteOffline()} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
 
         {planned && <div className="mt-4 md:hidden"><MobileTravelMode /></div>}
