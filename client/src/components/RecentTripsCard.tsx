@@ -1,5 +1,5 @@
 import { Clock3, Navigation, Trash2, RotateCw, Share2, LocateFixed } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
@@ -13,7 +13,7 @@ export default function RecentTripsCard() {
 
   const [locating, setLocating] = useState<string | null>(null);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const routes = await listOfflineRoutes();
     setItems(routes.slice(0, 3).map(route => ({
       id: route.id, origin: route.origin, destination: route.destination, savedAt: route.savedAt,
