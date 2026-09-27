@@ -9,6 +9,7 @@ export default function MobileQuickActions() {
   const current = location.split("?")[0];
   const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
   const [locating, setLocating] = useState(false);
+  const [shareState, setShareState] = useState<"idle" | "done">("idle");
   const locate = () => {
     if (!navigator.geolocation || locating) return;
     vibration();
@@ -23,7 +24,7 @@ export default function MobileQuickActions() {
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); setLocation(appUrl("/postos") + "?salvos=1"); } },
-    { label: "Compartilhar", short: "Enviar", icon: Share2, path: "", run: () => { void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto"); } },
+    { label: "Compartilhar", short: shareState === "done" ? "Enviado" : "Enviar", icon: Share2, path: "", run: () => { vibration(); void shareText("Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.", window.location.href, "Trajeto").then(() => { setShareState("done"); window.setTimeout(() => setShareState("idle"), 1800); }).catch(() => {}); } },
   ];
 
   return (
