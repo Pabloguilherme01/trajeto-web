@@ -2,6 +2,7 @@ import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation } from "lucid
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
+import { shareText } from "@/lib/mobileTools";
 
 type Place = { id: "casa" | "trabalho" | "outro"; label: string; value: string };
 
@@ -58,7 +59,7 @@ export default function MobileTripShortcuts() {
                     <Icon className="size-4 text-[#326575]" />
                     <span className="min-w-0 flex-1"><strong className="block text-xs">{place.label}</strong><span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span></span><Navigation className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
-                  <button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="mt-1 inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button>
+                  <div className="mt-1 flex items-center gap-3"><button type="button" onClick={() => void shareText(`${place.label}: ${place.value}`, `${window.location.origin}${appUrl("/planejar")}?destino=${encodeURIComponent(place.value)}`, "Destino no Trajeto")} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Navigation className="size-3" /> Enviar</button><button type="button" onClick={() => setPlaces(current => current.filter(item => item.id !== id))} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button></div>
                 </>
               ) : (
                 <button type="button" onClick={() => { setEditing(id); setValue(""); }} className="flex min-h-16 w-full items-center justify-center gap-2 rounded-xl text-xs font-bold text-[#52636C]">
