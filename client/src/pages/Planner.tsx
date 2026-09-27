@@ -43,6 +43,22 @@ export default function Planner() {
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   
+  const saveCurrentRouteOffline = async () => {
+    if (!planned) return;
+    try {
+      await saveOfflineRoute({
+        id: offlineRouteId(origin, destination),
+        origin: origin.trim(),
+        destination: destination.trim(),
+        savedAt: new Date().toISOString(),
+        payload: planned,
+      });
+      setShareMessage("Rota salva neste aparelho. Ela pode ser reaberta sem recalcular.");
+    } catch {
+      setShareMessage("Não foi possível salvar esta rota no aparelho. Tente novamente.");
+    }
+  };
+
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine);
     window.addEventListener("online", update);
@@ -299,22 +315,10 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           offline={offline || loadedFromOffline}
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
-          onSave={() => void saveOfflineRoute({
-            id: offlineRouteId(origin, destination),
-            origin: origin.trim(),
-            destination: destination.trim(),
-            savedAt: new Date().toISOString(),
-            payload: planned,
-          }).then(() => setShareMessage("Rota salva neste aparelho para acesso offline."))}
+          onSave={() => void saveCurrentRouteOffline()}
         />}
 
-        {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveOfflineRoute({
-  id: offlineRouteId(origin, destination),
-  origin: origin.trim(),
-  destination: destination.trim(),
-  savedAt: new Date().toISOString(),
-  payload: planned,
-}).then(() => setShareMessage("Rota salva neste aparelho para acesso offline."))} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
+        {planned && <MobileRouteDock routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onSave={() => void saveCurrentRouteOffline()} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
 
         {planned && <div className="mt-4 md:hidden"><MobileTravelMode /></div>}
 
