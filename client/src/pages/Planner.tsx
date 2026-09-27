@@ -40,6 +40,7 @@ export default function Planner() {
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [loadedFromOffline, setLoadedFromOffline] = useState(false);
+  const [offlineSavedAt, setOfflineSavedAt] = useState<string | null>(null);
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   
@@ -88,6 +89,7 @@ export default function Planner() {
       setOrigin(route.origin);
       setDestination(route.destination);
       setPlanned(route.payload as PlannedRoute);
+      setOfflineSavedAt(route.savedAt);
       setLoadedFromOffline(true);
       setShareMessage(
         offline
@@ -194,6 +196,7 @@ export default function Planner() {
     }
     const result = await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
     setLoadedFromOffline(false);
+    setOfflineSavedAt(null);
     if (result) rememberTrip(normalizedOrigin, normalizedDestination);
   };
 
@@ -320,12 +323,15 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           fuelCost={fuelEconomy.data?.tripCost ?? null}
           litersNeeded={fuelEconomy.data?.litersNeeded ?? null}
           autonomyKm={fuelEconomy.data?.autonomyKm ?? null}
-          offline={offline || loadedFromOffline}
+          offline={offline}
+          snapshot={loadedFromOffline}
+          snapshotSavedAt={offlineSavedAt}
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
           onSave={() => void saveCurrentRouteOffline()}
           onRefresh={loadedFromOffline && !offline ? () => {
             setLoadedFromOffline(false);
+            setOfflineSavedAt(null);
             setPlanned(null);
             setShareMessage("Rota salva encerrada. Calcule novamente para buscar dados atuais.");
           } : undefined}
