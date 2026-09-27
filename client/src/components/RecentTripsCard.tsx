@@ -1,7 +1,8 @@
-import { Clock3, Navigation, Trash2, RotateCw } from "lucide-react";
+import { Clock3, Navigation, Trash2, RotateCw, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
+import { shareText } from "@/lib/mobileTools";
 import { listOfflineRoutes, removeOfflineRoute } from "@/lib/offlineStore";
 
 type Item = { id: string; origin: string; destination: string; savedAt: string };
@@ -38,7 +39,7 @@ export default function RecentTripsCard() {
               <p className="truncate text-sm font-bold">{item.origin} → {item.destination}</p>
               <p className="mt-1 flex items-center gap-1 text-[0.65rem] text-[#718089]"><Clock3 className="size-3" />{new Date(item.savedAt).toLocaleString("pt-BR")}</p>
             </button>
-            <button type="button" onClick={async () => { await removeOfflineRoute(item.id); await refresh(); }} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#9B6258]" aria-label="Excluir rota salva"><Trash2 className="size-4" /></button>
+            <button type="button" onClick={() => void shareText(`${item.origin} → ${item.destination}`, `${window.location.origin}${appUrl("/planejar")}?origem=${encodeURIComponent(item.origin)}&destino=${encodeURIComponent(item.destination)}`, "Rota no Trajeto")} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#326575]" aria-label="Compartilhar rota"><Share2 className="size-4" /></button><button type="button" onClick={async () => { await removeOfflineRoute(item.id); await refresh(); }} className="grid size-10 shrink-0 place-items-center rounded-lg text-[#9B6258]" aria-label="Excluir rota salva"><Trash2 className="size-4" /></button>
           </div>
         ))}
       </div>
