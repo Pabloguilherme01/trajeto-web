@@ -19,6 +19,8 @@ export default function InstallAppPrompt() {
 
     const dismissedUntil = Number(localStorage.getItem("trajeto-install-dismissed-until") || "0");
     if (dismissedUntil > Date.now()) return () => window.removeEventListener("beforeinstallprompt", handler);
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (ios) setVisible(true);
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
