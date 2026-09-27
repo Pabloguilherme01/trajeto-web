@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { StationSheet } from "@/components/StationSheet";
 import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
-import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPin, Route as RouteIcon, Share2, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPin, Route as RouteIcon, Share2, ShieldCheck, Sparkles, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
+import { saveOfflineRoute } from "@/lib/offlineStore";
+import OfflineRouteVault from "@/components/OfflineRouteVault";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -32,7 +34,15 @@ export default function Planner() {
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
+  const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   
+  useEffect(() => {
+    const update = () => setOffline(!navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
+
   useEffect(() => {
     const routeLabel = origin.trim() && destination.trim() ? origin.trim() + " → " + destination.trim() : "Planejar rota";
     const title = routeLabel + " · Trajeto";
@@ -104,6 +114,10 @@ export default function Planner() {
     const economy = selectedVehicle && [gasoline, ethanol, gasolineConsumption, ethanolConsumption].every(value => Number.isFinite(value) && value > 0)
       ? { vehicleId: selectedVehicle.id, gasolinePrice: gasoline, ethanolPrice: ethanol, gasolineKmPerLiter: gasolineConsumption, ethanolKmPerLiter: ethanolConsumption }
       : undefined;
+    if (offline) {
+      setFormError("Sem internet: abra uma rota já salva neste aparelho. Uma rota nova precisa de conexão para calcular distância, trânsito e postos reais.");
+      return;
+    }
     await planRoute.mutateAsync({ origin: normalizedOrigin, destination: normalizedDestination, economy, recommendation: { priceWeight } });
   };
 
@@ -119,7 +133,7 @@ export default function Planner() {
 
   const shareRoute = async () => {
     if (!origin.trim() || !destination.trim()) return;
-    const url = `${window.location.origin}/planejar?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}`;
+    const url = `${window.location.origin}${appUrl("/planejar")}?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}`;
     const text = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}. Veja distância, duração e opções de abastecimento.`;
     try {
       if (navigator.share) await navigator.share({ title: "Trajeto · rota", text, url });
@@ -144,6 +158,7 @@ export default function Planner() {
       </header>
 
       <main className="container py-10 lg:py-14">
+        {offline && <section role="status" aria-live="polite" className="mb-6 flex items-start gap-3 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]"><WifiOff className="mt-0.5 size-4 shrink-0" /><p><strong className="text-[#163840]">Modo offline.</strong> Você pode abrir rotas salvas neste aparelho. Novas rotas, trânsito e consultas de postos precisam de internet.</p></section>}
         <div className="mb-10 max-w-3xl">
           <p className="eyebrow">Rota com dados reais</p>
           <h1 className="font-display mt-4 text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.86] tracking-[-0.065em]">Escolha melhor<br /><span className="text-[#BA5B45]">antes de sair.</span></h1>
@@ -172,6 +187,16 @@ export default function Planner() {
               <div>
                 <div className="grid gap-3 border-b border-[#D8DED5] pb-6 sm:grid-cols-3"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Distância</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{planned.route.distanceLabel}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Tempo estimado</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{minutes(planned.route.durationSeconds)}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Trajeto</p><p className="mt-2 text-sm font-semibold leading-snug">{planned.route.summary || "Rota calculada"}</p></div></div>
                 <div className="mt-6"><RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} /></div>
+                <button type="button" onClick={() => saveOfflineRoute({
+                  id: `${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`,
+                  origin: origin.trim(),
+                  destination: destination.trim(),
+                  savedAt: new Date().toISOString(),
+                  payload: planned,
+                }).then(() => setShareMessage("Rota salva neste aparelho para acesso offline."))}
+                  className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#163840] bg-white px-4 py-2 text-xs font-bold text-[#163840]">
+                  <WifiOff className="size-4" /> Salvar rota offline
+                </button>
                 <section className="mt-6 border border-[#C7D2C9] bg-[#F2F5EF] p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#54706A]">Situação da rota</p><h3 className="font-display mt-2 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">{planned.traffic.label}</h3><p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#54706A]">{planned.traffic.detail} Consulta registrada em {new Date(planned.traffic.checkedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.</p></div><span className={`rounded-full px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.12em] ${planned.traffic.state === "active" ? "bg-[#DDEFD4] text-[#315227]" : "bg-[#FFF1BF] text-[#6C4E00]"}`}>{planned.traffic.state === "active" ? "Fonte ao vivo" : "Cobertura pendente"}</span></div>{planned.traffic.incidents.length > 0 && <div className="mt-5 grid gap-3 border-y border-[#D1DBD1] py-4">{planned.traffic.incidents.map(incident => <article key={incident.id} className="border-l-2 border-[#BA5B45] bg-white p-3"><div className="flex flex-wrap items-start justify-between gap-3"><p className="text-sm font-bold text-[#163840]">{incident.description}</p><span className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[#8A4434]">{incident.severity === "major" ? "Impacto alto" : incident.severity === "moderate" ? "Impacto moderado" : "Impacto leve"}</span></div><p className="mt-2 text-xs leading-relaxed text-[#58716B]">{[incident.from, incident.to].filter(Boolean).join(" → ") || "Local informado pela fonte"}{incident.delaySeconds ? ` · atraso estimado de ${Math.round(incident.delaySeconds / 60)} min` : ""}{incident.reportedAt ? ` · atualização ${new Date(incident.reportedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}` : ""}</p></article>)}</div>}<div className="mt-4 flex flex-wrap gap-2">{planned.traffic.officialSources.map(source => <a key={source.label} href={source.url} target="_blank" rel="noopener noreferrer" className="border border-[#C7D2C9] bg-white px-3 py-2 text-xs font-bold text-[#36564E] transition hover:border-[#163840] hover:bg-[#163840] hover:text-white">{source.label} · {source.detail}</a>)}<a href={planned.traffic.anpComVcUrl} target="_blank" rel="noopener noreferrer" onClick={() => track("anp_quality_open", destination || origin)} className="border border-[#C7D2C9] bg-white px-3 py-2 text-xs font-bold text-[#36564E] transition hover:border-[#163840] hover:bg-[#163840] hover:text-white">ANP com VC · qualidade do posto</a></div></section>
                 <div className="mt-6 flex items-center gap-3 rounded-sm bg-[#EFF3EE] px-4 py-3 text-xs leading-relaxed text-[#54706A]"><ShieldCheck className="size-4 shrink-0 text-[#BA5B45]" />{planned.priceCoverage > 0 ? `${planned.priceCoverage} referência(s) de preço da ANP foram vinculadas a esta pesquisa.` : "Os postos abaixo são reais. Ainda não há referência ANP vinculada aos identificadores retornados."}</div>
                 {planned.recommendation && <section className="mt-6 border border-[#C6DA65] bg-[#F4F8D9] p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#567100]">Opção que atende sua prioridade</p><h3 className="font-display mt-2 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">{planned.recommendation.name}</h3></div><span className={`border px-2 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] ${planned.recommendation.detourSource === "real" ? "border-[#8AAA42] bg-white text-[#486800]" : "border-[#C8B569] bg-[#FFFBE9] text-[#695B17]"}`}>{planned.recommendation.detourSource === "real" ? "Desvio real" : "Desvio aproximado"}</span></div><p className="mt-2 text-sm leading-relaxed text-[#52644A]">Preço de referência: <strong>{planned.recommendation.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> · desvio {planned.recommendation.detourSource === "real" ? "real" : "estimado"} de <strong>{planned.recommendation.detourKm.toLocaleString("pt-BR")} km</strong>.</p>{planned.recommendation.netSavings && <div className="mt-3 border-l-2 border-[#789C28] bg-white/60 p-3"><p className="text-xs font-bold text-[#426100]">Economia líquida estimada (gasolina): {planned.recommendation.netSavings.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p><p className="mt-1 text-xs leading-relaxed text-[#5B6C4B]">Economia no percurso: {planned.recommendation.netSavings.grossFuelSaving.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} · custo estimado do desvio: {planned.recommendation.netSavings.detourFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}. {planned.recommendation.netSavingsMethod}</p></div>}<p className="mt-2 text-xs leading-relaxed text-[#5B6C4B]">{planned.recommendation.rationale} {planned.recommendation.method}</p><p className="mt-2 text-xs font-medium text-[#52644A]">{planned.recommendationDiagnostics.realDetoursCalculated}/{planned.recommendationDiagnostics.requestedCandidates} candidato(s) tiveram o desvio calculado pela rota real.</p></section>}
@@ -185,6 +210,8 @@ export default function Planner() {
         {planned && <section className="mt-10"><div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">Paradas na rota</p><h2 className="font-display mt-3 text-4xl font-semibold tracking-[-0.06em]">Postos encontrados.</h2></div><div className="flex items-end gap-3"><p className="max-w-md text-sm leading-relaxed text-[#607570]">Preços são referências datadas; o desvio informado é real quando calculado pela rota.</p><button type="button" onClick={shareRoute} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-none border border-[#163840] px-4 py-2 text-xs font-bold text-[#163840] transition hover:bg-[#163840] hover:text-white"><Share2 className="size-4" /> Compartilhar rota</button></div></div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{planned.stops.map(stop => { const isRecommended = planned.recommendation?.placeId === stop.placeId; return <article key={stop.placeId} className={`flex min-h-60 flex-col border bg-white p-5 ${isRecommended ? "border-[#9EBF1F] ring-1 ring-[#D4E67F]" : "border-[#D4DDD5]"}`}><div className="flex items-start justify-between gap-4"><div className="grid size-11 place-items-center rounded-full bg-[#E8EEE8] text-[#163840]"><Fuel className="size-4" /></div><span className={`text-[0.6rem] font-bold uppercase tracking-[0.14em] ${isRecommended ? "text-[#668400]" : "text-[#748985]"}`}>{isRecommended ? "Melhor para sua prioridade" : "Posto próximo"}</span></div><h3 className="mt-6 text-lg font-bold leading-tight">{stop.name}</h3><p className="mt-2 text-sm leading-relaxed text-[#667A76]">{stop.address}</p><div className="mt-auto pt-5">{stop.priceReference ? <p className="mb-2 text-xs text-[#55736C]">Referência ANP: <strong>{Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> · {new Date(stop.priceReference.collectedAt).toLocaleDateString("pt-BR")}</p> : <p className="mb-2 text-xs text-[#788A86]">Preço oficial ainda não vinculado para este posto.</p>}{isRecommended && <p className="mb-4 text-xs leading-relaxed text-[#5D7200]">Desvio {planned.recommendation?.detourSource === "real" ? "real" : "estimado"}: {planned.recommendation?.detourKm.toLocaleString("pt-BR")} km.</p>}<div className="grid grid-cols-2 gap-2"><Button onClick={() => { setSelectedStop(stop); track("station_sheet_opened", destination || origin); }} variant="outline" className="min-h-11 rounded-none border-[#163840] text-[#163840] hover:bg-[#163840] hover:text-white">Ver ficha</Button><Button onClick={() => openNavigation(stop)} variant="outline" className="min-h-11 rounded-none border-[#163840] text-[#163840] hover:bg-[#163840] hover:text-white"><ExternalLink className="mr-2 size-3.5" />Navegar</Button></div></div></article>; })}</div>
         </section>}
+
+        <OfflineRouteVault />
 
         <StationSheet open={Boolean(selectedStop)} onOpenChange={open => !open && setSelectedStop(null)} stop={selectedStop} recommendation={selectedStop && planned?.recommendation?.placeId === selectedStop.placeId ? planned.recommendation : null} favorite={Boolean(selectedStop && favoriteState.data?.includes(selectedStop.placeId))} onFavorite={toggleFavorite} onNavigationConfirmed={() => track("station_navigation_confirmed", destination || origin)} />
 
