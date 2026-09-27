@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
+import { openNavigation, vibration } from "@/lib/mobileTools";
 import { AUTH_RETURN_KEY } from "@/lib/authReturn";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import { filterAndSortStations, inferredBrand } from "@/lib/stationListControls";
@@ -219,7 +220,7 @@ export default function Stations() {
       toast.error("Não foi possível preparar o compartilhamento agora.");
     }
   };
-  const shareStation = async (station: typeof list[number]) => {
+  const navigateStation = (station: typeof list[number]) => {\n    vibration();\n    const urls = openNavigation(station.lat, station.lng, station.name);\n    const waze = window.confirm("Abrir no Waze?\n\nCancelar abre o Google Maps.");\n    window.open(waze ? urls.waze : urls.google, "_blank", "noopener,noreferrer");\n  };\n\n  const shareStation = async (station: typeof list[number]) => {
     const url = `${window.location.origin}/postos?q=${encodeURIComponent(query)}&station=${encodeURIComponent(station.placeId)}`;
     const text = `Encontrei ${station.name} no Trajeto. ${station.distanceLabel ? `Distância: ${station.distanceLabel}. ` : ""}Veja os dados e a navegação:`;
     try {
