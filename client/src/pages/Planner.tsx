@@ -60,7 +60,7 @@ export default function Planner() {
       setPlanned(route.payload as PlannedRoute);
       setShareMessage("Rota salva carregada deste aparelho. Trânsito e dados ao vivo podem estar desatualizados.");
     }).catch(() => {});
-  }, [offline]);
+  }, [offline, origin, destination, planned]);
 
   useEffect(() => {
     const routeLabel = origin.trim() && destination.trim() ? origin.trim() + " → " + destination.trim() : "Planejar rota";
