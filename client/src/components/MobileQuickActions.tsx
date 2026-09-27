@@ -90,7 +90,7 @@ export default function MobileQuickActions() {
       return;
     }
     if (lastIntent === "saved") {
-      setLocation(appUrl("/postos") + "?salvos=1");
+      setLocation(appUrl("/planejar") + "?salvos=1");
       return;
     }
     if (lastIntent === "nearby") {
@@ -117,7 +117,7 @@ export default function MobileQuickActions() {
     { label: smartDestination ? smartDestination.label : resumeLabel, short: smartDestination ? "Destino" : resumeLabel, icon: smartDestination ? Navigation : lastIntent === "nearby" ? LocateFixed : lastIntent === "saved" ? Bookmark : lastIntent === "route" ? Navigation : Fuel, path: "", run: () => { if (!smartDestination) return resumeAction(); vibration(); const updated = rememberDestinationUsage(smartDestination); setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated)); setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(smartDestination.value)); }, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
-    { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/postos") + "?salvos=1"); } },
+    { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/postos", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
     { label: "Compartilhar", short: shareState === "done" ? shareLabel : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => {
       vibration();
       void shareText(shareMessage, window.location.href, "Trajeto").then(() => {
