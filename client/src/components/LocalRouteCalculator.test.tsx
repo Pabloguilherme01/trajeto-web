@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectTripCosts } from "@/lib/tripProjection";
+import { compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
 
 describe("local route calculator contract", () => {
   it("projects a round trip without negative values", () => {
@@ -57,3 +57,35 @@ describe("local route calculator contract", () => {
     expect(result.annualCost).toBe(0);
   });
 });
+
+
+  it("compara dois cenários usando o mesmo percurso e extras", () => {
+    const result = compareTripScenarios({
+      oneWayDistanceKm: 35,
+      baselinePricePerLiter: 5.89,
+      baselineKmPerLiter: 10,
+      alternativePricePerLiter: 5.49,
+      alternativeKmPerLiter: 8.5,
+      roundTrip: true,
+      tripsPerWeek: 5,
+      extraCostPerTrip: 18,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.baseline.costPerTrip).toBeCloseTo(59.23, 1);
+    expect(result?.alternative.costPerTrip).toBeCloseTo(63.22, 1);
+    expect(result?.differencePerTrip).toBeCloseTo(-3.99, 1);
+    expect(result?.differencePerMonth).toBeCloseTo(-86.4, 1);
+  });
+
+  it("não compara cenário incompleto", () => {
+    expect(compareTripScenarios({
+      oneWayDistanceKm: 35,
+      baselinePricePerLiter: 5.89,
+      baselineKmPerLiter: 10,
+      alternativePricePerLiter: 0,
+      alternativeKmPerLiter: 8.5,
+      roundTrip: true,
+      tripsPerWeek: 5,
+    })).toBeNull();
+  });
