@@ -45,6 +45,15 @@ export async function shareText(text: string, url: string, title = "Trajeto") {
   throw new Error("Compartilhamento indisponível neste navegador.");
 }
 
+export function buildNearbyStationsUrl(basePath: string, lat?: number, lng?: number) {
+  const params = new URLSearchParams({ q: "postos" });
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    params.set("lat", String(lat));
+    params.set("lng", String(lng));
+  }
+  return basePath + "?" + params.toString();
+}
+
 export function openNavigation(lat: number, lng: number, label?: string) {
   const encoded = encodeURIComponent(label ?? (lat + "," + lng));
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
