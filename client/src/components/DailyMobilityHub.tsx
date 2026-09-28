@@ -115,13 +115,19 @@ export default function DailyMobilityHub() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center gap-2"><Route className="size-4 text-[#BDA5FF]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Rota offline</span></div>
               <p className="mt-2 text-sm font-extrabold">{latestRoute ? "1 ou mais rotas prontas" : "Nenhuma rota salva"}</p>
-              <p className="mt-1 truncate text-[0.62rem] text-white/50">{latestRoute ? latestRoute.origin + " → " + latestRoute.destination : "Salve uma rota para continuar sem conexão."}</p>\n              {routeInfo && <p className="mt-2 text-[0.6rem] font-bold text-white/60">{routeInfo.distanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km{routeInfo.durationMinutes !== null ? " · " + routeInfo.durationMinutes + " min" : ""}{routeInfo.stale ? " · cópia antiga" : ""}</p>}
+              <p className="mt-1 truncate text-[0.62rem] text-white/50">{latestRoute ? latestRoute.origin + " → " + latestRoute.destination : "Salve uma rota para continuar sem conexão."}</p>
+              {routeInfo && <p className="mt-2 text-[0.6rem] font-bold text-white/60">{routeInfo.distanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km{routeInfo.durationMinutes !== null ? " · " + routeInfo.durationMinutes + " min" : ""}{routeInfo.stale ? " · cópia antiga" : ""}</p>}
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center gap-2"><CarFront className="size-4 text-[#C7FF3C]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Veículo</span></div>
               <p className="mt-2 text-sm font-extrabold">{vehicle?.name ?? "Não configurado"}</p>
               <p className="mt-1 text-[0.62rem] text-white/50">{vehicle ? vehicle.consumption.toLocaleString("pt-BR") + " km/L · tanque " + vehicle.tank.toLocaleString("pt-BR") + " L" : "Cadastre o veículo para calcular autonomia e custo."}</p>
             </div>
+            {routeInfo?.estimatedFuelCost !== null && routeInfo?.estimatedFuelCost !== undefined && <div className="rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[0.04] p-4 sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2"><Fuel className="size-4 text-[#3DE3FF]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Custo da última rota</span></div>
+              <p className="mt-2 text-sm font-extrabold">{money(routeInfo.estimatedFuelCost)} estimados</p>
+              <p className="mt-1 text-[0.62rem] text-white/50">Combustível calculado localmente com seu veículo e o último preço registrado.</p>
+            </div>}
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center gap-2"><CircleDollarSign className="size-4 text-[#FFC928]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Este mês</span></div>
               <p className="mt-2 text-sm font-extrabold">{summary.entries ? money(summary.total) : "Sem registros"}</p>
