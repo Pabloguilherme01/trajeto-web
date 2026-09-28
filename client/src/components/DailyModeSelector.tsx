@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BatteryCharging, CalendarClock, Compass, Gauge, Sparkles, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { buildDailyModes, getAutomaticDailyMode, getSavedDailyMode, setSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
