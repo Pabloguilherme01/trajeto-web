@@ -54,6 +54,20 @@ export function buildNearbyStationsUrl(basePath: string, lat?: number, lng?: num
   return basePath + "?" + params.toString();
 }
 
+export function buildGoogleMapsDirectionsUrl(origin: string, destination: string) {
+  const normalizedOrigin = origin.trim();
+  const normalizedDestination = destination.trim();
+  return "https://www.google.com/maps/dir/?api=1&origin=" +
+    encodeURIComponent(normalizedOrigin) +
+    "&destination=" +
+    encodeURIComponent(normalizedDestination) +
+    "&travelmode=driving";
+}
+
+export function buildGoogleMapsSearchUrl(query: string) {
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query.trim());
+}
+
 export function openNavigation(lat: number, lng: number, label?: string) {
   const encoded = encodeURIComponent(label ?? (lat + "," + lng));
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
