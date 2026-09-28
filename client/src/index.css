@@ -78,6 +78,8 @@
   .section-title { font-family: "Sora", sans-serif; color: #0B1014; font-size: clamp(2.5rem, 5.2vw, 5rem); font-weight: 700; letter-spacing: -0.07em; line-height: 0.95; }
   .section-title em { color: #6C3DDB; font-style: normal; }
   .brand-wordmark { font-family: "Sora", sans-serif; font-weight: 800; letter-spacing: -0.09em; line-height: 1; text-transform: lowercase; }
+  .premium-surface { position: relative; isolation: isolate; }
+  .premium-surface::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 12% 0%, rgba(199,255,60,.09), transparent 34%), radial-gradient(circle at 88% 18%, rgba(61,227,255,.08), transparent 30%); opacity: .9; z-index: -1; }
   .route-grid { background-color: #0B1014; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px), radial-gradient(circle at 72% 34%, rgba(61,227,255,.15), transparent 27rem); background-size: 34px 34px, 34px 34px, auto; }
   @media (min-width: 640px) { .container { padding-inline: 2rem; } }
   @media (max-width: 639px) {
