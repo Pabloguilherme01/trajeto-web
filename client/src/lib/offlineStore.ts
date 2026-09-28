@@ -224,4 +224,8 @@ export function externalNavigationUrl(route: Pick<OfflineRoute, "origin" | "dest
     "&travelmode=driving";
 }
 
+export function wazeNavigationUrl(route: Pick<OfflineRoute, "destination">) {
+  return "https://www.waze.com/ul?q=" + encodeURIComponent(route.destination) + "&navigate=yes";
+}
+
 export const offlineRouteEvent = OFFLINE_ROUTE_EVENT;
