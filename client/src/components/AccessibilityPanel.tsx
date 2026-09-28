@@ -68,7 +68,7 @@ export default function AccessibilityPanel() {
                   <span className="grid size-9 place-items-center rounded-full bg-[#C7FF3C] text-[#0B1014]">{theme === "dark" ? <Moon className="size-4"/> : <Sun className="size-4"/>}</span>
                 </button>
               )}
-              <div className="flex min-h-14 items-center justify-between rounded-2xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.05] px-4"><span><strong className="block text-sm text-white">Modo escuro</strong><span className="text-xs text-[#8FA3AC]">Ativo por padrão para uso noturno e leitura operacional.</span></span><span className="grid size-7 place-items-center rounded-full bg-[#C7FF3C] text-[#0B1014]"><Check className="size-4"/></span></div>
+              
               {options.map(item=>(
                 <button key={item.key} type="button" aria-pressed={prefs[item.key]} onClick={()=>update(item.key)} className="flex min-h-16 items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-left">
                   <span><strong className="block text-sm text-white">{item.label}</strong><span className="text-xs text-[#8FA3AC]">{item.detail}</span></span>
