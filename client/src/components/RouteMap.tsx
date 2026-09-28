@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { LocateFixed, Minus, Plus, Satellite, TrafficCone } from "lucide-react";
 
 type Stop = { placeId: string; name: string; address: string; lat: number; lng: number };
-type RoutePreview = { id: string; polyline: string | null; selected?: boolean };
+type TrafficInterval = { startPolylinePointIndex?: number; endPolylinePointIndex?: number; speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM" };
+type RoutePreview = { id: string; polyline: string | null; selected?: boolean; trafficIntervals?: TrafficInterval[] };
 type RouteMapProps = { origin?: { lat: number; lng: number }; destination?: { lat: number; lng: number }; stops: Stop[]; routes?: RoutePreview[] };
 
 export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapProps) {
@@ -33,6 +34,11 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     mapRef.current?.setHeading(next);
   };
 
+  const trafficPath = (points: google.maps.LatLngLiteral[], interval: TrafficInterval) => {
+    const start = interval.startPolylinePointIndex ?? 0;
+    const end = interval.endPolylinePointIndex ?? points.length - 1;
+    return points.slice(start, Math.min(points.length, end + 1));
+  };
   const decodePolyline = (encoded: string): google.maps.LatLngLiteral[] => {
     const points: google.maps.LatLngLiteral[] = [];
     let index = 0;
@@ -76,17 +82,35 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     polylinesRef.current.forEach(line => line.setMap(null));
     polylinesRef.current = [];
     const validRoutes = (routes || []).filter(route => route.polyline);
-    validRoutes.forEach((route, index) => {
-      const line = new window.google.maps.Polyline({
-        map: mapRef.current,
-        path: decodePolyline(route.polyline as string),
-        geodesic: true,
-        strokeColor: route.selected ? "#BA5B45" : "#6A8F8A",
-        strokeOpacity: route.selected ? 0.95 : 0.38,
-        strokeWeight: route.selected ? 6 : 3,
-        zIndex: route.selected ? 4 : 2,
-      });
-      polylinesRef.current.push(line);
+    validRoutes.forEach((route) => {
+      const points = decodePolyline(route.polyline as string);
+      const intervals = route.trafficIntervals || [];
+      if (intervals.length) {
+        intervals.forEach(interval => {
+          const speedColor = interval.speed === "TRAFFIC_JAM" ? "#F06A6A" : interval.speed === "SLOW" ? "#FFC857" : "#6A8F8A";
+          const line = new window.google.maps.Polyline({
+            map: mapRef.current,
+            path: trafficPath(points, interval),
+            geodesic: true,
+            strokeColor: speedColor,
+            strokeOpacity: route.selected ? 0.95 : 0.45,
+            strokeWeight: route.selected ? 6 : 3,
+            zIndex: route.selected ? 4 : 2,
+          });
+          polylinesRef.current.push(line);
+        });
+      } else {
+        const line = new window.google.maps.Polyline({
+          map: mapRef.current,
+          path: points,
+          geodesic: true,
+          strokeColor: route.selected ? "#BA5B45" : "#6A8F8A",
+          strokeOpacity: route.selected ? 0.95 : 0.38,
+          strokeWeight: route.selected ? 6 : 3,
+          zIndex: route.selected ? 4 : 2,
+        });
+        polylinesRef.current.push(line);
+      }
     });
   }, [mapReady, routes]);
   const fitRoute = () => {
