@@ -2,7 +2,7 @@ import { getEconomyMode, getLastIntent, getLastTrip, type MobileIntent } from "@
 import { getFavoriteDestination, getDestinationUsage, getMobileDestinations } from "@/lib/mobileDestinations";
 
 const KEY = "trajeto-daily-mode";
-export type DailyModeId = "automatico" | "proxima" | "repetir" | "economia" | "offline";
+export type DailyModeId = "automatico" | "proxima" | "repetir" | "economia" | "offline" | "conducao";
 
 export type DailyMode = {
   id: DailyModeId;
@@ -17,7 +17,7 @@ function storage(): Storage | null {
 
 export function getSavedDailyMode(): DailyModeId | null {
   const value = storage()?.getItem(KEY);
-  return value === "automatico" || value === "proxima" || value === "repetir" || value === "economia" || value === "offline" ? value : null;
+  return value === "automatico" || value === "proxima" || value === "repetir" || value === "economia" || value === "offline" || value === "conducao" ? value : null;
 }
 
 export function setSavedDailyMode(mode: DailyModeId) {
@@ -65,6 +65,7 @@ export function buildDailyModes(online: boolean, savedRoutes: number): DailyMode
     { id: "repetir", label: "Repetir", detail: trip ? trip.origin + " → " + trip.destination : "Última viagem", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) : "/planejar" },
     { id: "economia", label: "Economia", detail: "Calcular custo, consumo e impacto mensal.", href: "/#calculadora" },
     { id: "offline", label: "Sem internet", detail: savedRoutes ? savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas") : "Preparar uma rota para usar offline.", href: "/planejar?salvos=1" },
+    { id: "conducao", label: "Condução", detail: trip ? "Abrir sua última viagem com menos distração." : "Abrir o planejamento com foco na direção.", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) : "/planejar" },
   ];
   return online ? modes : modes.filter(mode => mode.id === "automatico" || mode.id === "offline");
 }
