@@ -15,6 +15,24 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   const [satellite, setSatellite] = useState(false);
   const [traffic, setTraffic] = useState(false);
 
+  const [is3D, setIs3D] = useState(false);
+  const [heading, setHeading] = useState(0);
+  const [offlinePreview, setOfflinePreview] = useState(false);
+
+  const activate3D = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    const next = !is3D;
+    setIs3D(next);
+    map.setOptions(next ? { tilt: 60, heading } : { tilt: 0, heading: 0 });
+  };
+
+  const rotateCompass = () => {
+    const next = (heading + 45) % 360;
+    setHeading(next);
+    mapRef.current?.setHeading(next);
+  };
+
   const decodePolyline = (encoded: string): google.maps.LatLngLiteral[] => {
     const points: google.maps.LatLngLiteral[] = [];
     let index = 0;
