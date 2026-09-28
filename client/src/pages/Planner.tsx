@@ -36,8 +36,8 @@ function DrivingModeResult({
       <span className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/10 px-3 py-2 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#DFFF9A]"><RouteIcon className="size-3.5" /> Modo condução</span>
       <span className="text-[0.62rem] font-bold text-white/45">menos distração</span>
     </div>
-    <h2 id="driving-mode-title" className="mt-6 font-display text-[clamp(2rem,8vw,3.5rem)] font-semibold leading-[.92] tracking-[-.06em]">{planned.route.destination}</h2>
-    <p className="mt-2 text-sm text-white/55">{planned.route.origin} → destino</p>
+    <h2 id="driving-mode-title" className="mt-6 font-display text-[clamp(2rem,8vw,3.5rem)] font-semibold leading-[.92] tracking-[-.06em]">{planned.route.summary || "Rota calculada"}</h2>
+    <p className="mt-2 text-sm text-white/55">Percurso pronto para navegação</p>
     <div className="mt-6 grid grid-cols-2 gap-2">
       <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Distância</p><p className="mt-1 font-display text-2xl font-semibold">{planned.route.distanceLabel}</p></div>
       <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Tempo</p><p className="mt-1 font-display text-2xl font-semibold">{minutes(planned.route.durationSeconds)}</p></div>
