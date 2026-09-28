@@ -121,7 +121,9 @@ export async function saveOfflineRoute(route: OfflineRoute) {
   if (!isValidRoute(route)) {
     throw new Error("Não foi possível salvar: os dados da rota estão incompletos.");
   }
-  if (!hasIndexedDb()) return false;
+  if (!hasIndexedDb()) {
+    throw new Error("Não foi possível salvar: o armazenamento offline não está disponível neste navegador.");
+  }
 
   await withStore("readwrite", store => store.put(route));
   const routes = await listOfflineRoutes();
