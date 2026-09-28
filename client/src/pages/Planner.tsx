@@ -14,8 +14,7 @@ import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, t
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { projectTripCosts } from "@/lib/tripProjection";
-import MobileRouteDock from "@/components/MobileRouteDock";
-import TripDecisionSummary from "@/components/TripDecisionSummary";
+import MobileNavigationCenter from "@/components/MobileNavigationCenter";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
@@ -295,7 +294,7 @@ export default function Planner() {
       setShareMessage("A navegação externa precisa de internet. A rota salva continua disponível neste aparelho.");
       return;
     }
-    window.open(buildGoogleMapsDestinationUrl(stop.name, true), "_blank", "noopener,noreferrer");
+    window.open(buildGoogleMapsDestinationUrl(stop.name, true, stop.placeId), "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
 
@@ -445,7 +444,8 @@ export default function Planner() {
 
         {!drivingMode && <LocalRouteCalculator initialDistanceKm={planned ? planned.route.distanceMeters / 1000 : 0} />}
 
-        {planned && !drivingMode && <TripDecisionSummary
+        {planned && !drivingMode && <MobileNavigationCenter
+          destination={destination}
           distance={planned.route.distanceLabel}
           duration={minutes(planned.route.durationSeconds)}
           recommendationName={planned.recommendation?.name ?? null}
@@ -457,6 +457,7 @@ export default function Planner() {
           offline={offline}
           snapshot={loadedFromOffline}
           snapshotSavedAt={offlineSavedAt}
+          saved={Boolean(latestOfflineRoute && latestOfflineRoute.id === offlineRouteId(origin, destination))}
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
           onSave={saveCurrentRouteOffline}
@@ -466,14 +467,8 @@ export default function Planner() {
               setShareMessage("Não foi possível atualizar os dados agora. A rota salva continua disponível neste aparelho.");
             });
           } : undefined}
+          onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })}
         />}
-
-        {planned && <MobileRouteDock snapshot={loadedFromOffline} routeId={`${origin.trim().toLowerCase()}::${destination.trim().toLowerCase()}`} distance={planned.route.distanceLabel} duration={minutes(planned.route.durationSeconds)} onShare={shareRoute} onNavigate={openDestinationNavigation} onRefresh={loadedFromOffline && !offline ? () => {
-            setShareMessage("Buscando dados atuais da rota…");
-            void calculateCurrentRoute().catch(() => {
-              setShareMessage("Não foi possível atualizar os dados agora. A rota salva continua disponível neste aparelho.");
-            });
-          } : undefined} onSave={saveCurrentRouteOffline} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
 
 
         {planned && !drivingMode && <section id="route-stations" className="mt-10 scroll-mt-24"><div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">Paradas na rota</p><h2 className="font-display mt-3 text-4xl font-semibold tracking-[-0.06em]">Postos encontrados.</h2></div><div className="flex items-end gap-3"><p className="max-w-md text-sm leading-relaxed text-[#607570]">Preços são referências datadas; o desvio informado é real quando calculado pela rota.</p><button type="button" onClick={shareRoute} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-none border border-[#163840] px-4 py-2 text-xs font-bold text-[#163840] transition hover:bg-[#163840] hover:text-white"><Share2 className="size-4" /> Compartilhar rota</button></div></div>
