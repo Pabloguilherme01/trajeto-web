@@ -1,0 +1,53 @@
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import MobileNavigationCenter from "./MobileNavigationCenter";
+
+describe("MobileNavigationCenter", () => {
+  it("puts the destination, cost, stop and navigation action in one mobile surface", () => {
+    render(
+      <MobileNavigationCenter
+        destination="Brasília, DF"
+        distance="48 km"
+        duration="55 min"
+        recommendationName="Posto Exemplo"
+        detourKm={1.2}
+        detourSource="real"
+        fuelCost={28.5}
+        litersNeeded={4.8}
+        autonomyKm={520}
+        offline={false}
+        onNavigate={vi.fn()}
+        onShare={vi.fn()}
+        onSave={vi.fn()}
+        onStations={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Pronto para ir." })).toBeTruthy();
+    expect(screen.getByText("→ Brasília, DF")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Navegar agora/i })).toBeTruthy();
+    expect(screen.getByText("Posto Exemplo")).toBeTruthy();
+    expect(screen.getByText(/R$ 28,50/)).toBeTruthy();
+    expect(screen.getByText(/Autonomia estimada: 520 km/)).toBeTruthy();
+  });
+
+  it("disables external navigation while offline but keeps the route actions visible", () => {
+    render(
+      <MobileNavigationCenter
+        destination="Casa"
+        distance="10 km"
+        duration="15 min"
+        offline
+        snapshot
+        onNavigate={vi.fn()}
+        onShare={vi.fn()}
+        onSave={vi.fn()}
+        onStations={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /Navegar agora/i }).getAttribute("disabled")).not.toBeNull();
+    expect(screen.getByText(/A rota salva continua disponível/)).toBeTruthy();
+  });
+});
