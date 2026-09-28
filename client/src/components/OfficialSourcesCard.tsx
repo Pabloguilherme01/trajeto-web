@@ -1,28 +1,52 @@
 import React from "react";
-import { BadgeCheck, ExternalLink, FileBarChart, Fuel, ShieldCheck } from "lucide-react";
+import { BarChart3, BadgeCheck, Database, ExternalLink, FileBarChart, Fuel, History, ShieldCheck } from "lucide-react";
 
 const sources = [
   {
     title: "Preços semanais da ANP",
-    detail: "Pesquisa por município e posto, com referência da semana divulgada.",
+    detail: "Preços por Brasil, estado, município e posto; a página mantém as semanas mais recentes.",
     href: "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/levantamento-de-precos-de-combustiveis-ultimas-semanas-pesquisadas",
     icon: Fuel,
   },
   {
-    title: "Qualidade dos combustíveis",
-    detail: "Dados abertos do PMQC para gasolina, etanol e diesel.",
+    title: "Histórico de preços",
+    detail: "Séries históricas para comparar evolução de preços e contexto regional.",
+    href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos",
+    icon: History,
+  },
+  {
+    title: "Qualidade · PMQC",
+    detail: "Dados abertos de monitoramento de gasolina, etanol e diesel, em CSV e JSON.",
     href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/pmqc-programa-de-monitoramento-da-qualidade-dos-combustiveis",
     icon: ShieldCheck,
   },
   {
-    title: "ANP com VC — Postos",
-    detail: "Consulta oficial de postos autorizados e canal para o consumidor.",
+    title: "Postos · ANP com VC",
+    detail: "Consulta oficial e canal de orientação ao consumidor sobre postos revendedores.",
     href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/aplicativos/anp-com-vc-postos",
     icon: BadgeCheck,
   },
   {
+    title: "Preços de distribuição",
+    detail: "Referências de preços de distribuição por nível geográfico e produto.",
+    href: "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-de-distribuicao-de-combustiveis",
+    icon: BarChart3,
+  },
+  {
+    title: "Dados abertos ANP",
+    detail: "Catálogo oficial para consultar datasets públicos de combustíveis e abastecimento.",
+    href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos",
+    icon: Database,
+  },
+  {
+    title: "Anuário Estatístico 2026",
+    detail: "Tabelas oficiais consolidadas do setor, com séries de 2016 a 2025.",
+    href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/anuario/anuario-estatistico-2026-dados-abertos",
+    icon: FileBarChart,
+  },
+  {
     title: "CNH e CRLV digitais",
-    detail: "Serviço oficial para manter documentos de trânsito no celular.",
+    detail: "Serviço oficial para manter documentos de trânsito disponíveis no celular.",
     href: "https://www.gov.br/pt-br/servicos/obter-carteira-digital-de-transito",
     icon: FileBarChart,
   },
@@ -35,10 +59,10 @@ export default function OfficialSourcesCard() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[0.62rem] font-extrabold uppercase tracking-[0.15em] text-[#3DE3FF]">Dados úteis</p>
-            <h2 id="official-sources-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.05em] text-white">Fontes oficiais para decidir melhor</h2>
-            <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#8FA3AC]">Atalhos para informações públicas que complementam o Trajeto. O aplicativo não transforma referência oficial em preço garantido.</p>
+            <h2 id="official-sources-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.05em] text-white">Central de dados para sua viagem</h2>
+            <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#8FA3AC]">Acesse fontes públicas de referência sem misturar dado oficial, estimativa do Trajeto e preço garantido. O app usa essas fontes como camada de consulta, não como promessa de preço.</p>
           </div>
-          <span className="inline-flex min-h-9 items-center rounded-full border border-white/10 px-3 text-[0.58rem] font-bold text-[#9FB0B8]">Fonte externa · oficial</span>
+          <span className="inline-flex min-h-9 items-center rounded-full border border-white/10 px-3 text-[0.58rem] font-bold text-[#9FB0B8]">8 fontes oficiais</span>
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
