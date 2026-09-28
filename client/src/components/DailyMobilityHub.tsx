@@ -9,6 +9,9 @@ import { summarizeCurrentMobilityMonth } from "@/components/MobilityDashboardCar
 import { fuelLogEvent } from "@/lib/fuelLog";
 import { mobilityExpenseEvent } from "@/lib/mobilityExpenses";
 import { summarizeSavedRoute } from "@/lib/tripReadiness";
+import { getAutomaticDailyMode, getSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
+import { getLastTrip } from "@/lib/mobilePreferences";
+import { chooseMobilePrimaryAction } from "@/lib/mobilePrimaryAction";
 
 function money(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -20,6 +23,8 @@ export default function DailyMobilityHub() {
   const [vehicle, setVehicle] = useState<MobileVehicle | null>(() => getMobileVehicle());
   const [destinations, setDestinations] = useState(() => getMobileDestinations());
   const [usage, setUsage] = useState(() => getDestinationUsage());
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [dailyMode, setDailyMode] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
 
   useEffect(() => {
     const refresh = () => {
@@ -27,15 +32,21 @@ export default function DailyMobilityHub() {
       setVehicle(getMobileVehicle());
       setDestinations(getMobileDestinations());
       setUsage(getDestinationUsage());
+      setOnline(navigator.onLine);
+      setDailyMode(getSavedDailyMode() ?? "automatico");
       void listOfflineRoutes().then(setRoutes).catch(() => setRoutes([]));
     };
     refresh();
     const events = [offlineRouteEvent, mobileVehicleEvent, mobileDestinationEvent, fuelLogEvent, mobilityExpenseEvent];
     events.forEach(event => window.addEventListener(event, refresh));
     window.addEventListener("focus", refresh);
+    window.addEventListener("online", refresh);
+    window.addEventListener("offline", refresh);
     return () => {
       events.forEach(event => window.removeEventListener(event, refresh));
       window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", refresh);
+      window.removeEventListener("offline", refresh);
     };
   }, []);
 
@@ -56,30 +67,57 @@ export default function DailyMobilityHub() {
   }, [latestRoute, vehicle, stamp]);
   const hasAnySetup = Boolean(favorite || latestRoute || vehicle || budget);
 
-  const nextAction = favorite
+  const automaticMode = getAutomaticDailyMode(online, routes.length);
+  const primary = chooseMobilePrimaryAction({
+    online,
+    mode: dailyMode,
+    automaticMode,
+    savedRoutes: routes.length,
+    favorite: favorite ? { label: favorite.label, value: favorite.value } : null,
+    lastTrip: getLastTrip(),
+  });
+  const nextAction = primary.kind === "destination" && primary.target?.destination
     ? {
-        label: "Ir para o destino mais usado",
-        detail: favorite.value,
-        href: appUrl("/planejar") + "?destino=" + encodeURIComponent(favorite.value),
+        label: "Ir para " + primary.label,
+        detail: primary.target.destination,
+        href: appUrl("/planejar") + "?destino=" + encodeURIComponent(primary.target.destination),
       }
-    : latestRoute
+    : primary.kind === "repeat" && primary.target?.origin && primary.target?.destination
       ? {
-          label: "Continuar última rota",
-          detail: latestRoute.origin + " → " + latestRoute.destination,
-          href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestRoute.id) + "&origem=" + encodeURIComponent(latestRoute.origin) + "&destino=" + encodeURIComponent(latestRoute.destination),
+          label: "Repetir última viagem",
+          detail: primary.target.origin + " → " + primary.target.destination,
+          href: appUrl("/planejar") + "?origem=" + encodeURIComponent(primary.target.origin) + "&destino=" + encodeURIComponent(primary.target.destination),
         }
-      : {
-          label: "Planejar minha próxima viagem",
-          detail: "Defina origem e destino e salve a rota para reutilizar depois.",
-          href: appUrl("/planejar"),
-        };
+      : primary.kind === "offline"
+        ? {
+            label: "Continuar rota salva",
+            detail: latestRoute ? latestRoute.origin + " → " + latestRoute.destination : "Rotas preparadas neste aparelho.",
+            href: appUrl("/planejar?salvos=1"),
+          }
+        : primary.kind === "economy"
+          ? {
+              label: "Ver custo da viagem",
+              detail: "Abra a calculadora para comparar o impacto do deslocamento.",
+              href: appUrl("/") + "#calculadora",
+            }
+          : latestRoute
+            ? {
+                label: "Continuar última rota",
+                detail: latestRoute.origin + " → " + latestRoute.destination,
+                href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestRoute.id) + "&origem=" + encodeURIComponent(latestRoute.origin) + "&destino=" + encodeURIComponent(latestRoute.destination),
+              }
+            : {
+                label: "Planejar minha próxima viagem",
+                detail: "Defina origem e destino e salve a rota para reutilizar depois.",
+                href: appUrl("/planejar"),
+              };
 
   return (
     <section className="container py-8 sm:py-10" aria-labelledby="daily-mobility-title">
       <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121B22] text-white shadow-[0_20px_60px_rgba(0,0,0,.18)]">
         <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
           <div>
-            <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#C7FF3C]">Meu dia</p>
+            <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#C7FF3C]">Meu dia · {dailyMode === "automatico" ? "automático" : dailyMode}</p>
             <h2 id="daily-mobility-title" className="mt-2 font-display text-[clamp(2.2rem,6vw,4rem)] font-semibold leading-[.9] tracking-[-.065em]">
               Tudo pronto para o próximo deslocamento.
             </h2>
