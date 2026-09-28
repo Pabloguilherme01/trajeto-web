@@ -12,17 +12,17 @@ export type RouteShareDecision = {
 };
 
 export function buildRouteShareText(origin: string, destination: string, decision?: RouteShareDecision | null) {
-  const route = \`Planejei esta rota no Trajeto: \${origin.trim()} → \${destination.trim()}.\`;
+  const route = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}.`;
   if (!decision?.name) return route + " Veja distância, duração e opções de abastecimento.";
 
   const price = Number.isFinite(decision.price) && Number(decision.price) > 0
-    ? \` · referência de \${Number(decision.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/L\`
+    ? ` · referência de ${Number(decision.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/L`
     : "";
   const detour = Number.isFinite(decision.detourKm) && Number(decision.detourKm) >= 0
-    ? \` · desvio \${decision.detourSource === "real" ? "real" : "estimado"} de \${Number(decision.detourKm).toLocaleString("pt-BR")} km\`
+    ? ` · desvio ${decision.detourSource === "real" ? "real" : "estimado"} de ${Number(decision.detourKm).toLocaleString("pt-BR")} km`
     : "";
 
-  return route + \` Parada sugerida: \${decision.name}\${price}\${detour}.\`;
+  return route + ` Parada sugerida: ${decision.name}${price}${detour}.`;
 }
 
 export async function shareText(text: string, url: string, title = "Trajeto") {
@@ -36,7 +36,7 @@ export async function shareText(text: string, url: string, title = "Trajeto") {
   }
 
   if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-    await navigator.clipboard.writeText(text + "\\n" + url);
+    await navigator.clipboard.writeText(text + "\n" + url);
     return;
   }
 
