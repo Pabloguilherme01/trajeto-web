@@ -47,8 +47,12 @@ export default function Planner() {
   const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [routeAlternatives, setRouteAlternatives] = useState<RouteIntelligenceRoute[]>([]);
-  const [selectedRouteId, setSelectedRouteId] = useState("principal");
-  const [routeConfirmed, setRouteConfirmed] = useState(false);
+  const [selectedRouteId, setSelectedRouteId] = useState(() => {
+    try { return sessionStorage.getItem("trajeto-selected-route") || "principal"; } catch { return "principal"; }
+  });
+  const [routeConfirmed, setRouteConfirmed] = useState(() => {
+    try { return Boolean(sessionStorage.getItem("trajeto-selected-route")); } catch { return false; }
+  });
   const selectRoute = (routeId: string) => {
     setSelectedRouteId(routeId);
     setRouteConfirmed(false);
