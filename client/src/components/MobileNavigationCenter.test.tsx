@@ -21,6 +21,9 @@ describe("MobileNavigationCenter", () => {
         onShare={vi.fn()}
         onSave={vi.fn()}
         onStations={vi.fn()}
+        onGoogleMaps={vi.fn()}
+        onWaze={vi.fn()}
+        onAppleMaps={vi.fn()}
       />,
     );
 
@@ -30,6 +33,9 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getByText("Posto Exemplo")).toBeTruthy();
     expect(screen.getByText(/R$ 28,50/)).toBeTruthy();
     expect(screen.getByText(/Autonomia estimada: 520 km/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Google Maps/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Waze/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Apple Maps/i })).toBeTruthy();
   });
 
   it("disables external navigation while offline but keeps the route actions visible", () => {
