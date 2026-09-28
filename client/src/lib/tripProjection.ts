@@ -31,6 +31,53 @@ export function projectTripCosts(input: TripProjectionInput) {
 }
 
 
+
+export type FuelStatus = {
+  currentFuelLiters: number;
+  tankLiters: number;
+  fuelNeededToFill: number;
+  fillCost: number;
+  currentRangeKm: number;
+  tripFuelNeeded: number;
+  fuelRemainingAfterTrip: number;
+  rangeRemainingAfterTripKm: number;
+  canCompleteTrip: boolean;
+};
+
+export function calculateFuelStatus(input: {
+  tankLiters: number;
+  currentFuelLiters: number;
+  pricePerLiter: number;
+  kmPerLiter: number;
+  tripDistanceKm: number;
+}): FuelStatus | null {
+  const tankLiters = Math.max(0, input.tankLiters);
+  const currentFuelLiters = Math.max(0, Math.min(input.currentFuelLiters, tankLiters));
+  const pricePerLiter = Math.max(0, input.pricePerLiter);
+  const kmPerLiter = Math.max(0, input.kmPerLiter);
+  const tripDistanceKm = Math.max(0, input.tripDistanceKm);
+
+  if (!tankLiters || !kmPerLiter || !pricePerLiter) return null;
+
+  const fuelNeededToFill = tankLiters - currentFuelLiters;
+  const fillCost = fuelNeededToFill * pricePerLiter;
+  const currentRangeKm = currentFuelLiters * kmPerLiter;
+  const tripFuelNeeded = tripDistanceKm / kmPerLiter;
+  const fuelRemainingAfterTrip = currentFuelLiters - tripFuelNeeded;
+
+  return {
+    currentFuelLiters,
+    tankLiters,
+    fuelNeededToFill,
+    fillCost,
+    currentRangeKm,
+    tripFuelNeeded,
+    fuelRemainingAfterTrip,
+    rangeRemainingAfterTripKm: Math.max(0, fuelRemainingAfterTrip) * kmPerLiter,
+    canCompleteTrip: fuelRemainingAfterTrip >= 0,
+  };
+}
+
 export type TripScenarioComparison = {
   baseline: ReturnType<typeof projectTripCosts>;
   alternative: ReturnType<typeof projectTripCosts>;
