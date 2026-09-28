@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { addFuelLogEntry, listFuelLog, removeFuelLogEntry, summarizeFuelLog } from "./fuelLog";
+import { addFuelLogEntry, buildFuelLogCsv, listFuelLog, removeFuelLogEntry, summarizeFuelLog } from "./fuelLog";
 
 function installLocalStorageMock() {
   const store = new Map<string, string>();
