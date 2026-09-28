@@ -481,6 +481,8 @@ export default function Planner() {
             });
           } : undefined}
           onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          activeRouteLabel={routeAlternatives.length > 0 ? (selectedRouteId === "principal" ? "Principal" : selectedRouteId.replace("alternativa-", "Alternativa ")) : null}
+          routeConfirmed={routeAlternatives.length <= 1 || routeConfirmed}
         />}
 
         {!drivingMode && <LocalRouteCalculator initialDistanceKm={planned ? planned.route.distanceMeters / 1000 : 0} />}
