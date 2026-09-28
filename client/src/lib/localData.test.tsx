@@ -24,14 +24,16 @@ describe("localData", () => {
 
 it("exports Trajeto-owned data as a browser download", () => {
   localStorage.setItem("trajeto-daily-mode", "automatico");
-  const createObjectURL = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:test");
-  const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+  const createObjectURL = vi.fn().mockReturnValue("blob:test");
+  const revokeObjectURL = vi.fn();
+  Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createObjectURL });
+  Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: revokeObjectURL });
   const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
   expect(exportLocalAppData()).toBe(true);
   expect(click).toHaveBeenCalled();
   expect(createObjectURL).toHaveBeenCalled();
   expect(revokeObjectURL).toHaveBeenCalledWith("blob:test");
-  createObjectURL.mockRestore();
-  revokeObjectURL.mockRestore();
+  delete (URL as unknown as { createObjectURL?: unknown }).createObjectURL;
+  delete (URL as unknown as { revokeObjectURL?: unknown }).revokeObjectURL;
   click.mockRestore();
 });
