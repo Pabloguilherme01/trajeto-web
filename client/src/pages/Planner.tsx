@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
-import { buildGoogleMapsDestinationUrl, shareText, buildRouteShareText } from "@/lib/mobileTools";
+import { buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, shareText, buildRouteShareText } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
