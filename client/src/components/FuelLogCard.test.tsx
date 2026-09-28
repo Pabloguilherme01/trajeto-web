@@ -1,0 +1,29 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import FuelLogCard from "./FuelLogCard";
+
+describe("FuelLogCard", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it("registra e exibe um abastecimento", () => {
+    render(<FuelLogCard />);
+    fireEvent.change(screen.getByLabelText("Litros"), { target: { value: "40" } });
+    fireEvent.change(screen.getByLabelText("Valor total"), { target: { value: "240" } });
+    fireEvent.click(screen.getByRole("button", { name: "Registrar" }));
+    expect(screen.getByText(/6,00/)).toBeTruthy();
+    expect(screen.getByText(/40 L/)).toBeTruthy();
+  });
+
+  it("mostra o gasto acumulado e permite remover", () => {
+    render(<FuelLogCard />);
+    fireEvent.change(screen.getByLabelText("Litros"), { target: { value: "30" } });
+    fireEvent.change(screen.getByLabelText("Valor total"), { target: { value: "180" } });
+    fireEvent.click(screen.getByRole("button", { name: "Registrar" }));
+    expect(screen.getByText(/180,00/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Remover abastecimento/ }));
+    expect(screen.getByText("Registros")).toBeTruthy();
+  });
+});
