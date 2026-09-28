@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { CarFront, ChevronDown, CircleDollarSign, MapPinned, ShieldCheck } from "lucide-react";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
