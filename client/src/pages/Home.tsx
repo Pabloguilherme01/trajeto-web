@@ -11,7 +11,6 @@ import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
-import MobileQuickBar from "@/components/MobileQuickBar";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
