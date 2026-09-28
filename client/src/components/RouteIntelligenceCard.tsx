@@ -244,7 +244,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             {(() => {
               type Route = typeof data.routes[number];
               const balanced = selectRouteForDecision(data.routes, "balanced", fuelCost, totalCost);
-              const options: Array<{ key: string; label: string; hint: string; metric: (route: Route) => number | null }> = [
+              const options: Array<{ key: string; label: string; hint: string; metric: (route: Route) => number | null | undefined }> = [
                 { key: "balanced", label: "Equilibrado", hint: "tempo, distância e custos disponíveis", metric: route => balanced?.id === route.id ? 0 : null },
                 { key: "rápida", label: "Mais rápida", hint: "menor duração", metric: route => route.durationSeconds },
                 { key: "custo", label: "Menor custo", hint: "combustível + pedágio", metric: route => totalCost(route) },
