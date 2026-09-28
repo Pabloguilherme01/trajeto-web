@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, shareText, buildRouteShareText } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildWazeNavigationUrl, shareText, buildRouteShareText } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
@@ -439,6 +439,7 @@ export default function Planner() {
           onGoogleMaps={() => window.open(buildGoogleMapsDestinationUrl(destination, true), "_blank", "noopener,noreferrer")}
           onWaze={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")}
           onAppleMaps={() => window.open(buildAppleMapsDirectionsUrl(destination), "_blank", "noopener,noreferrer")}
+          onMultiStopNavigate={(waypoints) => window.open(buildGoogleMapsMultiStopUrl(destination, waypoints, true), "_blank", "noopener,noreferrer")}
           onShare={shareRoute}
           onSave={saveCurrentRouteOffline}
           onRefresh={loadedFromOffline && !offline ? () => {
