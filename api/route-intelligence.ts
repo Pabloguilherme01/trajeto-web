@@ -118,6 +118,7 @@ export default async function handler(request: Request) {
           estimatedPrice?: Array<{ currencyCode?: string; units?: string; nanos?: number }>;
         };
       };
+      routeLabels?: string[];
     }>;
   };
 
@@ -129,6 +130,7 @@ export default async function handler(request: Request) {
 
     return {
       id: index === 0 ? "principal" : `alternativa-${index}`,
+      labels: route.routeLabels || [],
       distanceMeters: route.distanceMeters ?? null,
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
