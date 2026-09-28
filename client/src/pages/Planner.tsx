@@ -164,7 +164,7 @@ export default function Planner() {
   const [priceWeight, setPriceWeight] = useState(70);
   const [roundTrip, setRoundTrip] = useState(false);
   const [tripsPerWeek, setTripsPerWeek] = useState(5);
-  const [selectedStop, setSelectedStop = useState<PlannedRoute["stops"][number] | null>(null);
+  const [selectedStop, setSelectedStop] = useState<PlannedRoute["stops"][number] | null>(null);
   const { isAuthenticated } = useAuth();
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation({ onSuccess: result => { setPlanned(result); track("route_open", destination || origin); } });
