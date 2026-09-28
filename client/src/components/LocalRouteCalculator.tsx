@@ -34,6 +34,7 @@ function rememberPrice(value: string) {
 export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = false }: LocalRouteCalculatorProps) {
   const savedVehicle = getMobileVehicle();
   const [draft] = useState(() => loadTripCalculatorDraft());
+  const [restoredDraft, setRestoredDraft] = useState(() => Boolean(draft));
   const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : (draft?.distance ?? ""));
   const [price, setPrice] = useState(() => draft?.price || getRememberedPrice());
   const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : (draft?.consumption ?? ""));
@@ -129,10 +130,10 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           <h2 id="local-calculator-title" className="font-display mt-1 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">Calcule o custo da viagem.</h2>
           <p className="mt-1 text-xs leading-relaxed text-[#607570]">Use a distância da rota. O cálculo é local e não depende do servidor, mapa ou preço automático.</p>
         </div>
-        <button type="button" onClick={() => { clearTripCalculatorDraft(); setDistance(initialDistanceKm > 0 ? String(initialDistanceKm) : ""); setPrice(""); setConsumption(savedVehicle ? String(savedVehicle.consumption) : ""); setTank(savedVehicle ? String(savedVehicle.tank) : ""); setCurrentFuel(""); setRoundTrip(true); setTripsPerWeek(5); setToll(""); setParking(""); setOther(""); setAlternativePrice(""); setAlternativeConsumption(""); setMonthlyBudget(""); }} className="ml-auto min-h-10 shrink-0 rounded-xl border border-[#C7D2C9] px-3 text-[0.62rem] font-extrabold text-[#365E51] hover:border-[#163840]">Limpar cenário</button>
+        <button type="button" onClick={() => { clearTripCalculatorDraft(); setRestoredDraft(false); setDistance(initialDistanceKm > 0 ? String(initialDistanceKm) : ""); setPrice(""); setConsumption(savedVehicle ? String(savedVehicle.consumption) : ""); setTank(savedVehicle ? String(savedVehicle.tank) : ""); setCurrentFuel(""); setRoundTrip(true); setTripsPerWeek(5); setToll(""); setParking(""); setOther(""); setAlternativePrice(""); setAlternativeConsumption(""); setMonthlyBudget(""); }} className="ml-auto min-h-10 shrink-0 rounded-xl border border-[#C7D2C9] px-3 text-[0.62rem] font-extrabold text-[#365E51] hover:border-[#163840]">Limpar cenário</button>
       </div>
 
-      {draft && <p role="status" className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-[0.65rem] font-bold text-[#56766A]">Último cenário restaurado neste aparelho. Suas entradas são salvas localmente para continuar de onde parou.</p>}
+      {restoredDraft && <p role="status" className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-[0.65rem] font-bold text-[#56766A]">Último cenário restaurado neste aparelho. Suas entradas são salvas localmente para continuar de onde parou.</p>}
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label className="text-xs font-bold text-[#365E51]">Distância de ida (km)
