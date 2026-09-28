@@ -13,7 +13,7 @@ describe("DailyNowCard", () => {
   afterEach(() => cleanup());
   it("renders a real primary action for a new user", async () => {
     render(<DailyNowCard />);
-    expect(screen.getByRole("heading", { name: /Prepare sua próxima viagem|Sua próxima viagem/i })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /Pronto para hoje/i })).toBeTruthy();
     expect(screen.getByRole("link", { name: /Abrir agora/i })).toBeTruthy();
   });
 });
