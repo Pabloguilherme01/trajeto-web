@@ -1,9 +1,11 @@
-import { Bookmark, Fuel, Navigation, Share2, LocateFixed, WifiOff, Sparkles } from "lucide-react";
+import { Bookmark, Fuel, Navigation, Share2, LocateFixed, WifiOff, Sparkles, Gauge } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText, vibration } from "@/lib/mobileTools";
 import { getLastIntent, getLastTrip, mobilePreferenceEvent, rememberIntent } from "@/lib/mobilePreferences";
+import { getAutomaticDailyMode, getSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { getFavoriteDestination, getDestinationUsage, getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 
 export default function MobileQuickActions() {
@@ -20,6 +22,8 @@ export default function MobileQuickActions() {
   const [dismissedStatus, setDismissedStatus] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [favoriteDestination, setFavoriteDestination] = useState<MobileDestination | null>(() => getFavoriteDestination());
+  const [savedRoutesCount, setSavedRoutesCount] = useState(0);
+  const [dailyMode, setDailyMode] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
 
   useEffect(() => {
     const onOnline = () => { setOnline(true); vibration(8); };
@@ -28,18 +32,22 @@ export default function MobileQuickActions() {
       setLastTrip(getLastTrip());
       setLastIntent(getLastIntent());
       setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), getDestinationUsage()));
+      setDailyMode(getSavedDailyMode() ?? "automatico");
+      void listOfflineRoutes().then(routes => setSavedRoutesCount(routes.length)).catch(() => setSavedRoutesCount(0));
     };
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener(mobileDestinationEvent, refresh);
+    window.addEventListener(offlineRouteEvent, refresh);
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener(mobileDestinationEvent, refresh);
+      window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
 
@@ -112,9 +120,20 @@ export default function MobileQuickActions() {
     ? `Minha próxima viagem no Trajeto: ${lastTrip.origin} → ${lastTrip.destination}.`
     : "Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.";
 
-  const smartDestination = favoriteDestination && !lastIntent ? favoriteDestination : null;
+  const automaticMode = getAutomaticDailyMode(online, savedRoutesCount);
+  const activeDailyMode = dailyMode === "automatico" ? automaticMode : dailyMode;
+  const smartDestination = activeDailyMode === "proxima" ? favoriteDestination : null;
+  const smartAction = activeDailyMode === "repetir" && lastTrip
+    ? { label: "Repetir", icon: Navigation, run: () => { vibration(); rememberIntent("route"); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)); } }
+    : activeDailyMode === "offline" && savedRoutesCount > 0
+      ? { label: "Continuar", icon: Bookmark, run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar?salvos=1")); } }
+      : activeDailyMode === "economia"
+        ? { label: "Custo", icon: Gauge, run: () => { vibration(); setLocation(appUrl("/#calculadora")); } }
+        : smartDestination
+          ? { label: smartDestination.label, icon: Navigation, run: () => { vibration(); const updated = rememberDestinationUsage(smartDestination); setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated)); rememberIntent("route"); setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(smartDestination.value)); } }
+          : { label: lastTrip ? "Retomar" : "Planejar", icon: Navigation, run: resumeAction };
   const actions = [
-    { label: smartDestination ? smartDestination.label : resumeLabel, short: smartDestination ? "Destino" : resumeLabel, icon: smartDestination ? Navigation : lastIntent === "nearby" ? LocateFixed : lastIntent === "saved" ? Bookmark : lastIntent === "route" ? Navigation : Fuel, path: "", run: () => { if (!smartDestination) return resumeAction(); vibration(); const updated = rememberDestinationUsage(smartDestination); setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated)); setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(smartDestination.value)); }, smart: true },
+    { label: smartAction.label, short: smartAction.label, icon: smartAction.icon, path: "", run: smartAction.run, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/planejar", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
@@ -138,7 +157,7 @@ export default function MobileQuickActions() {
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
       <div className={`mx-auto max-w-md rounded-[1.4rem] border p-1.5 shadow-[0_20px_55px_rgba(0,0,0,.48)] backdrop-blur-2xl transition-colors ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
         <div className="mb-1 flex items-center justify-between px-2 pt-0.5">
-          <span className="flex items-center gap-1 text-[0.5rem] font-extrabold uppercase tracking-[0.14em] text-[#71828B]"><Sparkles className="size-2.5 text-[#C7FF3C]" /> Acesso rápido</span>
+          <span className="flex items-center gap-1 text-[0.5rem] font-extrabold uppercase tracking-[0.14em] text-[#71828B]"><Sparkles className="size-2.5 text-[#C7FF3C]" /> {dailyMode === "automatico" ? "Ação automática" : "Modo " + activeDailyMode}</span>
           <span className={`inline-flex items-center gap-1 text-[0.5rem] font-bold ${online ? "text-[#B9D979]" : "text-[#FFD49C]"}`}><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C] shadow-[0_0_8px_rgba(199,255,60,.75)]" : "bg-[#FFB86B]"}`} aria-hidden="true" />{online ? "online" : "offline"}</span>
         </div>
         <div className="grid grid-cols-5 gap-1">
