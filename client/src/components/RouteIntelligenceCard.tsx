@@ -209,7 +209,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                     </div>
                   </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}
+                    {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}{trafficDetailed && route.trafficImpact && route.trafficImpact.totalPoints > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">impacto {(route.trafficImpact.affectedPoints / route.trafficImpact.totalPoints * 100).toFixed(0)}% da polyline</span>}
                     {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
                     {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
                   </div>
