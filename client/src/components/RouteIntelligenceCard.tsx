@@ -211,16 +211,18 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              ["rápida", "Mais rápida", (a: typeof data.routes[number], b: typeof data.routes[number]) => (a.durationSeconds ?? Infinity) - (b.durationSeconds ?? Infinity)],
-              ["custo", "Menor custo", (a: typeof data.routes[number], b: typeof data.routes[number]) => (totalCost(a) ?? Infinity) - (totalCost(b) ?? Infinity)],
-              ["distância", "Menor distância", (a: typeof data.routes[number], b: typeof data.routes[number]) => (a.distanceMeters ?? Infinity) - (b.distanceMeters ?? Infinity)],
-              ["pedágio", "Menor pedágio", (a: typeof data.routes[number], b: typeof data.routes[number]) => (a.toll?.amount ?? Infinity) - (b.toll?.amount ?? Infinity)],
-            ].map(([key, label, compare]) => {
-              const route = data.routes.reduce((best, item) => (compare(item, best) < 0 ? item : best), data.routes[0]);
+              ["rápida", "Mais rápida", (routes: typeof data.routes, r: typeof data.routes[number]) => (r.durationSeconds ?? Infinity), "menor duração"],
+              ["custo", "Menor custo", (routes: typeof data.routes, r: typeof data.routes[number]) => totalCost(r), "combustível + pedágio"],
+              ["distância", "Menor distância", (routes: typeof data.routes, r: typeof data.routes[number]) => r.distanceMeters, "distância total"],
+              ["pedágio", "Menor pedágio", (routes: typeof data.routes, r: typeof data.routes[number]) => r.toll?.amount, "valor informado"],
+            ].map(([key, label, metric, hint]) => {
+              const ranked = data.routes.filter(route => metric(data.routes, route) != null);
+              const route = ranked.length ? [...ranked].sort((a, b) => Number(metric(data.routes, a)) - Number(metric(data.routes, b)))[0] : data.routes[0];
               const active = selectedRouteId === route.id;
-              return <button key={key as string} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
-                <span className="block text-[0.52rem] font-black uppercase text-white/35">{label as string}</span>
+              return <button key={String(key)} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
+                <span className="block text-[0.52rem] font-black uppercase text-white/35">{String(label)}</span>
                 <span className="mt-1 block text-[0.62rem] font-black">{route.id === "principal" ? "Principal" : route.id.replace("alternativa-", "Alternativa ")}</span>
+                <span className="mt-1 block text-[0.48rem] text-white/35">{String(hint)}</span>
               </button>;
             })}
           </div>
