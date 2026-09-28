@@ -1,6 +1,7 @@
 import { Accessibility, Check, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
+import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
+import { setEconomyMode } from "@/lib/mobilePreferences";
 
 const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:string}> = [
   { key:"largeText", label:"Texto maior", detail:"Aumenta a leitura sem alterar os dados." },
@@ -47,6 +48,15 @@ export default function AccessibilityPanel() {
               <div><p className="text-[0.62rem] font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]">Acesso rápido</p><h2 id="accessibility-title" className="mt-1 text-xl font-extrabold text-white">Acessibilidade e modo de uso</h2><p className="mt-1 text-xs text-[#8FA3AC]">Preferências ficam neste aparelho e podem ser alteradas a qualquer momento.</p></div>
               <button type="button" onClick={()=>setOpen(false)} aria-label="Fechar acessibilidade" className="grid size-11 place-items-center rounded-xl border border-white/10 text-white"><X className="size-5"/></button>
             </header>
+
+            <div className="mt-5">
+              <p className="text-[0.62rem] font-extrabold uppercase tracking-[0.14em] text-[#7F919A]">Modos prontos</p>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:true});setEconomyMode(true);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Economia<span className="mt-0.5 block text-[0.58rem] font-normal text-[#8FA3AC]">menos dados e blocos</span></button>
+                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:true,highContrast:true,reduceMotion:false,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Leitura<span className="mt-0.5 block text-[0.58rem] font-normal text-[#8FA3AC]">texto e contraste</span></button>
+                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Condução<span className="mt-0.5 block text-[0.58rem] font-normal text-[#8FA3AC]">menos movimento</span></button>
+              </div>
+            </div>
 
             <div className="mt-5 grid gap-2">
               <div className="flex min-h-14 items-center justify-between rounded-2xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.05] px-4"><span><strong className="block text-sm text-white">Modo escuro</strong><span className="text-xs text-[#8FA3AC]">Ativo por padrão para uso noturno e leitura operacional.</span></span><span className="grid size-7 place-items-center rounded-full bg-[#C7FF3C] text-[#0B1014]"><Check className="size-4"/></span></div>
