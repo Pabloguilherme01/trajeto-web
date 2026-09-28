@@ -1,3 +1,4 @@
+import React from "react";
 import { CarFront, Fuel, Pencil, Route, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent, removeMobileVehicle, saveMobileVehicle, type MobileVehicle } from "@/lib/mobileVehicle";
