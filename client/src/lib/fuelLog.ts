@@ -1,6 +1,7 @@
 const FUEL_LOG_KEY = "trajeto-fuel-log";
 const FUEL_LOG_EVENT = "trajeto-fuel-log-change";
 const MAX_ENTRIES = 100;
+const LAST_FUEL_PRICE_KEY = "trajeto-last-fuel-price";
 
 export type FuelLogEntry = {
   id: string;
@@ -104,6 +105,7 @@ export function addFuelLogEntry(input: {
   try {
     const next = [entry, ...listFuelLog()].slice(0, MAX_ENTRIES);
     storage.setItem(FUEL_LOG_KEY, JSON.stringify(next));
+    storage.setItem(LAST_FUEL_PRICE_KEY, String(totalCost / liters));
     emitChange();
     return entry;
   } catch {
