@@ -170,6 +170,14 @@ Preço de referência da ANP não é apresentado como preço de bomba nem como o
 - `drizzle`: modelo persistente.
 - `shared`: contratos compartilhados.
 
+## Arquitetura de produção
+
+O frontend pode ser publicado no GitHub Pages como site estático. Quando o backend Express estiver hospedado separadamente, defina `VITE_API_BASE_URL` no build do frontend e `FRONTEND_ORIGIN` no backend para permitir apenas a origem pública do site.
+
+Sem backend disponível, o produto não finge que a API está funcionando: planejamento e busca de postos oferecem fallback direto para o Google Maps, enquanto rotas e consultas já salvas continuam disponíveis localmente. Isso mantém uma ação útil mesmo diante de falha de infraestrutura.
+
+O GitHub Pages é adequado para o frontend estático; o backend deve ser hospedado em uma plataforma que execute Node/Express. O Express é suportado diretamente como aplicação backend pela Vercel. citeturn1search1turn1search2
+
 ## Desenvolvimento
 
 Requisitos:
