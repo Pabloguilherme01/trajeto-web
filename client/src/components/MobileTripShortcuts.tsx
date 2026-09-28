@@ -1,3 +1,4 @@
+import React from "react";
 import { BriefcaseBusiness, Home, MapPin, Plus, Trash2, Navigation, ArrowRight, LocateFixed, Share2, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
