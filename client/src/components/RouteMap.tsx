@@ -4,7 +4,7 @@ import { LocateFixed, Minus, Plus, Satellite, TrafficCone } from "lucide-react";
 
 type Stop = { placeId: string; name: string; address: string; lat: number; lng: number };
 type TrafficInterval = { startPolylinePointIndex?: number; endPolylinePointIndex?: number; speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM" };
-type RoutePreview = { id: string; polyline: string | null; selected?: boolean; trafficIntervals?: TrafficInterval[] };
+type RoutePreview = { id: string; polyline: string | null; selected?: boolean; trafficIntervals?: TrafficInterval[]; durationSeconds?: number | null; staticDurationSeconds?: number | null; distanceMeters?: number | null; toll?: { amount: number | null; currency?: string } | null };
 type RouteMapProps = { origin?: { lat: number; lng: number }; destination?: { lat: number; lng: number }; stops: Stop[]; routes?: RoutePreview[] };
 
 export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapProps) {
@@ -127,6 +127,17 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     mapRef.current.fitBounds(bounds, 56);
     if (is3D) window.setTimeout(() => mapRef.current?.moveCamera({ tilt: currentTilt || 55, heading: currentHeading }), 0);
   };
+  const selectedRoute = routes.find(route => route.selected) || routes[0];
+  const trafficCounts = (selectedRoute?.trafficIntervals || []).reduce((acc, item) => {
+    if (item.speed === "SLOW") acc.slow += 1;
+    if (item.speed === "TRAFFIC_JAM") acc.jam += 1;
+    return acc;
+  }, { slow: 0, jam: 0 });
+  const trafficImpactSeconds = selectedRoute?.durationSeconds != null && selectedRoute?.staticDurationSeconds != null
+    ? Math.max(0, selectedRoute.durationSeconds - selectedRoute.staticDurationSeconds)
+    : null;
+  const trafficImpactMinutes = trafficImpactSeconds == null ? null : Math.max(0, Math.round(trafficImpactSeconds / 60));
+
   const toggleTraffic = () => {
     if (!mapRef.current) return;
     if (!trafficRef.current) trafficRef.current = new window.google.maps.TrafficLayer();
@@ -151,6 +162,20 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
         <button type="button" onClick={activate3D} disabled={!mapReady || !is3DAvailable} aria-pressed={is3D} className={"min-h-10 rounded-xl border px-3 text-[0.62rem] font-black shadow-lg backdrop-blur " + (is3D ? "border-[#C7FF3C]/40 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>{is3D ? "2D" : "3D"}</button>
         <button type="button" onClick={rotateCompass} disabled={!mapReady} aria-label={`Girar mapa para ${heading} graus`} className="min-h-10 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.62rem] font-black text-white shadow-lg backdrop-blur">N {Math.round(heading)}°</button>
       </div>
+      {selectedRoute && (
+        <div className="absolute bottom-3 left-3 max-w-[min(360px,calc(100%-84px))] rounded-xl border border-white/10 bg-[#0B1014]/90 p-3 text-white shadow-lg backdrop-blur" aria-live="polite">
+          <p className="text-[0.54rem] font-black uppercase tracking-[0.14em] text-[#3DE3FF]">Rota em análise</p>
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[0.62rem] font-bold">
+            {selectedRoute.distanceMeters != null && <span>{(selectedRoute.distanceMeters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
+            {trafficImpactMinutes != null && <span>+{trafficImpactMinutes} min trânsito</span>}
+            {selectedRoute.toll?.amount != null && <span>{selectedRoute.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: selectedRoute.toll.currency || "BRL" })} pedágio</span>}
+          </div>
+          {(trafficCounts.slow > 0 || trafficCounts.jam > 0) && (
+            <p className="mt-1 text-[0.56rem] text-white/50">{trafficCounts.slow} trecho(s) lento(s) · {trafficCounts.jam} congestionado(s)</p>
+          )}
+        </div>
+      )}
+
       <div className="absolute bottom-3 right-3 flex flex-col gap-1.5">
         <button type="button" onClick={() => mapRef.current?.setZoom(Math.min(21, (mapRef.current?.getZoom() || 11) + 1))} disabled={!mapReady} aria-label="Aumentar zoom" className="grid size-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 text-white shadow-lg backdrop-blur disabled:opacity-40"><Plus className="size-5" /></button>
         <button type="button" onClick={() => mapRef.current?.setZoom(Math.max(2, (mapRef.current?.getZoom() || 11) - 1))} disabled={!mapReady} aria-label="Diminuir zoom" className="grid size-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 text-white shadow-lg backdrop-blur disabled:opacity-40"><Minus className="size-5" /></button>
