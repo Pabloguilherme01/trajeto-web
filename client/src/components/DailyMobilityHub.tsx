@@ -1,5 +1,5 @@
 import { ArrowRight, CarFront, CheckCircle2, CircleDollarSign, Fuel, MapPin, Route, Wallet } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { getFavoriteDestination, getMobileDestinations, mobileDestinationEvent, getDestinationUsage } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
