@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { CalendarClock, CheckCircle2, ChevronRight, CircleAlert, Wrench } from "lucide-react";
 import { getMaintenanceItems, getMaintenanceStatus, removeMaintenanceItem, saveMaintenanceItem, vehicleMaintenanceEvent, type MaintenanceItem } from "@/lib/vehicleMaintenance";
