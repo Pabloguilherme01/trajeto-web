@@ -43,7 +43,7 @@ export default function MobileUtilityHub() {
             const isOpen = open === panel.id;
             return (
               <div key={panel.id} className={isOpen ? "overflow-hidden rounded-2xl border border-[#C7FF3C]/20 bg-[#10181F]" : "overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"}>
-                <button type="button" aria-expanded={isOpen} aria-controls={`utility-panel-${panel.id}`} onClick={() => toggle(panel.id)} className="flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left">
+                <button type="button" aria-label={`${panel.title}, ${isOpen ? "recolher seção" : "abrir seção"}`} aria-expanded={isOpen} aria-controls={`utility-panel-${panel.id}`} onClick={() => toggle(panel.id)} className="flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left">
                   <span className={isOpen ? "grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" : "grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-[#C7FF3C]"}>
                     <Icon className="size-5" />
                   </span>

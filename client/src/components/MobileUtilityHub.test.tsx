@@ -11,12 +11,12 @@ describe("MobileUtilityHub", () => {
     expect(screen.getByText("Minha rotina")).toBeTruthy();
     expect(screen.getAllByText("Antes de sair").length).toBeGreaterThan(0);
 
-    await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
-    expect(screen.getAllByRole("button", { name: /Meu veículo/i })[0].getAttribute("aria-expanded")).toBe("true");
+    await user.click(screen.getByRole("button", { name: "Meu veículo, abrir seção" }));
+    expect(screen.getByRole("button", { name: "Meu veículo, recolher seção" }).getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText("Não deixe o veículo virar surpresa.")).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
-    expect(screen.getAllByRole("button", { name: /Meu veículo/i })[0].getAttribute("aria-expanded")).toBe("false");
+    await user.click(screen.getByRole("button", { name: "Meu veículo, recolher seção" }));
+    expect(screen.getByRole("button", { name: "Meu veículo, abrir seção" }).getAttribute("aria-expanded")).toBe("false");
     expect(screen.queryByText("Não deixe o veículo virar surpresa.")).toBeNull();
   });
 });
