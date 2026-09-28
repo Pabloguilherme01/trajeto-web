@@ -1,3 +1,4 @@
+import React from "react";
 import { ArrowRight, Car, Clock3, MapPinned, Settings2, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
