@@ -24,9 +24,9 @@ const panels: Array<{id: PanelId; title: string; detail: string; icon: typeof Ma
 ];
 
 export default function MobileUtilityHub() {
-  const [open, setOpen] = useState<PanelId>("rotina");
+  const [open, setOpen] = useState<PanelId | null>("rotina");
 
-  const toggle = (id: PanelId) => setOpen(current => current === id ? id : id);
+  const toggle = (id: PanelId) => setOpen(current => current === id ? null : id);
 
   return (
     <section className="border-y border-white/8 bg-[#0B1014] py-6 sm:py-10" aria-labelledby="utility-hub-title">
@@ -43,7 +43,7 @@ export default function MobileUtilityHub() {
             const isOpen = open === panel.id;
             return (
               <div key={panel.id} className={isOpen ? "overflow-hidden rounded-2xl border border-[#C7FF3C]/20 bg-[#10181F]" : "overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"}>
-                <button type="button" aria-expanded={isOpen} onClick={() => toggle(panel.id)} className="flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left">
+                <button type="button" aria-expanded={isOpen} aria-controls={`utility-panel-${panel.id}`} onClick={() => toggle(panel.id)} className="flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left">
                   <span className={isOpen ? "grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" : "grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-[#C7FF3C]"}>
                     <Icon className="size-5" />
                   </span>
@@ -55,7 +55,7 @@ export default function MobileUtilityHub() {
                 </button>
 
                 {isOpen && (
-                  <div className="border-t border-white/8 px-3 pb-4 pt-3 sm:px-4">
+                  <div id={`utility-panel-${panel.id}`} className="border-t border-white/8 px-3 pb-4 pt-3 sm:px-4">
                     {panel.id === "rotina" && (
                       <div className="grid gap-4">
                         <DailyDepartureChecklist />
