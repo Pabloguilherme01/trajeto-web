@@ -1,3 +1,4 @@
+import React from "react";
 import { Download, Fuel, Gauge, ReceiptText, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { addFuelLogEntry, buildFuelLogCsv, fuelLogEvent, listFuelLog, removeFuelLogEntry, summarizeFuelLog, type FuelLogEntry } from "@/lib/fuelLog";
