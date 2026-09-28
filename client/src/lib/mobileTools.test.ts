@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -14,6 +14,12 @@ describe("mobile tools", () => {
     expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
       "https://www.google.com/maps/search/?api=1&query=postos+perto+de+%C3%81guas+Lindas",
     );
+  });
+
+  it("builds a Google Maps route with up to three intermediate stops", () => {
+    const url = buildGoogleMapsMultiStopUrl("Brasília, DF", ["Posto A", "Posto B", "Posto C", "Extra"], true);
+    expect(url).toContain("waypoints=Posto+A%7CPosto+B%7CPosto+C");
+    expect(url).toContain("dir_action=navigate");
   });
 
   it("builds Waze navigation links with a search fallback", () => {
