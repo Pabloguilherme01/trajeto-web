@@ -85,7 +85,14 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     if (index > 0 && deltaSeconds != null && deltaSeconds < 0) badges.push("mais rápida");
     if (index > 0 && savings != null && savings > 0) badges.push("menor custo");
     if (route.toll?.amount === 0 && base?.toll?.amount != null && base.toll.amount > 0) badges.push("sem pedágio");
-    return { badges, deltaSeconds, savings };
+    const tradeoff = deltaSeconds != null && savings != null
+      ? deltaSeconds > 0 && savings > 0
+        ? `economiza ${savings.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}, mas leva +${formatDuration(deltaSeconds)}`
+        : deltaSeconds < 0 && savings < 0
+          ? `ganha ${formatDuration(Math.abs(deltaSeconds))}, mas custa +${Math.abs(savings).toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}`
+          : null
+      : null;
+    return { badges, deltaSeconds, savings, tradeoff };
   };
 
   return (
@@ -139,6 +146,25 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black">Comparar provedores</p><p className="mt-1 text-[0.58rem] text-white/40">Google Routes × Apple Maps Server × TomTom.</p></div><button type="button" onClick={compareApple} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">{comparisonLoading ? "Consultando" : "Comparar"}</button><button type="button" onClick={compareTomTom} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">TomTom</button></div>{(apple?.routes?.[0] || tomtom?.routes?.[0]) && <div className="mt-3 grid grid-cols-3 gap-2"><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Google</p><strong className="text-xs">{formatDuration(main?.durationSeconds ?? null)} · {((main?.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Apple</p><strong className="text-xs">{apple?.routes?.[0] ? formatDuration(apple.routes[0].durationSeconds) : "não consultado"}</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">TomTom</p><strong className="text-xs">{tomtom?.routes?.[0] ? formatDuration(tomtom.routes[0].durationSeconds) : "não consultado"}</strong></div></div>}</div>}
 
       {data && data.routes.length > 1 && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {[
+            { label: "Mais rápida", route: data.routes.reduce((best, route) => route.durationSeconds != null && (best.durationSeconds == null || route.durationSeconds < best.durationSeconds) ? route : best, data.routes[0]) },
+            { label: "Menor custo", route: data.routes.reduce((best, route) => {
+              const cost = totalCost(route); const bestCost = totalCost(best);
+              return cost != null && (bestCost == null || cost < bestCost) ? route : best;
+            }, data.routes[0]) },
+            { label: "Sem pedágio", route: data.routes.find(route => route.toll?.amount === 0) || null },
+          ].map(item => (
+            <div key={item.label} className="rounded-xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[0.52rem] font-black uppercase tracking-wider text-white/35">{item.label}</p>
+              <p className="mt-1 text-xs font-black">{item.route ? (item.route.id === "principal" ? "Principal" : item.route.id.replace("alternativa-", "Alternativa ")) : "Não comprovado"}</p>
+              {item.route && <p className="mt-1 text-[0.55rem] text-white/45">{formatDuration(item.route.durationSeconds)} · {item.route.toll?.amount != null ? item.route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: item.route.toll.currency }) : "pedágio não informado"}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {data && data.routes.length > 1 && (
         <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
           <div className="mb-3">
             <p className="text-xs font-black">Escolha da alternativa</p>
@@ -159,6 +185,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}
                     {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
+                    {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
                     {route.toll?.amount != null && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">pedágio {route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency })}</span>}
                   </div>
                 </div>
