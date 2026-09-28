@@ -1,5 +1,6 @@
 import { Fuel, Gauge, Route as RouteIcon, WalletCards } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { projectTripCosts } from "@/lib/tripProjection";
 
 function numberValue(value: string) {
@@ -12,13 +13,42 @@ export type LocalRouteCalculatorProps = {
   compact?: boolean;
 };
 
+const PRICE_KEY = "trajeto-last-fuel-price";
+
+function getRememberedPrice() {
+  if (typeof window === "undefined") return "";
+  try {
+    const value = localStorage.getItem(PRICE_KEY) || "";
+    const parsed = Number(value.replace(",", "."));
+    return Number.isFinite(parsed) && parsed > 0 ? value : "";
+  } catch { return ""; }
+}
+
+function rememberPrice(value: string) {
+  const parsed = Number(value.replace(",", "."));
+  if (!Number.isFinite(parsed) || parsed <= 0) return;
+  try { localStorage.setItem(PRICE_KEY, value); } catch {}
+}
+
 export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = false }: LocalRouteCalculatorProps) {
+  const savedVehicle = getMobileVehicle();
   const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : "");
-  const [price, setPrice] = useState("");
-  const [consumption, setConsumption] = useState("");
-  const [tank, setTank] = useState("");
+  const [price, setPrice] = useState(getRememberedPrice);
+  const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : "");
+  const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : "");
   const [roundTrip, setRoundTrip] = useState(true);
   const [tripsPerWeek, setTripsPerWeek] = useState(5);
+
+  useEffect(() => {
+    const refreshVehicle = () => {
+      const vehicle = getMobileVehicle();
+      if (!vehicle) return;
+      setConsumption(current => current || String(vehicle.consumption));
+      setTank(current => current || String(vehicle.tank));
+    };
+    window.addEventListener(mobileVehicleEvent, refreshVehicle);
+    return () => window.removeEventListener(mobileVehicleEvent, refreshVehicle);
+  }, []);
 
   const values = useMemo(() => {
     const oneWayDistanceKm = numberValue(distance);
@@ -58,7 +88,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           <input value={distance} onChange={e => setDistance(e.target.value)} inputMode="decimal" placeholder="Ex.: 35" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
         </label>
         <label className="text-xs font-bold text-[#365E51]">Preço (R$/L)
-          <input value={price} onChange={e => setPrice(e.target.value)} inputMode="decimal" placeholder="Ex.: 5,89" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+          <input value={price} onChange={e => setPrice(e.target.value)} onBlur={() => rememberPrice(price)} inputMode="decimal" placeholder="Ex.: 5,89" aria-describedby="local-calculator-note" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
         </label>
         <label className="text-xs font-bold text-[#365E51]">Consumo (km/L)
           <input value={consumption} onChange={e => setConsumption(e.target.value)} inputMode="decimal" placeholder="Ex.: 10,5" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
@@ -92,7 +122,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">Para esta distância e autonomia informadas, o cálculo indica aproximadamente {values.estimatedRefuels} parada(s) de abastecimento.</p>
           )}
-          <p className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">Estimativa baseada exclusivamente nos valores informados. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.</p>
+          <p id="local-calculator-note" className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">Estimativa baseada exclusivamente nos valores informados. O cálculo lembra neste aparelho o último preço informado e pode aproveitar o veículo salvo. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.</p>
         </div>
       ) : (
         <p className="mt-4 rounded-xl border border-dashed border-[#C7D2C9] bg-[#F8FAF7] px-3 py-3 text-xs font-semibold text-[#71877E]">Preencha distância, preço e consumo para calcular. Nenhum valor é inventado pelo Trajeto.</p>
