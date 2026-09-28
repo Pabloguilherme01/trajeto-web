@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
+import { calculateFuelStatus, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
 
 describe("local route calculator contract", () => {
   it("projects a round trip without negative values", () => {
@@ -55,6 +55,59 @@ describe("local route calculator contract", () => {
     expect(result.weeklyCost).toBe(0);
     expect(result.monthlyCost).toBe(0);
     expect(result.annualCost).toBe(0);
+  });
+
+
+  it("calcula abastecimento, autonomia atual e combustível após a viagem", () => {
+    const result = calculateFuelStatus({
+      tankLiters: 50,
+      currentFuelLiters: 20,
+      pricePerLiter: 5.89,
+      kmPerLiter: 10,
+      tripDistanceKm: 120,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.fuelNeededToFill).toBe(30);
+    expect(result?.fillCost).toBeCloseTo(176.7, 2);
+    expect(result?.currentRangeKm).toBe(200);
+    expect(result?.tripFuelNeeded).toBe(12);
+    expect(result?.fuelRemainingAfterTrip).toBe(8);
+    expect(result?.rangeRemainingAfterTripKm).toBe(80);
+    expect(result?.canCompleteTrip).toBe(true);
+  });
+
+  it("sinaliza quando o combustível atual não cobre a viagem", () => {
+    const result = calculateFuelStatus({
+      tankLiters: 50,
+      currentFuelLiters: 5,
+      pricePerLiter: 5.89,
+      kmPerLiter: 10,
+      tripDistanceKm: 80,
+    });
+
+    expect(result?.canCompleteTrip).toBe(false);
+    expect(result?.fuelRemainingAfterTrip).toBe(-3);
+    expect(result?.rangeRemainingAfterTripKm).toBe(0);
+  });
+
+  it("limita o combustível atual ao tanque e rejeita dados incompletos", () => {
+    const result = calculateFuelStatus({
+      tankLiters: 40,
+      currentFuelLiters: 55,
+      pricePerLiter: 5.5,
+      kmPerLiter: 12,
+      tripDistanceKm: 24,
+    });
+
+    expect(result?.currentFuelLiters).toBe(40);
+    expect(calculateFuelStatus({
+      tankLiters: 40,
+      currentFuelLiters: 10,
+      pricePerLiter: 0,
+      kmPerLiter: 12,
+      tripDistanceKm: 24,
+    })).toBeNull();
   });
 
   it("compara dois cenários usando o mesmo percurso e extras", () => {
