@@ -4,9 +4,18 @@ export function isStandaloneApp() {
     Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 }
 
-export function shareText(text: string, url: string, title = "Trajeto") {
-  if (navigator.share) return navigator.share({ title, text, url });
-  return navigator.clipboard?.writeText(text + "\n" + url);
+export async function shareText(text: string, url: string, title = "Trajeto") {
+  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    await navigator.share({ title, text, url });
+    return;
+  }
+
+  if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+    await navigator.clipboard.writeText(text + "\n" + url);
+    return;
+  }
+
+  throw new Error("Compartilhamento indisponível neste navegador.");
 }
 
 export function openNavigation(lat: number, lng: number, label?: string) {
