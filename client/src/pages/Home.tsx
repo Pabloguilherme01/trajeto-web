@@ -285,29 +285,29 @@ export default function Home() {
           <MobilityDashboardCard />
         </section>
 
-        <section className="bg-[#EAF0F2] py-14 text-[#0B1014] sm:py-18">
+        <section className="border-y border-white/8 bg-[#0F171D] py-14 text-white sm:py-18">
           <div className="container">
             <div className="max-w-2xl">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Seu copiloto de deslocamento</p>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#3DE3FF]">Seu copiloto de deslocamento</p>
               <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Escolha → decida → salve → <em>continue mais rápido.</em></h2>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa para onde vai. O Trajeto organiza o próximo passo. O que você repete fica no aparelho: destinos, viagens, buscas e rotas salvas. Se a conexão cair, o que já foi preparado continua acessível.</p>
             </div>
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
-              <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
-                <span className="text-xs font-black text-[#52636C]">01</span>
-                <h3 className="mt-8 text-xl font-extrabold">Encontre</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Encontre o destino e as paradas que fazem sentido para a viagem.</p>
+              <article className="rounded-2xl border border-white/10 bg-[#111A21] p-5">
+                <span className="text-xs font-black text-[#7F919A]">01</span>
+                <h3 className="mt-8 text-xl font-extrabold text-white">Encontre</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#9FB0B8]">Encontre o destino e as paradas que fazem sentido para a viagem.</p>
               </article>
-              <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
-                <span className="text-xs font-black text-[#52636C]">02</span>
-                <h3 className="mt-8 text-xl font-extrabold">Decida</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Compare distância, duração e desvio antes de decidir.</p>
+              <article className="rounded-2xl border border-white/10 bg-[#111A21] p-5">
+                <span className="text-xs font-black text-[#7F919A]">02</span>
+                <h3 className="mt-8 text-xl font-extrabold text-white">Decida</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#9FB0B8]">Compare distância, duração e desvio antes de decidir.</p>
               </article>
-              <article className="rounded-2xl border border-[#CFD9DD] bg-white p-5">
-                <span className="text-xs font-black text-[#52636C]">03</span>
-                <h3 className="mt-8 text-xl font-extrabold">Continue</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#617179]">Salve a decisão no aparelho. Depois, reabra a viagem mesmo sem conexão.</p>
+              <article className="rounded-2xl border border-white/10 bg-[#111A21] p-5">
+                <span className="text-xs font-black text-[#7F919A]">03</span>
+                <h3 className="mt-8 text-xl font-extrabold text-white">Continue</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#9FB0B8]">Salve a decisão no aparelho. Depois, reabra a viagem mesmo sem conexão.</p>
               </article>
             </div>
           </div>
@@ -335,16 +335,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-[#F4F6F3] py-10 text-[#0B1014] sm:py-14">
+        <section className="border-y border-white/8 bg-[#0F171D] py-10 text-white sm:py-14">
           <div className="container grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             <div>
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#326575]">Preparação inteligente</p>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#3DE3FF]">Preparação inteligente</p>
               <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] sm:text-4xl">Antes de sair, deixe o celular pronto.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#617179]">Guarde a rota, confirme os itens essenciais e não dependa de uma conexão perfeita no momento da viagem.</p>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#9FB0B8]">Guarde a rota, confirme os itens essenciais e não dependa de uma conexão perfeita no momento da viagem.</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Rota salva</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Reabra o roteiro armazenado no aparelho.</p></div>
-                {online && <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Localização</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Encontre postos próximos com um toque.</p></div>}
-                {online && <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>}
+                <div className="rounded-2xl border border-white/10 bg-[#111A21] p-4"><p className="text-xs font-extrabold">Rota salva</p><p className="mt-1 text-xs leading-relaxed text-[#7F919A]">Reabra o roteiro armazenado no aparelho.</p></div>
+                {online && <div className="rounded-2xl border border-white/10 bg-[#111A21] p-4"><p className="text-xs font-extrabold">Localização</p><p className="mt-1 text-xs leading-relaxed text-[#7F919A]">Encontre postos próximos com um toque.</p></div>}
+                {online && <div className="rounded-2xl border border-white/10 bg-[#111A21] p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#7F919A]">Abra Waze ou Google Maps quando houver conexão.</p></div>}
               </div>
             </div>
             <div className="space-y-4"><RecentTripsCard /><MobileVehicleCard /><TripPrepCard /></div>
