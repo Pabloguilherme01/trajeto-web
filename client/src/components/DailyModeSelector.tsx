@@ -13,6 +13,7 @@ export default function DailyModeSelector() {
   const [savedRoutes, setSavedRoutes] = useState(0);
   const [selected, setSelected] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
   const [autoMode, setAutoMode] = useState<DailyModeId>(() => getAutomaticDailyMode(online, 0));
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const refresh = () => {
@@ -65,12 +66,18 @@ export default function DailyModeSelector() {
             <p className="flex items-center gap-1.5 text-[0.58rem] font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]"><BatteryCharging className="size-3.5" /> Modos rápidos</p>
             <h2 id="daily-modes-title" className="mt-1 text-sm font-extrabold text-white">Escolha como quer usar o Trajeto hoje</h2>
           </div>
-          <button type="button" onClick={chooseAutomatic} className="min-h-10 shrink-0 rounded-xl border border-[#C7FF3C]/25 px-3 text-[0.62rem] font-bold text-[#DFFF9A]">
-            Automático: {autoMode === "proxima" ? "próxima viagem" : autoMode === "repetir" ? "repetir" : autoMode === "economia" ? "economia" : "offline"}
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button type="button" onClick={chooseAutomatic} className={selected === "automatico" ? "min-h-10 rounded-xl border border-[#C7FF3C]/40 bg-[#C7FF3C]/10 px-3 text-[0.62rem] font-bold text-[#DFFF9A]" : "min-h-10 rounded-xl border border-white/10 px-3 text-[0.62rem] font-bold text-[#DFFF9A]"}>
+              Automático: {autoMode === "proxima" ? "próxima viagem" : autoMode === "repetir" ? "repetir" : autoMode === "economia" ? "economia" : "offline"}
+            </button>
+            <button type="button" aria-expanded={expanded} aria-controls="daily-modes-options" onClick={() => setExpanded(value => !value)} className="min-h-10 rounded-xl border border-white/10 px-3 text-[0.62rem] font-bold text-white">
+              {expanded ? "Fechar" : "Trocar modo"}
+            </button>
+          </div>
         </div>
 
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1" role="list">
+        {expanded && (
+          <div id="daily-modes-options" className="mt-3 flex gap-2 overflow-x-auto pb-1" role="list">
           {modes.map(mode => {
             const Icon = icons[mode.id];
             const activeMode = mode.id === activeId;
@@ -82,6 +89,8 @@ export default function DailyModeSelector() {
             );
           })}
         </div>
+          </div>
+        )}
 
         <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
