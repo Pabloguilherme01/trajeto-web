@@ -48,6 +48,17 @@ export default function Planner() {
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [routeAlternatives, setRouteAlternatives] = useState<RouteIntelligenceRoute[]>([]);
   const [selectedRouteId, setSelectedRouteId] = useState("principal");
+  const [routeConfirmed, setRouteConfirmed] = useState(false);
+  const selectRoute = (routeId: string) => {
+    setSelectedRouteId(routeId);
+    setRouteConfirmed(true);
+    try { sessionStorage.setItem("trajeto-selected-route", routeId); } catch {}
+  };
+  useEffect(() => {
+    setRouteConfirmed(false);
+    setSelectedRouteId("principal");
+    try { sessionStorage.removeItem("trajeto-selected-route"); } catch {}
+  }, [origin, destination]);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const drivingMode = new URLSearchParams(window.location.search).get("modo") === "conducao";
   
