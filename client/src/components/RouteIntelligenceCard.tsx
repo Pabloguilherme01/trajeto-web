@@ -35,6 +35,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [tomtom, setTomtom] = useState<{ routes: Array<{ distanceMeters: number | null; durationSeconds: number | null; trafficDelaySeconds: number | null }> } | null>(null);
   const [trafficDetailed, setTrafficDetailed] = useState(false);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
+  const [decisionMode, setDecisionMode] = useState<"balanced" | "fastest" | "cheapest" | "no-tolls">("balanced");
+  const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
 
   async function refresh() {
@@ -57,6 +59,19 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const main = data?.routes[0];
   useEffect(() => { setAvoidTollsState(Boolean(avoidTolls)); }, [avoidTolls]);
   useEffect(() => { setAvoidHighwaysState(Boolean(avoidHighways)); }, [avoidHighways]);
+  useEffect(() => {
+    const update = () => setOffline(!navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("trajeto-route-decision-mode", decisionMode); } catch {}
+  }, [decisionMode]);
+  useEffect(() => {
+    if (!selectedRouteId) return;
+    try { localStorage.setItem("trajeto-confirmed-route-id", selectedRouteId); } catch {}
+  }, [selectedRouteId]);
   useEffect(() => { void refresh(); }, [origin, destination, waypoints.join("|"), avoidTollsState, avoidHighwaysState, trafficDetailed]);
   async function compareTomTom() { setComparisonLoading(true); setMessage(""); try { const base = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim()?.replace(/\/$/, "") || ""; const response = await fetch(base + "/api/tomtom-route-intelligence", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin, destination, avoidTolls, avoidHighways }) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload?.message || "TomTom indisponível"); setTomtom(payload); } catch { setMessage("TomTom ainda não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
@@ -114,6 +129,30 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <button type="button" onClick={refresh} disabled={loading} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">
           <RefreshCw className={"size-3.5 " + (loading ? "animate-spin" : "")} /> {loading ? "Consultando" : "Atualizar"}
         </button>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-xs font-black">Modo de decisão</p>
+            <p className="mt-1 text-[0.58rem] text-white/40">Escolha o objetivo e o Trajeto reaplica a consulta real.</p>
+          </div>
+          <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.52rem] font-black text-white/55">{offline ? "offline · cálculos locais" : "online · dados reais"}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {([
+            ["balanced", "Equilibrado"],
+            ["fastest", "Mais rápido"],
+            ["cheapest", "Menor custo"],
+            ["no-tolls", "Sem pedágio"],
+          ] as const).map(([mode, label]) => (
+            <button key={mode} type="button" aria-pressed={decisionMode === mode} onClick={() => {
+              setDecisionMode(mode);
+              if (mode === "no-tolls") setAvoidTollsState(true);
+              if (mode !== "no-tolls" && mode !== "cheapest") setAvoidTollsState(false);
+            }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
+          ))}
+        </div>
       </div>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -291,6 +330,19 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             })}
           </div>
         </div>
+      )}
+
+      {data && (
+        <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02] p-3">
+          <summary className="cursor-pointer text-[0.62rem] font-black">Como o cálculo funciona</summary>
+          <div className="mt-2 space-y-1 text-[0.57rem] leading-relaxed text-white/45">
+            <p><strong className="text-white/65">Combustível:</strong> distância ÷ consumo × preço por litro.</p>
+            <p><strong className="text-white/65">Custo total:</strong> combustível + pedágio informado pela fonte.</p>
+            <p><strong className="text-white/65">Impacto do trânsito:</strong> duração com trânsito − duração estática, quando ambas existem.</p>
+            <p><strong className="text-white/65">Economia:</strong> custo da rota principal − custo da alternativa.</p>
+            <p>Sem preço ou dado externo disponível, o Trajeto mostra “não informado” em vez de estimar.</p>
+          </div>
+        </details>
       )}
 
       <p className="mt-3 text-[0.56rem] leading-relaxed text-white/35">Fonte avançada: Google Routes API. Quando a fonte não retornar preço de pedágio, o Trajeto informa “não informado” em vez de estimar sem base.</p>
