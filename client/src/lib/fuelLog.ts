@@ -122,6 +122,9 @@ export function removeFuelLogEntry(id: string): boolean {
     const next = current.filter(item => item.id !== id);
     if (next.length === current.length) return false;
     storage.setItem(FUEL_LOG_KEY, JSON.stringify(next));
+    const latest = next[0];
+    if (latest && latest.liters > 0) storage.setItem(LAST_FUEL_PRICE_KEY, String(latest.totalCost / latest.liters));
+    else storage.removeItem(LAST_FUEL_PRICE_KEY);
     emitChange();
     return true;
   } catch {
