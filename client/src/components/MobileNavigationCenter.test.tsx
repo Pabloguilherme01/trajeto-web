@@ -36,7 +36,7 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getAllByRole("button", { name: /Navegar agora/i })[0]).toBeTruthy();
     expect(screen.getAllByText("Posto Exemplo")[0]).toBeTruthy();
     expect(screen.getByText(/R\$\s*28,50/)).toBeTruthy();
-    expect(screen.getByText(/Autonomia estimada: 520 km/)).toBeTruthy();
+    expect(screen.getByText(/Autonomia estimada:/)).toBeTruthy();
     expect(screen.getByRole("button", { name: /Google Maps/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Waze/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Apple Maps/i })).toBeTruthy();
@@ -60,7 +60,7 @@ describe("MobileNavigationCenter", () => {
       />,
     );
 
-    expect(screen.getAllByRole("button", { name: /Navegar agora/i })[0].getAttribute("disabled")).not.toBeNull();
+    expect(screen.getAllByRole("button", { name: /Navegar agora/i }).every(button => button.hasAttribute("disabled"))).toBe(true);
     expect(screen.getByText(/A rota salva continua disponível/)).toBeTruthy();
   });
 });

@@ -155,7 +155,7 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
 
   const toggleTraffic = () => {
     if (!mapRef.current) return;
-    if (!trafficRef.current) trafficRef.current = new window.google.maps.TrafficLayer();
+    if (!trafficRef.current) trafficRef.current = new window.google!.maps.TrafficLayer();
     const next = !traffic;
     trafficRef.current.setMap(next ? mapRef.current : null);
     setTraffic(next);
