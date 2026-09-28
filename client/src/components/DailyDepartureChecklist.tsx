@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Check, ClipboardCheck, ExternalLink, RotateCcw } from "lucide-react";
-import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
@@ -51,13 +50,12 @@ export default function DailyDepartureChecklist() {
 
   const completed = state.completed.length;
   const readiness = useMemo(() => {
-    const automatic = [
-      context.savedRoutes > 0 || context.trip,
-      context.destination,
-      context.vehicle,
-    ].filter(Boolean).length;
-    return Math.min(checklist.length, completed + automatic);
-  }, [completed, context]);
+    const automaticIds: DepartureChecklistId[] = [];
+    if (context.savedRoutes > 0 || context.trip) automaticIds.push("route");
+    if (context.destination) automaticIds.push("destination");
+    if (context.vehicle) automaticIds.push("vehicle");
+    return new Set([...state.completed, ...automaticIds]).size;
+  }, [state.completed, context]);
 
   const toggle = (id: DepartureChecklistId) => {
     setState(setDepartureChecklistCompleted(id, !state.completed.includes(id)));
