@@ -36,10 +36,9 @@ describe("DailyMobilityHub", () => {
 
     expect(screen.getByText("Ir para o destino mais usado")).toBeInTheDocument();
     expect(screen.getByText(/Trabalho · Taguatinga, DF/)).toBeInTheDocument();
-    expect(screen.getByText(/12,5 km\/L · tanque 50 L/)).toBeInTheDocument();
-    expect(screen.getByText(/R\$ 800,00/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Continuar/i })).toHaveAttribute(
-      "href",
+    expect(screen.getByText(/12,5 km\/L · tanque 50 L/)).toBeTruthy();
+    expect(screen.getByText(/R\$ 800,00/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe(
       "/trajeto-web/planejar?destino=Taguatinga%2C%20DF",
     );
   });
