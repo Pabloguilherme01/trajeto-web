@@ -33,6 +33,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [avoidTollsState, setAvoidTollsState] = useState(Boolean(avoidTolls));
   const [avoidHighwaysState, setAvoidHighwaysState] = useState(Boolean(avoidHighways));
   const [tomtom, setTomtom] = useState<{ routes: Array<{ distanceMeters: number | null; durationSeconds: number | null; trafficDelaySeconds: number | null }> } | null>(null);
+  const [trafficDetailed, setTrafficDetailed] = useState(false);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
   const vehicle = getMobileVehicle();
 
@@ -40,7 +41,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     setLoading(true);
     setMessage("");
     try {
-      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState });
+      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState, trafficDetailed });
       setData(nextData);
       onRoutesChange?.(nextData.routes);
     } catch (error) {
@@ -56,7 +57,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const main = data?.routes[0];
   useEffect(() => { setAvoidTollsState(Boolean(avoidTolls)); }, [avoidTolls]);
   useEffect(() => { setAvoidHighwaysState(Boolean(avoidHighways)); }, [avoidHighways]);
-  useEffect(() => { void refresh(); }, [origin, destination, waypoints.join("|"), avoidTollsState, avoidHighwaysState]);
+  useEffect(() => { void refresh(); }, [origin, destination, waypoints.join("|"), avoidTollsState, avoidHighwaysState, trafficDetailed]);
   async function compareTomTom() { setComparisonLoading(true); setMessage(""); try { const base = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim()?.replace(/\/$/, "") || ""; const response = await fetch(base + "/api/tomtom-route-intelligence", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin, destination, avoidTolls, avoidHighways }) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload?.message || "TomTom indisponível"); setTomtom(payload); } catch { setMessage("TomTom ainda não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
@@ -113,6 +114,14 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <button type="button" onClick={refresh} disabled={loading} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">
           <RefreshCw className={"size-3.5 " + (loading ? "animate-spin" : "")} /> {loading ? "Consultando" : "Atualizar"}
         </button>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <button type="button" aria-pressed={trafficDetailed} onClick={() => setTrafficDetailed(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black " + (trafficDetailed ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/10 bg-white/[.03] text-white/60")}>
+          Trânsito detalhado {trafficDetailed ? "ativado" : "desativado"}
+        </button>
+        <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.58rem] text-white/45">{trafficDetailed ? "NORMAL · SLOW · TRAFFIC_JAM" : "Consulta básica"}</span>
+        <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.58rem] text-white/45">Cálculo sob demanda</span>
       </div>
 
       {message && <div className="mt-3 flex gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[.05] p-3 text-[0.68rem] text-amber-100"><AlertTriangle className="mt-0.5 size-4 shrink-0" />{message}</div>}
@@ -220,51 +229,30 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black">Comparar provedores</p><p className="mt-1 text-[0.58rem] text-white/40">Google Routes × Apple Maps Server × TomTom.</p></div><button type="button" onClick={compareApple} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">{comparisonLoading ? "Consultando" : "Comparar"}</button><button type="button" onClick={compareTomTom} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">TomTom</button></div>{(apple?.routes?.[0] || tomtom?.routes?.[0]) && <div className="mt-3 grid grid-cols-3 gap-2"><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Google</p><strong className="text-xs">{formatDuration(main?.durationSeconds ?? null)} · {((main?.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Apple</p><strong className="text-xs">{apple?.routes?.[0] ? formatDuration(apple.routes[0].durationSeconds) : "não consultado"}</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">TomTom</p><strong className="text-xs">{tomtom?.routes?.[0] ? formatDuration(tomtom.routes[0].durationSeconds) : "não consultado"}</strong></div></div>}</div>}
 
       {data && data.routes.length > 1 && (
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          {[
-            { label: "Mais rápida", route: data.routes.reduce((best, route) => route.durationSeconds != null && (best.durationSeconds == null || route.durationSeconds < best.durationSeconds) ? route : best, data.routes[0]) },
-            { label: "Menor custo", route: data.routes.reduce((best, route) => {
-              const cost = totalCost(route); const bestCost = totalCost(best);
-              return cost != null && (bestCost == null || cost < bestCost) ? route : best;
-            }, data.routes[0]) },
-            { label: "Sem pedágio", route: data.routes.find(route => route.toll?.amount === 0) || null },
-          ].map(item => (
-            <div key={item.label} className="rounded-xl border border-white/8 bg-white/[.025] p-3">
-              <p className="text-[0.52rem] font-black uppercase tracking-wider text-white/35">{item.label}</p>
-              <p className="mt-1 text-xs font-black">{item.route ? (item.route.id === "principal" ? "Principal" : item.route.id.replace("alternativa-", "Alternativa ")) : "Não comprovado"}</p>
-              {item.route && <p className="mt-1 text-[0.55rem] text-white/45">{formatDuration(item.route.durationSeconds)} · {item.route.toll?.amount != null ? item.route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: item.route.toll.currency }) : "pedágio não informado"}</p>}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {data && data.routes.length > 1 && (
         <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
-          <div className="mb-3">
-            <p className="text-xs font-black">Escolha da alternativa</p>
-            <p className="mt-1 text-[0.58rem] text-white/40">Compare o impacto antes de abrir o navegador.</p>
-          </div>
-          <div className="space-y-2">
+          <p className="text-xs font-black">Alternativas reais</p>
+          <p className="mt-1 text-[0.58rem] text-white/40">Selecione para destacar a polyline no mapa e depois confirme com “Usar esta rota”.</p>
+          <div className="mt-3 space-y-2">
             {data.routes.slice(0, 4).map((route, index) => {
-              const analysis = routeAnalysis(route, index);
+              const selected = selectedRouteId === route.id;
+              const traffic = (route.trafficIntervals || []).reduce((acc, item) => {
+                if (item.speed === "SLOW") acc.slow += 1;
+                if (item.speed === "TRAFFIC_JAM") acc.jam += 1;
+                return acc;
+              }, { slow: 0, jam: 0 });
               return (
-                <button type="button" onClick={() => onSelectRoute?.(route.id)} aria-pressed={selectedRouteId === route.id} className={"w-full text-left rounded-xl border p-3 transition " + (selectedRouteId === route.id ? "border-[#BA5B45]/60 bg-[#BA5B45]/[.08]" : "border-white/8 bg-white/[.025]")}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
-                      <p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
-                    </div>
-                    <strong className="text-sm">{totalCost(route) == null ? "Custo parcial" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
-                  </div>
+                <div key={route.id} className={"rounded-xl border p-3 " + (selected ? "border-[#C7FF3C]/50 bg-[#C7FF3C]/[.08]" : "border-white/8 bg-white/[.025]")}>
+                  <button type="button" aria-pressed={selected} onClick={() => onSelectRoute?.(route.id)} className="w-full text-left">
+                    <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
+                    <p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
+                  </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}
-                    {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
-                    {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
-                    {route.toll?.amount != null && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">pedágio {route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency })}</span>}
+                    {route.toll?.amount === 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem]">sem pedágio</span>}
+                    {trafficDetailed && traffic.slow > 0 && <span className="rounded-full bg-amber-300/10 px-2 py-1 text-[0.52rem] text-amber-100">{traffic.slow} trecho(s) lento(s)</span>}
+                    {trafficDetailed && traffic.jam > 0 && <span className="rounded-full bg-red-300/10 px-2 py-1 text-[0.52rem] text-red-100">{traffic.jam} congestionado(s)</span>}
                   </div>
+                  {selected && <div className="mt-2 flex items-center justify-between gap-2"><span className="text-[0.54rem] text-white/40">Prévia selecionada</span><button type="button" onClick={() => onConfirmRoute?.(route.id)} className="min-h-9 rounded-lg bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">Usar esta rota</button></div>}
                 </div>
-                  <p className="mt-2 text-[0.54rem] font-bold text-white/40">{selectedRouteId === route.id ? "Prévia selecionada no mapa" : "Toque para ver esta rota no mapa"}</p>
-                </button>
               );
             })}
           </div>
