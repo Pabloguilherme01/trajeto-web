@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { getDepartureChecklist, resetDepartureChecklist, setDepartureChecklistCompleted } from "./departureChecklist";
 
 describe("departureChecklist", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {\n    if (typeof localStorage !== "undefined") localStorage.clear();\n  });
 
   it("starts empty for the current day", () => {
     expect(getDepartureChecklist().completed).toEqual([]);
