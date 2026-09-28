@@ -59,11 +59,13 @@ describe("DailyMobilityHub", () => {
   it("respects the saved offline mode when a route is available", async () => {
     setSavedDailyMode("offline");
     await saveOfflineRoute({
+      id: "route-1",
       origin: "Casa",
       destination: "Trabalho",
+      savedAt: new Date().toISOString(),
       payload: {
         route: { distanceLabel: "12 km", distanceMeters: 12000, durationSeconds: 1200 },
-        stops: [],
+        stops: [{ placeId: "x", name: "Posto", address: "Rua 1" }],
         anpReferences: [],
       },
     });
