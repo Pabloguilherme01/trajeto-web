@@ -7,6 +7,7 @@ import { getLastIntent, getLastTrip, mobilePreferenceEvent, rememberIntent } fro
 import { getAutomaticDailyMode, getSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { getFavoriteDestination, getDestinationUsage, getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
+import { chooseMobilePrimaryAction } from "@/lib/mobilePrimaryAction";
 
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
@@ -121,19 +122,41 @@ export default function MobileQuickActions() {
     : "Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.";
 
   const automaticMode = getAutomaticDailyMode(online, savedRoutesCount);
-  const activeDailyMode = dailyMode === "automatico" ? automaticMode : dailyMode;
-  const smartDestination = activeDailyMode === "proxima" ? favoriteDestination : null;
-  const smartAction = activeDailyMode === "repetir" && lastTrip
-    ? { label: "Repetir", icon: Navigation, run: () => { vibration(); rememberIntent("route"); setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)); } }
-    : activeDailyMode === "offline" && savedRoutesCount > 0
-      ? { label: "Continuar", icon: Bookmark, run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar?salvos=1")); } }
-      : activeDailyMode === "economia"
-        ? { label: "Custo", icon: Gauge, run: () => { vibration(); setLocation(appUrl("/#calculadora")); } }
-        : smartDestination
-          ? { label: smartDestination.label, icon: Navigation, run: () => { vibration(); const updated = rememberDestinationUsage(smartDestination); setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated)); rememberIntent("route"); setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(smartDestination.value)); } }
-          : { label: lastTrip ? "Retomar" : "Planejar", icon: Navigation, run: resumeAction };
-  const actions = [
-    { label: smartAction.label, short: smartAction.label, icon: smartAction.icon, path: "", run: smartAction.run, smart: true },
+  const primary = chooseMobilePrimaryAction({
+    online,
+    mode: dailyMode,
+    automaticMode,
+    savedRoutes: savedRoutesCount,
+    favorite: favoriteDestination,
+    lastTrip,
+  });
+  const runPrimary = () => {
+    vibration();
+    if (primary.kind === "offline") {
+      rememberIntent("saved");
+      setLocation(appUrl("/planejar?salvos=1"));
+      return;
+    }
+    if (primary.kind === "repeat" && primary.target?.origin && primary.target.destination) {
+      rememberIntent("route");
+      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(primary.target.origin) + "&destino=" + encodeURIComponent(primary.target.destination));
+      return;
+    }
+    if (primary.kind === "destination" && primary.target?.destination) {
+      const updated = favoriteDestination ? rememberDestinationUsage(favoriteDestination) : getDestinationUsage();
+      if (favoriteDestination) setFavoriteDestination(getFavoriteDestination(getMobileDestinations(), updated));
+      rememberIntent("route");
+      setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(primary.target.destination));
+      return;
+    }
+    if (primary.kind === "economy") {
+      setLocation(appUrl("/") + "#calculadora");
+      return;
+    }
+    resumeAction();
+  };
+  const actions = [  const actions = [
+    { label: primary.label, short: primary.label, icon: primary.kind === "economy" ? Gauge : primary.kind === "offline" ? Bookmark : Navigation, path: "", run: runPrimary, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/planejar", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
