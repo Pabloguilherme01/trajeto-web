@@ -29,7 +29,7 @@ export default function FuelLogCard() {
     ? Number(totalCost.replace(",", ".")) / Number(liters.replace(",", "."))
     : 0;
 
-  const exportCsv = () => {\n    const csv = "\\uFEFF" + buildFuelLogCsv(entries);\n    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));\n    const link = document.createElement("a");\n    link.href = url;\n    link.download = `trajeto-abastecimentos-${new Date().toISOString().slice(0, 10)}.csv`;\n    link.click();\n    URL.revokeObjectURL(url);\n    setFeedback("Histórico exportado para CSV.");\n  };\n\n  const save = () => {
+  const exportCsv = () => {\n    const csv = "\uFEFF" + buildFuelLogCsv(entries);\n    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));\n    const link = document.createElement("a");\n    link.href = url;\n    link.download = `trajeto-abastecimentos-${new Date().toISOString().slice(0, 10)}.csv`;\n    link.click();\n    URL.revokeObjectURL(url);\n    setFeedback("Histórico exportado para CSV.");\n  };\n\n  const save = () => {
     const entry = addFuelLogEntry({
       liters: Number(liters.replace(",", ".")),
       totalCost: Number(totalCost.replace(",", ".")),
