@@ -105,7 +105,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
 
   return (
     <section aria-labelledby="route-intelligence-title" className="mt-4 rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white">
-      <button type="button" aria-pressed={selected} onClick={() => onSelectRoute?.(route.id)} className="w-full text-left"><div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Inteligência da rota</p>
           <h3 id="route-intelligence-title" className="mt-1 text-base font-black">Trânsito, pedágio e alternativas</h3>
