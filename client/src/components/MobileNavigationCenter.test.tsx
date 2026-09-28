@@ -7,6 +7,7 @@ describe("MobileNavigationCenter", () => {
   it("puts the destination, cost, stop and navigation action in one mobile surface", () => {
     render(
       <MobileNavigationCenter
+        origin="Águas Lindas, GO"
         destination="Brasília, DF"
         distance="48 km"
         duration="55 min"
@@ -46,6 +47,7 @@ describe("MobileNavigationCenter", () => {
   it("disables external navigation while offline but keeps the route actions visible", () => {
     render(
       <MobileNavigationCenter
+        origin="Trabalho"
         destination="Casa"
         distance="10 km"
         duration="15 min"
