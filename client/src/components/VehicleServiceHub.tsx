@@ -1,3 +1,4 @@
+import React from "react";
 import { CarFront, ExternalLink, FileCheck2, ShieldCheck, Wrench } from "lucide-react";
 
 const links = [
