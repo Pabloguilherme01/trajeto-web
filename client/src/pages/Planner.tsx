@@ -200,6 +200,23 @@ export default function Planner() {
   const selectedRouteDistanceKm = selectedRoute?.distanceMeters != null ? selectedRoute.distanceMeters / 1000 : planned ? planned.route.distanceMeters / 1000 : 0;
   const selectedRouteDuration = selectedRoute?.durationSeconds ?? planned?.route.durationSeconds ?? 0;
   const selectedRouteLabel = selectedRoute ? (selectedRoute.id === "principal" ? "Principal" : selectedRoute.id.replace("alternativa-", "Alternativa ")) : null;
+  const selectedRouteSnapshot = selectedRoute ? {
+    id: selectedRoute.id,
+    label: selectedRouteLabel,
+    distanceKm: selectedRouteDistanceKm,
+    durationSeconds: selectedRouteDuration,
+    toll: selectedRoute.toll?.amount ?? null,
+    savedAt: new Date().toISOString(),
+  } : null;
+  const saveRouteSnapshot = () => {
+    if (!selectedRouteSnapshot) return;
+    try {
+      localStorage.setItem("trajeto-route-simulator", JSON.stringify(selectedRouteSnapshot));
+      setShareMessage("Simulação salva neste aparelho para consulta offline.");
+    } catch {
+      setShareMessage("Não foi possível salvar a simulação neste aparelho.");
+    }
+  };
   const selectedVehicle = vehicles.data?.find(vehicle => vehicle.id === selectedVehicleId) ?? null;
   const selectedConsumption = selectedVehicle ? Number(selectedVehicle.customKmPerLiter ?? selectedVehicle.highwayKmPerLiter ?? selectedVehicle.cityKmPerLiter ?? 0) : 0;
   const fuelEconomyInput = useMemo(() => {
@@ -412,6 +429,12 @@ export default function Planner() {
                       <p className="mt-1 text-sm font-black text-[#163840]">{selectedRouteId === "principal" ? "Principal" : selectedRouteId.replace("alternativa-", "Alternativa ")}</p>
                     </div>
                     <span className="text-[0.58rem] font-bold text-[#5D7200]">Mantida enquanto você compara</span>
+                  </div>
+                )}
+                {selectedRouteSnapshot && (
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/8 bg-white/[.025] px-3 py-2">
+                    <span className="text-[0.58rem] text-white/50">Simulação: <strong className="text-white/75">{selectedRouteLabel}</strong> · {selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km · {minutes(selectedRouteDuration)}</span>
+                    <button type="button" onClick={saveRouteSnapshot} className="min-h-9 rounded-lg border border-white/10 px-3 text-[0.58rem] font-black text-white/70">Salvar offline</button>
                   </div>
                 )}
                 {!drivingMode && <RouteIntelligenceCard
