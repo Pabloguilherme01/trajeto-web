@@ -8,6 +8,7 @@ import { compareMobilityBudget, getMobilityBudget } from "@/lib/mobilityBudget";
 import { summarizeCurrentMobilityMonth } from "@/components/MobilityDashboardCard";
 import { fuelLogEvent } from "@/lib/fuelLog";
 import { mobilityExpenseEvent } from "@/lib/mobilityExpenses";
+import { isOfflineRouteStale } from "@/lib/offlineStore";
 
 function money(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -45,6 +46,23 @@ export default function DailyMobilityHub() {
   const latestRoute = routes[0] ?? null;
   const summary = useMemo(() => summarizeCurrentMobilityMonth(), [stamp]);
   const budget = useMemo(() => compareMobilityBudget(summary.total, getMobilityBudget()), [summary.total, stamp]);
+  const routeInfo = useMemo(() => {
+    if (!latestRoute || typeof latestRoute.payload !== "object" || latestRoute.payload === null) return null;
+    const payload = latestRoute.payload as { route?: { distanceMeters?: unknown; durationSeconds?: unknown } };
+    const distanceMeters = Number(payload.route?.distanceMeters);
+    const durationSeconds = Number(payload.route?.durationSeconds);
+    if (!Number.isFinite(distanceMeters) || distanceMeters < 0) return null;
+    const distanceKm = distanceMeters / 1000;
+    const durationMinutes = Number.isFinite(durationSeconds) && durationSeconds >= 0 ? Math.round(durationSeconds / 60) : null;
+    let estimatedFuelCost: number | null = null;
+    if (vehicle && vehicle.consumption > 0) {
+      try {
+        const price = Number(localStorage.getItem("trajeto-last-fuel-price"));
+        if (Number.isFinite(price) && price > 0) estimatedFuelCost = (distanceKm / vehicle.consumption) * price;
+      } catch {}
+    }
+    return { distanceKm, durationMinutes, estimatedFuelCost, stale: isOfflineRouteStale(latestRoute.savedAt) };
+  }, [latestRoute, vehicle]);
   const hasAnySetup = Boolean(favorite || latestRoute || vehicle || budget);
 
   const nextAction = favorite
@@ -97,7 +115,7 @@ export default function DailyMobilityHub() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center gap-2"><Route className="size-4 text-[#BDA5FF]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Rota offline</span></div>
               <p className="mt-2 text-sm font-extrabold">{latestRoute ? "1 ou mais rotas prontas" : "Nenhuma rota salva"}</p>
-              <p className="mt-1 truncate text-[0.62rem] text-white/50">{latestRoute ? latestRoute.origin + " → " + latestRoute.destination : "Salve uma rota para continuar sem conexão."}</p>
+              <p className="mt-1 truncate text-[0.62rem] text-white/50">{latestRoute ? latestRoute.origin + " → " + latestRoute.destination : "Salve uma rota para continuar sem conexão."}</p>\n              {routeInfo && <p className="mt-2 text-[0.6rem] font-bold text-white/60">{routeInfo.distanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km{routeInfo.durationMinutes !== null ? " · " + routeInfo.durationMinutes + " min" : ""}{routeInfo.stale ? " · cópia antiga" : ""}</p>}
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center gap-2"><CarFront className="size-4 text-[#C7FF3C]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Veículo</span></div>
