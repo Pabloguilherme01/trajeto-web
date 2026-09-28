@@ -40,13 +40,23 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
 
-  async function refresh() {
+  async function refresh(overrides?: { avoidTolls?: boolean; avoidHighways?: boolean }) {
     setLoading(true);
     setMessage("");
     try {
-      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState, trafficDetailed });
+      const nextAvoidTolls = overrides?.avoidTolls ?? avoidTollsState;
+      const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
+      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
       setData(nextData);
       onRoutesChange?.(nextData.routes);
+      const ranked = [...nextData.routes].filter(route => route.durationSeconds != null || totalCost(route) != null);
+      const automatic = decisionMode === "fastest"
+        ? ranked.sort((a, b) => (a.durationSeconds ?? Number.POSITIVE_INFINITY) - (b.durationSeconds ?? Number.POSITIVE_INFINITY))[0]
+        : decisionMode === "cheapest"
+          ? ranked.filter(route => totalCost(route) != null).sort((a, b) => totalCost(a)! - totalCost(b)!)[0]
+          : nextData.routes[0];
+      if (automatic) onSelectRoute?.(automatic.id);
+      if (decisionMode === "cheapest" && !automatic) setMessage("Para pré-selecionar o menor custo, informe preço de combustível e tenha pedágio disponível nas rotas.");
     } catch (error) {
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
       setMessage(code === "routing_provider_not_configured"
@@ -151,8 +161,9 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           ] as const).map(([mode, label]) => (
             <button key={mode} type="button" aria-pressed={decisionMode === mode} onClick={() => {
               setDecisionMode(mode);
-              if (mode === "no-tolls") setAvoidTollsState(true);
-              if (mode === "balanced" || mode === "fastest") setAvoidTollsState(false);
+              const nextAvoidTolls = mode === "no-tolls" ? true : mode === "balanced" || mode === "fastest" ? false : avoidTollsState;
+              setAvoidTollsState(nextAvoidTolls);
+              void refresh({ avoidTolls: nextAvoidTolls });
             }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
           ))}
         </div>
