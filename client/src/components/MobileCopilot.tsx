@@ -29,7 +29,7 @@ import {
   mobileDestinationEvent,
   rememberDestinationUsage,
 } from "@/lib/mobileDestinations";
-import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
+import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, vibration } from "@/lib/mobileTools";
 
 type Action = {
@@ -128,7 +128,7 @@ export default function MobileCopilot() {
     if (!online && latestOfflineRoute) {
       return {
         title: "Continue sua última rota",
-        detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination + " · " + formatAge(latestOfflineRoute.savedAt),
+        detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination + " · " + formatAge(latestOfflineRoute.savedAt) + (isOfflineRouteStale(latestOfflineRoute.savedAt) ? " · dados antigos" : ""),
         label: "Abrir",
         href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination),
         intent: "saved",
@@ -339,7 +339,7 @@ export default function MobileCopilot() {
                   Economia ativa
                 </button>
               )}
-              {!online && latestOfflineRoute && <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Cópia local pronta</span>}
+              {!online && latestOfflineRoute && (isOfflineRouteStale(latestOfflineRoute.savedAt) ? <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Cópia local antiga · atualize quando voltar</span> : <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#FFB86B]/20 bg-[#FFB86B]/6 px-3 text-[0.6rem] font-bold text-[#FFD1A8]">Cópia local pronta</span>)}
             </div>
           </div>
         </div>
