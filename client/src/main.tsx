@@ -43,16 +43,15 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+const apiBase = (configuredApiBase || import.meta.env.BASE_URL).replace(/\/?$/, "/");
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: `${import.meta.env.BASE_URL}api/trpc`,
+      url: `${apiBase}api/trpc`,
       transformer: superjson,
       headers() {
-        // Preview auto-login fallback: when the browser blocks iframe cookies
-        // (Safari ITP / private browsing / WebView), the runtime mirrors the
-        // session into sessionStorage so we can forward it as a Bearer token.
-        // The regular OAuth cookie flow keeps working and takes priority server-side.
         try {
           const raw = sessionStorage.getItem("manus-cookie");
           if (raw) {
