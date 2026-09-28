@@ -4,6 +4,7 @@ type RouteRequest = {
   waypoints?: string[];
   avoidTolls?: boolean;
   avoidHighways?: boolean;
+  emissionType?: "GASOLINE" | "DIESEL" | "HYBRID" | "ELECTRIC";
 };
 
 const allowedOrigin = process.env.TRAJETO_ALLOWED_ORIGIN || "*";
@@ -68,10 +69,11 @@ export default async function handler(request: Request) {
     routingPreference: "TRAFFIC_AWARE",
     computeAlternativeRoutes: waypoints.length === 0,
     routeModifiers: {
+      vehicleInfo: { emissionType: body.emissionType || "GASOLINE" },
       avoidTolls: Boolean(body.avoidTolls),
       avoidHighways: Boolean(body.avoidHighways),
     },
-    extraComputations: ["TOLLS"],
+    extraComputations: ["TOLLS", "FUEL_CONSUMPTION"],
     languageCode: "pt-BR",
     units: "METRIC",
   };
@@ -86,6 +88,7 @@ export default async function handler(request: Request) {
         "routes.duration",
         "routes.staticDuration",
         "routes.travelAdvisory.tollInfo.estimatedPrice",
+        "routes.travelAdvisory.fuelConsumptionMicroliters",
         "routes.routeLabels",
         "routes.legs.distanceMeters",
         "routes.legs.duration",
@@ -128,6 +131,7 @@ export default async function handler(request: Request) {
       distanceMeters: route.distanceMeters ?? null,
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
+      fuelConsumptionLiters: route.travelAdvisory?.fuelConsumptionMicroliters ? Number(route.travelAdvisory.fuelConsumptionMicroliters) / 1_000_000 : null,
       toll: toll ? {
         amount: tollValue,
         currency: toll.currencyCode || "BRL",
