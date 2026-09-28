@@ -13,6 +13,7 @@ export function projectTripCosts(input: TripProjectionInput) {
   const fuelCostPerTrip = Math.max(0, input.oneWayCost) * distanceMultiplier;
   const extraCostPerTrip = Math.max(0, input.extraCostPerTrip ?? 0);
   const costPerTrip = fuelCostPerTrip + extraCostPerTrip;
+  const costPerKm = distanceKm > 0 ? costPerTrip / distanceKm : 0;
   const weeklyCost = costPerTrip * weeklyTrips;
   const monthlyCost = weeklyCost * 4.33;
   const annualCost = monthlyCost * 12;
@@ -22,6 +23,7 @@ export function projectTripCosts(input: TripProjectionInput) {
     fuelCostPerTrip,
     extraCostPerTrip,
     costPerTrip,
+    costPerKm,
     weeklyCost,
     monthlyCost,
     annualCost,
