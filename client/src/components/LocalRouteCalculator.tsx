@@ -1,7 +1,7 @@
 import { Fuel, Gauge, Route as RouteIcon, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
-import { calculateFuelStatus, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
+import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
 
 function numberValue(value: string) {
   const parsed = Number(value.replace(",", "."));
@@ -87,7 +87,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     });
 
     const budget = numberValue(monthlyBudget);
-    const budgetStatus = budget > 0 ? { budget, difference: budget - projection.monthlyCost, usedPercent: (projection.monthlyCost / budget) * 100 } : null;
+    const budgetStatus = compareMonthlyBudget(projection.monthlyCost, budget);
     return { projection, fuelNeeded, autonomyKm, estimatedRefuels, fuelStatus, comparison, budgetStatus };
   }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget, roundTrip, tripsPerWeek]);
 
