@@ -144,12 +144,12 @@ export default function MobileTripShortcuts() {
   const favoritePlace = getFavoriteDestination(places, usage);
 
   return (
-    <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] shadow-[0_12px_35px_rgba(11,16,20,.06)] sm:p-6">
+    <section className="mobile-card rounded-3xl border border-white/10 bg-[#111A21] p-4 text-[#EAF0F2] shadow-[0_18px_50px_rgba(0,0,0,.2)] sm:p-6">
       <div>
-        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Atalhos pessoais</p>
+        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Atalhos pessoais</p>
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">Destinos que você repete.</h2>
-        <p className="mt-2 text-xs leading-relaxed text-[#617179]">Ficam somente neste aparelho. Não precisam de conta. Quando houver uma rota salva para o destino, o atalho também funciona sem internet.</p>
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">
+        <p className="mt-2 text-xs leading-relaxed text-[#8FA3AC]">Ficam somente neste aparelho. Não precisam de conta. Quando houver uma rota salva para o destino, o atalho também funciona sem internet.</p>
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2 text-[0.62rem] font-bold text-[#B7C5CA]">
           <LocateFixed className="size-3.5 text-[#326575]" />
           Use “Daqui” para transformar o destino em uma rota com sua posição atual.
         </div>
@@ -189,7 +189,7 @@ export default function MobileTripShortcuts() {
           const usageCount = usage[id]?.count ?? 0;
 
           return (
-            <div key={id} className="rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-3 shadow-[0_8px_24px_rgba(11,16,20,.04)]">
+            <div key={id} className="rounded-2xl border border-white/10 bg-white/[0.025] p-3 shadow-none">
               {place ? (
                 <>
                   <button
@@ -202,18 +202,18 @@ export default function MobileTripShortcuts() {
                     <span className="min-w-0 flex-1">
                       <strong className="flex items-center gap-1.5 text-xs">
                         {place.label}
-                        {isFavorite && <span className="rounded-full bg-[#EAF6B7] px-1.5 py-0.5 text-[0.48rem] font-extrabold uppercase tracking-[0.08em] text-[#365000]">Mais usado</span>}
+                        {isFavorite && <span className="rounded-full bg-[#C7FF3C]/15 px-1.5 py-0.5 text-[0.48rem] font-extrabold uppercase tracking-[0.08em] text-[#DFFF9A]">Mais usado</span>}
                       </strong>
-                      <span className="block truncate text-[0.65rem] text-[#718089]">{place.value}</span>
+                      <span className="block truncate text-[0.65rem] text-[#7F919A]">{place.value}</span>
                     </span>
                     <ArrowRight className="size-3.5 shrink-0 text-[#326575] opacity-70 transition group-hover:opacity-100" />
                   </button>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#163840] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button>
+                    <button type="button" onClick={() => openFromHere(place)} className="inline-flex min-h-10 items-center gap-1 rounded-lg bg-[#F2F5F6] px-2.5 text-[0.62rem] font-bold text-[#D7E0E4] active:scale-[.98]"><LocateFixed className="size-3" /> Daqui</button>
                     <button type="button" onClick={() => navigateTo(place)} disabled={!navigator.onLine} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575] disabled:cursor-not-allowed disabled:opacity-40"><Navigation className="size-3" /> Navegar</button>
                     <button type="button" onClick={() => void sharePlace(place)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Share2 className="size-3" /> Enviar</button>
                     <button type="button" onClick={() => { setEditing(id); setValue(place.value); }} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#326575]"><Pencil className="size-3" /> Editar</button>
-                    <button type="button" onClick={() => removeMobileDestination(id)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#9B6258]"><Trash2 className="size-3" /> Remover</button>
+                    <button type="button" onClick={() => removeMobileDestination(id)} className="inline-flex min-h-9 items-center gap-1 text-[0.62rem] font-bold text-[#FF9D8E]"><Trash2 className="size-3" /> Remover</button>
                   </div>
                 </>
               ) : (
@@ -236,7 +236,7 @@ export default function MobileTripShortcuts() {
               onChange={event => setValue(event.target.value)}
               onKeyDown={event => { if (event.key === "Enter") save(); }}
               placeholder="Ex.: Brasília, DF"
-              className="min-w-0 flex-1 rounded-xl border border-[#C7D2D6] bg-white px-3 py-3 text-sm outline-none focus:border-[#326575]"
+              className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#0B1014] px-3 py-3 text-sm outline-none focus:border-[#3DE3FF]"
             />
             <button type="button" onClick={() => { setEditing(null); setValue(""); }} className="min-h-11 rounded-xl border border-[#C7D2D6] bg-white px-3 text-xs font-bold text-[#52636C]">Cancelar</button>
             <button type="button" onClick={save} className="min-h-11 rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white">Salvar</button>
