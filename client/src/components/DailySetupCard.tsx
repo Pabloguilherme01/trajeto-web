@@ -9,7 +9,7 @@ import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/
 import { getAutomaticDailyMode, getSavedDailyMode, setSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
 import { chooseMobilePrimaryAction } from "@/lib/mobilePrimaryAction";
 
-const modeLabel: Record<DailyModeId, string> = { automatico: "Automático", proxima: "Destino frequente", repetir: "Repetir viagem", economia: "Economia", offline: "Offline" };
+const modeLabel: Record<DailyModeId, string> = { automatico: "Automático", proxima: "Destino frequente", repetir: "Repetir viagem", economia: "Economia", offline: "Offline", conducao: "Condução" };
 const SETUP_KEY = "trajeto-daily-setup";
 function storage() { try { return globalThis.localStorage ?? null; } catch { return null; } }
 function getSetupCompleted() { return storage()?.getItem(SETUP_KEY) === "1"; }
