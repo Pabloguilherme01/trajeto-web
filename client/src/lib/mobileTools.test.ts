@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -12,8 +12,16 @@ describe("mobile tools", () => {
       "https://www.google.com/maps/dir/?api=1&origin=%C3%81guas+Lindas%2C+GO&destination=Bras%C3%ADlia%2C+DF&travelmode=driving",
     );
     expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
-      "https://www.google.com/maps/search/?api=1&query=postos+perto+de+%C3%81guas+Lindas",
+      "https://www.google.com/maps/search/?api=1&query=postos%20perto%20de%20%C3%81guas%20Lindas",
     );
+  });
+
+  it("keeps origin and destination when building a route with waypoints", () => {
+    const url = buildGoogleMapsDirectionsUrl("Casa", "Trabalho", "driving", true, ["Parada A", "Parada B", "Parada C", "Extra"]);
+    expect(url).toContain("origin=Casa");
+    expect(url).toContain("destination=Trabalho");
+    expect(url).toContain("waypoints=Parada+A%7CParada+B%7CParada+C");
+    expect(url).toContain("dir_action=navigate");
   });
 
   it("builds a Google Maps route with up to three intermediate stops", () => {
