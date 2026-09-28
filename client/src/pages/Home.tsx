@@ -11,10 +11,6 @@ import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
-import RecentTripsCard from "@/components/RecentTripsCard";
-import MobileVehicleCard from "@/components/MobileVehicleCard";
-import TripPrepCard from "@/components/TripPrepCard";
-import OfficialSourcesCard from "@/components/OfficialSourcesCard";
 
 
 
@@ -304,24 +300,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        <section className="border-y border-white/8 bg-[#0F171D] py-10 text-white sm:py-14">
-          <div className="container grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-            <div>
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#3DE3FF]">Preparação inteligente</p>
-              <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] sm:text-4xl">Antes de sair, deixe o celular pronto.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#9FB0B8]">Guarde a rota, confirme os itens essenciais e não dependa de uma conexão perfeita no momento da viagem.</p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-[#111A21] p-4"><p className="text-xs font-extrabold">Rota salva</p><p className="mt-1 text-xs leading-relaxed text-[#7F919A]">Reabra o roteiro armazenado no aparelho.</p></div>
-                {online && <div className="rounded-2xl border border-white/10 bg-[#111A21] p-4"><p className="text-xs font-extrabold">Localização</p><p className="mt-1 text-xs leading-relaxed text-[#7F919A]">Encontre postos próximos com um toque.</p></div>}
-                {online && <div className="rounded-2xl border border-white/10 bg-[#111A21] p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#7F919A]">Abra Waze ou Google Maps quando houver conexão.</p></div>}
-              </div>
-            </div>
-            <div className="space-y-4"><RecentTripsCard /><MobileVehicleCard /><TripPrepCard /></div>
-          </div>
-        </section>
-
-        <OfficialSourcesCard />
 
         <section className="border-t border-white/8 bg-[#10181F] py-14 sm:py-18">
           <div className="container grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
