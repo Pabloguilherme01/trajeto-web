@@ -93,7 +93,7 @@ export default function DailyCommandCenter() {
     ? {
         label: "Repetir última viagem",
         detail: lastTrip.origin + " → " + lastTrip.destination,
-        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&modo=conducao",
+        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination),
       }
     : active?.id === "proxima" && favorite
       ? {
