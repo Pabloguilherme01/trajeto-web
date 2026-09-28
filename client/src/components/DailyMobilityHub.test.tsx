@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import DailyMobilityHub from "./DailyMobilityHub";
 import { saveMobileDestination, rememberDestinationUsage } from "@/lib/mobileDestinations";
 import { saveMobileVehicle } from "@/lib/mobileVehicle";
 import { setMobilityBudget } from "@/lib/mobilityBudget";
 import { setSavedDailyMode } from "@/lib/dailyModes";
-import { saveOfflineRoute } from "@/lib/offlineStore";
+import * as offlineStore from "@/lib/offlineStore";
 
 describe("DailyMobilityHub", () => {
   beforeEach(() => {
@@ -15,6 +15,7 @@ describe("DailyMobilityHub", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     cleanup();
   });
 
@@ -36,7 +37,7 @@ describe("DailyMobilityHub", () => {
 
     render(<DailyMobilityHub />);
 
-    expect(screen.getByText("Ir para o destino mais usado")).toBeTruthy();
+    expect(screen.getByText("Ir para Trabalho")).toBeTruthy();
     expect(screen.getByText(/Trabalho · Taguatinga, DF/)).toBeTruthy();
     expect(screen.getByText(/12,5 km\/L · tanque 50 L/)).toBeTruthy();
     expect(screen.getByText(/R\$ 800,00/)).toBeTruthy();
@@ -58,7 +59,7 @@ describe("DailyMobilityHub", () => {
 
   it("respects the saved offline mode when a route is available", async () => {
     setSavedDailyMode("offline");
-    await saveOfflineRoute({
+    vi.spyOn(offlineStore, "listOfflineRoutes").mockResolvedValue([{
       id: "route-1",
       origin: "Casa",
       destination: "Trabalho",
@@ -68,7 +69,7 @@ describe("DailyMobilityHub", () => {
         stops: [{ placeId: "x", name: "Posto", address: "Rua 1" }],
         anpReferences: [],
       },
-    });
+    }]);
 
     render(<DailyMobilityHub />);
 
