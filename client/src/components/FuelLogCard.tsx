@@ -29,7 +29,18 @@ export default function FuelLogCard() {
     ? Number(totalCost.replace(",", ".")) / Number(liters.replace(",", "."))
     : 0;
 
-  const exportCsv = () => {\n    const csv = "\uFEFF" + buildFuelLogCsv(entries);\n    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));\n    const link = document.createElement("a");\n    link.href = url;\n    link.download = `trajeto-abastecimentos-${new Date().toISOString().slice(0, 10)}.csv`;\n    link.click();\n    URL.revokeObjectURL(url);\n    setFeedback("Histórico exportado para CSV.");\n  };\n\n  const save = () => {
+  const exportCsv = () => {
+    const csv = "\uFEFF" + buildFuelLogCsv(entries);
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `trajeto-abastecimentos-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setFeedback("Histórico exportado para CSV.");
+  };
+
+  const save = () => {
     const entry = addFuelLogEntry({
       liters: Number(liters.replace(",", ".")),
       totalCost: Number(totalCost.replace(",", ".")),
@@ -59,7 +70,12 @@ export default function FuelLogCard() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-2">\n        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#718089]">Resumo local</p>\n        {entries.length > 0 && <button type="button" onClick={exportCsv} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#D8E0E3] px-3 text-[0.62rem] font-extrabold text-[#326575]"><Download className="size-3.5" /> Exportar CSV</button>}\n      </div>\n\n      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#718089]">Resumo local</p>
+        {entries.length > 0 && <button type="button" onClick={exportCsv} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#D8E0E3] px-3 text-[0.62rem] font-extrabold text-[#326575]"><Download className="size-3.5" /> Exportar CSV</button>}
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="rounded-xl bg-[#F2F5F6] p-3"><span className="block text-[0.58rem] font-bold uppercase text-[#718089]">Registros</span><strong className="mt-1 block text-lg">{summary.entries}</strong></div>
         <div className="rounded-xl bg-[#F2F5F6] p-3"><span className="block text-[0.58rem] font-bold uppercase text-[#718089]">Litros</span><strong className="mt-1 block text-lg">{number.format(summary.totalLiters)}</strong></div>
         <div className="rounded-xl bg-[#F2F5F6] p-3"><span className="block text-[0.58rem] font-bold uppercase text-[#718089]">Gasto</span><strong className="mt-1 block text-lg">{money.format(summary.totalCost)}</strong></div>
