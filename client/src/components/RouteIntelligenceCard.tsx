@@ -14,6 +14,7 @@ type Props = {
   selectedRouteId?: string;
   onSelectRoute?: (routeId: string) => void;
   onConfirmRoute?: (routeId: string) => void;
+  routeConfirmed?: boolean;
   onRoutesChange?: (routes: RouteIntelligence["routes"]) => void;
 };
 
@@ -24,7 +25,7 @@ function formatDuration(seconds: number | null) {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
 }
 
-export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways, selectedRouteId = "principal", onSelectRoute, onConfirmRoute, onRoutesChange }: Props) {
+export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways, selectedRouteId = "principal", onSelectRoute, onConfirmRoute, routeConfirmed = false, onRoutesChange }: Props) {
   const [data, setData] = useState<RouteIntelligence | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -246,7 +247,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                         <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
                         <p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
                       </div>
-                      <strong className="text-sm">{totalCost(route) == null ? "Custo parcial" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
+                      <strong className="text-sm">{totalCost(route) == null ? "Custo incompleto" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
                     </div>
                   </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -265,7 +266,19 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </div>
       )}
 
-      {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><p className="text-xs font-black">Navegar agora</p><p className="mt-1 text-[0.58rem] text-white/40">Rota selecionada: {selectedRouteId === "principal" ? "principal" : selectedRouteId.replace("alternativa-", "alternativa ")}. O navegador externo pode recalcular o caminho.</p><div className="mt-3 grid grid-cols-3 gap-2"><button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button><button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button><button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button></div></div></div>}
+      {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
+        <p className="text-xs font-black">Navegar agora</p>
+        <p className="mt-1 text-[0.58rem] text-white/40">
+          {routeConfirmed
+            ? <>Rota confirmada: {selectedRouteId === "principal" ? "principal" : selectedRouteId.replace("alternativa-", "alternativa ")}. O navegador externo pode recalcular o caminho.</>
+            : "Confirme “Usar esta rota” para liberar a navegação externa."}
+        </p>
+        {routeConfirmed && <div className="mt-3 grid grid-cols-3 gap-2">
+          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button>
+          <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button>
+          <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button>
+        </div>}
+      </div>}
 
       {data && (
         <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
