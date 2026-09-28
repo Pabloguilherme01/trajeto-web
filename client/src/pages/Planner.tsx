@@ -47,12 +47,17 @@ export default function Planner() {
   const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [locatingOrigin, setLocatingOrigin] = useState(false);
   const [routeAlternatives, setRouteAlternatives] = useState<RouteIntelligenceRoute[]>([]);
-  const [selectedRouteId, setSelectedRouteId] = useState(() => {
-    try { return sessionStorage.getItem("trajeto-selected-route") || "principal"; } catch { return "principal"; }
-  });
-  const [routeConfirmed, setRouteConfirmed] = useState(() => {
-    try { return Boolean(sessionStorage.getItem("trajeto-selected-route")); } catch { return false; }
-  });
+  const routeContextKey = `trajeto-route-context:${origin.trim().toLocaleLowerCase("pt-BR")}→${destination.trim().toLocaleLowerCase("pt-BR")}`;
+  const readPersistedRoute = () => {
+    try {
+      if (sessionStorage.getItem("trajeto-selected-route-context") !== routeContextKey) return null;
+      return sessionStorage.getItem("trajeto-selected-route");
+    } catch {
+      return null;
+    }
+  };
+  const [selectedRouteId, setSelectedRouteId] = useState(() => readPersistedRoute() || "principal");
+  const [routeConfirmed, setRouteConfirmed] = useState(() => Boolean(readPersistedRoute()));
   const selectRoute = (routeId: string) => {
     setSelectedRouteId(routeId);
     setRouteConfirmed(false);
@@ -60,13 +65,23 @@ export default function Planner() {
   const confirmRoute = (routeId: string) => {
     setSelectedRouteId(routeId);
     setRouteConfirmed(true);
-    try { sessionStorage.setItem("trajeto-selected-route", routeId); } catch {}
+    try {
+      sessionStorage.setItem("trajeto-selected-route", routeId);
+      sessionStorage.setItem("trajeto-selected-route-context", routeContextKey);
+      localStorage.setItem("trajeto-confirmed-route-id", routeId);
+      localStorage.setItem("trajeto-confirmed-route-context", routeContextKey);
+    } catch {}
   };
   useEffect(() => {
+    try {
+      const savedContext = sessionStorage.getItem("trajeto-selected-route-context");
+      if (savedContext === routeContextKey) return;
+      sessionStorage.removeItem("trajeto-selected-route");
+      sessionStorage.setItem("trajeto-selected-route-context", routeContextKey);
+    } catch {}
     setRouteConfirmed(false);
     setSelectedRouteId("principal");
-    try { sessionStorage.removeItem("trajeto-selected-route"); } catch {}
-  }, [origin, destination]);
+  }, [routeContextKey]);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const drivingMode = new URLSearchParams(window.location.search).get("modo") === "conducao";
   
@@ -424,7 +439,16 @@ export default function Planner() {
                   origin={planned.route.origin}
                   destination={planned.route.destination}
                   stops={planned.stops}
-                  routes={routeAlternatives.map(route => ({ id: route.id, polyline: route.polyline, selected: route.id === selectedRouteId, trafficIntervals: route.trafficIntervals }))}
+                  routes={routeAlternatives.map(route => ({
+                    id: route.id,
+                    polyline: route.polyline,
+                    selected: route.id === selectedRouteId,
+                    trafficIntervals: route.trafficIntervals,
+                    durationSeconds: route.durationSeconds,
+                    staticDurationSeconds: route.staticDurationSeconds,
+                    distanceMeters: route.distanceMeters,
+                    toll: route.toll,
+                  }))}
                 /></div>
                 {routeConfirmed && routeAlternatives.length > 0 && (
                   <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[#9EBF1F] bg-[#F2F6DE] px-4 py-3">
