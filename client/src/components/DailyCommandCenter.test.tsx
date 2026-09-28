@@ -1,6 +1,7 @@
 import React from "react";
 import { describe, expect, it, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import DailyCommandCenter from "./DailyCommandCenter";
 
 describe("DailyCommandCenter", () => {
@@ -17,7 +18,6 @@ describe("DailyCommandCenter", () => {
   });
 
   it("opens the saved mode choices", async () => {
-    const { userEvent } = await import("@testing-library/user-event");
     const user = userEvent.setup();
     render(<DailyCommandCenter />);
     await user.click(screen.getByRole("button", { name: /trocar modo/i }));
