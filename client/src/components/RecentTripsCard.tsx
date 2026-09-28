@@ -1,3 +1,4 @@
+import React from "react";
 import { ArrowLeftRight, ArrowRight, History, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
