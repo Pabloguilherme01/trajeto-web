@@ -27,4 +27,17 @@ describe("local route calculator contract", () => {
 
     expect(result.weeklyCost).toBe(420);
   });
+
+  it("keeps a zero-frequency projection at zero", () => {
+    const result = projectTripCosts({
+      oneWayDistanceKm: 20,
+      oneWayCost: 12,
+      roundTrip: true,
+      tripsPerWeek: 0,
+    });
+
+    expect(result.weeklyCost).toBe(0);
+    expect(result.monthlyCost).toBe(0);
+    expect(result.annualCost).toBe(0);
+  });
 });
