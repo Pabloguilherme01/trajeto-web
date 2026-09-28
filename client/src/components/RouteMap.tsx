@@ -40,8 +40,8 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
 
   const trafficPath = (points: google.maps.LatLngLiteral[], interval: TrafficInterval) => {
     const start = interval.startPolylinePointIndex ?? 0;
-    const end = interval.endPolylinePointIndex ?? points.length - 1;
-    return points.slice(start, Math.min(points.length, end + 1));
+    const endExclusive = interval.endPolylinePointIndex ?? points.length;
+    return points.slice(start, Math.min(points.length, endExclusive));
   };
   const decodePolyline = (encoded: string): google.maps.LatLngLiteral[] => {
     const points: google.maps.LatLngLiteral[] = [];
