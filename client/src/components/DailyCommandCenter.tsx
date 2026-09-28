@@ -25,6 +25,7 @@ import {
   getFavoriteDestination,
   getMobileDestinations,
   mobileDestinationEvent,
+  saveMobileDestination,
 } from "@/lib/mobileDestinations";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
@@ -53,6 +54,8 @@ export default function DailyCommandCenter() {
   const [vehicleVersion, setVehicleVersion] = useState(0);
   const [selected, setSelected] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
   const [expanded, setExpanded] = useState(false);
+  const [setupValue, setSetupValue] = useState("");
+  const [setupSaved, setSetupSaved] = useState(false);
 
   useEffect(() => {
     const refresh = () => {
@@ -115,6 +118,14 @@ export default function DailyCommandCenter() {
               href: appUrl("/planejar"),
             };
 
+  const saveFirstDestination = () => {
+    const value = setupValue.trim();
+    if (!saveMobileDestination("casa", value)) return;
+    setSavedDailyMode("automatico");
+    setSetupValue("");
+    setSetupSaved(true);
+  };
+
   const choose = (id: DailyModeId) => {
     setSelected(id);
     setSavedDailyMode(id);
@@ -154,6 +165,39 @@ export default function DailyCommandCenter() {
               </button>
             </div>
           </div>
+
+          {!favorite && (
+            <div className="mt-5 rounded-2xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.045] p-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]">
+                  <MapPin className="size-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-extrabold text-white">Deixe o Trajeto pronto em 10 segundos</p>
+                  <p className="mt-1 text-[0.65rem] leading-relaxed text-[#9FB0B8]">Cadastre seu destino principal. Ele vira um atalho automático e fica somente neste aparelho.</p>
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      value={setupValue}
+                      onChange={event => { setSetupValue(event.target.value); setSetupSaved(false); }}
+                      onKeyDown={event => { if (event.key === "Enter") saveFirstDestination(); }}
+                      placeholder="Ex.: Trabalho, Centro, faculdade"
+                      aria-label="Destino principal"
+                      className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#0B1014] px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780] focus:border-[#3DE3FF]"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveFirstDestination}
+                      disabled={setupValue.trim().length < 3}
+                      className="min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Salvar
+                    </button>
+                  </div>
+                  {setupSaved && <p role="status" className="mt-2 text-[0.62rem] font-bold text-[#C7FF3C]">Destino salvo. O modo automático já está ativo.</p>}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
