@@ -24,7 +24,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [apple, setApple] = useState<AppleRouteIntelligence | null>(null);
-  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonLoading, setComparisonLoading] = useState(false);\n  const [tomtom, setTomtom] = useState<{ routes: Array<{ distanceMeters: number | null; durationSeconds: number | null; trafficDelaySeconds: number | null }> } | null>(null);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
   const vehicle = getMobileVehicle();
 
@@ -44,7 +44,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   }
 
   const main = data?.routes[0];
-  async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
+  async function compareTomTom() { setComparisonLoading(true); setMessage(""); try { const base = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim()?.replace(/\\/$/, "") || ""; const response = await fetch(base + "/api/tomtom-route-intelligence", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin, destination, avoidTolls, avoidHighways }) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload?.message || "TomTom indisponível"); setTomtom(payload); } catch { setMessage("TomTom ainda não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }\n  async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
   const fuelCost = (route: typeof main) => {
     if (!route || !fuelPrice) return null;
