@@ -1,4 +1,4 @@
-import { ArrowRight, History, Trash2, X } from "lucide-react";
+import { ArrowLeftRight, ArrowRight, History, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -33,6 +33,31 @@ export default function RecentTripsCard() {
   }, []);
 
   if (!trips.length) return null;
+
+  const openReverseTrip = async (trip: RecentTrip) => {
+    const origin = trip.destination;
+    const destination = trip.origin;
+
+    if (navigator.onLine) {
+      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(origin) + "&destino=" + encodeURIComponent(destination));
+      return;
+    }
+
+    try {
+      const routes = await listOfflineRoutes();
+      const saved = findOfflineRouteByTrip(routes, origin, destination);
+      if (!saved) {
+        setFeedback("A volta desta viagem não tem uma cópia salva neste aparelho. Conecte-se à internet para calculá-la.");
+        return;
+      }
+      setLocation(
+        appUrl("/planejar") +
+        "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination),
+      );
+    } catch {
+      setFeedback("Não foi possível consultar as rotas salvas. Tente novamente.");
+    }
+  };
 
   const openTrip = async (trip: RecentTrip) => {
     if (navigator.onLine) {
@@ -74,9 +99,14 @@ export default function RecentTripsCard() {
               <p className="mt-0.5 truncate text-xs font-extrabold">{trip.origin} → {trip.destination}</p>
               <p className="mt-1 text-[0.6rem] text-[#718089]">Usada {formatAge(trip.usedAt)}</p>
             </div>
-            <button type="button" onClick={() => void openTrip(trip)} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
-              Repetir <ArrowRight className="size-3.5" />
-            </button>
+            <div className="flex shrink-0 gap-1.5">
+              <button type="button" onClick={() => void openTrip(trip)} className="inline-flex min-h-10 items-center gap-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
+                Repetir <ArrowRight className="size-3.5" />
+              </button>
+              <button type="button" onClick={() => void openReverseTrip(trip)} aria-label={"Planejar volta de " + trip.destination + " para " + trip.origin} className="grid size-10 place-items-center rounded-xl border border-[#D8E0E3] text-[#52636C]">
+                <ArrowLeftRight className="size-3.5" />
+              </button>
+            </div>
             <button type="button" onClick={() => removeRecentTrip(trip.origin, trip.destination)} aria-label={`Remover viagem ${trip.origin} para ${trip.destination}`} className="grid size-10 shrink-0 place-items-center rounded-xl border border-[#D8E0E3] text-[#718089]">
               <X className="size-3.5" />
             </button>
