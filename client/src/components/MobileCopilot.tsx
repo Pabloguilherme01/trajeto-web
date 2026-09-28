@@ -72,6 +72,7 @@ export default function MobileCopilot() {
   const [offlineRoutes, setOfflineRoutes] = useState(0);
   const [offlineStorageError, setOfflineStorageError] = useState(false);
   const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
+  const [locatingNearby, setLocatingNearby] = useState(false);
   const [state, setState] = useState(readState);
 
   useEffect(() => {
@@ -99,6 +100,31 @@ export default function MobileCopilot() {
       window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
+
+  const findNearby = () => {
+    if (locatingNearby) return;
+    if (!navigator.geolocation) {
+      setLocation(appUrl("/postos") + "?q=postos");
+      return;
+    }
+    setLocatingNearby(true);
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setLocatingNearby(false);
+        rememberIntent("nearby");
+        setLocation(
+          appUrl("/postos") +
+          "?q=postos&lat=" + encodeURIComponent(position.coords.latitude) +
+          "&lng=" + encodeURIComponent(position.coords.longitude),
+        );
+      },
+      () => {
+        setLocatingNearby(false);
+        setLocation(appUrl("/postos") + "?q=postos");
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
+    );
+  };
 
   const primary = useMemo<Action>(() => {
     if (!online && latestOfflineRoute) {
@@ -161,9 +187,9 @@ export default function MobileCopilot() {
     if (intent === "nearby") {
       return {
         title: "Encontrar postos por perto",
-        detail: "Use sua localização para encontrar a próxima parada.",
-        label: "Perto de mim",
-        href: appUrl("/postos") + "?q=" + encodeURIComponent("postos próximos"),
+        detail: locatingNearby ? "Obtendo sua localização para ordenar os postos mais próximos." : "Use sua localização para encontrar a próxima parada.",
+        label: locatingNearby ? "Localizando…" : "Perto de mim",
+        onClick: findNearby,
         intent: "nearby",
         icon: MapPin,
       };
