@@ -114,7 +114,7 @@ export default function DailyMobilityHub() {
 
   return (
     <section className="container py-8 sm:py-10" aria-labelledby="daily-mobility-title">
-      <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121B22] text-white shadow-[0_20px_60px_rgba(0,0,0,.18)]">
+      <div className="premium-surface overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121B22] text-white shadow-[0_20px_60px_rgba(0,0,0,.18)]">
         <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
           <div>
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#C7FF3C]">Meu dia · {dailyMode === "automatico" ? "automático" : dailyMode}</p>
