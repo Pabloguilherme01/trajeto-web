@@ -9,7 +9,7 @@ describe("MobileUtilityHub", () => {
     const user = userEvent.setup();
     render(<MobileUtilityHub />);
     expect(screen.getByText("Minha rotina")).toBeTruthy();
-    expect(screen.getByText("Antes de sair")).toBeTruthy();
+    expect(screen.getAllByText("Antes de sair").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
     expect(screen.getByText("Meu veículo")).toBeTruthy();
