@@ -15,11 +15,13 @@ export function buildRouteShareText(origin: string, destination: string, decisio
   const route = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}.`;
   if (!decision?.name) return route + " Veja distância, duração e opções de abastecimento.";
 
-  const price = Number.isFinite(decision.price) && Number(decision.price) > 0
-    ? ` · referência de ${Number(decision.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/L`
+  const priceValue = Number(decision.price);
+  const price = Number.isFinite(priceValue) && priceValue > 0
+    ? ` · referência de ${priceValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/L`
     : "";
-  const detour = Number.isFinite(decision.detourKm) && Number(decision.detourKm) >= 0
-    ? ` · desvio ${decision.detourSource === "real" ? "real" : "estimado"} de ${Number(decision.detourKm).toLocaleString("pt-BR")} km`
+  const detourValue = Number(decision.detourKm);
+  const detour = Number.isFinite(detourValue) && detourValue >= 0
+    ? ` · desvio ${decision.detourSource === "real" ? "real" : "estimado"} de ${detourValue.toLocaleString("pt-BR")} km`
     : "";
 
   return route + ` Parada sugerida: ${decision.name}${price}${detour}.`;
