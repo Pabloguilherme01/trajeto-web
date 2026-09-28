@@ -23,7 +23,6 @@ describe("AccessibilityPanel", () => {
     expect(JSON.parse(localStorage.getItem("trajeto-accessibility-preferences") || "{}")).toMatchObject({ compactMode:true, reduceMotion:true });
     expect(localStorage.getItem("trajeto-mobile-economy")).toBe("1");
   });
-});
 
   it("closes with Escape", () => {
     render(<AccessibilityPanel />);
@@ -32,3 +31,4 @@ describe("AccessibilityPanel", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
   });
+});
