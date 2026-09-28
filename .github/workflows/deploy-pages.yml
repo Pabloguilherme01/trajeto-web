@@ -43,6 +43,7 @@ jobs:
           test -f dist/public/site.webmanifest
           test -f dist/public/robots.txt
           test -f dist/public/favicon.svg
+          test -f dist/public/.vite/manifest.json
           cp dist/public/index.html dist/public/404.html
           printf '%s\n' "GitHub Pages artifact validated."
 
@@ -53,6 +54,7 @@ jobs:
           test -f dist/public/sw.js
           test -f dist/public/site.webmanifest
           test -f dist/public/favicon.svg
+          test -f dist/public/.vite/manifest.json
           grep -q 'scope' dist/public/site.webmanifest
           printf '%s\n' "Mobile/offline assets validated."
 
