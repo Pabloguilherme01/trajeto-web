@@ -5,6 +5,7 @@ type RouteRequest = {
   avoidTolls?: boolean;
   avoidHighways?: boolean;
   emissionType?: "GASOLINE" | "DIESEL" | "HYBRID" | "ELECTRIC";
+  trafficDetailed?: boolean;
 };
 
 const allowedOrigin = process.env.TRAJETO_ALLOWED_ORIGIN || "*";
@@ -73,7 +74,11 @@ export default async function handler(request: Request) {
       avoidTolls: Boolean(body.avoidTolls),
       avoidHighways: Boolean(body.avoidHighways),
     },
-    extraComputations: ["TOLLS", "FUEL_CONSUMPTION"],
+    extraComputations: [
+      "TOLLS",
+      "FUEL_CONSUMPTION",
+      ...(body.trafficDetailed ? ["TRAFFIC_ON_POLYLINE"] : []),
+    ],
     languageCode: "pt-BR",
     units: "METRIC",
   };
@@ -91,6 +96,7 @@ export default async function handler(request: Request) {
         "routes.travelAdvisory.fuelConsumptionMicroliters",
         "routes.routeLabels",
         "routes.polyline.encodedPolyline",
+        ...(body.trafficDetailed ? ["routes.travelAdvisory.speedReadingIntervals"] : []),
         "routes.legs.distanceMeters",
         "routes.legs.duration",
         "routes.legs.staticDuration",
@@ -121,6 +127,13 @@ export default async function handler(request: Request) {
       };
       routeLabels?: string[];
       polyline?: { encodedPolyline?: string };
+      travelAdvisory?: {
+        speedReadingIntervals?: Array<{
+          startPolylinePointIndex?: number;
+          endPolylinePointIndex?: number;
+          speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM";
+        }>;
+      };
     }>;
   };
 
@@ -134,6 +147,7 @@ export default async function handler(request: Request) {
       id: index === 0 ? "principal" : `alternativa-${index}`,
       labels: route.routeLabels || [],
       polyline: route.polyline?.encodedPolyline || null,
+      trafficIntervals: body.trafficDetailed ? (route.travelAdvisory?.speedReadingIntervals || []) : [],
       distanceMeters: route.distanceMeters ?? null,
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
@@ -150,6 +164,7 @@ export default async function handler(request: Request) {
     provider: "google-routes",
     generatedAt: new Date().toISOString(),
     trafficAware: true,
+    trafficDetailed: Boolean(body.trafficDetailed),
     alternativesAvailable: routes.length > 1,
     routes,
   });
