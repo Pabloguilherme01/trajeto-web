@@ -470,6 +470,7 @@ export default function Planner() {
                   destination={destination}
                   waypoints={[]}
                   selectedRouteId={selectedRouteId}
+                  routeConfirmed={routeConfirmed}
                   onSelectRoute={selectRoute}
                   onConfirmRoute={confirmRoute}
                   onRoutesChange={routes => {
