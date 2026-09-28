@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, Car, Clock3, RefreshCw, Route, Wallet } from "lucide-react";
 import { fetchRouteIntelligence, type RouteIntelligence } from "@/lib/routeIntelligence";
+import { fetchAppleRouteIntelligence, type AppleRouteIntelligence } from "@/lib/appleRouteIntelligence";
 
 type Props = {
   origin: string;
@@ -21,6 +22,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [data, setData] = useState<RouteIntelligence | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [apple, setApple] = useState<AppleRouteIntelligence | null>(null);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
 
   async function refresh() {
     setLoading(true);
@@ -38,6 +41,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   }
 
   const main = data?.routes[0];
+  async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
 
   return (
@@ -63,6 +67,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} disponível(is)</strong></div>
         </div>
       )}
+
+      {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black">Comparar provedores</p><p className="mt-1 text-[0.58rem] text-white/40">Google Routes × Apple Maps Server.</p></div><button type="button" onClick={compareApple} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">{comparisonLoading ? "Consultando" : "Comparar"}</button></div>{apple?.routes?.[0] && <div className="mt-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Google</p><strong className="text-xs">{formatDuration(main?.durationSeconds ?? null)} · {((main?.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Apple</p><strong className="text-xs">{formatDuration(apple.routes[0].durationSeconds)} · {((apple.routes[0].distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div></div>}</div>}
 
       {data && data.routes.length > 1 && (
         <div className="mt-3 space-y-2">
