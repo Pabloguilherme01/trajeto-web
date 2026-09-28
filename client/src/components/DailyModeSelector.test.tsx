@@ -17,7 +17,7 @@ describe("DailyModeSelector", () => {
     expect(screen.queryByText("Próxima viagem")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Trocar modo" }));
     expect(screen.getByText("Próxima viagem")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Trocar modo" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Fechar" }).getAttribute("aria-expanded")).toBe("true");
   });
 
   it("persists a manually selected mode", () => {
