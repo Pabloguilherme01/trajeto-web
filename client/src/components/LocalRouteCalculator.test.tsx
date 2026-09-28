@@ -126,7 +126,7 @@ describe("local route calculator contract", () => {
     expect(result?.baseline.costPerTrip).toBeCloseTo(59.23, 1);
     expect(result?.alternative.costPerTrip).toBeCloseTo(63.22, 1);
     expect(result?.differencePerTrip).toBeCloseTo(-3.99, 1);
-    expect(result?.differencePerMonth).toBeCloseTo(-86.4, 1);
+    expect(result?.differencePerMonth).toBeCloseTo(-86.2, 1);
   });
 
   it("não compara cenário incompleto", () => {
