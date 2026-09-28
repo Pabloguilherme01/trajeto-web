@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, shareText } from "./mobileTools";
+import { buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -9,10 +9,10 @@ describe("mobile tools", () => {
 
   it("builds safe external fallbacks for routes and station searches", () => {
     expect(buildGoogleMapsDirectionsUrl("Águas Lindas, GO", "Brasília, DF")).toBe(
-      "https://www.google.com/maps/dir/?api=1&origin=%C3%81guas%20Lindas%2C%20GO&destination=Bras%C3%ADlia%2C%20DF&travelmode=driving",
+      "https://www.google.com/maps/dir/?api=1&origin=%C3%81guas+Lindas%2C+GO&destination=Bras%C3%ADlia%2C+DF&travelmode=driving",
     );
     expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
-      "https://www.google.com/maps/search/?api=1&query=postos%20perto%20de%20%C3%81guas%20Lindas",
+      "https://www.google.com/maps/search/?api=1&query=postos+perto+de+%C3%81guas+Lindas",
     );
   });
 
