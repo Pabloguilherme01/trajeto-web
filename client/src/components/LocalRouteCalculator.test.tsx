@@ -12,6 +12,7 @@ describe("local route calculator contract", () => {
 
     expect(result.distanceKm).toBe(70);
     expect(result.costPerTrip).toBeCloseTo(41.23, 1);
+    expect(result.costPerKm).toBeCloseTo(0.589, 3);
     expect(result.weeklyCost).toBeCloseTo(206.15, 1);
     expect(result.monthlyCost).toBeGreaterThan(result.weeklyCost);
     expect(result.annualCost).toBeGreaterThan(result.monthlyCost);
