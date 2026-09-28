@@ -66,7 +66,7 @@ export default async function handler(request: Request) {
     intermediates: waypoints.map(address => ({ address })),
     travelMode: "DRIVE",
     routingPreference: "TRAFFIC_AWARE",
-    computeAlternativeRoutes: true,
+    computeAlternativeRoutes: waypoints.length === 0,
     routeModifiers: {
       avoidTolls: Boolean(body.avoidTolls),
       avoidHighways: Boolean(body.avoidHighways),
@@ -85,7 +85,8 @@ export default async function handler(request: Request) {
         "routes.distanceMeters",
         "routes.duration",
         "routes.staticDuration",
-        "routes.travelAdvisory.tollInfo",
+        "routes.travelAdvisory.tollInfo.estimatedPrice",
+        "routes.routeLabels",
         "routes.legs.distanceMeters",
         "routes.legs.duration",
         "routes.legs.staticDuration",
