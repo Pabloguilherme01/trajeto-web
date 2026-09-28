@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { distanceKm, rankNearbyStops, straightLineRoute } from "./offlineRouteMath";
-import { externalNavigationUrl, findOfflineRouteByTrip, type OfflineRoute } from "./offlineStore";
+import { externalNavigationUrl, findOfflineRouteByTrip, wazeNavigationUrl, type OfflineRoute } from "./offlineStore";
 
 describe("offline route math", () => {
   it("returns zero for identical points", () => {
@@ -59,5 +59,10 @@ describe("offline route reuse", () => {
     expect(url).toContain("origin=%C3%81guas%20Lindas%20de%20Goi%C3%A1s");
     expect(url).toContain("destination=Bras%C3%ADlia%2C%20DF");
     expect(url).toContain("travelmode=driving");
+  });
+
+  it("builds a Waze destination link with encoded destination", () => {
+    const url = wazeNavigationUrl(routes[0]);
+    expect(url).toBe("https://www.waze.com/ul?q=Bras%C3%ADlia%2C%20DF&navigate=yes");
   });
 });
