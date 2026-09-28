@@ -74,13 +74,14 @@ export function buildGoogleMapsDirectionsUrl(
   return "https://www.google.com/maps/dir/?" + params.toString();
 }
 
-export function buildGoogleMapsDestinationUrl(destination: string, navigate = false) {
+export function buildGoogleMapsDestinationUrl(destination: string, navigate = false, placeId?: string) {
   const normalizedDestination = destination.trim();
   const params = new URLSearchParams({
     api: "1",
     destination: normalizedDestination,
     travelmode: "driving",
   });
+  if (placeId?.trim()) params.set("destination_place_id", placeId.trim());
   if (navigate) params.set("dir_action", "navigate");
   return "https://www.google.com/maps/dir/?" + params.toString();
 }
