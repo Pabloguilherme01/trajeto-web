@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 function installLocalStorageMock() {
   const store = new Map<string, string>();
@@ -14,7 +14,7 @@ function installLocalStorageMock() {
     },
   });
 }
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import FuelLogCard from "./FuelLogCard";
 
 describe("FuelLogCard", () => {
