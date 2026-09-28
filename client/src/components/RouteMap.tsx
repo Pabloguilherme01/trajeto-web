@@ -6,7 +6,7 @@ type Stop = { placeId: string; name: string; address: string; lat: number; lng: 
 type RoutePreview = { id: string; polyline: string | null; selected?: boolean };
 type RouteMapProps = { origin?: { lat: number; lng: number }; destination?: { lat: number; lng: number }; stops: Stop[]; routes?: RoutePreview[] };
 
-export function RouteMap({ origin, destination, stops }: RouteMapProps) {
+export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const polylinesRef = useRef<google.maps.Polyline[]>([]);
@@ -75,6 +75,7 @@ export function RouteMap({ origin, destination, stops }: RouteMapProps) {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
     [origin, destination, ...stops].forEach(point => bounds.extend(point));
+    routes.filter(route => route.polyline).forEach(route => decodePolyline(route.polyline as string).forEach(point => bounds.extend(point)));
     mapRef.current.fitBounds(bounds, 56);
   };
   const toggleTraffic = () => {
