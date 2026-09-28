@@ -113,6 +113,7 @@ export default async function handler(request: Request) {
       duration?: string;
       staticDuration?: string;
       travelAdvisory?: {
+        fuelConsumptionMicroliters?: string;
         tollInfo?: {
           estimatedPrice?: Array<{ currencyCode?: string; units?: string; nanos?: number }>;
         };
@@ -132,10 +133,10 @@ export default async function handler(request: Request) {
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
       fuelConsumptionLiters: route.travelAdvisory?.fuelConsumptionMicroliters ? Number(route.travelAdvisory.fuelConsumptionMicroliters) / 1_000_000 : null,
-      toll: toll ? {
+      toll: route.travelAdvisory?.tollInfo ? {
         amount: tollValue,
-        currency: toll.currencyCode || "BRL",
-        estimated: true,
+        currency: toll?.currencyCode || "BRL",
+        estimated: tollValue != null,
       } : null,
     };
   });
