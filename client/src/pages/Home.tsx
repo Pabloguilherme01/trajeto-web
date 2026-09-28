@@ -11,6 +11,10 @@ import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
+import RecentTripsCard from "@/components/RecentTripsCard";
+import MobileVehicleCard from "@/components/MobileVehicleCard";
+import TripPrepCard from "@/components/TripPrepCard";
+import OfficialSourcesCard from "@/components/OfficialSourcesCard";
 
 
 
