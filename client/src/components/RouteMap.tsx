@@ -23,6 +23,21 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   const isVector = renderingType === "VECTOR";
   const is3DAvailable = isVector;
 
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const updateRenderingType = () => {
+      const type = mapRef.current?.getRenderingType?.();
+      if (type === window.google.maps.RenderingType.VECTOR) setRenderingType("VECTOR");
+      else if (type === window.google.maps.RenderingType.RASTER) {
+        setRenderingType("RASTER");
+        setIs3D(false);
+      }
+    };
+    updateRenderingType();
+    const listener = mapRef.current.addListener("renderingtype_changed", updateRenderingType);
+    return () => listener.remove();
+  }, [mapReady]);
+
   const activate3D = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -157,7 +172,7 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
       </div>
       <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
         <span className="inline-flex min-h-10 items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.58rem] font-black text-white shadow-lg backdrop-blur">
-          {isVector ? "3D · VETORIAL" : renderingType === google.maps.RenderingType.RASTER ? "2D · COMPATIBILIDADE" : "MAPA · INICIALIZANDO"}
+          {isVector ? "3D · VETORIAL" : renderingType === "RASTER" ? "2D · COMPATIBILIDADE" : "MAPA · INICIALIZANDO"}
         </span>
         <button type="button" onClick={activate3D} disabled={!mapReady || !is3DAvailable} aria-pressed={is3D} className={"min-h-10 rounded-xl border px-3 text-[0.62rem] font-black shadow-lg backdrop-blur " + (is3D ? "border-[#C7FF3C]/40 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>{is3D ? "2D" : "3D"}</button>
         <button type="button" onClick={rotateCompass} disabled={!mapReady} aria-label={`Girar mapa para ${heading} graus`} className="min-h-10 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.62rem] font-black text-white shadow-lg backdrop-blur">N {Math.round(heading)}°</button>
