@@ -176,7 +176,7 @@ O frontend pode ser publicado no GitHub Pages como site estático. Quando o back
 
 Sem backend disponível, o produto não finge que a API está funcionando: planejamento e busca de postos oferecem fallback direto para o Google Maps, enquanto rotas e consultas já salvas continuam disponíveis localmente. Isso mantém uma ação útil mesmo diante de falha de infraestrutura.
 
-O GitHub Pages é adequado para o frontend estático; o backend deve ser hospedado em uma plataforma que execute Node/Express. O Express é suportado diretamente como aplicação backend pela Vercel. citeturn1search1turn1search2
+O GitHub Pages é adequado para o frontend estático; o backend deve ser hospedado em uma plataforma que execute Node/Express. O Express é suportado diretamente como aplicação backend pela Vercel.
 
 ## Desenvolvimento
 
