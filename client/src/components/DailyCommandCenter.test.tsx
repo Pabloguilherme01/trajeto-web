@@ -11,10 +11,10 @@ describe("DailyCommandCenter", () => {
 
   it("renders the mobile command center with the primary actions", () => {
     render(<DailyCommandCenter />);
-    expect(screen.getByRole("heading", { name: /deixe o trajeto pronto para o seu dia/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /planejar próxima viagem/i })).toBeInTheDocument();
-    expect(screen.getByText(/modo atual/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /acessibilidade/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /deixe o trajeto pronto para o seu dia/i })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /planejar próxima viagem/i })).toBeTruthy();
+    expect(screen.getByText(/modo atual/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /acessibilidade/i })).toBeTruthy();
   });
 
   it("offers first-run destination setup when nothing is saved", async () => {
@@ -31,7 +31,7 @@ describe("DailyCommandCenter", () => {
     const user = userEvent.setup();
     render(<DailyCommandCenter />);
     await user.click(screen.getByRole("button", { name: /trocar modo/i }));
-    expect(screen.getByRole("button", { name: /economia/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sem internet/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /economia/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /sem internet/i })).toBeTruthy();
   });
 });
