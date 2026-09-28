@@ -41,6 +41,16 @@ describe("fuelLog", () => {
     expect(entry).not.toBeNull();
     expect(removeFuelLogEntry(entry!.id)).toBe(true);
     expect(listFuelLog()).toHaveLength(0);
-    expect(removeFuelLogEntry("missing")).toBe(false);\n  });\n\n  it("mantém o último preço sincronizado ao remover abastecimentos", () => {\n    const older = addFuelLogEntry({ date: "2026-09-01", liters: 40, totalCost: 200 });\n    const newer = addFuelLogEntry({ date: "2026-09-20", liters: 40, totalCost: 280 });\n    expect(localStorage.getItem("trajeto-last-fuel-price")).toBe("7");\n    expect(removeFuelLogEntry(newer!.id)).toBe(true);\n    expect(localStorage.getItem("trajeto-last-fuel-price")).toBe("5");\n    expect(removeFuelLogEntry(older!.id)).toBe(true);\n    expect(localStorage.getItem("trajeto-last-fuel-price")).toBeNull();
+    expect(removeFuelLogEntry("missing")).toBe(false);
+  });
+
+  it("mantém o último preço sincronizado ao remover abastecimentos", () => {
+    const older = addFuelLogEntry({ date: "2026-09-01", liters: 40, totalCost: 200 });
+    const newer = addFuelLogEntry({ date: "2026-09-20", liters: 40, totalCost: 280 });
+    expect(localStorage.getItem("trajeto-last-fuel-price")).toBe("7");
+    expect(removeFuelLogEntry(newer!.id)).toBe(true);
+    expect(localStorage.getItem("trajeto-last-fuel-price")).toBe("5");
+    expect(removeFuelLogEntry(older!.id)).toBe(true);
+    expect(localStorage.getItem("trajeto-last-fuel-price")).toBeNull();
   });
 });
