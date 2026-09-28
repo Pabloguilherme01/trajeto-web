@@ -25,6 +25,15 @@ export default async function handler(request: Request) {
   if (request.method === "OPTIONS") return json({ ok: true });
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
+  const configuredOrigin = process.env.TRAJETO_ALLOWED_ORIGIN;
+  if (!configuredOrigin) return json({ error: "server_origin_not_configured" }, 503);
+  const requestOrigin = request.headers.get("origin");
+  if (requestOrigin && requestOrigin !== configuredOrigin) {
+    return json({ error: "origin_not_allowed" }, 403);
+  }
+  const contentLength = Number(request.headers.get("content-length") || 0);
+  if (contentLength > 20_000) return json({ error: "payload_too_large" }, 413);
+
   const apiKey = process.env.GOOGLE_MAPS_ROUTES_API_KEY;
   if (!apiKey) {
     return json({
@@ -76,7 +85,7 @@ export default async function handler(request: Request) {
         "routes.distanceMeters",
         "routes.duration",
         "routes.staticDuration",
-        "routes.travelAdvisory",
+        "routes.travelAdvisory.tollInfo",
         "routes.legs.distanceMeters",
         "routes.legs.duration",
         "routes.legs.staticDuration",
