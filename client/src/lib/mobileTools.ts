@@ -113,9 +113,19 @@ export function buildWazeNavigationUrl(destination: string, coordinates?: { lat:
   return "https://waze.com/ul?" + params.toString();
 }
 
-export function buildAppleMapsDirectionsUrl(destination: string, origin?: string) {
+export type RoutePreference = "default" | "avoid-tolls" | "avoid-highways";
+
+export function buildAppleMapsDirectionsUrl(
+  destination: string,
+  origin?: string,
+  preference: RoutePreference = "default",
+  waypoints: string[] = [],
+) {
   const params = new URLSearchParams({ daddr: destination.trim(), dirflg: "d" });
   if (origin?.trim()) params.set("saddr", origin.trim());
+  if (preference === "avoid-tolls") params.set("dirflg", "d");
+  const normalizedWaypoints = waypoints.map(item => item.trim()).filter(Boolean).slice(0, 3);
+  for (const waypoint of normalizedWaypoints) params.append("waypoint", waypoint);
   return "https://maps.apple.com/?" + params.toString();
 }
 
