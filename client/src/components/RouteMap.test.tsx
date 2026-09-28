@@ -5,7 +5,8 @@ import { RouteMap } from "./RouteMap";
 
 vi.mock("@/components/Map", () => ({
   MapView: ({ onMapReady }: { onMapReady: (map: any) => void }) => {
-    window.google = { maps: { RenderingType: { VECTOR: "VECTOR", RASTER: "RASTER" }, TrafficLayer: vi.fn(() => ({ setMap: vi.fn() })) } } as any;\n    const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11), getRenderingType: vi.fn(() => "RASTER"), addListener: vi.fn(() => ({ remove: vi.fn() })) };
+    window.google = { maps: { RenderingType: { VECTOR: "VECTOR", RASTER: "RASTER" }, TrafficLayer: vi.fn(() => ({ setMap: vi.fn() })) } } as any;
+    const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11), getRenderingType: vi.fn(() => "RASTER"), addListener: vi.fn(() => ({ remove: vi.fn() })) };
     React.useEffect(() => onMapReady(map), [onMapReady]);
     return <div data-testid="map-view" />;
   },
