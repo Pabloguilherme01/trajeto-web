@@ -11,7 +11,8 @@ const localStorageMock = {
 describe("departureChecklist", () => {
   beforeEach(() => {
     memory.clear();
-    vi.stubGlobal("localStorage", localStorageMock);\n    vi.stubGlobal("window", undefined);
+    vi.stubGlobal("localStorage", localStorageMock);
+    vi.stubGlobal("window", undefined);
   });
 
   it("starts empty for the current day", () => {
