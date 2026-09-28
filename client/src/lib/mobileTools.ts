@@ -74,6 +74,18 @@ export function buildGoogleMapsDirectionsUrl(
   return "https://www.google.com/maps/dir/?" + params.toString();
 }
 
+export function buildGoogleMapsMultiStopUrl(destination: string, waypoints: string[], navigate = true) {
+  const normalizedWaypoints = waypoints.map(item => item.trim()).filter(Boolean).slice(0, 3);
+  const params = new URLSearchParams({
+    api: "1",
+    destination: destination.trim(),
+    travelmode: "driving",
+  });
+  if (normalizedWaypoints.length) params.set("waypoints", normalizedWaypoints.join("|"));
+  if (navigate) params.set("dir_action", "navigate");
+  return "https://www.google.com/maps/dir/?" + params.toString();
+}
+
 export function buildGoogleMapsDestinationUrl(destination: string, navigate = false, placeId?: string) {
   const normalizedDestination = destination.trim();
   const params = new URLSearchParams({
