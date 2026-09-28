@@ -83,7 +83,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     if (route.labels?.includes("FUEL_EFFICIENT")) badges.push("mais econômica");
     if (route.labels?.includes("SHORTER_DISTANCE")) badges.push("menor distância");
     if (index > 0 && deltaSeconds != null && deltaSeconds < 0) badges.push("mais rápida");
-    if (index > 0 && savings != null && savings < 0) badges.push("menor custo");
+    if (index > 0 && savings != null && savings > 0) badges.push("menor custo");
     if (route.toll?.amount === 0 && base?.toll?.amount != null && base.toll.amount > 0) badges.push("sem pedágio");
     return { badges, deltaSeconds, savings };
   };
