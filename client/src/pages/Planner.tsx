@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
+import { shareText, buildRouteShareText } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
@@ -274,11 +275,15 @@ export default function Planner() {
   const shareRoute = async () => {
     if (!origin.trim() || !destination.trim()) return;
     const url = `${window.location.origin}${appUrl("/planejar")}?origem=${encodeURIComponent(origin.trim())}&destino=${encodeURIComponent(destination.trim())}`;
-    const text = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}. Veja distância, duração e opções de abastecimento.`;
+    const text = buildRouteShareText(origin, destination, planned?.recommendation ? {
+      name: planned.recommendation.name,
+      price: planned.recommendation.price,
+      detourKm: planned.recommendation.detourKm,
+      detourSource: planned.recommendation.detourSource === "real" ? "real" : "estimated",
+    } : null);
     try {
-      if (navigator.share) await navigator.share({ title: "Trajeto · rota", text, url });
-      else { await navigator.clipboard.writeText(`${text}
-${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
+      await shareText(text, url, "Trajeto · rota");
+      setShareMessage("Rota pronta para compartilhar.");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       setShareMessage("Não foi possível preparar o compartilhamento agora.");
