@@ -18,6 +18,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import FuelLogCard from "./FuelLogCard";
 
 describe("FuelLogCard", () => {
+  afterEach(() => cleanup());
+
   beforeEach(() => {
     installLocalStorageMock();
     localStorage.clear();
