@@ -74,7 +74,12 @@ export function buildGoogleMapsDirectionsUrl(
   return "https://www.google.com/maps/dir/?" + params.toString();
 }
 
-export function buildGoogleMapsMultiStopUrl(destination: string, waypoints: string[], navigate = true) {
+export function buildGoogleMapsMultiStopUrl(
+  destination: string,
+  waypoints: string[],
+  navigate = true,
+  preference: RoutePreference = "default",
+) {
   const normalizedWaypoints = waypoints.map(item => item.trim()).filter(Boolean).slice(0, 3);
   const params = new URLSearchParams({
     api: "1",
@@ -83,6 +88,8 @@ export function buildGoogleMapsMultiStopUrl(destination: string, waypoints: stri
   });
   if (normalizedWaypoints.length) params.set("waypoints", normalizedWaypoints.join("|"));
   if (navigate) params.set("dir_action", "navigate");
+  if (preference === "avoid-tolls") params.set("avoid", "tolls");
+  if (preference === "avoid-highways") params.set("avoid", "highways");
   return "https://www.google.com/maps/dir/?" + params.toString();
 }
 
@@ -121,12 +128,13 @@ export function buildAppleMapsDirectionsUrl(
   preference: RoutePreference = "default",
   waypoints: string[] = [],
 ) {
-  const params = new URLSearchParams({ daddr: destination.trim(), dirflg: "d" });
-  if (origin?.trim()) params.set("saddr", origin.trim());
-  if (preference === "avoid-tolls") params.set("dirflg", "d");
+  const params = new URLSearchParams({ destination: destination.trim(), mode: "driving" });
+  if (origin?.trim()) params.set("source", origin.trim());
+  if (preference === "avoid-tolls") params.set("avoid", "tolls");
+  if (preference === "avoid-highways") params.set("avoid", "highways");
   const normalizedWaypoints = waypoints.map(item => item.trim()).filter(Boolean).slice(0, 3);
   for (const waypoint of normalizedWaypoints) params.append("waypoint", waypoint);
-  return "https://maps.apple.com/?" + params.toString();
+  return "https://maps.apple.com/directions?" + params.toString();
 }
 
 export function openNavigation(lat: number, lng: number, label?: string) {
