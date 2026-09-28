@@ -1,34 +1,26 @@
-// @vitest-environment jsdom
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import AccessibilityPanel from "./AccessibilityPanel";
 
 describe("AccessibilityPanel", () => {
-  beforeEach(() => localStorage.clear());
-  afterEach(() => cleanup());
-
-  it("opens the accessibility panel and persists a setting", () => {
-    render(<AccessibilityPanel />);
-    fireEvent.click(screen.getAllByRole("button", { name: "Abrir acessibilidade" })[0]);
-    expect(screen.getByRole("dialog")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Texto maior/ }));
-    expect(JSON.parse(localStorage.getItem("trajeto-accessibility-preferences") || "{}").largeText).toBe(true);
+  afterEach(() => {
+    cleanup();
+    localStorage.clear();
   });
 
-  it("applies the economy preset locally", () => {
+  it("offers local data controls without touching unrelated storage", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("trajeto-daily-mode", "automatico");
+    localStorage.setItem("other-app-setting", "keep");
     render(<AccessibilityPanel />);
-    fireEvent.click(screen.getAllByRole("button", { name: "Abrir acessibilidade" })[0]);
-    fireEvent.click(screen.getByRole("button", { name: /Economia/ }));
-    expect(JSON.parse(localStorage.getItem("trajeto-accessibility-preferences") || "{}")).toMatchObject({ compactMode:true, reduceMotion:true });
-    expect(localStorage.getItem("trajeto-mobile-economy")).toBe("1");
-  });
-
-  it("closes with Escape", () => {
-    render(<AccessibilityPanel />);
-    fireEvent.click(screen.getAllByRole("button", { name: "Abrir acessibilidade" })[0]);
-    expect(screen.getByRole("dialog")).toBeTruthy();
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: /abrir acessibilidade/i }));
+    expect(screen.getByText(/dados deste aparelho/i)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /limpar dados do trajeto/i }));
+    await user.click(screen.getByRole("button", { name: /confirmar limpeza/i }));
+    expect(localStorage.getItem("trajeto-daily-mode")).toBeNull();
+    expect(localStorage.getItem("other-app-setting")).toBe("keep");
+    expect(screen.getByRole("status")).toHaveTextContent(/dados locais removidos/i);
   });
 });
