@@ -54,14 +54,35 @@ export function buildNearbyStationsUrl(basePath: string, lat?: number, lng?: num
   return basePath + "?" + params.toString();
 }
 
-export function buildGoogleMapsDirectionsUrl(origin: string, destination: string) {
+export type GoogleMapsTravelMode = "driving" | "walking" | "bicycling" | "transit" | "two-wheeler";
+
+export function buildGoogleMapsDirectionsUrl(
+  origin: string,
+  destination: string,
+  travelMode: GoogleMapsTravelMode = "driving",
+  navigate = false,
+) {
   const normalizedOrigin = origin.trim();
   const normalizedDestination = destination.trim();
-  return "https://www.google.com/maps/dir/?api=1&origin=" +
-    encodeURIComponent(normalizedOrigin) +
-    "&destination=" +
-    encodeURIComponent(normalizedDestination) +
-    "&travelmode=driving";
+  const params = new URLSearchParams({
+    api: "1",
+    origin: normalizedOrigin,
+    destination: normalizedDestination,
+    travelmode: travelMode,
+  });
+  if (navigate) params.set("dir_action", "navigate");
+  return "https://www.google.com/maps/dir/?" + params.toString();
+}
+
+export function buildGoogleMapsDestinationUrl(destination: string, navigate = false) {
+  const normalizedDestination = destination.trim();
+  const params = new URLSearchParams({
+    api: "1",
+    destination: normalizedDestination,
+    travelmode: "driving",
+  });
+  if (navigate) params.set("dir_action", "navigate");
+  return "https://www.google.com/maps/dir/?" + params.toString();
 }
 
 export function buildGoogleMapsSearchUrl(query: string) {
