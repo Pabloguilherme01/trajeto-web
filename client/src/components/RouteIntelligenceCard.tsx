@@ -28,7 +28,6 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [comparisonLoading, setComparisonLoading] = useState(false);
   const [tomtom, setTomtom] = useState<{ routes: Array<{ distanceMeters: number | null; durationSeconds: number | null; trafficDelaySeconds: number | null }> } | null>(null);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
-  const [tripPreference, setTripPreference] = useState<"balanced" | "economy" | "time" | "no-tolls">(() => { try { return (localStorage.getItem("trajeto-route-preference") as "balanced" | "economy" | "time" | "no-tolls") || "balanced"; } catch { return "balanced"; } });
   const vehicle = getMobileVehicle();
 
   async function refresh() {
