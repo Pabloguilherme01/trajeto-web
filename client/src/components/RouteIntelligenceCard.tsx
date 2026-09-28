@@ -40,18 +40,18 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
 
-  const fuelCost = (route: typeof data extends null ? never : RouteIntelligence["routes"][number] | undefined) => {
+  function fuelCost(route: RouteIntelligence["routes"][number] | undefined) {
     if (!route || !fuelPrice) return null;
     if (route.fuelConsumptionLiters != null && route.fuelConsumptionLiters > 0) return route.fuelConsumptionLiters * fuelPrice;
     if (!vehicle || vehicle.consumption <= 0 || !route.distanceMeters) return null;
     return (route.distanceMeters / 1000 / vehicle.consumption) * fuelPrice;
-  };
-  const totalCost = (route: RouteIntelligence["routes"][number] | undefined) => {
+  }
+  function totalCost(route: RouteIntelligence["routes"][number] | undefined) {
     if (!route) return null;
     const fuel = fuelCost(route);
     const routeToll = route.toll?.amount;
     return fuel != null && routeToll != null ? fuel + routeToll : null;
-  };
+  }
 
   async function refresh(overrides?: { avoidTolls?: boolean; avoidHighways?: boolean }) {
     setLoading(true);
@@ -62,14 +62,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
       setData(nextData);
       onRoutesChange?.(nextData.routes);
-      const ranked = [...nextData.routes].filter(route => route.durationSeconds != null || totalCost(route) != null);
-      const automatic = decisionMode === "fastest"
-        ? ranked.sort((a, b) => (a.durationSeconds ?? Number.POSITIVE_INFINITY) - (b.durationSeconds ?? Number.POSITIVE_INFINITY))[0]
-        : decisionMode === "cheapest"
-          ? ranked.filter(route => totalCost(route) != null).sort((a, b) => totalCost(a)! - totalCost(b)!)[0]
-          : nextData.routes[0];
-      if (automatic) onSelectRoute?.(automatic.id);
-      if (decisionMode === "cheapest" && !automatic) setMessage("Para pré-selecionar o menor custo, informe preço de combustível e tenha pedágio disponível nas rotas.");
+      if (!selectedRouteId && nextData.routes[0]) onSelectRoute?.(nextData.routes[0].id);
     } catch (error) {
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
       setMessage(code === "routing_provider_not_configured"
@@ -106,7 +99,6 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     const current = totalCost(route);
     return base != null && current != null ? base - current : null;
   };
-  useEffect(() => { if (data?.routes.length) onRoutesChange?.(data.routes); }, [data]);
   const routeAnalysis = (route: typeof main, index: number) => {
     if (!route) return { badges: [] as string[], deltaSeconds: null as number | null, savings: null as number | null };
     const base = data?.routes[0];
@@ -137,7 +129,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           <h3 id="route-intelligence-title" className="mt-1 text-base font-black">Trânsito, pedágio e alternativas</h3>
           <p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Dados externos são apresentados como estimativas e não substituem a navegação.</p>
         </div>
-        <button type="button" onClick={refresh} disabled={loading} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">
+        <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">
           <RefreshCw className={"size-3.5 " + (loading ? "animate-spin" : "")} /> {loading ? "Consultando" : "Atualizar"}
         </button>
       </div>
@@ -184,7 +176,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <button type="button" aria-pressed={avoidHighwaysState} onClick={() => setAvoidHighwaysState(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black transition " + (avoidHighwaysState ? "border-[#3DE3FF]/40 bg-[#3DE3FF]/10 text-[#9FEFFF]" : "border-white/10 bg-white/[.03] text-white/60")}>
           <Route className="size-3.5" /> {avoidHighwaysState ? "Evitando rodovias" : "Considerar rodovias"}
         </button>
-        <button type="button" onClick={refresh} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.62rem] font-black text-white/70 disabled:opacity-50">
+        <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.62rem] font-black text-white/70 disabled:opacity-50">
           <RefreshCw className={"size-3.5 " + (loading ? "animate-spin" : "")} /> {loading ? "Atualizando" : "Aplicar cenário"}
         </button>
       </div>
