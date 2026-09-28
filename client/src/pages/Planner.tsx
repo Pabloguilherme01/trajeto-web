@@ -420,7 +420,7 @@ export default function Planner() {
                   origin={planned.route.origin}
                   destination={planned.route.destination}
                   stops={planned.stops}
-                  routes={routeAlternatives.map(route => ({ id: route.id, polyline: route.polyline, selected: route.id === selectedRouteId }))}
+                  routes={routeAlternatives.map(route => ({ id: route.id, polyline: route.polyline, selected: route.id === selectedRouteId, trafficIntervals: route.trafficIntervals }))}
                 /></div>
                 {routeConfirmed && routeAlternatives.length > 0 && (
                   <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[#9EBF1F] bg-[#F2F6DE] px-4 py-3">
