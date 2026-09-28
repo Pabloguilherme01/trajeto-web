@@ -68,7 +68,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     const fuelNeeded = projection.distanceKm / kmPerLiter;
     const estimatedRefuels = autonomyKm > 0 ? Math.max(0, Math.ceil(fuelNeeded / autonomyKm) - 1) : null;
 
-    return { projection, fuelNeeded, autonomyKm, estimatedRefuels, pricePerLiter, kmPerLiter };
+    return { projection, fuelNeeded, autonomyKm, estimatedRefuels };
   }, [distance, price, consumption, tank, toll, parking, other, roundTrip, tripsPerWeek]);
 
   return (
@@ -117,12 +117,13 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
 
       {values ? (
         <div className="mt-4">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             <div className="rounded-xl bg-[#163840] p-4 text-white"><RouteIcon className="size-4 text-[#FFC928]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/60">Total por viagem</p><p className="mt-1 text-xl font-black">{values.projection.costPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p><p className="mt-1 text-[0.58rem] text-white/55">combustível + extras</p></div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Fuel className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Combustível</p><p className="mt-1 text-xl font-black text-[#163840]">{values.fuelNeeded.toLocaleString("pt-BR",{maximumFractionDigits:1})} L</p><p className="mt-1 text-[0.58rem] text-[#71877E]">{values.projection.fuelCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p></div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><WalletCards className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Por mês</p><p className="mt-1 text-xl font-black text-[#163840]">{values.projection.monthlyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p></div>
-            <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Gauge className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Autonomia</p><p className="mt-1 text-xl font-black text-[#163840]">{values.autonomyKm ? values.autonomyKm.toLocaleString("pt-BR",{maximumFractionDigits:0}) + " km" : "Informe o tanque"}</p></div>
+            <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Gauge className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Autonomia</p><p className="mt-1 text-xl font-black text-[#163840]">{values.autonomyKm ? values.autonomyKm.toLocaleString("pt-BR",{maximumFractionDigits:0}) + " km" : "Informe o tanque"}</p></div><div className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-4"><RouteIcon className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Custo por km</p><p className="mt-1 text-xl font-black text-[#163840]">{values.projection.costPerKm.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2})}</p><p className="mt-1 text-[0.58rem] text-[#71877E]">combustível + extras</p></div>
           </div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2"><div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">Por semana: {values.projection.weeklyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</div><div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">Por ano: {values.projection.annualCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</div></div>
           {values.projection.extraCostPerTrip > 0 && <p className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#56766A]">Extras por viagem: {values.projection.extraCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Eles entram no total e nas projeções recorrentes.</p>}
           {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">Para esta distância e autonomia informadas, o cálculo indica aproximadamente {values.estimatedRefuels} parada(s) de abastecimento.</p>
