@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Ban, Car, Clock3, RefreshCw, Route, Wallet } from "lucide-react";
 import { fetchRouteIntelligence, type RouteIntelligence } from "@/lib/routeIntelligence";
 import { fetchAppleRouteIntelligence, type AppleRouteIntelligence } from "@/lib/appleRouteIntelligence";
