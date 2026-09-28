@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { externalNavigationUrl, listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
+import { externalNavigationUrl, listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, wazeNavigationUrl, type OfflineRoute } from "@/lib/offlineStore";
 
 function formatAge(savedAt: string) {
   const time = Date.parse(savedAt);
@@ -75,6 +75,14 @@ export default function OfflineRouteVault() {
     }
     const url = externalNavigationUrl(route);
     window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const navigateWithWaze = (route: OfflineRoute) => {
+    if (!isOnline) {
+      setFeedback("A navegação externa precisa de internet. A rota salva continua disponível offline.");
+      return;
+    }
+    window.open(wazeNavigationUrl(route), "_blank", "noopener,noreferrer");
   };
 
   const shareRoute = async (route: OfflineRoute) => {
@@ -207,7 +215,10 @@ export default function OfflineRouteVault() {
                   <ArrowRight className="size-3.5" /> Abrir
                 </button>
                 <button type="button" onClick={() => navigateExternally(route)} disabled={!isOnline} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-[0.62rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-45">
-                  <ExternalLink className="size-3.5" /> Navegar
+                  <ExternalLink className="size-3.5" /> Google Maps
+                </button>
+                <button type="button" onClick={() => navigateWithWaze(route)} disabled={!isOnline} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-[0.62rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-45">
+                  <ExternalLink className="size-3.5" /> Waze
                 </button>
                 <button type="button" onClick={() => void shareRoute(route)} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-[0.62rem] font-bold text-white">
                   <Share2 className="size-3.5" /> Compartilhar
