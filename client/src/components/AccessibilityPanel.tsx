@@ -23,6 +23,15 @@ export default function AccessibilityPanel() {
   },[]);
 
   useEffect(()=>{
+    if (!open) return;
+    const onKeyDown=(event: KeyboardEvent)=>{
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return()=>window.removeEventListener("keydown", onKeyDown);
+  },[open]);
+
+  useEffect(()=>{
     const refresh=()=>setPrefs(getAccessibilityPreferences());
     window.addEventListener(accessibilityPreferenceEvent,refresh);
     return()=>window.removeEventListener(accessibilityPreferenceEvent,refresh);
