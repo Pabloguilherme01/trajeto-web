@@ -1,11 +1,12 @@
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DailyCommandCenter from "./DailyCommandCenter";
 
 describe("DailyCommandCenter", () => {
   afterEach(() => {
+    cleanup();
     localStorage.clear();
   });
 
