@@ -4,14 +4,39 @@ export function isStandaloneApp() {
     Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 }
 
+export type RouteShareDecision = {
+  name: string;
+  price?: number | null;
+  detourKm?: number | null;
+  detourSource?: "real" | "estimated";
+};
+
+export function buildRouteShareText(origin: string, destination: string, decision?: RouteShareDecision | null) {
+  const route = \`Planejei esta rota no Trajeto: \${origin.trim()} → \${destination.trim()}.\`;
+  if (!decision?.name) return route + " Veja distância, duração e opções de abastecimento.";
+
+  const price = Number.isFinite(decision.price) && Number(decision.price) > 0
+    ? \` · referência de \${Number(decision.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/L\`
+    : "";
+  const detour = Number.isFinite(decision.detourKm) && Number(decision.detourKm) >= 0
+    ? \` · desvio \${decision.detourSource === "real" ? "real" : "estimado"} de \${Number(decision.detourKm).toLocaleString("pt-BR")} km\`
+    : "";
+
+  return route + \` Parada sugerida: \${decision.name}\${price}\${detour}.\`;
+}
+
 export async function shareText(text: string, url: string, title = "Trajeto") {
   if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-    await navigator.share({ title, text, url });
-    return;
+    try {
+      await navigator.share({ title, text, url });
+      return;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") throw error;
+    }
   }
 
   if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-    await navigator.clipboard.writeText(text + "\n" + url);
+    await navigator.clipboard.writeText(text + "\\n" + url);
     return;
   }
 
