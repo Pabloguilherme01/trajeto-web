@@ -24,7 +24,20 @@ async function startServer() {
   server.keepAliveTimeout = 5_000;
 
   app.disable("x-powered-by");
-  app.use((_req, res, next) => {
+  app.use((req, res, next) => {
+    const frontendOrigin = process.env.FRONTEND_ORIGIN?.trim();
+    if (frontendOrigin && req.headers.origin === frontendOrigin) {
+      res.setHeader("Access-Control-Allow-Origin", frontendOrigin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+      res.setHeader("Vary", "Origin");
+    }
+    if (req.method === "OPTIONS") {
+      res.status(204).end();
+      return;
+    }
+
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
