@@ -14,6 +14,7 @@ import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import OfficialSourcesCard from "@/components/OfficialSourcesCard";
 import OfficialDataRadar from "@/components/OfficialDataRadar";
+import VehicleServiceHub from "@/components/VehicleServiceHub";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -249,6 +250,8 @@ export default function Home() {
         <DailyCommandCenter />
 
         <OfficialDataRadar />
+
+        <VehicleServiceHub />
 
         <MobileCopilot />
 
