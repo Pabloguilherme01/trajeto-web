@@ -11,6 +11,7 @@ import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileQuickActions from "./components/MobileQuickActions";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import AccessibilityPanel from "./components/AccessibilityPanel";
 import Home from "./pages/Home";
 
 const Planner = lazy(() => import("./pages/Planner"));
@@ -70,12 +71,13 @@ function Router() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
           <Toaster />
           <InstallAppPrompt />
           <PwaUpdatePrompt />
           <MobileQuickActions />
+          <AccessibilityPanel />
           <AuthReturnHandler />
           <Router />
         </TooltipProvider>
