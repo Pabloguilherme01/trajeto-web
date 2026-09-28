@@ -1,8 +1,18 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { getDepartureChecklist, resetDepartureChecklist, setDepartureChecklistCompleted } from "./departureChecklist";
 
+const memory = new Map<string, string>();
+const localStorageMock = {
+  getItem: (key: string) => memory.get(key) ?? null,
+  setItem: (key: string, value: string) => { memory.set(key, value); },
+  removeItem: (key: string) => { memory.delete(key); },
+};
+
 describe("departureChecklist", () => {
-  beforeEach(() => {\n    if (typeof localStorage !== "undefined") localStorage.clear();\n  });
+  beforeEach(() => {
+    memory.clear();
+    vi.stubGlobal("localStorage", localStorageMock);
+  });
 
   it("starts empty for the current day", () => {
     expect(getDepartureChecklist().completed).toEqual([]);
