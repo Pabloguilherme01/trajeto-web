@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { distanceKm, rankNearbyStops, straightLineRoute } from "./offlineRouteMath";\nimport { externalNavigationUrl, findOfflineRouteByTrip, type OfflineRoute } from "./offlineStore";
+import { distanceKm, rankNearbyStops, straightLineRoute } from "./offlineRouteMath";
+import { externalNavigationUrl, findOfflineRouteByTrip, type OfflineRoute } from "./offlineStore";
 
 describe("offline route math", () => {
   it("returns zero for identical points", () => {
