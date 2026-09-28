@@ -12,6 +12,6 @@ describe("MobileUtilityHub", () => {
 
     await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
     expect(screen.getByText("Meu veículo")).toBeTruthy();
-    expect(screen.getByText("Dados de manutenção ficam neste aparelho.")).toBeTruthy();
+    expect(screen.getByText("Não deixe o veículo virar surpresa.")).toBeTruthy();
   });
 });
