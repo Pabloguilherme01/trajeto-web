@@ -50,13 +50,17 @@ export default function Planner() {
   const saveCurrentRouteOffline = async () => {
     if (!planned) return;
     try {
-      await saveOfflineRoute({
+      const savedAt = new Date().toISOString();
+      const savedRoute = {
         id: offlineRouteId(origin, destination),
         origin: origin.trim(),
         destination: destination.trim(),
-        savedAt: new Date().toISOString(),
+        savedAt,
         payload: planned,
-      });
+      };
+      await saveOfflineRoute(savedRoute);
+      setLatestOfflineRoute(savedRoute);
+      setOfflineSavedAt(savedAt);
       setShareMessage("Rota salva neste aparelho. Ela pode ser reaberta sem recalcular.");
     } catch (error) {
       setShareMessage("Não foi possível salvar esta rota no aparelho. Tente novamente.");
