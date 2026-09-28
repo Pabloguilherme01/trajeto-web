@@ -3,16 +3,37 @@ import { useEffect, useRef, useState } from "react";
 import { LocateFixed, Minus, Plus, Satellite, TrafficCone } from "lucide-react";
 
 type Stop = { placeId: string; name: string; address: string; lat: number; lng: number };
-type RouteMapProps = { origin?: { lat: number; lng: number }; destination?: { lat: number; lng: number }; stops: Stop[] };
+type RoutePreview = { id: string; polyline: string | null; selected?: boolean };
+type RouteMapProps = { origin?: { lat: number; lng: number }; destination?: { lat: number; lng: number }; stops: Stop[]; routes?: RoutePreview[] };
 
 export function RouteMap({ origin, destination, stops }: RouteMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const polylinesRef = useRef<google.maps.Polyline[]>([]);
   const trafficRef = useRef<google.maps.TrafficLayer | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [satellite, setSatellite] = useState(false);
   const [traffic, setTraffic] = useState(false);
 
+  const decodePolyline = (encoded: string): google.maps.LatLngLiteral[] => {
+    const points: google.maps.LatLngLiteral[] = [];
+    let index = 0;
+    let lat = 0;
+    let lng = 0;
+    while (index < encoded.length) {
+      let result = 0;
+      let shift = 0;
+      let byte = 0;
+      do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 31) << shift; shift += 5; } while (byte >= 32);
+      lat += result & 1 ? ~(result >> 1) : result >> 1;
+      result = 0;
+      shift = 0;
+      do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 31) << shift; shift += 5; } while (byte >= 32);
+      lng += result & 1 ? ~(result >> 1) : result >> 1;
+      points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+    }
+    return points;
+  };
   useEffect(() => {
     if (!mapRef.current || !window.google || !origin || !destination) return;
     markersRef.current.forEach(marker => marker.map = null);
@@ -31,6 +52,24 @@ export function RouteMap({ origin, destination, stops }: RouteMapProps) {
     map.fitBounds(bounds, 56);
   }, [mapReady, origin, destination, stops]);
 
+  useEffect(() => {
+    if (!mapRef.current || !window.google || !mapReady) return;
+    polylinesRef.current.forEach(line => line.setMap(null));
+    polylinesRef.current = [];
+    const validRoutes = (routes || []).filter(route => route.polyline);
+    validRoutes.forEach((route, index) => {
+      const line = new window.google.maps.Polyline({
+        map: mapRef.current,
+        path: decodePolyline(route.polyline as string),
+        geodesic: true,
+        strokeColor: route.selected ? "#BA5B45" : "#6A8F8A",
+        strokeOpacity: route.selected ? 0.95 : 0.38,
+        strokeWeight: route.selected ? 6 : 3,
+        zIndex: route.selected ? 4 : 2,
+      });
+      polylinesRef.current.push(line);
+    });
+  }, [mapReady, routes]);
   const fitRoute = () => {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
@@ -47,7 +86,7 @@ export function RouteMap({ origin, destination, stops }: RouteMapProps) {
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa interativo da viagem">
-      <MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} onMapReady={map => { mapRef.current = map; setMapReady(true); }} />
+<MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} onMapReady={map => { mapRef.current = map; setMapReady(true); }} />
       <div className="absolute left-3 top-3 flex max-w-[calc(100%-24px)] flex-wrap gap-2">
         <button type="button" onClick={fitRoute} disabled={!mapReady} aria-label="Enquadrar viagem" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur disabled:opacity-40"><LocateFixed className="size-4" />Viagem</button>
         <button type="button" onClick={toggleTraffic} disabled={!mapReady} aria-pressed={traffic} className={"inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " + (traffic ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-[#0B1014]/90 text-white")}><TrafficCone className="size-4" />Trânsito</button>
