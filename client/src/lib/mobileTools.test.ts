@@ -7,7 +7,6 @@ describe("mobile tools", () => {
     expect(buildNearbyStationsUrl("/postos", Number.NaN, Number.POSITIVE_INFINITY)).toBe("/postos?q=postos");
   });
 
-  it("
   it("shares the native route decision with useful context", () => {
     expect(buildRouteShareText("Águas Lindas", "Brasília", {
       name: "Posto Exemplo", price: 5.89, detourKm: 1.4, detourSource: "real",
