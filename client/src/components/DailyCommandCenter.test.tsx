@@ -17,6 +17,16 @@ describe("DailyCommandCenter", () => {
     expect(screen.getByRole("button", { name: /acessibilidade/i })).toBeInTheDocument();
   });
 
+  it("offers first-run destination setup when nothing is saved", async () => {
+    const user = userEvent.setup();
+    render(<DailyCommandCenter />);
+    const input = screen.getByRole("textbox", { name: /Destino principal/i });
+    await user.type(input, "Trabalho");
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(localStorage.getItem("trajeto-mobile-destinations")).toContain("Trabalho");
+    expect(localStorage.getItem("trajeto-daily-mode")).toBe("automatico");
+  });
+
   it("opens the saved mode choices", async () => {
     const user = userEvent.setup();
     render(<DailyCommandCenter />);
