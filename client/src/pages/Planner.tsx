@@ -51,6 +51,10 @@ export default function Planner() {
   const [routeConfirmed, setRouteConfirmed] = useState(false);
   const selectRoute = (routeId: string) => {
     setSelectedRouteId(routeId);
+    setRouteConfirmed(false);
+  };
+  const confirmRoute = (routeId: string) => {
+    setSelectedRouteId(routeId);
     setRouteConfirmed(true);
     try { sessionStorage.setItem("trajeto-selected-route", routeId); } catch {}
   };
