@@ -37,7 +37,10 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : "");
   const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : "");
   const [roundTrip, setRoundTrip] = useState(true);
-  const [tripsPerWeek, setTripsPerWeek] = useState(5);\n  const [toll, setToll] = useState("");\n  const [parking, setParking] = useState("");\n  const [other, setOther] = useState("");
+  const [tripsPerWeek, setTripsPerWeek] = useState(5);
+  const [toll, setToll] = useState("");
+  const [parking, setParking] = useState("");
+  const [other, setOther] = useState("");
 
   useEffect(() => {
     const refreshVehicle = () => {
