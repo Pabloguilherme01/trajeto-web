@@ -1,8 +1,9 @@
 import React from "react";
-import { Accessibility, Check, RotateCcw, X } from "lucide-react";
+import { Accessibility, Check, Moon, Sun, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
 import { setEconomyMode } from "@/lib/mobilePreferences";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:string}> = [
   { key:"largeText", label:"Texto maior", detail:"Aumenta a leitura sem alterar os dados." },
@@ -14,6 +15,7 @@ const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:s
 export default function AccessibilityPanel() {
   const [open,setOpen]=useState(false);
   const [prefs,setPrefs]=useState<AccessibilityPreferences>(()=>getAccessibilityPreferences());
+  const { theme, toggleTheme, switchable } = useTheme();
 
   useEffect(()=>{
     const refresh=()=>setPrefs(getAccessibilityPreferences());
@@ -60,6 +62,12 @@ export default function AccessibilityPanel() {
             </div>
 
             <div className="mt-5 grid gap-2">
+              {switchable && toggleTheme && (
+                <button type="button" onClick={toggleTheme} className="flex min-h-16 items-center justify-between gap-4 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[0.05] px-4 text-left">
+                  <span><strong className="block text-sm text-white">Tema</strong><span className="text-xs text-[#8FA3AC]">{theme === "dark" ? "Escuro ativo" : "Claro ativo"} · fica salvo neste aparelho.</span></span>
+                  <span className="grid size-9 place-items-center rounded-full bg-[#C7FF3C] text-[#0B1014]">{theme === "dark" ? <Moon className="size-4"/> : <Sun className="size-4"/>}</span>
+                </button>
+              )}
               <div className="flex min-h-14 items-center justify-between rounded-2xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.05] px-4"><span><strong className="block text-sm text-white">Modo escuro</strong><span className="text-xs text-[#8FA3AC]">Ativo por padrão para uso noturno e leitura operacional.</span></span><span className="grid size-7 place-items-center rounded-full bg-[#C7FF3C] text-[#0B1014]"><Check className="size-4"/></span></div>
               {options.map(item=>(
                 <button key={item.key} type="button" aria-pressed={prefs[item.key]} onClick={()=>update(item.key)} className="flex min-h-16 items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-left">
