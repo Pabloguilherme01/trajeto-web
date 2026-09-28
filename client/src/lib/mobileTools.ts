@@ -90,6 +90,23 @@ export function buildGoogleMapsSearchUrl(query: string) {
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query.trim());
 }
 
+export function buildWazeNavigationUrl(destination: string, coordinates?: { lat: number; lng: number }) {
+  const params = new URLSearchParams({ navigate: "yes" });
+  if (coordinates && Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng)) {
+    params.set("ll", `${coordinates.lat},${coordinates.lng}`);
+    params.set("zoom", "17");
+  } else {
+    params.set("q", destination.trim());
+  }
+  return "https://waze.com/ul?" + params.toString();
+}
+
+export function buildAppleMapsDirectionsUrl(destination: string, origin?: string) {
+  const params = new URLSearchParams({ daddr: destination.trim(), dirflg: "d" });
+  if (origin?.trim()) params.set("saddr", origin.trim());
+  return "https://maps.apple.com/?" + params.toString();
+}
+
 export function openNavigation(lat: number, lng: number, label?: string) {
   const encoded = encodeURIComponent(label ?? (lat + "," + lng));
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
