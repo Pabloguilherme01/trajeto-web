@@ -202,23 +202,6 @@ undefined
     }
   };
 
-  const handleChatSend = (content: string) => {
-    // Add user message
-    const newMessages: Message[] = [...chatMessages, { role: "user", content }];
-    setChatMessages(newMessages);
-
-    // Simulate AI response with delay
-    setIsChatLoading(true);
-    setTimeout(() => {
-      const aiResponse: Message = {
-        role: "assistant",
-        content: `This is a **demo response**. In a real app, you would call a tRPC mutation here:\n\n\`\`\`typescript\nconst chatMutation = trpc.ai.chat.useMutation({\n  onSuccess: (response) => {\n    setChatMessages(prev => [...prev, {\n      role: "assistant",\n      content: response.choices[0].message.content\n    }]);\n  }\n});\n\nchatMutation.mutate({ messages: newMessages });\n\`\`\`\n\nYour message was: "${content}"`,
-      };
-      setChatMessages([...newMessages, aiResponse]);
-      setIsChatLoading(false);
-    }, 1500);
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="container max-w-6xl mx-auto">
