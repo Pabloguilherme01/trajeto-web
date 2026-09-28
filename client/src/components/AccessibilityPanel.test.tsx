@@ -24,3 +24,11 @@ describe("AccessibilityPanel", () => {
     expect(localStorage.getItem("trajeto-mobile-economy")).toBe("1");
   });
 });
+
+  it("closes with Escape", () => {
+    render(<AccessibilityPanel />);
+    fireEvent.click(screen.getAllByRole("button", { name: "Abrir acessibilidade" })[0]);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
