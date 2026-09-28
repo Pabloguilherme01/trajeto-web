@@ -19,10 +19,14 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   const [is3D, setIs3D] = useState(false);
   const [heading, setHeading] = useState(0);
   const [offlinePreview, setOfflinePreview] = useState(false);
+  const [renderingType, setRenderingType] = useState<google.maps.RenderingType>(google.maps.RenderingType.UNINITIALIZED);
+  const isVector = renderingType === google.maps.RenderingType.VECTOR;
+  const is3DAvailable = isVector && Boolean(mapRef.current?.getMapCapabilities?.().isWebGLOverlayViewAvailable ?? true);
 
   const activate3D = () => {
     const map = mapRef.current;
     if (!map) return;
+    if (!isVector) return;
     const next = !is3D;
     setIs3D(next);
     map.setOptions(next ? { tilt: 60, heading } : { tilt: 0, heading: 0 });
@@ -133,14 +137,18 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa interativo da viagem">
-<MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} onMapReady={map => { mapRef.current = map; setMapReady(true); }} />
+<MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} onMapReady={map => { mapRef.current = map; setMapReady(true); }}
+        onRenderingTypeChange={type => { setRenderingType(type); if (type !== window.google.maps.RenderingType.VECTOR) setIs3D(false); }} />
       <div className="absolute left-3 top-3 flex max-w-[calc(100%-24px)] flex-wrap gap-2">
         <button type="button" onClick={fitRoute} disabled={!mapReady} aria-label="Enquadrar viagem" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur disabled:opacity-40"><LocateFixed className="size-4" />Viagem</button>
         <button type="button" onClick={toggleTraffic} disabled={!mapReady} aria-pressed={traffic} className={"inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " + (traffic ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-[#0B1014]/90 text-white")}><TrafficCone className="size-4" />Trânsito</button>
         <button type="button" onClick={() => { const map = mapRef.current; if (!map) return; const next = !satellite; map.setMapTypeId(next ? "satellite" : "roadmap"); setSatellite(next); }} disabled={!mapReady} aria-pressed={satellite} className={"inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " + (satellite ? "bg-white text-[#0B1014]" : "bg-[#0B1014]/90 text-white")}><Satellite className="size-4" />Satélite</button>
       </div>
       <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
-        <button type="button" onClick={activate3D} disabled={!mapReady} aria-pressed={is3D} className={"min-h-10 rounded-xl border px-3 text-[0.62rem] font-black shadow-lg backdrop-blur " + (is3D ? "border-[#C7FF3C]/40 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>{is3D ? "2D" : "3D"}</button>
+        <span className="inline-flex min-h-10 items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.58rem] font-black text-white shadow-lg backdrop-blur">
+          {isVector ? "3D · VETORIAL" : renderingType === google.maps.RenderingType.RASTER ? "2D · COMPATIBILIDADE" : "MAPA · INICIALIZANDO"}
+        </span>
+        <button type="button" onClick={activate3D} disabled={!mapReady || !is3DAvailable} aria-pressed={is3D} className={"min-h-10 rounded-xl border px-3 text-[0.62rem] font-black shadow-lg backdrop-blur " + (is3D ? "border-[#C7FF3C]/40 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>{is3D ? "2D" : "3D"}</button>
         <button type="button" onClick={rotateCompass} disabled={!mapReady} aria-label={`Girar mapa para ${heading} graus`} className="min-h-10 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.62rem] font-black text-white shadow-lg backdrop-blur">N {Math.round(heading)}°</button>
       </div>
       <div className="absolute bottom-3 right-3 flex flex-col gap-1.5">
