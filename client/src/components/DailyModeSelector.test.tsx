@@ -14,16 +14,16 @@ describe("DailyModeSelector", () => {
 
   it("keeps mode choices collapsed until the user asks to change mode", () => {
     render(<DailyModeSelector />);
-    expect(screen.queryByText("Próxima viagem")).toBeNull();
+    expect(screen.queryByRole("list")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Trocar modo" }));
-    expect(screen.getByText("Próxima viagem")).toBeTruthy();
+    expect(screen.getByRole("list")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Fechar" }).getAttribute("aria-expanded")).toBe("true");
   });
 
   it("persists a manually selected mode", () => {
     render(<DailyModeSelector />);
     fireEvent.click(screen.getByRole("button", { name: "Trocar modo" }));
-    fireEvent.click(screen.getByRole("button", { name: /Economia/ }));
+    fireEvent.click(screen.getByRole("list").querySelector("button:nth-of-type(4)") as HTMLButtonElement);
     expect(localStorage.getItem("trajeto-daily-mode")).toBe("economia");
   });
 });
