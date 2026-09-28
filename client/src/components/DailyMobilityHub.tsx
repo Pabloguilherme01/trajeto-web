@@ -8,7 +8,7 @@ import { compareMobilityBudget, getMobilityBudget } from "@/lib/mobilityBudget";
 import { summarizeCurrentMobilityMonth } from "@/components/MobilityDashboardCard";
 import { fuelLogEvent } from "@/lib/fuelLog";
 import { mobilityExpenseEvent } from "@/lib/mobilityExpenses";
-import { isOfflineRouteStale } from "@/lib/offlineStore";
+import { summarizeSavedRoute } from "@/lib/tripReadiness";
 
 function money(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -47,22 +47,13 @@ export default function DailyMobilityHub() {
   const summary = useMemo(() => summarizeCurrentMobilityMonth(), [stamp]);
   const budget = useMemo(() => compareMobilityBudget(summary.total, getMobilityBudget()), [summary.total, stamp]);
   const routeInfo = useMemo(() => {
-    if (!latestRoute || typeof latestRoute.payload !== "object" || latestRoute.payload === null) return null;
-    const payload = latestRoute.payload as { route?: { distanceMeters?: unknown; durationSeconds?: unknown } };
-    const distanceMeters = Number(payload.route?.distanceMeters);
-    const durationSeconds = Number(payload.route?.durationSeconds);
-    if (!Number.isFinite(distanceMeters) || distanceMeters < 0) return null;
-    const distanceKm = distanceMeters / 1000;
-    const durationMinutes = Number.isFinite(durationSeconds) && durationSeconds >= 0 ? Math.round(durationSeconds / 60) : null;
-    let estimatedFuelCost: number | null = null;
-    if (vehicle && vehicle.consumption > 0) {
-      try {
-        const price = Number(localStorage.getItem("trajeto-last-fuel-price"));
-        if (Number.isFinite(price) && price > 0) estimatedFuelCost = (distanceKm / vehicle.consumption) * price;
-      } catch {}
-    }
-    return { distanceKm, durationMinutes, estimatedFuelCost, stale: isOfflineRouteStale(latestRoute.savedAt) };
-  }, [latestRoute, vehicle]);
+    let price: number | null = null;
+    try {
+      const stored = Number(localStorage.getItem("trajeto-last-fuel-price"));
+      price = Number.isFinite(stored) && stored > 0 ? stored : null;
+    } catch {}
+    return summarizeSavedRoute(latestRoute, vehicle, price);
+  }, [latestRoute, vehicle, stamp]);
   const hasAnySetup = Boolean(favorite || latestRoute || vehicle || budget);
 
   const nextAction = favorite
