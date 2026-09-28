@@ -29,3 +29,56 @@ export function projectTripCosts(input: TripProjectionInput) {
     annualCost,
   };
 }
+
+
+export type TripScenarioComparison = {
+  baseline: ReturnType<typeof projectTripCosts>;
+  alternative: ReturnType<typeof projectTripCosts>;
+  differencePerTrip: number;
+  differencePerMonth: number;
+  differencePerYear: number;
+};
+
+export function compareTripScenarios(input: {
+  oneWayDistanceKm: number;
+  baselinePricePerLiter: number;
+  baselineKmPerLiter: number;
+  alternativePricePerLiter: number;
+  alternativeKmPerLiter: number;
+  roundTrip: boolean;
+  tripsPerWeek: number;
+  extraCostPerTrip?: number;
+}): TripScenarioComparison | null {
+  const distanceKm = Math.max(0, input.oneWayDistanceKm);
+  const baselinePrice = Math.max(0, input.baselinePricePerLiter);
+  const baselineConsumption = Math.max(0, input.baselineKmPerLiter);
+  const alternativePrice = Math.max(0, input.alternativePricePerLiter);
+  const alternativeConsumption = Math.max(0, input.alternativeKmPerLiter);
+
+  if (!distanceKm || !baselinePrice || !baselineConsumption || !alternativePrice || !alternativeConsumption) {
+    return null;
+  }
+
+  const baseline = projectTripCosts({
+    oneWayDistanceKm: distanceKm,
+    oneWayCost: (distanceKm / baselineConsumption) * baselinePrice,
+    roundTrip: input.roundTrip,
+    tripsPerWeek: input.tripsPerWeek,
+    extraCostPerTrip: input.extraCostPerTrip,
+  });
+  const alternative = projectTripCosts({
+    oneWayDistanceKm: distanceKm,
+    oneWayCost: (distanceKm / alternativeConsumption) * alternativePrice,
+    roundTrip: input.roundTrip,
+    tripsPerWeek: input.tripsPerWeek,
+    extraCostPerTrip: input.extraCostPerTrip,
+  });
+
+  return {
+    baseline,
+    alternative,
+    differencePerTrip: baseline.costPerTrip - alternative.costPerTrip,
+    differencePerMonth: baseline.monthlyCost - alternative.monthlyCost,
+    differencePerYear: baseline.annualCost - alternative.annualCost,
+  };
+}
