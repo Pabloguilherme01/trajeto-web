@@ -196,12 +196,16 @@ export default function Planner() {
   const favoriteState = trpc.personal.favoriteState.useQuery(favoriteInput, { enabled: isAuthenticated && Boolean(planned?.stops.length) });
   const addFavorite = trpc.personal.addFavorite.useMutation({ onSuccess: () => { favoriteState.refetch(); track("favorite_saved", destination || origin); }, onError: error => { if (error.message.includes("Please login")) startLogin(); } });
   const vehicles = trpc.personal.vehicles.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
+  const selectedRoute = routeAlternatives.find(route => route.id === selectedRouteId) ?? null;
+  const selectedRouteDistanceKm = selectedRoute?.distanceMeters != null ? selectedRoute.distanceMeters / 1000 : planned ? planned.route.distanceMeters / 1000 : 0;
+  const selectedRouteDuration = selectedRoute?.durationSeconds ?? planned?.route.durationSeconds ?? 0;
+  const selectedRouteLabel = selectedRoute ? (selectedRoute.id === "principal" ? "Principal" : selectedRoute.id.replace("alternativa-", "Alternativa ")) : null;
   const selectedVehicle = vehicles.data?.find(vehicle => vehicle.id === selectedVehicleId) ?? null;
   const selectedConsumption = selectedVehicle ? Number(selectedVehicle.customKmPerLiter ?? selectedVehicle.highwayKmPerLiter ?? selectedVehicle.cityKmPerLiter ?? 0) : 0;
   const fuelEconomyInput = useMemo(() => {
     const price = Number(pricePerLiter.replace(",", "."));
     if (!planned || !selectedVehicle || !Number.isFinite(price) || price <= 0 || selectedConsumption <= 0) return null;
-    return { distanceKm: (planned.route.distanceMeters / 1000) * (roundTrip ? 2 : 1), pricePerLiter: price, kmPerLiter: selectedConsumption, tankLiters: selectedVehicle.tankLiters ? Number(selectedVehicle.tankLiters) : null };
+    return { distanceKm: selectedRouteDistanceKm * (roundTrip ? 2 : 1), pricePerLiter: price, kmPerLiter: selectedConsumption, tankLiters: selectedVehicle.tankLiters ? Number(selectedVehicle.tankLiters) : null };
   }, [planned, selectedVehicle, selectedConsumption, pricePerLiter, roundTrip]);
   const fuelEconomy = trpc.personal.fuelEconomy.useQuery(fuelEconomyInput ?? { distanceKm: 0, pricePerLiter: 1, kmPerLiter: 1 }, { enabled: Boolean(fuelEconomyInput) && isAuthenticated, retry: 0 });
 
@@ -468,8 +472,8 @@ export default function Planner() {
         {planned && <MobileNavigationCenter
           origin={origin}
           destination={destination}
-          distance={planned.route.distanceLabel}
-          duration={minutes(planned.route.durationSeconds)}
+          distance={selectedRoute ? selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km" : planned.route.distanceLabel}
+          duration={minutes(selectedRouteDuration)}
           recommendationName={planned.recommendation?.name ?? null}
           detourKm={planned.recommendation?.detourKm ?? null}
           detourSource={planned.recommendation?.detourSource === "real" ? "real" : "estimated"}
@@ -496,7 +500,7 @@ export default function Planner() {
             });
           } : undefined}
           onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-          activeRouteLabel={routeAlternatives.length > 0 ? (selectedRouteId === "principal" ? "Principal" : selectedRouteId.replace("alternativa-", "Alternativa ")) : null}
+          activeRouteLabel={selectedRouteLabel}
           routeConfirmed={routeAlternatives.length <= 1 || routeConfirmed}
         />}
 
