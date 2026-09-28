@@ -3,6 +3,7 @@ import { Accessibility, Check, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
 import { setEconomyMode } from "@/lib/mobilePreferences";
+import { OPEN_ACCESSIBILITY_EVENT } from "@/components/DailyCommandCenter";
 
 const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:string}> = [
   { key:"largeText", label:"Texto maior", detail:"Aumenta a leitura sem alterar os dados." },
@@ -14,6 +15,12 @@ const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:s
 export default function AccessibilityPanel() {
   const [open,setOpen]=useState(false);
   const [prefs,setPrefs]=useState<AccessibilityPreferences>(()=>getAccessibilityPreferences());
+
+  useEffect(()=>{
+    const openFromApp=()=>setOpen(true);
+    window.addEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
+    return()=>window.removeEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
+  },[]);
 
   useEffect(()=>{
     const refresh=()=>setPrefs(getAccessibilityPreferences());
