@@ -1,7 +1,7 @@
 import { Fuel, Gauge, Route as RouteIcon, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
-import { projectTripCosts } from "@/lib/tripProjection";
+import { compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
 
 function numberValue(value: string) {
   const parsed = Number(value.replace(",", "."));
@@ -41,6 +41,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [toll, setToll] = useState("");
   const [parking, setParking] = useState("");
   const [other, setOther] = useState("");
+  const [alternativePrice, setAlternativePrice] = useState("");
+  const [alternativeConsumption, setAlternativeConsumption] = useState("");
 
   useEffect(() => {
     const refreshVehicle = () => {
@@ -67,9 +69,19 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     const autonomyKm = tankLiters ? tankLiters * kmPerLiter : 0;
     const fuelNeeded = projection.distanceKm / kmPerLiter;
     const estimatedRefuels = autonomyKm > 0 ? Math.max(0, Math.ceil(fuelNeeded / autonomyKm) - 1) : null;
+    const comparison = compareTripScenarios({
+      oneWayDistanceKm,
+      baselinePricePerLiter: pricePerLiter,
+      baselineKmPerLiter: kmPerLiter,
+      alternativePricePerLiter: numberValue(alternativePrice),
+      alternativeKmPerLiter: numberValue(alternativeConsumption),
+      roundTrip,
+      tripsPerWeek,
+      extraCostPerTrip,
+    });
 
-    return { projection, fuelNeeded, autonomyKm, estimatedRefuels };
-  }, [distance, price, consumption, tank, toll, parking, other, roundTrip, tripsPerWeek]);
+    return { projection, fuelNeeded, autonomyKm, estimatedRefuels, comparison };
+  }, [distance, price, consumption, tank, toll, parking, other, alternativePrice, alternativeConsumption, roundTrip, tripsPerWeek]);
 
   return (
     <section className={compact
@@ -125,6 +137,38 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           </div>
           <div className="mt-2 grid gap-2 sm:grid-cols-2"><div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">Por semana: {values.projection.weeklyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</div><div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">Por ano: {values.projection.annualCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</div></div>
           {values.projection.extraCostPerTrip > 0 && <p className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#56766A]">Extras por viagem: {values.projection.extraCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Eles entram no total e nas projeções recorrentes.</p>}
+          <details className="mt-4 rounded-2xl border border-[#D7DFD8] bg-[#F8FAF7] p-4">
+            <summary className="cursor-pointer text-xs font-extrabold text-[#163840]">Comparar outro cenário</summary>
+            <p className="mt-2 text-[0.62rem] leading-relaxed text-[#71877E]">Compare outro preço e consumo, por exemplo gasolina × etanol ou dois veículos. Os custos extras da viagem são mantidos iguais nos dois cenários.</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="text-xs font-bold text-[#365E51]">Preço do segundo cenário (R$/L)
+                <input value={alternativePrice} onChange={e => setAlternativePrice(e.target.value)} inputMode="decimal" placeholder="Ex.: 5,49" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+              </label>
+              <label className="text-xs font-bold text-[#365E51]">Consumo do segundo cenário (km/L)
+                <input value={alternativeConsumption} onChange={e => setAlternativeConsumption(e.target.value)} inputMode="decimal" placeholder="Ex.: 8,5" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+              </label>
+            </div>
+            {values.comparison && (
+              <div className="mt-4 rounded-xl border border-[#C7D2C9] bg-white p-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Cenário atual</p>
+                    <p className="mt-1 text-lg font-black text-[#163840]">{values.comparison.baseline.costPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}<span className="ml-1 text-[0.6rem] font-bold text-[#71877E]">/viagem</span></p>
+                  </div>
+                  <div>
+                    <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Segundo cenário</p>
+                    <p className="mt-1 text-lg font-black text-[#163840]">{values.comparison.alternative.costPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}<span className="ml-1 text-[0.6rem] font-bold text-[#71877E]">/viagem</span></p>
+                  </div>
+                </div>
+                <p className="mt-3 rounded-lg bg-[#EAF4EC] px-3 py-2 text-xs font-extrabold text-[#356451]">
+                  {values.comparison.differencePerTrip >= 0
+                    ? `O segundo cenário economiza ${values.comparison.differencePerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})} por viagem e ${values.comparison.differencePerMonth.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}/mês.`
+                    : `O segundo cenário custa ${Math.abs(values.comparison.differencePerTrip).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})} a mais por viagem e ${Math.abs(values.comparison.differencePerMonth).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}/mês.`}
+                </p>
+                <p className="mt-2 text-[0.62rem] leading-relaxed text-[#71877E]">Diferença anual: {Math.abs(values.comparison.differencePerYear).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Valores calculados somente com os dados informados.</p>
+              </div>
+            )}
+          </details>
           {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">Para esta distância e autonomia informadas, o cálculo indica aproximadamente {values.estimatedRefuels} parada(s) de abastecimento.</p>
           )}
