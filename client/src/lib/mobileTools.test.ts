@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildRouteShareText, shareText } from "./mobileTools";
+import { buildNearbyStationsUrl, buildRouteShareText, shareText } from "./mobileTools";
 
-describe("mobile sharing", () => {
+describe("mobile tools", () => {
+  it("builds a nearby-stations URL with validated coordinates", () => {
+    expect(buildNearbyStationsUrl("/postos", -15.86, -48.03)).toBe("/postos?q=postos&lat=-15.86&lng=-48.03");
+    expect(buildNearbyStationsUrl("/postos", Number.NaN, Number.POSITIVE_INFINITY)).toBe("/postos?q=postos");
+  });
+
+  it("
   it("shares the native route decision with useful context", () => {
     expect(buildRouteShareText("Águas Lindas", "Brasília", {
       name: "Posto Exemplo", price: 5.89, detourKm: 1.4, detourSource: "real",
