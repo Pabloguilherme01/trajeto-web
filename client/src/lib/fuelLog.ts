@@ -21,6 +21,15 @@ export type FuelLogSummary = {
   estimatedCostPerKm: number;
 };
 
+function getStorage(): Storage | null {
+  if (typeof globalThis === "undefined" || !("localStorage" in globalThis)) return null;
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 function emitChange() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(FUEL_LOG_EVENT));
 }
@@ -50,9 +59,10 @@ function normalizeEntry(value: unknown): FuelLogEntry | null {
 }
 
 export function listFuelLog(): FuelLogEntry[] {
-  if (typeof window === "undefined") return [];
+  const storage = getStorage();
+  if (!storage) return [];
   try {
-    const parsed = JSON.parse(localStorage.getItem(FUEL_LOG_KEY) || "[]");
+    const parsed = JSON.parse(storage.getItem(FUEL_LOG_KEY) || "[]");
     if (!Array.isArray(parsed)) return [];
     return parsed
       .map(normalizeEntry)
@@ -70,6 +80,9 @@ export function addFuelLogEntry(input: {
   odometerKm?: number;
   note?: string;
 }): FuelLogEntry | null {
+  const storage = getStorage();
+  if (!storage) return null;
+
   const liters = Number(input.liters);
   const totalCost = Number(input.totalCost);
   const odometer = input.odometerKm === undefined || input.odometerKm === null ? undefined : Number(input.odometerKm);
@@ -90,7 +103,7 @@ export function addFuelLogEntry(input: {
 
   try {
     const next = [entry, ...listFuelLog()].slice(0, MAX_ENTRIES);
-    localStorage.setItem(FUEL_LOG_KEY, JSON.stringify(next));
+    storage.setItem(FUEL_LOG_KEY, JSON.stringify(next));
     emitChange();
     return entry;
   } catch {
@@ -100,11 +113,13 @@ export function addFuelLogEntry(input: {
 
 export function removeFuelLogEntry(id: string): boolean {
   if (!id) return false;
+  const storage = getStorage();
+  if (!storage) return false;
   try {
     const current = listFuelLog();
     const next = current.filter(item => item.id !== id);
     if (next.length === current.length) return false;
-    localStorage.setItem(FUEL_LOG_KEY, JSON.stringify(next));
+    storage.setItem(FUEL_LOG_KEY, JSON.stringify(next));
     emitChange();
     return true;
   } catch {
