@@ -7,6 +7,8 @@ export type RouteIntelligenceRoute = {
   staticDurationSeconds: number | null;
   fuelConsumptionLiters: number | null;
   toll: { amount: number | null; currency: string; estimated: boolean } | null;
+  trafficIntervals: Array<{ startPolylinePointIndex?: number; endPolylinePointIndex?: number; speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM" }>;
+  trafficImpact: { slowPoints: number; jamPoints: number; affectedPoints: number; totalPoints: number } | null;
 };
 
 export type RouteIntelligence = {
@@ -28,6 +30,7 @@ export async function fetchRouteIntelligence(input: {
   waypoints?: string[];
   avoidTolls?: boolean;
   avoidHighways?: boolean;
+  trafficDetailed?: boolean;
 }): Promise<RouteIntelligence> {
   const response = await fetch(getEndpoint(), {
     method: "POST",
