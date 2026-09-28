@@ -375,7 +375,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
           snapshotSavedAt={offlineSavedAt}
           onNavigate={openDestinationNavigation}
           onShare={shareRoute}
-          onSave={() => void saveCurrentRouteOffline()}
+          onSave={saveCurrentRouteOffline}
           onRefresh={loadedFromOffline && !offline ? () => {
             setShareMessage("Buscando dados atuais da rota…");
             void calculateCurrentRoute().catch(() => {
@@ -389,7 +389,7 @@ ${url}`); setShareMessage("Link da rota copiado para compartilhar."); }
             void calculateCurrentRoute().catch(() => {
               setShareMessage("Não foi possível atualizar os dados agora. A rota salva continua disponível neste aparelho.");
             });
-          } : undefined} onSave={() => void saveCurrentRouteOffline()} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
+          } : undefined} onSave={saveCurrentRouteOffline} onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} />}
 
         {planned && <div className="mt-4 md:hidden"><MobileTravelMode /></div>}
 
