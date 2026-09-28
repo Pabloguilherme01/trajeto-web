@@ -56,8 +56,6 @@ describe("local route calculator contract", () => {
     expect(result.monthlyCost).toBe(0);
     expect(result.annualCost).toBe(0);
   });
-});
-
 
   it("compara dois cenários usando o mesmo percurso e extras", () => {
     const result = compareTripScenarios({
@@ -89,3 +87,5 @@ describe("local route calculator contract", () => {
       tripsPerWeek: 5,
     })).toBeNull();
   });
+
+});
