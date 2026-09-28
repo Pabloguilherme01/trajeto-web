@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { externalNavigationUrl, listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, wazeNavigationUrl, type OfflineRoute } from "@/lib/offlineStore";
+import { externalNavigationUrl, isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, wazeNavigationUrl, type OfflineRoute } from "@/lib/offlineStore";
 
 function formatAge(savedAt: string) {
   const time = Date.parse(savedAt);
@@ -139,6 +139,9 @@ export default function OfflineRouteVault() {
           {isOnline ? "Internet disponível" : "Sem internet"}
         </span>
         <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[#91A4AC]">{items.length === 1 ? "1 rota pronta" : `${items.length} rotas prontas`}</span>
+        {items.some(route => isOfflineRouteStale(route.savedAt)) && (
+          <span className="rounded-full bg-[#FFB86B]/10 px-2.5 py-1 text-[#FFCF91]">há rota antiga</span>
+        )}
       </div>
 
       {feedback && (
@@ -206,7 +209,9 @@ export default function OfflineRouteVault() {
                 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.65rem] text-[#7F919A]">
                   <span className="inline-flex items-center gap-1"><Clock3 className="size-3" />{formatAge(route.savedAt)}</span>
                   <span>{new Date(route.savedAt).toLocaleString("pt-BR")}</span>
-                  <span className="text-[#657780]">snapshot da viagem</span>
+                  <span className={isOfflineRouteStale(route.savedAt) ? "font-bold text-[#FFCF91]" : "text-[#657780]"}>
+                    {isOfflineRouteStale(route.savedAt) ? "snapshot antigo · atualize antes de confiar nos dados" : "snapshot da viagem"}
+                  </span>
                 </p>
               </button>
 
