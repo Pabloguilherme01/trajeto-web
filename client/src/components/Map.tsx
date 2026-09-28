@@ -63,7 +63,7 @@ export function MapView({
   onMapReady,
   deferUntilVisible = true,
   showTraffic = false,
-  mapTypeId = "roadmap",
+  mapTypeId = "roadmap" as google.maps.MapTypeId,
   heightClassName = "h-[520px]",
 }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
