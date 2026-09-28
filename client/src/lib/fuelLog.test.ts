@@ -22,6 +22,7 @@ describe("fuelLog", () => {
     expect(entry).not.toBeNull();
     expect(listFuelLog()).toHaveLength(1);
     expect(summarizeFuelLog().averagePricePerLiter).toBe(6);
+    expect(localStorage.getItem("trajeto-last-fuel-price")).toBe("6");
   });
 
   it("soma gastos e distância informada pelo hodômetro", () => {
