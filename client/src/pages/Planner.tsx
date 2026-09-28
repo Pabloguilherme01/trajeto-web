@@ -23,29 +23,6 @@ function minutes(seconds: number) {
   return `${Math.max(1, Math.round(seconds / 60))} min`;
 }
 
-function DrivingModeResult({
-  planned,
-  onNavigate,
-}: {
-  planned: PlannedRoute;
-  onNavigate: () => void;
-}) {
-  return <section aria-labelledby="driving-mode-title" className="rounded-[1.5rem] border border-[#C7FF3C]/30 bg-[#101A20] p-5 text-white shadow-[0_20px_60px_rgba(0,0,0,.22)] sm:p-7">
-    <div className="flex items-center justify-between gap-3">
-      <span className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/10 px-3 py-2 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#DFFF9A]"><RouteIcon className="size-3.5" /> Modo condução</span>
-      <span className="text-[0.62rem] font-bold text-white/45">menos distração</span>
-    </div>
-    <h2 id="driving-mode-title" className="mt-6 font-display text-[clamp(2rem,8vw,3.5rem)] font-semibold leading-[.92] tracking-[-.06em]">{planned.route.summary || "Rota calculada"}</h2>
-    <p className="mt-2 text-sm text-white/55">Percurso pronto para navegação</p>
-    <div className="mt-6 grid grid-cols-2 gap-2">
-      <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Distância</p><p className="mt-1 font-display text-2xl font-semibold">{planned.route.distanceLabel}</p></div>
-      <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Tempo</p><p className="mt-1 font-display text-2xl font-semibold">{minutes(planned.route.durationSeconds)}</p></div>
-    </div>
-    <div className="mt-4 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.05] p-4 text-sm leading-relaxed text-[#BCEFFA]">A navegação é feita pelo aplicativo de mapas. O Trajeto mantém aqui apenas o essencial da viagem e não substitui a atenção à direção.</div>
-    <button type="button" onClick={onNavigate} className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-5 text-sm font-black text-[#0B1014] active:scale-[.99]">Abrir navegação <ArrowRight className="size-4" /></button>
-  </section>;
-}
-
 function RouteResultSkeleton() {
   return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between" role="status">
     <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /></div>
@@ -392,8 +369,6 @@ export default function Planner() {
           <div className="p-6 sm:p-8">
             {planRoute.isPending ? <RouteResultSkeleton /> : !planned ? (
               <div className="flex h-full min-h-[340px] flex-col justify-between"><div className="grid size-14 place-items-center rounded-full bg-[#E9EFE9] text-[#BA5B45]"><Sparkles className="size-6" /></div><div><p className="eyebrow">O que aparece aqui</p><h2 className="font-display mt-4 max-w-md text-4xl font-semibold leading-[0.93] tracking-[-0.06em]">Postos reais,<br />dados com contexto.</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-[#627773]">A busca usa localização e rota para organizar os pontos de abastecimento. Quando a referência oficial da ANP estiver vinculada ao posto, ela aparece separada e com a data de coleta.</p></div><div className="flex flex-wrap gap-3 text-xs font-bold text-[#496760]"><span className="border border-[#C7D2C9] px-3 py-2">Google Maps</span><span className="border border-[#C7D2C9] px-3 py-2">ANP · atualização periódica</span></div></div>
-            ) : drivingMode ? (
-              <DrivingModeResult planned={planned} onNavigate={openDestinationNavigation} />
             ) : (
               <div>
                 <div className="grid gap-3 border-b border-[#D8DED5] pb-6 sm:grid-cols-3"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Distância</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{planned.route.distanceLabel}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Tempo estimado</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{minutes(planned.route.durationSeconds)}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Trajeto</p><p className="mt-2 text-sm font-semibold leading-snug">{planned.route.summary || "Rota calculada"}</p></div></div>
@@ -442,9 +417,7 @@ export default function Planner() {
           </div>
         </section>
 
-        {!drivingMode && <LocalRouteCalculator initialDistanceKm={planned ? planned.route.distanceMeters / 1000 : 0} />}
-
-        {planned && !drivingMode && <MobileNavigationCenter
+        {planned && <MobileNavigationCenter
           destination={destination}
           distance={planned.route.distanceLabel}
           duration={minutes(planned.route.durationSeconds)}
@@ -469,6 +442,10 @@ export default function Planner() {
           } : undefined}
           onStations={() => document.getElementById("route-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })}
         />}
+
+        {!drivingMode && <LocalRouteCalculator initialDistanceKm={planned ? planned.route.distanceMeters / 1000 : 0} />}
+
+
 
 
         {planned && !drivingMode && <section id="route-stations" className="mt-10 scroll-mt-24"><div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">Paradas na rota</p><h2 className="font-display mt-3 text-4xl font-semibold tracking-[-0.06em]">Postos encontrados.</h2></div><div className="flex items-end gap-3"><p className="max-w-md text-sm leading-relaxed text-[#607570]">Preços são referências datadas; o desvio informado é real quando calculado pela rota.</p><button type="button" onClick={shareRoute} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-none border border-[#163840] px-4 py-2 text-xs font-bold text-[#163840] transition hover:bg-[#163840] hover:text-white"><Share2 className="size-4" /> Compartilhar rota</button></div></div>
