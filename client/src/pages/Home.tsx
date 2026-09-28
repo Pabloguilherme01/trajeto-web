@@ -1,20 +1,21 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
-import TripPrepCard from "@/components/TripPrepCard";
-import LocalRouteCalculator from "@/components/LocalRouteCalculator";
-import FuelLogCard from "@/components/FuelLogCard";
-import MobilityExpenseCard from "@/components/MobilityExpenseCard";
-import MobilityDashboardCard from "@/components/MobilityDashboardCard";
-import MobileTripShortcuts from "@/components/MobileTripShortcuts";
-import MobileVehicleCard from "@/components/MobileVehicleCard";
-import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
+
+
+
+
+
+
+
+
 import DailyCommandCenter from "@/components/DailyCommandCenter";
-import OfficialSourcesCard from "@/components/OfficialSourcesCard";
-import OfficialDataRadar from "@/components/OfficialDataRadar";
-import VehicleServiceHub from "@/components/VehicleServiceHub";
-import VehicleMaintenanceCard from "@/components/VehicleMaintenanceCard";
-import RecentTripsCard from "@/components/RecentTripsCard";
+import MobileUtilityHub from "@/components/MobileUtilityHub";
+
+
+
+
+
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
@@ -248,22 +249,7 @@ export default function Home() {
 
         <DailyCommandCenter />
 
-        <OfficialDataRadar />
-
-        <VehicleServiceHub />
-          <VehicleMaintenanceCard />
-
-        <DailyDepartureChecklist />
-
-        <section className="container py-4 sm:py-5" aria-label="Atalhos de rotina"><MobileTripShortcuts /></section>
-
-        <section id="calculadora" className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
-
-        <section className="container grid gap-4 pb-8 sm:grid-cols-2 sm:pb-10 lg:grid-cols-3">
-          <FuelLogCard />
-          <MobilityExpenseCard />
-          <MobilityDashboardCard />
-        </section>
+        <MobileUtilityHub />
 
         <section className="border-y border-white/8 bg-[#0F171D] py-14 text-white sm:py-18">
           <div className="container">
