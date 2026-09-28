@@ -93,7 +93,7 @@ export default function DailyCommandCenter() {
     ? {
         label: "Repetir última viagem",
         detail: lastTrip.origin + " → " + lastTrip.destination,
-        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination),
+        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&modo=conducao",
       }
     : active?.id === "proxima" && favorite
       ? {
@@ -242,7 +242,7 @@ export default function DailyCommandCenter() {
           </div>
 
           {expanded && (
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {modes.map(mode => {
                 const Icon = modeIcon[mode.id];
                 const isActive = mode.id === activeId;
