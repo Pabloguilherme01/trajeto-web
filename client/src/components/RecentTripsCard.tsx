@@ -41,18 +41,17 @@ export default function RecentTripsCard() {
     }
     try {
       const routes = await listOfflineRoutes();
-      const saved = routes.find(route =>
-        route.origin.trim().toLocaleLowerCase("pt-BR") === trip.origin.trim().toLocaleLowerCase("pt-BR") &&
-        route.destination.trim().toLocaleLowerCase("pt-BR") === trip.destination.trim().toLocaleLowerCase("pt-BR"),
-      );
+      const saved = findOfflineRouteByTrip(routes, trip.origin, trip.destination);
+      if (!saved) {
+        setFeedback("Esta viagem não tem uma cópia salva neste aparelho. Conecte-se à internet para recalculá-la.");
+        return;
+      }
       setLocation(
         appUrl("/planejar") +
-        (saved
-          ? "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination)
-          : "?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination)),
+        "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination),
       );
     } catch {
-      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination));
+      setFeedback("Não foi possível consultar as rotas salvas. Tente novamente.");
     }
   };
 
