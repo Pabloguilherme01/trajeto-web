@@ -33,7 +33,23 @@ describe("local route calculator contract", () => {
     expect(result.weeklyCost).toBeCloseTo(296.15, 1);
   });
 
-  it("compara a projeção com o orçamento mensal", () => {\n    const within = compareMonthlyBudget(700, 800);\n    expect(within?.withinBudget).toBe(true);\n    expect(within?.difference).toBe(100);\n    expect(within?.usedPercent).toBeCloseTo(87.5, 5);\n\n    const over = compareMonthlyBudget(950, 800);\n    expect(over?.withinBudget).toBe(false);\n    expect(over?.difference).toBe(-150);\n  });\n\n  it("ignora orçamento ausente ou inválido", () => {\n    expect(compareMonthlyBudget(700, 0)).toBeNull();\n    expect(compareMonthlyBudget(-20, 800)?.monthlyCost).toBe(0);\n  });\n\n  it("clamps an invalid weekly frequency", () => {
+  it("compara a projeção com o orçamento mensal", () => {
+    const within = compareMonthlyBudget(700, 800);
+    expect(within?.withinBudget).toBe(true);
+    expect(within?.difference).toBe(100);
+    expect(within?.usedPercent).toBeCloseTo(87.5, 5);
+
+    const over = compareMonthlyBudget(950, 800);
+    expect(over?.withinBudget).toBe(false);
+    expect(over?.difference).toBe(-150);
+  });
+
+  it("ignora orçamento ausente ou inválido", () => {
+    expect(compareMonthlyBudget(700, 0)).toBeNull();
+    expect(compareMonthlyBudget(-20, 800)?.monthlyCost).toBe(0);
+  });
+
+  it("clamps an invalid weekly frequency", () => {
     const result = projectTripCosts({
       oneWayDistanceKm: 35,
       oneWayCost: 20,
