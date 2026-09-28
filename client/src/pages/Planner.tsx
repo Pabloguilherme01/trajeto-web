@@ -440,6 +440,8 @@ export default function Planner() {
           onWaze={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")}
           onAppleMaps={() => window.open(buildAppleMapsDirectionsUrl(destination), "_blank", "noopener,noreferrer")}
           onMultiStopNavigate={(waypoints) => window.open(buildGoogleMapsMultiStopUrl(destination, waypoints, true), "_blank", "noopener,noreferrer")}
+          onGoogleMapsPreferred={(preference, waypoints) => window.open(buildGoogleMapsMultiStopUrl(destination, waypoints, true, preference), "_blank", "noopener,noreferrer")}
+          onAppleMapsPreferred={(preference, waypoints) => window.open(buildAppleMapsDirectionsUrl(destination, undefined, preference, waypoints), "_blank", "noopener,noreferrer")}
           onShare={shareRoute}
           onSave={saveCurrentRouteOffline}
           onRefresh={loadedFromOffline && !offline ? () => {
