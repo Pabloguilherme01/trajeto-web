@@ -3,6 +3,7 @@ export type RouteIntelligenceRoute = {
   distanceMeters: number | null;
   durationSeconds: number | null;
   staticDurationSeconds: number | null;
+  fuelConsumptionLiters: number | null;
   toll: { amount: number | null; currency: string; estimated: boolean } | null;
 };
 
