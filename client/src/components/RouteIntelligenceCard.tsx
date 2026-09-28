@@ -148,6 +148,38 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </div>
       </div>}
 
+      {data && data.routes.length > 0 && (
+        <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-black">Simulador de decisão</p>
+              <p className="mt-1 text-[0.58rem] text-white/40">Escolha um critério. O Trajeto aplica somente aos dados reais retornados.</p>
+            </div>
+            <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/45">sem rota inventada</span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              ["rápida", "Mais rápida", (a: typeof data.routes[number], b: typeof data.routes[number]) => (a.durationSeconds ?? Infinity) - (b.durationSeconds ?? Infinity)],
+              ["custo", "Menor custo", (a: typeof data.routes[number], b: typeof data.routes[number]) => (totalCost(a) ?? Infinity) - (totalCost(b) ?? Infinity)],
+              ["distância", "Menor distância", (a: typeof data.routes[number], b: typeof data.routes[number]) => (a.distanceMeters ?? Infinity) - (b.distanceMeters ?? Infinity)],
+              ["pedágio", "Menor pedágio", (a: typeof data.routes[number], b: typeof data.routes[number]) => (a.toll?.amount ?? Infinity) - (b.toll?.amount ?? Infinity)],
+            ].map(([key, label, compare]) => {
+              const route = data.routes.reduce((best, item) => (compare(item, best) < 0 ? item : best), data.routes[0]);
+              const active = selectedRouteId === route.id;
+              return <button key={key as string} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
+                <span className="block text-[0.52rem] font-black uppercase text-white/35">{label as string}</span>
+                <span className="mt-1 block text-[0.62rem] font-black">{route.id === "principal" ? "Principal" : route.id.replace("alternativa-", "Alternativa ")}</span>
+              </button>;
+            })}
+          </div>
+          <div className="mt-3 rounded-xl border border-white/6 bg-black/10 p-3 text-[0.58rem] leading-relaxed text-white/45">
+            <p><strong className="text-white/70">Combustível:</strong> distância ÷ km/L × preço/L.</p>
+            <p className="mt-1"><strong className="text-white/70">Custo da viagem:</strong> combustível + pedágio informado.</p>
+            <p className="mt-1"><strong className="text-white/70">Comparação:</strong> tempo, distância, pedágio e custo são avaliados separadamente.</p>
+          </div>
+        </div>
+      )}
+
       {data && data.routes.length > 1 && (
         <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
           <p className="text-xs font-black">Escolha a rota no mapa</p>
