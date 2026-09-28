@@ -1,10 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildNearbyStationsUrl, buildRouteShareText, shareText } from "./mobileTools";
+import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
     expect(buildNearbyStationsUrl("/postos", -15.86, -48.03)).toBe("/postos?q=postos&lat=-15.86&lng=-48.03");
     expect(buildNearbyStationsUrl("/postos", Number.NaN, Number.POSITIVE_INFINITY)).toBe("/postos?q=postos");
+  });
+
+  it("builds safe external fallbacks for routes and station searches", () => {
+    expect(buildGoogleMapsDirectionsUrl("Águas Lindas, GO", "Brasília, DF")).toBe(
+      "https://www.google.com/maps/dir/?api=1&origin=%C3%81guas%20Lindas%2C%20GO&destination=Bras%C3%ADlia%2C%20DF&travelmode=driving",
+    );
+    expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
+      "https://www.google.com/maps/search/?api=1&query=postos%20perto%20de%20%C3%81guas%20Lindas",
+    );
   });
 
   it("shares the native route decision with useful context", () => {
