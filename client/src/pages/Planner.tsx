@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, Fuel, Loader2, MapPi
 import { useEffect, useMemo, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { Link, useLocation } from "wouter";
-import { buildGoogleMapsDirectionsUrl, shareText, buildRouteShareText } from "@/lib/mobileTools";
+import { buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, shareText, buildRouteShareText } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import OfflineRouteVault from "@/components/OfflineRouteVault";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
@@ -286,7 +286,7 @@ export default function Planner() {
       setShareMessage("A navegação externa precisa de internet. A rota salva continua disponível neste aparelho.");
       return;
     }
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination.trim())}`, "_blank", "noopener,noreferrer");
+    window.open(buildGoogleMapsDestinationUrl(destination.trim(), true), "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
 
@@ -295,7 +295,7 @@ export default function Planner() {
       setShareMessage("A navegação externa precisa de internet. A rota salva continua disponível neste aparelho.");
       return;
     }
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stop.name)}&destination_place_id=${encodeURIComponent(stop.placeId)}`, "_blank", "noopener,noreferrer");
+    window.open(buildGoogleMapsDestinationUrl(stop.name, true), "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
 
