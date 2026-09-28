@@ -87,6 +87,11 @@ export function MapView({
       streetViewControl: true,
       mapTypeId,
       mapId: "DEMO_MAP_ID",
+      renderingType: window.google.maps.RenderingType.VECTOR,
+      tilt: 0,
+      heading: 0,
+      tiltInteractionEnabled: true,
+      headingInteractionEnabled: true,
     });
     if (showTraffic) {
       const trafficLayer = new window.google.maps.TrafficLayer();
