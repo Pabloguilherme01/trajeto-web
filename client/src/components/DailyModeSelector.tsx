@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ArrowRight, BatteryCharging, CalendarClock, Compass, Gauge, Sparkles, WifiOff } from "lucide-react";
+import { ArrowRight, BatteryCharging, CalendarClock, CarFront, Compass, Gauge, Sparkles, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { buildDailyModes, getAutomaticDailyMode, getSavedDailyMode, setSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
 import { mobileDestinationEvent } from "@/lib/mobileDestinations";
 import { mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { offlineRouteEvent, listOfflineRoutes } from "@/lib/offlineStore";
 
-const icons = { automatico: Sparkles, proxima: Compass, repetir: CalendarClock, economia: Gauge, offline: WifiOff };
+const icons = { automatico: Sparkles, proxima: Compass, repetir: CalendarClock, economia: Gauge, offline: WifiOff, conducao: CarFront };
 
 export default function DailyModeSelector() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
@@ -68,7 +68,7 @@ export default function DailyModeSelector() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <button type="button" onClick={chooseAutomatic} className={selected === "automatico" ? "min-h-10 rounded-xl border border-[#C7FF3C]/40 bg-[#C7FF3C]/10 px-3 text-[0.62rem] font-bold text-[#DFFF9A]" : "min-h-10 rounded-xl border border-white/10 px-3 text-[0.62rem] font-bold text-[#DFFF9A]"}>
-              Automático: {autoMode === "proxima" ? "próxima viagem" : autoMode === "repetir" ? "repetir" : autoMode === "economia" ? "economia" : "offline"}
+              Automático: {autoMode === "proxima" ? "próxima viagem" : autoMode === "repetir" ? "repetir" : autoMode === "economia" ? "economia" : autoMode === "conducao" ? "condução" : "offline"}
             </button>
             <button type="button" aria-expanded={expanded} aria-controls="daily-modes-options" onClick={() => setExpanded(value => !value)} className="min-h-10 rounded-xl border border-white/10 px-3 text-[0.62rem] font-bold text-white">
               {expanded ? "Fechar" : "Trocar modo"}
