@@ -90,6 +90,7 @@ export default async function handler(request: Request) {
         "routes.travelAdvisory.tollInfo.estimatedPrice",
         "routes.travelAdvisory.fuelConsumptionMicroliters",
         "routes.routeLabels",
+        "routes.polyline.encodedPolyline",
         "routes.legs.distanceMeters",
         "routes.legs.duration",
         "routes.legs.staticDuration",
@@ -119,6 +120,7 @@ export default async function handler(request: Request) {
         };
       };
       routeLabels?: string[];
+      polyline?: { encodedPolyline?: string };
     }>;
   };
 
@@ -131,6 +133,7 @@ export default async function handler(request: Request) {
     return {
       id: index === 0 ? "principal" : `alternativa-${index}`,
       labels: route.routeLabels || [],
+      polyline: route.polyline?.encodedPolyline || null,
       distanceMeters: route.distanceMeters ?? null,
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
