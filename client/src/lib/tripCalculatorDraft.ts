@@ -17,8 +17,7 @@ export type TripCalculatorDraft = {
 export const tripCalculatorDraftKey = "trajeto-trip-calculator-draft";
 
 function getStorage(): Storage | null {
-  if (typeof window === "undefined") return null;
-  try { return window.localStorage; } catch { return null; }
+  try { return globalThis.localStorage ?? null; } catch { return null; }
 }
 
 export function loadTripCalculatorDraft(): Partial<TripCalculatorDraft> | null {
