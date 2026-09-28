@@ -422,6 +422,7 @@ export default function Planner() {
         </section>
 
         {planned && <MobileNavigationCenter
+          origin={origin}
           destination={destination}
           distance={planned.route.distanceLabel}
           duration={minutes(planned.route.durationSeconds)}
