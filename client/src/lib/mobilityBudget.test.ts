@@ -1,0 +1,4 @@
+import {beforeEach,describe,expect,it} from "vitest";
+import {clearMobilityBudget,compareMobilityBudget,getMobilityBudget,setMobilityBudget} from "@/lib/mobilityBudget";
+function install(){const m=new Map<string,string>();Object.defineProperty(globalThis,"localStorage",{configurable:true,value:{getItem:(k:string)=>m.get(k)??null,setItem:(k:string,v:string)=>m.set(k,v),removeItem:(k:string)=>m.delete(k)}})}
+describe("mobility budget",()=>{beforeEach(()=>{install();clearMobilityBudget()});it("persists budget",()=>{expect(setMobilityBudget(1200)).toBe(true);expect(getMobilityBudget()).toBe(1200)});it("compares spent and remaining",()=>{expect(compareMobilityBudget(300,1000)).toEqual({budget:1000,spent:300,remaining:700,usedPercent:30,withinBudget:true});expect(compareMobilityBudget(1200,1000)?.withinBudget).toBe(false)});it("ignores invalid budget",()=>{expect(setMobilityBudget(0)).toBe(false);expect(compareMobilityBudget(200,0)).toBeNull()})})
