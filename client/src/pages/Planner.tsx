@@ -24,7 +24,30 @@ function minutes(seconds: number) {
   return `${Math.max(1, Math.round(seconds / 60))} min`;
 }
 
-function DrivingModeResult({\n  planned,\n  onNavigate,\n}: {\n  planned: PlannedRoute;\n  onNavigate: () => void;\n}) {\n  return <section aria-labelledby="driving-mode-title" className="rounded-[1.5rem] border border-[#C7FF3C]/30 bg-[#101A20] p-5 text-white shadow-[0_20px_60px_rgba(0,0,0,.22)] sm:p-7">\n    <div className="flex items-center justify-between gap-3">\n      <span className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/10 px-3 py-2 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#DFFF9A]"><RouteIcon className="size-3.5" /> Modo condução</span>\n      <span className="text-[0.62rem] font-bold text-white/45">menos distração</span>\n    </div>\n    <h2 id="driving-mode-title" className="mt-6 font-display text-[clamp(2rem,8vw,3.5rem)] font-semibold leading-[.92] tracking-[-.06em]">{planned.route.destination}</h2>\n    <p className="mt-2 text-sm text-white/55">{planned.route.origin} → destino</p>\n    <div className="mt-6 grid grid-cols-2 gap-2">\n      <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Distância</p><p className="mt-1 font-display text-2xl font-semibold">{planned.route.distanceLabel}</p></div>\n      <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Tempo</p><p className="mt-1 font-display text-2xl font-semibold">{minutes(planned.route.durationSeconds)}</p></div>\n    </div>\n    <div className="mt-4 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.05] p-4 text-sm leading-relaxed text-[#BCEFFA]">A navegação é feita pelo aplicativo de mapas. O Trajeto mantém aqui apenas o essencial da viagem e não substitui a atenção à direção.</div>\n    <button type="button" onClick={onNavigate} className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-5 text-sm font-black text-[#0B1014] active:scale-[.99]">Abrir navegação <ArrowRight className="size-4" /></button>\n  </section>;\n}\n\nfunction RouteResultSkeleton() {
+function DrivingModeResult({
+  planned,
+  onNavigate,
+}: {
+  planned: PlannedRoute;
+  onNavigate: () => void;
+}) {
+  return <section aria-labelledby="driving-mode-title" className="rounded-[1.5rem] border border-[#C7FF3C]/30 bg-[#101A20] p-5 text-white shadow-[0_20px_60px_rgba(0,0,0,.22)] sm:p-7">
+    <div className="flex items-center justify-between gap-3">
+      <span className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/10 px-3 py-2 text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#DFFF9A]"><RouteIcon className="size-3.5" /> Modo condução</span>
+      <span className="text-[0.62rem] font-bold text-white/45">menos distração</span>
+    </div>
+    <h2 id="driving-mode-title" className="mt-6 font-display text-[clamp(2rem,8vw,3.5rem)] font-semibold leading-[.92] tracking-[-.06em]">{planned.route.destination}</h2>
+    <p className="mt-2 text-sm text-white/55">{planned.route.origin} → destino</p>
+    <div className="mt-6 grid grid-cols-2 gap-2">
+      <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Distância</p><p className="mt-1 font-display text-2xl font-semibold">{planned.route.distanceLabel}</p></div>
+      <div className="rounded-xl border border-white/8 bg-white/[.04] p-4"><p className="text-[0.58rem] font-bold uppercase tracking-[.12em] text-[#7F919A]">Tempo</p><p className="mt-1 font-display text-2xl font-semibold">{minutes(planned.route.durationSeconds)}</p></div>
+    </div>
+    <div className="mt-4 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.05] p-4 text-sm leading-relaxed text-[#BCEFFA]">A navegação é feita pelo aplicativo de mapas. O Trajeto mantém aqui apenas o essencial da viagem e não substitui a atenção à direção.</div>
+    <button type="button" onClick={onNavigate} className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-5 text-sm font-black text-[#0B1014] active:scale-[.99]">Abrir navegação <ArrowRight className="size-4" /></button>
+  </section>;
+}
+
+function RouteResultSkeleton() {
   return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between" role="status">
     <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /></div>
     <div className="h-44 animate-pulse border border-[#D8DED5] bg-[#EEF2ED]" />
@@ -45,7 +68,8 @@ export default function Planner() {
   const [offlineSavedAt, setOfflineSavedAt] = useState<string | null>(null);
   const [latestOfflineRoute, setLatestOfflineRoute] = useState<OfflineRoute | null>(null);
   const [locatingOrigin, setLocatingOrigin] = useState(false);
-  const [lastTrip, setLastTrip] = useState(getLastTrip);\n  const drivingMode = new URLSearchParams(window.location.search).get("modo") === "conducao";
+  const [lastTrip, setLastTrip] = useState(getLastTrip);
+  const drivingMode = new URLSearchParams(window.location.search).get("modo") === "conducao";
   
   const saveCurrentRouteOffline = async () => {
     if (!planned) return;
