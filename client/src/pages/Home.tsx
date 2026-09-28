@@ -13,6 +13,7 @@ import MobileVehicleCard from "@/components/MobileVehicleCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
 import DailySetupCard from "@/components/DailySetupCard";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
+import OfficialSourcesCard from "@/components/OfficialSourcesCard";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -352,6 +353,8 @@ export default function Home() {
             <div className="space-y-4"><RecentTripsCard /><MobileVehicleCard /><TripPrepCard /></div>
           </div>
         </section>
+
+        <OfficialSourcesCard />
 
         <section className="border-t border-white/8 bg-[#10181F] py-14 sm:py-18">
           <div className="container grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
