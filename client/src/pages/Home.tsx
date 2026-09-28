@@ -3,6 +3,7 @@ import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import TripPrepCard from "@/components/TripPrepCard";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
+import FuelLogCard from "@/components/FuelLogCard";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
@@ -241,6 +242,8 @@ export default function Home() {
         <MobileCopilot />
 
         <section className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
+
+        <section className="container pb-8 sm:pb-10"><FuelLogCard /></section>
 
         <section className="bg-[#EAF0F2] py-14 text-[#0B1014] sm:py-18">
           <div className="container">
