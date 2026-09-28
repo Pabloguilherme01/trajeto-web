@@ -44,6 +44,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [other, setOther] = useState("");
   const [alternativePrice, setAlternativePrice] = useState("");
   const [alternativeConsumption, setAlternativeConsumption] = useState("");
+  const [monthlyBudget, setMonthlyBudget] = useState("");
 
   useEffect(() => {
     const refreshVehicle = () => {
@@ -85,8 +86,10 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
       extraCostPerTrip,
     });
 
-    return { projection, fuelNeeded, autonomyKm, estimatedRefuels, fuelStatus, comparison };
-  }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, roundTrip, tripsPerWeek]);
+    const budget = numberValue(monthlyBudget);
+    const budgetStatus = budget > 0 ? { budget, difference: budget - projection.monthlyCost, usedPercent: (projection.monthlyCost / budget) * 100 } : null;
+    return { projection, fuelNeeded, autonomyKm, estimatedRefuels, fuelStatus, comparison, budgetStatus };
+  }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget, roundTrip, tripsPerWeek]);
 
   return (
     <section className={compact
@@ -133,6 +136,9 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
         <label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51]">Viagens por semana
           <input type="number" min="0" max="21" step="1" value={tripsPerWeek} onChange={e => setTripsPerWeek(Math.max(0, Math.min(21, Number(e.target.value) || 0)))} className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
         </label>
+        <label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51]">Orçamento mensal de deslocamento (R$, opcional)
+          <input value={monthlyBudget} onChange={e => setMonthlyBudget(e.target.value)} inputMode="decimal" placeholder="Ex.: 800" className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+        </label>
       </div>
 
       {values ? (
@@ -163,6 +169,17 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
             </div>
           )}
           <div className="mt-2 grid gap-2 sm:grid-cols-2"><div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">Por semana: {values.projection.weeklyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</div><div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">Por ano: {values.projection.annualCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</div></div>
+          {values.budgetStatus && (
+            <div className={"mt-2 rounded-xl border px-4 py-3 " + (values.budgetStatus.difference >= 0 ? "border-[#B7D8C1] bg-[#F0F8F2]" : "border-[#E7B0A0] bg-[#FFF4F0]")} role="status">
+              <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#56766A]">Orçamento mensal</p>
+              <p className={"mt-1 text-sm font-black " + (values.budgetStatus.difference >= 0 ? "text-[#356451]" : "text-[#8A4434]")}>
+                {values.budgetStatus.difference >= 0
+                  ? "Cabe no orçamento: sobra " + values.budgetStatus.difference.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) + "."
+                  : "Ultrapassa o orçamento em " + Math.abs(values.budgetStatus.difference).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) + "."}
+              </p>
+              <p className="mt-1 text-[0.62rem] text-[#71877E]">Projeção: {values.projection.monthlyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})} de {values.budgetStatus.budget.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})} ({values.budgetStatus.usedPercent.toLocaleString("pt-BR",{maximumFractionDigits:0})}% do limite).</p>
+            </div>
+          )}
           {values.projection.extraCostPerTrip > 0 && <p className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#56766A]">Extras por viagem: {values.projection.extraCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Eles entram no total e nas projeções recorrentes.</p>}
           <details className="mt-4 rounded-2xl border border-[#D7DFD8] bg-[#F8FAF7] p-4">
             <summary className="cursor-pointer text-xs font-extrabold text-[#163840]">Comparar outro cenário</summary>
