@@ -17,6 +17,21 @@ describe("local route calculator contract", () => {
     expect(result.annualCost).toBeGreaterThan(result.monthlyCost);
   });
 
+  it("inclui pedágio e estacionamento no custo total", () => {
+    const result = projectTripCosts({
+      oneWayDistanceKm: 35,
+      oneWayCost: (35 / 10) * 5.89,
+      roundTrip: true,
+      tripsPerWeek: 5,
+      extraCostPerTrip: 18,
+    });
+
+    expect(result.fuelCostPerTrip).toBeCloseTo(41.23, 1);
+    expect(result.extraCostPerTrip).toBe(18);
+    expect(result.costPerTrip).toBeCloseTo(59.23, 1);
+    expect(result.weeklyCost).toBeCloseTo(296.15, 1);
+  });
+
   it("clamps an invalid weekly frequency", () => {
     const result = projectTripCosts({
       oneWayDistanceKm: 35,
