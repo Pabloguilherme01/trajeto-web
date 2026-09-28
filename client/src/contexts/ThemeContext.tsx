@@ -22,11 +22,14 @@ export function ThemeProvider({
   switchable = false,
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (switchable) {
+    try {
       const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
+      if (stored === "light" || stored === "dark") return stored;
+      if (defaultTheme === "dark" || defaultTheme === "light") return defaultTheme;
+      return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    } catch {
+      return defaultTheme;
     }
-    return defaultTheme;
   });
 
   useEffect(() => {
@@ -37,9 +40,9 @@ export function ThemeProvider({
       root.classList.remove("dark");
     }
 
-    if (switchable) {
+    try {
       localStorage.setItem("theme", theme);
-    }
+    } catch {}
   }, [theme, switchable]);
 
   const toggleTheme = switchable
