@@ -263,7 +263,7 @@ export default function MobileCopilot() {
       intent: "stations",
       icon: MapPin,
     };
-  }, [online, offlineRoutes, latestOfflineRoute, state, setLocation]);
+  }, [online, offlineRoutes, latestOfflineRoute, state, setLocation, locatingNearby]);
 
   const actions: Action[] = online
     ? [
