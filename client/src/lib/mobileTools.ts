@@ -17,7 +17,7 @@ export function buildRouteShareText(origin: string, destination: string, decisio
 
   const priceValue = Number(decision.price);
   const price = Number.isFinite(priceValue) && priceValue > 0
-    ? ` · referência de ${priceValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/L`
+    ? ` · referência de ${priceValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }).replace(/\u00A0/g, " ")}/L`
     : "";
   const detourValue = Number(decision.detourKm);
   const detour = Number.isFinite(detourValue) && detourValue >= 0
