@@ -11,6 +11,7 @@ import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
+import DailySetupCard from "@/components/DailySetupCard";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -246,6 +247,8 @@ export default function Home() {
         <MobileCopilot />
 
         <DailyModeSelector />
+
+        <DailySetupCard />
 
         <section className="container py-4 sm:py-5" aria-label="Atalhos de rotina"><MobileTripShortcuts /></section>
 
