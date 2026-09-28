@@ -111,7 +111,7 @@ export default function DailyCommandCenter() {
             ? {
                 label: "Abrir modo condução",
                 detail: lastTrip.origin + " → " + lastTrip.destination,
-                href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination),
+                href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&modo=conducao",
               }
             : active?.id === "offline" && routes[0]
           ? {
