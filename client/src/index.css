@@ -117,3 +117,16 @@
     button:active, a:active { transform: none; }
   }
 }
+
+/* Preferências de acessibilidade persistentes */
+html.a11y-large { font-size: 112.5%; }
+html.a11y-large button, html.a11y-large a, html.a11y-large input, html.a11y-large select, html.a11y-large textarea { line-height: 1.35; }
+html.a11y-contrast :focus-visible { outline-width: 4px; outline-color: #FFFFFF; }
+html.a11y-contrast body { text-shadow: none; }
+html.a11y-contrast [class*="text-[#7"], html.a11y-contrast [class*="text-[#8"], html.a11y-contrast [class*="text-[#9"] { filter: brightness(1.22); }
+html.a11y-reduced-motion *, html.a11y-reduced-motion *::before, html.a11y-reduced-motion *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+html.a11y-compact .mobile-card { box-shadow: none; }
+html.a11y-compact .mobile-card { border-radius: 1rem; }
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: dark; }
+}
