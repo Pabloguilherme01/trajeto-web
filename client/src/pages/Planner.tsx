@@ -16,6 +16,7 @@ import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { projectTripCosts } from "@/lib/tripProjection";
 import MobileRouteDock from "@/components/MobileRouteDock";
 import TripDecisionSummary from "@/components/TripDecisionSummary";
+import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -415,6 +416,8 @@ export default function Planner() {
             )}
           </div>
         </section>
+
+        <LocalRouteCalculator initialDistanceKm={planned ? planned.route.distanceMeters / 1000 : 0} />
 
         {planned && <TripDecisionSummary
           distance={planned.route.distanceLabel}
