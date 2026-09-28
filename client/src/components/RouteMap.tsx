@@ -19,9 +19,9 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   const [is3D, setIs3D] = useState(false);
   const [heading, setHeading] = useState(0);
   const [offlinePreview, setOfflinePreview] = useState(false);
-  const [renderingType, setRenderingType] = useState<google.maps.RenderingType>(google.maps.RenderingType.UNINITIALIZED);
-  const isVector = renderingType === google.maps.RenderingType.VECTOR;
-  const is3DAvailable = isVector && Boolean(mapRef.current?.getMapCapabilities?.().isWebGLOverlayViewAvailable ?? true);
+  const [renderingType, setRenderingType] = useState<"VECTOR" | "RASTER" | "UNINITIALIZED">("UNINITIALIZED");
+  const isVector = renderingType === "VECTOR";
+  const is3DAvailable = isVector;
 
   const activate3D = () => {
     const map = mapRef.current;
@@ -138,7 +138,7 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa interativo da viagem">
 <MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} onMapReady={map => { mapRef.current = map; setMapReady(true); }}
-        onRenderingTypeChange={type => { setRenderingType(type); if (type !== window.google.maps.RenderingType.VECTOR) setIs3D(false); }} />
+        onRenderingTypeChange={type => { setRenderingType(type as "VECTOR" | "RASTER" | "UNINITIALIZED"); if (type !== window.google.maps.RenderingType.VECTOR) setIs3D(false); }} />
       <div className="absolute left-3 top-3 flex max-w-[calc(100%-24px)] flex-wrap gap-2">
         <button type="button" onClick={fitRoute} disabled={!mapReady} aria-label="Enquadrar viagem" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur disabled:opacity-40"><LocateFixed className="size-4" />Viagem</button>
         <button type="button" onClick={toggleTraffic} disabled={!mapReady} aria-pressed={traffic} className={"inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " + (traffic ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-[#0B1014]/90 text-white")}><TrafficCone className="size-4" />Trânsito</button>
