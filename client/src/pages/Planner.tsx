@@ -386,6 +386,15 @@ export default function Planner() {
                   stops={planned.stops}
                   routes={routeAlternatives.map(route => ({ id: route.id, polyline: route.polyline, selected: route.id === selectedRouteId }))}
                 /></div>
+                {routeConfirmed && routeAlternatives.length > 0 && (
+                  <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[#9EBF1F] bg-[#F2F6DE] px-4 py-3">
+                    <div>
+                      <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-[#668400]">Rota em uso</p>
+                      <p className="mt-1 text-sm font-black text-[#163840]">{selectedRouteId === "principal" ? "Principal" : selectedRouteId.replace("alternativa-", "Alternativa ")}</p>
+                    </div>
+                    <span className="text-[0.58rem] font-bold text-[#5D7200]">Mantida enquanto você compara</span>
+                  </div>
+                )}
                 {!drivingMode && <RouteIntelligenceCard
                   origin={origin}
                   destination={destination}
