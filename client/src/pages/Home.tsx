@@ -2,6 +2,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import TripPrepCard from "@/components/TripPrepCard";
+import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
@@ -238,6 +239,8 @@ export default function Home() {
         </section>
 
         <MobileCopilot />
+
+        <section className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
 
         <section className="bg-[#EAF0F2] py-14 text-[#0B1014] sm:py-18">
           <div className="container">
