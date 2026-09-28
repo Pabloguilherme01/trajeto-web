@@ -38,8 +38,8 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getByText(/R\$\s*28,50/)).toBeTruthy();
     expect(screen.getByText(/Autonomia estimada:/)).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /Google Maps/i }).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /Waze/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Apple Maps/i })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /Waze/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Apple Maps/i }).length).toBeGreaterThan(0);
     expect(screen.getByText("Preferência da viagem")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Evitar pedágios" })).toBeTruthy();
   });
