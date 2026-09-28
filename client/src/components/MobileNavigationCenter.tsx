@@ -1,4 +1,4 @@
-import { CheckCircle2, Fuel, Navigation, RefreshCw, Route, Save, Share2, WifiOff } from "lucide-react";
+import { CheckCircle2, Fuel, Navigation, RefreshCw, Route, Save, Share2, WifiOff, Map } from "lucide-react";
 
 type Props = {
   destination: string;
@@ -19,12 +19,15 @@ type Props = {
   onSave: () => void | Promise<void>;
   onRefresh?: () => void;
   onStations: () => void;
+  onGoogleMaps?: () => void;
+  onWaze?: () => void;
+  onAppleMaps?: () => void;
 };
 
 export default function MobileNavigationCenter({
   destination, distance, duration, recommendationName, detourKm, detourSource,
   fuelCost, litersNeeded, autonomyKm, offline, snapshot = false, snapshotSavedAt,
-  saved = false, onNavigate, onShare, onSave, onRefresh, onStations,
+  saved = false, onNavigate, onShare, onSave, onRefresh, onStations, onGoogleMaps, onWaze, onAppleMaps,
 }: Props) {
   const snapshotAge = snapshotSavedAt ? (() => {
     const time = Date.parse(snapshotSavedAt);
@@ -99,6 +102,9 @@ export default function MobileNavigationCenter({
         <button type="button" onClick={() => void onSave()} disabled={saved || (offline && snapshot)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-black text-white disabled:cursor-default disabled:opacity-50">
           {saved ? <CheckCircle2 className="size-4 text-[#C7FF3C]" /> : <Save className="size-4" />} {saved ? "Salva" : "Salvar"}
         </button>
+        {onGoogleMaps && <button type="button" onClick={onGoogleMaps} disabled={offline} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#BCEFFA] disabled:opacity-40"><Map className="size-4" /> Google Maps</button>}
+        {onWaze && <button type="button" onClick={onWaze} disabled={offline} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF] disabled:opacity-40">Waze</button>}
+        {onAppleMaps && <button type="button" onClick={onAppleMaps} disabled={offline} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black text-white disabled:opacity-40">Apple Maps</button>}
         {snapshot && onRefresh && !offline && (
           <button type="button" onClick={onRefresh} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/25 px-3 text-xs font-black text-[#DFFF9A]">
             <RefreshCw className="size-4" /> Atualizar
