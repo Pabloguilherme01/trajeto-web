@@ -43,6 +43,9 @@ jobs:
       - name: Client library tests
         run: npm run test:client-lib
 
+      - name: Client component tests
+        run: npm run test:client-components
+
       - name: Station sheet UI test
         run: npm run test:client-station-sheet
 
