@@ -5,6 +5,7 @@ const OFFLINE_ROUTE_EVENT = "trajeto-offline-route-change";
 const MAX_SAVED_ROUTES = 30;
 const MAX_TEXT_LENGTH = 500;
 const MAX_PAYLOAD_BYTES = 900_000;
+const STALE_ROUTE_MAX_AGE_MS = 72 * 60 * 60 * 1000;
 
 export type OfflineRoute = {
   id: string;
@@ -214,6 +215,12 @@ export function findOfflineRouteByTrip(routes: OfflineRoute[], origin: string, d
     route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
     route.destination.trim().toLocaleLowerCase("pt-BR") === normalizedDestination,
   ) ?? null;
+}
+
+export function isOfflineRouteStale(savedAt: string, now = Date.now(), maxAgeMs = STALE_ROUTE_MAX_AGE_MS) {
+  const savedTime = Date.parse(savedAt);
+  if (!Number.isFinite(savedTime) || !Number.isFinite(now) || maxAgeMs < 0) return true;
+  return now - savedTime > maxAgeMs;
 }
 
 export function externalNavigationUrl(route: Pick<OfflineRoute, "origin" | "destination">) {
