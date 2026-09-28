@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, Car, Clock3, RefreshCw, Route, Wallet } from "lucide-react";
 import { fetchRouteIntelligence, type RouteIntelligence } from "@/lib/routeIntelligence";
 import { fetchAppleRouteIntelligence, type AppleRouteIntelligence } from "@/lib/appleRouteIntelligence";
+import { getMobileVehicle } from "@/lib/mobileVehicle";
 
 type Props = {
   origin: string;
@@ -24,6 +25,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [message, setMessage] = useState("");
   const [apple, setApple] = useState<AppleRouteIntelligence | null>(null);
   const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
+  const vehicle = getMobileVehicle();
 
   async function refresh() {
     setLoading(true);
@@ -43,6 +46,16 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const main = data?.routes[0];
   async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
+  const fuelCost = (route: typeof main) => {
+    if (!route || !vehicle || !fuelPrice || vehicle.consumption <= 0 || !route.distanceMeters) return null;
+    return (route.distanceMeters / 1000 / vehicle.consumption) * fuelPrice;
+  };
+  const totalCost = (route: typeof main) => {
+    if (!route) return null;
+    const fuel = fuelCost(route);
+    const routeToll = route.toll?.amount ?? 0;
+    return fuel == null && route.toll?.amount == null ? null : (fuel ?? 0) + routeToll;
+  };
 
   return (
     <section aria-labelledby="route-intelligence-title" className="mt-4 rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white">
@@ -67,6 +80,16 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} disponível(is)</strong></div>
         </div>
       )}
+
+      {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div><p className="text-xs font-black">Custo da viagem</p><p className="mt-1 text-[0.58rem] text-white/40">{vehicle ? `${vehicle.name} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Cadastre o veículo para calcular combustível."}</p></div>
+          <label className="flex items-center gap-1 text-[0.58rem] text-white/50">R$/L<input aria-label="Preço do combustível por litro" inputMode="decimal" value={fuelPrice || ""} onChange={event => { const value = Number(event.target.value.replace(",", ".")); setFuelPrice(Number.isFinite(value) ? value : 0); try { localStorage.setItem("trajeto-route-fuel-price", String(value)); } catch {} }} className="w-20 rounded-lg border border-white/10 bg-white/[.06] px-2 py-2 text-xs font-black text-white outline-none" placeholder="0,00" /></label>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {data.routes.slice(0, 4).map((route, index) => <div key={"cost-" + route.id} className="rounded-xl bg-white/[.04] p-3"><p className="text-[0.52rem] uppercase text-white/35">{index === 0 ? "Principal" : "Alternativa " + index}</p><p className="mt-1 text-[0.62rem] text-white/50">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p><strong className="mt-1 block text-sm">{totalCost(route) == null ? "Informe combustível" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong><p className="mt-1 text-[0.55rem] text-white/35">{fuelCost(route) != null ? `Combustível ${fuelCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : "Combustível não calculado"} · Pedágio {route.toll?.amount != null ? route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency }) : "não informado"}</p></div>)}
+        </div>
+      </div>}
 
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black">Comparar provedores</p><p className="mt-1 text-[0.58rem] text-white/40">Google Routes × Apple Maps Server.</p></div><button type="button" onClick={compareApple} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">{comparisonLoading ? "Consultando" : "Comparar"}</button></div>{apple?.routes?.[0] && <div className="mt-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Google</p><strong className="text-xs">{formatDuration(main?.durationSeconds ?? null)} · {((main?.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Apple</p><strong className="text-xs">{formatDuration(apple.routes[0].durationSeconds)} · {((apple.routes[0].distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div></div>}</div>}
 
