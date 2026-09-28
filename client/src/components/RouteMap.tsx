@@ -41,6 +41,7 @@ export function RouteMap({ origin, destination, stops }: RouteMapProps) {
     const map = mapRef.current;
     const bounds = new window.google.maps.LatLngBounds();
     [origin, destination, ...stops].forEach(point => bounds.extend(point));
+    routes?.filter(route => route.polyline).forEach(route => decodePolyline(route.polyline as string).forEach(point => bounds.extend(point)));
     const makeMarker = (position: google.maps.LatLngLiteral, title: string, color: string) => {
       const pin = new window.google.maps.marker.PinElement({ background: color, borderColor: "#163840", glyphColor: "#163840" });
       const marker = new window.google.maps.marker.AdvancedMarkerElement({ map, position, title, content: pin.element });
