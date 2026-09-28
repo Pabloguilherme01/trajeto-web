@@ -13,6 +13,7 @@ type Props = {
   avoidHighways?: boolean;
   selectedRouteId?: string;
   onSelectRoute?: (routeId: string) => void;
+  onConfirmRoute?: (routeId: string) => void;
   onRoutesChange?: (routes: RouteIntelligence["routes"]) => void;
 };
 
@@ -23,7 +24,7 @@ function formatDuration(seconds: number | null) {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
 }
 
-export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways, selectedRouteId = "principal", onSelectRoute, onRoutesChange }: Props) {
+export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways, selectedRouteId = "principal", onSelectRoute, onConfirmRoute, onRoutesChange }: Props) {
   const [data, setData] = useState<RouteIntelligence | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -165,7 +166,10 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                   {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
                   {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
                 </div>
-                <p className="mt-2 text-[0.54rem] font-bold text-white/40">{selected ? "Prévia selecionada no mapa" : "Toque para visualizar no mapa"}</p>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="text-[0.54rem] font-bold text-white/40">{selected ? "Prévia destacada no mapa" : "Toque para visualizar no mapa"}</p>
+                    {selected && <button type="button" onClick={(event) => { event.stopPropagation(); onConfirmRoute?.(route.id); }} className="min-h-9 rounded-lg bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">Usar esta rota</button>}
+                  </div>
               </button>;
             })}
           </div>
