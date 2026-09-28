@@ -1,9 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+function installLocalStorageMock() {
+  const store = new Map<string, string>();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+      clear: () => store.clear(),
+    },
+  });
+}
 import { fireEvent, render, screen } from "@testing-library/react";
 import FuelLogCard from "./FuelLogCard";
 
 describe("FuelLogCard", () => {
   beforeEach(() => {
+    installLocalStorageMock();
     localStorage.clear();
     vi.restoreAllMocks();
   });
