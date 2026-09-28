@@ -1,3 +1,4 @@
+import React from "react";
 import { Accessibility, Check, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
