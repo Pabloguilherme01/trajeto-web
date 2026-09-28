@@ -37,7 +37,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : "");
   const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : "");
   const [roundTrip, setRoundTrip] = useState(true);
-  const [tripsPerWeek, setTripsPerWeek] = useState(5);
+  const [tripsPerWeek, setTripsPerWeek] = useState(5);\n  const [toll, setToll] = useState("");\n  const [parking, setParking] = useState("");\n  const [other, setOther] = useState("");
 
   useEffect(() => {
     const refreshVehicle = () => {
@@ -54,18 +54,18 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     const oneWayDistanceKm = numberValue(distance);
     const pricePerLiter = numberValue(price);
     const kmPerLiter = numberValue(consumption);
-    const tankLiters = numberValue(tank);
+    const tankLiters = numberValue(tank);\n    const extraCostPerTrip = numberValue(toll) + numberValue(parking) + numberValue(other);
     if (!oneWayDistanceKm || !pricePerLiter || !kmPerLiter) return null;
 
     const litersOneWay = oneWayDistanceKm / kmPerLiter;
     const oneWayCost = litersOneWay * pricePerLiter;
-    const projection = projectTripCosts({ oneWayDistanceKm, oneWayCost, roundTrip, tripsPerWeek });
+    const projection = projectTripCosts({ oneWayDistanceKm, oneWayCost, roundTrip, tripsPerWeek, extraCostPerTrip });
     const autonomyKm = tankLiters ? tankLiters * kmPerLiter : 0;
     const fuelNeeded = projection.distanceKm / kmPerLiter;
     const estimatedRefuels = autonomyKm > 0 ? Math.max(0, Math.ceil(fuelNeeded / autonomyKm) - 1) : null;
 
     return { projection, fuelNeeded, autonomyKm, estimatedRefuels, pricePerLiter, kmPerLiter };
-  }, [distance, price, consumption, tank, roundTrip, tripsPerWeek]);
+  }, [distance, price, consumption, tank, toll, parking, other, roundTrip, tripsPerWeek]);
 
   return (
     <section className={compact
@@ -98,8 +98,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
         </label>
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51]">Pedágio por viagem (R$)<input value={toll} onChange={e => setToll(e.target.value)} inputMode="decimal" placeholder="Ex.: 8,50" className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" /></label><label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51]">Estacionamento por viagem (R$)<input value={parking} onChange={e => setParking(e.target.value)} inputMode="decimal" placeholder="Ex.: 10" className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" /></label><label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51]">Outros custos por viagem (R$)<input value={other} onChange={e => setOther(e.target.value)} inputMode="decimal" placeholder="Ex.: 5" className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" /></label><div className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 sm:col-span-2 lg:col-span-3">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#56766A]">Tipo de viagem</p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button type="button" onClick={() => setRoundTrip(false)} aria-pressed={!roundTrip} className={`min-h-11 rounded-lg px-3 text-xs font-extrabold ${!roundTrip ? "bg-[#163840] text-white" : "bg-white text-[#365E51]"}`}>Só ida</button>
@@ -114,15 +114,15 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
       {values ? (
         <div className="mt-4">
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl bg-[#163840] p-4 text-white"><RouteIcon className="size-4 text-[#FFC928]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/60">Por viagem</p><p className="mt-1 text-xl font-black">{values.projection.costPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p></div>
-            <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Fuel className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Combustível</p><p className="mt-1 text-xl font-black text-[#163840]">{values.fuelNeeded.toLocaleString("pt-BR",{maximumFractionDigits:1})} L</p></div>
+            <div className="rounded-xl bg-[#163840] p-4 text-white"><RouteIcon className="size-4 text-[#FFC928]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/60">Total por viagem</p><p className="mt-1 text-xl font-black">{values.projection.costPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p><p className="mt-1 text-[0.58rem] text-white/55">combustível + extras</p></div>
+            <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Fuel className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Combustível</p><p className="mt-1 text-xl font-black text-[#163840]">{values.fuelNeeded.toLocaleString("pt-BR",{maximumFractionDigits:1})} L</p><p className="mt-1 text-[0.58rem] text-[#71877E]">{values.projection.fuelCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p></div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><WalletCards className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Por mês</p><p className="mt-1 text-xl font-black text-[#163840]">{values.projection.monthlyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p></div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Gauge className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Autonomia</p><p className="mt-1 text-xl font-black text-[#163840]">{values.autonomyKm ? values.autonomyKm.toLocaleString("pt-BR",{maximumFractionDigits:0}) + " km" : "Informe o tanque"}</p></div>
           </div>
-          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
+          {values.projection.extraCostPerTrip > 0 && <p className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#56766A]">Extras por viagem: {values.projection.extraCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Eles entram no total e nas projeções recorrentes.</p>}\n          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">Para esta distância e autonomia informadas, o cálculo indica aproximadamente {values.estimatedRefuels} parada(s) de abastecimento.</p>
           )}
-          <p id="local-calculator-note" className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">Estimativa baseada exclusivamente nos valores informados. O cálculo lembra neste aparelho o último preço informado e pode aproveitar o veículo salvo. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.</p>
+          <p id="local-calculator-note" className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">Estimativa baseada exclusivamente nos valores informados. Pedágios, estacionamento e outros custos são opcionais e considerados por viagem. O cálculo lembra neste aparelho o último preço informado e pode aproveitar o veículo salvo. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.</p>
         </div>
       ) : (
         <p className="mt-4 rounded-xl border border-dashed border-[#C7D2C9] bg-[#F8FAF7] px-3 py-3 text-xs font-semibold text-[#71877E]">Preencha distância, preço e consumo para calcular. Nenhum valor é inventado pelo Trajeto.</p>
