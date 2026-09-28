@@ -86,8 +86,10 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const totalCost = (route: typeof main) => {
     if (!route) return null;
     const fuel = fuelCost(route);
-    const routeToll = route.toll?.amount ?? 0;
-    return fuel == null && route.toll?.amount == null ? null : (fuel ?? 0) + routeToll;
+    if (fuel == null) return null;
+    const routeToll = route.toll?.amount;
+    if (routeToll == null) return null;
+    return fuel + routeToll;
   };
 
   const routeSavings = (route: typeof main) => {
@@ -149,7 +151,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <button key={mode} type="button" aria-pressed={decisionMode === mode} onClick={() => {
               setDecisionMode(mode);
               if (mode === "no-tolls") setAvoidTollsState(true);
-              if (mode !== "no-tolls" && mode !== "cheapest") setAvoidTollsState(false);
+              if (mode === "balanced" || mode === "fastest") setAvoidTollsState(false);
             }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
           ))}
         </div>
@@ -300,37 +302,6 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </div>
       )}
 
-
-      {data && data.routes.length > 1 && (
-        <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
-          <p className="text-xs font-black">Alternativas reais</p>
-          <p className="mt-1 text-[0.58rem] text-white/40">Selecione para destacar a polyline no mapa e depois confirme com “Usar esta rota”.</p>
-          <div className="mt-3 space-y-2">
-            {data.routes.slice(0, 4).map((route, index) => {
-              const selected = selectedRouteId === route.id;
-              const traffic = (route.trafficIntervals || []).reduce((acc, item) => {
-                if (item.speed === "SLOW") acc.slow += 1;
-                if (item.speed === "TRAFFIC_JAM") acc.jam += 1;
-                return acc;
-              }, { slow: 0, jam: 0 });
-              return (
-                <div key={route.id} className={"rounded-xl border p-3 " + (selected ? "border-[#C7FF3C]/50 bg-[#C7FF3C]/[.08]" : "border-white/8 bg-white/[.025]")}>
-                  <button type="button" aria-pressed={selected} onClick={() => onSelectRoute?.(route.id)} className="w-full text-left">
-                    <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
-                    <p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
-                  </button>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {route.toll?.amount === 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem]">sem pedágio</span>}
-                    {trafficDetailed && traffic.slow > 0 && <span className="rounded-full bg-amber-300/10 px-2 py-1 text-[0.52rem] text-amber-100">{traffic.slow} trecho(s) lento(s)</span>}
-                    {trafficDetailed && traffic.jam > 0 && <span className="rounded-full bg-red-300/10 px-2 py-1 text-[0.52rem] text-red-100">{traffic.jam} congestionado(s)</span>}
-                  </div>
-                  {selected && <div className="mt-2 flex items-center justify-between gap-2"><span className="text-[0.54rem] text-white/40">Prévia selecionada</span><button type="button" onClick={() => onConfirmRoute?.(route.id)} className="min-h-9 rounded-lg bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">Usar esta rota</button></div>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {data && (
         <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02] p-3">
