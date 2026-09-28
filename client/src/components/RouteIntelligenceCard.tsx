@@ -47,7 +47,9 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
   const fuelCost = (route: typeof main) => {
-    if (!route || !vehicle || !fuelPrice || vehicle.consumption <= 0 || !route.distanceMeters) return null;
+    if (!route || !fuelPrice) return null;
+    if (route.fuelConsumptionLiters != null && route.fuelConsumptionLiters > 0) return route.fuelConsumptionLiters * fuelPrice;
+    if (!vehicle || vehicle.consumption <= 0 || !route.distanceMeters) return null;
     return (route.distanceMeters / 1000 / vehicle.consumption) * fuelPrice;
   };
   const totalCost = (route: typeof main) => {
