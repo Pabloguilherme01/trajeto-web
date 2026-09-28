@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -14,6 +14,16 @@ describe("mobile tools", () => {
     expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
       "https://www.google.com/maps/search/?api=1&query=postos+perto+de+%C3%81guas+Lindas",
     );
+  });
+
+  it("builds Waze navigation links with a search fallback", () => {
+    expect(buildWazeNavigationUrl("Brasília, DF")).toBe("https://waze.com/ul?navigate=yes&q=Bras%C3%ADlia%2C+DF");
+    expect(buildWazeNavigationUrl("Destino", { lat: -15.86, lng: -48.03 })).toBe("https://waze.com/ul?navigate=yes&ll=-15.86%2C-48.03&zoom=17");
+  });
+
+  it("builds Apple Maps driving directions", () => {
+    expect(buildAppleMapsDirectionsUrl("Brasília, DF")).toBe("https://maps.apple.com/?daddr=Bras%C3%ADlia%2C+DF&dirflg=d");
+    expect(buildAppleMapsDirectionsUrl("Brasília, DF", "Águas Lindas, GO")).toBe("https://maps.apple.com/?daddr=Bras%C3%ADlia%2C+DF&dirflg=d&saddr=%C3%81guas+Lindas%2C+GO");
   });
 
   it("shares the native route decision with useful context", () => {
