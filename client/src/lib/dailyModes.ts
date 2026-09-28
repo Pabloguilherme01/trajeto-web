@@ -65,7 +65,7 @@ export function buildDailyModes(online: boolean, savedRoutes: number): DailyMode
     { id: "repetir", label: "Repetir", detail: trip ? trip.origin + " → " + trip.destination : "Última viagem", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) : "/planejar" },
     { id: "economia", label: "Economia", detail: "Calcular custo, consumo e impacto mensal.", href: "/#calculadora" },
     { id: "offline", label: "Sem internet", detail: savedRoutes ? savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas") : "Preparar uma rota para usar offline.", href: "/planejar?salvos=1" },
-    { id: "conducao", label: "Condução", detail: trip ? "Abrir sua última viagem com menos distração." : "Abrir o planejamento com foco na direção.", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) : "/planejar" },
+    { id: "conducao", label: "Condução", detail: trip ? "Abrir sua última viagem com menos distração." : "Abrir o planejamento com foco na direção.", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) + "&modo=conducao" : "/planejar?modo=conducao" },
   ];
   return online ? modes : modes.filter(mode => mode.id === "automatico" || mode.id === "offline");
 }
