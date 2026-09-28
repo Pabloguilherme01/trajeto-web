@@ -36,7 +36,7 @@ export default async function handler(request: Request) {
   const destination = body.destination?.trim();
   if (!origin || !destination || origin.length > 300 || destination.length > 300) return json({ error: "invalid_route" }, 400);
 
-  const params = new URLSearchParams({ origin, destination });
+  const params = new URLSearchParams({ origin, destination, transportType: "Automobile", requestsAlternateRoutes: "true", lang: "pt-BR" });
   const avoid: string[] = [];
   if (body.avoidTolls) avoid.push("Tolls");
   if (body.avoidHighways) avoid.push("Highways");
@@ -48,5 +48,12 @@ export default async function handler(request: Request) {
 
   if (!response.ok) return json({ error: "apple_provider_error", status: response.status, message: (await response.text()).slice(0, 500) }, 502);
   const data = await response.json();
-  return json({ provider: "apple-maps-server", generatedAt: new Date().toISOString(), data });
+  const routes = Array.isArray(data.routes) ? data.routes.slice(0, 4).map((route: { distanceMeters?: number; durationSeconds?: number; hasTolls?: boolean; name?: string }, index: number) => ({
+    id: index === 0 ? "principal" : `alternativa-${index}`,
+    distanceMeters: route.distanceMeters ?? null,
+    durationSeconds: route.durationSeconds ?? null,
+    toll: route.hasTolls ? { available: true } : { available: false },
+    name: route.name || null,
+  })) : [];
+  return json({ provider: "apple-maps-server", generatedAt: new Date().toISOString(), alternativesAvailable: routes.length > 1, routes });
 }
