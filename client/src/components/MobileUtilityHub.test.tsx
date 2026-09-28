@@ -12,7 +12,7 @@ describe("MobileUtilityHub", () => {
     expect(screen.getAllByText("Antes de sair").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
-    expect(screen.getByText("Meu veículo")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Meu veículo/i })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Não deixe o veículo virar surpresa.")).toBeTruthy();
   });
 });
