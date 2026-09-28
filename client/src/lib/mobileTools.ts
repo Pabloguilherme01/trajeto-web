@@ -61,6 +61,7 @@ export function buildGoogleMapsDirectionsUrl(
   destination: string,
   travelMode: GoogleMapsTravelMode = "driving",
   navigate = false,
+  waypoints: string[] = [],
 ) {
   const normalizedOrigin = origin.trim();
   const normalizedDestination = destination.trim();
@@ -71,6 +72,8 @@ export function buildGoogleMapsDirectionsUrl(
     travelmode: travelMode,
   });
   if (navigate) params.set("dir_action", "navigate");
+  const normalizedWaypoints = waypoints.map(item => item.trim()).filter(Boolean).slice(0, 3);
+  if (normalizedWaypoints.length) params.set("waypoints", normalizedWaypoints.join("|"));
   return "https://www.google.com/maps/dir/?" + params.toString();
 }
 

@@ -112,9 +112,12 @@ async function staleWhileRevalidate(request, cacheName) {
       if (response.ok) void cache.put(request, response.clone());
       return response;
     })
-    .catch(() => cached);
+    .catch(() => cached || new Response("Recurso não disponível offline.", {
+      status: 504,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    }));
 
-  return cached || network || new Response("", { status: 504 });
+  return cached || network;
 }
 
 async function networkFirst(request, cacheName) {

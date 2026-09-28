@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Ban, Car, Clock3, RefreshCw, Route, Wallet } from "lucide-react";
 import { fetchRouteIntelligence, type RouteIntelligence } from "@/lib/routeIntelligence";
 import { fetchAppleRouteIntelligence, type AppleRouteIntelligence } from "@/lib/appleRouteIntelligence";
 import { getMobileVehicle } from "@/lib/mobileVehicle";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
+import { selectRouteForDecision, type RouteDecisionMode } from "@/lib/routeDecision";
 
 type Props = {
   origin: string;
@@ -31,17 +32,29 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [message, setMessage] = useState("");
   const [apple, setApple] = useState<AppleRouteIntelligence | null>(null);
   const [comparisonLoading, setComparisonLoading] = useState(false);
-  const [avoidTollsState, setAvoidTollsState] = useState(Boolean(avoidTolls));
+  const [avoidTollsState, setAvoidTollsState] = useState(() => {
+    if (avoidTolls != null) return Boolean(avoidTolls);
+    try { return localStorage.getItem("trajeto-route-decision-mode") === "no-tolls"; } catch { return false; }
+  });
   const [avoidHighwaysState, setAvoidHighwaysState] = useState(Boolean(avoidHighways));
   const [tomtom, setTomtom] = useState<{ routes: Array<{ distanceMeters: number | null; durationSeconds: number | null; trafficDelaySeconds: number | null }> } | null>(null);
   const [trafficDetailed, setTrafficDetailed] = useState(false);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
-  const [decisionMode, setDecisionMode] = useState<"balanced" | "fastest" | "cheapest" | "no-tolls">("balanced");
+  const [decisionMode, setDecisionMode] = useState<RouteDecisionMode>(() => {
+    try {
+      const stored = localStorage.getItem("trajeto-route-decision-mode");
+      return stored === "fastest" || stored === "cheapest" || stored === "no-tolls" ? stored : "balanced";
+    } catch {
+      return "balanced";
+    }
+  });
+  const requestSequence = useRef(0);
+  const skipAutoRefresh = useRef(false);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
 
   function fuelCost(route: RouteIntelligence["routes"][number] | undefined) {
-    if (!route || !fuelPrice) return null;
+    if (!route || !Number.isFinite(fuelPrice) || fuelPrice <= 0) return null;
     if (route.fuelConsumptionLiters != null && route.fuelConsumptionLiters > 0) return route.fuelConsumptionLiters * fuelPrice;
     if (!vehicle || vehicle.consumption <= 0 || !route.distanceMeters) return null;
     return (route.distanceMeters / 1000 / vehicle.consumption) * fuelPrice;
@@ -50,31 +63,44 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     if (!route) return null;
     const fuel = fuelCost(route);
     const routeToll = route.toll?.amount;
+    if (route.toll?.currency !== "BRL") return null;
     return fuel != null && routeToll != null ? fuel + routeToll : null;
   }
 
-  async function refresh(overrides?: { avoidTolls?: boolean; avoidHighways?: boolean }) {
+  async function refresh(overrides?: { avoidTolls?: boolean; avoidHighways?: boolean; decisionMode?: RouteDecisionMode; applyPreset?: boolean }) {
+    const requestId = ++requestSequence.current;
     setLoading(true);
     setMessage("");
     try {
       const nextAvoidTolls = overrides?.avoidTolls ?? avoidTollsState;
       const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
+      const nextMode = overrides?.decisionMode ?? decisionMode;
       const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
+      if (requestId !== requestSequence.current) return;
       setData(nextData);
       onRoutesChange?.(nextData.routes);
-      if (!selectedRouteId && nextData.routes[0]) onSelectRoute?.(nextData.routes[0].id);
+      if (overrides?.applyPreset) {
+        const route = selectRouteForDecision(nextData.routes, nextMode, fuelCost, totalCost);
+        if (route) onSelectRoute?.(route.id);
+        else setMessage(nextMode === "no-tolls"
+          ? "Nenhuma alternativa retornada tem pedágio confirmado como zero."
+          : "Não há dados suficientes para aplicar esse critério.");
+      } else if (!selectedRouteId && nextData.routes[0]) {
+        onSelectRoute?.(nextData.routes[0].id);
+      }
     } catch (error) {
+      if (requestId !== requestSequence.current) return;
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
       setMessage(code === "routing_provider_not_configured"
         ? "Dados avançados ainda não estão configurados no servidor."
         : "Não foi possível atualizar trânsito e pedágios agora.");
     } finally {
-      setLoading(false);
+      if (requestId === requestSequence.current) setLoading(false);
     }
   }
 
   const main = data?.routes[0];
-  useEffect(() => { setAvoidTollsState(Boolean(avoidTolls)); }, [avoidTolls]);
+  useEffect(() => { if (avoidTolls != null) setAvoidTollsState(Boolean(avoidTolls)); }, [avoidTolls]);
   useEffect(() => { setAvoidHighwaysState(Boolean(avoidHighways)); }, [avoidHighways]);
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine);
@@ -86,10 +112,12 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     try { localStorage.setItem("trajeto-route-decision-mode", decisionMode); } catch {}
   }, [decisionMode]);
   useEffect(() => {
-    if (!selectedRouteId) return;
-    try { localStorage.setItem("trajeto-confirmed-route-id", selectedRouteId); } catch {}
-  }, [selectedRouteId]);
-  useEffect(() => { void refresh(); }, [origin, destination, waypoints.join("|"), avoidTollsState, avoidHighwaysState, trafficDetailed]);
+    if (skipAutoRefresh.current) {
+      skipAutoRefresh.current = false;
+      return;
+    }
+    void refresh();
+  }, [origin, destination, waypoints.join("|"), avoidTollsState, avoidHighwaysState, trafficDetailed]);
   async function compareTomTom() { setComparisonLoading(true); setMessage(""); try { const base = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim()?.replace(/\/$/, "") || ""; const response = await fetch(base + "/api/tomtom-route-intelligence", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin, destination, avoidTolls, avoidHighways }) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload?.message || "TomTom indisponível"); setTomtom(payload); } catch { setMessage("TomTom ainda não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
@@ -152,8 +180,11 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <button key={mode} type="button" aria-pressed={decisionMode === mode} onClick={() => {
               setDecisionMode(mode);
               const nextAvoidTolls = mode === "no-tolls" ? true : mode === "balanced" || mode === "fastest" ? false : avoidTollsState;
-              setAvoidTollsState(nextAvoidTolls);
-              void refresh({ avoidTolls: nextAvoidTolls });
+              if (nextAvoidTolls !== avoidTollsState) {
+                skipAutoRefresh.current = true;
+                setAvoidTollsState(nextAvoidTolls);
+              }
+              void refresh({ avoidTolls: nextAvoidTolls, decisionMode: mode, applyPreset: true });
             }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
           ))}
         </div>
@@ -193,7 +224,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
         <div className="flex items-center justify-between gap-3">
           <div><p className="text-xs font-black">Custo da viagem</p><p className="mt-1 text-[0.58rem] text-white/40">{vehicle ? `${vehicle.name} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Cadastre o veículo para calcular combustível."}</p></div>
-          <label className="flex items-center gap-1 text-[0.58rem] text-white/50">R$/L<input aria-label="Preço do combustível por litro" inputMode="decimal" value={fuelPrice || ""} onChange={event => { const value = Number(event.target.value.replace(",", ".")); setFuelPrice(Number.isFinite(value) ? value : 0); try { localStorage.setItem("trajeto-route-fuel-price", String(value)); } catch {} }} className="w-20 rounded-lg border border-white/10 bg-white/[.06] px-2 py-2 text-xs font-black text-white outline-none" placeholder="0,00" /></label>
+          <label className="flex items-center gap-1 text-[0.58rem] text-white/50">R$/L<input aria-label="Preço do combustível por litro" inputMode="decimal" value={fuelPrice || ""} onChange={event => { const parsed = Number(event.target.value.replace(",", ".")); const value = Number.isFinite(parsed) && parsed > 0 ? parsed : 0; setFuelPrice(value); try { localStorage.setItem("trajeto-route-fuel-price", String(value)); } catch {} }} className="w-20 rounded-lg border border-white/10 bg-white/[.06] px-2 py-2 text-xs font-black text-white outline-none" placeholder="0,00" /></label>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           {data.routes.slice(0, 4).map((route, index) => <div key={"cost-" + route.id} className="rounded-xl bg-white/[.04] p-3"><p className="text-[0.52rem] uppercase text-white/35">{index === 0 ? "Principal" : "Alternativa " + index}</p><p className="mt-1 text-[0.62rem] text-white/50">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p><strong className="mt-1 block text-sm">{totalCost(route) == null ? "Informe combustível" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>{routeSavings(route) != null && routeSavings(route)! > 0 && <p className="mt-1 text-[0.58rem] font-black text-[#C7FF3C]">Economia potencial de {routeSavings(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} vs. principal</p>}<p className="mt-1 text-[0.55rem] text-white/35">{fuelCost(route) != null ? `Combustível ${fuelCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : "Combustível não calculado"} · Pedágio {route.toll?.amount != null ? route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency }) : "não informado"}</p></div>)}
@@ -210,21 +241,27 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/45">sem rota inventada</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              ["rápida", "Mais rápida", (routes: typeof data.routes, r: typeof data.routes[number]) => (r.durationSeconds ?? Infinity), "menor duração"],
-              ["custo", "Menor custo", (routes: typeof data.routes, r: typeof data.routes[number]) => totalCost(r), "combustível + pedágio"],
-              ["distância", "Menor distância", (routes: typeof data.routes, r: typeof data.routes[number]) => r.distanceMeters, "distância total"],
-              ["pedágio", "Menor pedágio", (routes: typeof data.routes, r: typeof data.routes[number]) => r.toll?.amount, "valor informado"],
-            ].map(([key, label, metric, hint]) => {
-              const ranked = data.routes.filter(route => metric(data.routes, route) != null);
-              const route = ranked.length ? [...ranked].sort((a, b) => Number(metric(data.routes, a)) - Number(metric(data.routes, b)))[0] : data.routes[0];
-              const active = selectedRouteId === route.id;
-              return <button key={String(key)} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
-                <span className="block text-[0.52rem] font-black uppercase text-white/35">{String(label)}</span>
-                <span className="mt-1 block text-[0.62rem] font-black">{route.id === "principal" ? "Principal" : route.id.replace("alternativa-", "Alternativa ")}</span>
-                <span className="mt-1 block text-[0.48rem] text-white/35">{String(hint)}</span>
-              </button>;
-            })}
+            {(() => {
+              type Route = typeof data.routes[number];
+              const balanced = selectRouteForDecision(data.routes, "balanced", fuelCost, totalCost);
+              const options: Array<{ key: string; label: string; hint: string; metric: (route: Route) => number | null }> = [
+                { key: "balanced", label: "Equilibrado", hint: "tempo, distância e custos disponíveis", metric: route => balanced?.id === route.id ? 0 : null },
+                { key: "rápida", label: "Mais rápida", hint: "menor duração", metric: route => route.durationSeconds },
+                { key: "custo", label: "Menor custo", hint: "combustível + pedágio", metric: route => totalCost(route) },
+                { key: "distância", label: "Menor distância", hint: "distância total", metric: route => route.distanceMeters },
+                { key: "pedágio", label: "Menor pedágio", hint: "valor informado", metric: route => route.toll?.amount },
+              ];
+              return options.map(({ key, label, hint, metric }) => {
+                const route = [...data.routes].filter(candidate => metric(candidate) != null)
+                  .sort((a, b) => Number(metric(a)) - Number(metric(b)))[0];
+                const active = Boolean(route && selectedRouteId === route.id);
+                return <button key={key} type="button" disabled={!route} onClick={() => route && onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left disabled:cursor-not-allowed disabled:opacity-45 " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
+                  <span className="block text-[0.52rem] font-black uppercase text-white/35">{label}</span>
+                  <span className="mt-1 block text-[0.62rem] font-black">{route ? route.id === "principal" ? "Principal" : route.id.replace("alternativa-", "Alternativa ") : "Sem dados"}</span>
+                  <span className="mt-1 block text-[0.48rem] text-white/35">{hint}</span>
+                </button>;
+              });
+            })()}
           </div>
           <div className="mt-3 rounded-xl border border-white/6 bg-black/10 p-3 text-[0.58rem] leading-relaxed text-white/45">
             <p><strong className="text-white/70">Combustível:</strong> distância ÷ km/L × preço/L.</p>
@@ -277,7 +314,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             : "Confirme “Usar esta rota” para liberar a navegação externa."}
         </p>
         {routeConfirmed && <div className="mt-3 grid grid-cols-3 gap-2">
-          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button>
+          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true, waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button>
           <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button>
           <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button>
         </div>}

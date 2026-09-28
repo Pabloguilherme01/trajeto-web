@@ -50,8 +50,13 @@ export default function Planner() {
   const routeContextKey = `trajeto-route-context:${origin.trim().toLocaleLowerCase("pt-BR")}→${destination.trim().toLocaleLowerCase("pt-BR")}`;
   const readPersistedRoute = () => {
     try {
-      if (sessionStorage.getItem("trajeto-selected-route-context") !== routeContextKey) return null;
-      return sessionStorage.getItem("trajeto-selected-route");
+      if (localStorage.getItem("trajeto-confirmed-route-context") === routeContextKey) {
+        return localStorage.getItem("trajeto-confirmed-route-id");
+      }
+      if (sessionStorage.getItem("trajeto-selected-route-context") === routeContextKey) {
+        return sessionStorage.getItem("trajeto-selected-route");
+      }
+      return null;
     } catch {
       return null;
     }
@@ -61,6 +66,11 @@ export default function Planner() {
   const selectRoute = (routeId: string) => {
     setSelectedRouteId(routeId);
     setRouteConfirmed(false);
+    try {
+      sessionStorage.removeItem("trajeto-selected-route");
+      localStorage.removeItem("trajeto-confirmed-route-id");
+      localStorage.removeItem("trajeto-confirmed-route-context");
+    } catch {}
   };
   const confirmRoute = (routeId: string) => {
     setSelectedRouteId(routeId);
@@ -74,10 +84,12 @@ export default function Planner() {
   };
   useEffect(() => {
     try {
-      const savedContext = sessionStorage.getItem("trajeto-selected-route-context");
+      const savedContext = localStorage.getItem("trajeto-confirmed-route-context");
       if (savedContext === routeContextKey) return;
       sessionStorage.removeItem("trajeto-selected-route");
       sessionStorage.setItem("trajeto-selected-route-context", routeContextKey);
+      localStorage.removeItem("trajeto-confirmed-route-id");
+      localStorage.removeItem("trajeto-confirmed-route-context");
     } catch {}
     setRouteConfirmed(false);
     setSelectedRouteId("principal");
@@ -480,7 +492,9 @@ export default function Planner() {
                       setRouteConfirmed(false);
                       try {
                         sessionStorage.removeItem("trajeto-selected-route");
+                        sessionStorage.removeItem("trajeto-selected-route-context");
                         localStorage.removeItem("trajeto-confirmed-route-id");
+                        localStorage.removeItem("trajeto-confirmed-route-context");
                       } catch {}
                     }
                   }}

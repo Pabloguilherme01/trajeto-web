@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -14,6 +14,14 @@ describe("mobile tools", () => {
     expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
       "https://www.google.com/maps/search/?api=1&query=postos+perto+de+%C3%81guas+Lindas",
     );
+  });
+
+  it("keeps origin and destination when building a route with waypoints", () => {
+    const url = buildGoogleMapsDirectionsUrl("Casa", "Trabalho", "driving", true, ["Parada A", "Parada B", "Parada C", "Extra"]);
+    expect(url).toContain("origin=Casa");
+    expect(url).toContain("destination=Trabalho");
+    expect(url).toContain("waypoints=Parada+A%7CParada+B%7CParada+C");
+    expect(url).toContain("dir_action=navigate");
   });
 
   it("builds a Google Maps route with up to three intermediate stops", () => {
@@ -41,8 +49,8 @@ describe("mobile tools", () => {
   });
 
   it("builds Apple Maps driving directions", () => {
-    expect(buildAppleMapsDirectionsUrl("Brasília, DF")).toBe("https://maps.apple.com/?daddr=Bras%C3%ADlia%2C+DF&dirflg=d");
-    expect(buildAppleMapsDirectionsUrl("Brasília, DF", "Águas Lindas, GO")).toBe("https://maps.apple.com/?daddr=Bras%C3%ADlia%2C+DF&dirflg=d&saddr=%C3%81guas+Lindas%2C+GO");
+    expect(buildAppleMapsDirectionsUrl("Brasília, DF")).toBe("https://maps.apple.com/directions?destination=Bras%C3%ADlia%2C+DF&mode=driving");
+    expect(buildAppleMapsDirectionsUrl("Brasília, DF", "Águas Lindas, GO")).toBe("https://maps.apple.com/directions?destination=Bras%C3%ADlia%2C+DF&mode=driving&source=%C3%81guas+Lindas%2C+GO");
   });
 
   it("shares the native route decision with useful context", () => {
