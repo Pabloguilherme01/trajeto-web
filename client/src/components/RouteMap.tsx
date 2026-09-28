@@ -27,8 +27,8 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     if (!mapRef.current) return;
     const updateRenderingType = () => {
       const type = mapRef.current?.getRenderingType?.();
-      if (type === window.google.maps.RenderingType.VECTOR) setRenderingType("VECTOR");
-      else if (type === window.google.maps.RenderingType.RASTER) {
+      if (type === window.google?.maps?.RenderingType?.VECTOR) setRenderingType("VECTOR");
+      else if (type === window.google?.maps?.RenderingType?.RASTER) {
         setRenderingType("RASTER");
         setIs3D(false);
       }

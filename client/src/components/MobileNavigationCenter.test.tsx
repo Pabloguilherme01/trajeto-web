@@ -33,8 +33,8 @@ describe("MobileNavigationCenter", () => {
 
     expect(screen.getByRole("heading", { name: "Pronto para ir." })).toBeTruthy();
     expect(screen.getByText("→ Brasília, DF")).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Navegar agora/i })).toBeTruthy();
-    expect(screen.getByText("Posto Exemplo")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /Navegar agora/i })[0]).toBeTruthy();
+    expect(screen.getAllByText("Posto Exemplo")[0]).toBeTruthy();
     expect(screen.getByText(/R$ 28,50/)).toBeTruthy();
     expect(screen.getByText(/Autonomia estimada: 520 km/)).toBeTruthy();
     expect(screen.getByRole("button", { name: /Google Maps/i })).toBeTruthy();
