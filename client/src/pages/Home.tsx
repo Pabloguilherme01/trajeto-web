@@ -6,8 +6,6 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import FuelLogCard from "@/components/FuelLogCard";
 import MobilityExpenseCard from "@/components/MobilityExpenseCard";
 import MobilityDashboardCard from "@/components/MobilityDashboardCard";
-import DailyMobilityHub from "@/components/DailyMobilityHub";
-import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
@@ -255,35 +253,9 @@ export default function Home() {
         <VehicleServiceHub />
           <VehicleMaintenanceCard />
 
-        <MobileCopilot />
-
         <DailyDepartureChecklist />
 
         <section className="container py-4 sm:py-5" aria-label="Atalhos de rotina"><MobileTripShortcuts /></section>
-
-        <section className="container py-2 sm:py-4" aria-labelledby="today-title">
-          <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#111A21] shadow-[0_18px_50px_rgba(0,0,0,.22)]">
-            <div className="grid gap-0 md:grid-cols-[1.1fr_.9fr]">
-              <div className="p-5 sm:p-6">
-                <p className="text-[0.62rem] font-extrabold uppercase tracking-[0.15em] text-[#3DE3FF]">Painel de hoje</p>
-                <h2 id="today-title" className="mt-2 font-display text-2xl font-semibold tracking-[-0.055em] text-white sm:text-3xl">Seu próximo passo já fica preparado.</h2>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#9FB0B8]">Acompanhe a viagem, o custo e o veículo sem precisar procurar em várias telas. O Trajeto guarda somente preferências locais necessárias para acelerar o próximo uso.</p>
-              </div>
-              <div className="grid grid-cols-2 border-t border-white/8 md:border-l md:border-t-0">
-                <a href={appUrl("/planejar")} className="flex min-h-28 flex-col justify-between border-r border-white/8 p-4 transition hover:bg-white/[.035]">
-                  <Navigation className="size-5 text-[#C7FF3C]" />
-                  <span><strong className="block text-sm text-white">Planejar</strong><span className="mt-1 block text-[0.65rem] text-[#7F919A]">Destino, parada e rota</span></span>
-                </a>
-                <a href="#calculadora" className="flex min-h-28 flex-col justify-between p-4 transition hover:bg-white/[.035]">
-                  <TimerReset className="size-5 text-[#3DE3FF]" />
-                  <span><strong className="block text-sm text-white">Economizar</strong><span className="mt-1 block text-[0.65rem] text-[#7F919A]">Custo e consumo</span></span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <DailyMobilityHub />
 
         <section id="calculadora" className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
 
