@@ -10,10 +10,8 @@ import DailyMobilityHub from "@/components/DailyMobilityHub";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
-import DailyModeSelector from "@/components/DailyModeSelector";
-import DailyNowCard from "@/components/DailyNowCard";
-import DailySetupCard from "@/components/DailySetupCard";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
+import DailyCommandCenter from "@/components/DailyCommandCenter";
 import OfficialSourcesCard from "@/components/OfficialSourcesCard";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
@@ -247,13 +245,9 @@ export default function Home() {
           </div>
         </section>
 
-        <DailyNowCard />
+        <DailyCommandCenter />
 
         <MobileCopilot />
-
-        <DailyModeSelector />
-
-        <DailySetupCard />
 
         <DailyDepartureChecklist />
 
