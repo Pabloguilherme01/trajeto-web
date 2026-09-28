@@ -56,8 +56,9 @@ export default function Planner() {
         payload: planned,
       });
       setShareMessage("Rota salva neste aparelho. Ela pode ser reaberta sem recalcular.");
-    } catch {
+    } catch (error) {
       setShareMessage("Não foi possível salvar esta rota no aparelho. Tente novamente.");
+      throw error;
     }
   };
 
