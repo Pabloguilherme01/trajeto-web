@@ -1,6 +1,7 @@
 export type RouteIntelligenceRoute = {
   id: string;
   labels?: string[];
+  polyline: string | null;
   distanceMeters: number | null;
   durationSeconds: number | null;
   staticDurationSeconds: number | null;
