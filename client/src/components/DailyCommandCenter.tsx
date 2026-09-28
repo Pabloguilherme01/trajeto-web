@@ -45,6 +45,7 @@ const modeIcon: Record<DailyModeId, typeof Sparkles> = {
   repetir: Route,
   economia: CircleDollarSign,
   offline: WifiOff,
+  conducao: CarFront,
 };
 
 export default function DailyCommandCenter() {
@@ -106,7 +107,13 @@ export default function DailyCommandCenter() {
             detail: "Consumo, combustível e impacto mensal.",
             href: appUrl("/") + "#calculadora",
           }
-        : active?.id === "offline" && routes[0]
+        : active?.id === "conducao" && lastTrip
+            ? {
+                label: "Abrir modo condução",
+                detail: lastTrip.origin + " → " + lastTrip.destination,
+                href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination),
+              }
+            : active?.id === "offline" && routes[0]
           ? {
               label: "Continuar rota salva",
               detail: routes[0].origin + " → " + routes[0].destination,
