@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { clearLocalAppData, listLocalAppKeys } from "./localData";
+import { clearLocalAppData, exportLocalAppData, listLocalAppKeys } from "./localData";
 
 describe("localData", () => {
   afterEach(() => localStorage.clear());
@@ -19,4 +19,19 @@ describe("localData", () => {
     expect(localStorage.getItem("trajeto-mobile-vehicle")).toBeNull();
     expect(localStorage.getItem("other-app-setting")).toBe("keep");
   });
+});
+
+
+it("exports Trajeto-owned data as a browser download", () => {
+  localStorage.setItem("trajeto-daily-mode", "automatico");
+  const createObjectURL = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:test");
+  const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+  const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+  expect(exportLocalAppData()).toBe(true);
+  expect(click).toHaveBeenCalled();
+  expect(createObjectURL).toHaveBeenCalled();
+  expect(revokeObjectURL).toHaveBeenCalledWith("blob:test");
+  createObjectURL.mockRestore();
+  revokeObjectURL.mockRestore();
+  click.mockRestore();
 });
