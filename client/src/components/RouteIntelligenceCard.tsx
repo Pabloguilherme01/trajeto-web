@@ -147,6 +147,31 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </div>
       </div>}
 
+      {data && data.routes.length > 1 && (
+        <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
+          <p className="text-xs font-black">Escolha a rota no mapa</p>
+          <p className="mt-1 text-[0.58rem] text-white/40">Selecione uma alternativa para destacar o caminho real antes de navegar.</p>
+          <div className="mt-3 space-y-2">
+            {data.routes.slice(0, 4).map((route, index) => {
+              const analysis = routeAnalysis(route, index);
+              const selected = selectedRouteId === route.id;
+              return <button key={route.id} type="button" aria-pressed={selected} onClick={() => onSelectRoute?.(route.id)} className={"w-full rounded-xl border p-3 text-left transition " + (selected ? "border-[#C7FF3C]/50 bg-[#C7FF3C]/[.08]" : "border-white/8 bg-white/[.025] hover:border-white/20")}>
+                <div className="flex items-start justify-between gap-3">
+                  <div><p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p><p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p></div>
+                  <strong className="text-sm">{totalCost(route) == null ? "Custo parcial" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}
+                  {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
+                  {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
+                </div>
+                <p className="mt-2 text-[0.54rem] font-bold text-white/40">{selected ? "Prévia selecionada no mapa" : "Toque para visualizar no mapa"}</p>
+              </button>;
+            })}
+          </div>
+        </div>
+      )}
+
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><p className="text-xs font-black">Navegar agora</p><p className="mt-1 text-[0.58rem] text-white/40">O Trajeto prepara a viagem; o navegador escolhido faz a condução.</p><div className="mt-3 grid grid-cols-3 gap-2"><button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button><button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button><button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button></div></div>
 
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black">Comparar provedores</p><p className="mt-1 text-[0.58rem] text-white/40">Google Routes × Apple Maps Server × TomTom.</p></div><button type="button" onClick={compareApple} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">{comparisonLoading ? "Consultando" : "Comparar"}</button><button type="button" onClick={compareTomTom} disabled={comparisonLoading} className="min-h-10 rounded-lg bg-white/[.07] px-3 text-[0.62rem] font-black disabled:opacity-50">TomTom</button></div>{(apple?.routes?.[0] || tomtom?.routes?.[0]) && <div className="mt-3 grid grid-cols-3 gap-2"><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Google</p><strong className="text-xs">{formatDuration(main?.durationSeconds ?? null)} · {((main?.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">Apple</p><strong className="text-xs">{apple?.routes?.[0] ? formatDuration(apple.routes[0].durationSeconds) : "não consultado"}</strong></div><div className="rounded-lg bg-white/[.04] p-2.5"><p className="text-[0.52rem] uppercase text-white/35">TomTom</p><strong className="text-xs">{tomtom?.routes?.[0] ? formatDuration(tomtom.routes[0].durationSeconds) : "não consultado"}</strong></div></div>}</div>}
