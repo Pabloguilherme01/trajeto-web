@@ -389,7 +389,7 @@ export default function Planner() {
                 {!drivingMode && <RouteIntelligenceCard
                   origin={origin}
                   destination={destination}
-                  waypoints={planned.stops.slice(0, 3).map(stop => stop.address)}
+                  waypoints={[]}
                   selectedRouteId={selectedRouteId}
                   onSelectRoute={setSelectedRouteId}
                   onRoutesChange={routes => {
