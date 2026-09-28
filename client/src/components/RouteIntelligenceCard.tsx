@@ -156,21 +156,28 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             {data.routes.slice(0, 4).map((route, index) => {
               const analysis = routeAnalysis(route, index);
               const selected = selectedRouteId === route.id;
-              return <div key={route.id} className={"w-full rounded-xl border p-3 text-left transition " + (selected ? "border-[#C7FF3C]/50 bg-[#C7FF3C]/[.08]" : "border-white/8 bg-white/[.025]")}>
-                <div className="flex items-start justify-between gap-3">
-                  <div><p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p><p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p></div>
-                  <strong className="text-sm">{totalCost(route) == null ? "Custo parcial" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
-                </div></button>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}
-                  {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
-                  {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
-                </div>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                    <p className="text-[0.54rem] font-bold text-white/40">{selected ? "Prévia destacada no mapa" : "Toque para visualizar no mapa"}</p>
-                    {selected && <button type="button" onClick={(event) => { event.stopPropagation(); onConfirmRoute?.(route.id); }} className="min-h-9 rounded-lg bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">Usar esta rota</button>}
+              return (
+                <div key={route.id} className={"w-full rounded-xl border p-3 transition " + (selected ? "border-[#C7FF3C]/50 bg-[#C7FF3C]/[.08]" : "border-white/8 bg-white/[.025]")}>
+                  <button type="button" aria-pressed={selected} onClick={() => onSelectRoute?.(route.id)} className="w-full text-left">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
+                        <p className="mt-1 text-[0.58rem] text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
+                      </div>
+                      <strong className="text-sm">{totalCost(route) == null ? "Custo parcial" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
+                    </div>
+                  </button>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/65">{badge}</span>)}
+                    {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
+                    {analysis.tradeoff && <span className="w-full text-[0.55rem] leading-relaxed text-white/45">{analysis.tradeoff}</span>}
                   </div>
-              </div>;
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="text-[0.54rem] font-bold text-white/40">{selected ? "Prévia destacada no mapa" : "Toque para visualizar no mapa"}</p>
+                    {selected && <button type="button" onClick={() => onConfirmRoute?.(route.id)} className="min-h-9 rounded-lg bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">Usar esta rota</button>}
+                  </div>
+                </div>
+              );
             })}
           </div>
         </div>
