@@ -11,7 +11,7 @@ const sources = [
   {
     title: "Histórico de preços",
     detail: "Séries históricas para comparar evolução de preços e contexto regional.",
-    href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos",
+    href: "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/serie-historica-de-precos-de-combustiveis",
     icon: History,
   },
   {
