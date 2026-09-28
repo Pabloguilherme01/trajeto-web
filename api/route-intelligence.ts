@@ -124,16 +124,14 @@ export default async function handler(request: Request) {
         tollInfo?: {
           estimatedPrice?: Array<{ currencyCode?: string; units?: string; nanos?: number }>;
         };
-      };
-      routeLabels?: string[];
-      polyline?: { encodedPolyline?: string };
-      travelAdvisory?: {
         speedReadingIntervals?: Array<{
           startPolylinePointIndex?: number;
           endPolylinePointIndex?: number;
           speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM";
         }>;
       };
+      routeLabels?: string[];
+      polyline?: { encodedPolyline?: string };
     }>;
   };
 
@@ -148,6 +146,13 @@ export default async function handler(request: Request) {
       labels: route.routeLabels || [],
       polyline: route.polyline?.encodedPolyline || null,
       trafficIntervals: body.trafficDetailed ? (route.travelAdvisory?.speedReadingIntervals || []) : [],
+      trafficImpact: body.trafficDetailed ? (() => {
+        const intervals = route.travelAdvisory?.speedReadingIntervals || [];
+        const points = intervals.reduce((sum, item) => sum + Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)), 0);
+        const slow = intervals.reduce((sum, item) => sum + (item.speed === "SLOW" ? Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)) : 0), 0);
+        const jam = intervals.reduce((sum, item) => sum + (item.speed === "TRAFFIC_JAM" ? Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)) : 0), 0);
+        return { slowPoints: slow, jamPoints: jam, affectedPoints: slow + jam, totalPoints: points };
+      })() : null,
       distanceMeters: route.distanceMeters ?? null,
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
