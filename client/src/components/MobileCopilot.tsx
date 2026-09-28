@@ -30,7 +30,7 @@ import {
   rememberDestinationUsage,
 } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
-import { vibration } from "@/lib/mobileTools";
+import { buildNearbyStationsUrl, vibration } from "@/lib/mobileTools";
 
 type Action = {
   title: string;
@@ -104,7 +104,7 @@ export default function MobileCopilot() {
   const findNearby = () => {
     if (locatingNearby) return;
     if (!navigator.geolocation) {
-      setLocation(appUrl("/postos") + "?q=postos");
+      setLocation(buildNearbyStationsUrl(appUrl("/postos")));
       return;
     }
     setLocatingNearby(true);
@@ -113,14 +113,12 @@ export default function MobileCopilot() {
         setLocatingNearby(false);
         rememberIntent("nearby");
         setLocation(
-          appUrl("/postos") +
-          "?q=postos&lat=" + encodeURIComponent(position.coords.latitude) +
-          "&lng=" + encodeURIComponent(position.coords.longitude),
+          buildNearbyStationsUrl(appUrl("/postos"), position.coords.latitude, position.coords.longitude),
         );
       },
       () => {
         setLocatingNearby(false);
-        setLocation(appUrl("/postos") + "?q=postos");
+        setLocation(buildNearbyStationsUrl(appUrl("/postos")));
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
     );
