@@ -6,6 +6,8 @@ import DailyMobilityHub from "./DailyMobilityHub";
 import { saveMobileDestination, rememberDestinationUsage } from "@/lib/mobileDestinations";
 import { saveMobileVehicle } from "@/lib/mobileVehicle";
 import { setMobilityBudget } from "@/lib/mobilityBudget";
+import { setSavedDailyMode } from "@/lib/dailyModes";
+import { saveOfflineRoute } from "@/lib/offlineStore";
 
 describe("DailyMobilityHub", () => {
   beforeEach(() => {
@@ -42,4 +44,34 @@ describe("DailyMobilityHub", () => {
       "/planejar?destino=Taguatinga%2C%20DF",
     );
   });
+  it("respects the saved economy mode instead of forcing a destination", () => {
+    const destination = { id: "trabalho" as const, label: "Trabalho", value: "Taguatinga, DF" };
+    saveMobileDestination(destination.id, destination.value);
+    rememberDestinationUsage(destination);
+    setSavedDailyMode("economia");
+
+    render(<DailyMobilityHub />);
+
+    expect(screen.getByText("Ver custo da viagem")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe("/#calculadora");
+  });
+
+  it("respects the saved offline mode when a route is available", async () => {
+    setSavedDailyMode("offline");
+    await saveOfflineRoute({
+      origin: "Casa",
+      destination: "Trabalho",
+      payload: {
+        route: { distanceLabel: "12 km", distanceMeters: 12000, durationSeconds: 1200 },
+        stops: [],
+        anpReferences: [],
+      },
+    });
+
+    render(<DailyMobilityHub />);
+
+    expect(screen.getByText("Continuar rota salva")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe("/planejar?salvos=1");
+  });
+
 });
