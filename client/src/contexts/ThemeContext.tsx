@@ -1,58 +1,30 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "dark";
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme?: () => void;
-  switchable: boolean;
+  switchable: false;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  defaultTheme?: Theme;
-  switchable?: boolean;
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "light",
-  switchable = false,
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    try {
-      const stored = localStorage.getItem("theme");
-      if (stored === "light" || stored === "dark") return stored;
-      if (defaultTheme === "dark" || defaultTheme === "light") return defaultTheme;
-      return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    } catch {
-      return defaultTheme;
-    }
-  });
-
+export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
+    root.classList.add("dark");
+    root.style.colorScheme = "dark";
     try {
-      localStorage.setItem("theme", theme);
+      localStorage.setItem("theme", "dark");
     } catch {}
-  }, [theme, switchable]);
-
-  const toggleTheme = switchable
-    ? () => {
-        setTheme(prev => (prev === "light" ? "dark" : "light"));
-      }
-    : undefined;
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, switchable }}>
+    <ThemeContext.Provider value={{ theme: "dark", switchable: false }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -60,9 +32,5 @@ export function ThemeProvider({
 
 export function useTheme() {
   const context = useContext(ThemeContext);
-  return context ?? {
-    theme: "dark" as Theme,
-    toggleTheme: undefined,
-    switchable: false,
-  };
+  return context ?? { theme: "dark" as Theme, switchable: false as const };
 }
