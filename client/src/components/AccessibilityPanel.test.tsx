@@ -15,7 +15,7 @@ describe("AccessibilityPanel", () => {
     localStorage.setItem("trajeto-daily-mode", "automatico");
     localStorage.setItem("other-app-setting", "keep");
     render(<AccessibilityPanel />);
-    await user.click(screen.getByRole("button", { name: /abrir acessibilidade/i }));
+    await user.click(screen.getAllByRole("button", { name: /abrir acessibilidade/i })[0]);
     expect(screen.getByText(/dados deste aparelho/i)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /limpar dados do trajeto/i }));
     await user.click(screen.getByRole("button", { name: /confirmar limpeza/i }));
