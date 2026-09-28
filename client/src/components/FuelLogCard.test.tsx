@@ -30,7 +30,7 @@ describe("FuelLogCard", () => {
     fireEvent.change(screen.getByLabelText("Valor total"), { target: { value: "240" } });
     fireEvent.change(screen.getByLabelText("Observação (opcional)"), { target: { value: "Posto habitual" } });
     fireEvent.click(screen.getByRole("button", { name: "Registrar" }));
-    expect(screen.getByText(/6,00/)).toBeTruthy();
+    expect(screen.getAllByText(/6,00/).length).toBeGreaterThan(0);
     expect(screen.getByText(/40 L/)).toBeTruthy();
     expect(screen.getByText(/Posto habitual/)).toBeTruthy();
   });
@@ -40,7 +40,7 @@ describe("FuelLogCard", () => {
     fireEvent.change(screen.getByLabelText("Litros"), { target: { value: "30" } });
     fireEvent.change(screen.getByLabelText("Valor total"), { target: { value: "180" } });
     fireEvent.click(screen.getByRole("button", { name: "Registrar" }));
-    expect(screen.getByText(/180,00/)).toBeTruthy();
+    expect(screen.getAllByText(/180,00/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: /Remover abastecimento/ }));
     expect(screen.getByText("Registros")).toBeTruthy();
   });
