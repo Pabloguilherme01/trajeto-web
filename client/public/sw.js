@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v6";
+const VERSION = "trajeto-v7";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 
@@ -13,7 +13,14 @@ const STATIC_SHELL = [
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then(cache => cache.addAll(STATIC_SHELL))
+      .then(async cache => {
+        await cache.addAll(STATIC_SHELL);
+        const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
+        if (!response.ok) return;
+        const manifest = await response.json();
+        const assets = collectManifestAssets(manifest);
+        await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -33,6 +40,28 @@ self.addEventListener("activate", event => {
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
+
+function collectManifestAssets(manifest) {
+  const assets = new Set();
+  const visit = entry => {
+    if (!entry || typeof entry !== "object") return;
+    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\\//, ""));
+    for (const css of Array.isArray(entry.css) ? entry.css : []) {
+      if (typeof css === "string") assets.add("./" + css.replace(/^\\//, ""));
+    }
+    for (const asset of Array.isArray(entry.assets) ? entry.assets : []) {
+      if (typeof asset === "string") assets.add("./" + asset.replace(/^\\//, ""));
+    }
+    for (const key of ["imports", "dynamicImports"]) {
+      for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
+        const target = manifest[imported];
+        if (target) visit(target);
+      }
+    }
+  };
+  for (const entry of Object.values(manifest)) visit(entry);
+  return [...assets];
+}
 
 self.addEventListener("fetch", event => {
   const request = event.request;
