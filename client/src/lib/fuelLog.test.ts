@@ -1,8 +1,21 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { addFuelLogEntry, listFuelLog, removeFuelLogEntry, summarizeFuelLog } from "./fuelLog";
 
+function installLocalStorageMock() {
+  const store = new Map<string, string>();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+      clear: () => store.clear(),
+    },
+  });
+}
+
 describe("fuelLog", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => installLocalStorageMock());
 
   it("registra abastecimento e calcula preço por litro", () => {
     const entry = addFuelLogEntry({ date: "2026-09-20", liters: 40, totalCost: 240, odometerKm: 10000 });
