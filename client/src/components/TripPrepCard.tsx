@@ -1,3 +1,4 @@
+import React from "react";
 import { CheckCircle2, Sparkles, RotateCcw, Navigation, Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
