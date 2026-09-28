@@ -54,7 +54,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     const oneWayDistanceKm = numberValue(distance);
     const pricePerLiter = numberValue(price);
     const kmPerLiter = numberValue(consumption);
-    const tankLiters = numberValue(tank);\n    const extraCostPerTrip = numberValue(toll) + numberValue(parking) + numberValue(other);
+    const tankLiters = numberValue(tank);
+    const extraCostPerTrip = numberValue(toll) + numberValue(parking) + numberValue(other);
     if (!oneWayDistanceKm || !pricePerLiter || !kmPerLiter) return null;
 
     const litersOneWay = oneWayDistanceKm / kmPerLiter;
@@ -119,7 +120,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><WalletCards className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Por mês</p><p className="mt-1 text-xl font-black text-[#163840]">{values.projection.monthlyCost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p></div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4"><Gauge className="size-4 text-[#356451]" /><p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Autonomia</p><p className="mt-1 text-xl font-black text-[#163840]">{values.autonomyKm ? values.autonomyKm.toLocaleString("pt-BR",{maximumFractionDigits:0}) + " km" : "Informe o tanque"}</p></div>
           </div>
-          {values.projection.extraCostPerTrip > 0 && <p className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#56766A]">Extras por viagem: {values.projection.extraCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Eles entram no total e nas projeções recorrentes.</p>}\n          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
+          {values.projection.extraCostPerTrip > 0 && <p className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-xs font-bold text-[#56766A]">Extras por viagem: {values.projection.extraCostPerTrip.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}. Eles entram no total e nas projeções recorrentes.</p>}
+          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">Para esta distância e autonomia informadas, o cálculo indica aproximadamente {values.estimatedRefuels} parada(s) de abastecimento.</p>
           )}
           <p id="local-calculator-note" className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">Estimativa baseada exclusivamente nos valores informados. Pedágios, estacionamento e outros custos são opcionais e considerados por viagem. O cálculo lembra neste aparelho o último preço informado e pode aproveitar o veículo salvo. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.</p>
