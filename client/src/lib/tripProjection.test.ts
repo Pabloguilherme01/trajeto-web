@@ -11,10 +11,29 @@ describe("projectTripCosts", () => {
     });
 
     expect(result.distanceKm).toBe(100);
+    expect(result.fuelCostPerTrip).toBe(50);
+    expect(result.extraCostPerTrip).toBe(0);
     expect(result.costPerTrip).toBe(50);
     expect(result.weeklyCost).toBe(250);
     expect(result.monthlyCost).toBeCloseTo(1082.5);
     expect(result.annualCost).toBeCloseTo(12990);
+  });
+
+  it("inclui custos extras por viagem", () => {
+    const result = projectTripCosts({
+      oneWayDistanceKm: 40,
+      oneWayCost: 20,
+      roundTrip: true,
+      tripsPerWeek: 3,
+      extraCostPerTrip: 12.5,
+    });
+
+    expect(result.distanceKm).toBe(80);
+    expect(result.fuelCostPerTrip).toBe(40);
+    expect(result.extraCostPerTrip).toBe(12.5);
+    expect(result.costPerTrip).toBe(52.5);
+    expect(result.weeklyCost).toBe(157.5);
+    expect(result.monthlyCost).toBeCloseTo(681.975);
   });
 
   it("limita frequência inválida sem produzir valores negativos", () => {
@@ -23,6 +42,7 @@ describe("projectTripCosts", () => {
       oneWayCost: -5,
       roundTrip: false,
       tripsPerWeek: 99,
+      extraCostPerTrip: -10,
     });
 
     expect(result.distanceKm).toBe(0);
