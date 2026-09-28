@@ -11,6 +11,7 @@ import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
+import MobileQuickBar from "@/components/MobileQuickBar";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -116,7 +117,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0B1014] text-[#EAF0F2]">
+    <div className="min-h-screen overflow-x-hidden bg-[#0B1014] pb-20 text-[#EAF0F2] md:pb-0">
       <header className="border-b border-white/8 bg-[#0B1014]">
         <div className="container flex h-[68px] items-center justify-between gap-4">
           <a href={appUrl("/")} className="flex items-center gap-2.5" aria-label="Trajeto — início">
