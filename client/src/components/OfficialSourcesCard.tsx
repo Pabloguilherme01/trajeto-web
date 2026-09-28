@@ -1,3 +1,4 @@
+import React from "react";
 import { BadgeCheck, ExternalLink, FileBarChart, Fuel, ShieldCheck } from "lucide-react";
 
 const sources = [
