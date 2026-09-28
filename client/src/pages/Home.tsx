@@ -11,6 +11,7 @@ import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
+import DailyNowCard from "@/components/DailyNowCard";
 import DailySetupCard from "@/components/DailySetupCard";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
 import OfficialSourcesCard from "@/components/OfficialSourcesCard";
@@ -245,6 +246,8 @@ export default function Home() {
             </section>
           </div>
         </section>
+
+        <DailyNowCard />
 
         <MobileCopilot />
 
