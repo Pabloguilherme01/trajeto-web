@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildGoogleMapsDirectionsUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -20,6 +20,19 @@ describe("mobile tools", () => {
     const url = buildGoogleMapsMultiStopUrl("Brasília, DF", ["Posto A", "Posto B", "Posto C", "Extra"], true);
     expect(url).toContain("waypoints=Posto+A%7CPosto+B%7CPosto+C");
     expect(url).toContain("dir_action=navigate");
+  });
+
+  it("supports Google Maps route preferences", () => {
+    const url = buildGoogleMapsMultiStopUrl("Brasília, DF", ["Posto A"], true, "avoid-tolls");
+    expect(url).toContain("avoid=tolls");
+  });
+
+  it("supports Apple Maps multistop and avoidance preferences", () => {
+    const url = buildAppleMapsDirectionsUrl("Brasília, DF", undefined, "avoid-tolls", ["Posto A", "Posto B"]);
+    expect(url).toContain("maps.apple.com/directions?");
+    expect(url).toContain("avoid=tolls");
+    expect(url).toContain("waypoint=Posto+A");
+    expect(url).toContain("waypoint=Posto+B");
   });
 
   it("builds Waze navigation links with a search fallback", () => {
