@@ -19,9 +19,9 @@ describe("DailyMobilityHub", () => {
   it("shows a useful first action when no local setup exists", () => {
     render(<DailyMobilityHub />);
 
-    expect(screen.getByRole("heading", { name: /Tudo pronto para o próximo deslocamento/i })).toBeInTheDocument();
-    expect(screen.getByText("Planejar minha próxima viagem")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Continuar/i })).toHaveAttribute("href", "/trajeto-web/planejar");
+    expect(screen.getByRole("heading", { name: /Tudo pronto para o próximo deslocamento/i })).toBeTruthy();
+    expect(screen.getByText("Planejar minha próxima viagem")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe("/trajeto-web/planejar");
   });
 
   it("prioritizes the most-used destination and shows local vehicle and budget", () => {
@@ -34,8 +34,8 @@ describe("DailyMobilityHub", () => {
 
     render(<DailyMobilityHub />);
 
-    expect(screen.getByText("Ir para o destino mais usado")).toBeInTheDocument();
-    expect(screen.getByText(/Trabalho · Taguatinga, DF/)).toBeInTheDocument();
+    expect(screen.getByText("Ir para o destino mais usado")).toBeTruthy();
+    expect(screen.getByText(/Trabalho · Taguatinga, DF/)).toBeTruthy();
     expect(screen.getByText(/12,5 km\/L · tanque 50 L/)).toBeTruthy();
     expect(screen.getByText(/R\$ 800,00/)).toBeTruthy();
     expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe(
