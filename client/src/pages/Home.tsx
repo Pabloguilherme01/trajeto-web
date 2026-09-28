@@ -135,7 +135,7 @@ export default function Home() {
           <div className="container py-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Objetivo: preparar e continuar a viagem</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Assistente pessoal de mobilidade</p>
                 <p className="mt-1 text-sm font-bold text-white">{online ? "Prepare a rota antes de sair e deixe uma cópia no celular para quando a conexão falhar." : savedRoutes > 0 ? `Sem internet: ${savedRoutes} rota${savedRoutes === 1 ? "" : "s"} pronta${savedRoutes === 1 ? "" : "s"} para continuar neste aparelho.` : "Sem internet: não há uma rota pronta para continuar neste aparelho."}</p>
               </div>
               {online ? <a href={appUrl("/planejar")} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
@@ -158,10 +158,10 @@ export default function Home() {
                 <Navigation className="size-3.5" /> Águas Lindas · DF · Entorno
               </div>
               <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
-                Decida a parada.<br /><span className="text-[#C7FF3C]">Siga melhor.</span>
+                Seu dia em movimento.<br /><span className="text-[#C7FF3C]">Mais simples.</span>
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#B7C4CA] sm:mt-7 sm:text-lg">
-                O Trajeto transforma deslocamento em uma sequência simples: escolha o destino, decida onde parar, salve o plano e saia. Na próxima vez, o celular já lembra o caminho. Sem cadastro para começar.
+                O Trajeto transforma deslocamento em uma rotina simples: escolha para onde vai, veja o impacto da viagem, prepare o que precisa e continue mais rápido na próxima vez. Destinos, rotas, custos e preferências ficam organizados no celular.
               </p>
 
               <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
@@ -247,6 +247,8 @@ export default function Home() {
 
         <DailyModeSelector />
 
+        <section className="container py-4 sm:py-5" aria-label="Atalhos de rotina"><MobileTripShortcuts /></section>
+
         <DailyMobilityHub />
 
         <section id="calculadora" className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
@@ -315,7 +317,7 @@ export default function Home() {
                 {online && <div className="rounded-2xl border border-[#CFD9DD] bg-white p-4"><p className="text-xs font-extrabold">Navegação</p><p className="mt-1 text-xs leading-relaxed text-[#6B7A81]">Abra Waze ou Google Maps quando houver conexão.</p></div>}
               </div>
             </div>
-            <div className="space-y-4"><MobileTripShortcuts /><RecentTripsCard /><MobileVehicleCard /><TripPrepCard /></div>
+            <div className="space-y-4"><RecentTripsCard /><MobileVehicleCard /><TripPrepCard /></div>
           </div>
         </section>
 
