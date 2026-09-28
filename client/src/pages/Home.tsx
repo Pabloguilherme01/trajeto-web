@@ -151,7 +151,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="border-b border-white/8">
+        <section className="premium-surface border-b border-white/8">
           <div className="container grid gap-7 py-8 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/8 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#D9FF91]">
