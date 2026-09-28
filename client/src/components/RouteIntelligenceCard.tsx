@@ -40,6 +40,19 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
 
+  const fuelCost = (route: typeof data extends null ? never : RouteIntelligence["routes"][number] | undefined) => {
+    if (!route || !fuelPrice) return null;
+    if (route.fuelConsumptionLiters != null && route.fuelConsumptionLiters > 0) return route.fuelConsumptionLiters * fuelPrice;
+    if (!vehicle || vehicle.consumption <= 0 || !route.distanceMeters) return null;
+    return (route.distanceMeters / 1000 / vehicle.consumption) * fuelPrice;
+  };
+  const totalCost = (route: RouteIntelligence["routes"][number] | undefined) => {
+    if (!route) return null;
+    const fuel = fuelCost(route);
+    const routeToll = route.toll?.amount;
+    return fuel != null && routeToll != null ? fuel + routeToll : null;
+  };
+
   async function refresh(overrides?: { avoidTolls?: boolean; avoidHighways?: boolean }) {
     setLoading(true);
     setMessage("");
@@ -88,21 +101,6 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
   const trafficDelay = main?.durationSeconds != null && main?.staticDurationSeconds != null ? Math.max(0, main.durationSeconds - main.staticDurationSeconds) : null;
-  const fuelCost = (route: typeof main) => {
-    if (!route || !fuelPrice) return null;
-    if (route.fuelConsumptionLiters != null && route.fuelConsumptionLiters > 0) return route.fuelConsumptionLiters * fuelPrice;
-    if (!vehicle || vehicle.consumption <= 0 || !route.distanceMeters) return null;
-    return (route.distanceMeters / 1000 / vehicle.consumption) * fuelPrice;
-  };
-  const totalCost = (route: typeof main) => {
-    if (!route) return null;
-    const fuel = fuelCost(route);
-    if (fuel == null) return null;
-    const routeToll = route.toll?.amount;
-    if (routeToll == null) return null;
-    return fuel + routeToll;
-  };
-
   const routeSavings = (route: typeof main) => {
     const base = data?.routes[0] ? totalCost(data.routes[0]) : null;
     const current = totalCost(route);
