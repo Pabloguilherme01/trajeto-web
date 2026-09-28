@@ -32,6 +32,27 @@ export function projectTripCosts(input: TripProjectionInput) {
 
 
 
+export type MonthlyBudgetStatus = {
+  budget: number;
+  monthlyCost: number;
+  difference: number;
+  usedPercent: number;
+  withinBudget: boolean;
+};
+
+export function compareMonthlyBudget(monthlyCost: number, budget: number): MonthlyBudgetStatus | null {
+  const normalizedCost = Math.max(0, monthlyCost);
+  const normalizedBudget = Math.max(0, budget);
+  if (!normalizedBudget) return null;
+  return {
+    budget: normalizedBudget,
+    monthlyCost: normalizedCost,
+    difference: normalizedBudget - normalizedCost,
+    usedPercent: (normalizedCost / normalizedBudget) * 100,
+    withinBudget: normalizedCost <= normalizedBudget,
+  };
+}
+
 export type FuelStatus = {
   currentFuelLiters: number;
   tankLiters: number;
