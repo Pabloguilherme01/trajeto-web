@@ -11,6 +11,9 @@ type Props = {
   waypoints?: string[];
   avoidTolls?: boolean;
   avoidHighways?: boolean;
+  selectedRouteId?: string;
+  onSelectRoute?: (routeId: string) => void;
+  onRoutesChange?: (routes: RouteIntelligence["routes"]) => void;
 };
 
 function formatDuration(seconds: number | null) {
@@ -20,7 +23,7 @@ function formatDuration(seconds: number | null) {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
 }
 
-export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways }: Props) {
+export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways, selectedRouteId = "principal", onSelectRoute, onRoutesChange }: Props) {
   const [data, setData] = useState<RouteIntelligence | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -36,7 +39,9 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     setLoading(true);
     setMessage("");
     try {
-      setData(await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState }));
+      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState });
+      setData(nextData);
+      onRoutesChange?.(nextData.routes);
     } catch (error) {
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
       setMessage(code === "routing_provider_not_configured"
@@ -73,6 +78,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     const current = totalCost(route);
     return base != null && current != null ? base - current : null;
   };
+  useEffect(() => { if (data?.routes.length) onRoutesChange?.(data.routes); }, [data]);
   const routeAnalysis = (route: typeof main, index: number) => {
     if (!route) return { badges: [] as string[], deltaSeconds: null as number | null, savings: null as number | null };
     const base = data?.routes[0];
@@ -174,7 +180,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             {data.routes.slice(0, 4).map((route, index) => {
               const analysis = routeAnalysis(route, index);
               return (
-                <div key={route.id} className={"rounded-xl border p-3 " + (index === 0 ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04]" : "border-white/8 bg-white/[.025]")}>
+                <button type="button" onClick={() => onSelectRoute?.(route.id)} aria-pressed={selectedRouteId === route.id} className={"w-full text-left rounded-xl border p-3 transition " + (selectedRouteId === route.id ? "border-[#BA5B45]/60 bg-[#BA5B45]/[.08]" : "border-white/8 bg-white/[.025]")}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
@@ -189,6 +195,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                     {route.toll?.amount != null && <span className="rounded-full bg-white/[.07] px-2 py-1 text-[0.52rem] font-black text-white/55">pedágio {route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency })}</span>}
                   </div>
                 </div>
+                  <p className="mt-2 text-[0.54rem] font-bold text-white/40">{selectedRouteId === route.id ? "Prévia selecionada no mapa" : "Toque para ver esta rota no mapa"}</p>
+                </button>
               );
             })}
           </div>
