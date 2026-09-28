@@ -143,7 +143,7 @@ export default function DailyMobilityHub() {
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center gap-2"><Route className="size-4 text-[#BDA5FF]" /><span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/45">Rota offline</span></div>
-              <p className="mt-2 text-sm font-extrabold">{latestRoute ? "1 ou mais rotas prontas" : "Nenhuma rota salva"}</p>
+              <p className="mt-2 text-sm font-extrabold">{latestRoute ? routes.length + " rota" + (routes.length === 1 ? "" : "s") + " pronta" + (routes.length === 1 ? "" : "s") : "Nenhuma rota salva"}</p>
               <p className="mt-1 truncate text-[0.62rem] text-white/50">{latestRoute ? latestRoute.origin + " → " + latestRoute.destination : "Salve uma rota para continuar sem conexão."}</p>
               {routeInfo && <p className="mt-2 text-[0.6rem] font-bold text-white/60">{routeInfo.distanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km{routeInfo.durationMinutes !== null ? " · " + routeInfo.durationMinutes + " min" : ""}{routeInfo.stale ? " · cópia antiga" : ""}</p>}
             </div>
