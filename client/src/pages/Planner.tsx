@@ -442,7 +442,8 @@ export default function Planner() {
                   destination={destination}
                   waypoints={[]}
                   selectedRouteId={selectedRouteId}
-                  onSelectRoute={setSelectedRouteId}
+                  onSelectRoute={selectRoute}
+                  onConfirmRoute={confirmRoute}
                   onRoutesChange={routes => {
                     setRouteAlternatives(routes);
                     if (!routes.some(route => route.id === selectedRouteId)) setSelectedRouteId(routes[0]?.id || "principal");
