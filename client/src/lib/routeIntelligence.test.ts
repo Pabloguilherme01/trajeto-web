@@ -18,6 +18,7 @@ describe("route intelligence", () => {
         distanceMeters: 12000,
         durationSeconds: 900,
         staticDurationSeconds: 720,
+        fuelConsumptionLiters: 1.8,
         toll: { amount: 8.5, currency: "BRL", estimated: true },
       }],
     }), { status: 200, headers: { "content-type": "application/json" } }));
@@ -29,6 +30,7 @@ describe("route intelligence", () => {
     });
 
     expect(result.routes[0].toll?.amount).toBe(8.5);
+    expect(result.routes[0].fuelConsumptionLiters).toBe(1.8);
     expect(result.trafficAware).toBe(true);
   });
 
