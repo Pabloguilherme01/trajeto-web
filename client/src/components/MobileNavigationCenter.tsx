@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { getNavigationPreferences, saveNavigationPreferences, type NavigationProvider } from "@/lib/navigationPreferences";
+import RouteIntelligenceCard from "./RouteIntelligenceCard";
 import { CheckCircle2, Fuel, Navigation, RefreshCw, Route, Save, Share2, WifiOff, Map, Plus, X } from "lucide-react";
 
 type Props = {
+  origin: string;
   destination: string;
   distance: string;
   duration: string;
@@ -30,7 +32,7 @@ type Props = {
 };
 
 export default function MobileNavigationCenter({
-  destination, distance, duration, recommendationName, detourKm, detourSource,
+  origin, destination, distance, duration, recommendationName, detourKm, detourSource,
   fuelCost, litersNeeded, autonomyKm, offline, snapshot = false, snapshotSavedAt,
   saved = false, onNavigate, onShare, onSave, onRefresh, onStations, onGoogleMaps, onWaze, onAppleMaps, onMultiStopNavigate, onGoogleMapsPreferred, onAppleMapsPreferred,
 }: Props) {
@@ -140,6 +142,8 @@ export default function MobileNavigationCenter({
           </button>
         )}
       </div>
+
+      {!offline && <RouteIntelligenceCard origin={origin} destination={destination} waypoints={stops} />}
 
       <p className="border-t border-white/8 px-4 py-2.5 text-center text-[0.56rem] font-semibold leading-relaxed text-white/40">
         {offline
