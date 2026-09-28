@@ -35,7 +35,7 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getByText("→ Brasília, DF")).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /Navegar agora/i })[0]).toBeTruthy();
     expect(screen.getAllByText("Posto Exemplo")[0]).toBeTruthy();
-    expect(screen.getByText(/R$ 28,50/)).toBeTruthy();
+    expect(screen.getByText(/R\$\s*28,50/)).toBeTruthy();
     expect(screen.getByText(/Autonomia estimada: 520 km/)).toBeTruthy();
     expect(screen.getByRole("button", { name: /Google Maps/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Waze/i })).toBeTruthy();
@@ -60,7 +60,7 @@ describe("MobileNavigationCenter", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Navegar agora/i }).getAttribute("disabled")).not.toBeNull();
+    expect(screen.getAllByRole("button", { name: /Navegar agora/i })[0].getAttribute("disabled")).not.toBeNull();
     expect(screen.getByText(/A rota salva continua disponível/)).toBeTruthy();
   });
 });
