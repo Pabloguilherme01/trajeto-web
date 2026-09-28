@@ -1,5 +1,6 @@
 export type RouteIntelligenceRoute = {
   id: string;
+  labels?: string[];
   distanceMeters: number | null;
   durationSeconds: number | null;
   staticDurationSeconds: number | null;
