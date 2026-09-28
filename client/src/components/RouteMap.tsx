@@ -118,7 +118,10 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     const bounds = new window.google.maps.LatLngBounds();
     [origin, destination, ...stops].forEach(point => bounds.extend(point));
     routes.filter(route => route.polyline).forEach(route => decodePolyline(route.polyline as string).forEach(point => bounds.extend(point)));
+    const currentTilt = mapRef.current.getTilt?.() ?? 0;
+    const currentHeading = mapRef.current.getHeading?.() ?? 0;
     mapRef.current.fitBounds(bounds, 56);
+    if (is3D) window.setTimeout(() => mapRef.current?.moveCamera({ tilt: currentTilt || 55, heading: currentHeading }), 0);
   };
   const toggleTraffic = () => {
     if (!mapRef.current) return;
