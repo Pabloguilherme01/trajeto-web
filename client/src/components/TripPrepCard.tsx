@@ -103,58 +103,58 @@ export default function TripPrepCard() {
   };
 
   return (
-    <section className="mobile-card rounded-3xl border border-[#CFD9DD] bg-white p-4 text-[#0B1014] sm:p-6">
+    <section className="mobile-card rounded-3xl border border-white/10 bg-[#111A21] p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,.2)] sm:p-6">
       <div className="flex items-start gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF0F2]"><CheckCircle2 className="size-5 text-[#326575]" /></div>
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#111A21]/[0.06]"><CheckCircle2 className="size-5 text-[#3DE3FF]" /></div>
         <div className="min-w-0">
-          <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#326575]">Antes de sair</p>
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Antes de sair</p>
           <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">{online ? "Deixe a próxima viagem pronta." : latestOfflineRoute ? "Sua viagem continua pronta." : "Prepare uma rota para usar offline."}</h2>
-          <p className="mt-2 text-xs leading-relaxed text-[#617179]">{online ? `${progress}/${defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.` : latestOfflineRoute ? "A rota salva pode ser reaberta neste aparelho sem recalcular." : "Sem uma rota salva, o modo offline não consegue preparar uma nova viagem."}</p>
+          <p className="mt-2 text-xs leading-relaxed text-[#8FA3AC]">{online ? `${progress}/${defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.` : latestOfflineRoute ? "A rota salva pode ser reaberta neste aparelho sem recalcular." : "Sem uma rota salva, o modo offline não consegue preparar uma nova viagem."}</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#E3E9EB]" aria-hidden="true"><div className="h-full rounded-full bg-[#326575] transition-all" style={{ width: `${(progress / defaults.length) * 100}%` }} /></div>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className={`rounded-xl border p-3 ${hasTrip ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
-          <Navigation className="size-4 text-[#326575]" />
-          <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#617179]">Próxima viagem</p>
+        <div className={`rounded-xl border p-3 ${hasTrip ? "border-[#326575]/25 bg-[#111A21]/[0.05]" : "border-white/10 bg-[#111A21]/[0.03]"}`}>
+          <Navigation className="size-4 text-[#3DE3FF]" />
+          <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#8FA3AC]">Próxima viagem</p>
           <p className="mt-1 truncate text-xs font-extrabold">{activeOfflineDestination ?? (hasTrip ? lastTrip?.destination : "Nenhuma definida")}</p>
         </div>
-        <div className={`rounded-xl border p-3 ${localRouteReady ? "border-[#326575]/25 bg-[#F2F5F6]" : "border-[#D8E0E3] bg-[#FCFDFD]"}`}>
-          <Smartphone className="size-4 text-[#326575]" />
-          <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#617179]">Rotas locais</p>
+        <div className={`rounded-xl border p-3 ${localRouteReady ? "border-[#326575]/25 bg-[#111A21]/[0.05]" : "border-white/10 bg-[#111A21]/[0.03]"}`}>
+          <Smartphone className="size-4 text-[#3DE3FF]" />
+          <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#8FA3AC]">Rotas locais</p>
           <p className="mt-1 text-xs font-extrabold">{storageError ? "Armazenamento indisponível" : savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas")}</p>
         </div>
       </div>
 
       <details className="mt-4 group" open={!ready}>
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-[#D8E0E3] bg-[#F8FAFA] px-3 py-2.5 text-xs font-extrabold text-[#36545C] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#111A21]/[0.03] px-3 py-2.5 text-xs font-extrabold text-[#36545C] [&::-webkit-details-marker]:hidden">
           <span>{ready ? "Checklist concluído" : "Revisar o que falta antes de sair"}</span>
-          <span className="rounded-full bg-white px-2 py-1 text-[0.58rem] text-[#617179] group-open:hidden">abrir</span>
-          <span className="hidden rounded-full bg-white px-2 py-1 text-[0.58rem] text-[#617179] group-open:inline">fechar</span>
+          <span className="rounded-full bg-white/[0.03] px-2 py-1 text-[0.58rem] text-[#8FA3AC] group-open:hidden">abrir</span>
+          <span className="hidden rounded-full bg-white/[0.03] px-2 py-1 text-[0.58rem] text-[#8FA3AC] group-open:inline">fechar</span>
         </summary>
         <div className="mt-2 space-y-2">
         {defaults.map(([id, label]) => (
-          <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-[#D8E0E3] bg-[#FCFDFD] px-3 py-2 transition-colors has-[:checked]:border-[#326575]/40 has-[:checked]:bg-[#F2F5F6]">
+          <label key={id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-[#111A21]/[0.03] px-3 py-2 transition-colors has-[:checked]:border-[#326575]/40 has-[:checked]:bg-[#111A21]/[0.05]">
             <input type="checkbox" checked={Boolean(smartChecked[id])} onChange={() => toggle(id)} disabled={(id === "rota" && localRouteReady) || (id === "offline" && localRouteReady)} className="size-5 accent-[#326575]" />
-            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}{((id === "rota" && localRouteReady) || (id === "offline" && localRouteReady)) && <span className="ml-1 text-[0.58rem] font-bold text-[#326575]">(auto)</span>}</span>
+            <span className={smartChecked[id] ? "text-sm font-semibold text-[#58706D] line-through" : "text-sm font-semibold"}>{label}{((id === "rota" && localRouteReady) || (id === "offline" && localRouteReady)) && <span className="ml-1 text-[0.58rem] font-bold text-[#3DE3FF]">(auto)</span>}</span>
           </label>
         ))}
         </div>
       </details>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-[0.65rem] font-bold text-[#617179]">{ready ? (online ? "Tudo pronto para sair." : "Tudo pronto para continuar.") : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
-        <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[#D8E0E3] px-2.5 text-[0.62rem] font-bold text-[#617179]"><RotateCcw className="size-3" /> Limpar</button>
+        <span className="text-[0.65rem] font-bold text-[#8FA3AC]">{ready ? (online ? "Tudo pronto para sair." : "Tudo pronto para continuar.") : `${defaults.length - progress} ${defaults.length - progress === 1 ? "item" : "itens"} ainda pendente(s).`}</span>
+        <button type="button" onClick={() => setChecked({})} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 px-2.5 text-[0.62rem] font-bold text-[#8FA3AC]"><RotateCcw className="size-3" /> Limpar</button>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#D8E0E3] bg-[#F8FAFA] px-3 py-2.5">
-        <span className="flex min-w-0 items-center gap-2 text-[0.62rem] font-bold text-[#617179]">
+      <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#111A21]/[0.03] px-3 py-2.5">
+        <span className="flex min-w-0 items-center gap-2 text-[0.62rem] font-bold text-[#8FA3AC]">
           <span className={online ? "size-2 rounded-full bg-[#326575]" : "size-2 rounded-full bg-[#C77B3C]"} />
           {storageError ? "Não foi possível verificar as rotas deste aparelho." : online ? "Online: pronto para novas consultas." : latestOfflineRoute ? "Offline: uma rota pronta para continuar." : "Offline: nenhuma rota salva pronta."}
         </span>
         {!online && latestOfflineRoute && !storageError && (
-          <button type="button" onClick={openPreparedTrip} className="min-h-9 shrink-0 rounded-lg bg-[#163840] px-2.5 text-[0.58rem] font-extrabold text-white">
+          <button type="button" onClick={openPreparedTrip} className="min-h-9 shrink-0 rounded-lg bg-[#C7FF3C] text-[#0B1014] px-2.5 text-[0.58rem] font-extrabold text-white">
             Continuar
           </button>
         )}
@@ -167,12 +167,12 @@ export default function TripPrepCard() {
       )}
 
       {ready && !storageError && (
-        <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#F2F5F6] p-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#326575]">
+        <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#111A21]/[0.05] p-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#3DE3FF]">
             <Sparkles className="size-4 shrink-0" />
             <span>{online ? "Tudo preparado. O próximo passo é sair." : latestOfflineRoute ? "Tudo preparado. O próximo passo é continuar a rota salva." : "Salve uma rota quando estiver online para habilitar a continuidade offline."}</span>
           </div>
-          <button type="button" onClick={openPreparedTrip} disabled={!online && !latestOfflineRoute} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#163840] px-4 text-xs font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={openPreparedTrip} disabled={!online && !latestOfflineRoute} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#C7FF3C] text-[#0B1014] px-4 text-xs font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40">
             {online ? "Iniciar próxima viagem" : latestOfflineRoute ? "Continuar rota salva" : "Sem rota salva"}
           </button>
         </div>
