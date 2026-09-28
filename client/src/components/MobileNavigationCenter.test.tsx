@@ -24,6 +24,9 @@ describe("MobileNavigationCenter", () => {
         onGoogleMaps={vi.fn()}
         onWaze={vi.fn()}
         onAppleMaps={vi.fn()}
+        onMultiStopNavigate={vi.fn()}
+        onGoogleMapsPreferred={vi.fn()}
+        onAppleMapsPreferred={vi.fn()}
       />,
     );
 
@@ -36,6 +39,8 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getByRole("button", { name: /Google Maps/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Waze/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Apple Maps/i })).toBeTruthy();
+    expect(screen.getByText("Preferência da viagem")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Evitar pedágios" })).toBeTruthy();
   });
 
   it("disables external navigation while offline but keeps the route actions visible", () => {
