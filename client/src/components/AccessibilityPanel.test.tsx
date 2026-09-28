@@ -21,6 +21,6 @@ describe("AccessibilityPanel", () => {
     await user.click(screen.getByRole("button", { name: /confirmar limpeza/i }));
     expect(localStorage.getItem("trajeto-daily-mode")).toBeNull();
     expect(localStorage.getItem("other-app-setting")).toBe("keep");
-    expect(screen.getByRole("status").textContent).toMatch(/dados locais removidos/i);
+    expect(screen.getByText(/nenhum dado local do trajeto está salvo/i)).toBeTruthy();
   });
 });
