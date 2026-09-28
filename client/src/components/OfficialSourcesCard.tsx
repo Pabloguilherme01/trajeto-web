@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart3, BadgeCheck, Database, ExternalLink, FileBarChart, Fuel, History, ShieldCheck } from "lucide-react";
+import { BarChart3, BadgeCheck, CarFront, Database, ExternalLink, FileBarChart, Fuel, History, ShieldCheck, TriangleAlert } from "lucide-react";
 
 const sources = [
   {
@@ -50,6 +50,30 @@ const sources = [
     href: "https://www.gov.br/pt-br/servicos/obter-carteira-digital-de-transito",
     icon: FileBarChart,
   },
+  {
+    title: "Serviços de trânsito",
+    detail: "Portal oficial para habilitação, veículos, infrações e serviços da Senatran.",
+    href: "https://www.gov.br/pt-br/temas/servicos-de-transito",
+    icon: CarFront,
+  },
+  {
+    title: "Consultar veículo",
+    detail: "Acesso oficial aos serviços disponíveis para veículos e documentos.",
+    href: "https://www.gov.br/pt-br/temas/servicos-de-transito",
+    icon: CarFront,
+  },
+  {
+    title: "Infrações e multas",
+    detail: "Consulte serviços oficiais relacionados a infrações e recursos.",
+    href: "https://www.gov.br/pt-br/temas/servicos-de-transito",
+    icon: TriangleAlert,
+  },
+  {
+    title: "Recall de veículos",
+    detail: "Acesse a consulta oficial de campanhas de recall disponíveis.",
+    href: "https://www.gov.br/pt-br/temas/servicos-de-transito",
+    icon: ShieldCheck,
+  },
 ] as const;
 
 export default function OfficialSourcesCard() {
@@ -62,7 +86,7 @@ export default function OfficialSourcesCard() {
             <h2 id="official-sources-title" className="mt-1 font-display text-2xl font-semibold tracking-[-0.05em] text-white">Central de dados para sua viagem</h2>
             <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#8FA3AC]">Acesse fontes públicas de referência sem misturar dado oficial, estimativa do Trajeto e preço garantido. O app usa essas fontes como camada de consulta, não como promessa de preço.</p>
           </div>
-          <span className="inline-flex min-h-9 items-center rounded-full border border-white/10 px-3 text-[0.58rem] font-bold text-[#9FB0B8]">8 fontes oficiais</span>
+          <span className="inline-flex min-h-9 items-center rounded-full border border-white/10 px-3 text-[0.58rem] font-bold text-[#9FB0B8]">12 atalhos oficiais</span>
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
