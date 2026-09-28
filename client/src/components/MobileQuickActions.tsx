@@ -155,7 +155,7 @@ export default function MobileQuickActions() {
     }
     resumeAction();
   };
-  const actions = [  const actions = [
+  const actions = [
     { label: primary.label, short: primary.label, icon: primary.kind === "economy" ? Gauge : primary.kind === "offline" ? Bookmark : Navigation, path: "", run: runPrimary, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
