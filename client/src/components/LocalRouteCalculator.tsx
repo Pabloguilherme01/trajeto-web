@@ -2,6 +2,7 @@ import { Fuel, Gauge, Route as RouteIcon, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
+import { clearTripCalculatorDraft, loadTripCalculatorDraft, saveTripCalculatorDraft } from "@/lib/tripCalculatorDraft";
 
 function numberValue(value: string) {
   const parsed = Number(value.replace(",", "."));
@@ -32,19 +33,42 @@ function rememberPrice(value: string) {
 
 export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = false }: LocalRouteCalculatorProps) {
   const savedVehicle = getMobileVehicle();
-  const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : "");
-  const [price, setPrice] = useState(getRememberedPrice);
-  const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : "");
-  const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : "");
-  const [currentFuel, setCurrentFuel] = useState("");
-  const [roundTrip, setRoundTrip] = useState(true);
-  const [tripsPerWeek, setTripsPerWeek] = useState(5);
-  const [toll, setToll] = useState("");
-  const [parking, setParking] = useState("");
-  const [other, setOther] = useState("");
-  const [alternativePrice, setAlternativePrice] = useState("");
-  const [alternativeConsumption, setAlternativeConsumption] = useState("");
-  const [monthlyBudget, setMonthlyBudget] = useState("");
+  const [draft] = useState(() => loadTripCalculatorDraft());
+  const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : (draft?.distance ?? ""));
+  const [price, setPrice] = useState(() => draft?.price || getRememberedPrice());
+  const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : (draft?.consumption ?? ""));
+  const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : (draft?.tank ?? ""));
+  const [currentFuel, setCurrentFuel] = useState(draft?.currentFuel ?? "");
+  const [roundTrip, setRoundTrip] = useState(draft?.roundTrip ?? true);
+  const [tripsPerWeek, setTripsPerWeek] = useState(draft?.tripsPerWeek ?? 5);
+  const [toll, setToll] = useState(draft?.toll ?? "");
+  const [parking, setParking] = useState(draft?.parking ?? "");
+  const [other, setOther] = useState(draft?.other ?? "");
+  const [alternativePrice, setAlternativePrice] = useState(draft?.alternativePrice ?? "");
+  const [alternativeConsumption, setAlternativeConsumption] = useState(draft?.alternativeConsumption ?? "");
+  const [monthlyBudget, setMonthlyBudget] = useState(draft?.monthlyBudget ?? "");
+
+  useEffect(() => {
+    if (initialDistanceKm > 0) setDistance(String(initialDistanceKm));
+  }, [initialDistanceKm]);
+
+  useEffect(() => {
+    saveTripCalculatorDraft({
+      distance,
+      price,
+      consumption,
+      tank,
+      currentFuel,
+      roundTrip,
+      tripsPerWeek,
+      toll,
+      parking,
+      other,
+      alternativePrice,
+      alternativeConsumption,
+      monthlyBudget,
+    });
+  }, [distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
 
   useEffect(() => {
     const refreshVehicle = () => {
@@ -105,7 +129,10 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           <h2 id="local-calculator-title" className="font-display mt-1 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">Calcule o custo da viagem.</h2>
           <p className="mt-1 text-xs leading-relaxed text-[#607570]">Use a distância da rota. O cálculo é local e não depende do servidor, mapa ou preço automático.</p>
         </div>
+        <button type="button" onClick={() => { clearTripCalculatorDraft(); setDistance(initialDistanceKm > 0 ? String(initialDistanceKm) : ""); setPrice(""); setConsumption(savedVehicle ? String(savedVehicle.consumption) : ""); setTank(savedVehicle ? String(savedVehicle.tank) : ""); setCurrentFuel(""); setRoundTrip(true); setTripsPerWeek(5); setToll(""); setParking(""); setOther(""); setAlternativePrice(""); setAlternativeConsumption(""); setMonthlyBudget(""); }} className="ml-auto min-h-10 shrink-0 rounded-xl border border-[#C7D2C9] px-3 text-[0.62rem] font-extrabold text-[#365E51] hover:border-[#163840]">Limpar cenário</button>
       </div>
+
+      {draft && <p role="status" className="mt-3 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] px-3 py-2 text-[0.65rem] font-bold text-[#56766A]">Último cenário restaurado neste aparelho. Suas entradas são salvas localmente para continuar de onde parou.</p>}
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label className="text-xs font-bold text-[#365E51]">Distância de ida (km)
