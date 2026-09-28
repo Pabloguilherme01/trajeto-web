@@ -21,7 +21,7 @@ describe("DailyMobilityHub", () => {
 
     expect(screen.getByRole("heading", { name: /Tudo pronto para o próximo deslocamento/i })).toBeTruthy();
     expect(screen.getByText("Planejar minha próxima viagem")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe("/trajeto-web/planejar");
+    expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe("/planejar");
   });
 
   it("prioritizes the most-used destination and shows local vehicle and budget", () => {
@@ -39,7 +39,7 @@ describe("DailyMobilityHub", () => {
     expect(screen.getByText(/12,5 km\/L · tanque 50 L/)).toBeTruthy();
     expect(screen.getByText(/R\$ 800,00/)).toBeTruthy();
     expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe(
-      "/trajeto-web/planejar?destino=Taguatinga%2C%20DF",
+      "/planejar?destino=Taguatinga%2C%20DF",
     );
   });
 });
