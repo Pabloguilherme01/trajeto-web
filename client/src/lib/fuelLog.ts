@@ -157,3 +157,20 @@ export function summarizeFuelLog(entries = listFuelLog()): FuelLogSummary {
 }
 
 export const fuelLogEvent = FUEL_LOG_EVENT;
+
+
+export function buildFuelLogCsv(entries = listFuelLog()): string {
+  const escape = (value: string | number) => '"' + String(value).replace(/"/g, '""') + '"';
+  const rows = entries.map(entry => [
+    new Date(entry.date).toLocaleDateString("pt-BR"),
+    entry.liters.toFixed(2),
+    entry.totalCost.toFixed(2),
+    (entry.totalCost / entry.liters).toFixed(2),
+    entry.odometerKm ?? "",
+    entry.note ?? "",
+  ].map(escape).join(";"));
+  return [
+    ["Data", "Litros", "Valor total (R$)", "Preço/L (R$)", "Hodômetro (km)", "Observação"].map(escape).join(";"),
+    ...rows,
+  ].join("\\n");
+}
