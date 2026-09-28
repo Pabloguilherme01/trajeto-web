@@ -10,6 +10,7 @@ import DailyMobilityHub from "@/components/DailyMobilityHub";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
+import DailyModeSelector from "@/components/DailyModeSelector";
 import RecentTripsCard from "@/components/RecentTripsCard";
 import { ArrowRight, BadgeCheck, Download, Fuel, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -244,9 +245,11 @@ export default function Home() {
 
         <MobileCopilot />
 
+        <DailyModeSelector />
+
         <DailyMobilityHub />
 
-        <section className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
+        <section id="calculadora" className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
 
         <section className="container grid gap-4 pb-8 sm:pb-10 lg:grid-cols-2"><FuelLogCard /><MobilityExpenseCard /><MobilityDashboardCard /></section>
 
