@@ -198,8 +198,6 @@ export function offlineRouteId(origin: string, destination: string) {
   return origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
 }
 
-export const offlineRouteEvent = OFFLINE_ROUTE_EVENT;
-
 
 export function findOfflineRouteByDestination(routes: OfflineRoute[], destination: string) {
   const target = destination.trim().toLocaleLowerCase("pt-BR");
