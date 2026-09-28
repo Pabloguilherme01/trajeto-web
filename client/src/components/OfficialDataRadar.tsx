@@ -1,3 +1,4 @@
+import React from "react";
 import { BarChart3, Database, ExternalLink, Fuel, ShieldCheck } from "lucide-react";
 
 const datasets = [
