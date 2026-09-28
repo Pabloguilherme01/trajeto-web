@@ -6,6 +6,7 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import FuelLogCard from "@/components/FuelLogCard";
 import MobilityExpenseCard from "@/components/MobilityExpenseCard";
 import MobilityDashboardCard from "@/components/MobilityDashboardCard";
+import DailyMobilityHub from "@/components/DailyMobilityHub";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import MobileVehicleCard from "@/components/MobileVehicleCard";
@@ -242,6 +243,8 @@ export default function Home() {
         </section>
 
         <MobileCopilot />
+
+        <DailyMobilityHub />
 
         <section className="container py-8 sm:py-10"><LocalRouteCalculator /></section>
 
