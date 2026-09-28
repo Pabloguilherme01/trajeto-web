@@ -101,7 +101,23 @@ export function MapView({
       onMapReady(map.current);
     }
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : "Não foi possível carregar o mapa.");
+      try {
+        if (!mapContainer.current || map.current || !window.google?.maps) throw error;
+        map.current = new window.google.maps.Map(mapContainer.current, {
+          zoom: initialZoom,
+          center: initialCenter,
+          mapTypeControl: true,
+          fullscreenControl: true,
+          zoomControl: true,
+          streetViewControl: true,
+          mapTypeId,
+          renderingType: window.google.maps.RenderingType.RASTER,
+        });
+        onMapReady?.(map.current);
+        setLoadError(null);
+      } catch {
+        setLoadError(error instanceof Error ? error.message : "Não foi possível carregar o mapa.");
+      }
     }
   });
 
