@@ -385,11 +385,14 @@ export default function Planner() {
           </div>
           <p className="mt-3 text-[0.68rem]">{latestOfflineRoute ? "Abra a rota salva para continuar. Novas rotas, trânsito, localização ao vivo e consultas de postos precisam de internet." : "Sem rota salva: novas rotas, localização ao vivo e consultas de postos ficam disponíveis quando a conexão voltar."}</p>
         </section>}
-        <div className="mb-10 max-w-3xl">
-          <p className="eyebrow">Rota com dados reais</p>
+        <div className="mb-6 max-w-3xl sm:mb-10">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="eyebrow">Rota com dados reais</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C7D2C9] bg-white px-2.5 py-1 text-[0.55rem] font-black uppercase tracking-[0.12em] text-[#55736C]"><ShieldCheck className="size-3" /> fonte separada de estimativa</span>
+          </div>
           <h1 className="font-display mt-4 text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.86] tracking-[-0.065em]">Escolha melhor<br /><span className="text-[#BA5B45]">antes de sair.</span></h1>
-          <p className="mt-6 max-w-2xl text-[1.05rem] leading-relaxed text-[#5A706D]">Pesquise uma rota de carro, veja distância e duração e compare onde parar sem confundir referência de combustível com preço em tempo real.</p>
-          <div className="mt-5 grid gap-2 border-l-2 border-[#FFC928] bg-[#FFFBEF] p-4 text-xs leading-relaxed text-[#5A706D] sm:grid-cols-3"><p><strong className="text-[#163840]">Rota e distância:</strong> Google Maps na consulta atual.</p><p><strong className="text-[#163840]">Trânsito:</strong> TomTom quando houver ocorrência acionável.</p><p><strong className="text-[#163840]">Combustível:</strong> referências semanais datadas da ANP, não preço em tempo real.</p></div>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#5A706D] sm:mt-6 sm:text-[1.05rem]">Pesquise uma rota de carro, veja distância e duração e compare onde parar sem confundir referência de combustível com preço em tempo real.</p>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:grid-cols-3"><div className="rounded-xl border border-[#C7D2C9] bg-white p-3 text-[0.68rem] leading-relaxed text-[#5A706D]"><strong className="block text-[#163840]">Rota</strong>Distância e duração da consulta.</div><div className="rounded-xl border border-[#C7D2C9] bg-white p-3 text-[0.68rem] leading-relaxed text-[#5A706D]"><strong className="block text-[#163840]">Trânsito</strong>Informação adicional quando disponível.</div><div className="col-span-2 rounded-xl border border-[#C7D2C9] bg-white p-3 text-[0.68rem] leading-relaxed text-[#5A706D] sm:col-span-1"><strong className="block text-[#163840]">Combustível</strong>Referência datada, nunca apresentada como preço ao vivo.</div></div>
         </div>
 
         <section className="grid overflow-hidden border border-[#C7D2C9] bg-white lg:grid-cols-[0.74fr_1.26fr]">
