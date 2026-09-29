@@ -533,6 +533,29 @@ export default function Planner() {
           </div>
         </section>
 
+        {planned && <section className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Resumo da rota">
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+            <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#3DE3FF]">Distância</p>
+            <p className="mt-1 text-lg font-black text-white">{selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
+            <p className="text-[0.58rem] text-white/45">rota selecionada</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+            <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]">Tempo</p>
+            <p className="mt-1 text-lg font-black text-white">{minutes(selectedRouteDuration)}</p>
+            <p className="text-[0.58rem] text-white/45">estimativa atual</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+            <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#BDA5FF]">Paradas</p>
+            <p className="mt-1 text-lg font-black text-white">{planned.stops.length}</p>
+            <p className="text-[0.58rem] text-white/45">encontradas na rota</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+            <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFC928]">ANP</p>
+            <p className="mt-1 text-lg font-black text-white">{planned.priceCoverage}</p>
+            <p className="text-[0.58rem] text-white/45">referências vinculadas</p>
+          </div>
+        </section>
+
         {planned && <MobileNavigationCenter
           origin={origin}
           destination={destination}
