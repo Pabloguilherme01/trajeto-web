@@ -11,7 +11,8 @@ import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileQuickActions from "./components/MobileQuickActions";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import AccessibilityPanel from "./components/AccessibilityPanel";\nimport SiteNavigation from "./components/SiteNavigation";
+import AccessibilityPanel from "./components/AccessibilityPanel";
+import SiteNavigation from "./components/SiteNavigation";
 import Home from "./pages/Home";
 
 const Planner = lazy(() => import("./pages/Planner"));
@@ -55,9 +56,12 @@ function Router() {
       <Suspense fallback={<RouteLoading />}>
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/planejar" component={Planner} />\n          <Route path="/rota" component={Planner} />\n          <Route path="/salvos"><Planner /></Route>
+          <Route path="/planejar" component={Planner} />
+          <Route path="/rota" component={Planner} />
+          <Route path="/salvos"><Planner /></Route>
           <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
-          <Route path="/postos" component={Stations} />\n          <Route path="/buscar" component={Stations} />
+          <Route path="/postos" component={Stations} />
+          <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/minha-conta" component={Personal} />
           <Route path="/404" component={NotFound} />
