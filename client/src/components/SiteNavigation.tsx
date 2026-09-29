@@ -1,10 +1,10 @@
-import { HelpCircle, Home, MapPinned, Navigation, UserRound } from "lucide-react";
+import { Bookmark, HelpCircle, Home, MapPinned, Navigation, UserRound } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
 const items = [
   { href: "/", label: "Início", icon: Home },
-  { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
+  { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },\n  { href: "/salvos", label: "Salvos", icon: Bookmark },
   { href: "/postos", label: "Postos", icon: MapPinned },
   { href: "/minha-conta", label: "Minha conta", icon: UserRound },
   { href: "/ajuda", label: "Ajuda", icon: HelpCircle },
