@@ -174,7 +174,7 @@ export default function MobileQuickActions() {
     } },
   ];
 
-  if (keyboardOpen) return null;
+  // Postos has its own contextual dock. Keeping both would stack two fixed nav bars on mobile.\n  if (keyboardOpen || current === appUrl("/postos")) return null;
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
