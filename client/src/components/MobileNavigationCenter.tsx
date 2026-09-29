@@ -99,6 +99,16 @@ export default function MobileNavigationCenter({
             <span className="text-[0.52rem] text-white/45">{routeConfirmed ? "Confirmada" : "Selecione uma rota"}</span>
           </div>
         )}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="rounded-xl border border-white/8 bg-white/[.025] px-3 py-2.5">
+            <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/35">Origem</p>
+            <p className="mt-1 truncate text-xs font-bold text-white/80" title={origin}>{origin}</p>
+          </div>
+          <div className="rounded-xl border border-white/8 bg-white/[.025] px-3 py-2.5">
+            <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/35">Destino</p>
+            <p className="mt-1 truncate text-xs font-bold text-white/80" title={destination}>{destination}</p>
+          </div>
+        </div>
         {autonomyKm != null && (
           <div className="mt-3 flex items-center gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.05] px-3 py-2.5 text-xs text-[#E4F9B5]">
             <Fuel className="size-4 shrink-0" />
