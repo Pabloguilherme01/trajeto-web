@@ -163,7 +163,8 @@ export default function Planner() {
   }, []);
 
   useEffect(() => {
-    if (location.split("?")[0] !== appUrl("/planejar") && location.split("?")[0] !== appUrl("/salvos")) return;\n    if (location.split("?")[0] === appUrl("/planejar") && new URLSearchParams(location.split("?")[1] ?? "").get("salvos") !== "1") return;
+    if (location.split("?")[0] !== appUrl("/planejar") && location.split("?")[0] !== appUrl("/salvos")) return;
+    if (location.split("?")[0] === appUrl("/planejar") && new URLSearchParams(location.split("?")[1] ?? "").get("salvos") !== "1") return;
     const timer = window.setTimeout(() => {
       document.getElementById("saved-routes")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 80);
