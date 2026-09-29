@@ -89,6 +89,12 @@ export default function DailyCommandCenter() {
   const activeId = selected === "automatico" ? automatic : selected;
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
   const completed = [favorite, lastTrip, vehicle, routes.length > 0].filter(Boolean).length;
+  const readiness = [
+    { label: "Destino", value: Boolean(favorite), detail: favorite ? favorite.label : "Cadastre um atalho", icon: MapPin },
+    { label: "Veículo", value: Boolean(vehicle), detail: vehicle ? vehicle.name : "Ainda não cadastrado", icon: CarFront },
+    { label: "Rota offline", value: routes.length > 0, detail: routes.length > 0 ? `${routes.length} preparada${routes.length === 1 ? "" : "s"}` : "Salve uma rota", icon: WifiOff },
+    { label: "Última viagem", value: Boolean(lastTrip), detail: lastTrip ? "Pronta para repetir" : "Nenhuma registrada", icon: Route },
+  ];
   const primary = active?.id === "repetir" && lastTrip
     ? {
         label: "Repetir última viagem",
@@ -163,7 +169,23 @@ export default function DailyCommandCenter() {
               </p>
             </div>
 
-            <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:mt-6">
+            {readiness.map(item => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="rounded-xl border border-white/8 bg-white/[.025] px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <Icon className={item.value ? "size-3.5 text-[#C7FF3C]" : "size-3.5 text-[#71838C]"} />
+                    <span className={item.value ? "text-[0.48rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]" : "text-[0.48rem] font-black uppercase tracking-[.1em] text-[#71838C]"}>{item.value ? "pronto" : "pendente"}</span>
+                  </div>
+                  <p className="mt-1.5 text-[0.58rem] font-black uppercase tracking-[.08em] text-white/45">{item.label}</p>
+                  <p className="mt-0.5 truncate text-[0.62rem] font-bold text-white/80">{item.detail}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
               <a href={primary.href} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-5 text-xs font-black text-[#0B1014] transition hover:bg-white active:scale-[.98] sm:flex-none">
                 {primary.label} <ArrowRight className="size-4" />
               </a>
