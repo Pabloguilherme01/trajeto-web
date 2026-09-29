@@ -55,9 +55,9 @@ function Router() {
       <Suspense fallback={<RouteLoading />}>
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/planejar" component={Planner} />
+          <Route path="/planejar" component={Planner} />\n          <Route path="/rota" component={Planner} />\n          <Route path="/salvos"><Planner /></Route>
           <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
-          <Route path="/postos" component={Stations} />
+          <Route path="/postos" component={Stations} />\n          <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/minha-conta" component={Personal} />
           <Route path="/404" component={NotFound} />
