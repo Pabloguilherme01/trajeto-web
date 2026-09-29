@@ -164,7 +164,7 @@ export default function Home() {
               <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
                 Seu dia em movimento.<br /><span className="text-[#C7FF3C]">Mais simples.</span>
               </h1>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#B7C4CA] sm:mt-7 sm:text-lg">
+              <p className="mt-5 max-w-xl text-[0.95rem] leading-[1.65] text-[#B7C4CA] sm:mt-7 sm:text-lg">
                 O Trajeto transforma deslocamento em uma rotina simples: escolha para onde vai, veja o impacto da viagem, prepare o que precisa e continue mais rápido na próxima vez. Destinos, rotas, custos e preferências ficam organizados no celular.
               </p>
 
@@ -187,7 +187,7 @@ export default function Home() {
               </div>
             </div>
 
-            <section className="rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
+            <section className="mobile-glass rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Comece aqui</p>
