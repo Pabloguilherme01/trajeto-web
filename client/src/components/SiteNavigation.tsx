@@ -4,7 +4,8 @@ import { appUrl } from "@/lib/appUrl";
 
 const items = [
   { href: "/", label: "Início", icon: Home },
-  { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },\n  { href: "/salvos", label: "Salvos", icon: Bookmark },
+  { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
+  { href: "/salvos", label: "Salvos", icon: Bookmark },
   { href: "/postos", label: "Postos", icon: MapPinned },
   { href: "/minha-conta", label: "Minha conta", icon: UserRound },
   { href: "/ajuda", label: "Ajuda", icon: HelpCircle },
