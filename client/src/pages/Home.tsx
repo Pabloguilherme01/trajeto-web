@@ -159,7 +159,7 @@ export default function Home() {
           <div className="container grid gap-7 py-8 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/8 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#D9FF91]">
-                <Navigation className="size-3.5" /> Águas Lindas · DF · Entorno
+                <Navigation className="size-3.5" /> Águas Lindas de Goiás · Entorno
               </div>
               <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
                 Seu dia em movimento.<br /><span className="text-[#C7FF3C]">Mais simples.</span>
