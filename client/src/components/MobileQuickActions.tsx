@@ -162,7 +162,7 @@ export default function MobileQuickActions() {
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/planejar", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
     { label: "Compartilhar", short: shareState === "done" ? shareLabel : lastTrip ? "Viagem" : "Enviar", icon: Share2, path: "", run: () => {
       vibration();
-      void shareText(shareMessage, window.location.href, "Trajeto").then(() => {
+      void shareText(shareMessage, shareUrl, "Trajeto").then(() => {
         setShareState("done");
         setShareLabel("Enviado");
         vibration(18);
