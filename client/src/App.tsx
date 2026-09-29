@@ -11,7 +11,7 @@ import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileQuickActions from "./components/MobileQuickActions";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import AccessibilityPanel from "./components/AccessibilityPanel";
+import AccessibilityPanel from "./components/AccessibilityPanel";\nimport SiteNavigation from "./components/SiteNavigation";
 import Home from "./pages/Home";
 
 const Planner = lazy(() => import("./pages/Planner"));
