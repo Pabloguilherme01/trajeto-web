@@ -82,6 +82,7 @@ export default function App() {
           <PwaUpdatePrompt />
           <MobileQuickActions />
           <AccessibilityPanel />
+          <SiteNavigation />
           <AuthReturnHandler />
           <Router />
         </TooltipProvider>
