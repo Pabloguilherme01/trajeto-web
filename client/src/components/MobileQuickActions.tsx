@@ -11,7 +11,7 @@ import { chooseMobilePrimaryAction } from "@/lib/mobilePrimaryAction";
 
 export default function MobileQuickActions() {
   const [location, setLocation] = useLocation();
-  const current = location.split("?")[0];
+  const current = location.split("?")[0].replace(/\/$/, "") || "/";
   const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
   const [locating, setLocating] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "done">("idle");
@@ -174,7 +174,7 @@ export default function MobileQuickActions() {
     } },
   ];
 
-  // Postos has its own contextual dock. Keeping both would stack two fixed nav bars on mobile.\n  if (keyboardOpen || current === appUrl("/postos")) return null;
+  // Postos has its own contextual dock. Keeping both would stack two fixed nav bars on mobile.\n  if (keyboardOpen || current.endsWith("/postos")) return null;
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
@@ -185,7 +185,7 @@ export default function MobileQuickActions() {
         </div>
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run, smart }) => {
-            const active = label === "Salvos" ? current === appUrl("/planejar") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
+            const active = label === "Salvos" ? current.endsWith("/planejar") && savedMode : label === "Postos" ? current.endsWith("/postos") && !savedMode : Boolean(path && current.endsWith(path));
             return (
               <button key={label} type="button" onClick={run} aria-current={active ? "page" : undefined} className={smart ? "relative flex min-h-[3.7rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014] shadow-[0_5px_16px_rgba(199,255,60,.16)] active:scale-[.97]" : active ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014]" : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#9EADB4] transition active:scale-[.97] active:bg-white/10"}>
                 <Icon className="size-[1.05rem]" strokeWidth={smart || active ? 2.6 : 2} />
