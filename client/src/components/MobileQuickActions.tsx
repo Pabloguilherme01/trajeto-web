@@ -178,7 +178,7 @@ export default function MobileQuickActions() {
 
   return (
     <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
-      <div className={`mx-auto max-w-md rounded-[1.4rem] border p-1.5 shadow-[0_20px_55px_rgba(0,0,0,.48)] backdrop-blur-2xl transition-colors ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
+      <div className={`mobile-glass mx-auto max-w-md rounded-[1.45rem] border p-1.5 shadow-[0_20px_55px_rgba(0,0,0,.48)] transition-colors ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
         <div className="mb-1 flex items-center justify-between px-2 pt-0.5">
           <span className="flex items-center gap-1 text-[0.5rem] font-extrabold uppercase tracking-[0.14em] text-[#71828B]"><Sparkles className="size-2.5 text-[#C7FF3C]" /> {dailyMode === "automatico" ? "Ação automática" : "Modo " + primary.kind}</span>
           <span className={`inline-flex items-center gap-1 text-[0.5rem] font-bold ${online ? "text-[#B9D979]" : "text-[#FFD49C]"}`}><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C] shadow-[0_0_8px_rgba(199,255,60,.75)]" : "bg-[#FFB86B]"}`} aria-hidden="true" />{online ? "online" : "offline"}</span>
@@ -187,7 +187,7 @@ export default function MobileQuickActions() {
           {actions.map(({ label, short, icon: Icon, path, run, smart }) => {
             const active = label === "Salvos" ? current === appUrl("/planejar") && savedMode : label === "Postos" ? current === appUrl("/postos") && !savedMode : Boolean(path && current === appUrl(path));
             return (
-              <button key={label} type="button" onClick={run} aria-current={active ? "page" : undefined} className={smart ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014] shadow-[0_5px_16px_rgba(199,255,60,.16)] active:scale-[.97]" : active ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014]" : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#9EADB4] transition active:scale-[.97] active:bg-white/10"}>
+              <button key={label} type="button" onClick={run} aria-current={active ? "page" : undefined} className={smart ? "relative flex min-h-[3.7rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014] shadow-[0_5px_16px_rgba(199,255,60,.16)] active:scale-[.97]" : active ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014]" : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#9EADB4] transition active:scale-[.97] active:bg-white/10"}>
                 <Icon className="size-[1.05rem]" strokeWidth={smart || active ? 2.6 : 2} />
                 <span className="text-[0.58rem] font-extrabold tracking-[0.01em]">{smart ? label : active ? label : short}</span>
                 {smart && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-[#0B1014]" aria-label="Atalho inteligente" />}
