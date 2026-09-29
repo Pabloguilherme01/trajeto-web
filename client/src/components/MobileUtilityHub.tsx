@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CarFront, ChevronDown, CircleDollarSign, MapPinned, ShieldCheck } from "lucide-react";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
@@ -13,6 +13,8 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import VehicleServiceHub from "@/components/VehicleServiceHub";
 import OfficialDataRadar from "@/components/OfficialDataRadar";
 import OfficialSourcesCard from "@/components/OfficialSourcesCard";
+import { getMobileDestinations, mobileDestinationEvent } from "@/lib/mobileDestinations";
+import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 
 type PanelId = "rotina" | "veiculo" | "custos" | "fontes";
 
@@ -25,6 +27,23 @@ const panels: Array<{id: PanelId; title: string; detail: string; icon: typeof Ma
 
 export default function MobileUtilityHub() {
   const [open, setOpen] = useState<PanelId | null>(null);
+  const [destinationCount, setDestinationCount] = useState(() => getMobileDestinations().length);
+  const [hasVehicle, setHasVehicle] = useState(() => Boolean(getMobileVehicle()));
+
+  useEffect(() => {
+    const refresh = () => {
+      setDestinationCount(getMobileDestinations().length);
+      setHasVehicle(Boolean(getMobileVehicle()));
+    };
+    window.addEventListener(mobileDestinationEvent, refresh);
+    window.addEventListener(mobileVehicleEvent, refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener(mobileDestinationEvent, refresh);
+      window.removeEventListener(mobileVehicleEvent, refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
 
   const toggle = (id: PanelId) => setOpen(current => current === id ? null : id);
 
@@ -51,7 +70,7 @@ export default function MobileUtilityHub() {
                     <strong className="block text-sm font-extrabold text-white">{panel.title}</strong>
                     <span className="mt-0.5 block text-xs leading-relaxed text-[#7F919A]">{panel.detail}</span>
                   </span>
-                  <ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
+                  <span className="hidden shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black uppercase tracking-[.1em] text-[#71838C] sm:inline-flex">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"}` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : "fontes visíveis"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
                 </button>
 
                 {isOpen && (
