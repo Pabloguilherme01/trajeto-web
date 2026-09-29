@@ -24,16 +24,16 @@ const panels: Array<{id: PanelId; title: string; detail: string; icon: typeof Ma
 ];
 
 export default function MobileUtilityHub() {
-  const [open, setOpen] = useState<PanelId | null>("rotina");
+  const [open, setOpen] = useState<PanelId | null>(null);
 
   const toggle = (id: PanelId) => setOpen(current => current === id ? null : id);
 
   return (
-    <section className="border-y border-white/8 bg-[#0B1014] py-6 sm:py-10" aria-labelledby="utility-hub-title">
+    <section className="border-y border-white/8 bg-[#0B1014] py-5 sm:py-10" aria-labelledby="utility-hub-title">
       <div className="container">
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-3 sm:mb-6">
           <p className="text-[0.62rem] font-extrabold uppercase tracking-[0.16em] text-[#3DE3FF]">Tudo no lugar certo</p>
-          <h2 id="utility-hub-title" className="mt-2 font-display text-3xl font-semibold tracking-[-0.06em] text-white sm:text-4xl">Ferramentas do dia</h2>
+          <h2 id="utility-hub-title" className="mobile-title mt-2 font-display text-3xl font-semibold tracking-[-0.06em] text-white sm:text-4xl">Ferramentas do dia</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#82949D]">Abra só o que precisa. O Trajeto mantém os recursos avançados fora do caminho até você precisar deles.</p>
         </div>
 
@@ -42,8 +42,8 @@ export default function MobileUtilityHub() {
             const Icon = panel.icon;
             const isOpen = open === panel.id;
             return (
-              <div key={panel.id} className={isOpen ? "overflow-hidden rounded-2xl border border-[#C7FF3C]/20 bg-[#10181F]" : "overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"}>
-                <button type="button" aria-expanded={isOpen} aria-controls={`utility-panel-${panel.id}`} onClick={() => toggle(panel.id)} className="flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left">
+              <div key={panel.id} className={isOpen ? "mobile-card overflow-hidden rounded-2xl border border-[#C7FF3C]/25 bg-[#10181F] shadow-[0_18px_48px_rgba(0,0,0,.2)]" : "mobile-card overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"}>
+                <button type="button" aria-expanded={isOpen} aria-controls={`utility-panel-${panel.id}`} onClick={() => toggle(panel.id)} className="mobile-touch flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left">
                   <span className={isOpen ? "grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" : "grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-[#C7FF3C]"}>
                     <Icon className="size-5" />
                   </span>
