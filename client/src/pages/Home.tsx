@@ -127,10 +127,10 @@ export default function Home() {
             <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" />
             <span className="brand-wordmark text-xl text-white">trajeto</span>
           </a>
-          <nav className="hidden items-center gap-2 text-xs font-bold sm:flex">
-            <a href={appUrl("/ajuda")} className="rounded-full px-3 py-2 text-[#9FB0B8] transition hover:bg-white/5 hover:text-white">Como funciona</a>
-            <a href={appUrl("/planejar")} className="rounded-full bg-[#C7FF3C] px-4 py-2.5 text-[#0B1014] transition hover:bg-white">Planejar rota</a>
-          </nav>
+          <div className="flex items-center gap-2">
+            <a href={appUrl("/minha-conta")} className="hidden rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#9FB0B8] transition hover:bg-white/5 hover:text-white sm:inline-flex">Minha conta</a>
+            <a href={appUrl("/planejar")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3.5 py-2 text-xs font-extrabold text-[#0B1014] transition hover:bg-white sm:hidden"><Navigation className="size-4" /> Planejar</a>
+          </div>
         </div>
       </header>
 
