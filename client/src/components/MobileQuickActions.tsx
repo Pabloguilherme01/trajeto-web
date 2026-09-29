@@ -181,7 +181,7 @@ export default function MobileQuickActions() {
       <div className={`mobile-glass mx-auto max-w-md rounded-[1.45rem] border p-1.5 shadow-[0_20px_55px_rgba(0,0,0,.48)] transition-colors ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
         <div className="mb-1 flex items-center justify-between px-2 pt-0.5">
           <span className="flex items-center gap-1 text-[0.5rem] font-extrabold uppercase tracking-[0.14em] text-[#71828B]"><Sparkles className="size-2.5 text-[#C7FF3C]" /> {dailyMode === "automatico" ? "Ação automática" : "Modo " + primary.kind}</span>
-          <span className={`inline-flex items-center gap-1 text-[0.5rem] font-bold ${online ? "text-[#B9D979]" : "text-[#FFD49C]"}`}><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C] shadow-[0_0_8px_rgba(199,255,60,.75)]" : "bg-[#FFB86B]"}`} aria-hidden="true" />{online ? "online" : "offline"}</span>
+          <span className={`inline-flex items-center gap-2 text-[0.5rem] font-bold ${online ? "text-[#B9D979]" : "text-[#FFD49C]"}`}><span className={`inline-flex items-center gap-1.5`}><span className={`size-1.5 rounded-full ${online ? "bg-[#C7FF3C] shadow-[0_0_8px_rgba(199,255,60,.75)]" : "bg-[#FFB86B]"}`} aria-hidden="true" />{online ? "online" : "offline"}</span>{savedRoutesCount > 0 && <span className="rounded-full border border-white/8 bg-white/[.04] px-1.5 py-0.5 text-[0.45rem] text-white/55">{savedRoutesCount} offline</span>}</span>
         </div>
         <div className="grid grid-cols-5 gap-1">
           {actions.map(({ label, short, icon: Icon, path, run, smart }) => {
