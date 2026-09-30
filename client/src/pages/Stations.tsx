@@ -384,7 +384,7 @@ ${url}`); toast.success("Link do posto copiado para compartilhar."); }
           <div className="rounded-2xl border border-white/8 bg-white/[.035] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#3DE3FF]">Encontrados</p>
             <p className="mt-1 text-xl font-black text-white">{list.length}</p>
-            <p className="text-[0.58rem] text-[#71838C]">nesta consulta</p>
+            <p className="text-[0.58rem] text-[#71838C]">{usingCachedStations ? `cache · ${cachedAgeLabel ?? "data local"}` : searchedAt ? `consulta · ${searchedAt}` : "nesta consulta"}</p>
           </div>
           <div className="rounded-2xl border border-white/8 bg-white/[.035] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]">Abertos</p>
