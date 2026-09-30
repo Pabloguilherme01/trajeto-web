@@ -11,6 +11,20 @@ export type RouteStop = {
   isOpen?: boolean;
 };
 
+export function routeCorridorPoints(result: DirectionsResult, limit = 4) {
+  const steps = result.routes[0]?.legs.flatMap(leg => leg.steps) ?? [];
+  if (!steps.length) return [];
+
+  const stride = Math.max(1, Math.floor(steps.length / (limit + 1)));
+  const points = steps
+    .filter((_, index) => index > 0 && index < steps.length - 1)
+    .filter((_, index) => index % stride === 0)
+    .slice(0, limit)
+    .map(step => step.start_location);
+
+  return points;
+}
+
 export function normalizeStops(searches: PlacesSearchResult[]): RouteStop[] {
   const unique = new Map<string, RouteStop>();
 
@@ -30,7 +44,7 @@ export function normalizeStops(searches: PlacesSearchResult[]): RouteStop[] {
     }
   }
 
-  return Array.from(unique.values()).slice(0, 8);
+  return Array.from(unique.values()).slice(0, 10);
 }
 
 export function routeSummary(result: DirectionsResult) {
