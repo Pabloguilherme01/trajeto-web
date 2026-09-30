@@ -3,8 +3,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { resolveIntentQuery } from "@/lib/intentResolver";
+import { normalizePlaceSearchText } from "@/lib/placeSearch";
+import { searchOfflineDestinations } from "@/lib/offlineDestinations";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
-import QuickResolver from "@/components/QuickResolver";
 import { shareText, vibration } from "@/lib/mobileTools";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
@@ -43,11 +45,37 @@ export default function Home() {
       setMessage("Digite pelo menos 3 caracteres.");
       return;
     }
+
     setMessage(null);
-    rememberIntent("explore");
     rememberSearch(query);
+
+    const offline = searchOfflineDestinations(query)[0];
+    const normalizedQuery = normalizePlaceSearchText(query);
+    const normalizedName = offline ? normalizePlaceSearchText(offline.name) : "";
+    const normalizedShortName = offline ? normalizePlaceSearchText(offline.shortName) : "";
+    const exactOffline = Boolean(
+      offline &&
+      query.length >= 4 &&
+      (normalizedQuery === normalizedName || normalizedQuery === normalizedShortName),
+    );
+
+    if (exactOffline) {
+      rememberIntent("route");
+      vibration(8);
+      setLocation(appUrl("/local/" + encodeURIComponent(offline.id)));
+      return;
+    }
+
+    const intent = resolveIntentQuery(query);
+    rememberIntent(intent.kind === "route" ? "route" : "explore");
     vibration();
-    setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(query));
+
+    if (intent.kind === "route") {
+      setLocation(appUrl("/planejar") + "?offline=1&destino=" + encodeURIComponent(query));
+      return;
+    }
+
+    setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(intent.query));
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -160,21 +188,6 @@ export default function Home() {
             <ArrowRight className="size-4 text-white/25" />
           </button>
         </section>
-
-        <button
-          type="button"
-          onClick={() => { rememberIntent("route"); setLocation(appUrl("/planejar") + "?offline=1"); }}
-          className="mobile-action mobile-action-secondary mt-2 min-h-14 w-full justify-start rounded-2xl border-[#3DE3FF]/15 bg-[#3DE3FF]/[.045] px-4 text-left"
-        >
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><MapPinned className="size-5" /></span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-xs font-black text-white">Pontos essenciais offline</span>
-            <span className="mt-0.5 block text-[0.52rem] font-bold text-white/35">Hospitais, UPA, Vapt Vupt, rodoviária e serviços públicos já prontos</span>
-          </span>
-          <ArrowRight className="size-4 text-white/30" />
-        </button>
-
-        <QuickResolver onMessage={setMessage} />
 
 
         <section className="mt-3 grid grid-cols-3 gap-2" aria-label="Atalhos locais">
