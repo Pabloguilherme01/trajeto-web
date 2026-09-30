@@ -3,6 +3,7 @@ const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
 const RECENT_TRIPS_KEY = "trajeto-recent-trips";
 const MAX_RECENT_TRIPS = 8;
+const MAX_ROUTE_BACKUP = 30;
 const ROUTE_USAGE_KEY = "trajeto-route-usage";
 const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
@@ -86,8 +87,68 @@ export function removeRecentTrip(origin: string, destination: string) {
 }
 
 export function clearRecentTrips() {
-  try { localStorage.removeItem(RECENT_TRIPS_KEY); } catch {}
+  try {
+    localStorage.removeItem(RECENT_TRIPS_KEY);
+    localStorage.removeItem(ROUTE_USAGE_KEY);
+  } catch {}
   notifyPreferenceChange();
+}
+
+export function restoreLocalMobilityProfile(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const data = value as Record<string, unknown>;
+  if (data.version !== 1 || data.scope !== "aparelho") return false;
+
+  const trips = Array.isArray(data.trips) ? data.trips.filter(isRecentTrip).slice(0, MAX_RECENT_TRIPS) : [];
+  const searches = Array.isArray(data.recentSearches)
+    ? data.recentSearches
+      .filter((item): item is string => typeof item === "string" && item.trim().length >= 3)
+      .map(item => item.trim())
+      .slice(0, 5)
+    : [];
+  const routeUsage: Record<string, number> = {};
+
+  if (Array.isArray(data.routeUsage)) {
+    for (const item of data.routeUsage.slice(0, MAX_ROUTE_BACKUP)) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+      const route = item as Record<string, unknown>;
+      if (
+        typeof route.origin === "string" && route.origin.trim().length >= 3 &&
+        typeof route.destination === "string" && route.destination.trim().length >= 3 &&
+        Number.isFinite(Number(route.count)) && Number(route.count) > 0
+      ) {
+        const routeKey = route.origin.trim().toLocaleLowerCase("pt-BR") + "::" + route.destination.trim().toLocaleLowerCase("pt-BR");
+        routeUsage[routeKey] = Math.min(9999, Math.floor(Number(route.count)));
+      }
+    }
+  }
+
+  if (!trips.length && !searches.length && !Object.keys(routeUsage).length) return false;
+
+  try {
+    localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(trips));
+    localStorage.setItem(SEARCHES_KEY, JSON.stringify(searches));
+    localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(routeUsage));
+
+    const lastTrip = data.lastTrip;
+    if (lastTrip && typeof lastTrip === "object" && !Array.isArray(lastTrip)) {
+      const candidate = lastTrip as Record<string, unknown>;
+      if (
+        typeof candidate.origin === "string" && candidate.origin.trim().length >= 3 &&
+        typeof candidate.destination === "string" && candidate.destination.trim().length >= 3
+      ) {
+        localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({
+          origin: candidate.origin.trim().slice(0, 500),
+          destination: candidate.destination.trim().slice(0, 500),
+        }));
+      }
+    }
+  } catch {
+    return false;
+  }
+
+  notifyPreferenceChange();
+  return true;
 }
 
 export function getRouteUsage(origin: string, destination: string) {
