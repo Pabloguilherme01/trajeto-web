@@ -199,3 +199,7 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
   }
 }
+
+
+/* Accessibility: keep the desktop public-flow status badge above WCAG AA contrast. */
+nav[aria-label="Navegação principal"] .text-\\[\\#60737D\\] { color: #6F8791; }
