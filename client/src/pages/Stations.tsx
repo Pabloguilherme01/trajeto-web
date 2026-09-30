@@ -42,7 +42,7 @@ function getInitialQuery() {
   return new URLSearchParams(window.location.search).get("q") || corridorPresets[0]?.query || "postos";
 }
 
-export default function Stations() {
+export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [location, setLocation] = useLocation();
   const search = useSearch();
   const params = useMemo(() => new URLSearchParams(search), [search]);
@@ -50,7 +50,7 @@ export default function Stations() {
   const [query, setQuery] = useState(getInitialQuery);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [nearby, setNearby] = useState(false);
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(mapFirst);
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -72,7 +72,7 @@ export default function Stations() {
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
-  const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
+  const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");\n\n  useEffect(() => { if (mapFirst) setShowMap(true); }, [mapFirst]);
 
   const latParam = params.get("lat");
   const lngParam = params.get("lng");
