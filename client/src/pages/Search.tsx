@@ -13,8 +13,8 @@ const quickActions = [
   { label: "Rotas rápidas", hint: "UPA, hospital, centro e mais", icon: Route, kind: "routes", query: "" },
   { label: "Serviços públicos", hint: "Saúde, segurança e cidadania", icon: Landmark, kind: "services", query: "" },
   { label: "Perto de mim", hint: "Usar localização do aparelho", icon: Compass, kind: "nearby", query: "" },
-  { label: "Saúde", hint: "Hospitais, UPA e UBS", icon: HeartPulse, kind: "external", query: "hospitais UPA UBS, Águas Lindas de Goiás, GO" },
-  { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "external", query: "emergência, Águas Lindas de Goiás, GO" },
+  { label: "Saúde", hint: "UPA, HEAL, hospital e UBS", icon: HeartPulse, kind: "services", query: "saude" },
+  { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "services", query: "seguranca" },
   { label: "Farmácias", hint: "Encontrar farmácias", icon: Store, kind: "external", query: "farmácias, Águas Lindas de Goiás, GO" },
   { label: "Compras", hint: "Mercados e atacarejos", icon: ShoppingCart, kind: "external", query: "supermercados atacadistas, Águas Lindas de Goiás, GO" },
 ] as const;
@@ -60,7 +60,7 @@ export default function SearchPage() {
   const openQuick = (action: typeof quickActions[number]) => {
     if (action.kind === "internal") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=postos"); return; }
     if (action.kind === "routes") { setLocation(appUrl("/buscar") + "?q="); return; }
-    if (action.kind === "services") { setLocation(appUrl("/servicos")); return; }
+    if (action.kind === "services") { setLocation(appUrl("/servicos") + (action.query ? "?categoria=" + encodeURIComponent(action.query) : "")); return; }
     if (action.kind === "nearby") {
       if (!navigator.geolocation) { setLocation(appUrl("/postos")); return; }
       navigator.geolocation.getCurrentPosition(
