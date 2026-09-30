@@ -160,6 +160,27 @@ export default function Home() {
           </button>
         </section>
 
+        <section className="mt-5">
+          <div className="flex items-center justify-between gap-3">
+            <div><p className="text-[0.5rem] font-black uppercase tracking-[.16em] text-white/25">Explorar a cidade</p><h2 className="mt-1 text-base font-black">O que você precisa?</h2></div>
+            <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="text-[.52rem] font-black text-[#3DE3FF]">Abrir mapa</button>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {[
+              ["⛽","Postos","postos"],
+              ["🏥","Saúde","hospital"],
+              ["🏫","Educação","escola"],
+              ["🚌","Transporte","transporte"],
+              ["🏛","Serviços","servico publico"],
+            ].map(([icon,label,query]) => (
+              <button key={label} type="button" onClick={() => { rememberSearch(query); setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(query)); }} className="min-h-14 rounded-2xl border border-white/8 bg-white/[.025] px-3 text-left">
+                <span className="text-base" aria-hidden="true">{icon}</span>
+                <span className="mt-1 block text-[.55rem] font-black text-white/70">{label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {lastTrip && (
           <section className="mt-4 rounded-2xl border border-white/8 bg-[#111A21] p-3.5">
             <div className="flex items-center gap-3">
