@@ -1,5 +1,5 @@
 import { CheckCircle2, MapPin, Navigation, X } from "lucide-react";
-import { openNavigation, vibration } from "@/lib/mobileTools";
+import { getPreferredNavigationProvider, openNavigation, vibration } from "@/lib/mobileTools";
 
 type ComparableStation = {
   placeId: string;
@@ -114,7 +114,13 @@ export default function StationComparePanel({ stations, onClear }: Props) {
           <button
             key={station.placeId + "-navigate"}
             type="button"
-            onClick={() => { vibration(); const urls = openNavigation(station.lat, station.lng, station.name); window.open(urls.google, "_blank", "noopener,noreferrer"); }}
+            onClick={() => {
+              vibration();
+              const urls = openNavigation(station.lat, station.lng, station.name);
+              const provider = getPreferredNavigationProvider();
+              const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
+              window.open(url, "_blank", "noopener,noreferrer");
+            }}
             className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.55rem] font-black text-[#0B1014] active:scale-[.98]"
           >
             <Navigation className="mr-1 inline size-3.5" /> Navegar para {station.name}
