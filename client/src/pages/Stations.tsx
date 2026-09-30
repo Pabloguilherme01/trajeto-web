@@ -3,10 +3,11 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -33,11 +34,12 @@ export default function Stations() {
   const lng = Number(params.get("lng"));
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
+  const staticRuntime = isGitHubPagesRuntime();
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     hasCoordinates ? { query, lat, lng } : { query },
     {
-      enabled: query.trim().length >= 3 && !showSavedOnly,
+      enabled: query.trim().length >= 3 && !showSavedOnly && !staticRuntime,
       retry: 1,
       getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
     },
@@ -118,6 +120,9 @@ export default function Stations() {
         setInput("postos próximos");
         setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
         vibration(18);
+        if (staticRuntime) {
+          window.open(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude), "_blank", "noopener,noreferrer");
+        }
       },
       () => {
         setLocating(false);
@@ -207,6 +212,23 @@ export default function Stations() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {staticRuntime && !showSavedOnly && (
+          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
+              <div className="min-w-0">
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Modo público</p>
+                <h2 id="public-stations-title" className="mt-1 text-lg font-black">Pesquisar postos sem esperar por servidor.</h2>
+                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">Esta versão está hospedada como site estático. A busca ao vivo é entregue pelo Google Maps, enquanto favoritos e dados já salvos continuam no aparelho.</p>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
+              <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]">Postos perto de mim</button>
+            </div>
           </section>
         )}
 
