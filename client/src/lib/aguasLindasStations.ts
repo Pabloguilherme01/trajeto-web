@@ -1,3 +1,13 @@
+export type MapStationDiscovery = {
+  displayName: string;
+  address: string;
+  phone: string | null;
+  rating: number | null;
+  reviews: number | null;
+  hours: string | null;
+  note: string;
+};
+
 export type LocalStationRecord = {
   id: string;
   legalName: string;
@@ -27,8 +37,28 @@ export const AGUAS_LINDAS_DATA_POLICY = "ANP é a fonte primária para status ca
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
 
+export const AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT = AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length;
+
+function normalizeStationQuery(query: string) {
+  return query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+export function searchAguasLindasMapDiscoveries(query: string): MapStationDiscovery[] {
+  const normalized = normalizeStationQuery(query);
+  if (!normalized || normalized === "postos" || normalized === "combustiveis" || normalized.includes("aguas lindas")) {
+    return [...AGUAS_LINDAS_MAP_ONLY_DISCOVERIES];
+  }
+  return AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.filter(item =>
+    normalizeStationQuery([item.displayName, item.address, item.phone ?? "", item.hours ?? "", item.note].join(" ")).includes(normalized),
+  );
+}
+
+export function mapDiscoverySearchUrl(item: MapStationDiscovery) {
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.displayName + ", " + item.address);
+}
+
 export const AGUAS_LINDAS_STATIONS_SOURCES = {
-  anp: "Dados cadastrais dos revendedores varejistas de combustíveis automotivos, ANP, atualização de 29/09/2026.",
+  anp: "Dados cadastrais dos revendedores varejistas de combustíveis automotivos, ANP, página oficial atualizada em 28/09/2026.",
   cirtrox: "Consulta de empresas por CNAE e município, atualização indicada em setembro de 2026.",
   directory: "Diretório público de postos em Águas Lindas de Goiás, usado para consolidar nomes comerciais e endereços quando disponíveis.",
 };
