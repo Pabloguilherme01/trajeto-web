@@ -111,27 +111,46 @@ for (const record of output) {
   if (!deduped.has(key)) deduped.set(key, record);
 }
 const data = [...deduped.values()];
+
 if (!data.length) {
-  try {
-    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
-    if (previous?.data?.length) {
-      console.warn(JSON.stringify({ warning: "Nenhum preço ANP foi extraído; snapshot anterior preservado.", previousRows: previous.data.length }));
-      process.exit(0);
-    }
-  } catch {}
   await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
+  const retrievedAt = new Date().toISOString();
   const emptySnapshot = {
     source: "ANP",
     sourceUrl,
-    retrievedAt: new Date().toISOString(),
+    retrievedAt,
     referencePeriod,
     totalRows: 0,
     totalStations: 0,
     data: [],
     warning: "A fonte semanal foi acessada, mas nenhum registro municipal foi reconhecido. Não exibir preço como atual."
   };
+
+  try {
+    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
+    const sameEmptySnapshot =
+      previous?.source === "ANP" &&
+      previous?.sourceUrl === sourceUrl &&
+      previous?.referencePeriod === referencePeriod &&
+      previous?.totalRows === 0 &&
+      previous?.totalStations === 0 &&
+      Array.isArray(previous?.data) &&
+      previous.data.length === 0;
+
+    if (sameEmptySnapshot) {
+      console.warn(JSON.stringify({
+        warning: "Nenhum preço individual ANP reconhecido; snapshot vazio já está atualizado.",
+        referencePeriod
+      }));
+      process.exit(0);
+    }
+  } catch {}
+
   await writeFile(OUTPUT, JSON.stringify(emptySnapshot, null, 2) + "\n", "utf8");
-  console.warn(JSON.stringify({ warning: "Nenhum preço individual ANP reconhecido; snapshot vazio materializado.", referencePeriod }));
+  console.warn(JSON.stringify({
+    warning: "Nenhum preço individual ANP reconhecido; snapshot vazio materializado para impedir preço antigo como atual.",
+    referencePeriod
+  }));
   process.exit(0);
 }
 
