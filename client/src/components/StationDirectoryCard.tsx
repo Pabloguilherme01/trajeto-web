@@ -188,7 +188,7 @@ export function StationDirectoryCard({
           </div>
           <div className="text-right">
             <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
-            <p className="text-[0.46rem] font-bold text-white/25">qualidade/frescor</p>
+            <p className="text-[0.46rem] font-bold text-white/25">completude</p>
           </div>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
