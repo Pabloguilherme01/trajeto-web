@@ -3,6 +3,7 @@ import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
+import TodayPulse from "@/components/TodayPulse";
 import { ArrowRight, BadgeCheck, Bookmark, Download, Fuel, History, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getLastTrip, getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
@@ -242,39 +243,7 @@ export default function Home() {
 
         <DailyCommandCenter />
 
-        <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-7" aria-labelledby="mobile-snapshot-title">
-          <div className="container">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-[0.58rem] font-black uppercase tracking-[0.16em] text-[#3DE3FF]">Resumo operacional</p>
-                <h2 id="mobile-snapshot-title" className="mt-1 font-display text-xl font-semibold tracking-[-0.045em] text-white sm:text-2xl">Tudo que importa agora.</h2>
-              </div>
-              <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D] sm:block">dados deste aparelho</span>
-            </div>
-            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-4 md:overflow-visible">
-              <article className="min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><WifiOff className={online ? "size-4 text-[#C7FF3C]" : "size-4 text-[#FFC928]"} /><span className={online ? "text-[0.55rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]" : "text-[0.55rem] font-black uppercase tracking-[.1em] text-[#FFC928]"}>{online ? "Conectado" : "Offline"}</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{online ? "Consultas ao vivo disponíveis" : "Modo local ativo"}</p>
-                <p className="mt-1 text-[0.62rem] leading-relaxed text-[#73858E]">{online ? "Mapas e consultas novas podem ser abertas." : savedRoutes ? "Rotas já preparadas continuam acessíveis." : "Prepare uma rota quando a conexão voltar."}</p>
-              </article>
-              <button type="button" onClick={openSavedRoutes} className="min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 text-left transition hover:border-[#C7FF3C]/35 active:scale-[.99] md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><Bookmark className="size-4 text-[#C7FF3C]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Offline</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{savedRoutes} {savedRoutes === 1 ? "rota salva" : "rotas salvas"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{latestSavedRoute ? latestSavedRoute.origin + " → " + latestSavedRoute.destination : "Nenhuma rota preparada ainda"}</p>
-              </button>
-              <a href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : appUrl("/planejar")} className="min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 transition hover:border-[#BDA5FF]/35 active:scale-[.99] md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><History className="size-4 text-[#BDA5FF]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Última viagem</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{lastTrip ? "Repetir agora" : "Ainda não registrada"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Planeje a primeira viagem"}</p>
-              </a>
-              <div className="min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><Search className="size-4 text-[#3DE3FF]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Pesquisa</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{recentSearches.length} {recentSearches.length === 1 ? "consulta recente" : "consultas recentes"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{recentSearches[0] ?? "Suas próximas buscas aparecerão aqui"}</p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <TodayPulse />
 
         <MobileUtilityHub />
 
