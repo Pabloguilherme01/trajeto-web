@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Fuel, MapPinned, Route as RouteIcon, ShieldCheck, WifiOff } from "lucide-react";
+import { ArrowRight, CheckCircle2, Fuel, Landmark, MapPinned, Route as RouteIcon, ShieldCheck, WifiOff } from "lucide-react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
@@ -34,6 +34,15 @@ export default function Help() {
               </article>
             ))}
           </div>
+        </section>
+
+        <section className="mt-4">
+          <Link href={appUrl("/servicos")} className="block rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.055] p-5">
+            <p className="flex items-center gap-2 text-[0.55rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]"><Landmark className="size-3.5" /> Utilidade pública</p>
+            <p className="mt-2 text-lg font-black">Central de Águas Lindas</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/45">Saúde, segurança, assistência, trânsito, educação, cidadania e canais de emergência, com catálogo local e acesso offline.</p>
+            <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#3DE3FF] px-3 text-xs font-black text-[#0B1014]">Abrir central <ArrowRight className="size-3.5" /></span>
+          </Link>
         </section>
 
         <section className="mt-4 grid gap-3 sm:grid-cols-2">
