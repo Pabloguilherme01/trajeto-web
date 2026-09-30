@@ -1,6 +1,6 @@
 import { MapView } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
+import { Apple, LocateFixed, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
@@ -148,6 +148,9 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
+  const userMarker = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+  const [tiltEnabled, setTiltEnabled] = useState(false);
+  const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
@@ -265,6 +268,49 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     return () => window.google?.maps?.event.removeListener(listener);
   }, [ready, resolvedStations, offline]);
 
+  const locateUser = () => {
+    if (offline || !mapRef.current || !navigator.geolocation) {
+      setMapMessage("Localização do aparelho não está disponível neste modo.");
+      return;
+    }
+    setMapMessage(null);
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const map = mapRef.current;
+        if (!map) return;
+        map.setCenter(coords);
+        map.setZoom(15);
+        try {
+          userMarker.current?.map && (userMarker.current.map = null);
+          const pin = new window.google.maps.marker.PinElement({
+            background: "#3DE3FF",
+            borderColor: "#163840",
+            glyphColor: "#163840",
+            glyph: "•",
+            scale: 1.1,
+          });
+          userMarker.current = new window.google.maps.marker.AdvancedMarkerElement({
+            map,
+            position: coords,
+            title: "Sua localização",
+            content: pin.element,
+          });
+        } catch {}
+      },
+      () => setMapMessage("Não foi possível obter sua localização."),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+    );
+  };
+
+  const toggleTilt = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    const next = !tiltEnabled;
+    map.setTilt(next ? 45 : 0);
+    setTiltEnabled(next);
+  };
+
   if (!drawableStations.length && offline) {
     return <div className={"grid " + heightClassName + " place-items-center bg-[#0B1014] p-6 text-center"}><div><p className="text-sm font-black text-white/60">Mapa offline ainda sem coordenadas salvas.</p><p className="mt-2 text-xs leading-relaxed text-white/35">Abra o mapa uma vez com internet para posicionar os postos e armazenar as coordenadas neste aparelho.</p></div></div>;
   }
@@ -275,6 +321,18 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
 
   return (
     <div className="relative">
+      <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
+        <button type="button" onClick={locateUser} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-white shadow-lg backdrop-blur" aria-label="Centralizar na minha localização">
+          <LocateFixed className="size-4" />
+        </button>
+        <button type="button" onClick={toggleTilt} className={"min-h-10 rounded-xl border px-3 text-[0.58rem] font-black shadow-lg backdrop-blur " + (tiltEnabled ? "border-[#C7FF3C]/30 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>
+          {tiltEnabled ? "2.5D ativo" : "2.5D"}
+        </button>
+        <button type="button" onClick={() => { setMapMessage(null); mapRef.current?.setZoom(12); mapRef.current?.setCenter({ lat: -15.7545, lng: -48.2816 }); }} className="min-h-10 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.58rem] font-black text-white shadow-lg backdrop-blur">
+          Centro
+        </button>
+      </div>
+      {mapMessage && <div role="status" className="absolute left-3 right-3 top-[4.65rem] z-20 rounded-xl border border-white/10 bg-[#0B1014]/95 px-3 py-2 text-[0.58rem] font-bold text-white shadow-lg">{mapMessage}</div>}
       <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
       {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
       {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-[0.58rem] font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
