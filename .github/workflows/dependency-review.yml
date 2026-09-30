@@ -9,6 +9,9 @@ permissions:
 
 jobs:
   dependency-review:
+    # The action requires GitHub Dependency Graph to be enabled. Keep the
+    # workflow from failing solely because the repository capability is off.
+    if: ${{ github.event.repository.security_and_analysis.dependency_graph.status == 'enabled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
