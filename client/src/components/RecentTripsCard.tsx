@@ -41,6 +41,21 @@ export default function RecentTripsCard() {
   const mostUsedCount = getRouteUsage(mostUsedTrip.origin, mostUsedTrip.destination);
   const totalRecordedUses = trips.reduce((sum, trip) => sum + getRouteUsage(trip.origin, trip.destination), 0);
   const recurringRoutes = trips.filter(trip => getRouteUsage(trip.origin, trip.destination) > 1).length;
+  const [offlineReady, setOfflineReady] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void listOfflineRoutes().then(routes => {
+      if (!active) return;
+      setOfflineReady(Boolean(routes.some(route =>
+        route.origin.trim().toLocaleLowerCase("pt-BR") === mostUsedTrip.origin.trim().toLocaleLowerCase("pt-BR") &&
+        route.destination.trim().toLocaleLowerCase("pt-BR") === mostUsedTrip.destination.trim().toLocaleLowerCase("pt-BR"),
+      )));
+    }).catch(() => {
+      if (active) setOfflineReady(null);
+    });
+    return () => { active = false; };
+  }, [mostUsedTrip.origin, mostUsedTrip.destination]);
 
   const prepareRoutine = () => {
     const query = "?origem=" + encodeURIComponent(mostUsedTrip.origin) + "&destino=" + encodeURIComponent(mostUsedTrip.destination);
@@ -111,6 +126,7 @@ export default function RecentTripsCard() {
               <p className="text-[0.52rem] font-black uppercase tracking-[0.12em] text-[#326575]">Sua rota mais recorrente</p>
               <p className="mt-1 truncate text-xs font-extrabold">{mostUsedTrip.origin} → {mostUsedTrip.destination}</p>
               <p className="mt-1 text-[0.58rem] font-semibold text-[#718089]">{mostUsedCount} usos neste aparelho</p>
+              <p className="mt-1 text-[0.52rem] font-bold text-[#326575]">{offlineReady === true ? "rota disponível offline" : offlineReady === false ? "sem cópia offline desta rota" : "verificando cópia offline…"}</p>
             </div>
             <div className="flex shrink-0 gap-1.5">
               <button type="button" onClick={prepareRoutine} className="min-h-10 rounded-xl bg-[#0B1014] px-3 text-[0.58rem] font-black text-white">
