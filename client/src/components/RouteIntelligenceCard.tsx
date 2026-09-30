@@ -37,6 +37,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [trafficDetailed, setTrafficDetailed] = useState(false);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
   const [decisionMode, setDecisionMode] = useState<"balanced" | "fastest" | "cheapest" | "no-tolls">("balanced");
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
 
@@ -61,6 +62,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
       const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
       setData(nextData);
+      setLastUpdatedAt(Date.now());
       onRoutesChange?.(nextData.routes);
       if (!selectedRouteId && nextData.routes[0]) onSelectRoute?.(nextData.routes[0].id);
     } catch (error) {
@@ -140,7 +142,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <p className="text-xs font-black">Modo de decisão</p>
             <p className="mt-1 text-[0.58rem] text-white/40">Escolha o objetivo e o Trajeto reaplica a consulta real.</p>
           </div>
-          <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.52rem] font-black text-white/55">{offline ? "offline · cálculos locais" : "online · dados reais"}</span>
+          <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.52rem] font-black text-white/55">{offline ? "offline · cálculos locais" : lastUpdatedAt ? `atualizado ${new Date(lastUpdatedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : "online · dados reais"}</span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {([
@@ -153,7 +155,6 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
               setDecisionMode(mode);
               const nextAvoidTolls = mode === "no-tolls" ? true : mode === "balanced" || mode === "fastest" ? false : avoidTollsState;
               setAvoidTollsState(nextAvoidTolls);
-              void refresh({ avoidTolls: nextAvoidTolls });
             }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
           ))}
         </div>
