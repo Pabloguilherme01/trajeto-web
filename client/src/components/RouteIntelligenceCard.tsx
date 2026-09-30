@@ -65,12 +65,19 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     setLoading(true);
     setMessage("");
     try {
-      const nextAvoidTolls = overrides?.avoidTolls ?? avoidTollsState;
-      const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
-      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
-      setData(nextData);
-      setLastUpdatedAt(Date.now());
-      onRoutesChange?.(nextData.routes);
+      const cacheKey = JSON.stringify({v:1,origin:origin.trim().toLocaleLowerCase("pt-BR"),destination:destination.trim().toLocaleLowerCase("pt-BR"),waypoints:waypoints.map(item=>item.trim().toLocaleLowerCase("pt-BR")),avoidTolls:nextAvoidTolls,avoidHighways:nextAvoidHighways,trafficDetailed});
+      const cacheStorageKey = "trajeto-route-intelligence:" + btoa(unescape(encodeURIComponent(cacheKey))).slice(0,180);
+      const now = Date.now();
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheStorageKey) || "null");
+        if(cached && typeof cached==="object" && typeof cached.savedAt==="number" && now-cached.savedAt<120000 && cached.data){
+          setData(cached.data as RouteIntelligence); setLastUpdatedAt(cached.savedAt); onRoutesChange?.((cached.data as RouteIntelligence).routes); return;
+        }
+      } catch {}
+      const nextData = await fetchRouteIntelligence({origin,destination,waypoints,avoidTolls:nextAvoidTolls,avoidHighways:nextAvoidHighways,trafficDetailed});
+      setData(nextData); setLastUpdatedAt(now); onRoutesChange?.(nextData.routes);
+      try { sessionStorage.setItem(cacheStorageKey,JSON.stringify({savedAt:now,data:nextData})); } catch {}
+
       if (!selectedRouteId && nextData.routes[0]) onSelectRoute?.(nextData.routes[0].id);
     } catch (error) {
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
