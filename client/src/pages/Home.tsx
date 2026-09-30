@@ -165,9 +165,14 @@ export default function Home() {
               <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
                 Seu dia em movimento.<br /><span className="text-[#C7FF3C]">Mais simples.</span>
               </h1>
-              <p className="mt-5 max-w-xl text-[0.95rem] leading-[1.65] text-[#B7C4CA] sm:mt-7 sm:text-lg">
-                O Trajeto transforma deslocamento em uma rotina simples: escolha para onde vai, veja o impacto da viagem, prepare o que precisa e continue mais rápido na próxima vez. Destinos, rotas, custos e preferências ficam organizados no celular.
+              <p className="mt-5 max-w-xl text-[0.95rem] leading-[1.55] text-[#B7C4CA] sm:mt-7 sm:text-lg sm:leading-[1.65]">
+                Planeje, compare e continue suas viagens pelo celular. Rotas, postos, custos e atalhos ficam organizados para a próxima saída.
               </p>
+              <div className="mt-4 flex flex-wrap gap-1.5 sm:mt-6">
+                <span className="rounded-full border border-white/10 bg-white/[.035] px-2.5 py-1.5 text-[0.55rem] font-black uppercase tracking-[.1em] text-white/55">sem cadastro</span>
+                <span className="rounded-full border border-white/10 bg-white/[.035] px-2.5 py-1.5 text-[0.55rem] font-black uppercase tracking-[.1em] text-white/55">dados locais</span>
+                <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2.5 py-1.5 text-[0.55rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]">offline preparado</span>
+              </div>
 
               <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
                 <div className="border border-white/10 bg-white/[0.035] p-4">
@@ -230,7 +235,7 @@ export default function Home() {
               </div>}
 
               <div className="mt-6">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Atalhos mais usados</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Buscas rápidas</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {corridorPresets.slice(0, 4).map(preset => (
                     <button key={preset.id} onClick={() => { setActivePresetId(preset.id); openSearch(preset.query, preset.id); }} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C] hover:bg-[#C7FF3C]/8">
