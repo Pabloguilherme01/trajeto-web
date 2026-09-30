@@ -464,7 +464,7 @@ export default function Planner() {
             ) : (
               <div>
                 <div className="grid grid-cols-2 gap-3 border-b border-[#D8DED5] pb-6 sm:grid-cols-4"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Distância</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{planned.route.distanceLabel}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Tempo estimado</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{minutes(planned.route.durationSeconds)}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Chegada</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{estimatedArrival(selectedRouteDuration || planned.route.durationSeconds, clockNow)}</p><p className="mt-1 text-[0.58rem] font-semibold text-[#71807B]">se sair agora</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Trajeto</p><p className="mt-2 text-sm font-semibold leading-snug">{planned.route.summary || "Rota calculada"}</p></div></div>
-                <TripFuelBriefing distanceKm={selectedRouteDistanceKm || planned.route.distanceMeters / 1000} durationSeconds={selectedRouteDuration || planned.route.durationSeconds} />
+                <TripFuelBriefing distanceKm={selectedRouteDistanceKm || planned.route.distanceMeters / 1000} durationSeconds={selectedRouteDuration || planned.route.durationSeconds} roundTrip={roundTrip} />
                 <div className="mt-6"><RouteMap
                   origin={planned.route.origin}
                   destination={planned.route.destination}
