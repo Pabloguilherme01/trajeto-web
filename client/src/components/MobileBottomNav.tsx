@@ -92,6 +92,9 @@ export default function MobileBottomNav() {
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Bookmark className="size-5" /> Salvos
           </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/explorar")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <MapPinned className="size-5" /> Explorer
+          </button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <HelpCircle className="size-5" /> Ajuda e uso offline
           </button>
