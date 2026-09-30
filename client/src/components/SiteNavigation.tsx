@@ -2,14 +2,14 @@ import { Bookmark, HelpCircle, Home, MapPinned, Navigation, UserRound } from "lu
 import { Link, useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
-const items = [
+type NavigationItem = { href: string; label: string; icon: typeof Home; primary?: boolean };\n\nconst items: NavigationItem[] = [
   { href: "/", label: "Início", icon: Home },
   { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
   { href: "/salvos", label: "Salvos", icon: Bookmark },
   { href: "/postos", label: "Postos", icon: MapPinned },
   { href: "/minha-conta", label: "Minha conta", icon: UserRound },
   { href: "/ajuda", label: "Ajuda", icon: HelpCircle },
-] as const;
+];
 
 export default function SiteNavigation() {
   const [location] = useLocation();
