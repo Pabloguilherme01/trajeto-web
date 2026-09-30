@@ -1,5 +1,6 @@
 import { Bookmark, Fuel, HelpCircle, Home, Navigation, UserRound } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { appUrl } from "@/lib/appUrl";
 
 const items = [
@@ -7,6 +8,7 @@ const items = [
   { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
   { href: "/postos", label: "Postos", icon: Fuel, primary: false },
   { href: "/salvos", label: "Salvos", icon: Bookmark, primary: false },
+  { href: "/ajuda", label: "Ajuda", icon: HelpCircle, primary: false },
   { href: "/minha-conta", label: "Conta", icon: UserRound, primary: false },
 ] satisfies Array<{ href: string; label: string; icon: typeof Home; primary: boolean }>;
 
@@ -18,7 +20,7 @@ export default function SiteNavigation() {
     <nav aria-label="Navegação principal" className="hidden border-b border-white/8 bg-[#0B1014]/95 shadow-[0_10px_35px_rgba(0,0,0,.12)] backdrop-blur-xl md:block">
       <div className="container">
         <ul className="flex min-h-12 items-center gap-1 overflow-x-auto">
-          {items.map(({ href, label, icon: Icon, primary }) => {
+          {items.filter(item => item.href !== "/minha-conta" || !isGitHubPagesRuntime()).map(({ href, label, icon: Icon, primary }) => {
             const active = current === href || (href !== "/" && current.startsWith(href + "/"));
             return (
               <li key={href} className="shrink-0">
@@ -38,7 +40,7 @@ export default function SiteNavigation() {
               </li>
             );
           })}
-          <li className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D]">
+          <li className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#9FB1BA]">
             <span className="size-1.5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />
             Fluxo público · sem cadastro
           </li>

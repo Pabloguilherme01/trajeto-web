@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v10";
+const VERSION = "trajeto-v11";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -56,14 +56,16 @@ self.addEventListener("message", event => {
 
 function collectManifestAssets(manifest) {
   const assets = new Set();
+  const visited = new Set();
   const visit = entry => {
-    if (!entry || typeof entry !== "object") return;
-    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\\//, ""));
+    if (!entry || typeof entry !== "object" || visited.has(entry)) return;
+    visited.add(entry);
+    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\//, ""));
     for (const css of Array.isArray(entry.css) ? entry.css : []) {
-      if (typeof css === "string") assets.add("./" + css.replace(/^\\//, ""));
+      if (typeof css === "string") assets.add("./" + css.replace(/^\//, ""));
     }
     for (const asset of Array.isArray(entry.assets) ? entry.assets : []) {
-      if (typeof asset === "string") assets.add("./" + asset.replace(/^\\//, ""));
+      if (typeof asset === "string") assets.add("./" + asset.replace(/^\//, ""));
     }
     for (const key of ["imports", "dynamicImports"]) {
       for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
@@ -112,8 +114,8 @@ async function networkFirstNavigation(request) {
     return response;
   } catch {
     return (
-      await cache.match(request) ||
-      await cache.match("./index.html") ||
+      await cache.match(request, { ignoreVary: true }) ||
+      await cache.match("./index.html", { ignoreVary: true }) ||
       new Response("Trajeto indisponível offline.", {
         status: 503,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
@@ -124,7 +126,8 @@ async function networkFirstNavigation(request) {
 
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
+  // Versioned static assets are identical for every Origin header.
+  const cached = await cache.match(request, { ignoreVary: true });
   const network = fetch(request)
     .then(response => {
       if (response.ok) void cache.put(request, response.clone());
@@ -132,7 +135,7 @@ async function staleWhileRevalidate(request, cacheName) {
     })
     .catch(() => cached);
 
-  return cached || network || new Response("", { status: 504 });
+  return cached || await network || new Response("", { status: 504 });
 }
 
 async function networkFirst(request, cacheName) {

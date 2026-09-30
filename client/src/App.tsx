@@ -5,6 +5,7 @@ import NotFound from "@/pages/NotFound";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { normalizeRouterTarget } from "@/lib/appUrl";
 import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
@@ -31,7 +32,7 @@ function RouteLoading() {
       <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#121B22] p-5">
         <div className="size-2 animate-pulse rounded-full bg-[#C7FF3C]" />
         <p className="mt-4 text-sm font-black">Abrindo o Trajeto…</p>
-        <p className="mt-1 text-xs leading-relaxed text-white/45">Carregando somente a tela necessária.</p>
+        <p className="mt-1 text-xs leading-relaxed text-white/65">Carregando somente a tela necessária.</p>
       </div>
     </div>
   );
@@ -59,7 +60,6 @@ function AuthReturnHandler() {
 
 function Router() {
   return (
-    <WouterRouter base={routerBase}>
       <Suspense fallback={<RouteLoading />}>
         <Switch>
           <Route path="/" component={Home} />
@@ -75,12 +75,12 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </Suspense>
-    </WouterRouter>
   );
 }
 
 export default function App() {
   return (
+    <WouterRouter base={routerBase} hrefs={target => normalizeRouterTarget(target)} aroundNav={(navigate, target, options) => navigate(normalizeRouterTarget(target), options)}>
     <ErrorBoundary>
       <ThemeProvider>
         <TooltipProvider>
@@ -95,5 +95,6 @@ export default function App() {
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
+    </WouterRouter>
   );
 }

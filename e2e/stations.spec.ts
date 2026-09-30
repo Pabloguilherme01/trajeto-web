@@ -13,6 +13,7 @@ test("postos: abre, filtra e mantém a ficha navegável", async ({ page }) => {
 
 test("postos: acessibilidade sem violações críticas", async ({ page }) => {
   await page.goto("/postos?q=postos", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   const results = await new AxeBuilder({ page })
     .exclude("#aguas-lindas-map")
     .analyze();

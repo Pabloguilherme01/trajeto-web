@@ -10,8 +10,13 @@ test("postos: continua navegável depois de perder a conexão", async ({ page, c
     }
   });
 
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+
   await context.setOffline(true);
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
   await page.reload({ waitUntil: "domcontentloaded" });
+  if (errors.length) console.log("Offline page errors:", errors);
 
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await expect(page.getByText(/Diretório completo/i)).toBeVisible();

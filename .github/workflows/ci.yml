@@ -34,6 +34,9 @@ jobs:
       - name: Install from lock
         run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
+      - name: Service worker syntax
+        run: node --check client/public/sw.js
+
       - name: Typecheck
         run: npm run check
 
@@ -49,8 +52,8 @@ jobs:
       - name: Station sheet UI test
         run: npm run test:client-station-sheet
 
-      - name: Stations page UI test
-        run: npm run test:client-stations-page
+      - name: Page UI regression tests
+        run: npx vitest run client/src/pages --maxWorkers=1 --minWorkers=1
 
       - name: Production build
         run: npm run build
