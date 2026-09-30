@@ -47,3 +47,14 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
   expect(currentUrl.search).toContain("origem=");
   expect(currentUrl.search).toContain("destino=");
 });
+
+test("Pages: mapa e ficha local funcionam como recursos independentes", async ({ page }) => {
+  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
+  await expect(page.locator("#aguas-lindas-map")).toBeVisible();
+
+  await page.goto("local/rham", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "Rham Auto Posto", exact: true })).toBeVisible();
+  await expect(page.getByText("Ficha completa")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Compartilhar" })).toBeVisible();
+});
