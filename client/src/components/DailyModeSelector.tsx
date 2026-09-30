@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BatteryCharging, CalendarClock, CarFront, Compass, Gauge, Sparkles, WifiOff } from "lucide-react";
+import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { buildDailyModes, getAutomaticDailyMode, getSavedDailyMode, setSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
 import { mobileDestinationEvent } from "@/lib/mobileDestinations";
@@ -14,6 +15,7 @@ export default function DailyModeSelector() {
   const [selected, setSelected] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
   const [autoMode, setAutoMode] = useState<DailyModeId>(() => getAutomaticDailyMode(online, 0));
   const [expanded, setExpanded] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const refresh = () => {
@@ -49,13 +51,18 @@ export default function DailyModeSelector() {
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
   if (!active) return null;
 
-  const choose = (id: DailyModeId) => {
-    setSelected(id);
-    setSavedDailyMode(id);
+  const openMode = (mode: { id: DailyModeId; href: string }) => {
+    setSelected(mode.id);
+    setSavedDailyMode(mode.id);
+    setExpanded(false);
+    setLocation(appUrl(mode.href));
   };
+
   const chooseAutomatic = () => {
     setSelected("automatico");
     setSavedDailyMode("automatico");
+    setExpanded(false);
+    setLocation(appUrl(active.href));
   };
 
   return (
@@ -82,7 +89,7 @@ export default function DailyModeSelector() {
             const Icon = icons[mode.id];
             const activeMode = mode.id === activeId;
             return (
-              <button key={mode.id} type="button" role="listitem" aria-pressed={activeMode} onClick={() => choose(mode.id)} className={activeMode ? "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-[#C7FF3C]/50 bg-[#C7FF3C]/10 px-3 text-left" : "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-left"}>
+              <button key={mode.id} type="button" role="listitem" aria-pressed={activeMode} onClick={() => openMode(mode)} className={activeMode ? "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-[#C7FF3C]/50 bg-[#C7FF3C]/10 px-3 text-left" : "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-left"}>
                 <span className="flex items-center gap-1.5 text-[0.64rem] font-extrabold text-white"><Icon className="size-3.5 text-[#3DE3FF]" />{mode.label}</span>
                 <span className="mt-1 block truncate text-[0.58rem] text-[#82939C]">{mode.detail}</span>
               </button>
@@ -97,9 +104,9 @@ export default function DailyModeSelector() {
             <p className="mt-1 truncate text-xs font-extrabold text-white">{active.label}</p>
             <p className="mt-0.5 truncate text-[0.62rem] text-[#7F919A]">{active.detail}</p>
           </div>
-          <a href={appUrl(active.href)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">
+          <button type="button" onClick={() => openMode(active)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">
             Abrir <ArrowRight className="size-3.5" />
-          </a>
+          </button>
         </div>
       </div>
     </section>
