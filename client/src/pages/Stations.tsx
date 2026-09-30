@@ -1,4 +1,4 @@
-import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
+import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -854,7 +854,18 @@ export default function Stations() {
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
-              {(directorySearch || directorySort !== "name" || withIndividualPriceOnly) && <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); setWithIndividualPriceOnly(false); }} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.56rem] font-bold text-white/45">Limpar filtros</button>}
+              {(directorySearch || directorySort !== "name" || withIndividualPriceOnly || neighborhoodFilter !== "all" || brandFilter !== "all" || addressOnly || verifiedOnly || mappedOnly || fuelFilter !== "all") && <button type="button" onClick={() => {
+                setDirectorySearch("");
+                setDirectorySort(userCoords ? "distance" : "name");
+                setWithIndividualPriceOnly(false);
+                setNeighborhoodFilter("all");
+                setBrandFilter("all");
+                setAddressOnly(false);
+                setVerifiedOnly(false);
+                setMappedOnly(false);
+                setFuelFilter("all");
+                setDirectoryVisibleCount(48);
+              }} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.56rem] font-bold text-white/45">Limpar filtros</button>}
               <button type="button" onClick={() => setWithIndividualPriceOnly(value => !value)} className={withIndividualPriceOnly ? "min-h-11 rounded-2xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014]" : "min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-bold text-white/55"}>{withIndividualPriceOnly ? "Com preço ANP" : "Preço individual"}</button>
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[0.5rem] text-white/30" aria-live="polite">
