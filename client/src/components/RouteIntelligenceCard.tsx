@@ -3,7 +3,7 @@ import { AlertTriangle, Ban, Car, Clock3, RefreshCw, Route, Wallet } from "lucid
 import { fetchRouteIntelligence, type RouteIntelligence } from "@/lib/routeIntelligence";
 import { fetchAppleRouteIntelligence, type AppleRouteIntelligence } from "@/lib/appleRouteIntelligence";
 import { getMobileVehicle } from "@/lib/mobileVehicle";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 
 type Props = {
   origin: string;
@@ -270,14 +270,14 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/45">sem rota inventada</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              ["rápida", "Mais rápida", (routes: typeof data.routes, r: typeof data.routes[number]) => (r.durationSeconds ?? Infinity), "menor duração"],
-              ["custo", "Menor custo", (routes: typeof data.routes, r: typeof data.routes[number]) => totalCost(r), "combustível + pedágio"],
-              ["distância", "Menor distância", (routes: typeof data.routes, r: typeof data.routes[number]) => r.distanceMeters, "distância total"],
-              ["pedágio", "Menor pedágio", (routes: typeof data.routes, r: typeof data.routes[number]) => r.toll?.amount, "valor informado"],
-            ].map(([key, label, metric, hint]) => {
-              const ranked = data.routes.filter(route => metric(data.routes, route) != null);
-              const route = ranked.length ? [...ranked].sort((a, b) => Number(metric(data.routes, a)) - Number(metric(data.routes, b)))[0] : data.routes[0];
+            {([
+              ["rápida", "Mais rápida", (route: typeof data.routes[number]) => route.durationSeconds ?? Infinity, "menor duração"],
+              ["custo", "Menor custo", (route: typeof data.routes[number]) => totalCost(route), "combustível + pedágio"],
+              ["distância", "Menor distância", (route: typeof data.routes[number]) => route.distanceMeters, "distância total"],
+              ["pedágio", "Menor pedágio", (route: typeof data.routes[number]) => route.toll?.amount, "valor informado"],
+            ] as Array<[string, string, (route: typeof data.routes[number]) => number | null, string]>).map(([key, label, metric, hint]) => {
+              const ranked = data.routes.filter(route => metric(route) != null);
+              const route = ranked.length ? [...ranked].sort((a, b) => Number(metric(a)) - Number(metric(b)))[0] : data.routes[0];
               const active = selectedRouteId === route.id;
               return <button key={String(key)} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
                 <span className="block text-[0.52rem] font-black uppercase text-white/35">{String(label)}</span>
@@ -377,7 +377,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             : "Confirme “Usar esta rota” para liberar a navegação externa."}
         </p>
         {routeConfirmed && <div className="mt-3 grid grid-cols-3 gap-2">
-          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button>
+          <button type="button" onClick={() => window.open(buildGoogleMapsMultiStopUrl(destination, waypoints, true, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default"), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button>
           <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button>
           <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button>
         </div>}
