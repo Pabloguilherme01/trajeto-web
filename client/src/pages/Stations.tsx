@@ -124,6 +124,19 @@ export default function Stations() {
     return cards;
   }, [aguasLindasCatalog, anpStations]);
 
+  const directoryDistanceByKey = useMemo(() => {
+    if (!userCoords) return new Map<string, number>();
+    const distances = new Map<string, number>();
+    for (const item of directoryCards) {
+      const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
+      const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        distances.set(item.key, haversineKm(userCoords.lat, userCoords.lng, lat, lng));
+      }
+    }
+    return distances;
+  }, [directoryCards, userCoords]);
+
   const directoryCardsFiltered = useMemo(() => {
     const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const matches = directoryCards.filter(item => {
@@ -146,15 +159,8 @@ export default function Stations() {
     return [...matches].sort((a, b) => {
       const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
       if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) => {
-          const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-          const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-        };
-        const aCoords = getCoords(a);
-        const bCoords = getCoords(b);
-        const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
-        const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
+        const aDistance = directoryDistanceByKey.get(a.key) ?? Number.POSITIVE_INFINITY;
+        const bDistance = directoryDistanceByKey.get(b.key) ?? Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "price") {
@@ -168,7 +174,7 @@ export default function Stations() {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, directoryDistanceByKey, pricesByCnpj]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -835,12 +841,7 @@ export default function Stations() {
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
                   prices={pricesByCnpj.get(item.key) ?? []}
                   catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
-                  distanceKm={(() => {
-                    if (!userCoords) return null;
-                    const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-                    const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-                    return Number.isFinite(lat) && Number.isFinite(lng) ? haversineKm(userCoords.lat, userCoords.lng, lat, lng) : null;
-                  })()}
+                  distanceKm={directoryDistanceByKey.get(item.key) ?? null}
                   onToggleSaved={item.local || item.anp ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
