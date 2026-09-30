@@ -7,7 +7,7 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNa
 import { listMobileStationFavorites, toggleMobileStationFavorite } from "@/lib/mobileStationStore";
 import { buildLocationEntity } from "@/lib/stationEntity";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
-import { groupAnpFuelRows } from "@shared/anpRevendedores";
+import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { indexAnpPricesByCnpj, loadAguasLindasAnpPrices, type AnpPriceSnapshot } from "@/lib/anpPrices";
 
 export default function Local() {
@@ -18,7 +18,7 @@ export default function Local() {
     [id],
   );
   const [saved, setSaved] = useState(() => listMobileStationFavorites());
-  const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
+  const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);\n  const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() => getOfflineAnpSnapshot().rows);
 
   useEffect(() => {
     if (!local) return;
@@ -27,12 +27,27 @@ export default function Local() {
       if (snapshot) setPriceSnapshot(snapshot);
     });
     return () => controller.abort();
-  }, [local]);
+  }, [local, anpRows]);
+
+  useEffect(() => {
+    if (!local || anpRows.length > 0) return;
+    let active = true;
+    fetch(appUrl("/data/aguas-lindas-anp.json"), { cache: "default" })
+      .then(response => response.ok ? response.json() as Promise<{ data?: unknown[] }> : Promise.reject(new Error("snapshot unavailable")))
+      .then(payload => {
+        if (!active) return;
+        const rows = (payload.data ?? [])
+          .map(item => item && typeof item === "object" ? normalizeAnpFuelRow(item as Record<string, unknown>) : null)
+          .filter((row): row is AnpFuelRow => Boolean(row));
+        if (rows.length) setAnpRows(rows);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [local, anpRows.length]);
 
   const anp = useMemo(() => {
     if (!local) return null;
-    const snapshot = getOfflineAnpSnapshot();
-    return groupAnpFuelRows(snapshot.rows).find(item => item.cnpj === local.cnpj) ?? null;
+    return groupAnpFuelRows(anpRows).find(item => item.cnpj === local.cnpj) ?? null;
   }, [local]);
 
   const price = useMemo(
