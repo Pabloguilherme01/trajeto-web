@@ -679,6 +679,24 @@ export default function Stations() {
               <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#D9FF91]">{directoryCards.length} postos</span>
             </div>
 
+            <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-white/30">Referência municipal de preços</p>
+                  <p className="mt-1 text-[0.56rem] text-white/45">{AGUAS_LINDAS_PRICE_REFERENCE.period} · ANP · não é preço individual em tempo real</p>
+                </div>
+                <span className="text-[0.46rem] font-black text-white/25">amostra municipal</span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-[0.52rem] text-white/45 sm:grid-cols-3">
+                <span>Gasolina <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>Etanol <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.ethanol.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>Diesel S10 <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS10.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>Diesel S500 <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS500.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>GLP P13 <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.glpP13.average.toFixed(2).replace(".", ",")}</strong></span>
+                <span>GNV <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gnv.average.toFixed(2).replace(".", ",")}/m³</strong></span>
+              </div>
+            </div>
+
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
@@ -705,7 +723,7 @@ export default function Stations() {
           </section>
         )}
 
-        {staticRuntime && !showSavedOnly && (
+        {staticRuntime && !showSavedOnly && !broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="local-directory-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
