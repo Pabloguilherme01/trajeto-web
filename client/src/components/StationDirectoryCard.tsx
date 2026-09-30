@@ -239,6 +239,16 @@ export function StationDirectoryCard({
           <p className="text-[0.46rem] font-black uppercase tracking-[.12em] text-white/30">Confiança</p>
           <p className="mt-1 text-lg font-black text-[#C7FF3C]">{confidence}%</p>
           <p className="text-[0.44rem] font-bold text-white/25">{stationDataConfidenceBand(confidence)}</p>
+          <div
+            className="mt-1.5 h-1.5 w-20 overflow-hidden rounded-full bg-white/8"
+            role="meter"
+            aria-label={"Confiança dos dados: " + confidence + "%"}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={confidence}
+          >
+            <div className="h-full rounded-full bg-[#C7FF3C] transition-[width] duration-300" style={{ width: confidence + "%" }} />
+          </div>
         </div>
       </div>
 
