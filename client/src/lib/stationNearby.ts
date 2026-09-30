@@ -15,6 +15,8 @@ export type NearbySearchAdapter = {
     locationRestriction: { center: { lat: number; lng: number }; radius: number };
     maxResultCount: number;
     rankPreference: "DISTANCE";
+  language?: string;
+  region?: string;
   }) => Promise<{ places?: Array<{
     id?: string;
     displayName?: { text?: string };
@@ -36,6 +38,8 @@ export async function findNearbyStations(
     locationRestriction: { center, radius: Math.min(Math.max(radius, 250), 50000) },
     maxResultCount: 20,
     rankPreference: "DISTANCE",
+    language: "pt-BR",
+    region: "BR",
   });
 
   return (response.places ?? []).flatMap((place) => {
