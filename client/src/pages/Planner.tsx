@@ -52,6 +52,7 @@ export default function Planner() {
   const [roundTrip, setRoundTrip] = useState(false);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
+  const staticRuntime = isGitHubPagesRuntime();
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -107,7 +108,7 @@ export default function Planner() {
       return;
     }
 
-    if (isGitHubPagesRuntime()) {
+    if (staticRuntime) {
       setError(null);
       setSavedMessage("Modo público ativo: abra a navegação externa para obter distância, trânsito e chegada atualizados.");
       setFallbackReady(true);
@@ -333,8 +334,8 @@ export default function Planner() {
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
               <div className="min-w-0">
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Navegação pronta</p>
-                <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">O serviço de cálculo não respondeu, mas sua viagem não ficou travada.</h2>
-                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado.</p>
+                <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">{staticRuntime ? "Navegação pronta para este site estático." : "O serviço de cálculo não respondeu, mas sua viagem não ficou travada."}</h2>
+                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">{staticRuntime ? "Esta versão do Trajeto não depende de um servidor para abrir a viagem. O navegador escolhido calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
