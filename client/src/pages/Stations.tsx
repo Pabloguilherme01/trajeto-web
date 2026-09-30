@@ -104,34 +104,29 @@ export default function Stations() {
     return cards;
   }, [aguasLindasCatalog, anpStations]);
 
-  const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number], anp: typeof anpStations[number] | null) => {
-    const lat = anp?.latitude ?? local.anp?.latitude;
-    const lng = anp?.longitude ?? local.anp?.longitude;
+  const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
+    const lat = anp?.latitude ?? local?.anp?.latitude;
+    const lng = anp?.longitude ?? local?.anp?.longitude;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      toast.message("Este cadastro ainda não possui coordenada consolidada para o atalho local.");
+      return;
+    }
     const station = {
-      placeId: "aguas-lindas:" + (anp?.cnpj || local.cnpj),
-      name: local.displayName,
+      placeId: "aguas-lindas:" + (anp?.cnpj || local?.cnpj),
+      name: local?.displayName || anp?.razaoSocial || "Posto",
       address: [
-        anp?.endereco || local.address,
-        anp?.bairro || local.neighborhood,
+        anp?.endereco || local?.address,
+        anp?.bairro || local?.neighborhood,
         anp?.municipio || "Águas Lindas de Goiás",
         anp?.uf || "GO",
       ].filter(Boolean).join(", "),
-      lat: Number.isFinite(lat) ? Number(lat) : 0,
-      lng: Number.isFinite(lng) ? Number(lng) : 0,
-      phone: local.mapData?.phone ?? null,
+      lat: Number(lat),
+      lng: Number(lng),
+      phone: local?.mapData?.phone ?? null,
       website: null,
-      openingHours: local.mapData?.hours ? [local.mapData.hours] : [],
-      isOpen: local.mapData?.operationalStatus === "open" ? true : local.mapData?.operationalStatus === "closed" ? false : null,
+      openingHours: local?.mapData?.hours ? [local.mapData.hours] : [],
+      isOpen: local?.mapData?.operationalStatus === "open" ? true : local?.mapData?.operationalStatus === "closed" ? false : null,
     } satisfies MobileStation;
-
-    if (!Number.isFinite(station.lat) || !Number.isFinite(station.lng)) {
-      const addressOnly = { ...station, lat: 0, lng: 0 };
-      const result = toggleMobileStationFavorite(addressOnly);
-      setSaved(result.stations);
-      vibration();
-      toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");
-      return;
-    }
     const result = toggleMobileStationFavorite(station);
     setSaved(result.stations);
     vibration();
@@ -699,7 +694,7 @@ export default function Stations() {
                   local={item.local}
                   anp={item.anp}
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
-                  onToggleSaved={item.local ? () => toggleDirectorySaved(item.local as typeof aguasLindasCatalog[number], item.anp) : undefined}
+                  onToggleSaved={item.local || item.anp ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
             </div>
