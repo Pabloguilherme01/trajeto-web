@@ -16,26 +16,33 @@ const STATIC_SHELL = [
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then(async cache => {
-        await Promise.all(STATIC_SHELL.map(asset => cache.add(asset).catch(() => undefined)));
+  event.waitUntil((async () => {
+    try {
+      const cache = await caches.open(STATIC_CACHE);
+      await Promise.all(STATIC_SHELL.map(asset => cache.add(asset).catch(() => undefined)));
+
+      try {
         const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
-        if (!response.ok) return;
-        const manifest = await response.json();
-        const assets = collectManifestAssets(manifest);
-        await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
-      })
-      .then(() => caches.open(DATA_CACHE))
-      .then(async cache => {
-        await Promise.all([
-          cache.add("./data/aguas-lindas-anp.json").catch(() => undefined),
-          cache.add("./data/aguas-lindas-anp-precos.json").catch(() => undefined),
-        ]);
-      })
-      .then(() => caches.open(MAP_CACHE))
-      .then(() => self.skipWaiting())
-  );
+        if (response.ok) {
+          const manifest = await response.json();
+          const assets = collectManifestAssets(manifest);
+          await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
+        }
+      } catch {
+        // The static shell remains usable even when Vite's asset manifest is unavailable.
+      }
+
+      const dataCache = await caches.open(DATA_CACHE);
+      await Promise.all([
+        dataCache.add("./data/aguas-lindas-anp.json").catch(() => undefined),
+        dataCache.add("./data/aguas-lindas-anp-precos.json").catch(() => undefined),
+      ]);
+
+      await caches.open(MAP_CACHE);
+    } finally {
+      await self.skipWaiting();
+    }
+  })());
 });
 
 self.addEventListener("activate", event => {
