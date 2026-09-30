@@ -64,5 +64,4 @@ jobs:
         run: npm run test:e2e
 
       - name: GitHub Pages base-path smoke
-        if: ${{ always() }}
-        run: npm run test:e2e:pages
+        run: timeout 300s npm run test:e2e:pages
