@@ -155,8 +155,10 @@ export default function MobileQuickActions() {
     }
     resumeAction();
   };
+  const primaryShortLabel = primary.kind === "repeat" ? "Repetir" : primary.kind === "destination" ? "Destino" : primary.kind === "economy" ? "Economia" : primary.kind === "offline" ? "Offline" : "Planejar";
+
   const actions = [
-    { label: primary.label, short: primary.label, icon: primary.kind === "economy" ? Gauge : primary.kind === "offline" ? Bookmark : Navigation, path: "", run: runPrimary, smart: true },
+    { label: primary.label, short: primaryShortLabel, icon: primary.kind === "economy" ? Gauge : primary.kind === "offline" ? Bookmark : Navigation, path: "", run: runPrimary, smart: true },
     { label: "Postos", short: "Paradas", icon: Fuel, path: "/postos", run: () => { vibration(); rememberIntent("stations"); setLocation(appUrl("/postos")); } },
     { label: "Perto de mim", short: locating ? "GPS…" : "GPS", icon: LocateFixed, path: "", run: locate },
     { label: "Salvos", short: "Salvos", icon: Bookmark, path: "/planejar", run: () => { vibration(); rememberIntent("saved"); setLocation(appUrl("/planejar") + "?salvos=1"); } },
@@ -187,7 +189,7 @@ export default function MobileQuickActions() {
           {actions.map(({ label, short, icon: Icon, path, run, smart }) => {
             const active = label === "Salvos" ? current.endsWith("/planejar") && savedMode : label === "Postos" ? current.endsWith("/postos") && !savedMode : Boolean(path && current.endsWith(path));
             return (
-              <button key={label} type="button" onClick={run} aria-current={active ? "page" : undefined} className={smart ? "relative flex min-h-[3.7rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014] shadow-[0_5px_16px_rgba(199,255,60,.16)] active:scale-[.97]" : active ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014]" : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#9EADB4] transition active:scale-[.97] active:bg-white/10"}>
+              <button key={label} type="button" onClick={run} aria-label={label} title={label} aria-current={active ? "page" : undefined} className={smart ? "relative flex min-h-[3.7rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014] shadow-[0_5px_16px_rgba(199,255,60,.16)] active:scale-[.97]" : active ? "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] bg-[#C7FF3C] px-1 text-[#0B1014]" : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#9EADB4] transition active:scale-[.97] active:bg-white/10"}>
                 <Icon className="size-[1.05rem]" strokeWidth={smart || active ? 2.6 : 2} />
                 <span className="text-[0.58rem] font-extrabold tracking-[0.01em]">{smart ? label : active ? label : short}</span>
                 {smart && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-[#0B1014]" aria-label="Atalho inteligente" />}
