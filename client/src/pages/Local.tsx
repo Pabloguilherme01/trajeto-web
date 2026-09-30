@@ -18,7 +18,8 @@ export default function Local() {
     [id],
   );
   const [saved, setSaved] = useState(() => listMobileStationFavorites());
-  const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);\n  const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() => getOfflineAnpSnapshot().rows);
+  const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
+  const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() => getOfflineAnpSnapshot().rows);
 
   useEffect(() => {
     if (!local) return;
@@ -27,7 +28,7 @@ export default function Local() {
       if (snapshot) setPriceSnapshot(snapshot);
     });
     return () => controller.abort();
-  }, [local, anpRows]);
+  }, [local]);
 
   useEffect(() => {
     if (!local || anpRows.length > 0) return;
@@ -48,7 +49,7 @@ export default function Local() {
   const anp = useMemo(() => {
     if (!local) return null;
     return groupAnpFuelRows(anpRows).find(item => item.cnpj === local.cnpj) ?? null;
-  }, [local]);
+  }, [local, anpRows]);
 
   const price = useMemo(
     () => indexAnpPricesByCnpj(priceSnapshot?.data ?? []).get(local?.cnpj ?? "")?.[0] ?? null,
