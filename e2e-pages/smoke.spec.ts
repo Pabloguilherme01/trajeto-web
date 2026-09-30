@@ -58,3 +58,31 @@ test("Pages: mapa e ficha local funcionam como recursos independentes", async ({
   await expect(page.getByText("Ficha completa")).toBeVisible();
   await expect(page.getByRole("button", { name: "Compartilhar" })).toBeVisible();
 });
+
+
+test("Pages: busca universal encontra um local e abre a ficha", async ({ page }) => {
+  await page.goto("buscar", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /Encontre o que precisa/i })).toBeVisible();
+  const input = page.getByRole("textbox", { name: /Buscar locais/i });
+  await input.fill("Rham");
+  await page.getByRole("button", { name: "Pesquisar" }).click();
+  await expect(page.getByText("Rham Auto Posto", { exact: true })).toBeVisible();
+  await page.getByText("Rham Auto Posto", { exact: true }).click();
+  await expect(page).toHaveURL(/\/trajeto-web\/local\/rham$/);
+  await expect(page.getByText("Ficha completa")).toBeVisible();
+});
+
+test("Pages: modos de rota ficam disponíveis sem backend", async ({ page }) => {
+  await page.route("https://router.project-osrm.org/**", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ code: "Ok", routes: [{ distance: 2500, duration: 600, geometry: "abc" }] }),
+  }));
+  await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7700,-48.2700", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("button", { name: /A pé/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Bicicleta/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Transporte/i })).toBeVisible();
+  await page.getByRole("button", { name: /A pé/i }).click();
+  await page.getByRole("button", { name: "Calcular rota" }).click();
+  await expect(page.getByText("2,5 km")).toBeVisible();
+});
