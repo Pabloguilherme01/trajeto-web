@@ -171,7 +171,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   useEffect(() => {
     if (!drawableStations.length) return;
     cacheOfflineMapStations(drawableStations.filter(station => typeof station.id === "string").map(station => ({ ...station, id: station.id as string })));
-  }, [drawableStations.length]);
+  }, [resolvedStations]);
 
   useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps || offline) return;
