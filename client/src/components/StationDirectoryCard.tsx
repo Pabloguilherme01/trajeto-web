@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { appUrl } from "@/lib/appUrl";
 import { stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
@@ -67,7 +67,6 @@ export function StationDirectoryCard({
   catalogStatus?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
   const cnpj = anp?.cnpj || local?.cnpj || "";
@@ -141,16 +140,12 @@ export function StationDirectoryCard({
     } catch {}
   };
 
+  const plannerUrl = appUrl("/planejar") + "?destino=" + encodeURIComponent(address);
+
   return (
-    <motion.article
+    <article
       id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
-      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
-      whileHover={reduceMotion ? undefined : { y: -3 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.997 }}
-      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
+      className="group relative scroll-mt-24 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-3.5 shadow-[0_14px_40px_rgba(0,0,0,.18)] [content-visibility:auto] [contain-intrinsic-size:460px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
@@ -234,13 +229,21 @@ export function StationDirectoryCard({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-3 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_24px_rgba(199,255,60,.10)] active:scale-[.98]"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
+        <button type="button" aria-label="Abrir no Google Maps" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.55rem] font-black text-white/75 active:scale-[.98]">Google</button>
+        <button type="button" aria-label="Abrir no Waze" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.55rem] font-black text-[#C9F7FF] active:scale-[.98]">Waze</button>
+        <button type="button" aria-label="Abrir no Apple Maps" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.55rem] font-black text-white/75 active:scale-[.98]">Apple</button>
+        <a href={plannerUrl} className="flex min-h-11 items-center justify-center rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] px-2 text-[0.55rem] font-black text-[#D9FF91] active:scale-[.98]">Planejar rota</a>
+        <button type="button" onClick={() => void share()} className="min-h-11 rounded-xl border border-white/8 px-2 text-[0.55rem] font-black text-white/65 active:scale-[.98]">Compartilhar</button>
       </div>
 
+      <details className="mt-3 overflow-hidden rounded-2xl border border-white/8 bg-white/[.02]">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/70">
+          <span>Mais opções, fontes e dados técnicos</span>
+          <span className="text-[0.48rem] font-bold text-white/30">abrir</span>
+        </summary>
+        <div className="space-y-3 border-t border-white/8 px-3 pb-3 pt-3">
       <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
@@ -291,7 +294,7 @@ export function StationDirectoryCard({
         <p className="mt-1 text-[0.52rem] leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
         <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
       </div>
-      <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
+      <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto funciona sem cadastro.</p>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/55">
@@ -329,10 +332,13 @@ export function StationDirectoryCard({
           {coords && <p className="text-white/25">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
         </div>
       </details>
+        </div>
+      </details>
+
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-[0.48rem] text-white/25">
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
-        <span>Sem conta · uso direto</span>
+        <span>Sem cadastro · uso direto</span>
       </div>
-    </motion.article>
+    </article>
   );
 }
