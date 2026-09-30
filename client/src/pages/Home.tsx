@@ -11,6 +11,7 @@ import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
+import LatestRouteRadar from "@/components/LatestRouteRadar";
 
 
 
@@ -307,6 +308,8 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        <LatestRouteRadar />
 
         <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-7" aria-labelledby="mobile-snapshot-title">
           <div className="container">
