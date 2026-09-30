@@ -439,7 +439,7 @@ export default function Planner() {
 
             {planned.recommendation && (
               <section className="mt-3 rounded-[1.5rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4">
-                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Posto no corredor</p>
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">No caminho</p>
                 <h3 className="mt-1 text-lg font-black">{planned.recommendation.name}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-white/45">
                   {planned.recommendation.detourSource === "real" ? "Desvio calculado pela rota real" : "Desvio geométrico estimado"} · {planned.recommendation.detourKm.toLocaleString("pt-BR")} km
@@ -497,11 +497,11 @@ export default function Planner() {
               </section>
             )}
 
-            {planned.stops.length > 0 && (
+            {planned.stops.filter(stop => stop.placeId !== planned.recommendation?.placeId).length > 0 && (
               <section className="mt-3">
-                <div className="flex items-end justify-between gap-3"><div><p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Paradas encontradas</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-[0.55rem] text-white/30">dados desta consulta</span></div>
+                <div className="flex items-end justify-between gap-3"><div><p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Outras paradas</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.filter(stop => stop.placeId !== planned.recommendation?.placeId).length} posto(s)</h3></div><span className="text-[0.55rem] text-white/30">mesma consulta da rota</span></div>
                 <div className="mt-3 space-y-2">
-                  {planned.stops.slice(0, 6).map(stop => (
+                  {planned.stops.filter(stop => stop.placeId !== planned.recommendation?.placeId).slice(0, 6).map(stop => (
                     <article key={stop.placeId} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0"><p className="truncate text-sm font-black">{stop.name}</p><p className="mt-1 line-clamp-2 text-[0.62rem] leading-relaxed text-white/40">{stop.address}</p></div>
