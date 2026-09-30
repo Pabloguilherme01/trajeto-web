@@ -80,7 +80,7 @@ function Router() {
           <Route path="/salvos"><Planner /></Route>
           <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
           <Route path="/mapa"><Stations mapFirst /></Route>
-          <Route path="/postos" component={Stations} />
+          <Route path="/postos"><Stations /></Route>
           <Route path="/local/:id" component={Local} />
           <Route path="/explorar" component={Explorer} />
           <Route path="/ajuda" component={Help} />
