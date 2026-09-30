@@ -76,7 +76,7 @@ export default function Home() {
   };
 
   const useLocationAsOrigin = () => {
-    if (!online || locating || !navigator.geolocation) return;
+    if (locating || !navigator.geolocation) return;
     setLocating(true);
     rememberIntent("route");
     navigator.geolocation.getCurrentPosition(
@@ -181,7 +181,7 @@ export default function Home() {
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
                 <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
-                <button type="button" onClick={useLocationAsOrigin} disabled={!online || locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
+                <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
                   <LocateFixed className="size-4" />
                 </button>
               </div>
