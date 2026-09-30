@@ -16,7 +16,7 @@ const categoryOptions:CategoryOption[]=[
   {key:"all",label:"Tudo",icon:Globe2},{key:"fuel",label:"Postos",icon:Fuel},
   {key:"health",label:"Saúde",icon:HeartPulse},{key:"education",label:"Educação",icon:GraduationCap},
   {key:"transport",label:"Transporte",icon:Bus},{key:"government",label:"Serviços",icon:Landmark},
-  {key:"security",label:"Segurança",icon:Shield},{key:"leisure",label:"Lazer",icon:TreePine},
+  {key:"security",label:"Segurança",icon:Shield},{key:"leisure",label:"Lazer",icon:TreePine},{key:"territory",label:"Território",icon:MapPin},
   {key:"accessibility",label:"Acessibilidade",icon:Accessibility},
 ];
 
@@ -28,7 +28,7 @@ function fallbackCenter():Coordinates{
 }
 
 function iconFor(category:PlaceCategory){
-  const map={fuel:Fuel,health:HeartPulse,education:GraduationCap,transport:Bus,government:Landmark,security:Shield,leisure:TreePine,accessibility:Accessibility};
+  const map={fuel:Fuel,health:HeartPulse,education:GraduationCap,transport:Bus,government:Landmark,security:Shield,leisure:TreePine,accessibility:Accessibility,territory:MapPin};
   return map[category];
 }
 
