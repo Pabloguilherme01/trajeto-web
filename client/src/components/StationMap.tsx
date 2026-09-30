@@ -139,6 +139,7 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
 export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", showTraffic = false, nearbyCenter, onSelectStation }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; nearbyCenter?: { lat: number; lng: number } | null; onSelectStation?: (station: StationMapItem) => void }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const userMarker = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
   const [ready, setReady] = useState(false);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
@@ -318,6 +319,26 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     const bounds = new window.google.maps.LatLngBounds();
     const popup = infoWindow.current ?? new window.google.maps.InfoWindow();
     infoWindow.current = popup;
+
+    userMarker.current?.map && (userMarker.current.map = null);
+    userMarker.current = null;
+    if (nearbyCenter) {
+      const userPin = new window.google.maps.marker.PinElement({
+        background: "#FF7D6A",
+        borderColor: "#0B1014",
+        glyphColor: "#FFFFFF",
+        glyph: "•",
+      });
+      userMarker.current = new window.google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: nearbyCenter,
+        title: "Sua localização · usada somente nesta sessão",
+        content: userPin.element,
+        zIndex: 1000,
+      });
+      bounds.extend(nearbyCenter);
+    }
+
     drawableStations.forEach((station, index) => {
       const position = { lat: station.lat, lng: station.lng };
       bounds.extend(position);
@@ -345,8 +366,12 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     });
     map.fitBounds(bounds, 44);
     const listener = window.google.maps.event.addListenerOnce(map, "idle", () => { if ((map.getZoom() ?? 12) > 15) map.setZoom(15); });
-    return () => window.google?.maps?.event.removeListener(listener);
-  }, [ready, canonicalStations, offline]);
+    return () => {
+      window.google?.maps?.event.removeListener(listener);
+      userMarker.current?.map && (userMarker.current.map = null);
+      userMarker.current = null;
+    };
+  }, [ready, canonicalStations, offline, nearbyCenter]);
 
   if (!drawableStations.length && offline) {
     return <div className={"grid " + heightClassName + " place-items-center bg-[#0B1014] p-6 text-center"}><div><p className="text-sm font-black text-white/60">Mapa offline ainda sem coordenadas salvas.</p><p className="mt-2 text-xs leading-relaxed text-white/35">Abra o mapa uma vez com internet para posicionar os postos e armazenar as coordenadas neste aparelho.</p></div></div>;
