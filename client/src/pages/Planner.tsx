@@ -293,9 +293,9 @@ export default function Planner() {
           </span>
         </header>
 
-        {!savedMode && (
+        {!savedMode && offlineFocus && (
           <OfflineRouteHub
-            compact={!offlineFocus}
+            compact={false}
             onSelectDestination={chooseOfflineDestination}
             highlightedDestinationId={null}
           />
