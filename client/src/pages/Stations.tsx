@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { getEconomyMode, getRecentSearches, mobilePreferenceEvent, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
@@ -48,6 +48,7 @@ export default function Stations() {
   const [input, setInput] = useState(getInitialQuery);
   const [query, setQuery] = useState(getInitialQuery);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [economyMode, setEconomyMode] = useState(getEconomyMode);
   const [nearby, setNearby] = useState(false);
   const [showMap, setShowMap] = useState(() => isBroadAguasLindasQuery(getInitialQuery()));
   const [onlyOpen, setOnlyOpen] = useState(false);
@@ -204,7 +205,7 @@ export default function Stations() {
   const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
-    hasCoordinates ? { query, lat, lng } : { query },
+    hasCoordinates ? { query, lat, lng, limit: economyMode ? 8 : 20 } : { query, limit: economyMode ? 8 : 20 },
     {
       enabled: query.trim().length >= 3 && !showSavedOnly && !staticRuntime,
       retry: 1,
@@ -355,13 +356,16 @@ export default function Stations() {
   useEffect(() => {
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
+    const onPreferencesChange = () => setEconomyMode(getEconomyMode());
     const refreshSaved = () => setSaved(listMobileStationFavorites());
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
+    window.addEventListener(mobilePreferenceEvent, onPreferencesChange);
     window.addEventListener("focus", refreshSaved);
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener(mobilePreferenceEvent, onPreferencesChange);
       window.removeEventListener("focus", refreshSaved);
     };
   }, []);
