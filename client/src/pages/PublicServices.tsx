@@ -47,6 +47,17 @@ export default function PublicServices() {
   }, []);
 
   useEffect(() => {
+    const nextQuery = params.get("q") ?? "";
+    const nextCategory = params.get("categoria");
+    setQuery(nextQuery);
+    setCategory(
+      PUBLIC_SERVICE_CATEGORIES.some(item => item.id === nextCategory)
+        ? nextCategory as PublicServiceCategory | "todos"
+        : "todos",
+    );
+  }, [params]);
+
+  useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
