@@ -554,7 +554,7 @@ export default function Planner() {
 
             {planned.stops.length > 0 && (
               <section className="mt-3">
-                <div className="flex items-end justify-between gap-3"><div><p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Paradas encontradas</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-[0.55rem] text-white/30">dados desta consulta</span></div>
+                <div className="flex items-end justify-between gap-3"><div><p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">{publicRouteSource ? "No caminho" : "Paradas encontradas"}</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-[0.55rem] text-white/30">{publicRouteSource ? "catálogo local · posição estimada no corredor" : "dados desta consulta"}</span></div>
                 <div className="mt-3 space-y-2">
                   {planned.stops.slice(0, 6).map(stop => (
                     <article key={stop.placeId} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
