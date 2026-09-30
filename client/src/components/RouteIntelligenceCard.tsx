@@ -270,19 +270,28 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/45">sem rota inventada</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              ["rápida", "Mais rápida", (routes: typeof data.routes, r: typeof data.routes[number]) => (r.durationSeconds ?? Infinity), "menor duração"],
-              ["custo", "Menor custo", (routes: typeof data.routes, r: typeof data.routes[number]) => totalCost(r), "combustível + pedágio"],
-              ["distância", "Menor distância", (routes: typeof data.routes, r: typeof data.routes[number]) => r.distanceMeters, "distância total"],
-              ["pedágio", "Menor pedágio", (routes: typeof data.routes, r: typeof data.routes[number]) => r.toll?.amount, "valor informado"],
-            ].map(([key, label, metric, hint]) => {
-              const ranked = data.routes.filter(route => metric(data.routes, route) != null);
-              const route = ranked.length ? [...ranked].sort((a, b) => Number(metric(data.routes, a)) - Number(metric(data.routes, b)))[0] : data.routes[0];
+            {(
+              [
+                { key: "rápida", label: "Mais rápida", metric: (route) => route.durationSeconds ?? null, hint: "menor duração" },
+                { key: "custo", label: "Menor custo", metric: (route) => totalCost(route), hint: "combustível + pedágio" },
+                { key: "distância", label: "Menor distância", metric: (route) => route.distanceMeters, hint: "distância total" },
+                { key: "pedágio", label: "Menor pedágio", metric: (route) => route.toll?.amount ?? null, hint: "valor informado" },
+              ] satisfies Array<{
+                key: string;
+                label: string;
+                metric: (route: RouteIntelligence["routes"][number]) => number | null;
+                hint: string;
+              }>
+            ).map(({ key, label, metric, hint }) => {
+              const ranked = data.routes.filter(route => metric(route) != null);
+              const route = ranked.length
+                ? [...ranked].sort((a, b) => Number(metric(a)) - Number(metric(b)))[0]
+                : data.routes[0];
               const active = selectedRouteId === route.id;
-              return <button key={String(key)} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
-                <span className="block text-[0.52rem] font-black uppercase text-white/35">{String(label)}</span>
+              return <button key={key} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
+                <span className="block text-[0.52rem] font-black uppercase text-white/35">{label}</span>
                 <span className="mt-1 block text-[0.62rem] font-black">{route.id === "principal" ? "Principal" : route.id.replace("alternativa-", "Alternativa ")}</span>
-                <span className="mt-1 block text-[0.48rem] text-white/35">{String(hint)}</span>
+                <span className="mt-1 block text-[0.48rem] text-white/35">{hint}</span>
               </button>;
             })}
           </div>
