@@ -285,11 +285,9 @@ export default function Planner() {
   };
 
   const chooseOfflineDestination = (destination: OfflineDestination) => {
+    resetResult();
     setDestination(destination.address);
-    setPlanned(null);
-    setFallbackReady(false);
     setSavedMessage(destination.shortName + " carregado como destino. Este ponto também funciona sem internet.");
-    setError(null);
     window.requestAnimationFrame(() => {
       document.getElementById("planner-destination")?.focus();
       document.getElementById("planner-destination")?.scrollIntoView({ behavior: "smooth", block: "center" });
