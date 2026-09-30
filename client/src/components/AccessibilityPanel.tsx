@@ -1,6 +1,6 @@
 import React from "react";
 import { Accessibility, Check, RotateCcw, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
 import { setEconomyMode } from "@/lib/mobilePreferences";
 import { clearLocalAppData, exportLocalAppData, listLocalAppKeys, localDataEvent } from "@/lib/localData";
@@ -19,26 +19,44 @@ export default function AccessibilityPanel() {
   const [localDataCount,setLocalDataCount]=useState(()=>listLocalAppKeys().length);
   const [clearStep,setClearStep]=useState<"idle"|"confirm"|"done">("idle");
   const [backupStatus,setBackupStatus]=useState<"idle"|"done"|"error">("idle");
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const openPanel = () => { returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setOpen(true); };
+  const closePanel = () => setOpen(false);
 
   useEffect(()=>{
-    const openFromApp=()=>setOpen(true);
+    const openFromApp=()=>openPanel();
     window.addEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
     return()=>window.removeEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
   },[]);
 
   useEffect(()=>{
     if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusTimer = window.setTimeout(() => {
+      document.getElementById("accessibility-close")?.focus();
+    }, 0);
     const onKeyDown=(event: KeyboardEvent)=>{
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") closePanel();
     };
     window.addEventListener("keydown", onKeyDown);
-    return()=>window.removeEventListener("keydown", onKeyDown);
+    return()=>{
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      returnFocusRef.current?.focus();
+    };
   },[open]);
 
   useEffect(()=>{
     const refresh=()=>setPrefs(getAccessibilityPreferences());
+    const onLocalData=()=>setLocalDataCount(listLocalAppKeys().length);
     window.addEventListener(accessibilityPreferenceEvent,refresh);
-    return()=>window.removeEventListener(accessibilityPreferenceEvent,refresh);
+    window.addEventListener(localDataEvent,onLocalData);
+    return()=>{
+      window.removeEventListener(accessibilityPreferenceEvent,refresh);
+      window.removeEventListener(localDataEvent,onLocalData);
+    };
   },[]);
 
   useEffect(()=>{
@@ -56,18 +74,18 @@ export default function AccessibilityPanel() {
 
   return (
     <>
-      <button type="button" onClick={()=>setOpen(true)} aria-label="Abrir acessibilidade" className="fixed right-3 top-1/2 z-50 hidden -translate-y-1/2 rounded-full border border-white/15 bg-[#121B22]/95 p-3 text-[#C7FF3C] shadow-xl backdrop-blur md:grid place-items-center">
+      <button type="button" onClick={openPanel} aria-label="Abrir acessibilidade" className="fixed right-3 top-1/2 z-50 hidden -translate-y-1/2 rounded-full border border-white/15 bg-[#121B22]/95 p-3 text-[#C7FF3C] shadow-xl backdrop-blur md:grid place-items-center">
         <Accessibility className="size-5"/>
       </button>
-      <button type="button" onClick={()=>setOpen(true)} aria-label="Abrir acessibilidade" className="fixed bottom-[calc(5.9rem+env(safe-area-inset-bottom))] right-3 z-50 grid size-11 place-items-center rounded-full border border-white/15 bg-[#121B22]/95 text-[#C7FF3C] shadow-xl backdrop-blur md:hidden">
+      <button type="button" onClick={openPanel} aria-label="Abrir acessibilidade" className="fixed bottom-[calc(5.9rem+env(safe-area-inset-bottom))] right-3 z-50 grid size-11 place-items-center rounded-full border border-white/15 bg-[#121B22]/95 text-[#C7FF3C] shadow-xl backdrop-blur md:hidden">
         <Accessibility className="size-5"/>
       </button>
       {open && (
-        <div className="fixed inset-0 z-[70] bg-black/70 p-3 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
+        <div className="fixed inset-0 z-[70] bg-black/70 p-3 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" onMouseDown={e=>{if(e.target===e.currentTarget)closePanel()}}>
           <section className="mx-auto mt-auto max-h-[90vh] max-w-lg overflow-auto rounded-3xl border border-white/15 bg-[#0F171D] p-4 shadow-2xl sm:mt-10 sm:p-6">
             <header className="flex items-start justify-between gap-4">
               <div><p className="text-[0.62rem] font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]">Acesso rápido</p><h2 id="accessibility-title" className="mt-1 text-xl font-extrabold text-white">Acessibilidade e modo de uso</h2><p className="mt-1 text-xs text-[#8FA3AC]">Preferências ficam neste aparelho e podem ser alteradas a qualquer momento.</p></div>
-              <button type="button" onClick={()=>setOpen(false)} aria-label="Fechar acessibilidade" className="grid size-11 place-items-center rounded-xl border border-white/10 text-white"><X className="size-5"/></button>
+              <button type="button" id="accessibility-close" onClick={closePanel} aria-label="Fechar acessibilidade" className="grid size-11 place-items-center rounded-xl border border-white/10 text-white"><X className="size-5"/></button>
             </header>
 
             <div className="mt-5">
@@ -107,7 +125,7 @@ export default function AccessibilityPanel() {
               </div>
               {clearStep === "idle" && localDataCount > 0 && <button type="button" onClick={()=>setClearStep("confirm")} className="mt-3 min-h-11 w-full rounded-xl border border-[#FFB5A1]/25 bg-[#FFB5A1]/[.05] px-4 text-xs font-extrabold text-[#FFD0C3]">Limpar dados do Trajeto neste aparelho</button>}
               {clearStep === "confirm" && <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <button type="button" onClick={()=>{const count=clearLocalAppData();setLocalDataCount(Math.max(0,localDataCount-count));setPrefs({largeText:false,highContrast:false,reduceMotion:false,compactMode:false});}} className="min-h-11 rounded-xl bg-[#FFB5A1] px-4 text-xs font-extrabold text-[#21110D]">Confirmar limpeza</button>
+                <button type="button" onClick={()=>{clearLocalAppData();resetAccessibilityPreferences();setLocalDataCount(listLocalAppKeys().length);setPrefs(getAccessibilityPreferences());setClearStep("done");}} className="min-h-11 rounded-xl bg-[#FFB5A1] px-4 text-xs font-extrabold text-[#21110D]">Confirmar limpeza</button>
                 <button type="button" onClick={()=>setClearStep("idle")} className="min-h-11 rounded-xl border border-white/10 px-4 text-xs font-bold text-white">Cancelar</button>
               </div>}
               {clearStep === "done" && <div role="status" className="mt-3 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3 py-2 text-xs font-bold text-[#DFFF9A]">Dados locais removidos. O Trajeto voltou ao estado inicial neste aparelho.</div>}
