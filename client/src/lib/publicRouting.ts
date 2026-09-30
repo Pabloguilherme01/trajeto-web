@@ -72,8 +72,8 @@ function cacheSet<T>(key: string, value: T) {
 }
 
 async function geocode(value: string): Promise<PublicCoordinate> {
-  const coordinate = parseCoordinateInput(value);
-  if (coordinate) return coordinate;
+  const parsedCoordinate = parseCoordinateInput(value);
+  if (parsedCoordinate) return parsedCoordinate;
 
   const query = normalizeText(value);
   if (!query) throw new Error("Origem ou destino vazio.");
@@ -109,9 +109,9 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     throw new Error("Não foi possível localizar “" + query + "”. Tente usar endereço completo, cidade ou coordenadas.");
   }
 
-  const coordinate = { lat, lng };
-  cacheSet(cacheKey, coordinate);
-  return coordinate;
+  const geocodedCoordinate = { lat, lng };
+  cacheSet(cacheKey, geocodedCoordinate);
+  return geocodedCoordinate;
 }
 
 export async function calculatePublicRoute(originText: string, destinationText: string): Promise<PublicRoute> {
@@ -134,19 +134,39 @@ export async function calculatePublicRoute(originText: string, destinationText: 
 
   const data = await fetchJson<OsrmResponse>(url);
   const route = data.routes?.[0];
-  if (data.code !== "Ok" || !route || !Number.isFinite(route.distance) || !Number.isFinite(route.duration) || typeof route.geometry !== "string") {
+  const distanceMeters = route?.distance;
+  const durationSeconds = route?.duration;
+  const polyline = route?.geometry;
+  if (data.code !== "Ok" || !Number.isFinite(distanceMeters) || !Number.isFinite(durationSeconds) || typeof polyline !== "string") {
     throw new Error("Não foi possível calcular uma rota para estes pontos.");
   }
 
   const result: PublicRoute = {
     origin,
     destination,
-    distanceMeters: route.distance,
-    durationSeconds: route.duration,
-    polyline: route.geometry,
+    distanceMeters,
+    durationSeconds,
+    polyline,
   };
   cacheSet("route:" + coordinateKey, result);
   return result;
+}
+
+
+function publicDistanceLabel(meters: number) {
+  return meters >= 1000
+    ? (meters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
+    : Math.round(meters).toLocaleString("pt-BR") + " m";
+}
+
+function publicDurationLabel(seconds: number) {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return rest ? hours + "h " + rest + "min" : hours + "h";
+  }
+  return minutes + " min";
 }
 
 export function buildPublicRoutePayload(result: PublicRoute) {
@@ -156,7 +176,9 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       origin: result.origin,
       destination: result.destination,
       distanceMeters: result.distanceMeters,
+      distanceLabel: publicDistanceLabel(result.distanceMeters),
       durationSeconds: result.durationSeconds,
+      durationLabel: publicDurationLabel(result.durationSeconds),
       polyline: result.polyline,
       summary: "Rota pública calculada com OpenStreetMap/OSRM.",
     },
