@@ -20,6 +20,29 @@ export type LocalStationRecord = {
 
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
+export const AGUAS_LINDAS_SOURCE_REGISTRY = {
+  anp: {
+    status: "official",
+    updatedAt: "2026-09-28",
+    scope: "revendedores varejistas de combustíveis automotivos em operação",
+    fields: ["autorização", "razão social", "CNPJ", "endereço", "bairro", "CEP", "UF", "município", "bandeira"],
+  },
+  anpApi: {
+    status: "official",
+    scope: "consulta por CNPJ/UF/município",
+    fields: ["produtos", "distribuidor", "tancagem", "bicos", "situação Sigaf", "coordenadas", "histórico de bandeira"],
+  },
+  prices: {
+    status: "official",
+    period: "20/09/2026 a 26/09/2026",
+    note: "somente postos com coleta aparecem na amostra; ausência não significa fechamento.",
+  },
+  maps: {
+    status: "supplementary",
+    note: "nome comercial, telefone, horário, avaliações e localização; não comprova autorização ANP.",
+  },
+} as const;
+
 export const AGUAS_LINDAS_DATA_AUDIT = {
   checkedAt: "2026-09-30",
   officialAnpBaseUpdatedAt: "2026-09-28",
