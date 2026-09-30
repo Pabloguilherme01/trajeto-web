@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, mapDiscoverySearchUrl, searchAguasLindasMapDiscoveries, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ANP_CATALOG_COUNT, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, mapDiscoverySearchUrl, searchAguasLindasMapDiscoveries, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -337,9 +337,9 @@ export default function Stations() {
                 <p className="text-[0.52rem] text-white/30">registros catalogados</p>
               </div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
-                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP individual</p>
-                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_VERIFIED_COUNT}</p>
-                <p className="text-[0.52rem] text-white/30">confirmados nesta base</p>
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Referência ANP</p>
+                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_COUNT}</p>
+                <p className="text-[0.52rem] text-white/30">revendedores na referência pública</p>
               </div>
             </div>
               </div>
@@ -463,6 +463,7 @@ export default function Stations() {
                     <div><p className="text-[0.5rem] text-white/30">GNV</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gnv.average.toFixed(2).replace(".", ",")}/m³</p></div>
                   </div>
                   <p className="mt-3 text-[0.54rem] leading-relaxed text-white/30">Período {AGUAS_LINDAS_PRICE_REFERENCE.period}; médias municipais da ANP, não preço atual individual de cada posto.</p>
+                <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">O número da referência ANP não é usado como prova individual neste catálogo até os registros serem enriquecidos via API oficial.</p>
                 </div>
                 <div className="space-y-2">
                   {searchAguasLindasMapDiscoveries(query).map(item => (
