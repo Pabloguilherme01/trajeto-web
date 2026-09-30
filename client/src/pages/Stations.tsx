@@ -53,36 +53,6 @@ export default function Stations() {
   );
   const anpRows = staticRuntime ? staticAnpRows : anpLiveQuery.data?.rows ?? [];
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
-  const mapStations = useMemo<StationMapItem[]>(() => {
-    const official = anpStations
-      .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
-      .map(station => ({
-        id: `anp-${station.cnpj}`,
-        name: station.razaoSocial || `Posto ${station.cnpj}`,
-        address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
-        lat: station.latitude as number,
-        lng: station.longitude as number,
-        cnpj: station.cnpj,
-        brand: station.distribuidora,
-        source: "ANP" as const,
-      }));
-
-    if (official.length > 0) return official;
-
-    return liveStations
-      .filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lng))
-      .map(station => ({
-        id: station.placeId,
-        placeId: station.placeId,
-        name: station.name,
-        address: station.address,
-        lat: station.lat,
-        lng: station.lng,
-        source: "Google" as const,
-      }));
-  }, [anpStations, liveStations]);
-  const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
-  const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -122,6 +92,36 @@ export default function Stations() {
     return all.filter(station => !seen.has(station.placeId) && (seen.add(station.placeId), true));
   }, [stationPages.data]);
 
+  const mapStations = useMemo<StationMapItem[]>(() => {
+    const official = anpStations
+      .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
+      .map(station => ({
+        id: `anp-${station.cnpj}`,
+        name: station.razaoSocial || `Posto ${station.cnpj}`,
+        address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
+        lat: station.latitude as number,
+        lng: station.longitude as number,
+        cnpj: station.cnpj,
+        brand: station.distribuidora,
+        source: "ANP" as const,
+      }));
+
+    if (official.length > 0) return official;
+
+    return liveStations
+      .filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lng))
+      .map(station => ({
+        id: station.placeId,
+        placeId: station.placeId,
+        name: station.name,
+        address: station.address,
+        lat: station.lat,
+        lng: station.lng,
+        source: "Google" as const,
+      }));
+  }, [anpStations, liveStations]);
+  const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
+  const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
   const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
