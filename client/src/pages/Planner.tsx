@@ -100,6 +100,8 @@ export default function Planner() {
   }, [savedMode]);
 
   useEffect(() => {
+    const value = queryParams.get("modo");
+    setMode(value === "walking" || value === "cycling" || value === "transit" ? value : "driving");
     resetResult();
     const routeId = queryParams.get("rota");
     let active = true;
