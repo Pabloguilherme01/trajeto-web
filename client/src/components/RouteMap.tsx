@@ -26,9 +26,11 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   useEffect(() => {
     if (!mapRef.current) return;
     const updateRenderingType = () => {
+      const mapsApi = typeof window !== "undefined" ? window.google?.maps : undefined;
       const type = mapRef.current?.getRenderingType?.();
-      if (type === window.google.maps.RenderingType.VECTOR) setRenderingType("VECTOR");
-      else if (type === window.google.maps.RenderingType.RASTER) {
+      if (!mapsApi?.RenderingType) return;
+      if (type === mapsApi.RenderingType.VECTOR) setRenderingType("VECTOR");
+      else if (type === mapsApi.RenderingType.RASTER) {
         setRenderingType("RASTER");
         setIs3D(false);
       }
