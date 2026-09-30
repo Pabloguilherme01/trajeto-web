@@ -141,13 +141,12 @@ export function StationDirectoryCard({
   const anpComVcUrl = "https://anpcomvcpostos.anp.gov.br/";
   const phone = local?.mapData?.phone;
 
-  const copy = async (value: string, message = "Copiado.") => {
+  const copy = async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       vibration();
       window.setTimeout(() => setCopied(false), 1400);
-      void message;
     } catch {}
   };
 
