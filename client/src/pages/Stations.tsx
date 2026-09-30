@@ -143,38 +143,46 @@ export default function Stations() {
       return !normalized || text.includes(normalized);
     });
 
+    const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
+    const priceKey = fuelFilter === "all" ? "gasolina-comum" : fuelFilter;
+    const getCoords = (item: typeof directoryCards[number]) => {
+      const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
+      const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
+      return Number.isFinite(lat) && Number.isFinite(lng) && userCoords
+        ? haversineKm(userCoords.lat, userCoords.lng, lat, lng)
+        : null;
+    };
+    if (directorySort === "best-value") {
+      const decisionRows = matches.map(item => ({
+        item,
+        decision: {
+          distanceKm: getCoords(item),
+          price: pricesByCnpj.get(item.key)?.find(price => price.productKey === priceKey)?.salePrice ?? null,
+          isOpen: item.local?.mapData?.operationalStatus === "open" ? true : item.local?.mapData?.operationalStatus === "closed" ? false : null,
+          hasAnp: Boolean(item.anp),
+        },
+      }));
+      const prices = decisionRows.map(row => row.decision.price).filter((value): value is number => value != null && Number.isFinite(value) && value > 0);
+      const distances = decisionRows.map(row => row.decision.distanceKm).filter((value): value is number => value != null && Number.isFinite(value) && value > 0);
+      const baseline = {
+        minPrice: prices.length ? Math.min(...prices) : null,
+        minDistanceKm: distances.length ? Math.min(...distances) : null,
+      };
+      return decisionRows
+        .sort((a, b) => compareBestValue(a.decision, b.decision, baseline) || stationLabel(a.item).localeCompare(stationLabel(b.item), "pt-BR"))
+        .map(row => row.item);
+    }
+
     return [...matches].sort((a, b) => {
-      const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
       if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) => {
-          const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-          const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-        };
-        const aCoords = getCoords(a);
-        const bCoords = getCoords(b);
-        const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
-        const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
+        const aDistance = getCoords(a) ?? Number.POSITIVE_INFINITY;
+        const bDistance = getCoords(b) ?? Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
-      const priceKey = fuelFilter === "all" ? "gasolina-comum" : fuelFilter;
-      if (directorySort === "price" || directorySort === "best-value") {
-        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === priceKey)?.salePrice ?? null;
-        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === priceKey)?.salePrice ?? null;
-        if (directorySort === "best-value") {
-          const coordsOf = (item: typeof directoryCards[number]) => {
-            const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-            const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-            return Number.isFinite(lat) && Number.isFinite(lng) && userCoords
-              ? haversineKm(userCoords.lat, userCoords.lng, lat, lng)
-              : null;
-          };
-          return compareBestValue(
-            { distanceKm: coordsOf(a), price: aPrice, isOpen: a.local?.mapData?.operationalStatus === "open" ? true : a.local?.mapData?.operationalStatus === "closed" ? false : null, hasAnp: Boolean(a.anp) },
-            { distanceKm: coordsOf(b), price: bPrice, isOpen: b.local?.mapData?.operationalStatus === "open" ? true : b.local?.mapData?.operationalStatus === "closed" ? false : null, hasAnp: Boolean(b.anp) },
-          ) || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-        }
-        return (aPrice ?? Number.POSITIVE_INFINITY) - (bPrice ?? Number.POSITIVE_INFINITY) || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      if (directorySort === "price") {
+        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === priceKey)?.salePrice ?? Number.POSITIVE_INFINITY;
+        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === priceKey)?.salePrice ?? Number.POSITIVE_INFINITY;
+        return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "brand") {
         return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
