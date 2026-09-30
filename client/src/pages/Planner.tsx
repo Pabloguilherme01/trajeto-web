@@ -47,6 +47,7 @@ export default function Planner() {
   const [showMap, setShowMap] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [fallbackReady, setFallbackReady] = useState(false);
   const [roundTrip, setRoundTrip] = useState(false);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
@@ -82,6 +83,7 @@ export default function Planner() {
       setOrigin(route.origin);
       setDestination(route.destination);
       setPlanned(route.payload as PlannedRoute);
+      setFallbackReady(false);
       setSavedMessage("Rota salva aberta neste aparelho.");
     }).catch(() => {});
   }, [planned, queryParams]);
@@ -106,15 +108,19 @@ export default function Planner() {
 
     setError(null);
     setSavedMessage(null);
+    setFallbackReady(false);
     setShowMap(false);
     rememberTrip(from, to);
     track("route_open", to);
     try {
       const result = await planRoute.mutateAsync({ origin: from, destination: to });
       setPlanned(result);
+      setFallbackReady(false);
       vibration(14);
     } catch {
-      setError("Não foi possível calcular a rota agora. Você ainda pode abrir o mesmo trajeto no Google Maps.");
+      setError(null);
+      setFallbackReady(true);
+      vibration(8);
     }
   };
 
@@ -308,6 +314,25 @@ export default function Planner() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {fallbackReady && !planned && !savedMode && origin.trim() && destination.trim() && (
+          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="navigation-fallback-title">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
+              <div className="min-w-0">
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Navegação pronta</p>
+                <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">O serviço de cálculo não respondeu, mas sua viagem não ficou travada.</h2>
+                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado.</p>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir Google Maps</button>
+              <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
+              <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+            </div>
+            <p className="mt-3 text-center text-[0.56rem] font-semibold text-white/30">Esse modo é compatível com hospedagem estática, como GitHub Pages.</p>
           </section>
         )}
 
