@@ -52,27 +52,28 @@ export type StationDecisionInput = {
   hasAnp: boolean;
 };
 
-export function compareBestValue(a: StationDecisionInput, b: StationDecisionInput) {
-  const valid = (value: number | null) => value != null && Number.isFinite(value) && value > 0;
-  const aPrice = valid(a.price) ? a.price as number : Number.POSITIVE_INFINITY;
-  const bPrice = valid(b.price) ? b.price as number : Number.POSITIVE_INFINITY;
-  const aDistance = valid(a.distanceKm) ? a.distanceKm as number : Number.POSITIVE_INFINITY;
-  const bDistance = valid(b.distanceKm) ? b.distanceKm as number : Number.POSITIVE_INFINITY;
+export type StationDecisionBaseline = {
+  minDistanceKm: number | null;
+  minPrice: number | null;
+};
 
-  const prices = [aPrice, bPrice].filter(Number.isFinite);
-  const distances = [aDistance, bDistance].filter(Number.isFinite);
-  const minPrice = prices.length ? Math.min(...prices) : 1;
-  const minDistance = distances.length ? Math.min(...distances) : 1;
+function finitePositive(value: number | null) {
+  return value != null && Number.isFinite(value) && value > 0;
+}
 
-  const score = (item: StationDecisionInput) => {
-    const pricePart = valid(item.price) ? ((item.price as number) / minPrice) * 0.58 : 1.35;
-    const distancePart = valid(item.distanceKm) ? ((item.distanceKm as number) / minDistance) * 0.32 : 1.15;
-    const openPart = item.isOpen === true ? -0.12 : item.isOpen === false ? 0.12 : 0.04;
-    const anpPart = item.hasAnp ? -0.03 : 0.03;
-    return pricePart + distancePart + openPart + anpPart;
-  };
+export function stationDecisionScore(item: StationDecisionInput, baseline: StationDecisionBaseline) {
+  const minPrice = finitePositive(baseline.minPrice) ? baseline.minPrice as number : 1;
+  const minDistance = finitePositive(baseline.minDistanceKm) ? baseline.minDistanceKm as number : 1;
 
-  return score(a) - score(b);
+  const pricePart = finitePositive(item.price) ? ((item.price as number) / minPrice) * 0.58 : 1.35;
+  const distancePart = finitePositive(item.distanceKm) ? ((item.distanceKm as number) / minDistance) * 0.32 : 1.15;
+  const openPart = item.isOpen === true ? -0.12 : item.isOpen === false ? 0.12 : 0.04;
+  const anpPart = item.hasAnp ? -0.03 : 0.03;
+  return pricePart + distancePart + openPart + anpPart;
+}
+
+export function compareBestValue(a: StationDecisionInput, b: StationDecisionInput, baseline: StationDecisionBaseline) {
+  return stationDecisionScore(a, baseline) - stationDecisionScore(b, baseline);
 }
 
 export function stationSortLabel(sortBy: StationSort) {
