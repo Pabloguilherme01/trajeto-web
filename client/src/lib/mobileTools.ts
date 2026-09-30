@@ -167,6 +167,55 @@ export function vibration(pattern: number | number[] = 12) {
   try { navigator.vibrate?.(pattern); } catch {}
 }
 
+export function buildWhatsAppShareUrl(text: string, url: string) {
+  const message = [text.trim(), url.trim()].filter(Boolean).join("\\n");
+  return "https://wa.me/?text=" + encodeURIComponent(message);
+}
+
+type SpeechRecognitionResult = { 0?: { transcript?: string } };
+type SpeechRecognitionEventLike = { results?: ArrayLike<SpeechRecognitionResult> };
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+export function getSpeechRecognitionConstructor() {
+  if (typeof window === "undefined") return null;
+  const speechWindow = window as Window & {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  };
+  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
+}
+
+export function startVoiceSearch(onResult: (text: string) => void, onError?: () => void) {
+  const Recognition = getSpeechRecognitionConstructor();
+  if (!Recognition) return null;
+  const recognition = new Recognition();
+  recognition.lang = "pt-BR";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onresult = event => {
+    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+    if (transcript) onResult(transcript);
+  };
+  recognition.onerror = () => onError?.();
+  try {
+    recognition.start();
+  } catch {
+    onError?.();
+    return null;
+  }
+  return recognition;
+}
+
 
 
 
