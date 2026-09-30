@@ -19,10 +19,20 @@ import MobileUtilityHub from "@/components/MobileUtilityHub";
 import { ArrowRight, BadgeCheck, Bookmark, Download, Fuel, History, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getLastStation, getLastTrip, getRecentSearches, mobilePreferenceEvent, rememberSearch, type LastStation } from "@/lib/mobilePreferences";
-import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
+import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { useLocation } from "wouter";
 
 const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
+
+function savedRouteAge(savedAt: string) {
+  const elapsed = Date.now() - Date.parse(savedAt);
+  if (!Number.isFinite(elapsed) || elapsed < 0) return "idade indisponível";
+  const hours = Math.floor(elapsed / 3600000);
+  if (hours < 1) return "salva há menos de 1h";
+  if (hours < 24) return `salva há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `salva há ${days}d`;
+}
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -281,7 +291,8 @@ export default function Home() {
                     </h2>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">última viagem</span>}
-                      {latestSavedRoute && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">{online ? "rota salva" : "offline pronta"}</span>}
+                      {latestSavedRoute && <span className={isOfflineRouteStale(latestSavedRoute.savedAt) ? "rounded-full bg-[#FFC928]/10 px-2 py-1 text-[0.5rem] font-black text-[#FFD66B]" : "rounded-full bg-[#C7FF3C]/10 px-2 py-1 text-[0.5rem] font-black text-[#C7FF3C]"}>{isOfflineRouteStale(latestSavedRoute.savedAt) ? "revisar rota" : online ? "rota salva" : "offline pronta"}</span>}
+                      {latestSavedRoute && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/45">{savedRouteAge(latestSavedRoute.savedAt)}</span>}
                       {lastStation && !lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">último posto</span>}
                     </div>
                   </div>
@@ -316,6 +327,7 @@ export default function Home() {
                 <div className="flex items-center justify-between gap-2"><Bookmark className="size-4 text-[#C7FF3C]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Offline</span></div>
                 <p className="mt-2 text-xs font-extrabold text-white">{savedRoutes} {savedRoutes === 1 ? "rota salva" : "rotas salvas"}</p>
                 <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{latestSavedRoute ? latestSavedRoute.origin + " → " + latestSavedRoute.destination : "Nenhuma rota preparada ainda"}</p>
+                {latestSavedRoute && <p className={isOfflineRouteStale(latestSavedRoute.savedAt) ? "mt-1 text-[0.58rem] font-bold text-[#FFD66B]" : "mt-1 text-[0.58rem] font-semibold text-[#60737D]"}>{isOfflineRouteStale(latestSavedRoute.savedAt) ? "Rota antiga · confirme antes de sair" : savedRouteAge(latestSavedRoute.savedAt)}</p>}
               </button>
               <a href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : appUrl("/planejar")} className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 transition hover:border-[#BDA5FF]/35 active:scale-[.99] md:min-w-0">
                 <div className="flex items-center justify-between gap-2"><History className="size-4 text-[#BDA5FF]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Última viagem</span></div>
