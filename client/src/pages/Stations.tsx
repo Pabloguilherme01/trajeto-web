@@ -55,7 +55,7 @@ export default function Stations() {
   const verifiedFilterAvailable = false;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
-  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(60);
+  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
@@ -358,13 +358,25 @@ export default function Stations() {
 
 
 
+
+  useEffect(() => {
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (!hash.startsWith("#posto-")) return;
+    const target = decodeURIComponent(hash.slice("#posto-".length));
+    if (!target) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById("posto-" + encodeURIComponent(target))?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [directoryCards.length, directorySearch, location]);
+
   useEffect(() => {
     setLocalVisibleCount(12);
-    setDirectoryVisibleCount(60);
+    setDirectoryVisibleCount(48);
   }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
   useEffect(() => {
-    setDirectoryVisibleCount(16);
+    setDirectoryVisibleCount(48);
   }, [directorySearch, directorySort]);
 
   useEffect(() => {
@@ -968,10 +980,10 @@ export default function Stations() {
             {directoryVisibleCount >= directoryCardsFiltered.length && directoryCardsFiltered.length > 16 && (
               <button
                 type="button"
-                onClick={() => setDirectoryVisibleCount(16)}
+                onClick={() => setDirectoryVisibleCount(48)}
                 className="mt-2 min-h-10 w-full text-[0.6rem] font-bold text-white/30"
               >
-                Mostrar apenas os primeiros 60
+                Mostrar apenas os primeiros 48
               </button>
             )}
 
