@@ -47,7 +47,7 @@ export default function MobileBottomNav() {
       );
       return;
     }
-    setLocation(appUrl(item.href) + (item.key === "saved" ? "?salvos=1" : ""));
+    setLocation(appUrl(item.href));
   };
 
   return (
