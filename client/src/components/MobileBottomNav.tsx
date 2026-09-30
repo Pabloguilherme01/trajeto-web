@@ -1,9 +1,9 @@
-import { Bookmark, Fuel, Home, Navigation } from "lucide-react";
+import { Bookmark, Fuel, Home, MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import MobileMoreSheet from "@/components/MobileMoreSheet";
-import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
@@ -16,13 +16,11 @@ const baseItems = [
 
 export default function MobileBottomNav() {
   const [location, setLocation] = useLocation();
-  const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [savedTotal, setSavedTotal] = useState(0);
   const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const refresh = () => {
-      setLastTrip(getLastTrip());
       void Promise.all([listOfflineRoutes(), Promise.resolve(listMobileStationFavorites())])
         .then(([routes, stations]) => setSavedTotal(routes.length + stations.length))
         .catch(() => setSavedTotal(0));
