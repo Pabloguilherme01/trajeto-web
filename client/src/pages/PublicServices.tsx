@@ -80,9 +80,38 @@ export default function PublicServices() {
             <p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#C7FF3C]">Central de serviços</p>
             <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">Águas Lindas em um só lugar.</h1>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/45">Serviços e locais públicos essenciais já ficam incorporados ao app. O catálogo básico funciona sem depender de consulta online.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">{PUBLIC_SERVICES.length} registros públicos</span>
+              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">6 categorias</span>
+              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">offline por padrão</span>
+            </div>
           </div>
           <button type="button" onClick={() => setLocation(appUrl("/"))} className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/10 px-3 text-xs font-black text-white/70">Início</button>
         </header>
+
+        <section className="mt-5 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3" aria-labelledby="emergency-strip-title">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[0.5rem] font-black uppercase tracking-[.14em] text-[#FFB86B]">Utilidade imediata</p>
+              <h2 id="emergency-strip-title" className="mt-1 text-sm font-black">Canais de emergência</h2>
+            </div>
+            <span className="text-[0.5rem] font-bold text-white/30">ligação local</span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: "Polícia", number: "190" },
+              { label: "SAMU", number: "192" },
+              { label: "Bombeiros", number: "193" },
+              { label: "Polícia Civil", number: "(61) 3618-2716" },
+            ].map(item => (
+              <a key={item.label} href={phoneHref(item.number) ?? "#"} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1014] px-3 text-[0.62rem] font-black text-white/80 transition hover:border-[#FFB86B]/30 hover:text-white">
+                <Phone className="size-3.5 text-[#FFB86B]" />
+                <span>{item.label}</span>
+                <span className="text-white/30">{item.number}</span>
+              </a>
+            ))}
+          </div>
+        </section>
 
         <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
           <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
