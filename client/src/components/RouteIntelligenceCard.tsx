@@ -191,7 +191,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.58rem] text-white/45">Cálculo sob demanda</span>
       </div>
 
-      {message && <div className="mt-3 flex gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[.05] p-3 text-[0.68rem] text-amber-100"><AlertTriangle className="mt-0.5 size-4 shrink-0" />{message}</div>}
+      {message && <div role="alert" aria-live="polite" className="mt-3 flex gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[.05] p-3 text-[0.68rem] text-amber-100"><AlertTriangle className="mt-0.5 size-4 shrink-0" />{message}</div>}
 
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <button type="button" aria-pressed={avoidTollsState} onClick={() => setAvoidTollsState(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black transition " + (avoidTollsState ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/10 bg-white/[.03] text-white/60")}>
@@ -219,10 +219,10 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
 
       {data && main && (
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-white/[.04] p-3"><Route className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Rota principal</p><strong className="text-sm">{(main.distanceMeters ?? 0) / 1000 < 1 ? "< 1 km" : `${((main.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km`}</strong></div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Route className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Distância</p><strong className="text-sm">{(main.distanceMeters ?? 0) / 1000 < 1 ? "< 1 km" : `${((main.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km`}</strong></div>
           <div className="rounded-xl bg-white/[.04] p-3"><Clock3 className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Com trânsito</p><strong className="text-sm">{formatDuration(main.durationSeconds)}</strong>{trafficDelay != null && trafficDelay > 30 && <p className="mt-1 text-[0.55rem] text-amber-200">+{formatDuration(trafficDelay)} por trânsito</p>}</div>
-          <div className="rounded-xl bg-white/[.04] p-3"><Wallet className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Pedágio</p><strong className="text-sm">{toll != null ? toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) : "Não informado"}</strong></div>
-          <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} disponível(is)</strong><p className="mt-1 text-[0.52rem] text-white/35">{data.trafficAware ? "trânsito considerado" : "trânsito básico"}</p></div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Wallet className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Pedágio</p><strong className="text-sm">{toll != null ? toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) : "Não informado"}</strong>{main.toll?.estimated && <p className="mt-1 text-[0.52rem] text-amber-200">estimado</p>}</div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} {Math.max(0, data.routes.length - 1) === 1 ? "alternativa" : "alternativas"}</strong><p className="mt-1 text-[0.52rem] text-white/35">{data.trafficAware ? "trânsito considerado" : "trânsito básico"}</p></div>
         </div>
       )}
 
