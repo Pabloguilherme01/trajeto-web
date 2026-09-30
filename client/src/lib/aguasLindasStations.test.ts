@@ -5,6 +5,7 @@ import {
   AGUAS_LINDAS_STATION_STATS,
   AGUAS_LINDAS_STATIONS,
   AGUAS_LINDAS_STATIONS_COUNT,
+  getTopAguasLindasNeighborhoods,
   searchAguasLindasStations,
   stationMapsSearchUrl,
 } from "./aguasLindasStations";
@@ -31,6 +32,14 @@ describe("diretório de postos de Águas Lindas", () => {
     expect(searchAguasLindasStations("00.375.386/0002-05")[0]?.displayName).toContain("Mizuno");
     expect(searchAguasLindasStations("Jardim Querência").length).toBeGreaterThan(0);
     expect(searchAguasLindasStations("perola")[0]?.displayName).toContain("Pérola");
+  });
+
+  it("ordena atalhos de bairro pelo número real de cadastros e respeita o limite", () => {
+    const shortcuts = getTopAguasLindasNeighborhoods(4);
+    expect(shortcuts).toHaveLength(4);
+    expect(shortcuts.every(item => item.name && item.count > 0)).toBe(true);
+    expect(shortcuts[0]!.count).toBeGreaterThanOrEqual(shortcuts[1]!.count);
+    expect(getTopAguasLindasNeighborhoods(0)).toEqual([]);
   });
 
   it("mantém referências de mapas separadas da confirmação ANP", () => {
