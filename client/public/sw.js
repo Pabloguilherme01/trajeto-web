@@ -114,8 +114,8 @@ async function networkFirstNavigation(request) {
     return response;
   } catch {
     return (
-      await cache.match(request) ||
-      await cache.match("./index.html") ||
+      await cache.match(request, { ignoreVary: true }) ||
+      await cache.match("./index.html", { ignoreVary: true }) ||
       new Response("Trajeto indisponível offline.", {
         status: 503,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
@@ -126,7 +126,8 @@ async function networkFirstNavigation(request) {
 
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
+  // Versioned static assets are identical for every Origin header.
+  const cached = await cache.match(request, { ignoreVary: true });
   const network = fetch(request)
     .then(response => {
       if (response.ok) void cache.put(request, response.clone());

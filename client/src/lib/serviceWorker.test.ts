@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 function loadWorker(cached?: Response) {
   const context: Record<string, any> = {
     self: { addEventListener: vi.fn() }, Response,
-    caches: { open: async () => ({ match: async () => cached }) },
+    caches: { open: async () => ({ match: async (_request: unknown, options?: CacheQueryOptions) => options?.ignoreVary ? cached : undefined }) },
     fetch: async () => { throw new Error("offline"); },
   };
   runInNewContext(readFileSync(new URL("../../public/sw.js", import.meta.url), "utf8"), context);
@@ -31,7 +31,7 @@ describe("service worker", () => {
     expect(response).toBeInstanceOf(Response);
     expect(response.status).toBe(504);
   });
-  it("keeps an already cached asset available offline", async () => {
+  it("keeps a static asset available when its cached Origin header differs", async () => {
     const cached = new Response("saved asset");
     const worker = loadWorker(cached);
     expect(await worker.staleWhileRevalidate(new Request("https://example.com/main.js"), "static")).toBe(cached);
