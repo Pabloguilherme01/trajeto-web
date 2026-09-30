@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/appUrl";
 export function isStandaloneApp() {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(display-mode: standalone)").matches ||
@@ -170,7 +171,7 @@ export function vibration(pattern: number | number[] = 12) {
 
 
 export function buildOfflineDestinationShareUrl(destinationId: string) {
-  return window.location.origin + "/trajeto/local/" + encodeURIComponent(destinationId);
+  return window.location.origin + appUrl("/local/" + encodeURIComponent(destinationId));
 }
 
 export function buildOfflineDestinationShareText(destination: { name: string; shortName: string; address: string; description: string }) {
