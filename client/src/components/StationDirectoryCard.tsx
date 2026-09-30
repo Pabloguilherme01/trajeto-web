@@ -151,7 +151,7 @@ export function StationDirectoryCard({
       transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduceMotion ? undefined : { y: -3 }}
       whileTap={reduceMotion ? undefined : { scale: 0.997 }}
-      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
+      className="station-directory-card group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
@@ -201,7 +201,7 @@ export function StationDirectoryCard({
         </div>
       </section>
 
-      <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
+      <section className="station-price mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-[#D9FF91]">Preço pesquisado pela ANP</p>
@@ -255,7 +255,7 @@ export function StationDirectoryCard({
         <p className="mt-2 text-[0.48rem] leading-relaxed text-white/30">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
+      <div className="station-secondary mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Contato e redes</p>
           <span className="text-[0.48rem] font-bold text-white/20">sem login</span>
