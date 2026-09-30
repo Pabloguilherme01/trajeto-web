@@ -1,5 +1,5 @@
 import { ArrowRight, Compass, Fuel, Hospital, MapPin, Navigation, Search as SearchIcon, ShieldAlert, Store, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { AGUAS_LINDAS_STATIONS, searchAguasLindasStations } from "@/lib/aguasLindasStations";
@@ -37,7 +37,7 @@ export default function SearchPage() {
     setQuery(next);
   }, [params]);
 
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const value = input.trim();
     if (!value) {
