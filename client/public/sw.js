@@ -56,8 +56,10 @@ self.addEventListener("message", event => {
 
 function collectManifestAssets(manifest) {
   const assets = new Set();
+  const visited = new Set();
   const visit = entry => {
-    if (!entry || typeof entry !== "object") return;
+    if (!entry || typeof entry !== "object" || visited.has(entry)) return;
+    visited.add(entry);
     if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\//, ""));
     for (const css of Array.isArray(entry.css) ? entry.css : []) {
       if (typeof css === "string") assets.add("./" + css.replace(/^\//, ""));

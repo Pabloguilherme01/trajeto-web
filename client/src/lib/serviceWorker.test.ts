@@ -21,6 +21,10 @@ describe("service worker", () => {
     const worker = loadWorker();
     expect(Array.from(worker.collectManifestAssets({ entry: { file: "/assets/main.js", css: ["/assets/main.css"], dynamicImports: ["page"] }, page: { file: "assets/page.js" } }))).toEqual(["./assets/main.js", "./assets/main.css", "./assets/page.js"]);
   });
+  it("terminates when bundled modules import one another", () => {
+    const worker = loadWorker();
+    expect(Array.from(worker.collectManifestAssets({ main: { file: "assets/main.js", imports: ["shared"] }, shared: { file: "assets/shared.js", imports: ["main"] } }))).toEqual(["./assets/main.js", "./assets/shared.js"]);
+  });
   it("returns an HTTP response when neither network nor cache has an asset", async () => {
     const worker = loadWorker();
     const response = await worker.staleWhileRevalidate(new Request("https://example.com/missing.js"), "static");
