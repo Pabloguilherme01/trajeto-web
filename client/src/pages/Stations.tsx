@@ -78,7 +78,7 @@ export default function Stations() {
 
   const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
   const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
-  const visibleStations = onlyOpen ? stations.filter(station => station.isOpen !== false) : stations;
+  const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
 
@@ -127,9 +127,11 @@ export default function Stations() {
     setQuery(trimmed);
     setShowMap(false);
     setCompareIds([]);
+    setOnlyOpen(false);
     setNeighborhoodFilter("all");
     setBrandFilter("all");
     setAddressOnly(false);
+    setVerifiedOnly(false);
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
   };
 
@@ -144,6 +146,11 @@ export default function Stations() {
         setLocating(false);
         rememberIntent("nearby");
         setNearby(true);
+        setOnlyOpen(false);
+        setNeighborhoodFilter("all");
+        setBrandFilter("all");
+        setAddressOnly(false);
+        setVerifiedOnly(false);
         vibration(18);
         if (staticRuntime) {
           window.location.assign(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude));
@@ -256,7 +263,16 @@ export default function Stations() {
             {recentSearches.length > 0 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                 {recentSearches.slice(0, 4).map(item => (
-                  <button key={item} type="button" onClick={() => { setInput(item); setQuery(item); setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item)); }} className="max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-[0.57rem] font-bold text-white/40">{item}</button>
+                  <button key={item} type="button" onClick={() => {
+                  setInput(item);
+                  setQuery(item);
+                  setOnlyOpen(false);
+                  setNeighborhoodFilter("all");
+                  setBrandFilter("all");
+                  setAddressOnly(false);
+                  setVerifiedOnly(false);
+                  setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
+                }} className="max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-[0.57rem] font-bold text-white/40">{item}</button>
                 ))}
               </div>
             )}
