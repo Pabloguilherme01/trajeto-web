@@ -905,7 +905,6 @@ export default function Stations() {
                   </div>
                   {anpStations.length > 12 && <p className="px-2.5 pb-2 text-center text-[0.55rem] text-white/25">Mostrando os primeiros 12. O CSV contém todas as linhas retornadas pela ANP.</p>}
                 </details>
-}
               </>
             )}
 
