@@ -476,6 +476,10 @@ export default function Stations() {
         setVerifiedOnly(false);
         setMappedOnly(false);
         setPriceOnly(false);
+        setDistanceFilter("all");
+        setFuelFilter("all");
+        setDirectorySort("distance");
+        setFiltersOpen(false);
         vibration(18);
         setQuery("postos");
         setInput("postos próximos");
