@@ -37,16 +37,30 @@ function readCachedCoordinate(station: StationMapItem) {
   try {
     const raw = localStorage.getItem(coordinateCacheKey(station));
     if (!raw) return null;
-    const value = JSON.parse(raw) as { lat?: unknown; lng?: unknown };
+    const value = JSON.parse(raw) as { lat?: unknown; lng?: unknown; source?: string };
+    // Google Places content is not used as a permanent station database.
+    if (value.source === "Google") return null;
     if (typeof value.lat === "number" && typeof value.lng === "number" && Number.isFinite(value.lat) && Number.isFinite(value.lng)) {
-      return { lat: value.lat, lng: value.lng, source: "Google" as const };
+      return { lat: value.lat, lng: value.lng, source: "local" as const };
     }
   } catch {}
   return null;
 }
 
-function stationMatchIsPlausible(station: StationMapItem, place: google.maps.places.PlaceResult) {
-  const placeText = normalizeStationText([place.name, place.formatted_address].filter(Boolean).join(" "));
+type GooglePlaceSearchResult = {
+  id?: string;
+  displayName?: { text?: string } | string;
+  formattedAddress?: string;
+  location?: { lat: () => number; lng: () => number } | google.maps.LatLngLiteral;
+};
+
+function googlePlaceText(place: GooglePlaceSearchResult) {
+  const displayName = typeof place.displayName === "string" ? place.displayName : place.displayName?.text;
+  return normalizeStationText([displayName, place.formattedAddress].filter(Boolean).join(" "));
+}
+
+function stationMatchIsPlausible(station: StationMapItem, place: GooglePlaceSearchResult) {
+  const placeText = googlePlaceText(place);
   if (!placeText.includes("aguas lindas")) return false;
   const stationTokens = normalizeStationText([station.name, station.address].filter(Boolean).join(" "))
     .split(" ")
@@ -56,11 +70,6 @@ function stationMatchIsPlausible(station: StationMapItem, place: google.maps.pla
   return hits >= 1;
 }
 
-function writeCachedCoordinate(station: StationMapItem, lat: number, lng: number) {
-  try {
-    localStorage.setItem(coordinateCacheKey(station), JSON.stringify({ lat, lng, source: "Google", savedAt: new Date().toISOString() }));
-  } catch {}
-}
 
 function sourceLabel(source?: StationMapItem["source"]) {
   if (source === "ANP") return "ANP";
@@ -152,36 +161,60 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     const unresolved = resolvedStations.filter(station => !hasCoordinates(station));
     if (!unresolved.length) return;
     let cancelled = false;
-    const service = new window.google.maps.places.PlacesService(mapRef.current);
+    type PlacesNewApi = {
+      Place?: {
+        searchByText?: (request: Record<string, unknown>) => Promise<{ places?: GooglePlaceSearchResult[] }>;
+      };
+    };
+    const placeApi = (window.google.maps.places as unknown as PlacesNewApi).Place;
+    const searchByText = placeApi?.searchByText;
+    if (!searchByText) return;
     let cursor = 0;
     const workers = Math.min(3, unresolved.length);
-    const resolveOne = (station: StationMapItem) => new Promise<void>(resolve => {
+    const resolveOne = async (station: StationMapItem) => {
       const query = [station.name, station.address, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
-      service.textSearch({ query, region: "br", language: "pt-BR", location: { lat: -15.7545, lng: -48.2816 }, radius: 30_000 }, (results, status) => {
-        if (cancelled) return resolve();
-        const match = status === window.google.maps.places.PlacesServiceStatus.OK ? results?.find(item => item.geometry?.location && stationMatchIsPlausible(station, item)) : undefined;
-        if (match?.geometry?.location) {
-          const lat = match.geometry.location.lat();
-          const lng = match.geometry.location.lng();
-          writeCachedCoordinate(station, lat, lng);
-          setResolvedStations(current => current.map(item => ((item.cnpj && station.cnpj && item.cnpj === station.cnpj) || item.id === station.id) ? { ...item, lat, lng, source: "Google" as const } : item));
-        }
-        resolve();
-      });
-    });
+      try {
+        const response = await searchByText({
+          textQuery: query,
+          fields: ["id", "displayName", "formattedAddress", "location"],
+          includedType: "gas_station",
+          language: "pt-BR",
+          region: "BR",
+          locationBias: { center: { lat: -15.7545, lng: -48.2816 }, radius: 30_000 },
+          maxResultCount: 5,
+        });
+        if (cancelled) return;
+        const match = response.places?.find(item => item.location && stationMatchIsPlausible(station, item));
+        if (!match?.location) return;
+        const lat = typeof match.location === "object" && "lat" in match.location
+          ? typeof match.location.lat === "function" ? match.location.lat() : match.location.lat
+          : null;
+        const lng = typeof match.location === "object" && "lng" in match.location
+          ? typeof match.location.lng === "function" ? match.location.lng() : match.location.lng
+          : null;
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        const resolvedLat = lat as number;
+        const resolvedLng = lng as number;
+        setResolvedStations(current => current.map(item => ((item.cnpj && station.cnpj && item.cnpj === station.cnpj) || item.id === station.id) ? { ...item, lat: resolvedLat, lng: resolvedLng, source: "Google" as const } : item));
+      } catch {
+        // Enrichment is optional; the ANP/local catalog remains the source of truth.
+      }
+    };
     const worker = async () => {
       while (!cancelled) { const index = cursor++; if (index >= unresolved.length) return; await resolveOne(unresolved[index]); }
     };
     setResolvingCount(unresolved.length);
     void Promise.all(Array.from({ length: workers }, () => worker())).finally(() => { if (!cancelled) setResolvingCount(0); });
     return () => { cancelled = true; };
-  }, [ready, offline, resolvedStations.length]);
+  }, [ready, offline, resolvedStations.map(item => item.cnpj || item.id || item.name).join("|")]);
 
   const drawableStations = resolvedStations.filter(hasCoordinates);
 
   useEffect(() => {
     if (!drawableStations.length) return;
-    cacheOfflineMapStations(drawableStations.filter(station => typeof station.id === "string").map(station => ({ ...station, id: station.id as string })));
+    cacheOfflineMapStations(drawableStations
+      .filter(station => station.source !== "Google" && typeof station.id === "string")
+      .map(station => ({ ...station, id: station.id as string })));
   }, [resolvedStations]);
 
   useEffect(() => {

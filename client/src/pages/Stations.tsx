@@ -14,7 +14,10 @@ import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
-import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
+import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
+import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
+import type { AnpPriceSnapshot } from "@/lib/anpPrices";
+import { stationCatalogStatusLabel } from "@/lib/stationEntity";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -54,7 +57,7 @@ export default function Stations() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
+  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -67,6 +70,8 @@ export default function Stations() {
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
+  const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
+  const [fuelFilter, setFuelFilter] = useState<"all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv">("all");
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -82,6 +87,7 @@ export default function Stations() {
   const liveAnpRows = anpLiveQuery.data?.rows ?? [];
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
+  const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -151,13 +157,18 @@ export default function Stations() {
         const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
+      if (directorySort === "price") {
+        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
+        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
+        return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      }
       if (directorySort === "brand") {
         return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
           stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -305,6 +316,28 @@ export default function Stations() {
     ? new Date(cachedSnapshot.savedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
     : null;
   const usingCache = !online && liveStations.length === 0 && stations.length > 0;
+
+  useEffect(() => {
+    if (!broadAguasLindasQuery || showSavedOnly) return;
+    const controller = new AbortController();
+    void loadAguasLindasAnpPrices(controller.signal).then(snapshot => {
+      if (snapshot) setPriceSnapshot(snapshot);
+    });
+    return () => controller.abort();
+  }, [broadAguasLindasQuery, showSavedOnly]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all([hydrateOfflineAnpSnapshot(), hydrateOfflineMapStations()]).then(([anpSnapshot, mapSnapshot]) => {
+      if (cancelled) return;
+      if (anpSnapshot.rows.length && staticAnpRows.length === 0) {
+        setStaticAnpRows(anpSnapshot.rows);
+        setStaticAnpRetrievedAt(anpSnapshot.retrievedAt);
+      }
+      if (mapSnapshot.stations.length && offlineMap.length === 0) setOfflineMap(mapSnapshot.stations);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!staticRuntime || !broadAguasLindasQuery || showSavedOnly) return;
@@ -887,10 +920,13 @@ export default function Stations() {
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
                 <h2 id="complete-stations-title" className="mt-1 text-xl font-black">Cada posto, uma ficha completa</h2>
                 <p className="mt-2 text-[0.65rem] leading-relaxed text-white/45">
-                  {directoryCards.length} fichas consolidadas por CNPJ quando disponível, cruzando cadastro local, ANP e referências secundárias. Cada ficha tem rota para Google Maps, Waze e Apple Maps.
+                  {directoryCards.length} fichas consolidadas por CNPJ. O catálogo separa {anpStations.length} registros ANP de referências secundárias, sem transformar descoberta de mapa em autorização ANP. Cada ficha tem rota para Google Maps, Waze e Apple Maps.
                 </p>
               </div>
-              <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#D9FF91]">{directoryCards.length} postos</span>
+              <div className="shrink-0 text-right">
+                <span className="inline-flex rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#D9FF91]">{directoryCards.length} fichas</span>
+                <p className="mt-1 text-[0.45rem] font-bold text-white/25">{anpStations.length} registros ANP</p>
+              </div>
             </div>
 
             <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3">
@@ -929,24 +965,32 @@ export default function Stations() {
               </label>
               <select value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
+                <option value="price">Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
-              <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis</span>
-              <span>{userCoords ? "distância calculada no aparelho" : "lista sem exigir localização"}</span>
+              <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
+              <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsFiltered.slice(0, directoryVisibleCount).map((item, index) => (
+              {directoryCardsFiltered
+                .filter(item => fuelFilter === "all" || (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter) ?? false) || item.anp?.products?.some(product => {
+                  const text = (product.produto || "").toLocaleLowerCase("pt-BR");
+                  return fuelFilter === "gasolina-comum" ? text.includes("gasolina") && !text.includes("aditivada") : fuelFilter === "etanol" ? text.includes("etanol") : fuelFilter === "diesel-s10" ? text.includes("s10") : fuelFilter === "diesel-s500" ? text.includes("s500") : fuelFilter === "glp-p13" ? text.includes("glp") || text.includes("p13") : fuelFilter === "gnv" ? text.includes("gnv") : false;
+                }))
+                .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
                   index={index + 1}
                   local={item.local}
                   anp={item.anp}
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
+                  prices={pricesByCnpj.get(item.key) ?? []}
+                  catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
                   distanceKm={(() => {
                     if (!userCoords) return null;
                     const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);

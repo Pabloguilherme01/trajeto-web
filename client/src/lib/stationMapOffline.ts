@@ -1,4 +1,5 @@
 import { normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
+import { idbGet, idbPut } from "@/lib/offlineDb";
 
 export type OfflineStationMapEntry = {
   id: string;
@@ -68,11 +69,23 @@ export function getOfflineAnpSnapshot(): OfflineAnpSnapshot {
 
 export function cacheOfflineAnpSnapshot(rows: AnpFuelRow[], retrievedAt?: string | null) {
   if (!rows.length) return false;
-  return writeJson(ANP_KEY, {
+  const snapshot = {
     retrievedAt: retrievedAt ?? new Date().toISOString(),
     savedAt: new Date().toISOString(),
     rows: rows.slice(0, MAX_ANP_ROWS),
-  });
+  };
+  writeJson(ANP_KEY, snapshot);
+  void idbPut("data", ANP_KEY, snapshot);
+  return true;
+}
+
+export async function hydrateOfflineAnpSnapshot() {
+  const snapshot = await idbGet<OfflineAnpSnapshot>("data", ANP_KEY);
+  if (snapshot?.rows?.length) {
+    writeJson(ANP_KEY, snapshot);
+    return snapshot;
+  }
+  return getOfflineAnpSnapshot();
 }
 
 function isOfflineMapEntry(value: unknown): value is OfflineStationMapEntry {
@@ -93,7 +106,7 @@ export function getOfflineMapStations(): OfflineMapSnapshot {
   const raw = Array.isArray((value as { stations?: unknown }).stations) ? (value as { stations: unknown[] }).stations : [];
   return {
     savedAt: typeof (value as { savedAt?: unknown }).savedAt === "string" ? (value as { savedAt: string }).savedAt : "",
-    stations: raw.filter(isOfflineMapEntry).slice(0, MAX_MAP_STATIONS),
+    stations: raw.filter(isOfflineMapEntry).filter(station => station.source !== "Google").slice(0, MAX_MAP_STATIONS),
   };
 }
 
@@ -101,7 +114,7 @@ export function cacheOfflineMapStations(stations: OfflineStationMapEntry[]) {
   if (!stations.length) return false;
 
   const current = getOfflineMapStations().stations;
-  const merged = [...stations, ...current];
+  const merged = [...stations.filter(station => station.source !== "Google"), ...current.filter(station => station.source !== "Google")];
   const seen = new Set<string>();
   const deduped = merged.filter(station => {
     const key = station.cnpj
@@ -112,10 +125,19 @@ export function cacheOfflineMapStations(stations: OfflineStationMapEntry[]) {
     return true;
   }).slice(0, MAX_MAP_STATIONS);
 
-  return writeJson(MAP_KEY, {
-    savedAt: new Date().toISOString(),
-    stations: deduped,
-  });
+  const snapshot = { savedAt: new Date().toISOString(), stations: deduped };
+  writeJson(MAP_KEY, snapshot);
+  void idbPut("map", MAP_KEY, snapshot);
+  return true;
+}
+
+export async function hydrateOfflineMapStations() {
+  const snapshot = await idbGet<OfflineMapSnapshot>("map", MAP_KEY);
+  if (snapshot?.stations?.length) {
+    writeJson(MAP_KEY, snapshot);
+    return snapshot;
+  }
+  return getOfflineMapStations();
 }
 
 export function getOfflineMapAgeLabel(savedAt: string) {

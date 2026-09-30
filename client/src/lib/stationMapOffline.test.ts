@@ -41,7 +41,8 @@ describe("stationMapOffline", () => {
     expect(cacheOfflineMapStations([official])).toBe(true);
 
     const snapshot = getOfflineMapStations();
-    expect(snapshot.stations).toHaveLength(2);
+    // Google Places content is intentionally excluded from persistent offline storage.
+    expect(snapshot.stations).toHaveLength(1);
     expect(snapshot.stations[0]?.source).toBe("ANP");
     expect(snapshot.savedAt).toBeTruthy();
   });
