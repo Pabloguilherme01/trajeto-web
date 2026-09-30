@@ -106,8 +106,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     try { localStorage.setItem("trajeto-confirmed-route-id", selectedRouteId); } catch {}
   }, [selectedRouteId]);
   useEffect(() => { void refresh(); }, [origin, destination, waypoints.join("|"), avoidTollsState, avoidHighwaysState, trafficDetailed]);
-  async function compareTomTom() { setComparisonLoading(true); setMessage(""); try { const base = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim()?.replace(/\/$/, "") || ""; const response = await fetch(base + "/api/tomtom-route-intelligence", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin, destination, avoidTolls, avoidHighways }) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload?.message || "TomTom indisponível"); setTomtom(payload); } catch { setMessage("TomTom ainda não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
-  async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls, avoidHighways })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
+  async function compareTomTom() { setComparisonLoading(true); setMessage(""); try { const base = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim()?.replace(/\/$/, "") || ""; const response = await fetch(base + "/api/tomtom-route-intelligence", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ origin, destination, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState }) }); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload?.message || "TomTom indisponível"); setTomtom(payload); } catch { setMessage("TomTom ainda não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
+  async function compareApple() { setComparisonLoading(true); setMessage(""); try { setApple(await fetchAppleRouteIntelligence({ origin, destination, avoidTolls: avoidTollsState, avoidHighways: avoidHighwaysState })); } catch { setMessage("Apple Maps Server não está configurado ou não respondeu agora."); } finally { setComparisonLoading(false); } }
   const toll = main?.toll?.amount;
   const trafficDelay = main?.durationSeconds != null && main?.staticDurationSeconds != null ? Math.max(0, main.durationSeconds - main.staticDurationSeconds) : null;
   const routeSavings = (route: typeof main) => {
@@ -125,7 +125,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       if (mode === "fastest") return Number(a.durationSeconds ?? Infinity) - Number(b.durationSeconds ?? Infinity);
       if (mode === "cheapest") return Number(totalCost(a) ?? Infinity) - Number(totalCost(b) ?? Infinity);
       if (mode === "no-tolls") return Number(a.durationSeconds ?? Infinity) - Number(b.durationSeconds ?? Infinity);
-      return Number(b.labels?.includes("FUEL_EFFICIENT") ?? false) - Number(a.labels?.includes("FUEL_EFFICIENT") ?? false);
+      const timed = pool.map(route => Number(route.durationSeconds ?? Infinity)).filter(Number.isFinite); const costs = pool.map(route => totalCost(route)).filter((value): value is number => value != null && Number.isFinite(value)); const minTime = Math.min(...timed); const maxTime = Math.max(...timed); const minCost = costs.length ? Math.min(...costs) : 0; const maxCost = costs.length ? Math.max(...costs) : 0; const score = (route: typeof pool[number]) => { const time = Number(route.durationSeconds ?? Infinity); const cost = totalCost(route); const timeScore = maxTime > minTime && Number.isFinite(time) ? (time - minTime) / (maxTime - minTime) : 0; const costScore = cost != null && maxCost > minCost ? (cost - minCost) / (maxCost - minCost) : 0; const fuelBonus = route.labels?.includes("FUEL_EFFICIENT") ? 0.05 : 0; return timeScore * (costs.length ? 0.6 : 1) + costScore * (costs.length ? 0.4 : 0) + fuelBonus; }; return score(a) - score(b);
     });
     if (ranked[0]) onSelectRoute?.(ranked[0].id);
   };
@@ -153,7 +153,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   };
 
   return (
-    <section aria-labelledby="route-intelligence-title" className="mt-4 rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white">
+    <section aria-labelledby="route-intelligence-title" aria-busy={loading} className="mt-4 rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Inteligência da rota</p>
