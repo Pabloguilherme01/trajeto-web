@@ -116,7 +116,7 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
               <button
                 type="button"
                 onClick={() => choose(destination)}
