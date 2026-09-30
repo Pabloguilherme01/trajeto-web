@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v11";
+const VERSION = "trajeto-v12";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -101,13 +101,21 @@ async function networkFirstNavigation(request) {
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  try {
-    const response = await fetch(request);
-    if (response.ok) await cache.put(request, response.clone());
-    return response;
-  } catch {
-    return cached || new Response("", { status: 504 });
+
+  const refresh = fetch(request)
+    .then(response => {
+      if (response.ok) void cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) {
+    void refresh;
+    return cached;
   }
+
+  const response = await refresh;
+  return response || new Response("", { status: 504 });
 }
 
 async function networkFirst(request, cacheName) {
