@@ -45,6 +45,17 @@ function readCachedCoordinate(station: StationMapItem) {
   return null;
 }
 
+function stationMatchIsPlausible(station: StationMapItem, place: google.maps.places.PlaceResult) {
+  const placeText = normalizeStationText([place.name, place.formatted_address].filter(Boolean).join(" "));
+  if (!placeText.includes("aguas lindas")) return false;
+  const stationTokens = normalizeStationText([station.name, station.address].filter(Boolean).join(" "))
+    .split(" ")
+    .filter(token => token.length >= 4 && !["posto", "auto", "combustiveis", "aguas", "lindas", "goias"].includes(token));
+  if (!stationTokens.length) return true;
+  const hits = stationTokens.filter(token => placeText.includes(token)).length;
+  return hits >= 1;
+}
+
 function writeCachedCoordinate(station: StationMapItem, lat: number, lng: number) {
   try {
     localStorage.setItem(coordinateCacheKey(station), JSON.stringify({ lat, lng, source: "Google", savedAt: new Date().toISOString() }));
@@ -148,7 +159,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
       const query = [station.name, station.address, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
       service.textSearch({ query, region: "br", language: "pt-BR", location: { lat: -15.7545, lng: -48.2816 }, radius: 30_000 }, (results, status) => {
         if (cancelled) return resolve();
-        const match = status === window.google.maps.places.PlacesServiceStatus.OK ? results?.find(item => item.geometry?.location) : undefined;
+        const match = status === window.google.maps.places.PlacesServiceStatus.OK ? results?.find(item => item.geometry?.location && stationMatchIsPlausible(station, item)) : undefined;
         if (match?.geometry?.location) {
           const lat = match.geometry.location.lat();
           const lng = match.geometry.location.lng();
