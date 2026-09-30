@@ -12,6 +12,7 @@ import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
 import TripReadinessCard from "@/components/TripReadinessCard";
+import MobilityCostForecast from "@/components/MobilityCostForecast";
 
 
 
@@ -358,6 +359,8 @@ export default function Home() {
             <TripReadinessCard />
           </div>
         </section>
+
+        <MobilityCostForecast />
 
         <MobileUtilityHub />
 
