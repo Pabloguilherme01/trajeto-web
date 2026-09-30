@@ -398,10 +398,10 @@ export default function Planner() {
                 <CheckCircle2 className="size-5 shrink-0 text-[#C7FF3C]" />
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-2xl bg-white/[.045] p-3"><RouteIcon className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Distância</p><p className="mt-1 text-sm font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><Navigation className="size-3.5 text-[#C7FF3C]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Tempo</p><p className="mt-1 text-sm font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <div className="rounded-2xl bg-white/[.045] p-3.5"><RouteIcon className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Distância</p><p className="mt-1 text-sm font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
+                <div className="rounded-2xl bg-white/[.045] p-3.5"><Navigation className="size-3.5 text-[#C7FF3C]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Tempo</p><p className="mt-1 text-sm font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
+                <div className="col-span-2 rounded-2xl bg-white/[.045] p-3.5"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Chegada estimada</p><p className="mt-1 text-base font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
               <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3">
