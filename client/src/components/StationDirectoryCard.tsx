@@ -194,9 +194,9 @@ export function StationDirectoryCard({
           <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
         </div>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.48rem] text-white/30">
-          <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
-          <span>Preço: {primaryPrice ? "ANP" : "não disponível"}</span>
-          <span>Localização: {coords ? "coordenada" : "não confirmada"}</span>
+          <span>Cadastro: {anp ? "ANP" : "catálogo local"}{anp ? " · " + formatDate(anp.dataObtencao ?? anp.dataVinculacao ?? anp.dataPublicacao) : ""}</span>
+          <span>Preço: {primaryPrice ? "ANP · " + (primaryPrice.collectionDate ? formatDate(primaryPrice.collectionDate) : "data não informada") : "não disponível"}</span>
+          <span>Localização: {coords ? (anp?.latitude != null && anp?.longitude != null ? "ANP" : "mapa") + " · " + formatDate(anp?.dataObtencao ?? anp?.dataVinculacao ?? anp?.dataPublicacao ?? local?.mapData?.observedAt) : "não confirmada"}</span>
         </div>
       </section>
 
