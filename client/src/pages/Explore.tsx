@@ -9,7 +9,7 @@ import { inferPlaceCategory, placeMatchesQuery } from "@/lib/placeSearch";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
 import { appUrl } from "@/lib/appUrl";
 import type { Coordinates } from "@/lib/stationDirectorySearch";
-import { openNavigation } from "@/lib/mobileTools";
+import { getPreferredNavigationProvider, openNavigation } from "@/lib/mobileTools";
 
 type CategoryOption={key:PlaceCategory|"all";label:string;icon:typeof Fuel};
 const categoryOptions:CategoryOption[]=[
@@ -77,7 +77,7 @@ export default function Explore(){
 
   const openNav=(place:PlaceEntity)=>{
     if(!place.coordinates)return;
-    const links=openNavigation(place.coordinates.lat,place.coordinates.lng,place.name); window.open(links.google,"_blank","noopener,noreferrer");
+    const links=openNavigation(place.coordinates.lat,place.coordinates.lng,place.name); const provider=getPreferredNavigationProvider(); window.open(links[provider],"_blank","noopener,noreferrer");
   };
 
   const categoryTitle=category==="all"?"Tudo":PLACE_CATEGORY_LABELS[category];
@@ -106,7 +106,7 @@ export default function Explore(){
         <button type="button" onClick={()=>setLocation(appUrl("/postos"))} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/8 px-3 text-[.56rem] font-black text-white/55"><Fuel className="size-3.5"/>Diretório ANP de postos</button>
       </div>
 
-      <section className="mt-4"><CityExplorerMap category={category} center={center} online={online} onResults={setResults} onSelect={setSelected}/></section>
+      <section className="mt-4"><CityExplorerMap category={category} query={query} center={center} online={online} onResults={setResults} onSelect={setSelected}/></section>
       <DataHealthStrip online={online} />
 
       <section className="mt-4 rounded-[1.25rem] border border-white/8 bg-white/[.025] p-3">
