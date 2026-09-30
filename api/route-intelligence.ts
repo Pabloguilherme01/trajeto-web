@@ -8,9 +8,7 @@ type RouteRequest = {
   trafficDetailed?: boolean;
 };
 
-const allowedOrigin = process.env.TRAJETO_ALLOWED_ORIGIN || "*";
-
-function json(data: unknown, status = 200) {
+function json(data: unknown, status = 200, allowedOrigin = "") {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -19,45 +17,51 @@ function json(data: unknown, status = 200) {
       "access-control-allow-origin": allowedOrigin,
       "access-control-allow-methods": "POST, OPTIONS",
       "access-control-allow-headers": "content-type",
+      "vary": "Origin",
     },
   });
 }
 
 export default async function handler(request: Request) {
-  if (request.method === "OPTIONS") return json({ ok: true });
+  const configuredOrigin = process.env.TRAJETO_ALLOWED_ORIGIN?.trim();
+  if (request.method === "OPTIONS") {
+    return configuredOrigin ? json({ ok: true }, 200, configuredOrigin) : json({ error: "server_origin_not_configured" }, 503);
+  }
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-
-  const configuredOrigin = process.env.TRAJETO_ALLOWED_ORIGIN;
   if (!configuredOrigin) return json({ error: "server_origin_not_configured" }, 503);
+
   const requestOrigin = request.headers.get("origin");
   if (requestOrigin && requestOrigin !== configuredOrigin) {
-    return json({ error: "origin_not_allowed" }, 403);
+    return json({ error: "origin_not_allowed" }, 403, configuredOrigin);
   }
+
   const contentLength = Number(request.headers.get("content-length") || 0);
-  if (contentLength > 20_000) return json({ error: "payload_too_large" }, 413);
+  if (contentLength > 20_000) return json({ error: "payload_too_large" }, 413, configuredOrigin);
 
   const apiKey = process.env.GOOGLE_MAPS_ROUTES_API_KEY;
   if (!apiKey) {
     return json({
       error: "routing_provider_not_configured",
       message: "O provedor de rotas ainda não está configurado no servidor.",
-    }, 503);
+    }, 503, configuredOrigin);
   }
 
   let body: RouteRequest;
   try {
     body = await request.json() as RouteRequest;
   } catch {
-    return json({ error: "invalid_json" }, 400);
+    return json({ error: "invalid_json" }, 400, configuredOrigin);
   }
 
   const origin = body.origin?.trim();
   const destination = body.destination?.trim();
   if (!origin || !destination || origin.length > 300 || destination.length > 300) {
-    return json({ error: "invalid_route" }, 400);
+    return json({ error: "invalid_route" }, 400, configuredOrigin);
   }
 
-  const waypoints = (body.waypoints || [])
+  const rawWaypoints = Array.isArray(body.waypoints) ? body.waypoints : [];
+  const waypoints = rawWaypoints
+    .filter((item): item is string => typeof item === "string")
     .map(item => item.trim())
     .filter(Boolean)
     .slice(0, 3);
@@ -103,15 +107,12 @@ export default async function handler(request: Request) {
       ].join(","),
     },
     body: JSON.stringify(requestBody),
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!response.ok) {
-    const detail = await response.text();
-    return json({
-      error: "routing_provider_error",
-      status: response.status,
-      message: detail.slice(0, 500),
-    }, 502);
+    console.error(`[GoogleRoutes] provider error ${response.status}`);
+    return json({ error: "routing_provider_error", message: "Falha no provedor de rotas." }, 502, configuredOrigin);
   }
 
   const data = await response.json() as {
@@ -141,22 +142,26 @@ export default async function handler(request: Request) {
       ? Number(toll.units || 0) + Number(toll.nanos || 0) / 1_000_000_000
       : null;
 
+    const trafficIntervals = body.trafficDetailed ? (route.travelAdvisory?.speedReadingIntervals || []) : [];
+    const trafficImpact = body.trafficDetailed ? (() => {
+      const points = trafficIntervals.reduce((sum, item) => sum + Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)), 0);
+      const slow = trafficIntervals.reduce((sum, item) => sum + (item.speed === "SLOW" ? Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)) : 0), 0);
+      const jam = trafficIntervals.reduce((sum, item) => sum + (item.speed === "TRAFFIC_JAM" ? Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)) : 0), 0);
+      return { slowPoints: slow, jamPoints: jam, affectedPoints: slow + jam, totalPoints: points };
+    })() : null;
+
     return {
       id: index === 0 ? "principal" : `alternativa-${index}`,
       labels: route.routeLabels || [],
       polyline: route.polyline?.encodedPolyline || null,
-      trafficIntervals: body.trafficDetailed ? (route.travelAdvisory?.speedReadingIntervals || []) : [],
-      trafficImpact: body.trafficDetailed ? (() => {
-        const intervals = route.travelAdvisory?.speedReadingIntervals || [];
-        const points = intervals.reduce((sum, item) => sum + Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)), 0);
-        const slow = intervals.reduce((sum, item) => sum + (item.speed === "SLOW" ? Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)) : 0), 0);
-        const jam = intervals.reduce((sum, item) => sum + (item.speed === "TRAFFIC_JAM" ? Math.max(1, (item.endPolylinePointIndex ?? 0) - (item.startPolylinePointIndex ?? 0)) : 0), 0);
-        return { slowPoints: slow, jamPoints: jam, affectedPoints: slow + jam, totalPoints: points };
-      })() : null,
+      trafficIntervals,
+      trafficImpact,
       distanceMeters: route.distanceMeters ?? null,
       durationSeconds: route.duration ? Number.parseInt(route.duration, 10) : null,
       staticDurationSeconds: route.staticDuration ? Number.parseInt(route.staticDuration, 10) : null,
-      fuelConsumptionLiters: route.travelAdvisory?.fuelConsumptionMicroliters ? Number(route.travelAdvisory.fuelConsumptionMicroliters) / 1_000_000 : null,
+      fuelConsumptionLiters: route.travelAdvisory?.fuelConsumptionMicroliters
+        ? Number(route.travelAdvisory.fuelConsumptionMicroliters) / 1_000_000
+        : null,
       toll: route.travelAdvisory?.tollInfo ? {
         amount: tollValue,
         currency: toll?.currencyCode || "BRL",
@@ -172,5 +177,5 @@ export default async function handler(request: Request) {
     trafficDetailed: Boolean(body.trafficDetailed),
     alternativesAvailable: routes.length > 1,
     routes,
-  });
+  }, 200, configuredOrigin);
 }
