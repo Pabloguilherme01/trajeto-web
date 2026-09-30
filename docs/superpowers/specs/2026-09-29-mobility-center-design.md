@@ -4323,3 +4323,189 @@ Esta especificação deixa de crescer por adição de módulos. A partir deste p
 A próxima etapa é obrigatoriamente:
 
 **especificação → aprovação → plano técnico → implementação TDD → verificação → code review → deploy.**
+
+
+## 192. Mobile Product Evaluation — avaliação do produto inteiro
+
+A avaliação final não será limitada a páginas ou componentes isolados.
+
+O WCAG-EM 2, publicado em 23/07/2026, passou a abranger também apps e outros produtos digitais; o Trajeto adotará a lógica de avaliação por produto e jornadas completas. citeturn0search4
+
+### 192.1 Journey Sampling
+Selecionar jornadas representativas:
+
+- primeiro acesso;
+- destino recorrente;
+- nova rota;
+- rota offline;
+- retorno de navegação;
+- conclusão;
+- registro de combustível;
+- consulta de custos;
+- recuperação de erro;
+- compartilhamento.
+
+### 192.2 Accessibility Evidence
+Para cada jornada registrar:
+
+- resultado;
+- barreiras;
+- viewport;
+- método de entrada;
+- estado de rede;
+- tecnologia assistiva quando aplicável;
+- correção;
+- regressão.
+
+### 192.3 Mobile Environment Matrix
+Avaliar em:
+
+- viewport estreita;
+- viewport média;
+- viewport larga;
+- teclado aberto;
+- orientação vertical;
+- orientação horizontal;
+- conexão limitada;
+- offline;
+- zoom;
+- reduced motion.
+
+## 193. Interaction Reliability Contract
+
+Uma interação crítica somente será considerada funcional quando:
+
+1. recebe input;
+2. fornece feedback imediato;
+3. executa a ação;
+4. mostra resultado;
+5. permite recuperação;
+6. preserva contexto.
+
+### 193.1 No Silent Failure
+Nenhuma ação pode simplesmente não responder sem indicar estado.
+
+### 193.2 Double Tap Safety
+Ações que geram navegação, gravação ou mutação devem impedir duplicação acidental quando necessário.
+
+### 193.3 Idempotent Commands
+Comandos locais críticos devem possuir comportamento idempotente quando tecnicamente aplicável.
+
+## 194. Mobile Loading Budget
+
+Todo estado de loading precisa definir:
+
+- início;
+- conteúdo esperado;
+- timeout;
+- fallback;
+- conclusão.
+
+Skeleton não pode representar indefinidamente uma requisição que já falhou.
+
+## 195. Mobile Error Taxonomy
+
+Classificar erros em:
+
+- usuário;
+- rede;
+- provider;
+- dados;
+- storage;
+- aplicação;
+- configuração.
+
+Cada classe terá recuperação apropriada.
+
+## 196. Mobile Empty-State Taxonomy
+
+Separar:
+
+- nunca houve dado;
+- não há resultado;
+- dado não disponível offline;
+- dado expirado;
+- provider indisponível;
+- filtro sem correspondência.
+
+Isso evita apresentar situações diferentes com a mesma mensagem.
+
+## 197. Mobile Trust UX
+
+Informações de confiança devem aparecer compactamente:
+
+**Fonte · período · estado**
+
+Abrir detalhes somente quando solicitado.
+
+O objetivo é transparência sem sobrecarregar o fluxo.
+
+## 198. Mobile External Action Guard
+
+Toda ação que sai do Trajeto deve ser explicitamente reconhecível:
+
+- abrir navegador;
+- abrir mapa;
+- compartilhar;
+- abrir site externo.
+
+O usuário deve saber que deixou o contexto do Trajeto.
+
+## 199. Mobile State Persistence
+
+Ao interromper o app, preservar quando possível:
+
+- missão;
+- destino;
+- origem;
+- etapa;
+- seleção de rota;
+- estado do formulário;
+- posição de scroll relevante.
+
+Nunca persistir automaticamente dados sensíveis sem necessidade.
+
+## 200. Final Product Architecture
+
+A arquitetura final será:
+
+**Mobile Shell**
+→ **Experience**
+→ **Application**
+→ **Domain**
+→ **Storage**
+→ **Providers**
+
+Com fluxos transversais:
+
+**Provenance · Recovery · Security · Accessibility · Performance · Observability**
+
+Nenhuma integração externa poderá atravessar diretamente a camada de UI.
+
+## 201. Final User Experience Contract
+
+O aplicativo deverá conseguir responder, em qualquer estado:
+
+**Onde estou?**
+
+**O que estou fazendo?**
+
+**O que falta?**
+
+**Qual é a próxima ação?**
+
+**O que acontece se falhar?**
+
+**De onde veio esta informação?**
+
+Se a interface não conseguir responder a essas perguntas de forma clara, o estado não está pronto.
+
+## 202. Final Scope Lock
+
+A especificação está encerrada.
+
+Novas ideias futuras deverão ser avaliadas durante implementação através do critério de produto e não acrescentadas indefinidamente ao documento.
+
+Prioridade absoluta:
+
+**funcionamento mobile > simplicidade > recuperação > acessibilidade > performance > transparência > segurança > expansão.**
