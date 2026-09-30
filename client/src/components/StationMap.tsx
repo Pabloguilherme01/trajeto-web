@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
 export type StationMapItem = {
   id?: string;
