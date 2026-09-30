@@ -74,6 +74,7 @@ export default function TripReadinessCard() {
   const hasWarning = items.some(item => item.warn);
   const status = readyCount === items.length ? "Pronto para sair" : hasWarning ? "Revisar antes de sair" : "Preparação incompleta";
   const routineLabel = mostUsedTrip ? `${mostUsedTrip.origin} → ${mostUsedTrip.destination}` : lastTrip ? `${lastTrip.origin} → ${lastTrip.destination}` : null;
+  const routineOffline = mostUsedTrip ? routes.find(route => route.origin.trim().toLocaleLowerCase("pt-BR") === mostUsedTrip.origin.trim().toLocaleLowerCase("pt-BR") && route.destination.trim().toLocaleLowerCase("pt-BR") === mostUsedTrip.destination.trim().toLocaleLowerCase("pt-BR")) : null;
 
   return (
     <section className="mobile-card rounded-3xl border border-white/10 bg-[#10181F] p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,.2)] sm:p-6" aria-labelledby="trip-readiness-title">
@@ -92,6 +93,7 @@ export default function TripReadinessCard() {
           <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Rotina detectada localmente</p>
           <p className="mt-1 truncate text-xs font-extrabold text-white">{routineLabel}</p>
           <p className="mt-1 text-[0.58rem] text-white/45">{mostUsedTrip ? "Esta é a rota mais usada na memória deste aparelho." : "Última rota registrada neste aparelho."}</p>
+          {routineOffline && <p className={"mt-1 text-[0.55rem] font-bold " + (isOfflineRouteStale(routineOffline.savedAt) ? "text-amber-200" : "text-[#C7FF3C]")}>{isOfflineRouteStale(routineOffline.savedAt) ? "Cópia offline antiga · revisar antes de depender dela." : "Cópia offline disponível para contingência."}</p>}
         </div>
       )}
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
