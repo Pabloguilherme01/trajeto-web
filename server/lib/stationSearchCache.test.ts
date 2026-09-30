@@ -24,4 +24,11 @@ describe("stationSearchCache", () => {
     expect(getCachedStationSearch<{ marker: string }>("postos", -15.83, -48.95, 1_001)).toEqual({ marker: "A" });
     expect(getCachedStationSearch<{ marker: string }>("postos", -15.84, -48.96, 1_001)).toEqual({ marker: "B" });
   });
+
+  it("isola o cache por tamanho do lote", () => {
+    cacheStationSearch("postos", { limit: 20 }, 1_000, undefined, undefined, 20);
+    cacheStationSearch("postos", { limit: 8 }, 1_000, undefined, undefined, 8);
+    expect(getCachedStationSearch<{ limit: number }>("postos", undefined, undefined, 1_001, 20)).toEqual({ limit: 20 });
+    expect(getCachedStationSearch<{ limit: number }>("postos", undefined, undefined, 1_001, 8)).toEqual({ limit: 8 });
+  });
 });
