@@ -102,14 +102,14 @@ export default function Explore(){
   return <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-10">
     <div className="container max-w-5xl px-3 pt-4 sm:px-5 sm:pt-7">
       <header className="flex items-center justify-between gap-3">
-        <div><p className="text-[.5rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mapa público</p><h1 className="mt-1 font-display text-[clamp(1.7rem,8vw,3.2rem)] font-semibold tracking-[-.055em]">Águas Lindas</h1><p className="mt-1 text-xs text-white/38">Mapa, serviços e referências em uma única busca.</p></div>
+        <div><p className="text-[.5rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mapa público</p><h1 className="mt-1 font-display text-[clamp(1.7rem,8vw,3.2rem)] font-semibold tracking-[-.055em]">Águas Lindas</h1><p className="mt-1 text-xs text-white/60">Mapa, serviços e referências em uma única busca.</p></div>
         {!online&&<span className="inline-flex items-center gap-1.5 rounded-full border border-[#FFB86B]/25 px-2.5 py-2 text-[.52rem] font-black text-[#FFD59B]"><WifiOff className="size-3"/>offline</span>}
       </header>
 
       <form onSubmit={submit} className="mt-5 rounded-[1.45rem] border border-white/10 bg-[#121B22] p-2.5">
         <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3">
           <Search className="size-4 text-[#3DE3FF]"/>
-          <input value={input} onChange={e=>setInput(e.target.value)} className="min-h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/25" placeholder="O que você procura?" enterKeyHint="search"/>
+          <input value={input} onChange={e=>setInput(e.target.value)} className="min-h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/65" placeholder="O que você procura?" enterKeyHint="search"/>
           <button type="submit" className="grid size-10 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Buscar"><ChevronRight className="size-5"/></button>
         </div>
       </form>
@@ -128,32 +128,32 @@ export default function Explore(){
       <DataHealthStrip online={online} />
 
             {filtered.some(place => place.source === "Google") && (
-        <p className="mt-3 rounded-xl border border-white/6 bg-white/[.02] px-3 py-2 text-[.48rem] leading-relaxed text-white/30">
+        <p className="mt-3 rounded-xl border border-white/6 bg-white/[.02] px-3 py-2 text-[.48rem] leading-relaxed text-white/65">
           Google · dados de mapa e Places exibidos como enriquecimento desta sessão.
         </p>
       )}
 
 <section className="mt-4 rounded-[1.25rem] border border-white/8 bg-white/[.025] p-3">
-        <div className="flex items-start gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Globe2 className="size-4"/></div><div><p className="text-[.55rem] font-black text-white">Como ler o mapa</p><p className="mt-1 text-[.52rem] leading-relaxed text-white/38">ANP é usado como fonte cadastral e de preço para postos. MAPA identifica enriquecimento geográfico externo. Uma referência externa não vira automaticamente um registro oficial.</p></div></div>
+        <div className="flex items-start gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Globe2 className="size-4"/></div><div><p className="text-[.55rem] font-black text-white">Como ler o mapa</p><p className="mt-1 text-[.52rem] leading-relaxed text-white/60">ANP é usado como fonte cadastral e de preço para postos. MAPA identifica enriquecimento geográfico externo. Uma referência externa não vira automaticamente um registro oficial.</p></div></div>
       </section>
 
       <section className="mt-4">
-        <div className="flex items-end justify-between gap-3"><div><p className="text-[.48rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">{category==="all"?"🌐":PLACE_CATEGORY_ICONS[category]} {categoryTitle}</p><h2 className="mt-1 text-base font-black">Resultados</h2></div><span className="text-[.55rem] font-bold text-white/30">{filtered.length} locais</span></div>
+        <div className="flex items-end justify-between gap-3"><div><p className="text-[.48rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">{category==="all"?"🌐":PLACE_CATEGORY_ICONS[category]} {categoryTitle}</p><h2 className="mt-1 text-base font-black">Resultados</h2></div><span className="text-[.55rem] font-bold text-white/65">{filtered.length} locais</span></div>
 
         {category==="accessibility"&&<div className="mt-3 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] p-3 text-xs leading-relaxed text-white/55">Acessibilidade só aparece quando houver dados específicos e verificáveis. O Trajeto não presume rampa, banheiro ou acesso com base apenas no nome do local.</div>}
 
         <div className="mt-3 grid gap-2">
           {filtered.map(place=>{const Icon=iconFor(place.category);const distance=placeDistanceLabel(place,center);return <article key={place.id} className="rounded-[1.25rem] border border-white/8 bg-[#121B22] p-3">
-            <div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[.05] text-[#C7FF3C]"><Icon className="size-4"/></div><div className="min-w-0 flex-1"><h3 className="truncate text-[.72rem] font-black">{place.name}</h3><p className="mt-1 line-clamp-2 text-[.58rem] leading-relaxed text-white/40">{place.address||"Endereço não informado"}</p><div className="mt-2 flex flex-wrap gap-1.5"><span className="rounded-full bg-white/[.05] px-2 py-1 text-[.46rem] font-black text-white/55">{place.source}</span>{distance&&<span className="rounded-full bg-white/[.05] px-2 py-1 text-[.46rem] font-black text-white/55">{distance}</span>}{place.status==="temporarily_closed"&&<span className="rounded-full bg-[#FFB86B]/10 px-2 py-1 text-[.46rem] font-black text-[#FFD59B]">fechado segundo a fonte</span>}</div></div><button type="button" onClick={()=>setSelected(place)} className="grid size-9 place-items-center rounded-xl border border-white/8 text-white/45" aria-label={"Abrir "+place.name}><MapPin className="size-4"/></button></div>
-            <div className="mt-3 flex gap-2"><button type="button" onClick={()=>openNav(place)} disabled={!place.coordinates} className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] text-[.55rem] font-black text-[#0B1014] disabled:opacity-30"><Navigation className="size-3.5"/>Ir agora</button>{place.mapsUrl&&<a href={place.mapsUrl} target="_blank" rel="noreferrer" className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-white/45" aria-label="Abrir referência no mapa"><ExternalLink className="size-3.5"/></a>}</div>
+            <div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[.05] text-[#C7FF3C]"><Icon className="size-4"/></div><div className="min-w-0 flex-1"><h3 className="truncate text-[.72rem] font-black">{place.name}</h3><p className="mt-1 line-clamp-2 text-[.58rem] leading-relaxed text-white/60">{place.address||"Endereço não informado"}</p><div className="mt-2 flex flex-wrap gap-1.5"><span className="rounded-full bg-white/[.05] px-2 py-1 text-[.46rem] font-black text-white/55">{place.source}</span>{distance&&<span className="rounded-full bg-white/[.05] px-2 py-1 text-[.46rem] font-black text-white/55">{distance}</span>}{place.status==="temporarily_closed"&&<span className="rounded-full bg-[#FFB86B]/10 px-2 py-1 text-[.46rem] font-black text-[#FFD59B]">fechado segundo a fonte</span>}</div></div><button type="button" onClick={()=>setSelected(place)} className="grid size-9 place-items-center rounded-xl border border-white/8 text-white/60" aria-label={"Abrir "+place.name}><MapPin className="size-4"/></button></div>
+            <div className="mt-3 flex gap-2"><button type="button" onClick={()=>openNav(place)} disabled={!place.coordinates} className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] text-[.55rem] font-black text-[#0B1014] disabled:opacity-30"><Navigation className="size-3.5"/>Ir agora</button>{place.mapsUrl&&<a href={place.mapsUrl} target="_blank" rel="noreferrer" className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-white/60" aria-label="Abrir referência no mapa"><ExternalLink className="size-3.5"/></a>}</div>
           </article>;})}
         </div>
 
-        {!filtered.length&&<div className="mt-3 rounded-[1.25rem] border border-white/8 bg-white/[.02] p-5 text-center"><p className="text-sm font-black">Nenhum resultado disponível</p><p className="mt-1 text-xs leading-relaxed text-white/35">{online?"Tente outro termo ou aproxime o mapa.":"Para consultas externas, conecte-se à internet. Postos locais continuam disponíveis em Postos."}</p></div>}
+        {!filtered.length&&<div className="mt-3 rounded-[1.25rem] border border-white/8 bg-white/[.02] p-5 text-center"><p className="text-sm font-black">Nenhum resultado disponível</p><p className="mt-1 text-xs leading-relaxed text-white/65">{online?"Tente outro termo ou aproxime o mapa.":"Para consultas externas, conecte-se à internet. Postos locais continuam disponíveis em Postos."}</p></div>}
       </section>
 
       {selected&&<div className="fixed inset-x-3 bottom-[max(5.5rem,calc(5rem + env(safe-area-inset-bottom)))] z-50 mx-auto max-w-md rounded-[1.5rem] border border-white/10 bg-[#10191F]/98 p-4 shadow-[0_24px_80px_rgba(0,0,0,.55)] backdrop-blur-xl">
-        <div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]"><MapPin className="size-4"/></div><div className="min-w-0 flex-1"><p className="text-[.68rem] font-black">{selected.name}</p><p className="mt-1 text-[.56rem] leading-relaxed text-white/42">{selected.address||"Endereço não informado"}</p><p className="mt-2 text-[.48rem] font-bold text-white/28">{selected.source==="Google"?"Enriquecimento de mapa · não é cadastro oficial":selected.source+" · base local"}</p></div><button type="button" onClick={()=>setSelected(null)} className="grid size-9 place-items-center text-white/40" aria-label="Fechar"><ChevronRight className="size-4 rotate-90"/></button></div>
+        <div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]"><MapPin className="size-4"/></div><div className="min-w-0 flex-1"><p className="text-[.68rem] font-black">{selected.name}</p><p className="mt-1 text-[.56rem] leading-relaxed text-white/60">{selected.address||"Endereço não informado"}</p><p className="mt-2 text-[.48rem] font-bold text-white/65">{selected.source==="Google"?"Enriquecimento de mapa · não é cadastro oficial":selected.source+" · base local"}</p></div><button type="button" onClick={()=>setSelected(null)} className="grid size-9 place-items-center text-white/60" aria-label="Fechar"><ChevronRight className="size-4 rotate-90"/></button></div>
       </div>}
     </div>
   </main>;
