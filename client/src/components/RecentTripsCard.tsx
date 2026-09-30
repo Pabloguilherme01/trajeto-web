@@ -152,6 +152,19 @@ export default function RecentTripsCard() {
           </div>
         </div>
       )}
+      <div className="mt-4 rounded-2xl border border-[#0B1014]/10 bg-[#0B1014] p-3.5 text-white">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[0.52rem] font-black uppercase tracking-[0.12em] text-[#C7FF3C]">Resumo da rotina</p>
+            <p className="mt-1 truncate text-xs font-extrabold">{mostUsedTrip.origin} → {mostUsedTrip.destination}</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-white/[.08] px-2 py-1 text-[0.5rem] font-black text-white/65">{mostUsedCount} usos</span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-white/[.06] p-2.5"><p className="text-[0.5rem] uppercase tracking-[.1em] text-white/35">Offline</p><p className="mt-1 text-xs font-black">{offlineInfo?.ready ? "disponível" : offlineInfo?.ready === false ? "não salvo" : "verificando"}</p></div>
+          <div className="rounded-xl bg-white/[.06] p-2.5"><p className="text-[0.5rem] uppercase tracking-[.1em] text-white/35">Referência</p><p className="mt-1 text-xs font-black">{offlineAge ? `há ${offlineAge}` : "não informada"}</p></div>
+        </div>
+      </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-[#F4F7F6] p-3">
           <p className="text-[0.52rem] font-black uppercase tracking-[0.12em] text-[#718089]">Uso registrado</p>
