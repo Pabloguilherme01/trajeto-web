@@ -494,6 +494,7 @@ export default function Stations() {
         rememberIntent("nearby");
         const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
         setUserCoords(coords);
+        setDirectorySort("distance");
         setShowMap(true);
         setNearby(true);
         setOnlyOpen(false);
