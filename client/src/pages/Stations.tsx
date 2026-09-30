@@ -707,23 +707,6 @@ export default function Stations() {
           </section>
         )}
 
-        {staticRuntime && !showSavedOnly && !broadAguasLindasQuery && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/15 bg-[#0F1A20] p-4" aria-labelledby="public-stations-title">
-            <div className="flex items-start gap-3">
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
-              <div className="min-w-0">
-                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Busca pública</p>
-                <h2 id="public-stations-title" className="mt-1 text-lg font-black">Resultados de mapa e dados locais.</h2>
-                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">Quando uma busca depender do mapa externo, ela será aberta no provedor correspondente. Favoritos e dados oficiais já salvos permanecem disponíveis neste aparelho.</p>
-              </div>
-            </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no mapa</button>
-              <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]">Postos perto de mim</button>
-            </div>
-          </section>
-        )}
-
         {!showSavedOnly && broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
             <div className="flex items-start justify-between gap-3">
@@ -767,11 +750,19 @@ export default function Stations() {
                   </section>
                 )}
 
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
-                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 py-2.5">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.5rem] font-bold text-white/40">
+                    <span><strong className="text-white/70">{anpRows.length}</strong> linhas ANP</span>
+                    <span><strong className="text-white/70">{anpStations.length}</strong> postos consolidados</span>
+                    <span><strong className="text-white/70">{anpWithCoordinates}</strong> com coordenada</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={exportAnpCsv}
+                    className="min-h-9 shrink-0 rounded-lg border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.5rem] font-black text-[#9FEFFF]"
+                  >
+                    Exportar CSV
+                  </button>
                 </div>
 
                 <details className="mt-3 rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
