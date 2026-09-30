@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { CircleUserRound, LayoutDashboard, LogOut, MapPinned, PanelLeft } from "lucide-react";
+import { LayoutDashboard, LogOut, MapPinned, PanelLeft } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -29,7 +29,6 @@ import { Button } from "./ui/button";
 import { dashboardAccessCopy, type DashboardAccessCopy } from "@/lib/dashboardAccessCopy";
 
 const menuItems = [
-  { icon: CircleUserRound, label: "Minha conta", path: "/minha-conta", adminOnly: false },
   { icon: MapPinned, label: "Planejador", path: "/planejar", adminOnly: false },
   { icon: LayoutDashboard, label: "Operações", path: "/operacoes", adminOnly: true },
 ] as const;
