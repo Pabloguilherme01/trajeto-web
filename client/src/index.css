@@ -124,6 +124,46 @@
   }
 }
 
+/* Camada mobile premium — consistência visual sem alterar o layout estrutural. */
+@media (max-width: 767px) {
+  .premium-surface {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(199,255,60,.055), transparent 32%),
+      radial-gradient(circle at 100% 18%, rgba(61,227,255,.045), transparent 28%),
+      #0B1014;
+  }
+  .mobile-glass {
+    box-shadow:
+      0 16px 42px rgba(0,0,0,.30),
+      inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  .mobile-title,
+  .mobile-section-title {
+    text-wrap: balance;
+  }
+  .mobile-card {
+    border-color: rgba(255,255,255,.075);
+    box-shadow:
+      0 12px 32px rgba(0,0,0,.18),
+      inset 0 1px 0 rgba(255,255,255,.025);
+  }
+  .mobile-card:active {
+    box-shadow: 0 8px 22px rgba(0,0,0,.22);
+  }
+  .mobile-touch {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+@media (min-width: 768px) {
+  .premium-surface {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(199,255,60,.035), transparent 28%),
+      radial-gradient(circle at 88% 18%, rgba(61,227,255,.03), transparent 24%),
+      #0B1014;
+  }
+}
+
 /* Preferências de acessibilidade persistentes */
 html.a11y-large { font-size: 112.5%; }
 html.a11y-large button, html.a11y-large a, html.a11y-large input, html.a11y-large select, html.a11y-large textarea { line-height: 1.35; }
