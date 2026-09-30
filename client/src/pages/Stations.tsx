@@ -109,6 +109,7 @@ export default function Stations() {
   const liveAnpRows = anpLiveQuery.data?.rows ?? [];
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
+  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
   const directoryCards = useMemo(() => {
     const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
@@ -1159,6 +1160,7 @@ export default function Stations() {
                   isOpen: station.isOpen ?? null,
                   distanceLabel: station.distanceLabel ?? null,
                   distanceMeters: station.distanceMeters ?? null,
+                  phone: station.phone ?? null,
                 }))}
                 onClear={() => setCompareIds([])}
               />
