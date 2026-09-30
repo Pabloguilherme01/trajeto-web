@@ -13,6 +13,7 @@ export function inferPlaceCategory(query:string):PlaceCategory|"all"{
   if(/(policia|delegacia|bombeiro|seguranca)/.test(text)) return "security";
   if(/(parque|praca|lazer|esporte|quadra|area verde)/.test(text)) return "leisure";
   if(/(acessivel|acessibilidade|rampa)/.test(text)) return "accessibility";
+  if(/(bairro|setor|rua|avenida|quadra|cep|endereco|br[- ]?\d+)/.test(text)) return "territory";
   return "all";
 }
 export function placeMatchesQuery(fields:Array<string|null|undefined>,query:string){
@@ -41,5 +42,6 @@ export function categoryFromGoogleType(types:string[]|undefined):PlaceCategory|n
   if(/bus_station|transit|train_station/.test(joined)) return "transport";
   if(/city_hall|government|courthouse|post_office/.test(joined)) return "government";
   if(/police|fire_station/.test(joined)) return "security";
+  if(/neighborhood|locality|administrative_area|postal_code|route|street_address/.test(joined)) return "territory";
   return null;
 }
