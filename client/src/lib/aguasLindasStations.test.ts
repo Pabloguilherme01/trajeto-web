@@ -18,10 +18,11 @@ describe("diretório de postos de Águas Lindas", () => {
     expect(searchAguasLindasStations("postos em Águas Lindas de Goiás")).toHaveLength(41);
   });
 
-  it("permite localizar por nome, alias ou CNPJ", () => {
+  it("permite localizar por nome, alias, CNPJ e texto sem acento", () => {
     expect(searchAguasLindasStations("ponteio")[0]?.displayName).toContain("Ponteio");
     expect(searchAguasLindasStations("00.375.386/0002-05")[0]?.displayName).toContain("Mizuno");
     expect(searchAguasLindasStations("Jardim Querência").length).toBeGreaterThan(0);
+    expect(searchAguasLindasStations("perola")[0]?.displayName).toContain("Pérola");
   });
 
   it("gera um link seguro para consulta do posto no Google Maps", () => {
