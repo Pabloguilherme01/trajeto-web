@@ -10,7 +10,7 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNav
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
-import { isGitHubPagesRuntime, supportsLiveRouting } from "@/lib/runtimeCapabilities";
+import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePublicRoute } from "@/lib/publicRouting";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
@@ -132,8 +132,8 @@ export default function Planner() {
       setError("Origem e destino precisam ser diferentes.");
       return;
     }
-    if (!online) {
-      setError("Sem internet. Para calcular uma rota nova, conecte-se ou abra uma rota salva.");
+    if (!online && !staticRuntime) {
+      setError("Sem internet. Para calcular uma rota nova no servidor, conecte-se ou abra uma rota salva.");
       return;
     }
 
@@ -160,8 +160,13 @@ export default function Planner() {
         if (!resolvedOrigin) throw new Error("Informe a origem ou permita a localização para calcular a rota no próprio Trajeto.");
         const publicRoute = await calculatePublicRoute(resolvedOrigin, to);
         if (version !== requestVersion.current) return;
-        setPlanned(buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute);
-        setSavedMessage("Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.");
+        const publicPayload = buildPublicRoutePayload(publicRoute);
+        setPlanned(publicPayload as unknown as PlannedRoute);
+        setSavedMessage(
+          publicRoute.source === "local-estimate"
+            ? "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
+            : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.",
+        );
         if (resolvedOrigin) rememberTrip(resolvedOrigin, to);
         track("route_open", to);
         vibration(14);
@@ -200,7 +205,7 @@ export default function Planner() {
   };
 
   const useCurrentLocation = () => {
-    if (!online || !navigator.geolocation || locating) return;
+    if (!navigator.geolocation || locating) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       position => {
@@ -322,7 +327,7 @@ export default function Planner() {
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
                   <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
-                  <button type="button" onClick={useCurrentLocation} disabled={!online || locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
+                  <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
 
@@ -525,7 +530,11 @@ export default function Planner() {
               <details>
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-white/35" /></summary>
                 <div className="mt-3 grid gap-2 text-[0.62rem] leading-relaxed text-white/45">
-                  <p>Fonte da rota: {staticRuntime ? "rede viária OpenStreetMap/OSRM, calculada no navegador" : "serviço de rota do Trajeto"}.</p>
+                  <p>Fonte da rota: {planned.route.source === "local-estimate"
+                    ? "estimativa local baseada nas coordenadas"
+                    : staticRuntime
+                      ? "rede viária OpenStreetMap/OSRM, calculada no navegador"
+                      : "serviço de rota do Trajeto"}.</p>
                   <p>Referências de preço, quando presentes, são identificadas separadamente e têm data de coleta própria.</p>
                   <p>Tempo de chegada é uma estimativa calculada a partir da duração retornada; a navegação ao vivo fica sob responsabilidade do app externo escolhido.</p>
                 </div>
