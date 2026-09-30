@@ -97,7 +97,7 @@ export default function DailyCommandCenter() {
     { label: "Veículo", value: Boolean(vehicle), detail: vehicle ? vehicle.name : "Ainda não cadastrado", icon: CarFront },
     { label: "Rota offline", value: routes.length > 0, detail: routes.length > 0 ? `${routes.length} preparada${routes.length === 1 ? "" : "s"}` : "Salve uma rota", icon: WifiOff },
     { label: "Última viagem", value: Boolean(lastTrip), detail: lastTrip ? "Pronta para repetir" : "Nenhuma registrada", icon: Route },
-    { label: "Último posto", value: Boolean(lastStation), detail: lastStation ? lastStation.name : "Nenhum consultado", icon: Fuel },
+    { label: "Último posto", value: Boolean(lastStation), detail: lastStation ? lastStation.name : "Histórico vazio", icon: Fuel },
   ];
   const primary = active?.id === "repetir" && lastTrip
     ? {
