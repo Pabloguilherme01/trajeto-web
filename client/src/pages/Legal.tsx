@@ -70,7 +70,9 @@ export function Terms() {
   );
 }
 
-export default function Legal() {
+export default function Legal({ defaultSection = "overview" }: { defaultSection?: "overview" | "privacy" | "terms" }) {
+  if (defaultSection === "privacy") return <Privacy />;
+  if (defaultSection === "terms") return <Terms />;
   return (
     <Layout title="Transparência">
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
