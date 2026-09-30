@@ -65,6 +65,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     setLoading(true);
     setMessage("");
     try {
+      const nextAvoidTolls = overrides?.avoidTolls ?? avoidTollsState;
+      const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
       const cacheKey = JSON.stringify({v:1,origin:origin.trim().toLocaleLowerCase("pt-BR"),destination:destination.trim().toLocaleLowerCase("pt-BR"),waypoints:waypoints.map(item=>item.trim().toLocaleLowerCase("pt-BR")),avoidTolls:nextAvoidTolls,avoidHighways:nextAvoidHighways,trafficDetailed});
       const cacheStorageKey = "trajeto-route-intelligence:" + btoa(unescape(encodeURIComponent(cacheKey))).slice(0,180);
       const now = Date.now();
