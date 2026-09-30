@@ -38,7 +38,8 @@ function formatArrival(seconds: number | null | undefined) {
 export default function Planner() {
   const [location, setLocation] = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(window.location.search), [location]);
-  const savedMode = queryParams.get("salvos") === "1";
+  const pathname = location.split("?")[0].replace(/\/$/, "") || "/";
+  const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
   const [origin, setOrigin] = useState(() => queryParams.get("origem") || getLastTrip()?.origin || "");
   const [destination, setDestination] = useState(() => queryParams.get("destino") || getLastTrip()?.destination || "");
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
