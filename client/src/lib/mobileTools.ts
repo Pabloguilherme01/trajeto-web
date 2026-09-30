@@ -140,6 +140,33 @@ export function buildAppleMapsDirectionsUrl(
   return "https://maps.apple.com/directions?" + params.toString();
 }
 
+/** Universal OpenStreetMap route link; works in browsers and compatible map apps. */
+export function buildOpenStreetMapDirectionsUrl(destination: string, origin?: string) {
+  const normalizedDestination = destination.trim();
+  const normalizedOrigin = origin?.trim();
+  if (!normalizedOrigin) {
+    return "https://www.openstreetmap.org/search?query=" + encodeURIComponent(normalizedDestination);
+  }
+  const params = new URLSearchParams({ engine: "fossgis_osrm_car", route: normalizedOrigin + ";" + normalizedDestination });
+  return "https://www.openstreetmap.org/directions?" + params.toString();
+}
+
+export type NavigationProvider = "google" | "waze" | "apple" | "openstreetmap";
+
+/** Create a destination link for the selected provider, falling back to the address when coordinates are absent. */
+export function buildNavigationProviderUrl(
+  provider: NavigationProvider,
+  destination: string,
+  coordinates?: { lat: number; lng: number } | null,
+) {
+  const hasCoordinates = coordinates && Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng);
+  const target = hasCoordinates ? `${coordinates.lat},${coordinates.lng}` : destination.trim();
+  if (provider === "google") return buildGoogleMapsDestinationUrl(target, true);
+  if (provider === "waze") return buildWazeNavigationUrl(destination, hasCoordinates ? coordinates : undefined);
+  if (provider === "apple") return buildAppleMapsDirectionsUrl(target);
+  return buildOpenStreetMapDirectionsUrl(destination.trim());
+}
+
 export function openNavigation(lat: number, lng: number, label?: string) {
   const encoded = encodeURIComponent(label ?? (lat + "," + lng));
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
