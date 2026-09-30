@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { DirectoryCardShape, DirectoryPriceIndex } from "@/lib/stationDirectoryModel";
 import { getDirectoryCoordinates, getDirectoryGasolinePrice } from "@/lib/stationDirectoryModel";
 import { getDistanceKm, type Coordinates } from "@/lib/stationDirectorySearch";
@@ -69,4 +68,3 @@ export default function StationCompareSheet({ open, onClose, items, pricesByCnpj
   );
 }
 
-export type { AnpPriceRecord };
