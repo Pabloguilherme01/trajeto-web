@@ -50,7 +50,7 @@ export default function Stations() {
   const [query, setQuery] = useState(getInitialQuery);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [nearby, setNearby] = useState(false);
-  const [showMap, setShowMap] = useState(() => isBroadAguasLindasQuery(getInitialQuery()));
+  const [showMap, setShowMap] = useState(false);
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -407,7 +407,7 @@ export default function Stations() {
     if (showSavedOnly || !urlQuery || urlQuery === query) return;
     setQuery(urlQuery);
     setInput(urlQuery);
-    setShowMap(isBroadAguasLindasQuery(urlQuery));
+    setShowMap(false);
     setCompareIds([]);
     setOnlyOpen(false);
     setNeighborhoodFilter("all");
@@ -471,7 +471,7 @@ export default function Stations() {
     rememberSearch(trimmed);
     vibration();
     setQuery(trimmed);
-    setShowMap(isBroadAguasLindasQuery(trimmed));
+    setShowMap(false);
     setCompareIds([]);
     setOnlyOpen(false);
     setNeighborhoodFilter("all");
