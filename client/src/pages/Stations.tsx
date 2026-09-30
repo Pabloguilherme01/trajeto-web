@@ -41,7 +41,7 @@ function isBroadAguasLindasQuery(value: string) {
 type FuelFilter = "all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv";
 type DirectoryCardShape = { key: string; local: ReturnType<typeof searchAguasLindasStations>[number] | null; anp: ReturnType<typeof groupAnpFuelRows>[number] | null };
 
-function matchesFuelFilter(item: DirectoryCardShape, filter: FuelFilter, pricesByCnpj: Map<string, AnpPriceSnapshot["data"]>) {
+function matchesFuelFilter(item: DirectoryCardShape, filter: FuelFilter, pricesByCnpj: ReturnType<typeof indexAnpPricesByCnpj>) {
   if (filter === "all") return true;
   if (pricesByCnpj.get(item.key)?.some(price => price.productKey === filter)) return true;
   return item.anp?.products?.some(product => {
