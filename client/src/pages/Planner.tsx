@@ -168,13 +168,13 @@ export default function Planner() {
         }
         const publicRoute = await calculatePublicRoute(resolvedOrigin, to, mode);
         if (version !== requestVersion.current) return;
-        const publicPayload = buildPublicRoutePayload(publicRoute);
-        setPlanned(publicPayload as unknown as PlannedRoute);
-        setSavedMessage(
-          publicRoute.source === "local-estimate"
-            ? "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
-            : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.",
-        );
+        const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
+        setPlanned(publicPayload);
+        const baseMessage = publicRoute.source === "local-estimate"
+          ? "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
+          : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.";
+        const autoSaved = await persistRouteLocally(publicPayload, resolvedOrigin, to);
+        setSavedMessage(baseMessage + (autoSaved ? " Cópia offline criada automaticamente." : ""));
         if (resolvedOrigin) rememberTrip(resolvedOrigin, to);
         track("route_open", to);
         vibration(14);
@@ -203,6 +203,9 @@ export default function Planner() {
       if (version !== requestVersion.current) return;
       setPlanned(result);
       setFallbackReady(false);
+      const autoSaved = await persistRouteLocally(result, from, to);
+      if (version !== requestVersion.current) return;
+      if (autoSaved) setSavedMessage("Rota calculada e salva automaticamente neste aparelho.");
       vibration(14);
     } catch {
       if (version !== requestVersion.current) return;
@@ -243,21 +246,32 @@ export default function Planner() {
     setDestination("");
   };
 
+  const persistRouteLocally = async (route: PlannedRoute, routeOrigin: string, routeDestination: string) => {
+    const normalizedOrigin = routeOrigin.trim();
+    const normalizedDestination = routeDestination.trim();
+    if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
+    try {
+      await saveOfflineRoute({
+        id: offlineRouteId(normalizedOrigin, normalizedDestination),
+        origin: normalizedOrigin,
+        destination: normalizedDestination,
+        savedAt: new Date().toISOString(),
+        payload: route,
+      });
+      refreshSavedRoutes();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const saveCurrentRoute = async () => {
     if (!planned) return;
-    try {
-      const savedAt = new Date().toISOString();
-      await saveOfflineRoute({
-        id: offlineRouteId(origin, destination),
-        origin: origin.trim(),
-        destination: destination.trim(),
-        savedAt,
-        payload: planned,
-      });
-      setSavedMessage("Rota salva neste aparelho.");
-      refreshSavedRoutes();
+    const saved = await persistRouteLocally(planned, origin, destination);
+    if (saved) {
+      setSavedMessage("Cópia offline atualizada neste aparelho.");
       vibration(16);
-    } catch {
+    } else {
       setSavedMessage("Não foi possível salvar a rota neste aparelho.");
     }
   };
@@ -541,7 +555,7 @@ export default function Planner() {
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
+                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Atualizar cópia</button>
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 
