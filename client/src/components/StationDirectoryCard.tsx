@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
@@ -67,7 +66,6 @@ export function StationDirectoryCard({
   catalogStatus?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
   const cnpj = anp?.cnpj || local?.cnpj || "";
@@ -142,14 +140,8 @@ export function StationDirectoryCard({
   };
 
   return (
-    <motion.article
+    <article
       id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
-      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
-      whileHover={reduceMotion ? undefined : { y: -3 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.997 }}
       className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
@@ -328,6 +320,6 @@ export function StationDirectoryCard({
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
         <span>Sem conta · uso direto</span>
       </div>
-    </motion.article>
+    </article>
   );
 }
