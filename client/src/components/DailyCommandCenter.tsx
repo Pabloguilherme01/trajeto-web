@@ -234,8 +234,8 @@ export default function DailyCommandCenter() {
             </div>
           )}
 
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
+          <div className="mt-5 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
+            <div className="min-w-[10rem] snap-start rounded-xl border border-white/8 bg-white/[.035] p-3 sm:min-w-0">
               <MapPin className="size-4 text-[#3DE3FF]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Destino</p>
               <p className="mt-1 truncate text-xs font-extrabold text-white">{favorite?.label ?? "Configurar"}</p>
