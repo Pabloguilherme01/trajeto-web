@@ -313,7 +313,7 @@ export default function Planner() {
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#BDA5FF]">Neste aparelho</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-[0.5rem] font-black text-white/35">{savedRoutes.length}</span>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-[0.5rem] font-black text-white/35">{savedRoutes.length + savedStations.length}</span>
             </div>
             {savedRoutes.length === 0 && savedStations.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
@@ -333,6 +333,33 @@ export default function Planner() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {savedMode && savedStations.length > 0 && (
+          <section className="mt-5" aria-labelledby="saved-stations-title">
+            <div className="flex items-end justify-between gap-3">
+              <div><p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#3DE3FF]">Postos favoritos</p><h2 id="saved-stations-title" className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">Seus postos.</h2></div>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-[0.5rem] font-black text-white/35">{savedStations.length}</span>
+            </div>
+            <div className="mt-3 space-y-2">
+              {savedStations.map(station => (
+                <article key={station.placeId} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-black">{station.name}</p>
+                      <p className="mt-1 line-clamp-2 text-[0.62rem] leading-relaxed text-white/40">{station.address}</p>
+                      {station.isOpen != null && <p className={"mt-2 text-[0.56rem] font-black " + (station.isOpen ? "text-[#C7FF3C]" : "text-white/35")}>{station.isOpen ? "Aberto agora" : "Fechado agora"}</p>}
+                    </div>
+                    <button type="button" onClick={() => { toggleMobileStationFavorite(station); setSavedStations(listMobileStationFavorites()); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir agora</button>
+                    <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(station.address || station.name))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Planejar</button>
+                  </div>
+                </article>
+              ))}
+            </div>
           </section>
         )}
 
