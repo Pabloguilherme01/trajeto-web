@@ -51,7 +51,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/planejar" component={Planner} />
           <Route path="/rota" component={Planner} />
-          <Route path="/salvos"><Planner /></Route>
+          <Route path="/salvos"><Stations /></Route>
           <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
           <Route path="/postos" component={Stations} />
           <Route path="/buscar" component={Stations} />
