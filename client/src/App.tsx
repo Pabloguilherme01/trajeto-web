@@ -19,7 +19,7 @@ import Home from "./pages/Home";
 
 const Planner = lazy(() => import("./pages/Planner"));
 const Operations = lazy(() => import("./pages/Operations"));
-const Stations = lazy(() => import("./pages/Stations"));
+const Stations = lazy(() => import("./pages/Stations"));\nconst Local = lazy(() => import("./pages/Local"));
 const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
 
@@ -75,7 +75,7 @@ function Router() {
           <Route path="/rota" component={Planner} />
           <Route path="/salvos"><Planner /></Route>
           <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
-          <Route path="/postos" component={Stations} />
+          <Route path="/mapa"><Stations mapFirst /></Route>\n          <Route path="/postos" component={Stations} />\n          <Route path="/local/:id" component={Local} />
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
