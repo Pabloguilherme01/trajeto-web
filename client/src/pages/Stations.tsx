@@ -967,7 +967,7 @@ export default function Stations() {
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
-              <span>{userCoords ? "distância calculada no aparelho" : "lista sem exigir localização"}</span>
+              <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
