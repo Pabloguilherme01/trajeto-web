@@ -112,6 +112,8 @@ export default function Planner() {
         setOrigin(route.origin);
         setDestination(route.destination);
         setPlanned(route.payload as PlannedRoute);
+        const savedMode = (route.payload as PlannedRoute).route as PlannedRoute["route"] & { mode?: PublicTravelMode };
+        if (savedMode.mode === "walking" || savedMode.mode === "cycling" || savedMode.mode === "transit" || savedMode.mode === "driving") setMode(savedMode.mode);
         setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
       }).catch(() => { if (active) setError("Não foi possível abrir a rota salva."); });
     } else if (queryParams.has("origem") || queryParams.has("destino")) {
@@ -146,7 +148,7 @@ export default function Planner() {
     resetResult();
     const version = requestVersion.current;
 
-    if (staticRuntime) {
+    if (staticRuntime || mode !== "driving") {
       setError(null);
       setFallbackReady(false);
       setPublicRoutePending(true);
@@ -279,7 +281,7 @@ export default function Planner() {
         detourKm: planned.recommendation.detourKm,
         detourSource: planned.recommendation.detourSource,
       } : null);
-      const url = window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(origin.trim()) + "&destino=" + encodeURIComponent(destination.trim());
+      const url = window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(origin.trim()) + "&destino=" + encodeURIComponent(destination.trim()) + "&modo=" + encodeURIComponent(mode);
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
     } catch {}
