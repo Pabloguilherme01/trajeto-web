@@ -11,6 +11,7 @@ import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
+import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
@@ -87,6 +88,56 @@ export default function Stations() {
     () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
     []
   );
+
+  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
+  const directoryCards = useMemo(() => {
+    const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
+    const cards = aguasLindasCatalog.map(local => ({
+      key: local.cnpj,
+      local,
+      anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
+    }));
+    for (const anp of anpStations) {
+      if (localByCnpj.has(anp.cnpj)) continue;
+      cards.push({ key: anp.cnpj, local: null, anp });
+    }
+    return cards;
+  }, [aguasLindasCatalog, anpStations]);
+
+  const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number], anp: typeof anpStations[number] | null) => {
+    const lat = anp?.latitude ?? local.anp?.latitude;
+    const lng = anp?.longitude ?? local.anp?.longitude;
+    const station = {
+      placeId: "aguas-lindas:" + (anp?.cnpj || local.cnpj),
+      name: local.displayName,
+      address: [
+        anp?.endereco || local.address,
+        anp?.bairro || local.neighborhood,
+        anp?.municipio || "Águas Lindas de Goiás",
+        anp?.uf || "GO",
+      ].filter(Boolean).join(", "),
+      lat: Number.isFinite(lat) ? Number(lat) : 0,
+      lng: Number.isFinite(lng) ? Number(lng) : 0,
+      phone: local.mapData?.phone ?? null,
+      website: null,
+      openingHours: local.mapData?.hours ? [local.mapData.hours] : [],
+      isOpen: local.mapData?.operationalStatus === "open" ? true : local.mapData?.operationalStatus === "closed" ? false : null,
+    } satisfies MobileStation;
+
+    if (!Number.isFinite(station.lat) || !Number.isFinite(station.lng)) {
+      const addressOnly = { ...station, lat: 0, lng: 0 };
+      const result = toggleMobileStationFavorite(addressOnly);
+      setSaved(result.stations);
+      vibration();
+      toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");
+      return;
+    }
+    const result = toggleMobileStationFavorite(station);
+    setSaved(result.stations);
+    vibration();
+    toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");
+  };
+
 
   const visibleLocalDirectory = localDirectory.slice(0, localVisibleCount);
   const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
@@ -617,6 +668,45 @@ export default function Stations() {
             )}
 
             <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
+          </section>
+        )}
+
+        {broadAguasLindasQuery && !showSavedOnly && (
+          <section className="mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
+                <h2 id="complete-stations-title" className="mt-1 text-xl font-black">Cada posto, uma ficha completa</h2>
+                <p className="mt-2 text-[0.65rem] leading-relaxed text-white/45">
+                  {directoryCards.length} fichas consolidadas por CNPJ quando disponível, cruzando cadastro local, ANP e referências secundárias. Cada ficha tem rota para Google Maps, Waze e Apple Maps.
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#D9FF91]">{directoryCards.length} postos</span>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
+              <button type="button" onClick={() => document.getElementById("complete-stations-title")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></button>
+            </div>
+
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+              {directoryCards.map((item, index) => (
+                <StationDirectoryCard
+                  key={item.key}
+                  index={index + 1}
+                  local={item.local}
+                  anp={item.anp}
+                  saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
+                  onToggleSaved={item.local ? () => toggleDirectorySaved(item.local as typeof aguasLindasCatalog[number], item.anp) : undefined}
+                />
+              ))}
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.55rem] leading-relaxed text-white/35">
+              <strong className="text-white/55">Rota:</strong> o Trajeto envia o destino ao provedor escolhido. Google Maps, Waze e Apple Maps calculam a rota, trânsito e instruções de navegação. O site não inventa distância ou tempo quando não possui um motor de roteamento próprio.
+            </div>
           </section>
         )}
 
