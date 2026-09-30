@@ -9,7 +9,7 @@ import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileSta
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
-import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import { hasConfiguredRoutingApi, isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -55,7 +55,7 @@ export default function Planner() {
   const [fallbackReady, setFallbackReady] = useState(false);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
-  const staticRuntime = isGitHubPagesRuntime();
+  const staticRuntime = isGitHubPagesRuntime() && !hasConfiguredRoutingApi();
   const requestVersion = useRef(0);
 
   const resetResult = () => {
@@ -315,7 +315,7 @@ export default function Planner() {
               </div>
 
               <button type="submit" disabled={planRoute.isPending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
-                <span>{planRoute.isPending ? "Calculando rota…" : "Calcular rota"}</span>
+                <span>{planRoute.isPending ? "Calculando rota…" : staticRuntime ? "Preparar navegação" : "Calcular rota"}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
             </form>
@@ -391,7 +391,7 @@ export default function Planner() {
               <div className="min-w-0">
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Navegação pronta</p>
                 <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">{staticRuntime ? "Navegação pronta para este site estático." : "O serviço de cálculo não respondeu, mas sua viagem não ficou travada."}</h2>
-                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">{staticRuntime ? "Esta versão do Trajeto não depende de um servidor para abrir a viagem. O navegador escolhido calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
+                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
