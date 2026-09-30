@@ -18,6 +18,7 @@ export type LocalStationRecord = {
 
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
+export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 0;
 
 export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
 export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
@@ -90,7 +91,22 @@ const records: StationSeed[] = [
 
 function tupleToRecord(row: StationSeed): LocalStationRecord {
   const [id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, sourceNote] = row;
-  return { id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, status: "cadastro_ativo", sourceNote, dataQuality: "catalog-only", dataOrigin: "local-catalog", verifiedAt: null, verificationFlags: { address: Boolean(address), coordinates: false, authorization: false, brand: Boolean(brand) } };
+  return {
+    id,
+    legalName,
+    displayName,
+    cnpj,
+    neighborhood,
+    address,
+    brand,
+    aliases,
+    status: "cadastro_ativo",
+    sourceNote,
+    dataQuality: "catalog-only",
+    dataOrigin: "local-catalog",
+    verifiedAt: null,
+    verificationFlags: { address: false, coordinates: false, authorization: false, brand: false },
+  };
 }
 
 export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
