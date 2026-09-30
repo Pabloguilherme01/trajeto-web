@@ -1,4 +1,4 @@
-import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
+import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -52,6 +52,7 @@ export default function Stations() {
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
@@ -411,7 +412,7 @@ export default function Stations() {
       toast.message("Ainda não há coordenadas suficientes para salvar o mapa.");
       return;
     }
-    const saved = cacheOfflineMapStations(mapStations);
+    const saved = cacheOfflineMapStations(mapStations.map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index })) as Array<StationMapItem & { id: string }>);
     toast.message(saved ? `Mapa salvo neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar o mapa local.");
   };
 
@@ -679,7 +680,7 @@ export default function Stations() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><Map className="mr-1 inline size-3.5" />Abrir mapa</button>
+              <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><MapIcon className="mr-1 inline size-3.5" />Abrir mapa</button>
               <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-[0.6rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
               <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
               <div className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.53rem] font-black text-white/45"><ShieldCheck className="size-3.5 text-[#C7FF3C]" />ANP + cache local</div>
@@ -1099,7 +1100,7 @@ export default function Stations() {
                 <p className="mt-1 text-[0.56rem] text-white/30">{usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><Map className="size-4" /></button>
+                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><MapIcon className="size-4" /></button>
                 {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">{compareIds.length} comparar</button>}
               </div>
             </section>
