@@ -5,7 +5,7 @@ import { RouteMap } from "./RouteMap";
 
 vi.mock("@/components/Map", () => ({
   MapView: ({ onMapReady }: { onMapReady: (map: any) => void }) => {
-    const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11) };
+    const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11), addListener: vi.fn(() => ({ remove: vi.fn() })) };
     React.useEffect(() => onMapReady(map), [onMapReady]);
     return <div data-testid="map-view" />;
   },
