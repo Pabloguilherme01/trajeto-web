@@ -167,6 +167,28 @@ export default function CityExplorerMap({category,center,online,onResults,onSele
 
   useEffect(()=>()=>clearMarkers(),[]);
 
+  if(!online){
+    const offlineMessage = category==="fuel" && localFuel.length
+      ? "Os postos do catálogo local continuam disponíveis. Para saúde, educação e outras categorias, os resultados externos precisam de conexão."
+      : "As camadas externas precisam de conexão; o Trajeto não inventa pontos que não estejam no pacote local.";
+    const offlineSource = category==="fuel" ? "ANP / catálogo local" : "pacote local disponível no aparelho";
+    return <div className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#E8F0EA]">
+      <div className="min-h-[min(46dvh,420px)] p-5">
+        <div className="flex min-h-[360px] flex-col justify-between rounded-[1.35rem] border border-black/10 bg-[linear-gradient(135deg,#edf4ef,#dce8df)] p-5 text-[#163840]">
+          <div>
+            <p className="text-[.55rem] font-black uppercase tracking-[.14em] text-[#3A6B72]">Mapa local</p>
+            <h2 className="mt-2 max-w-xs text-xl font-black tracking-tight">Você está offline.</h2>
+            <p className="mt-2 max-w-sm text-xs leading-relaxed text-[#5F7169]">{offlineMessage}</p>
+          </div>
+          <div className="rounded-2xl border border-black/10 bg-white/70 p-3">
+            <p className="text-[.52rem] font-black uppercase tracking-[.12em] text-[#6B7B73]">Fonte</p>
+            <p className="mt-1 text-sm font-black">{offlineSource}</p>
+          </div>
+        </div>
+      </div>
+    </div>;
+  }
+
   return <div className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-white">
     <MapView
       className="h-[min(66dvh,620px)]"
