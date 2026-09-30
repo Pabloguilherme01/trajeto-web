@@ -9,7 +9,8 @@ describe("OfflineRouteHub", () => {
 
     expect(screen.getByRole("heading", { name: /rotas rápidas para pontos essenciais/i })).toBeInTheDocument();
     expect(screen.getByText("Hospital Bom Jesus")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /usar como destino/i }));
+    expect(screen.getByText(/Fonte: Prefeitura \/ CNES/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /usar hospital municipal bom jesus como destino/i }));
 
     expect(onSelectDestination).toHaveBeenCalledTimes(1);
     expect(onSelectDestination.mock.calls[0][0].id).toBe("hospital-bom-jesus");
