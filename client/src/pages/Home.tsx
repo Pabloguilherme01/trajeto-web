@@ -25,11 +25,13 @@ export default function Home() {
   const [favoriteDestination, setFavoriteDestination] = useState<MobileDestination | null>(() => getFavoriteDestination());
   const [locating, setLocating] = useState(false);
   const [shareDone, setShareDone] = useState(false);
+  const [hasVehicle, setHasVehicle] = useState(() => Boolean(getMobileVehicle()));
 
   useEffect(() => {
     const refresh = () => {
       setLastTrip(getLastTrip());
       setRecentSearches(getRecentSearches());
+      setHasVehicle(Boolean(getMobileVehicle()));
       const nextDestinations = getMobileDestinations();
       setDestinations(nextDestinations);
       setFavoriteDestination(getFavoriteDestination(nextDestinations));
@@ -52,11 +54,11 @@ export default function Home() {
 
   const mobilityContext = useMemo(() => getMobilityContext({
     online,
-    hasDestination: destinations.length > 0,
-    hasVehicle: Boolean(getMobileVehicle()),
+    hasDestination: destination.trim().length >= 3 || destinations.length > 0,
+    hasVehicle,
     hasLastTrip: Boolean(lastTrip),
     offlineRoutes: offlineRouteList,
-  }), [online, destinations.length, lastTrip, offlineRouteList]);
+  }), [online, destination, destinations.length, hasVehicle, lastTrip, offlineRouteList]);
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
