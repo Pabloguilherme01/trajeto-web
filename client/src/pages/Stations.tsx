@@ -1161,6 +1161,11 @@ export default function Stations() {
                   distanceLabel: station.distanceLabel ?? null,
                   distanceMeters: station.distanceMeters ?? null,
                   phone: station.phone ?? null,
+                  anpMatch: station.anpMatch ? {
+                    status: station.anpMatch.status,
+                    confidence: station.anpMatch.confidence,
+                    brand: station.anpMatch.brand,
+                  } : undefined,
                 }))}
                 onClear={() => setCompareIds([])}
               />
