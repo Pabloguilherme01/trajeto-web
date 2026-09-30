@@ -74,9 +74,12 @@ export default function Stations() {
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
 
-  const lat = Number(params.get("lat"));
-  const lng = Number(params.get("lng"));
-  const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const latParam = params.get("lat");
+  const lngParam = params.get("lng");
+  const lat = latParam === null ? Number.NaN : Number(latParam);
+  const lng = lngParam === null ? Number.NaN : Number(lngParam);
+  const hasCoordinates = latParam !== null && lngParam !== null &&
+    Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
   const urlQuery = params.get("q")?.trim() || "";
   const staticRuntime = isGitHubPagesRuntime();
