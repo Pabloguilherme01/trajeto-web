@@ -114,7 +114,7 @@ export default function Explore(){
 
             {filtered.some(place => place.source === "Google") && (
         <p className="mt-3 rounded-xl border border-white/6 bg-white/[.02] px-3 py-2 text-[.48rem] leading-relaxed text-white/30">
-          Google Maps · dados de mapa e Places exibidos como enriquecimento desta sessão.
+          Google · dados de mapa e Places exibidos como enriquecimento desta sessão.
         </p>
       )}
 
