@@ -9,6 +9,7 @@ import { resolveStationIdentity, type StationIdentityMatch } from "../lib/statio
 import { isGooglePageTokenUnavailable, requestGoogleNextPage } from "../lib/googlePlacesPagination";
 import { dedupePlaceDetailsRequest } from "../lib/placeDetailsRequest";
 import { stationPaginationMetricRegion } from "../lib/stationPaginationMetrics";
+import { fetchAnpStations } from "../lib/anpRevendedores";
 
 export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional(), lat: z.number().finite().min(-90).max(90).optional(), lng: z.number().finite().min(-180).max(180).optional() });
 const detailsInput = z.object({ placeId: z.string().trim().min(1).max(255) });
@@ -54,6 +55,12 @@ export const stationsRouter = router({
     const distances = mergeStationDistances(matrices, stations.length);
     const result: StationSearchPage = { query: input.query, queriedAt: Date.now(), stations: stations.map((station, index) => ({ ...station, ...distances[index], anpMatch: resolveStationIdentity(station, authorizedStations) })), nextCursor: search.next_page_token ?? null, paginationWarning: null };
     return input.cursor ? result : cacheStationSearch(input.query, result, Date.now(), input.lat, input.lng);
+  }),
+  anp: publicProcedure.input(z.object({ municipio: z.string().trim().min(3).max(80).default("AGUASLINDASDEGOIAS"), uf: z.string().trim().length(2).default("GO") })).query(async ({ input }) => {
+    const normalizedMunicipio = input.municipio.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    const normalizedUf = input.uf.toUpperCase();
+    const snapshot = await fetchAnpStations(normalizedMunicipio, normalizedUf);
+    return snapshot;
   }),
   details: publicProcedure.input(detailsInput).query(async ({ input }) => {
     const details = await dedupePlaceDetailsRequest(input.placeId, () => makeRequest<PlaceDetailsResult>("/maps/api/place/details/json", { place_id: input.placeId, fields: "name,formatted_address,formatted_phone_number,website,opening_hours,geometry" }));
