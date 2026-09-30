@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
@@ -16,12 +17,14 @@ const baseItems = [
 export default function MobileBottomNav() {
   const [location, setLocation] = useLocation();
   const [lastTrip, setLastTrip] = useState(getLastTrip);
-  const [savedRoutes, setSavedRoutes] = useState(0);
+  const [savedTotal, setSavedTotal] = useState(0);
 
   useEffect(() => {
     const refresh = () => {
       setLastTrip(getLastTrip());
-      void listOfflineRoutes().then(routes => setSavedRoutes(routes.length)).catch(() => setSavedRoutes(0));
+      void Promise.all([listOfflineRoutes(), Promise.resolve(listMobileStationFavorites())])
+        .then(([routes, stations]) => setSavedTotal(routes.length + stations.length))
+        .catch(() => setSavedTotal(0));
     };
     refresh();
     window.addEventListener("focus", refresh);
@@ -74,7 +77,7 @@ export default function MobileBottomNav() {
             >
               <Icon className="size-[1.05rem]" strokeWidth={primary || active ? 2.7 : 2} />
               <span className="text-[0.55rem] font-extrabold">{primary && lastTrip ? resumeLabel : item.short}</span>
-              {item.key === "saved" && savedRoutes > 0 && <span className="absolute right-2 top-1.5 grid min-w-4 place-items-center rounded-full bg-[#3DE3FF] px-1 text-[0.45rem] font-black text-[#0B1014]">{savedRoutes > 9 ? "9+" : savedRoutes}</span>}
+              {item.key === "saved" && savedTotal > 0 && <span className="absolute right-2 top-1.5 grid min-w-4 place-items-center rounded-full bg-[#3DE3FF] px-1 text-[0.45rem] font-black text-[#0B1014]">{savedTotal > 9 ? "9+" : savedTotal}</span>}
               {active && !primary && <span className="absolute bottom-1 h-0.5 w-5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />}
             </button>
           );
