@@ -3,7 +3,6 @@ import { buildPublicRoutePayload, calculatePublicRoute } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
-    sessionStorage.clear();
     vi.stubGlobal("fetch", vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify([{ lat: "-15.7545", lon: "-48.2816" }]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]), { status: 200 }))
