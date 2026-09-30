@@ -5,6 +5,7 @@ import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
