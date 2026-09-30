@@ -1,4 +1,4 @@
-import { ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
+import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -1383,7 +1383,8 @@ export default function Stations() {
               <StationComparePanel
                 stations={compared.map(station => ({
                   ...station,
-                  distanceMeters: station.distanceMeters,
+                  distanceLabel: station.distanceLabel ?? null,
+                  distanceMeters: station.distanceMeters ?? null,
                 }))}
                 onClear={() => setCompareIds([])}
               />
