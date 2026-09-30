@@ -1,10 +1,9 @@
-import { ArrowRight, Bookmark, Fuel, LocateFixed, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Fuel, LocateFixed, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { useProductEvents } from "@/hooks/useProductEvents";
@@ -17,9 +16,7 @@ export default function Home() {
   const track = useProductEvents();
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
-  const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
-  const [offlineRoutes, setOfflineRoutes] = useState(0);
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches);
   const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
   const [locating, setLocating] = useState(false);
@@ -28,11 +25,9 @@ export default function Home() {
 
   useEffect(() => {
     const refresh = () => {
-      setLastTrip(getLastTrip());
       setRecentSearches(getRecentSearches());
       const nextDestinations = getMobileDestinations();
       setDestinations(nextDestinations);
-      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); }).catch(() => { setOfflineRoutes(0); });
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
@@ -40,12 +35,10 @@ export default function Home() {
     window.addEventListener("focus", refresh);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    window.addEventListener(offlineRouteEvent, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
-      window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
 
@@ -91,13 +84,6 @@ export default function Home() {
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
-  };
-
-  const openLastTrip = () => {
-    if (!lastTrip) return;
-    rememberIntent("route");
-    vibration();
-    setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
   };
 
   const findNearby = () => {
@@ -149,9 +135,12 @@ export default function Home() {
               {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
               {online ? "online" : "offline"}
             </span>
-            <button type="button" onClick={() => void shareHome()} aria-label="Compartilhar Trajeto" className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-white/70 active:scale-[.97]">
-              <Share2 className="size-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              {shareDone && <span className="rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/5 px-2.5 py-1.5 text-[0.5rem] font-bold text-[#C7FF3C]" role="status" aria-live="polite">Compartilhado</span>}
+              <button type="button" onClick={() => void shareHome()} aria-label="Compartilhar Trajeto" className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-white/70 active:scale-[.97]">
+                <Share2 className="size-4" />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -226,21 +215,14 @@ export default function Home() {
           <MobileDataMode />
         </section>
 
-        <section className="mt-4 grid gap-3 sm:grid-cols-3">
-          <button type="button" onClick={openLastTrip} disabled={!lastTrip} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left disabled:opacity-40 active:scale-[.99]">
-            <Route className="size-4 text-[#C7FF3C]" />
-            <p className="mt-3 text-xs font-black">Última rota</p>
-            <p className="mt-1 truncate text-[0.63rem] text-white/40">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Ainda não há viagem registrada"}</p>
-          </button>
-          <button type="button" onClick={findNearby} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
-            <Fuel className="size-4 text-[#3DE3FF]" />
-            <p className="mt-3 text-xs font-black">Postos perto</p>
-            <p className="mt-1 text-[0.63rem] text-white/40">{online ? "Abrir os postos usando sua posição" : isGitHubPagesRuntime() ? "Abrir o diretório local sem internet" : "Abrir postos salvos/cached neste aparelho"}</p>
-          </button>
-          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
-            <Bookmark className="size-4 text-[#BDA5FF]" />
-            <p className="mt-3 text-xs font-black">Rotas salvas</p>
-            <p className="mt-1 text-[0.63rem] text-white/40">{offlineRoutes > 0 ? offlineRoutes + " rota(s) disponíveis offline" : "Nenhuma rota salva offline"}</p>
+        <section className="mt-4">
+          <button type="button" onClick={findNearby} className="mobile-card flex min-h-20 w-full items-center gap-3 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Fuel className="size-4" /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-black">Postos perto</span>
+              <span className="mt-1 block truncate text-[0.63rem] text-white/40">{online ? "Usar sua posição para encontrar a próxima parada" : isGitHubPagesRuntime() ? "Abrir o diretório local sem internet" : "Abrir postos já armazenados neste aparelho"}</span>
+            </span>
+            <ArrowRight className="size-4 shrink-0 text-white/25" />
           </button>
         </section>
 
@@ -248,7 +230,6 @@ export default function Home() {
           <section className="mt-7">
             <div className="flex items-center justify-between">
               <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-white/30">Consultas recentes</p>
-              {shareDone && <span className="text-[0.56rem] font-bold text-[#C7FF3C]">Link copiado/compartilhado</span>}
             </div>
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
               {recentSearches.slice(0, 5).map(item => (
