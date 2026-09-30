@@ -129,7 +129,7 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
             <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(selected.lat + "," + selected.lng), "_blank", "noopener,noreferrer")} className="grid size-10 place-items-center rounded-xl border border-black/10 bg-white text-[#163840]" aria-label="Navegar pelo Apple Maps"><Apple className="size-4" /></button>
           </div>}
         </div>
-        <div className="mt-2 flex items-center justify-between gap-3 text-[.5rem] font-bold text-[#7D8C84]"><span>{stations.length} posições offline</span><span>Verde = ANP · azul = mapa</span></div>
+        <div className="mt-2 flex items-center justify-between gap-3 text-[.5rem] font-bold text-[#7D8C84]"><span>{stations.length} posições offline</span><span>Verde = ANP · azul = referência secundária</span></div>
       </div>
     </div>
   );
@@ -238,7 +238,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
           "<span style=\"display:block;margin-top:5px;font-size:12px;line-height:1.45;color:#53635d\">" + escapeHtml(station.address || "Endereço não informado") + "</span>" +
           (station.cnpj ? "<span style=\"display:block;margin-top:4px;font-size:11px;color:#7a8882\">CNPJ " + escapeHtml(station.cnpj) + "</span>" : "") +
           (station.brand ? "<span style=\"display:block;margin-top:3px;font-size:11px;color:#7a8882\">" + escapeHtml(station.brand) + "</span>" : "") +
-          "<span style=\"display:inline-block;margin-top:7px;padding:4px 7px;border-radius:999px;background:" + (official ? "#ECFFBA" : "#E0FBFF") + ";color:#34524A;font-size:10px;font-weight:800\">" + (official ? "Fonte ANP" : "Referência de mapa") + "</span>" +
+          "<span style=\"display:inline-block;margin-top:7px;padding:4px 7px;border-radius:999px;background:" + (official ? "#ECFFBA" : "#E0FBFF") + ";color:#34524A;font-size:10px;font-weight:800\">" + (official ? "Fonte ANP" : station.source === "Google" ? "Referência de mapa" : "Catálogo local") + "</span>" +
           "<div style=\"display:flex;gap:6px;flex-wrap:wrap;margin-top:9px\">" +
           "<a href=\"https://www.google.com/maps/dir/?api=1&destination=" + station.lat + "," + station.lng + "&travelmode=driving&dir_action=navigate\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;padding:8px 10px;border-radius:8px;background:#163840;color:#fff;text-decoration:none;font-size:11px;font-weight:700\">Google</a>" +
           "<a href=\"" + buildWazeNavigationUrl(station.address, { lat: station.lat, lng: station.lng }) + "\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;padding:8px 10px;border-radius:8px;background:#eefbff;color:#163840;text-decoration:none;font-size:11px;font-weight:700\">Waze</a>" +
