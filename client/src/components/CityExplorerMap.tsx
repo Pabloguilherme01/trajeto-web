@@ -43,6 +43,7 @@ const sourceColors: Record<PlaceCategory | "all", string> = {
   security: "#FF8D55",
   leisure: "#59DFA5",
   accessibility: "#3DE3FF",
+  territory: "#D6B77C",
 };
 
 function placeCoordinates(value: google.maps.LatLng | google.maps.LatLngLiteral | undefined) {
