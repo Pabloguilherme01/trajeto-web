@@ -48,7 +48,7 @@ if (rows.length === 0) {
   } catch {
     // Não existe snapshot anterior utilizável; falha para não publicar uma base vazia.
   }
-  throw new Error("A consulta da ANP retornou zero registros e não existe snapshot anterior utilizável.");
+  console.warn("ANP retornou zero registros e não existe snapshot anterior utilizável. O site seguirá com a base local/cache.");
 }
 
 const snapshot = {
