@@ -9,6 +9,7 @@ const localStorageMock = {
 };
 
 Object.defineProperty(globalThis, "localStorage", { value: localStorageMock, configurable: true });
+Object.defineProperty(globalThis, "window", { value: globalThis, configurable: true });
 import { cacheOfflineMapStations, getOfflineMapAgeLabel, getOfflineMapStations } from "./stationMapOffline";
 
 describe("stationMapOffline", () => {
