@@ -275,24 +275,26 @@ export default function Stations() {
               <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
             </div>
 
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <label className="min-w-0 flex-1">
+                <span className="sr-only">Filtrar diretório por bairro</span>
+                <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none">
+                  <option value="all">Todos os bairros</option>
+                  {localNeighborhoods.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
+                </select>
+              </label>
+              <button type="button" onClick={() => { setNeighborhoodFilter("all"); setQuery("postos"); setInput("postos"); }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/65">Mostrar todos</button>
+            </div>
+
             {localDirectory.length ? (
               <>
-              <div className="mt-4 flex items-center justify-between gap-2">
+              <div className="mt-4 flex items-center justify-between gap-2" aria-live="polite">
                 <p className="text-[0.58rem] font-black uppercase tracking-[.12em] text-white/30">{localDirectory.length} resultado(s)</p>
                 <span className="text-[0.55rem] text-white/25">ordenado por bairro</span>
               </div>
               <div className="mt-3 space-y-2">
                 {localDirectory.map(station => {
-                  const statusText = station.status === "encerramento_indicado"
-                    ? "operação possivelmente encerrada"
-                    : station.status === "operacao_nao_verificada"
-                      ? "operação não verificada"
-                      : "cadastro ativo";
-                  const statusClass = station.status === "encerramento_indicado"
-                    ? "border-[#FF7D6A]/20 bg-[#FF7D6A]/[.04] text-[#FFC0B7]"
-                    : station.status === "operacao_nao_verificada"
-                      ? "border-[#FFB86B]/20 bg-[#FFB86B]/[.04] text-[#FFD39E]"
-                      : "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] text-[#D9FF91]";
+                  const statusText = "empresa ativa no cadastro";
                   return (
                     <article key={station.cnpj} className="rounded-[1.25rem] border border-white/8 bg-[#0B1014] p-3.5">
                       <div className="flex items-start gap-3">
@@ -305,7 +307,7 @@ export default function Stations() {
                               <p className="text-sm font-black text-white">{station.displayName}</p>
                               <p className="mt-1 text-[0.58rem] font-semibold text-white/35">{station.legalName} · CNPJ {station.cnpj}</p>
                             </div>
-                            <span className={"shrink-0 rounded-full border px-2 py-1 text-[0.46rem] font-black " + statusClass}>{statusText}</span>
+                            <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] px-2 py-1 text-[0.46rem] font-black text-[#D9FF91]">{statusText}</span>
                           </div>
                           {station.address ? (
                             <p className="mt-2 text-[0.62rem] leading-relaxed text-white/45">{station.address}</p>
@@ -325,16 +327,6 @@ export default function Stations() {
                     </article>
                   );
                 })}
-              </div>
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                <label className="min-w-0 flex-1">
-                  <span className="sr-only">Filtrar diretório por bairro</span>
-                  <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none">
-                    <option value="all">Todos os bairros</option>
-                    {localNeighborhoods.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
-                  </select>
-                </label>
-                <button type="button" onClick={() => { setNeighborhoodFilter("all"); setQuery("postos"); setInput("postos"); }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/65">Mostrar todos</button>
               </div>
               </>
             ) : (
