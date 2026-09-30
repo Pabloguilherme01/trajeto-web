@@ -4,8 +4,10 @@ import { VehicleGarage } from "@/components/VehicleGarage";
 import { Button } from "@/components/ui/button";
 import { personalAccessCopy } from "@/lib/dashboardAccessCopy";
 import { trpc } from "@/lib/trpc";
-import { ArrowRight, BellRing, Clock3, Fuel, Heart, History, Loader2, MapPinned, Route as RouteIcon } from "lucide-react";
+import { ArrowRight, BellRing, Clock3, Fuel, Heart, History, Loader2, MapPinned, Route as RouteIcon, Share2 } from "lucide-react";
 import { Link } from "wouter";
+import { appUrl } from "@/lib/appUrl";
+import { shareText } from "@/lib/mobileTools";
 import MobilePageHeader from "@/components/MobilePageHeader";
 
 function date(value: Date | string) {
@@ -61,6 +63,7 @@ export default function Personal() {
                 <div className="rounded-xl bg-black/15 p-3"><span className="block text-white/35">Distância</span><strong className="mt-1 block text-white">{(route.distanceMeters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</strong></div>
                 <div className="rounded-xl bg-black/15 p-3"><span className="block text-white/35">Consulta</span><strong className="mt-1 block text-white">{date(route.createdAt)}</strong></div>
               </div>
+              <div className="mt-2 grid grid-cols-2 gap-2"><button type="button" onClick={() => { void shareText(`Minha rota no Trajeto: ${route.origin} → ${route.destination}.`, `${window.location.origin}${appUrl("/planejar")}?origem=${encodeURIComponent(route.origin)}&destino=${encodeURIComponent(route.destination)}`, "Trajeto"); }} className="mobile-pressable inline-flex items-center justify-center gap-2 rounded-xl border border-[#BDA5FF]/20 bg-[#BDA5FF]/[0.06] px-3 text-[0.6rem] font-black text-[#E6DCFF]"><Share2 className="size-3.5" /> Compartilhar</button><Link href={`/planejar?origem=${encodeURIComponent(route.origin)}&destino=${encodeURIComponent(route.destination)}`} className="mobile-pressable inline-flex items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]"><ArrowRight className="size-3.5" /> Repetir rota</Link></div>
               <div className="mt-2 rounded-xl border border-white/8 bg-black/10 p-3 text-[0.62rem]">
                 <span className="text-white/35">Cenário</span>
                 <strong className="mt-1 block text-[#C7FF3C]">{route.vehicleNickname || "Sem veículo salvo"}</strong>
