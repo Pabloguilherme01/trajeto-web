@@ -2925,3 +2925,557 @@ O Trajeto deve parecer, no celular, um **aplicativo de mobilidade simples**, enq
 A complexidade deve ficar no motor.
 
 **O usuário deve enxergar simplicidade.**
+
+
+## 114. Reformulação mobile definitiva — “app primeiro, plataforma depois”
+
+A prioridade de produto fica oficialmente invertida: o Trajeto deve primeiro ser um aplicativo mobile simples, rápido e funcional. Toda a complexidade de dados, observatório, multimodalidade, cenários e governança ficará atrás de uma experiência pública mínima.
+
+### 114.1 Mobile Core
+
+O núcleo público terá somente quatro conceitos visíveis:
+
+- destino;
+- viagem;
+- próxima ação;
+- estado.
+
+Qualquer informação que não ajude uma dessas quatro decisões fica fora do primeiro nível.
+
+### 114.2 Zero Dashboard Principle
+
+A Home não poderá funcionar como dashboard.
+
+É proibido, no primeiro nível:
+
+- múltiplos grids de cards;
+- quatro ou mais blocos de métricas;
+- vários CTAs concorrentes;
+- longos textos explicativos;
+- tabelas densas;
+- gráficos antes da decisão principal;
+- fontes detalhadas antes da ação.
+
+### 114.3 One Primary Action
+
+Cada tela terá exatamente uma ação primária visualmente dominante.
+
+Exemplos:
+
+- Home → Ir;
+- Planner → Calcular rota;
+- Rota → Escolher;
+- Preparação → Preparar;
+- Condução → Navegar;
+- Pós-viagem → Concluir.
+
+### 114.4 Progressive Disclosure
+
+Informação em três níveis:
+
+1. essencial;
+2. detalhes;
+3. técnico.
+
+O usuário não precisa atravessar informações técnicas para executar uma tarefa simples.
+
+### 114.5 Navigation Contract
+
+A navegação mobile deve permanecer estável:
+
+**Agora | Viajar | Mobilidade | Dados**
+
+Nenhuma feature nova pode criar uma quinta área principal sem revisão da arquitetura.
+
+### 114.6 Mobile Route Contract
+
+Toda rota da aplicação precisa definir:
+
+- loading;
+- ready;
+- empty;
+- error;
+- offline;
+- stale;
+- degraded;
+- recovery.
+
+Não existe estado implícito.
+
+### 114.7 Interaction Contract
+
+Toda ação crítica deve funcionar com:
+
+- toque simples;
+- teclado quando aplicável;
+- leitor de tela;
+- foco visível.
+
+Swipe/drag/long press podem ser atalhos, nunca requisito.
+
+### 114.8 Thumb Reach
+
+Ações primárias devem ficar preferencialmente em regiões acessíveis com uma mão. A navegação inferior deve respeitar safe-area.
+
+### 114.9 Mobile Keyboard Contract
+
+Campos devem:
+
+- evitar autoFocus desnecessário;
+- não ficar escondidos pelo teclado;
+- preservar foco;
+- permitir fechar teclado sem perder contexto;
+- usar tipos de input adequados;
+- evitar zoom involuntário quando possível.
+
+### 114.10 No Infinite Loading
+
+Todo carregamento externo deve possuir:
+
+- timeout;
+- fallback;
+- retry limitado;
+- mensagem de estado;
+- ação alternativa.
+
+### 114.11 Offline Honesty
+
+O app deve diferenciar:
+
+- online;
+- offline;
+- cache;
+- snapshot;
+- stale;
+- indisponível.
+
+Nunca apresentar cache como dado atual.
+
+## 115. “Fast Path” — caminho rápido
+
+Criar um caminho otimizado para o comportamento mais frequente:
+
+**abrir → destino recente → rota → navegador**
+
+O Fast Path não carrega histórico, custos, fontes, manutenção ou observatório antes de executar a ação.
+
+### 115.1 Warm Start
+
+Quando dados locais estiverem disponíveis, o shell pode iniciar com:
+
+- último destino;
+- última missão;
+- última rota;
+- estado offline.
+
+Sem bloquear o carregamento por APIs externas.
+
+### 115.2 Resume Action
+
+Se uma missão estiver incompleta:
+
+**Continuar viagem**
+
+deve aparecer como ação contextual principal.
+
+### 115.3 Recent Destination
+
+Destino recente não deve ser confundido com destino favorito. Os dois conceitos devem permanecer separados.
+
+## 116. “Trip Workspace”
+
+O Planner deixa de ser uma página cheia de módulos e passa a ser um workspace de uma missão.
+
+Estrutura:
+
+**Cabeçalho da missão**
+→ destino/origem
+
+**Rota**
+→ resultado
+
+**Preparação**
+→ dependências
+
+**Execução**
+→ navegador
+
+**Resultado**
+→ encerramento
+
+Tudo referente à mesma missão usa uma única fonte de estado.
+
+### 116.1 Mission Header
+
+Exibir somente:
+
+- destino;
+- estado;
+- ação principal.
+
+### 116.2 Route Bottom Sheet
+
+Alternativas e detalhes de rota podem aparecer em bottom sheet.
+
+### 116.3 Preparation Sheet
+
+Combustível, offline, veículo e checklist aparecem somente quando relevantes.
+
+### 116.4 Navigation Sheet
+
+Links Google/Waze/Apple ficam em uma ação clara, sem três CTAs grandes concorrendo.
+
+## 117. “Mobility Home”
+
+A área Mobilidade deixa de ser uma coleção de cards.
+
+Organização:
+
+- Viagens;
+- Destinos;
+- Veículo;
+- Custos;
+- Registros.
+
+Cada item abre uma lista ou detalhe, carregando dados sob demanda.
+
+## 118. “Data Center”
+
+A área Dados será técnica por natureza.
+
+Organização:
+
+- Fontes;
+- Indicadores;
+- Evidências;
+- Atualizações;
+- Privacidade;
+- Diagnóstico.
+
+Dados públicos territoriais, ANTT, PEMOB, BNDES e demais datasets nunca aparecem automaticamente na Home.
+
+A PEMOB 2025 possui bases municipal e metropolitana oficiais; esses dados serão tratados como dados estruturais/territoriais, não como condições de trânsito atuais. citeturn0search7
+
+A ANTT mantém atualmente seu Portal de Dados Abertos e Plano de Dados Abertos 2025–2027, permitindo adapters versionados para fontes compatíveis. citeturn0search8
+
+## 119. “Trust Strip”
+
+Dados importantes podem receber uma linha compacta:
+
+**Fonte · Atualização · Tipo**
+
+Exemplo:
+
+**ANP · 25/09/2026 · oficial**
+
+ou
+
+**Registrado por você · hoje · registro local**
+
+Detalhes completos ficam sob demanda.
+
+## 120. Mobile Empty-State System
+
+Nenhuma tela vazia terá apenas “Nenhum dado”.
+
+Formato:
+
+**O que está vazio**
+→ **por que**
+→ **o que fazer**
+
+Exemplo:
+
+> Você ainda não tem destinos salvos.  
+> Pesquise um destino para começar.  
+> **Pesquisar destino**
+
+## 121. Mobile Error-State System
+
+Formato:
+
+**problema → impacto → recuperação**
+
+Exemplo:
+
+> Não foi possível atualizar a rota.  
+> A última rota salva continua disponível.  
+> **Abrir rota salva**
+
+## 122. Mobile Data Loading System
+
+Usar skeleton somente quando houver carregamento real.
+
+Não usar animação como substituto de resposta.
+
+Se o tempo exceder o orçamento:
+
+**Carregamento lento**
+
+→ tentar novamente  
+→ usar cache  
+→ continuar offline
+
+## 123. Mobile Performance Budget
+
+Definir budgets verificáveis para:
+
+- JavaScript inicial;
+- CSS;
+- imagens;
+- requests;
+- tempo de boot;
+- tempo até interação;
+- renderizações;
+- armazenamento;
+- consultas externas.
+
+Os valores exatos serão definidos no plano técnico após medir a aplicação atual, em vez de inventar metas não calibradas.
+
+## 124. Feature Loading Budget
+
+Cada feature deve declarar:
+
+- custo de carregamento;
+- requests;
+- storage;
+- dependências;
+- fallback.
+
+Features pesadas não podem entrar no caminho crítico da Home.
+
+## 125. State Ownership Audit
+
+Para cada dado, definir uma única fonte:
+
+- missão → Mission Store;
+- destino → Destination Store;
+- veículo → Vehicle Store;
+- rota → Route State;
+- eventos → Event Store;
+- fontes → Source Registry.
+
+Componentes não podem manter cópias concorrentes do mesmo conceito sem sincronização explícita.
+
+## 126. Event Subscription Consolidation
+
+Reduzir listeners independentes de:
+
+- `focus`;
+- `online`;
+- `offline`;
+- eventos de preferências;
+- eventos de combustível;
+- eventos de veículo.
+
+Criar mecanismos compartilhados quando houver ganho real.
+
+## 127. React Safety Contract
+
+Todo componente novo deve ser revisado contra:
+
+- hooks condicionais;
+- efeitos com dependências incorretas;
+- subscriptions sem cleanup;
+- setState após unmount;
+- suspense sem fallback útil;
+- erros não capturados;
+- renderizações infinitas;
+- dados externos não validados.
+
+Isso é obrigatório porque o objetivo desta fase é **funcionar**, não somente parecer melhor.
+
+## 128. Mobile Regression Contract
+
+Antes de qualquer deploy, validar:
+
+### Home
+- abre;
+- busca;
+- destino;
+- ação principal.
+
+### Planner
+- origem;
+- destino;
+- loading;
+- rota;
+- erro;
+- alternativa.
+
+### Offline
+- salvar;
+- abrir;
+- stale;
+- recuperação.
+
+### Navegação
+- Google;
+- Waze;
+- Apple.
+
+### Histórico
+- registrar;
+- listar;
+- repetir.
+
+### Dados
+- fonte;
+- timestamp;
+- procedência.
+
+### Segurança
+- storage corrompido;
+- URL inválida;
+- provider inválido;
+- payload inválido.
+
+## 129. Visual Regression Contract
+
+Comparar capturas nos principais tamanhos mobile depois das mudanças críticas.
+
+Verificar:
+
+- overflow horizontal;
+- texto cortado;
+- botão fora da tela;
+- modal atrás do teclado;
+- bottom navigation cobrindo conteúdo;
+- safe-area;
+- foco;
+- scroll;
+- sticky elements;
+- orientação.
+
+## 130. No Feature Creep During Rewrite
+
+Durante a primeira fase da reformulação não adicionar novos módulos de baixo impacto.
+
+A implementação deve priorizar:
+
+**funcionar → simplificar → testar → otimizar → então expandir.**
+
+## 131. Ordem definitiva da reconstrução
+
+### Fase 0 — Diagnóstico
+- inventário;
+- dependências;
+- componentes;
+- fluxos;
+- erros;
+- performance;
+- mobile screenshots/testes.
+
+### Fase 1 — Fundação
+- design tokens;
+- Mobile Shell;
+- navigation;
+- state system;
+- error system;
+- loading system.
+
+### Fase 2 — Home
+- Agora;
+- busca;
+- destino;
+- Fast Path;
+- Resume.
+
+### Fase 3 — Trip Workspace
+- Planner;
+- rota;
+- alternativas;
+- preparação;
+- navegação;
+- conclusão.
+
+### Fase 4 — Mobilidade
+- viagens;
+- destinos;
+- veículo;
+- custos;
+- registros.
+
+### Fase 5 — Dados
+- fontes;
+- evidências;
+- observatório;
+- datasets;
+- privacidade.
+
+### Fase 6 — Robustez
+- offline;
+- recovery;
+- storage;
+- segurança;
+- provider failures.
+
+### Fase 7 — Qualidade
+- acessibilidade;
+- performance;
+- visual regression;
+- golden journeys.
+
+### Fase 8 — Expansão
+- multimodal;
+- ANTT;
+- PEMOB;
+- BNDES;
+- cenários;
+- automações.
+
+### Fase 9 — Produção
+- build;
+- CI;
+- deploy preview;
+- smoke tests;
+- code review;
+- deploy final.
+
+## 132. Critério absoluto de aceitação
+
+O Trajeto não poderá ser considerado pronto se:
+
+- a Home estiver visualmente congestionada;
+- uma ação principal não for evidente;
+- uma tela puder ficar em loading indefinido;
+- um erro não tiver recuperação;
+- dados públicos aparecerem sem fonte/período;
+- uma função essencial depender de gesto;
+- o teclado quebrar o fluxo;
+- houver overflow horizontal;
+- bottom navigation cobrir conteúdo;
+- dados corrompidos derrubarem o app;
+- provider indisponível derrubar o fluxo;
+- componentes mantiverem estados conflitantes;
+- o usuário precisar atravessar detalhes técnicos para chegar à ação principal.
+
+## 133. Resultado esperado
+
+No celular, o Trajeto deverá parecer:
+
+**um aplicativo simples de mobilidade.**
+
+Internamente, poderá possuir:
+
+- motor de missões;
+- grafo de mobilidade;
+- dados públicos;
+- evidências;
+- custos;
+- veículos;
+- histórico;
+- offline;
+- multimodalidade;
+- governança;
+- recuperação.
+
+A complexidade fica na arquitetura.
+
+A interface fica simples.
+
+## 134. Regra final
+
+**Não adicionar mais complexidade à superfície para resolver problemas de arquitetura.**
+
+Se algo está difícil de usar, a primeira resposta será simplificar o fluxo e consolidar estado, não criar outro card.
