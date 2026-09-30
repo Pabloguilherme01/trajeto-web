@@ -32,3 +32,21 @@ export function calculateDepartureTime(
     totalPlanningMinutes: Math.ceil(durationSeconds / 60000) + buffer,
   };
 }
+
+
+export function describeDepartureStatus(
+  departure: Date,
+  now = new Date(),
+): "upcoming" | "due" | "late" {
+  const deltaMs = departure.getTime() - now.getTime();
+  if (deltaMs > 60_000) return "upcoming";
+  if (deltaMs >= -60_000) return "due";
+  return "late";
+}
+
+export function departureMinutesDelta(
+  departure: Date,
+  now = new Date(),
+): number {
+  return Math.round((departure.getTime() - now.getTime()) / 60000);
+}
