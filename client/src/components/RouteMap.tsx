@@ -1,5 +1,5 @@
+import React, { useEffect, useRef, useState } from "react";
 import { MapView } from "@/components/Map";
-import { useEffect, useRef, useState } from "react";
 import { LocateFixed, Minus, Plus, Satellite, TrafficCone } from "lucide-react";
 
 type Stop = { placeId: string; name: string; address: string; lat: number; lng: number };
