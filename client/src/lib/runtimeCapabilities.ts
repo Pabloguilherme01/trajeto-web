@@ -18,6 +18,6 @@ export function supportsLiveRouting() {
 
 export function routingCapabilityLabel() {
   if (hasConfiguredRoutingApi()) return "rota avançada disponível";
-  if (isGitHubPagesRuntime()) return "navegação externa disponível";
+  if (isGitHubPagesRuntime()) return "rota pública disponível";
   return "rota avançada disponível";
 }
