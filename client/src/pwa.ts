@@ -10,22 +10,24 @@ function announceUpdate(registration: ServiceWorkerRegistration) {
 export function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
-  window.addEventListener("load", () => {
-    void navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL }).then(registration => {
-      currentRegistration = registration;
-      announceUpdate(registration);
+  // Register immediately instead of waiting for window.load. This avoids a race
+  // where the app is already interactive/offline before the worker is installed.
+  void navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", {
+    scope: import.meta.env.BASE_URL,
+  }).then(registration => {
+    currentRegistration = registration;
+    announceUpdate(registration);
 
-      registration.addEventListener("updatefound", () => {
-        const worker = registration.installing;
-        if (!worker) return;
-        worker.addEventListener("statechange", () => {
-          if (worker.state === "installed" && navigator.serviceWorker.controller) {
-            announceUpdate(registration);
-          }
-        });
+    registration.addEventListener("updatefound", () => {
+      const worker = registration.installing;
+      if (!worker) return;
+      worker.addEventListener("statechange", () => {
+        if (worker.state === "installed" && navigator.serviceWorker.controller) {
+          announceUpdate(registration);
+        }
       });
-    }).catch(() => {});
-  });
+    });
+  }).catch(() => {});
 }
 
 export async function applyServiceWorkerUpdate() {
