@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
-import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
+import { getMobileDestinations, type MobileDestination } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
@@ -91,14 +91,6 @@ export default function Home() {
     rememberIntent("route");
     vibration();
     setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
-  };
-
-  const openFavoriteDestination = () => {
-    if (!favoriteDestination) return;
-    rememberDestinationUsage(favoriteDestination);
-    rememberIntent("route");
-    vibration();
-    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(favoriteDestination.value));
   };
 
   const findNearby = () => {
