@@ -295,38 +295,38 @@ export function StationDirectoryCard({
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/55">
-          <span>Todos os dados disponíveis</span>
+          <span>Dados técnicos e fontes</span>
           <Fuel className="size-4 text-white/25" />
         </summary>
         <div className="space-y-2 border-t border-white/8 px-3 py-3 text-[0.54rem] leading-relaxed text-white/45">
-          <p><strong className="text-white/65">Identidade:</strong> {local?.aliases?.join(" · ") || "sem aliases consolidados"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
-          <p><strong className="text-white/65">ANP · identificação:</strong> código SIMP {anp?.codigoSimp || "—"} · autorização {anp?.autorizacao || "—"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
-          <p><strong className="text-white/65">ANP · datas:</strong> publicação {formatDate(anp?.dataPublicacao)} · vinculação {formatDate(anp?.dataVinculacao)} · obtenção dos dados {formatDate(anp?.dataObtencao)}</p>
-          <p><strong className="text-white/65">ANP · distribuição:</strong> {anp?.distribuidora || "não informada"} · situação constatada {anp?.situacaoConstatada || "não informada"} · SIGAF {anp?.statusSigaf || "não informado"}</p>
-          <p><strong className="text-white/65">Produtos ANP:</strong> {products.length ? products.map(item => [item.produto || "produto não informado", item.classe || null, item.tancagem != null ? "tancagem " + item.tancagem.toLocaleString("pt-BR") + " " + (item.unidadeMedidaTancagem || "") : null, item.quantidadeBicos != null ? "bicos " + item.quantidadeBicos : null].filter(Boolean).join(" · ")).join(" | ") : "nenhum registro de produto disponível no snapshot atual"}</p>
-          <p><strong className="text-white/65">ANP · localização:</strong> {anp?.endereco || local?.address || "—"} · complemento {anp?.complemento || "—"} · bairro {anp?.bairro || local?.neighborhood || "—"} · CEP {anp?.cep || "—"} · município/UF {anp?.municipio || "—"}/{anp?.uf || "—"}</p>
-          <p><strong className="text-white/65">ANP · georreferenciamento:</strong> {anp?.latitude != null && anp?.longitude != null ? anp.latitude + ", " + anp.longitude : "coordenada principal não informada"} · ANP 4C {anp?.latitudeAnp4c != null && anp?.longitudeAnp4c != null ? anp.latitudeAnp4c + ", " + anp.longitudeAnp4c : "não informado"} · validação {anp?.validacao || "não informada"} · acurácia estimada {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM + " m" : "não informada"} · SRID {anp?.srid || "não informado"} · sistema {anp?.sistemaReferenciaCoordenadas || "não informado"}</p>
-          <p><strong className="text-white/65">ANP · origem:</strong> {anp?.origemInformacao || "não informada"}{anp?.observacao ? " · observação: " + anp.observacao : ""}</p>
-          <p><strong className="text-white/65">Município/UF:</strong> {anp?.municipio || "Águas Lindas de Goiás"} / {anp?.uf || "GO"}</p>
-          <p><strong className="text-white/65">Situação ANP/SIGAF:</strong> {anp?.situacaoConstatada || "não informada"} · {anp?.statusSigaf || "sem ocorrência informada"}</p>
-          <p><strong className="text-white/65">Origem cadastral API:</strong> {anp?.src || "não informada"}</p>
-          <p><strong className="text-white/65">PMQC retornado pela API:</strong> {anp?.inadimplenciaPMQC?.length ? JSON.stringify(anp.inadimplenciaPMQC) : "nenhum registro adicional retornado"}</p>
-          <p><strong className="text-white/65">Origem:</strong> {anp?.origemInformacao || "não informada"} · obtido em {formatDate(anp?.dataObtencao)}</p>
-          <p><strong className="text-white/65">Geografia:</strong> {coords ? coords.lat.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + coords.lng.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas consolidadas"} · validação {anp?.validacao || "—"} · acurácia {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : "—"} · SRID {anp?.srid || "—"}</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <p><strong className="text-white/65">Identidade:</strong> {cnpj ? formatCnpj(cnpj) : "CNPJ não informado"} · SIMP {anp?.codigoSimp || "—"}</p>
+            <p><strong className="text-white/65">Situação:</strong> {anp?.situacaoConstatada || "não informada"} · SIGAF {anp?.statusSigaf || "—"}</p>
+            <p><strong className="text-white/65">Publicação:</strong> {formatDate(anp?.dataPublicacao)} · obtenção {formatDate(anp?.dataObtencao)}</p>
+            <p><strong className="text-white/65">Origem:</strong> {anp?.origemInformacao || anp?.src || "não informada"}</p>
+          </div>
+
           <div className="rounded-xl border border-white/8 bg-black/10 p-2.5">
-            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#87DFF0]">Produtos / tancagem / bicos</p>
+            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#87DFF0]">Georreferenciamento</p>
+            <p className="mt-1">{coords ? coords.lat.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + coords.lng.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas consolidadas"} · validação {anp?.validacao || "—"} · acurácia {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : "—"} · SRID {anp?.srid || "—"}</p>
+          </div>
+
+          <div className="rounded-xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.025] p-2.5">
+            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#D9FF91]">Produtos e estrutura</p>
             {products.length ? products.map((item, productIndex) => (
               <p key={productIndex} className="mt-1">{item.produto || "produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem || ""} · bicos {item.quantidadeBicos ?? "—"} · classe {item.classe || "—"}</p>
             )) : <p className="mt-1">Nenhum produto ANP materializado nesta consulta.</p>}
           </div>
-          <div className="rounded-xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.025] p-2.5">
-            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#D9FF91]">Referência secundária de mapas</p>
+
+          <div className="rounded-xl border border-white/8 bg-white/[.02] p-2.5">
+            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-white/45">Referência complementar de mapa</p>
             <p className="mt-1">Telefone {phone || "—"} · nota {local?.mapData?.rating ?? "—"} · avaliações {local?.mapData?.reviewCount ?? "—"} · horário {local?.mapData?.hours || "—"} · bandeira observada {local?.mapData?.observedBrand || "—"}</p>
             <p className="mt-1">Status observado: {statusLabel} · coletado em {formatDate(local?.mapData?.observedAt)}</p>
           </div>
+
           <p><strong className="text-white/65">Qualidade:</strong> {local?.dataQuality || (anp ? "ANP" : "catálogo")} · {local?.sourceNote || "Cadastro consolidado de fontes públicas."}</p>
-          {anp?.observacao && <p><strong className="text-white/65">Observação ANP:</strong> {anp.observacao}</p>}
-          {coords && <p className="text-white/25">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
+          <p><strong className="text-white/65">ANP:</strong> dados cadastrais e preços são snapshots; o Trajeto não os apresenta como informação em tempo real.</p>
+          {coords && <p className="text-white/25">A rota é calculada pelo provedor escolhido. O Trajeto não inventa distância ou duração quando não há motor de roteamento próprio configurado.</p>}
         </div>
       </details>
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-[0.48rem] text-white/25">
