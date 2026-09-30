@@ -1,11 +1,9 @@
-import { ArrowRight, Bookmark, CheckCircle2, Fuel, LocateFixed, Navigation, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Fuel, LocateFixed, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
-import { getFavoriteDestination, getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
-import { getMobileVehicle } from "@/lib/mobileVehicle";
-import { getMobilityContext } from "@/lib/mobilityContext";
+import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
@@ -21,23 +19,18 @@ export default function Home() {
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [offlineRoutes, setOfflineRoutes] = useState(0);
-  const [offlineRouteList, setOfflineRouteList] = useState<Array<{ savedAt?: string | null }>>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches);
   const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
-  const [favoriteDestination, setFavoriteDestination] = useState<MobileDestination | null>(() => getFavoriteDestination());
   const [locating, setLocating] = useState(false);
   const [shareDone, setShareDone] = useState(false);
-  const [hasVehicle, setHasVehicle] = useState(() => Boolean(getMobileVehicle()));
 
   useEffect(() => {
     const refresh = () => {
       setLastTrip(getLastTrip());
       setRecentSearches(getRecentSearches());
-      setHasVehicle(Boolean(getMobileVehicle()));
       const nextDestinations = getMobileDestinations();
       setDestinations(nextDestinations);
-      setFavoriteDestination(getFavoriteDestination(nextDestinations));
-      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); setOfflineRouteList(routes); }).catch(() => { setOfflineRoutes(0); setOfflineRouteList([]); });
+      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); }).catch(() => { setOfflineRoutes(0); });
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
@@ -53,14 +46,6 @@ export default function Home() {
       window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
-
-  const mobilityContext = useMemo(() => getMobilityContext({
-    online,
-    hasDestination: destination.trim().length >= 3 || destinations.length > 0,
-    hasVehicle,
-    hasLastTrip: Boolean(lastTrip),
-    offlineRoutes: offlineRouteList,
-  }), [online, destination, destinations.length, hasVehicle, lastTrip, offlineRouteList]);
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -212,15 +197,6 @@ export default function Home() {
             </button>
           </form>
 
-          {favoriteDestination && (
-            <button type="button" onClick={openFavoriteDestination} className="mt-3 flex min-h-11 w-full items-center justify-between rounded-xl border border-white/8 bg-white/[.025] px-3.5 text-left active:scale-[.99]">
-              <span>
-                <span className="block text-[0.52rem] font-black uppercase tracking-[.12em] text-white/30">Destino mais usado</span>
-                <span className="mt-0.5 block truncate text-xs font-extrabold text-white">{favoriteDestination.label}</span>
-              </span>
-              <Navigation className="size-4 text-[#3DE3FF]" />
-            </button>
-          )}
         </section>
 
         <MobileCopilot />
