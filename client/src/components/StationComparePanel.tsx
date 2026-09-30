@@ -45,7 +45,52 @@ export default function StationComparePanel({ stations, onClear }: Props) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="space-y-2 p-3 sm:hidden">
+        {stations.map(station => (
+          <article key={station.placeId + "-mobile-card"} className="rounded-2xl border border-white/8 bg-[#0B1014] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-black text-white">{station.name}</p>
+                <p className="mt-1 line-clamp-2 text-[0.58rem] leading-relaxed text-white/40">{station.address || "Endereço não informado"}</p>
+              </div>
+              <span className="shrink-0 rounded-full border border-white/8 px-2 py-1 text-[0.48rem] font-black text-white/45">{station.distanceLabel ?? "—"}</span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-[0.54rem]">
+              <div className="rounded-xl bg-white/[.025] p-2.5">
+                <dt className="text-white/25">Funcionamento</dt>
+                <dd className="mt-1 font-black text-white/70">{statusLabel(station.isOpen)}</dd>
+              </div>
+              <div className="rounded-xl bg-white/[.025] p-2.5">
+                <dt className="text-white/25">Cadastro</dt>
+                <dd className="mt-1 font-black text-white/70">{station.anpMatch?.status === "probable" ? "ANP provável" : "Sem conciliação ANP"}</dd>
+              </div>
+              <div className="rounded-xl bg-white/[.025] p-2.5">
+                <dt className="text-white/25">Bandeira</dt>
+                <dd className="mt-1 font-black text-white/70">{station.anpMatch?.brand ?? "Não informada"}</dd>
+              </div>
+              <div className="rounded-xl bg-white/[.025] p-2.5">
+                <dt className="text-white/25">Telefone</dt>
+                <dd className="mt-1 truncate font-black text-white/70">{station.phone ?? "Não informado"}</dd>
+              </div>
+            </dl>
+            <button
+              type="button"
+              onClick={() => {
+                vibration();
+                const urls = openNavigation(station.lat, station.lng, station.name);
+                const provider = getPreferredNavigationProvider();
+                const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
+                window.open(url, "_blank", "noopener,noreferrer");
+              }}
+              className="mt-2 min-h-11 w-full rounded-xl bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]"
+            >
+              <Navigation className="mr-1 inline size-3.5" /> Navegar
+            </button>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full min-w-[36rem] border-collapse text-left">
           <thead>
             <tr className="border-b border-white/8 bg-[#0B1014]">
@@ -98,7 +143,7 @@ export default function StationComparePanel({ stations, onClear }: Props) {
         </table>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3 sm:grid-cols-3">
+      <div className="hidden grid-cols-2 gap-2 border-t border-white/8 p-3 sm:grid sm:grid-cols-3">
         {stations.map(station => (
           <button
             key={station.placeId + "-navigate"}
