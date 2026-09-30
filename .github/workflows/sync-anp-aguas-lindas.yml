@@ -34,7 +34,7 @@ jobs:
 
       - name: Commit snapshot
         run: |
-          if git diff --quiet -- client/public/data/aguas-lindas-anp.json; then
+          if [ -z "$(git status --porcelain -- client/public/data/aguas-lindas-anp.json)" ]; then
             echo "ANP sem alterações."
             exit 0
           fi
