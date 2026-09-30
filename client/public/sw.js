@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v14";
+const VERSION = "trajeto-v15";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -53,8 +53,10 @@ self.addEventListener("message", event => {
 
 function collectManifestAssets(manifest) {
   const assets = new Set();
+  const visited = new Set();
   const visit = entry => {
-    if (!entry || typeof entry !== "object") return;
+    if (!entry || typeof entry !== "object" || visited.has(entry)) return;
+    visited.add(entry);
     if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\//, ""));
     for (const css of Array.isArray(entry.css) ? entry.css : []) if (typeof css === "string") assets.add("./" + css.replace(/^\//, ""));
     for (const asset of Array.isArray(entry.assets) ? entry.assets : []) if (typeof asset === "string") assets.add("./" + asset.replace(/^\//, ""));
