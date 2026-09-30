@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -421,21 +421,26 @@ export default function Stations() {
               </div>
               <p className="mt-2 text-[0.5rem] leading-relaxed text-white/25">{AGUAS_LINDAS_PRICE_REFERENCE.note}</p>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
-                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Cadastro local</p>
-                <p className="mt-1 text-lg font-black text-white">{AGUAS_LINDAS_STATIONS_COUNT}</p>
-                <p className="text-[0.52rem] text-white/30">registros catalogados</p>
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Cadastros</p>
+                <p className="mt-1 text-lg font-black text-white">{AGUAS_LINDAS_STATION_STATS.total}</p>
+                <p className="text-[0.52rem] text-white/30">CNPJs sem duplicação</p>
               </div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
-                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Referência ANP</p>
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Endereço</p>
+                <p className="mt-1 text-lg font-black text-white">{AGUAS_LINDAS_STATION_STATS.withAddress}</p>
+                <p className="text-[0.52rem] text-white/30">{AGUAS_LINDAS_STATION_STATS.withoutAddress} sem endereço consolidado</p>
+              </div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Mapas cruzados</p>
+                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_STATION_STATS.mapEnriched}</p>
+                <p className="text-[0.52rem] text-white/30">referência secundária atual</p>
+              </div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP</p>
                 <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count}</p>
-                <p className="text-[0.52rem] text-white/30">cobertura de referência</p>
-              </div>
-              <div className="col-span-2 rounded-xl border border-white/8 bg-[#0B1014] p-3 sm:col-span-1">
-                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP enriquecido</p>
-                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_VERIFIED_COUNT}</p>
-                <p className="text-[0.52rem] text-white/30">verificados via API</p>
+                <p className="text-[0.52rem] text-white/30">{AGUAS_LINDAS_ANP_VERIFIED_COUNT} enriquecidos via API</p>
               </div>
             </div>
               </div>
