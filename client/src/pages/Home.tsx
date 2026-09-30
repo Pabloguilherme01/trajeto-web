@@ -25,6 +25,17 @@ export default function Home() {
   const [formMessage, setFormMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setLocation(appUrl("/buscar"));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setLocation]);
+
+  useEffect(() => {
     const refresh = () => {
       setLastTrip(getLastTrip());
       setRecentSearches(getRecentSearches());
@@ -167,7 +178,7 @@ export default function Home() {
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><SearchIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-black text-white">O que você procura?</span>
-              <span className="mt-0.5 block truncate text-[0.58rem] text-white/35">Posto, endereço, bairro ou serviço</span>
+              <span className="mt-0.5 block truncate text-[0.58rem] text-white/35">Posto, endereço, bairro ou serviço · Ctrl K</span>
             </span>
             <ArrowRight className="size-4 shrink-0 text-white/25" />
           </button>
