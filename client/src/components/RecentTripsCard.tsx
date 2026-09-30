@@ -42,6 +42,11 @@ export default function RecentTripsCard() {
   const totalRecordedUses = trips.reduce((sum, trip) => sum + getRouteUsage(trip.origin, trip.destination), 0);
   const recurringRoutes = trips.filter(trip => getRouteUsage(trip.origin, trip.destination) > 1).length;
 
+  const prepareRoutine = () => {
+    const query = "?origem=" + encodeURIComponent(mostUsedTrip.origin) + "&destino=" + encodeURIComponent(mostUsedTrip.destination);
+    setLocation(appUrl("/planejar") + query);
+  };
+
   const openReverseTrip = async (trip: RecentTrip) => {
     const origin = trip.destination;
     const destination = trip.origin;
@@ -107,9 +112,14 @@ export default function RecentTripsCard() {
               <p className="mt-1 truncate text-xs font-extrabold">{mostUsedTrip.origin} → {mostUsedTrip.destination}</p>
               <p className="mt-1 text-[0.58rem] font-semibold text-[#718089]">{mostUsedCount} usos neste aparelho</p>
             </div>
-            <button type="button" onClick={() => void openTrip(mostUsedTrip)} className="min-h-10 shrink-0 rounded-xl bg-[#0B1014] px-3 text-[0.58rem] font-black text-white">
-              Ir agora
-            </button>
+            <div className="flex shrink-0 gap-1.5">
+              <button type="button" onClick={prepareRoutine} className="min-h-10 rounded-xl bg-[#0B1014] px-3 text-[0.58rem] font-black text-white">
+                Preparar
+              </button>
+              <button type="button" onClick={() => void openTrip(mostUsedTrip)} aria-label="Ir agora pela rota mais recorrente" className="grid size-10 place-items-center rounded-xl border border-[#D8E0E3] text-[#52636C]">
+                <ArrowRight className="size-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       )}
