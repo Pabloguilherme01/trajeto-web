@@ -1,4 +1,4 @@
-import { Accessibility, Bus, ChevronRight, ExternalLink, Fuel, Globe2, HeartPulse, Landmark, LocateFixed, MapPin, Navigation, Search, Shield, TreePine, WifiOff, GraduationCap } from "lucide-react";
+import { Accessibility, Bus, ChevronRight, ExternalLink, Fuel, Globe2, HeartPulse, Landmark, LocateFixed, MapPin, Navigation, Search, Share2, Shield, TreePine, WifiOff, GraduationCap } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import CityExplorerMap, { placeDistanceLabel } from "@/components/CityExplorerMap";
@@ -9,7 +9,7 @@ import { inferPlaceCategory, placeMatchesQuery } from "@/lib/placeSearch";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
 import { appUrl } from "@/lib/appUrl";
 import type { Coordinates } from "@/lib/stationDirectorySearch";
-import { getPreferredNavigationProvider, openNavigation } from "@/lib/mobileTools";
+import { getPreferredNavigationProvider, openNavigation, shareText, vibration } from "@/lib/mobileTools";
 
 type CategoryOption={key:PlaceCategory|"all";label:string;icon:typeof Fuel};
 const categoryOptions:CategoryOption[]=[
@@ -83,6 +83,19 @@ export default function Explore(){
     const links=openNavigation(place.coordinates.lat,place.coordinates.lng,place.name); const provider=getPreferredNavigationProvider(); window.open(links[provider],"_blank","noopener,noreferrer");
   };
 
+  const shareMap=async()=>{
+    const title=selected?.name || (query.trim() ? query.trim() : "Águas Lindas");
+    const url=window.location.origin + appUrl("/mapa") + (query.trim() ? "?q=" + encodeURIComponent(query.trim()) : "");
+    try {
+      await shareText(
+        "Trajeto · " + title + (selected?.address ? " · " + selected.address : ""),
+        url,
+        "Trajeto · mapa",
+      );
+      vibration(6);
+    } catch {}
+  };
+
   const categoryTitle=category==="all"?"Tudo":PLACE_CATEGORY_LABELS[category];
 
   return <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-10">
@@ -104,9 +117,10 @@ export default function Explore(){
         {categoryOptions.map(item=>{const Icon=item.icon;const active=category===item.key;return <button key={item.key} type="button" aria-pressed={active} onClick={()=>{setCategory(item.key);setQuery("");setSelected(null);}} className={active?"shrink-0 rounded-2xl bg-[#C7FF3C] px-3 py-2.5 text-[#0B1014]":"shrink-0 rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2.5 text-white/65"}><span className="flex items-center gap-2 text-[.6rem] font-black"><Icon className="size-3.5"/>{item.label}</span></button>;})}
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <button type="button" onClick={locate} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[.56rem] font-black text-[#8BEAFF]"><LocateFixed className="size-3.5"/>Perto de mim</button>
-        <button type="button" onClick={()=>setLocation(appUrl("/postos"))} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/8 px-3 text-[.56rem] font-black text-white/55"><Fuel className="size-3.5"/>Diretório ANP de postos</button>
+      <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <button type="button" onClick={locate} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[.56rem] font-black text-[#8BEAFF]"><LocateFixed className="size-3.5"/>Perto de mim</button>
+        <button type="button" onClick={()=>void shareMap()} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-white/8 px-3 text-[.56rem] font-black text-white/65" aria-label="Compartilhar mapa atual"><Share2 className="size-3.5"/>Compartilhar</button>
+        <button type="button" onClick={()=>setLocation(appUrl("/postos"))} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-white/8 px-3 text-[.56rem] font-black text-white/65"><Fuel className="size-3.5"/>Diretório ANP de postos</button>
       </div>
 
       <section className="mt-4"><CityExplorerMap category={category} query={query} center={center} online={online} onResults={setResults} onSelect={setSelected}/></section>
