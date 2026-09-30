@@ -74,10 +74,47 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     try {
       const nextAvoidTolls = overrides?.avoidTolls ?? avoidTollsState;
       const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
-      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
+      const cacheKey = "trajeto-route-intelligence:" + JSON.stringify({
+        origin: origin.trim().toLocaleLowerCase("pt-BR"),
+        destination: destination.trim().toLocaleLowerCase("pt-BR"),
+        waypoints: waypoints.map(item => item.trim().toLocaleLowerCase("pt-BR")),
+        avoidTolls: nextAvoidTolls,
+        avoidHighways: nextAvoidHighways,
+        trafficDetailed,
+      });
+      const now = Date.now();
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+        if (
+          cached &&
+          typeof cached === "object" &&
+          typeof cached.savedAt === "number" &&
+          now - cached.savedAt < 120000 &&
+          cached.data &&
+          typeof cached.data === "object"
+        ) {
+          setData(cached.data as RouteIntelligence);
+          setLastUpdatedAt(cached.savedAt);
+          onRoutesChange?.((cached.data as RouteIntelligence).routes);
+          if (!selectedRouteId && (cached.data as RouteIntelligence).routes[0]) onSelectRoute?.((cached.data as RouteIntelligence).routes[0].id);
+          return;
+        }
+      } catch {}
+
+      const nextData = await fetchRouteIntelligence({
+        origin,
+        destination,
+        waypoints,
+        avoidTolls: nextAvoidTolls,
+        avoidHighways: nextAvoidHighways,
+        trafficDetailed,
+      });
       setData(nextData);
-      setLastUpdatedAt(Date.now());
+      setLastUpdatedAt(now);
       onRoutesChange?.(nextData.routes);
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ savedAt: now, data: nextData }));
+      } catch {}
       if (!selectedRouteId && nextData.routes[0]) onSelectRoute?.(nextData.routes[0].id);
     } catch (error) {
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
