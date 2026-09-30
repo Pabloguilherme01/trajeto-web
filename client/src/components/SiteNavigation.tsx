@@ -1,6 +1,5 @@
-import { Bookmark, Fuel, HelpCircle, Home, Navigation, UserRound } from "lucide-react";
+import { Bookmark, Fuel, HelpCircle, Home, Navigation } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { appUrl } from "@/lib/appUrl";
 
 const items = [
@@ -20,7 +19,7 @@ export default function SiteNavigation() {
     <nav aria-label="Navegação principal" className="hidden border-b border-white/8 bg-[#0B1014]/95 shadow-[0_10px_35px_rgba(0,0,0,.12)] backdrop-blur-xl md:block">
       <div className="container">
         <ul className="flex min-h-12 items-center gap-1 overflow-x-auto">
-          {items.filter(item => item.href !== "/minha-conta" || !isGitHubPagesRuntime()).map(({ href, label, icon: Icon, primary }) => {
+          {items.map(({ href, label, icon: Icon, primary }) => {
             const active = current === href || (href !== "/" && current.startsWith(href + "/"));
             return (
               <li key={href} className="shrink-0">
