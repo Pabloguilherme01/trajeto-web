@@ -404,6 +404,11 @@ export default function Stations() {
   }, []);
 
   useEffect(() => {
+    if (!hasCoordinates) return;
+    setUserCoords(current => current && current.lat === lat && current.lng === lng ? current : { lat, lng });
+  }, [hasCoordinates, lat, lng]);
+
+  useEffect(() => {
     if (anpRows.length > 0) {
       const retrievedAt = staticAnpRetrievedAt ?? anpLiveQuery.data?.retrievedAt ?? null;
       cacheOfflineAnpSnapshot(anpRows, retrievedAt);
@@ -451,6 +456,13 @@ export default function Stations() {
     setLocalVisibleCount(12);
   };
 
+  const resetDirectoryView = () => {
+    setDirectorySearch("");
+    setDirectorySort("name");
+    setFuelFilter("all");
+    setDirectoryVisibleCount(48);
+  };
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = input.trim();
@@ -470,6 +482,9 @@ export default function Stations() {
     setAddressOnly(false);
     setVerifiedOnly(false);
     setMappedOnly(false);
+    setDirectorySearch("");
+    setDirectorySort("name");
+    setFuelFilter("all");
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
   };
 
@@ -805,29 +820,6 @@ export default function Stations() {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
-          <section className="mt-4 overflow-hidden rounded-[1.7rem] border border-white/8 bg-white/[.025] p-4 shadow-[0_18px_65px_rgba(0,0,0,.20)] backdrop-blur sm:p-5" aria-label="Painel rápido dos postos">
-            <div className="flex items-start gap-3">
-              <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
-                <Sparkles className="size-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#C7FF3C]">Águas Lindas · posto em 1 toque</p>
-                  <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/45">{online ? "online + cache local" : "offline"}</span>
-                </div>
-                <h2 className="mt-1 text-xl font-black tracking-[-.03em]">Mapa, ficha e rota no mesmo lugar.</h2>
-                <p className="mt-1 text-[0.63rem] leading-relaxed text-white/40">Abra o mapa, escolha um posto e saia direto para o navegador que você usa. Os dados locais ficam disponíveis no aparelho sem cadastro.</p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
-              <div className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.53rem] font-black text-white/45"><ShieldCheck className="size-3.5 text-[#C7FF3C]" />ANP + cache local</div>
-            </div>
-          </section>
-        )}
-
-        {!showSavedOnly && broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -976,6 +968,9 @@ export default function Stations() {
                 <Search className="size-4 text-white/25" />
                 <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-[0.62rem] text-white outline-none placeholder:text-white/25" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-7 place-items-center rounded-lg text-white/30" aria-label="Limpar busca"><X className="size-3.5" /></button>}
+                {(directorySearch || fuelFilter !== "all" || directorySort !== "name") && (
+                  <button type="button" onClick={resetDirectoryView} className="shrink-0 rounded-lg px-2 py-1 text-[0.48rem] font-black text-[#D9FF91]">Limpar</button>
+                )}
               </label>
               <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Ordenar diretório">
                 {[
@@ -1038,9 +1033,10 @@ export default function Stations() {
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
             </div>
 
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsForDisplay
-                .slice(0, directoryVisibleCount).map((item, index) => (
+            {directoryCardsForDisplay.length > 0 && (
+              <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                {directoryCardsForDisplay
+                  .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
                   index={index + 1}
@@ -1056,9 +1052,18 @@ export default function Stations() {
                     return Number.isFinite(lat) && Number.isFinite(lng) ? haversineKm(userCoords.lat, userCoords.lng, lat, lng) : null;
                   })()}
                   onToggleSaved={item.local || item.anp ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
-                />
-              ))}
-            </div>
+                  />
+                ))}
+              </div>
+            )}
+
+            {directoryCardsForDisplay.length === 0 && (
+              <div className="mt-4 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-center">
+                <p className="text-sm font-black text-white">Nenhuma ficha corresponde ao filtro.</p>
+                <p className="mt-1 text-[0.6rem] text-white/40">Ajuste a busca ou escolha outro combustível.</p>
+                <button type="button" onClick={resetDirectoryView} className="mt-3 min-h-10 rounded-xl border border-[#C7FF3C]/20 px-3 text-[0.58rem] font-black text-[#D9FF91]">Limpar filtros</button>
+              </div>
+            )}
 
             {directoryVisibleCount < directoryCardsForDisplay.length && (
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -1071,10 +1076,10 @@ export default function Stations() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDirectoryVisibleCount(directoryCardsFiltered.length)}
+                  onClick={() => setDirectoryVisibleCount(directoryCardsForDisplay.length)}
                   className="min-h-12 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] text-xs font-black text-[#D9FF91] transition-transform duration-200 active:scale-[.99]"
                 >
-                  Mostrar todos os {directoryCardsFiltered.length}
+                  Mostrar todos os {directoryCardsForDisplay.length}
                 </button>
               </div>
             )}
