@@ -267,7 +267,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   return (
     <div className="relative">
       <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
-      {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s) automaticamente. As coordenadas serão salvas para uso offline.</div>}
+      {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
       {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-[0.58rem] font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
     </div>
   );
