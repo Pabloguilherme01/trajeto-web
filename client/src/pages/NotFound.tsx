@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import { appUrl } from "@/lib/appUrl";
 
 export default function NotFound() {
   return (
@@ -14,7 +15,7 @@ export default function NotFound() {
             A página que você tentou abrir não existe ou foi movida. Volte ao início para continuar sua consulta.
           </p>
           <Button asChild className="mt-7 min-h-11 bg-[#C7FF3C] px-5 text-sm font-extrabold text-[#0B1014] hover:bg-white">
-            <Link href="/"><ArrowLeft className="mr-2 size-4" />Voltar ao início</Link>
+            <Link href={appUrl("/")}><ArrowLeft className="mr-2 size-4" />Voltar ao início</Link>
           </Button>
         </section>
       </div>
