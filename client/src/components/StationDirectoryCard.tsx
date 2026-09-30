@@ -50,6 +50,7 @@ export function StationDirectoryCard({
   local,
   anp,
   saved,
+  distanceKm = null,
   onToggleSaved,
 }: {
   index: number;
@@ -147,6 +148,7 @@ export function StationDirectoryCard({
             {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/35">sem cruzamento ANP</span>}
             <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/45">{distributor}</span>
             {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">coordenada</span>}
+            {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
             {status && <span className={"rounded-full border px-2 py-1 text-[0.45rem] font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
           </div>
         </div>
@@ -180,6 +182,7 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => void share()} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Share2 className="size-3.5" />Compartilhar</button>
         <button type="button" onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/15 text-[0.55rem] font-black text-[#9FEFFF]"><ExternalLink className="size-3.5" />Consulta ANP</button>
       </div>
+      <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/55">
