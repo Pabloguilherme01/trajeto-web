@@ -1,6 +1,7 @@
+import React, { useMemo, useState } from "react";
 import { ChevronRight, MapPinned, Search, Share2, Siren, WifiOff } from "lucide-react";
+
 import { appUrl } from "@/lib/appUrl";
-import { useMemo, useState } from "react";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import {
   OFFLINE_DESTINATION_CATEGORIES,
