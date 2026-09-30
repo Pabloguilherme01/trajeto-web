@@ -1,4 +1,4 @@
-export type CityCategory = "saude" | "transporte" | "via";
+export type CityCategory = "saude" | "transporte" | "via" | "servico";
 
 export type CityPlace = {
   id: string;
@@ -13,6 +13,9 @@ export type CityPlace = {
 };
 
 const municipalHealthSource = "https://aguaslindasdegoias.go.gov.br/unidades-de-saude/";
+const municipalContactsSource = "https://aguaslindasdegoias.go.gov.br/contatos/";
+const municipalSocialSource = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/";
+const municipalLibrarySource = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-educacao/biblioteca-municipal-cora-coraline-e-janete-castro/";
 const planSource = "https://legislacao.aguaslindasdegoias.go.gov.br/leis/394";
 
 export const AGUAS_LINDAS_CITY_CHECKED_AT = "2026-09-30";
@@ -45,21 +48,58 @@ export const CITY_PLACES: CityPlace[] = [
   { id: "avenida-brasil", name: "Avenida Brasil · Águas Bonitas", category: "via", address: "Avenida Brasil, Parque das Águas Bonitas / Quinta das Águas Lindas, Águas Lindas de Goiás, GO", source: "Plano Diretor municipal · Lei 341/2002", sourceUrl: planSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
   { id: "avenida-1-barragem", name: "Avenida 1 · Parque da Barragem", category: "via", address: "Avenida 1, Parque da Barragem, Águas Lindas de Goiás, GO", source: "Plano Diretor municipal · Lei 341/2002", sourceUrl: planSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
   { id: "rua-pau-brasil", name: "Rua Pau Brasil · Jardim Santa Lúcia", category: "via", address: "Rua Pau Brasil, Jardim Santa Lúcia, Águas Lindas de Goiás, GO", source: "Plano Diretor municipal · Lei 341/2002", sourceUrl: planSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "prefeitura", name: "Prefeitura Municipal", category: "servico", address: "Área Especial 4, Avenida 02, Jardim Querência, Águas Lindas de Goiás, GO, CEP 72910-733", phone: "+55 61 3616-1058", detail: "Endereço e telefone publicados no portal municipal. Confirme o setor antes de ir.", source: "Prefeitura de Águas Lindas · contatos", sourceUrl: municipalContactsSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "cras-i-jardim-brasilia", name: "CRAS I · Jardim Brasília", category: "servico", address: "Quadra 53, Lote 1B, Jardim Brasília, Águas Lindas de Goiás, GO", phone: "+55 61 99294-2109", detail: "Atendimento publicado: segunda a sexta, 8h–12h e 13h–17h. Confirme antes de ir.", source: "Prefeitura · Assistência Social", sourceUrl: municipalSocialSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "cras-ii-santa-lucia", name: "CRAS II · Santa Lúcia", category: "servico", address: "Quadra 54, Área Especial, Santa Lúcia, Águas Lindas de Goiás, GO", phone: "+55 61 99294-8823", detail: "Atendimento publicado: segunda a sexta, 8h–12h e 13h–17h. Confirme antes de ir.", source: "Prefeitura · Assistência Social", sourceUrl: municipalSocialSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "cras-iii-praca-cultura", name: "CRAS III · Praça da Cultura", category: "servico", address: "Avenida 05, Quadra 0, Lote 01, Setor 11, Águas Lindas de Goiás, GO", phone: "+55 61 99295-2076", detail: "Atendimento publicado: segunda a sexta, 8h–12h e 13h–17h. Confirme antes de ir.", source: "Prefeitura · Assistência Social", sourceUrl: municipalSocialSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "creas-setor-02", name: "CREAS · Setor 02", category: "servico", address: "Quadra 42, Casa 51, Setor 02, Águas Lindas de Goiás, GO", phone: "+55 61 99296-0392", detail: "Atendimento publicado: segunda a sexta, 8h–12h e 13h–17h. Confirme antes de ir.", source: "Prefeitura · Assistência Social", sourceUrl: municipalSocialSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "cadunico-perola-02", name: "Cadastro Único · Pérola 02", category: "servico", address: "Avenida Perimetral, Quadra 113, Loja 09, Pérola 02, Águas Lindas de Goiás, GO", phone: "+55 61 99302-9284", detail: "Atendimento publicado: segunda a sexta, 8h–12h e 13h–17h. Confirme documentos e serviços antes de ir.", source: "Prefeitura · Assistência Social", sourceUrl: municipalSocialSource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
+  { id: "biblioteca-municipal", name: "Biblioteca Municipal Cora Coralina e Janete Castro", category: "servico", address: "Quadra 30, Lote 03, Jardim Barragem II, Águas Lindas de Goiás, GO", phone: "+55 61 3618-4461", detail: "Atendimento publicado: segunda a sexta, 8h–12h e 13h–17h. Confirme atividades e horários antes de ir.", source: "Prefeitura · Biblioteca Municipal", sourceUrl: municipalLibrarySource, checkedAt: AGUAS_LINDAS_CITY_CHECKED_AT },
 ];
+
+/** A single curated order for quick suggestions, reused by every search field. */
+export const CITY_FEATURED_PLACE_IDS = [
+  "hospital-bom-jesus",
+  "heal",
+  "prefeitura",
+  "cras-i-jardim-brasilia",
+  "biblioteca-municipal",
+  "terminal-nelson-alves",
+  "br-070",
+  "avenida-brasilia",
+  "avenida-cuiaba",
+] as const;
+
+export function getCityPlaceSuggestions(query = "", limit = 8) {
+  if (query.trim()) return searchCityPlaces(query).slice(0, limit);
+  const featured = CITY_FEATURED_PLACE_IDS
+    .map(id => CITY_PLACES.find(place => place.id === id))
+    .filter((place): place is CityPlace => place !== undefined);
+  return [...featured, ...CITY_PLACES.filter(place => !CITY_FEATURED_PLACE_IDS.includes(place.id as typeof CITY_FEATURED_PLACE_IDS[number]))]
+    .slice(0, limit);
+}
+
+export function formatCityPlaceSearchValue(place: CityPlace) {
+  return `${place.name}, ${place.address}`;
+}
 
 export const CITY_SERVICES = [
-  { id: "transit", name: "Secretaria de Trânsito e Mobilidade Urbana", phone: "+55 61 92003-6663", detail: "Atendimento geral publicado pela Prefeitura.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalHealthSource },
-  { id: "traffic-service", name: "Atendimento de trânsito", phone: "+55 61 92003-6668", detail: "Contato de atendimento publicado pela Prefeitura.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalHealthSource },
-  { id: "traffic-plantao", name: "Plantão / agentes de trânsito", phone: "+55 61 92003-6674", detail: "Contato publicado pela Prefeitura. Em emergência, use os canais oficiais de emergência.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalHealthSource },
-  { id: "animal", name: "Apreensão de animais em via pública", phone: "+55 61 92003-6679", detail: "Contato publicado pela Prefeitura.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalHealthSource },
-  { id: "health", name: "Secretaria Municipal de Saúde", phone: "+55 61 3618-4096", detail: "Contato institucional; não substitui atendimento de emergência.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalHealthSource },
+  { id: "transit", name: "Secretaria de Trânsito e Mobilidade Urbana", phone: "+55 61 92003-6663", detail: "Atendimento geral publicado pela Prefeitura.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalContactsSource },
+  { id: "traffic-service", name: "Atendimento de trânsito", phone: "+55 61 92003-6668", detail: "Contato de atendimento publicado pela Prefeitura.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalContactsSource },
+  { id: "traffic-plantao", name: "Plantão / agentes de trânsito", phone: "+55 61 92003-6674", detail: "Contato publicado pela Prefeitura. Em emergência, use os canais oficiais de emergência.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalContactsSource },
+  { id: "animal", name: "Apreensão de animais em via pública", phone: "+55 61 92003-6679", detail: "Contato publicado pela Prefeitura.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalContactsSource },
+  { id: "health", name: "Secretaria Municipal de Saúde", phone: "+55 61 3618-4096", detail: "Contato institucional; não substitui atendimento de emergência.", source: "Prefeitura de Águas Lindas", sourceUrl: municipalContactsSource },
 ];
 
+function normalizeCitySearch(value: string) {
+  return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+}
+
 export function searchCityPlaces(query: string, category: CityCategory | "todos" = "todos") {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalized = normalizeCitySearch(query);
   return CITY_PLACES.filter(place => {
     if (category !== "todos" && place.category !== category) return false;
-    const text = `${place.name} ${place.address} ${place.detail ?? ""} ${place.category}`.toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const text = normalizeCitySearch(`${place.name} ${place.address} ${place.detail ?? ""} ${place.category}`);
     return !normalized || text.includes(normalized);
   });
 }
