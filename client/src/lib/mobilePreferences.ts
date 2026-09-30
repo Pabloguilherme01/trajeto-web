@@ -3,6 +3,7 @@ const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
 const RECENT_TRIPS_KEY = "trajeto-recent-trips";
 const MAX_RECENT_TRIPS = 8;
+const ROUTE_USAGE_KEY = "trajeto-route-usage";
 const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
@@ -89,6 +90,14 @@ export function clearRecentTrips() {
   notifyPreferenceChange();
 }
 
+export function getRouteUsage(origin: string, destination: string) {
+  const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  try {
+    const value = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    return value && typeof value === "object" && Number.isFinite(Number(value[key])) ? Number(value[key]) : 0;
+  } catch { return 0; }
+}
+
 export function rememberTrip(origin: string, destination: string) {
   const normalizedOrigin = origin.trim();
   const normalizedDestination = destination.trim();
@@ -100,6 +109,10 @@ export function rememberTrip(origin: string, destination: string) {
       item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination.toLocaleLowerCase("pt-BR"),
     )].slice(0, MAX_RECENT_TRIPS);
     localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
+    const usageKey = normalizedOrigin.toLocaleLowerCase("pt-BR") + "::" + normalizedDestination.toLocaleLowerCase("pt-BR");
+    const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    usage[usageKey] = Number.isFinite(Number(usage[usageKey])) ? Number(usage[usageKey]) + 1 : 1;
+    localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(usage));
     localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: normalizedOrigin, destination: normalizedDestination }));
   } catch {}
   rememberIntent("route");
