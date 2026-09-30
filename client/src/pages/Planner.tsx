@@ -21,6 +21,7 @@ import MobileNavigationCenter from "@/components/MobileNavigationCenter";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import TripFuelBriefing from "@/components/TripFuelBriefing";
 import TripDecisionPanel from "@/components/TripDecisionPanel";
+import TripDepartureChecklistCard from "@/components/TripDepartureChecklistCard";
 import RouteTotalCostCard from "@/components/RouteTotalCostCard";
 import RouteCostComparisonCard from "@/components/RouteCostComparisonCard";
 import RouteRecurringImpactCard from "@/components/RouteRecurringImpactCard";
@@ -542,6 +543,12 @@ export default function Planner() {
                     <RouteSensitivityCard routes={routeAlternatives} selectedRouteId={selectedRouteId} />
                     <RouteDataProvenanceCard route={selectedRoute} />
                     <ArrivalTimePlannerCard route={selectedRoute} />
+                    <TripDepartureChecklistCard
+                      route={selectedRoute}
+                      routeConfirmed={routeConfirmed}
+                      online={typeof navigator === "undefined" || navigator.onLine}
+                      loadedFromOffline={loadedFromOffline}
+                    />
                   </>
                 )}
                 <section className="mt-6 border border-[#C7D2C9] bg-[#F2F5EF] p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#54706A]">Situação da rota</p><h3 className="font-display mt-2 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">{planned.traffic.label}</h3><p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#54706A]">{planned.traffic.detail} Consulta registrada em {new Date(planned.traffic.checkedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.</p></div><span className={`rounded-full px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.12em] ${planned.traffic.state === "active" ? "bg-[#DDEFD4] text-[#315227]" : "bg-[#FFF1BF] text-[#6C4E00]"}`}>{planned.traffic.state === "active" ? "Fonte ao vivo" : "Cobertura pendente"}</span></div>{planned.traffic.incidents.length > 0 && <div className="mt-5 grid gap-3 border-y border-[#D1DBD1] py-4">{planned.traffic.incidents.map(incident => <article key={incident.id} className="border-l-2 border-[#BA5B45] bg-white p-3"><div className="flex flex-wrap items-start justify-between gap-3"><p className="text-sm font-bold text-[#163840]">{incident.description}</p><span className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[#8A4434]">{incident.severity === "major" ? "Impacto alto" : incident.severity === "moderate" ? "Impacto moderado" : "Impacto leve"}</span></div><p className="mt-2 text-xs leading-relaxed text-[#58716B]">{[incident.from, incident.to].filter(Boolean).join(" → ") || "Local informado pela fonte"}{incident.delaySeconds ? ` · atraso estimado de ${Math.round(incident.delaySeconds / 60)} min` : ""}{incident.reportedAt ? ` · atualização ${new Date(incident.reportedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}` : ""}</p></article>)}</div>}<div className="mt-4 flex flex-wrap gap-2">{planned.traffic.officialSources.map(source => <a key={source.label} href={source.url} target="_blank" rel="noopener noreferrer" className="border border-[#C7D2C9] bg-white px-3 py-2 text-xs font-bold text-[#36564E] transition hover:border-[#163840] hover:bg-[#163840] hover:text-white">{source.label} · {source.detail}</a>)}<a href={planned.traffic.anpComVcUrl} target="_blank" rel="noopener noreferrer" onClick={() => track("anp_quality_open", destination || origin)} className="border border-[#C7D2C9] bg-white px-3 py-2 text-xs font-bold text-[#36564E] transition hover:border-[#163840] hover:bg-[#163840] hover:text-white">ANP com VC · qualidade do posto</a></div></section>
