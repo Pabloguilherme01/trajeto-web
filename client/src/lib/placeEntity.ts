@@ -1,4 +1,4 @@
-export type PlaceCategory = "fuel" | "health" | "education" | "transport" | "government" | "security" | "leisure" | "accessibility";
+export type PlaceCategory = "fuel" | "health" | "education" | "transport" | "government" | "security" | "leisure" | "accessibility" | "territory";
 export type PlaceSource = "ANP" | "IBGE" | "Google" | "Local";
 export type PlaceEvidence = { label:string; source:PlaceSource; updatedAt?:string|null; value?:string|null };
 export type PlaceEntity = {
