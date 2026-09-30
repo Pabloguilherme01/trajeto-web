@@ -3,21 +3,21 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, buildWazeNavigationUrl, buildAppleMapsDirectionsUrl, getPreferredNavigationProvider, openNavigation, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, shareText, vibration } from "@/lib/mobileTools";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
-import { groupAnpFuelRows } from "@shared/anpRevendedores";
+import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj, type AnpPriceSnapshot } from "@/lib/anpPrices";
 import { buildDirectoryCards, getDirectoryCoordinates, type FuelFilter } from "@/lib/stationDirectoryModel";
 import { getDistanceKm, type Coordinates } from "@/lib/stationDirectorySearch";
-import { useStationDirectory, type StationDirectoryDistanceFilter, type StationDirectoryFilters, type StationDirectorySort } from "@/hooks/useStationDirectory";
+import { useStationDirectory, type StationDirectoryDistanceFilter, type StationDirectoryFilters } from "@/hooks/useStationDirectory";
 import StationFiltersSheet from "@/components/StationFiltersSheet";
 import StationDirectoryCard from "@/components/StationDirectoryCard";
 import StationCompareSheet from "@/components/StationCompareSheet";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { getOfflineMapStations, cacheOfflineMapStations } from "@/lib/stationMapOffline";
+import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot, cacheOfflineMapStations, hydrateOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { toast } from "sonner";
 import type { AnpStation } from "@shared/anpRevendedores";
 
@@ -55,6 +55,8 @@ export default function Stations() {
   const [compareOpen, setCompareOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
+  const [offlineAnpRows, setOfflineAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
+  const [offlineAnpRetrievedAt, setOfflineAnpRetrievedAt] = useState<string | null>(() => getOfflineAnpSnapshot().retrievedAt);
   const [priceState, setPriceState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [filters, setFilters] = useState<StationDirectoryFilters>({
     fuelFilter: "all",
@@ -73,9 +75,10 @@ export default function Stations() {
   const savedOnly = pathname.endsWith("/salvos") || params.get("salvos") === "1";
   const nearbyMode = Boolean(readCoordinates(location));
 
+  const staticRuntime = isGitHubPagesRuntime();
   const anpQuery = trpc.stationDirectory.anp.useQuery(
     { municipio: "AGUASLINDASDEGOIAS", uf: "GO" },
-    { enabled: !isGitHubPagesRuntime(), retry: 1, staleTime: 15 * 60_000 },
+    { enabled: !staticRuntime && !savedOnly && online, retry: 1, staleTime: 15 * 60_000 },
   );
 
   useEffect(() => {
@@ -100,6 +103,7 @@ export default function Stations() {
   }, []);
 
   useEffect(() => {
+    if (savedOnly) return;
     let cancelled = false;
     setPriceState("loading");
     void loadAguasLindasAnpPrices()
@@ -112,12 +116,39 @@ export default function Stations() {
         if (!cancelled) setPriceState("error");
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [savedOnly]);
 
-  const anpStations = useMemo<AnpStation[]>(() => {
-    const live = anpQuery.data?.rows ?? [];
-    return live.length > 0 ? groupAnpFuelRows(live) : [];
-  }, [anpQuery.data?.rows]);
+  useEffect(() => {
+    let cancelled = false;
+    void hydrateOfflineAnpSnapshot().then(snapshot => {
+      if (cancelled || !snapshot.rows.length) return;
+      setOfflineAnpRows(snapshot.rows);
+      setOfflineAnpRetrievedAt(snapshot.retrievedAt);
+    });
+    if (!staticRuntime || savedOnly) return () => { cancelled = true; };
+
+    fetch(appUrl("/data/aguas-lindas-anp.json"), { cache: "default" })
+      .then(response => response.ok ? response.json() as Promise<{ data?: unknown[]; retrievedAt?: string }> : Promise.reject(new Error("snapshot indisponível")))
+      .then(payload => {
+        if (cancelled) return;
+        const rows = (payload.data ?? [])
+          .map(item => item && typeof item === "object" ? item : null)
+          .filter((item): item is Record<string, unknown> => Boolean(item))
+          .map(item => {
+            try { return normalizeAnpFuelRow(item); } catch { return null; }
+          })
+          .filter((item): item is AnpFuelRow => Boolean(item));
+        if (rows.length) {
+          setOfflineAnpRows(rows);
+          setOfflineAnpRetrievedAt(typeof payload.retrievedAt === "string" ? payload.retrievedAt : null);
+          cacheOfflineAnpSnapshot(rows, typeof payload.retrievedAt === "string" ? payload.retrievedAt : null);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => { cancelled = true; };
+  }, [savedOnly, staticRuntime]);
+
 
   const directoryCards = useMemo(
     () => buildDirectoryCards(AGUAS_LINDAS_STATIONS, anpStations),
