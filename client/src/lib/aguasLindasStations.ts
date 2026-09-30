@@ -24,6 +24,14 @@ export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
 export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
 export const AGUAS_LINDAS_DATA_POLICY = "ANP é a fonte primária para status cadastral; fontes secundárias apenas complementam nomes/endereço quando necessário.";
 
+export const AGUAS_LINDAS_MAP_ONLY_DISCOVERIES = [
+  {
+    displayName: "Posto Milenium Águas Lindas de Goiás",
+    address: "Condomínio Bela Vista, Águas Lindas de Goiás, GO",
+    note: "Encontrado em pesquisa de mapas; CNPJ não localizado em fonte empresarial confiável nesta coleta. Não incorporado à contagem cadastral até conciliação por CNPJ/endereço.",
+  },
+] as const;
+
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
 
