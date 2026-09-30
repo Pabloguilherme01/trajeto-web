@@ -9,7 +9,7 @@ import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
-  { key: "map", href: "/postos", label: "Mapa", short: "Mapa", icon: Map },
+  { key: "map", href: "/mapa", label: "Mapa", short: "Mapa", icon: Map },
   { key: "saved", href: "/salvos", label: "Salvos", short: "Salvos", icon: Bookmark },
   { key: "more", href: "#", label: "Mais", short: "Mais", icon: MoreHorizontal },
 ] as const;
@@ -39,7 +39,7 @@ export default function MobileBottomNav() {
   const current = location.split("?")[0].replace(/\/$/, "") || "/";
   const searchParams = new URLSearchParams(location.split("?")[1] ?? "");
   const savedMode = searchParams.get("salvos") === "1";
-  const mapMode = current === "/postos" && searchParams.get("view") === "map";
+  const mapMode = current === "/mapa" || (current === "/postos" && searchParams.get("view") === "map");
 
   const go = (item: typeof baseItems[number]) => {
     if (item.key === "more") {
@@ -47,7 +47,7 @@ export default function MobileBottomNav() {
       return;
     }
     if (item.key === "map") {
-      setLocation(appUrl("/postos") + "?q=postos&view=map");
+      setLocation(appUrl("/mapa"));
       return;
     }
     setLocation(appUrl(item.href));
