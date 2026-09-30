@@ -12,6 +12,8 @@ import MobileCopilot from "@/components/MobileCopilot";
 import MobileDataMode from "@/components/MobileDataMode";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import VoiceInputButton from "@/components/VoiceInputButton";
+import CityPlaceAutocomplete from "@/components/CityPlaceAutocomplete";
+import { formatCityPlaceSearchValue } from "@/lib/aguasLindasCity";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -77,12 +79,17 @@ export default function Home() {
   };
 
   const useLocationAsOrigin = () => {
-    if (!online || locating || !navigator.geolocation) return;
+    if (locating) return;
+    if (!navigator.geolocation) {
+      setFormMessage("Este navegador não oferece localização. Digite sua origem ou escolha um ponto sugerido.");
+      return;
+    }
     setLocating(true);
     rememberIntent("route");
     navigator.geolocation.getCurrentPosition(
       position => {
         setLocating(false);
+        setFormMessage(null);
         setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
         vibration(16);
       },
@@ -132,7 +139,8 @@ export default function Home() {
       await shareText("Trajeto · planeje viagens, encontre postos e guarde rotas.", url, "Trajeto");
       setShareDone(true);
       window.setTimeout(() => setShareDone(false), 1800);
-    } catch {
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       setFormMessage("Não foi possível abrir o compartilhamento.");
     }
   };
@@ -155,6 +163,7 @@ export default function Home() {
             </button>
           </div>
         </header>
+        {shareDone && <p className="mt-2 text-right text-[.6rem] font-bold text-[#C7FF3C]" role="status" aria-live="polite">Link do Trajeto compartilhado.</p>}
 
         <section className="mt-8">
           <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mobilidade diária</p>
@@ -181,9 +190,9 @@ export default function Home() {
               <span className="mb-1.5 block text-[0.58rem] font-black uppercase tracking-[.12em] text-white/35">Origem</span>
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
+                <CityPlaceAutocomplete id="home-origin" value={origin} onValueChange={setOrigin} onPlaceSelect={place => setOrigin(formatCityPlaceSearchValue(place))} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 w-full min-w-0 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
                 <VoiceInputButton label="a origem" onTranscript={setOrigin} />
-                <button type="button" onClick={useLocationAsOrigin} disabled={!online || locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
+                <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem" title="Usar GPS como origem">
                   <LocateFixed className="size-4" />
                 </button>
               </div>
@@ -193,7 +202,7 @@ export default function Home() {
               <span className="mb-1.5 block text-[0.58rem] font-black uppercase tracking-[.12em] text-white/35">Destino</span>
               <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
+                <CityPlaceAutocomplete id="home-destination" value={destination} onValueChange={setDestination} onPlaceSelect={place => setDestination(formatCityPlaceSearchValue(place))} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 w-full min-w-0 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
                 <VoiceInputButton label="o destino" onTranscript={setDestination} />
               </div>
             </label>
@@ -256,7 +265,6 @@ export default function Home() {
           <section className="mt-7">
             <div className="flex items-center justify-between">
               <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-white/30">Consultas recentes</p>
-              {shareDone && <span className="text-[0.56rem] font-bold text-[#C7FF3C]">Link copiado/compartilhado</span>}
             </div>
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
               {recentSearches.slice(0, 5).map(item => (
