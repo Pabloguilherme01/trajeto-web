@@ -16,6 +16,7 @@ export type OfflineDestination = {
   keywords: string[];
   sourceLabel: string;
   sourceUrl: string;
+  phone?: string;
   emergency?: boolean;
 };
 
@@ -86,6 +87,7 @@ export const OFFLINE_DESTINATIONS: OfflineDestination[] = [
     keywords: ["samu", "192", "ambulancia", "emergencia", "saude"],
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/samu-servico-de-atendimento-movel-de-urgencia/",
+    phone: "192",
     emergency: true,
   },
   {
