@@ -1,5 +1,5 @@
 import { Bookmark, Fuel, Home, Navigation, UserRound, Wifi, WifiOff } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip } from "@/lib/mobilePreferences";
@@ -70,7 +70,7 @@ export default function MobileBottomNav() {
           {items.map(({ href, label, icon: Icon, primary }) => {
             const active = current === href || (href !== "/" && current.startsWith(href + "/"));
             const isPrimary = primary;
-            const onClick = (event: React.MouseEvent) => {
+            const onClick = (event: MouseEvent) => {
               event.preventDefault();
               if (isPrimary && lastTrip) {
                 const target = appUrl(
