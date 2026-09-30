@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createRouteSearch, getAuthorizedStationsForQuery, getLatestPriceSnapshots, getPriceReferencesByAreas, getUserVehicleById, rememberGooglePlaceIds } from "../db";
 import { makeRequest, type DirectionsResult, type GeocodingResult, type PlacesSearchResult } from "../_core/map";
 import { publicProcedure, router } from "../_core/trpc";
-import { normalizeStops, routeSummary } from "../lib/routePlanner";
+import { normalizeStops, routeCorridorPoints, routeSummary } from "../lib/routePlanner";
 import { routeTrafficStatus } from "../lib/routeTraffic";
 import { compareFuelPrices } from "../lib/fuelEconomy";
 import { recommendFuelStop, selectFuelRecommendationCandidates } from "../lib/stationRecommendation";
@@ -46,10 +46,21 @@ export const routesRouter = router({
     const originPoint = originGeo.results[0]?.geometry.location ?? route.origin;
     const destinationPoint = destinationGeo.results[0]?.geometry.location ?? route.destination;
 
-    const nearby = await Promise.all([
-      makeRequest<PlacesSearchResult>("/maps/api/place/nearbysearch/json", { location: `${originPoint.lat},${originPoint.lng}`, radius: 10000, type: "gas_station" }),
-      makeRequest<PlacesSearchResult>("/maps/api/place/nearbysearch/json", { location: `${destinationPoint.lat},${destinationPoint.lng}`, radius: 10000, type: "gas_station" }),
-    ]);
+    const corridorPoints = routeCorridorPoints(directions, 4);
+    const searchPoints = [
+      { point: originPoint, radius: 7000 },
+      ...corridorPoints.map(point => ({ point, radius: 6000 })),
+      { point: destinationPoint, radius: 7000 },
+    ];
+    const nearby = await Promise.all(
+      searchPoints.map(({ point, radius }) =>
+        makeRequest<PlacesSearchResult>("/maps/api/place/nearbysearch/json", {
+          location: point.lat + "," + point.lng,
+          radius,
+          type: "gas_station",
+        }).catch(() => ({ results: [], status: "ZERO_RESULTS" } as PlacesSearchResult)),
+      ),
+    );
 
     const stops = normalizeStops(nearby);
     void rememberGooglePlaceIds(stops.map(stop => stop.placeId));
@@ -129,6 +140,7 @@ export const routesRouter = router({
       economy,
       recommendation,
       recommendationDiagnostics: {
+        corridorSearchPoints: searchPoints.length,
         requestedCandidates: candidateStops.length,
         realDetoursCalculated: Object.keys(realDetoursKm).length,
       },
