@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Bookmark, Clock3, MapPin, Navigation, Search, Wifi, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { getFavoriteDestination, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
+import { getFavoriteDestination, getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { getLastTrip, getRecentSearches, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
+import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 
 export default function TodayPulse() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
@@ -12,6 +13,8 @@ export default function TodayPulse() {
   const [favorite, setFavorite] = useState<MobileDestination | null>(() => getFavoriteDestination());
   const [recentSearch, setRecentSearch] = useState(() => getRecentSearches()[0] ?? "");
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
+  const [destinationCount, setDestinationCount] = useState(() => getMobileDestinations().length);
+  const [vehicleName, setVehicleName] = useState(() => getMobileVehicle()?.name ?? "");
 
   useEffect(() => {
     const refresh = () => {
@@ -19,6 +22,8 @@ export default function TodayPulse() {
       setFavorite(getFavoriteDestination());
       setRecentSearch(getRecentSearches()[0] ?? "");
       void listOfflineRoutes().then(setSavedRoutes).catch(() => setSavedRoutes([]));
+      setDestinationCount(getMobileDestinations().length);
+      setVehicleName(getMobileVehicle()?.name ?? "");
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
@@ -28,6 +33,7 @@ export default function TodayPulse() {
     window.addEventListener("offline", onOffline);
     window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener(mobileDestinationEvent, refresh);
+    window.addEventListener(mobileVehicleEvent, refresh);
     window.addEventListener(offlineRouteEvent, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
@@ -35,6 +41,7 @@ export default function TodayPulse() {
       window.removeEventListener("offline", onOffline);
       window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener(mobileDestinationEvent, refresh);
+      window.removeEventListener(mobileVehicleEvent, refresh);
       window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
@@ -68,6 +75,8 @@ export default function TodayPulse() {
                 {online ? "online" : "offline"}
               </span>
               {savedRoutes.length > 0 && <span className="rounded-full bg-white/[0.04] px-2 py-1 text-[0.5rem] font-black uppercase tracking-[0.08em] text-white/45">{savedRoutes.length} salva{savedRoutes.length === 1 ? "" : "s"}</span>}
+              {destinationCount > 0 && <span className="rounded-full bg-white/[0.04] px-2 py-1 text-[0.5rem] font-black uppercase tracking-[0.08em] text-white/45">{destinationCount} destino{destinationCount === 1 ? "" : "s"}</span>}
+              {vehicleName && <span className="hidden rounded-full bg-[#BDA5FF]/10 px-2 py-1 text-[0.5rem] font-black uppercase tracking-[0.08em] text-[#DCCFFF] sm:inline-block">veículo · {vehicleName}</span>}
             </div>
             <p className="mt-1 text-xs leading-relaxed text-[#9FB0B8]">
               {lastTrip
@@ -114,7 +123,7 @@ export default function TodayPulse() {
         <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[0.045] px-3 py-2.5">
           <div className="min-w-0">
             <p className="text-[0.48rem] font-black uppercase tracking-[0.14em] text-[#C7FF3C]">Preparação</p>
-            <p className="mt-0.5 truncate text-[0.62rem] font-extrabold text-white">{readiness}</p>
+            <p className="mt-0.5 truncate text-[0.62rem] font-extrabold text-white" aria-live="polite">{readiness}</p>
           </div>
           {lastTrip && <button type="button" onClick={shareLastTrip} className="mobile-pressable inline-flex shrink-0 items-center justify-center rounded-lg border border-white/10 px-3 text-[0.58rem] font-black text-white/75">Enviar rota</button>}
         </div>
