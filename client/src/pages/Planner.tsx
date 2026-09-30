@@ -221,9 +221,7 @@ export default function Planner() {
     selected: true,
     trafficIntervals: [],
     durationSeconds: planned.route.durationSeconds,
-    staticDurationSeconds: planned.route.staticDurationSeconds,
     distanceMeters: planned.route.distanceMeters,
-    toll: planned.route.toll ?? null,
   }] : [];
 
   return (
@@ -338,8 +336,8 @@ export default function Planner() {
                 </div>
                 <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
                   <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">Pedágio</p>
-                  <p className="mt-1 text-xs font-black">{planned.route.toll?.amount == null ? "Não informado" : planned.route.toll.amount === 0 ? "Sem pedágio informado" : planned.route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: planned.route.toll.currency || "BRL" })}</p>
-                  <p className="mt-1 text-[0.58rem] text-white/35">{planned.route.toll?.estimated ? "estimativa" : "fonte da rota"}</p>
+                  <p className="mt-1 text-xs font-black">Não informado</p>
+                  <p className="mt-1 text-[0.58rem] text-white/35">o retorno básico da rota não fornece pedágio</p>
                 </div>
               </div>
 
