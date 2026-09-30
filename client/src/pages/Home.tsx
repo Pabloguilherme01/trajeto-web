@@ -6,8 +6,6 @@ import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
-import MobileCopilot from "@/components/MobileCopilot";
-import MobileDataMode from "@/components/MobileDataMode";
 import TripReadinessCard from "@/components/TripReadinessCard";
 
 export default function Home() {
@@ -218,23 +216,13 @@ export default function Home() {
 
         </section>
 
-        <MobileCopilot />
-
-        <section className="mt-4">
-          <details className="rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4">
-            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-black">
-              <span>Antes de sair</span>
-              <span className="text-[0.55rem] font-bold uppercase tracking-[.12em] text-white/25">checagem local</span>
-            </summary>
-            <div className="mt-3">
-              <TripReadinessCard />
-            </div>
-          </details>
-        </section>
-
-        <section className="mt-4">
-          <MobileDataMode />
-        </section>
+        <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-black">
+            <span>Recursos do aparelho</span>
+            <span className="text-[0.55rem] font-bold uppercase tracking-[.12em] text-white/25">opcional</span>
+          </summary>
+          <div className="mt-3"><TripReadinessCard /></div>
+        </details>
 
         {recentSearches.length > 0 && (
           <section className="mt-7">
