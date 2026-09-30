@@ -5,6 +5,8 @@ const RECENT_TRIPS_KEY = "trajeto-recent-trips";
 const MAX_RECENT_TRIPS = 8;
 const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
+const ROUTE_USAGE_KEY = "trajeto-route-usage";
+const MAX_TRACKED_ROUTES = 30;
 const PREFERENCE_EVENT = "trajeto-preferences-change";
 
 export type MobileIntent = "route" | "stations" | "nearby" | "saved";
@@ -54,6 +56,37 @@ export function getLastTrip(): { origin: string; destination: string } | null {
 
 export type RecentTrip = { origin: string; destination: string; usedAt: string };
 
+export type RouteUsage = {
+  origin: string;
+  destination: string;
+  count: number;
+  lastUsed: string;
+};
+
+function isRouteUsage(value: unknown): value is RouteUsage {
+  return Boolean(
+    value && typeof value === "object" &&
+    typeof (value as RouteUsage).origin === "string" && (value as RouteUsage).origin.trim().length >= 3 &&
+    typeof (value as RouteUsage).destination === "string" && (value as RouteUsage).destination.trim().length >= 3 &&
+    typeof (value as RouteUsage).count === "number" && Number.isFinite((value as RouteUsage).count) && (value as RouteUsage).count >= 1 &&
+    typeof (value as RouteUsage).lastUsed === "string" && Number.isFinite(Date.parse((value as RouteUsage).lastUsed))
+  );
+}
+
+export function getRouteUsage(): RouteUsage[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "[]");
+    if (!Array.isArray(value)) return [];
+    return value
+      .filter(isRouteUsage)
+      .map(item => ({ ...item, count: Math.min(9999, Math.floor(item.count)) }))
+      .sort((a, b) => b.count - a.count || Date.parse(b.lastUsed) - Date.parse(a.lastUsed))
+      .slice(0, MAX_TRACKED_ROUTES);
+  } catch {
+    return [];
+  }
+}
+
 function isRecentTrip(value: unknown): value is RecentTrip {
   return Boolean(
     value && typeof value === "object" &&
@@ -101,6 +134,18 @@ export function rememberTrip(origin: string, destination: string) {
     )].slice(0, MAX_RECENT_TRIPS);
     localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
     localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: normalizedOrigin, destination: normalizedDestination }));
+
+    const routeKey = normalizedOrigin.toLocaleLowerCase("pt-BR") + "::" + normalizedDestination.toLocaleLowerCase("pt-BR");
+    const routeUsage = getRouteUsage();
+    const existing = routeUsage.find(item =>
+      item.origin.trim().toLocaleLowerCase("pt-BR") + "::" + item.destination.trim().toLocaleLowerCase("pt-BR") === routeKey,
+    );
+    const updated = existing
+      ? routeUsage.map(item => item === existing
+        ? { ...item, count: Math.min(9999, item.count + 1), lastUsed: trip.usedAt }
+        : item)
+      : [{ origin: normalizedOrigin, destination: normalizedDestination, count: 1, lastUsed: trip.usedAt }, ...routeUsage].slice(0, MAX_TRACKED_ROUTES);
+    localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(updated));
   } catch {}
   rememberIntent("route");
 }
