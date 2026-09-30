@@ -81,6 +81,12 @@
   .premium-surface { position: relative; isolation: isolate; }
   .premium-surface::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 12% 0%, rgba(199,255,60,.09), transparent 34%), radial-gradient(circle at 88% 18%, rgba(61,227,255,.08), transparent 30%); opacity: .9; z-index: -1; }
   .route-grid { background-color: #0B1014; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px), radial-gradient(circle at 72% 34%, rgba(61,227,255,.15), transparent 27rem); background-size: 34px 34px, 34px 34px, auto; }
+  .mobile-action { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; border: 1px solid rgba(255,255,255,.08); border-radius: 1rem; padding-inline: .9rem; font-size: .68rem; font-weight: 900; line-height: 1.15; transition: transform .16s ease, opacity .16s ease, background-color .16s ease, border-color .16s ease; }
+  .mobile-action-primary { background: #C7FF3C; color: #0B1014; border-color: transparent; box-shadow: 0 8px 24px rgba(199,255,60,.08); }
+  .mobile-action-secondary { background: rgba(255,255,255,.025); color: rgba(255,255,255,.72); }
+  .mobile-action-icon { display: inline-grid; min-height: 44px; min-width: 44px; place-items: center; border: 1px solid rgba(255,255,255,.08); border-radius: .85rem; transition: transform .16s ease, opacity .16s ease, background-color .16s ease; }
+  .mobile-action:active, .mobile-action-icon:active { transform: translateY(1px) scale(.985); }
+  .mobile-action:disabled, .mobile-action-icon:disabled { opacity: .35; cursor: not-allowed; }
   @media (min-width: 640px) { .container { padding-inline: 2rem; } }
   @media (max-width: 639px) {
     .container { padding-inline: 1rem; }
