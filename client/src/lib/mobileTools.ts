@@ -195,7 +195,7 @@ export function getSpeechRecognitionConstructor() {
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
 }
 
-export function startVoiceSearch(onResult: (text: string) => void, onError?: () => void) {
+export function startVoiceSearch(onResult: (text: string) => void, onError?: () => void, onEnd?: () => void) {
   const Recognition = getSpeechRecognitionConstructor();
   if (!Recognition) return null;
   const recognition = new Recognition();
@@ -207,6 +207,7 @@ export function startVoiceSearch(onResult: (text: string) => void, onError?: () 
     if (transcript) onResult(transcript);
   };
   recognition.onerror = () => onError?.();
+  recognition.onend = () => onEnd?.();
   try {
     recognition.start();
   } catch {
