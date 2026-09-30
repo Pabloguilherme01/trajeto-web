@@ -21,6 +21,17 @@ const routeTarget = (route: OfflineRoute) =>
   "&origem=" + encodeURIComponent(route.origin) +
   "&destino=" + encodeURIComponent(route.destination);
 
+function formatRouteAge(savedAt: string | undefined) {
+  if (!savedAt) return "idade indisponível";
+  const time = Date.parse(savedAt);
+  if (!Number.isFinite(time)) return "idade indisponível";
+  const hours = Math.floor(Math.max(0, Date.now() - time) / 3600000);
+  if (hours < 1) return "salva há menos de 1h";
+  if (hours < 24) return `salva há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `salva há ${days}d`;
+}
+
 export default function TripPrepCard() {
   const [checked, setChecked] = useState<Record<string, boolean>>(() => {
     try {
@@ -125,6 +136,7 @@ export default function TripPrepCard() {
           <Smartphone className="size-4 text-[#3DE3FF]" />
           <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#8FA3AC]">Rotas locais</p>
           <p className="mt-1 text-xs font-extrabold">{storageError ? "Armazenamento indisponível" : savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas")}</p>
+          {latestOfflineRoute && !storageError && <p className="mt-1 text-[0.55rem] font-semibold text-[#8FA3AC]">{formatRouteAge(latestOfflineRoute.savedAt)} · referência local</p>}
         </div>
       </div>
 
