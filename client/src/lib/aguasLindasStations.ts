@@ -61,7 +61,7 @@ export const AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE = {
   source: "Torêva / consulta empresarial",
   note: "Referência externa de 31 empresas ativas no CNAE; não substitui a base oficial de revendedores autorizados da ANP.",
 } as const;
-export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = null;
+export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 33;
 
 export const AGUAS_LINDAS_ANP_CATALOG_REFERENCE = {
   count: 33,
