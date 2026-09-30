@@ -36,7 +36,16 @@ jobs:
         run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund --prefer-offline
 
       - name: Sincronizar preços ANP por posto
-        run: node scripts/sync-anp-prices-aguas-lindas.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npm run sync:anp:precos:aguas-lindas; then
+            echo "Snapshot de preços ANP atualizado."
+          elif [ -f client/public/data/aguas-lindas-anp-precos.json ]; then
+            echo "ANP preços indisponível agora; snapshot anterior preservado."
+          else
+            echo "ANP preços indisponível agora; nenhuma amostra individual nova foi materializada."
+          fi
 
       - name: Commit snapshot
         run: |
