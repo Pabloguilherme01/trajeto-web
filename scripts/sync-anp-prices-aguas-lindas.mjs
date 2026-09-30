@@ -1,11 +1,28 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import * as XLSX from "xlsx";
-import { normalizeAnpPriceProduct, preferredUnit } from "../shared/anpPrices.ts";
 
 const PAGE_URL = "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/levantamento-de-precos-de-combustiveis-ultimas-semanas-pesquisadas";
 const OUTPUT = new URL("../client/public/data/aguas-lindas-anp-precos.json", import.meta.url);
 
 const norm = value => String(value ?? "").trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+
+
+function normalizeProduct(value) {
+  const key = norm(value);
+  if (key.includes("gasolina comum") || key === "gasolina") return "gasolina-comum";
+  if (key.includes("gasolina aditivada")) return "gasolina-aditivada";
+  if (key.includes("etanol")) return "etanol";
+  if (key.includes("diesel s10")) return "diesel-s10";
+  if (key.includes("diesel s500")) return "diesel-s500";
+  if (key.includes("glp") || key.includes("13 kg") || key.includes("p13")) return "glp-p13";
+  if (key.includes("gnv") || key.includes("gas natural")) return "gnv";
+  return "outro";
+}
+function unitFor(productKey) {
+  if (productKey === "glp-p13") return "13kg";
+  if (productKey === "gnv") return "m3";
+  return "L";
+}
 
 function parseNumber(value) {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
@@ -68,7 +85,7 @@ for (const sheetName of workbook.SheetNames) {
     const price = parseNumber(pick(row, ["preco de revenda", "preco revenda", "preço de revenda", "valor de venda", "preco"]) );
     if (!product || price == null) continue;
 
-    const productKey = normalizeAnpPriceProduct(product);
+    const productKey = normalizeProduct(product);
     const collectionDate = dateToIso(pick(row, ["data da coleta", "data coleta", "data coleta preço"]));
     output.push({
       cnpj,
@@ -80,7 +97,7 @@ for (const sheetName of workbook.SheetNames) {
       produto: product,
       productKey,
       salePrice: price,
-      unit: preferredUnit(productKey),
+      unit: unitFor(productKey),
       collectionDate,
       referencePeriod,
       source: "ANP",
