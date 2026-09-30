@@ -1,5 +1,6 @@
-import { ChevronRight, ExternalLink, MapPinned, Search, ShieldCheck, Siren, WifiOff } from "lucide-react";
+import { ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
 import { useMemo, useState } from "react";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, vibration } from "@/lib/mobileTools";
 import {
   OFFLINE_DESTINATION_CATEGORIES,
   searchOfflineDestinations,
@@ -27,6 +28,17 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
 
   const choose = (destination: OfflineDestination) => {
     onSelectDestination(destination);
+  };
+
+  const navigate = (destination: OfflineDestination) => {
+    const provider = getPreferredNavigationProvider();
+    const url = provider === "waze"
+      ? buildWazeNavigationUrl(destination.address)
+      : provider === "apple"
+        ? buildAppleMapsDirectionsUrl(destination.address)
+        : buildGoogleMapsDirectionsUrl("", destination.address, "driving", true);
+    window.open(url, "_blank", "noopener,noreferrer");
+    vibration(8);
   };
 
   return (
@@ -100,16 +112,27 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-[0.59rem] leading-relaxed text-white/42">{destination.address}</p>
                 <p className="mt-2 line-clamp-2 text-[0.56rem] leading-relaxed text-white/28">{destination.description}</p>
+                <p className="mt-2 text-[0.48rem] font-bold text-white/25">Fonte: {destination.sourceLabel}</p>
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => choose(destination)}
                 className="mobile-action mobile-action-primary min-h-11"
+                aria-label={"Usar " + destination.name + " como destino"}
               >
                 Usar como destino
+                <ChevronRight className="ml-auto size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(destination)}
+                className="mobile-action mobile-action-secondary min-h-11"
+                aria-label={"Abrir navegação para " + destination.name}
+              >
+                Navegar
                 <ChevronRight className="ml-auto size-4" />
               </button>
               <a
