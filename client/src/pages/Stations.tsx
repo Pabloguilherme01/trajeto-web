@@ -212,8 +212,8 @@ export default function Stations() {
     const official = anpStations
       .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
       .map(station => ({
-        id: `anp-${station.cnpj}`,
-        name: station.razaoSocial || `Posto ${station.cnpj}`,
+        id: "anp-" + station.cnpj,
+        name: station.razaoSocial || "Posto " + station.cnpj,
         address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
         lat: station.latitude as number,
         lng: station.longitude as number,
@@ -222,58 +222,70 @@ export default function Stations() {
         source: "ANP" as const,
       }));
 
-    // Mesmo sem snapshot ANP disponível no runtime estático, usa as coordenadas
-    // já consolidadas no catálogo local como segunda camada de cobertura.
-    const local = aguasLindasCatalog
-      .filter(station => Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude))
-      .map(station => ({
-        id: `local-${station.cnpj}`,
-        name: station.displayName || station.legalName,
-        address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
-        lat: Number(station.anp?.latitude),
-        lng: Number(station.anp?.longitude),
-        cnpj: station.cnpj,
-        brand: station.brand || station.mapData?.observedBrand,
-        source: "local" as const,
+    const local = aguasLindasCatalog.map(station => ({
+      id: "local-" + station.cnpj,
+      name: station.displayName || station.legalName,
+      address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
+      ...(Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude)
+        ? { lat: Number(station.anp?.latitude), lng: Number(station.anp?.longitude) }
+        : {}),
+      cnpj: station.cnpj,
+      brand: station.brand || station.mapData?.observedBrand,
+      source: "local" as const,
+    }));
+
+    const directory = directoryCards.map(item => ({
+      id: "directory-" + item.key,
+      name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
+      address: [
+        item.anp?.endereco || item.local?.address,
+        item.anp?.complemento,
+        item.anp?.bairro || item.local?.neighborhood,
+        item.anp?.municipio || "Águas Lindas de Goiás",
+        item.anp?.uf || "GO",
+      ].filter(Boolean).join(" · "),
+      ...(Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)
+        ? { lat: Number(item.anp?.latitude), lng: Number(item.anp?.longitude) }
+        : Number.isFinite(item.local?.anp?.latitude) && Number.isFinite(item.local?.anp?.longitude)
+          ? { lat: Number(item.local?.anp?.latitude), lng: Number(item.local?.anp?.longitude) }
+          : {}),
+      cnpj: item.anp?.cnpj || item.local?.cnpj || null,
+      brand: item.anp?.distribuidora || item.local?.brand || item.local?.mapData?.observedBrand || null,
+      source: "local" as const,
+    }));
+
+    const live = liveStations
+      .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+      .map(item => ({
+        id: item.placeId,
+        placeId: item.placeId,
+        name: item.name,
+        address: item.address,
+        lat: item.lat,
+        lng: item.lng,
+        cnpj: null,
+        brand: null,
+        source: "Google" as const,
       }));
 
     const seen = new Set<string>();
-    const keyFor = (station: StationMapItem) =>
-      station.cnpj
+    const merged: StationMapItem[] = [];
+    for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
+      const key = station.cnpj
         ? "cnpj:" + station.cnpj
         : station.placeId
           ? "place:" + station.placeId
-          : station.address
-            ? "address:" + normalize(station.address)
-            : `coord:${station.lat.toFixed(4)},${station.lng.toFixed(4)}`;
-
-    const merged: StationMapItem[] = [];
-    for (const station of [
-      ...official,
-      ...local,
-      ...liveStations
-        .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
-        .map(item => ({
-          id: item.placeId,
-          placeId: item.placeId,
-          name: item.name,
-          address: item.address,
-          lat: item.lat,
-          lng: item.lng,
-          source: "Google" as const,
-        })),
-      ...offlineMap,
-    ]) {
-      const key = keyFor(station);
-      const coordinateKey = `coord:${station.lat.toFixed(4)},${station.lng.toFixed(4)}`;
-      if (seen.has(key) || seen.has(coordinateKey)) continue;
+          : "address:" + normalize(station.address || station.name);
+      const coordinateKey = typeof station.lat === "number" && typeof station.lng === "number"
+        ? "coord:" + station.lat.toFixed(5) + "," + station.lng.toFixed(5)
+        : null;
+      if (seen.has(key) || (coordinateKey && seen.has(coordinateKey))) continue;
       seen.add(key);
-      seen.add(coordinateKey);
+      if (coordinateKey) seen.add(coordinateKey);
       merged.push(station);
     }
-
     return merged;
-  }, [anpStations, liveStations, offlineMap]);
+  }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
   const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
