@@ -1356,7 +1356,15 @@ export default function Stations() {
               </button>
             )}
 
-            {compared.length > 0 && <StationComparePanel stations={compared} onClear={() => setCompareIds([])} />}
+            {compared.length > 0 && (
+              <StationComparePanel
+                stations={compared.map(station => ({
+                  ...station,
+                  distanceMeters: station.distanceMeters,
+                }))}
+                onClear={() => setCompareIds([])}
+              />
+            )}
 
             <section className="mt-4 rounded-3xl border border-white/8 bg-white/[.025] p-4">
               <details>
