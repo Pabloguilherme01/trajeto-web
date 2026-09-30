@@ -61,10 +61,11 @@ export default function MobilityInsightsCard() {
     };
 
     loadOffline();
+    const onOfflineRouteChange = () => { refresh(); loadOffline(); };
     window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener(mobileDestinationEvent, refresh);
     window.addEventListener(mobileVehicleEvent, refresh);
-    window.addEventListener(offlineRouteEvent, () => { refresh(); loadOffline(); });
+    window.addEventListener(offlineRouteEvent, onOfflineRouteChange);
     window.addEventListener("focus", refresh);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
@@ -72,7 +73,7 @@ export default function MobilityInsightsCard() {
       window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener(mobileDestinationEvent, refresh);
       window.removeEventListener(mobileVehicleEvent, refresh);
-      window.removeEventListener(offlineRouteEvent, loadOffline);
+      window.removeEventListener(offlineRouteEvent, onOfflineRouteChange);
       window.removeEventListener("focus", refresh);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
@@ -106,7 +107,6 @@ export default function MobilityInsightsCard() {
       totalUses,
       lastSevenDays,
       matchingOffline,
-      activeRouteKeys,
     };
   }, [stamp, offlineRoutes]);
 
