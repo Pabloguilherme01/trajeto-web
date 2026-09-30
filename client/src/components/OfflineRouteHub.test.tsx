@@ -19,12 +19,12 @@ describe("OfflineRouteHub", () => {
   it("filtra por categoria e usa busca textual local", () => {
     render(<OfflineRouteHub compact onSelectDestination={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
-    expect(screen.getByText("Hospital Bom Jesus")).toBeInTheDocument();
-    expect(screen.queryByText("Rodoviária")).not.toBeInTheDocument();
+    expect(screen.getByText("Hospital Bom Jesus")).toBeTruthy();
+    expect(screen.queryByText("Rodoviária")).toBeNull();
 
     fireEvent.change(screen.getByLabelText("Pesquisar ponto pronto offline"), {
       target: { value: "vapt vupt" },
     });
-    expect(screen.getByText("Vapt Vupt")).toBeInTheDocument();
+    expect(screen.getByText("Vapt Vupt")).toBeTruthy();
   });
 });
