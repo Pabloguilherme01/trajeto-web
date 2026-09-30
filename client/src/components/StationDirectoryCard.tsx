@@ -298,27 +298,6 @@ export function StationDirectoryCard({
           <Navigation className="mr-1 inline size-3.5" />
           Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}
         </button>
-        <button
-          type="button"
-          onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }}
-          className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] text-[0.55rem] font-black text-white/75 active:scale-[.98]"
-        >
-          Google
-        </button>
-        <button
-          type="button"
-          onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }}
-          className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] text-[0.55rem] font-black text-[#C9F7FF] active:scale-[.98]"
-        >
-          Waze
-        </button>
-        <button
-          type="button"
-          onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }}
-          className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] text-[0.55rem] font-black text-white/75 active:scale-[.98]"
-        >
-          Apple
-        </button>
         <a
           href={plannerUrl}
           className="flex min-h-11 items-center justify-center rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] text-[0.55rem] font-black text-[#D9FF91] active:scale-[.98]"
@@ -328,11 +307,41 @@ export function StationDirectoryCard({
         <button
           type="button"
           onClick={() => void share()}
-          className="col-span-2 min-h-11 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/65 active:scale-[.98]"
+          className="min-h-11 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/65 active:scale-[.98]"
         >
           <Share2 className="mr-1 inline size-3.5" /> Compartilhar
         </button>
       </div>
+
+      <details className="mt-2 rounded-xl border border-white/8 bg-white/[.02]">
+        <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between px-3 text-[0.54rem] font-black text-white/60">
+          <span>Escolher outro app de navegação</span>
+          <span className="text-[0.44rem] text-white/25">Google · Waze · Apple</span>
+        </summary>
+        <div className="grid grid-cols-3 gap-2 border-t border-white/8 p-2">
+          <button
+            type="button"
+            onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }}
+            className="min-h-10 rounded-lg border border-white/8 bg-white/[.03] text-[0.52rem] font-black text-white/70 active:scale-[.98]"
+          >
+            Google
+          </button>
+          <button
+            type="button"
+            onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }}
+            className="min-h-10 rounded-lg border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] text-[0.52rem] font-black text-[#C9F7FF] active:scale-[.98]"
+          >
+            Waze
+          </button>
+          <button
+            type="button"
+            onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }}
+            className="min-h-10 rounded-lg border border-white/10 bg-white/[.04] text-[0.52rem] font-black text-white/70 active:scale-[.98]"
+          >
+            Apple
+          </button>
+        </div>
+      </details>
 
       <details className="mt-3 overflow-hidden rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/70">
