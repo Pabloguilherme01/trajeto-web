@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
-import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { shareText, vibration } from "@/lib/mobileTools";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
 export default function Home() {
@@ -36,22 +36,22 @@ export default function Home() {
     };
   }, []);
 
-  const searchStations = (value: string) => {
+  const searchPlaces = (value: string) => {
     const query = value.trim();
     if (query.length < 3) {
       setMessage("Digite pelo menos 3 caracteres.");
       return;
     }
     setMessage(null);
-    rememberIntent("stations");
+    rememberIntent("explore");
     rememberSearch(query);
     vibration();
-    setLocation(appUrl("/postos") + "?q=postos&busca=" + encodeURIComponent(query));
+    setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(query));
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    searchStations(input);
+    searchPlaces(input);
   };
 
   const findNearby = () => {
@@ -59,7 +59,7 @@ export default function Home() {
     rememberIntent("nearby");
     setMessage(null);
     if (!online || !navigator.geolocation) {
-      setLocation(buildNearbyStationsUrl(appUrl("/postos")));
+      setLocation(appUrl("/mapa"));
       return;
     }
     setLocating(true);
@@ -67,7 +67,7 @@ export default function Home() {
       position => {
         setLocating(false);
         vibration(16);
-        setLocation(buildNearbyStationsUrl(appUrl("/postos"), position.coords.latitude, position.coords.longitude));
+        setLocation(appUrl("/mapa") + "?lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
       },
       () => {
         setLocating(false);
@@ -115,7 +115,7 @@ export default function Home() {
             <span className="text-[#C7FF3C]">abastecer?</span>
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/40">
-            Pesquise por posto, bairro ou endereço. Depois compare preço, distância e qualidade dos dados antes de navegar.
+            Busque lugares, serviços, bairros ou referências. Depois veja no mapa, confira a fonte e escolha como chegar.
           </p>
         </section>
 
@@ -125,15 +125,15 @@ export default function Home() {
             <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
               <Search className="size-4 shrink-0 text-[#3DE3FF]" />
               <input
-                id="home-station-search"
+                id="home-place-search"
                 value={input}
                 onChange={event => { setInput(event.target.value); setMessage(null); }}
                 className="min-h-13 min-w-0 flex-1 bg-transparent text-base font-medium text-white outline-none placeholder:text-white/22"
-                placeholder="Buscar posto, bairro ou endereço"
+                placeholder="Posto, hospital, escola, Vapt Vupt, bairro…"
                 autoComplete="street-address"
                 enterKeyHint="search"
               />
-              <button type="submit" disabled={input.trim().length < 3} className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] disabled:opacity-25" aria-label="Pesquisar postos">
+              <button type="submit" disabled={input.trim().length < 3} className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] disabled:opacity-25" aria-label="Pesquisar na cidade">
                 <ArrowRight className="size-5" />
               </button>
             </div>
