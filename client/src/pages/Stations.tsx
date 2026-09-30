@@ -330,26 +330,6 @@ export default function Stations() {
     toast.message("Mapa local salvo neste aparelho.");
   };
 
-  const navigateItem = (key: string) => {
-    const item = directoryCards.find(card => card.key === key);
-    if (!item) return;
-    const coords = getDirectoryCoordinates(item);
-    const address = [
-      item.anp?.endereco || item.local?.address,
-      item.anp?.bairro || item.local?.neighborhood,
-      "Águas Lindas de Goiás",
-      "GO",
-    ].filter(Boolean).join(", ");
-    if (coords) {
-      const urls = openNavigation(coords.lat, coords.lng, item.local?.displayName || item.anp?.razaoSocial || "Posto");
-      const provider = getPreferredNavigationProvider();
-      const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
-      window.open(url, "_blank", "noopener,noreferrer");
-    } else {
-      window.open(buildGoogleMapsSearchUrl([item.local?.displayName || item.anp?.razaoSocial, address].filter(Boolean).join(", ")), "_blank", "noopener,noreferrer");
-    }
-  };
-
   const shareDirectory = async () => {
     try {
       await shareText(
