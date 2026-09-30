@@ -1,5 +1,6 @@
+import React, { useMemo, useState } from "react";
 import { ArrowRight, Bus, Fuel, HeartPulse, Landmark, LocateFixed, MapPinned, Navigation, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { resolveIntentQuery } from "@/lib/intentResolver";
