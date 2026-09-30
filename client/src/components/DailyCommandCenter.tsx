@@ -89,6 +89,7 @@ export default function DailyCommandCenter() {
   const activeId = selected === "automatico" ? automatic : selected;
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
   const completed = [favorite, lastTrip, vehicle, routes.length > 0].filter(Boolean).length;
+  const nextSetup = !favorite ? "destino" : !vehicle ? "veículo" : !lastTrip ? "primeira viagem" : routes.length === 0 ? "rota offline" : null;
   const readiness = [
     { label: "Destino", value: Boolean(favorite), detail: favorite ? favorite.label : "Cadastre um atalho", icon: MapPin },
     { label: "Veículo", value: Boolean(vehicle), detail: vehicle ? vehicle.name : "Ainda não cadastrado", icon: CarFront },
@@ -247,7 +248,7 @@ export default function DailyCommandCenter() {
             <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
               <CheckCircle2 className="size-4 text-[#C7FF3C]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Pronto</p>
-              <p className="mt-1 text-xs font-extrabold text-white">{completed}/4 itens</p>
+              <p className="mt-1 text-xs font-extrabold text-white">{completed}/4 itens</p><p className="mt-0.5 truncate text-[0.52rem] text-white/35">{nextSetup ? `Próximo: ${nextSetup}` : "Tudo preparado"}</p>
             </div>
           </div>
         </div>
@@ -287,7 +288,7 @@ export default function DailyCommandCenter() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4">
+        <div className="border-t border-white/8 px-5 py-3 sm:px-7"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-[0.55rem] font-black uppercase tracking-[.13em] text-[#71838C]">Atalhos do dia</p><span className="text-[0.55rem] font-bold text-white/35">{nextSetup ? `falta: ${nextSetup}` : "configuração completa"}</span></div></div>\n        <div className="grid grid-cols-2 sm:grid-cols-4">
           <a href={favorite ? appUrl("/planejar") + "?destino=" + encodeURIComponent(favorite.value) : appUrl("/planejar")} className="group min-h-24 border-r border-white/8 p-4 transition hover:bg-white/[.035]">
             <MapPin className="size-4 text-[#3DE3FF]" />
             <p className="mt-5 text-xs font-extrabold text-white">Meu destino</p>
