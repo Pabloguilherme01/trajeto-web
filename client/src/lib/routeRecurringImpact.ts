@@ -22,8 +22,8 @@ export function calculateRecurringRouteImpact(
   const monthlyMinutesDelta = deltaMinutesPerTrip != null && Number.isFinite(deltaMinutesPerTrip)
     ? deltaMinutesPerTrip * trips * WEEKS_PER_MONTH
     : null;
-  const costPerMinuteSaved = deltaMinutesPerTrip != null && deltaMinutesPerTrip < 0
-    ? Math.abs(deltaCostPerTrip) / Math.abs(deltaMinutesPerTrip)
+  const costPerMinuteSaved = deltaMinutesPerTrip != null && deltaMinutesPerTrip < 0 && deltaCostPerTrip > 0
+    ? deltaCostPerTrip / Math.abs(deltaMinutesPerTrip)
     : null;
 
   return { weeklyDelta, monthlyDelta, annualDelta, monthlyMinutesDelta, costPerMinuteSaved };
