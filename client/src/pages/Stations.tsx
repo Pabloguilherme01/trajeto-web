@@ -386,6 +386,7 @@ export default function Stations() {
                             <div className="min-w-0">
                               <p className="text-sm font-black text-white">{station.displayName}</p>
                               <p className="mt-1 text-[0.58rem] font-semibold text-white/35">{station.legalName} · CNPJ {station.cnpj}</p>
+                            <p className="mt-1 text-[0.5rem] leading-relaxed text-white/25">Identidade principal: CNPJ. Nome comercial, telefone, bandeira e horário podem variar entre fontes.</p>
                             </div>
                             <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] px-2 py-1 text-[0.46rem] font-black text-[#D9FF91]">{statusText}</span>
                           </div>
