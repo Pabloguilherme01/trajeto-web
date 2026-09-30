@@ -27,7 +27,7 @@ import {
   mobileDestinationEvent,
   saveMobileDestination,
 } from "@/lib/mobileDestinations";
-import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { getLastStation, getLastTrip, mobilePreferenceEvent, type LastStation } from "@/lib/mobilePreferences";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
@@ -51,6 +51,7 @@ const modeIcon: Record<DailyModeId, typeof Sparkles> = {
 export default function DailyCommandCenter() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [routes, setRoutes] = useState<OfflineRoute[]>([]);
+  const [lastStation, setLastStation] = useState<LastStation | null>(() => getLastStation());
   const [destinationVersion, setDestinationVersion] = useState(0);
   const [vehicleVersion, setVehicleVersion] = useState(0);
   const [selected, setSelected] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
@@ -62,6 +63,7 @@ export default function DailyCommandCenter() {
     const refresh = () => {
       setOnline(typeof navigator === "undefined" || navigator.onLine);
       void listOfflineRoutes().then(setRoutes).catch(() => setRoutes([]));
+      setLastStation(getLastStation());
       setDestinationVersion(value => value + 1);
       setVehicleVersion(value => value + 1);
     };
@@ -95,6 +97,7 @@ export default function DailyCommandCenter() {
     { label: "Veículo", value: Boolean(vehicle), detail: vehicle ? vehicle.name : "Ainda não cadastrado", icon: CarFront },
     { label: "Rota offline", value: routes.length > 0, detail: routes.length > 0 ? `${routes.length} preparada${routes.length === 1 ? "" : "s"}` : "Salve uma rota", icon: WifiOff },
     { label: "Última viagem", value: Boolean(lastTrip), detail: lastTrip ? "Pronta para repetir" : "Nenhuma registrada", icon: Route },
+    { label: "Último posto", value: Boolean(lastStation), detail: lastStation ? lastStation.name : "Nenhum consultado", icon: Fuel },
   ];
   const primary = active?.id === "repetir" && lastTrip
     ? {
@@ -170,7 +173,7 @@ export default function DailyCommandCenter() {
               </p>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:mt-6">
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5 lg:mt-6">
             {readiness.map(item => {
               const Icon = item.icon;
               return (
