@@ -29,11 +29,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Instalar dependências
+        run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund --prefer-offline
+
       - name: Sincronizar ANP cadastral
         run: node scripts/sync-anp-aguas-lindas.mjs
-
-      - name: Instalar dependência de leitura de planilha
-        run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund --prefer-offline
 
       - name: Sincronizar preços ANP por posto
         run: node scripts/sync-anp-prices-aguas-lindas.mjs
