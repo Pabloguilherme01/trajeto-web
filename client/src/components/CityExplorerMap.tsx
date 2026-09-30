@@ -95,6 +95,11 @@ export default function CityExplorerMap({category,center,online,onResults,onSele
       setError(null);
       return;
     }
+    if(category==="fuel" && localFuel.length){
+      onResults(localFuel);
+      await renderMarkers(localFuel);
+      return;
+    }
     setLoading(true);
     setError(null);
     try{
@@ -141,15 +146,8 @@ export default function CityExplorerMap({category,center,online,onResults,onSele
           evidence:[{label:"Enriquecimento geográfico",source:"Google",updatedAt:new Date().toISOString()}],
         };
       }).filter((value):value is PlaceEntity=>Boolean(value));
-      if(category==="fuel" && localFuel.length){
-        const localKeys=new Set(localFuel.map(item=>item.cnpj).filter(Boolean));
-        const merged=[...localFuel,...mapped.filter(item=>!localKeys.has(item.address||""))];
-        onResults(merged);
-        await renderMarkers(merged);
-      } else {
-        onResults(mapped);
-        await renderMarkers(mapped);
-      }
+      onResults(mapped);
+      await renderMarkers(mapped);
     }catch{
       setError("O mapa externo não respondeu agora. Os dados locais continuam disponíveis quando existirem.");
       if(category==="fuel" && localFuel.length){
