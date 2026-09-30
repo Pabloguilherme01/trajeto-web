@@ -111,8 +111,8 @@ export default function Home() {
         <section className="mt-8">
           <p className="text-[0.52rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Encontrar</p>
           <h1 className="mobile-title mt-2 font-display text-[clamp(2.7rem,12vw,5rem)] font-semibold leading-[.9] tracking-[-.075em]">
-            Onde você quer<br />
-            <span className="text-[#C7FF3C]">abastecer?</span>
+            O que você quer<br />
+            <span className="text-[#C7FF3C]">encontrar?</span>
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/40">
             Busque lugares, serviços, bairros ou referências. Depois veja no mapa, confira a fonte e escolha como chegar.
@@ -121,7 +121,7 @@ export default function Home() {
 
         <section className="mt-6">
           <form onSubmit={submit} className="rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 shadow-[0_22px_60px_rgba(0,0,0,.28)]">
-            <label htmlFor="home-place-search" className="sr-only">Buscar posto</label>
+            <label htmlFor="home-place-search" className="sr-only">Buscar na cidade</label>
             <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
               <Search className="size-4 shrink-0 text-[#3DE3FF]" />
               <input
