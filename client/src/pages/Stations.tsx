@@ -519,7 +519,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   };
 
   const handleMapStationSelect = (station: StationMapItem) => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
     const normalizedAddress = normalize(station.address);
     let targetCnpj = station.cnpj?.trim();
 
@@ -543,8 +543,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       return;
     }
 
-    // Um clique no marcador deve sempre revelar a ficha, mesmo se filtros antigos
-    // estiverem escondendo o posto no diretório.
+    const matchedLocal = directoryCards.find(item => (item.anp?.cnpj || item.local?.cnpj) === targetCnpj)?.local;
+    if (matchedLocal) {
+      setLocation(appUrl("/local/" + encodeURIComponent(matchedLocal.id)));
+      return;
+    }
+
     setDirectorySearch("");
     setNeighborhoodFilter("all");
     setBrandFilter("all");
