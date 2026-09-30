@@ -1376,3 +1376,646 @@ Uma nova capacidade deve preferencialmente conectar pelo menos duas entidades ou
 ## 50. Critério de aceitação final
 
 A arquitetura será considerada pronta quando uma missão puder ser criada, preparada, retomada e encerrada; múltiplas paradas puderem ser organizadas sem navegação própria; conflitos de horário/recursos forem detectados; rotas tiverem snapshots e procedência; custos diferenciarem planejado/calculado/registrado; cálculos forem auditáveis; dados incompletos/contraditórios forem identificados sem destruição silenciosa; missões puderem ser recuperadas offline; importações forem validadas antes de alterar dados; compartilhamentos mostrarem exatamente o que será enviado; provedores declararem capacidades; falhas externas degradarem com segurança; storage puder ser validado/recuperado; eventos puderem ser reproduzidos; busca puder encontrar entidades e executar ações; UI se adapte ao contexto sem duplicação; jornadas críticas tenham regressão; diagnósticos não exponham dados sensíveis; não haja promessa de dados inexistentes; o produto permaneça leve e compatível com GitHub Pages; e nenhuma feature exista apenas para aumentar quantidade.
+
+
+## 51. Evolução máxima — dados externos e mobilidade multimodal
+
+Esta extensão adiciona capacidades concretas de dados públicos e multimodalidade sem presumir cobertura local. A ANTT mantém atualmente política/plano de dados abertos 2025–2027 e seu portal disponibiliza conjuntos em CSV/JSON, incluindo empresas, veículos, autorizações e dados MONITRIIP de viagens e paradas. Essas fontes devem ser tratadas como catálogos externos versionados, com período, atualização, licença e limitações explícitas. citeturn0search0turn0search1turn0search6
+
+### 51.1 Mobility Data Registry
+
+Criar um registro interno de fontes contendo:
+
+- nome da fonte;
+- organização;
+- URL;
+- formato;
+- licença;
+- cobertura geográfica;
+- período;
+- frequência de atualização;
+- última atualização conhecida;
+- esquema;
+- campos disponíveis;
+- status de integração;
+- limitações.
+
+A fonte não deve ser considerada atual apenas porque o registro existe.
+
+### 51.2 Source Health
+
+Para cada fonte integrada, registrar fatos observáveis:
+
+- última consulta;
+- sucesso/erro;
+- latência quando mensurável;
+- quantidade de registros recebidos;
+- alteração de schema;
+- data do dado;
+- data do metadata.
+
+Não transformar isso em uma nota subjetiva da fonte.
+
+### 51.3 Data Freshness Matrix
+
+Uma matriz central:
+
+| Fonte | Último dado | Último metadata | Cobertura | Estado |
+|---|---|---|---|---|
+| fonte A | timestamp | timestamp | região | disponível |
+| fonte B | timestamp | timestamp | nacional | antiga |
+| fonte C | desconhecido | timestamp | parcial | limitada |
+
+### 51.4 ANTT Open Mobility Adapter
+
+Preparar adapter para fontes públicas da ANTT quando houver relação direta com a missão do usuário.
+
+Possíveis conjuntos:
+
+- empresas habilitadas;
+- veículos habilitados;
+- autorizações;
+- viagens;
+- paradas;
+- bilhetes;
+- indicadores MONITRIIP.
+
+O portal atual possui dezenas de conjuntos de passageiros e formatos CSV/JSON; a integração deve selecionar apenas os datasets com utilidade real para a experiência do Trajeto. citeturn0search1turn0search5
+
+### 51.5 MONITRIIP Data Adapter
+
+Quando tecnicamente adequado, permitir ingestão de dados públicos MONITRIIP para análises de transporte coletivo.
+
+O MONITRIIP oficial descreve dados de viagens, bilhetes e indicadores, e o portal atual disponibiliza bases públicas de serviço regular, fretado e semiurbano. citeturn0search4turn0search6
+
+### 51.6 Semiurbano Data Explorer
+
+Quando houver cobertura compatível, permitir explorar:
+
+- linha;
+- sentido;
+- viagem programada;
+- início;
+- tarifa máxima;
+- paradas;
+- distância;
+- tempo de viagem;
+- velocidade média;
+- pontos de localização.
+
+Esses campos existem na base pública MONITRIIP semiurbana atualmente publicada, mas a UI deve informar a data da base e não tratá-la como trânsito em tempo real. citeturn0search3
+
+### 51.7 Public Transport Snapshot
+
+Criar snapshots de transporte público com:
+
+- fonte;
+- período;
+- linha;
+- viagem;
+- parada;
+- horário;
+- tarifa quando disponível;
+- timestamp do dataset.
+
+O snapshot não deve ser apresentado como horário atual se a fonte não for tempo real.
+
+### 51.8 Multimodal Domain
+
+Evoluir o domínio de transporte para suportar:
+
+- carro;
+- motocicleta;
+- bicicleta;
+- caminhada;
+- transporte público;
+- combinação de modos.
+
+A implementação inicial pode manter apenas os modos já suportados, mas os contratos não devem codificar toda mobilidade como carro.
+
+### 51.9 Multimodal Mission
+
+Uma missão futura poderá representar:
+
+**caminhada → ônibus → caminhada**
+
+ou
+
+**carro → estacionamento → caminhada**
+
+Cada etapa possuirá seu próprio provedor, evidência e disponibilidade.
+
+### 51.10 Mode Availability
+
+A interface deve mostrar somente modos realmente suportados para a consulta atual.
+
+Exemplo:
+
+- carro: disponível;
+- ônibus: dados de horário disponíveis;
+- bicicleta: indisponível;
+- trânsito: indisponível.
+
+### 51.11 Multimodal Comparison
+
+Quando houver dados comparáveis, permitir comparar:
+
+- duração;
+- custo conhecido;
+- distância;
+- número de etapas;
+- horários;
+- dados disponíveis.
+
+Não criar uma classificação universal de “melhor transporte”.
+
+## 52. Dados locais e públicos juntos
+
+### 52.1 Personal + Public Data Boundary
+
+Separar claramente:
+
+**Meu dado**
+
+de
+
+**Dado público**
+
+e
+
+**Dado calculado a partir dos dois**.
+
+### 52.2 Provenance Composition
+
+Um cálculo combinado deve mostrar suas duas origens.
+
+Exemplo:
+
+**custo estimado**
+
+→ distância de provedor externo  
+→ consumo registrado pelo usuário  
+→ preço registrado pelo usuário.
+
+### 52.3 Public Data Snapshot
+
+Fontes públicas importantes podem ser armazenadas localmente com:
+
+- dataset;
+- versão;
+- período;
+- timestamp;
+- hash/identificador quando disponível;
+- schema.
+
+### 52.4 Dataset Change Detector
+
+Detectar:
+
+- novo campo;
+- campo removido;
+- alteração de tipo;
+- alteração de metadata;
+- mudança de periodicidade.
+
+Não aplicar alteração de schema automaticamente aos dados do usuário.
+
+### 52.5 Source Migration Assistant
+
+Quando uma fonte alterar seu schema:
+
+1. detectar;
+2. comparar;
+3. mostrar impacto;
+4. preparar adapter;
+5. testar;
+6. ativar somente após validação.
+
+## 53. Mobility Intelligence baseada em evidências
+
+### 53.1 Evidence Graph
+
+Relacionar:
+
+**fonte → dataset → registro → cálculo → missão → decisão**
+
+Isso permite rastrear qualquer informação importante.
+
+### 53.2 Decision Trace
+
+Para cada decisão contextual:
+
+**por que apareceu → quais dados sustentaram → quais dados faltaram → qual alternativa existia.**
+
+### 53.3 Trust Summary
+
+Uma síntese compacta:
+
+- fonte;
+- frescor;
+- cobertura;
+- cálculo;
+- limitações.
+
+### 53.4 Data Contradiction Center
+
+Quando duas fontes reais divergirem:
+
+> Fonte A informa X  
+> Fonte B informa Y
+
+O sistema não escolhe silenciosamente uma delas. Mostra a divergência e a política aplicada.
+
+### 53.5 Data Confidence Breakdown
+
+Não usar nota única. Exibir dimensões independentes:
+
+- presença;
+- frescor;
+- cobertura;
+- consistência;
+- procedência.
+
+## 54. Inteligência temporal
+
+### 54.1 Mobility Calendar 2.0
+
+Relacionar:
+
+- missão;
+- compromisso;
+- veículo;
+- manutenção;
+- documento;
+- janela;
+- viagem recorrente.
+
+### 54.2 Departure Planner
+
+Calcular janela de saída a partir de:
+
+**horário alvo + duração conhecida/estimada + paradas + buffer.**
+
+### 54.3 Schedule Conflict Graph
+
+Visualizar conflitos:
+
+**missão A ↔ veículo ↔ missão B**
+
+**missão ↔ manutenção**
+
+**missão ↔ janela de documento**
+
+### 54.4 Temporal Exceptions
+
+Uma rotina pode possuir exceção explicitamente registrada:
+
+> Hoje usar veículo B.
+
+A exceção não altera a preferência permanente.
+
+### 54.5 Mission Deadline
+
+Missões podem possuir prazo:
+
+- hoje;
+- data;
+- horário;
+- janela.
+
+Quando expirar:
+
+**expirada → encerrar ou reabrir como nova.**
+
+## 55. Missões avançadas
+
+### 55.1 Mission Pack
+
+Pacote operacional completo para uma viagem.
+
+### 55.2 Mission Passport
+
+Identidade persistente da missão com:
+
+- versão;
+- estado;
+- origem;
+- destino;
+- etapas;
+- recursos;
+- eventos;
+- resultado.
+
+### 55.3 Mission Branch
+
+Permitir duplicar uma missão para experimentar uma configuração alternativa sem alterar a original.
+
+### 55.4 Scenario Isolation
+
+Toda simulação fica separada da missão real.
+
+### 55.5 Mission Replay
+
+Reproduzir eventos e decisões conhecidos em ordem temporal.
+
+### 55.6 Mission Closure
+
+Encerramento explícito com:
+
+- concluída;
+- parcial;
+- interrompida;
+- cancelada.
+
+## 56. Mobility Resource Intelligence
+
+### 56.1 Resource Availability
+
+Veículos e recursos possuem disponibilidade temporal.
+
+### 56.2 Resource Utilization
+
+Resumo factual:
+
+- quantas missões;
+- período;
+- último uso;
+- indisponibilidades registradas.
+
+### 56.3 Resource Conflict Resolver
+
+Mostrar conflito e opções:
+
+- trocar recurso;
+- mudar horário;
+- dividir missão;
+- manter conflito conscientemente.
+
+### 56.4 Resource History
+
+Relacionar recursos às missões e eventos sem criar rastreamento contínuo.
+
+## 57. Recibos, documentos e comprovação
+
+### 57.1 Trip Receipt
+
+Ao concluir missão, gerar resumo estruturado.
+
+### 57.2 Evidence Receipt
+
+Para cálculos importantes, gerar uma pequena ficha com:
+
+- resultado;
+- entradas;
+- fórmula;
+- procedência;
+- timestamp.
+
+### 57.3 Document Bundle
+
+Permitir incluir documentos selecionados no Mission Pack.
+
+### 57.4 Receipt Matching
+
+Relacionar recibo a:
+
+- abastecimento;
+- despesa;
+- manutenção;
+- missão.
+
+Sempre com confirmação quando houver ambiguidade.
+
+## 58. Compartilhamento seguro
+
+### 58.1 Share Preview
+
+Antes de compartilhar:
+
+- campos incluídos;
+- campos omitidos;
+- origem;
+- destino;
+- validade do pacote.
+
+### 58.2 Expiring Share Package
+
+Quando existir infraestrutura adequada, permitir pacotes de compartilhamento com expiração explícita.
+
+### 58.3 Share Audit
+
+Registrar localmente:
+
+- quando;
+- qual pacote;
+- quais campos;
+- qual destino lógico.
+
+Não armazenar conteúdo sensível em logs.
+
+### 58.4 Public/Private Boundary
+
+Dados públicos externos nunca devem ser confundidos visualmente com dados privados do usuário.
+
+## 59. Dados públicos locais e preparação offline
+
+### 59.1 Public Data Cache
+
+Armazenar apenas datasets/snapshots necessários para recursos realmente utilizados.
+
+### 59.2 Dataset TTL
+
+Cada dataset terá política de validade específica.
+
+### 59.3 Offline Public Data
+
+Quando disponível, mostrar:
+
+**Fonte pública — snapshot de DD/MM/AAAA**
+
+e nunca:
+
+**dados atuais**
+
+quando não houver atualização atual.
+
+### 59.4 Offline Capability Matrix
+
+Mostrar por função:
+
+| Capacidade | Online | Offline |
+|---|---|---|
+| missão | ✓ | ✓ |
+| rota salva | ✓ | ✓ |
+| trânsito atual | depende | não |
+| snapshot público | ✓ | ✓ se salvo |
+| navegação externa | depende | depende |
+
+## 60. Segurança de integração
+
+### 60.1 External Input Boundary
+
+Todo dado externo deve ser tratado como não confiável antes de entrar no domínio.
+
+### 60.2 Schema Validation
+
+Validar:
+
+- tipo;
+- formato;
+- intervalo;
+- obrigatoriedade;
+- versão.
+
+### 60.3 Provider Payload Quarantine
+
+Resposta externa inesperada não deve quebrar o aplicativo.
+
+### 60.4 URL Safety
+
+Links externos devem:
+
+- usar destinos conhecidos;
+- evitar open redirect;
+- não incorporar parâmetros sensíveis desnecessários;
+- abrir somente ações explicitamente escolhidas.
+
+### 60.5 Secret Boundary
+
+Tokens, chaves e segredos nunca devem ser persistidos em localStorage público ou incluídos em logs.
+
+## 61. Qualidade e regressão máxima
+
+### 61.1 Data Contract Tests
+
+Cada adapter deve possuir fixtures de:
+
+- resposta válida;
+- resposta vazia;
+- schema antigo;
+- schema novo;
+- campo ausente;
+- tipo inválido;
+- timeout.
+
+### 61.2 Provider Contract Tests
+
+Testar a tradução:
+
+**provedor → domínio Trajeto**
+
+sem renderizar React.
+
+### 61.3 Golden Data Fixtures
+
+Conjuntos pequenos e determinísticos para:
+
+- rota;
+- missão;
+- combustível;
+- transporte público;
+- custos;
+- fontes públicas;
+- offline.
+
+### 61.4 Full Journey Simulator
+
+Simular:
+
+**criar missão → adicionar parada → selecionar recurso → calcular → salvar offline → abrir navegação → registrar resultado → encerrar → comparar com histórico.**
+
+### 61.5 Corruption Tests
+
+Testar:
+
+- localStorage inválido;
+- schema incompatível;
+- dados truncados;
+- importação parcial;
+- resposta externa inválida.
+
+### 61.6 Provider Failure Tests
+
+Simular:
+
+- timeout;
+- 500;
+- payload incompleto;
+- ausência de trânsito;
+- ausência de pedágio;
+- provedor indisponível.
+
+### 61.7 Accessibility Journey Tests
+
+Testar jornada completa, não apenas componentes isolados.
+
+## 62. Control Plane de dados
+
+Adicionar ao modo técnico:
+
+- registry de fontes;
+- datasets;
+- schema;
+- freshness;
+- capabilities;
+- migrations;
+- adapters;
+- cache;
+- requests;
+- erros;
+- recovery.
+
+Nenhuma dessas informações deve poluir o modo público.
+
+## 63. Critério final de expansão
+
+O Trajeto só deve adicionar um novo dataset externo quando:
+
+1. existir fonte identificável;
+2. houver utilidade concreta;
+3. houver cobertura compatível;
+4. houver período conhecido;
+5. houver metodologia/documentação suficiente;
+6. houver política de atualização;
+7. houver fallback/degraded state;
+8. houver testes;
+9. a integração não exigir dependência pesada;
+10. o dado melhorar uma decisão real do usuário.
+
+## 64. Ordem final atualizada
+
+1. Contratos e schema.
+2. storageSafety, recovery e migrations.
+3. Mobility Orchestrator.
+4. Mission Goal/Dependency/Constraint Engine.
+5. Destinos, templates e multi-stop.
+6. Agenda, saída e conflitos.
+7. Route Portfolio, fingerprints, snapshots e evidências.
+8. Offline Vault e Mission Pack.
+9. Event Bus, timeline e replay.
+10. Data Sufficiency, Lineage, Reconciliation e Anomaly Detector.
+11. Ledger, recibos, documentos e veículos.
+12. Mobility Data Registry.
+13. Provider/Source adapters.
+14. ANTT/public-data adapter quando houver caso de uso validado.
+15. Multimodal domain/contracts.
+16. Import/export/portabilidade.
+17. Privacy/share/security.
+18. Request budget/cache/dedup.
+19. Command Center.
+20. Accessibility/cognitive load/mobile.
+21. Control Plane/self-audit.
+22. Contract/golden/corruption/provider-failure tests.
+23. Build/CI verification.
+24. Code review.
+25. Só então merge/deploy.
+
+## 65. Novo critério de “nível máximo”
+
+O Trajeto não será considerado avançado porque possui muitas funções.
+
+Será considerado avançado quando conseguir:
+
+**entender o estado → identificar dependências → verificar dados → explicar limitações → preparar a missão → operar com conectividade limitada → registrar resultado → reconstruir o que aconteceu → aprender somente com evidência → proteger os dados → exportar o conhecimento → continuar funcionando sem depender de uma única fonte.**
+
+Essa é a arquitetura-alvo desta especificação.
