@@ -296,11 +296,11 @@ export default function Home() {
                 <p className="mt-2 text-xs font-extrabold text-white">{lastTrip ? "Repetir agora" : "Ainda não registrada"}</p>
                 <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Planeje a primeira viagem"}</p>
               </a>
-              <div className="min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 md:min-w-0">
+              <button type="button" onClick={() => openSearch(recentSearches[0] ?? "")} className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 text-left transition hover:border-[#3DE3FF]/35 active:scale-[.99] md:min-w-0" aria-label={recentSearches[0] ? `Reabrir pesquisa recente: ${recentSearches[0]}` : "Abrir pesquisa de postos"}>
                 <div className="flex items-center justify-between gap-2"><Search className="size-4 text-[#3DE3FF]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Pesquisa</span></div>
                 <p className="mt-2 text-xs font-extrabold text-white">{recentSearches.length} {recentSearches.length === 1 ? "consulta recente" : "consultas recentes"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{recentSearches[0] ?? "Suas próximas buscas aparecerão aqui"}</p>
-              </div>
+                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{recentSearches[0] ?? "Toque para iniciar uma busca"}</p>
+              </button>
               <a
                 href={lastStation ? appUrl("/postos") + "?station=" + encodeURIComponent(lastStation.placeId) + "&q=" + encodeURIComponent(lastStation.query || lastStation.name) : appUrl("/postos")}
                 className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 transition hover:border-[#FFB86B]/35 active:scale-[.99] md:min-w-0"
