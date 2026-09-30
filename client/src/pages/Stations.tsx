@@ -46,7 +46,8 @@ export default function Stations() {
     const filtered = matches.filter(station =>
       (neighborhoodFilter === "all" || station.neighborhood === neighborhoodFilter) &&
       (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter) &&
-      (!addressOnly || Boolean(station.address)) &&\n      (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP")
+      (!addressOnly || Boolean(station.address)) &&
+      (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP")
     );
     return [...filtered].sort((a, b) =>
       (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
@@ -295,7 +296,8 @@ export default function Stations() {
                 </select>
               </label>
               <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
-              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço</label>\n              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Dados ANP</label>
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço</label>
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Dados ANP</label>
             </div>
 
             {localDirectory.length ? (
