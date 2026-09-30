@@ -209,7 +209,7 @@ export default function Stations() {
 
   const mapStations = useMemo<StationMapItem[]>(() => {
     const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
-    const official = anpStations
+    const official: StationMapItem[] = anpStations
       .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
       .map(station => ({
         id: "anp-" + station.cnpj,
@@ -222,7 +222,7 @@ export default function Stations() {
         source: "ANP" as const,
       }));
 
-    const local = aguasLindasCatalog.map(station => ({
+    const local: StationMapItem[] = aguasLindasCatalog.map(station => ({
       id: "local-" + station.cnpj,
       name: station.displayName || station.legalName,
       address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
@@ -234,7 +234,7 @@ export default function Stations() {
       source: "local" as const,
     }));
 
-    const directory = directoryCards.map(item => ({
+    const directory: StationMapItem[] = directoryCards.map(item => ({
       id: "directory-" + item.key,
       name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
       address: [
@@ -254,7 +254,7 @@ export default function Stations() {
       source: "local" as const,
     }));
 
-    const live = liveStations
+    const live: StationMapItem[] = liveStations
       .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
       .map(item => ({
         id: item.placeId,
@@ -482,7 +482,13 @@ export default function Stations() {
       toast.message("Ainda não há coordenadas suficientes para salvar o mapa.");
       return;
     }
-    const normalized = mapStations.map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
+    const normalized = mapStations
+      .filter((station): station is StationMapItem & { id: string; lat: number; lng: number } =>
+        (typeof station.id === "string" || typeof station.placeId === "string") &&
+        typeof station.lat === "number" && Number.isFinite(station.lat) &&
+        typeof station.lng === "number" && Number.isFinite(station.lng)
+      )
+      .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
     const saved = cacheOfflineMapStations(normalized);
     if (saved) setOfflineMap(getOfflineMapStations().stations);
     toast.message(saved ? `Mapa salvo neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar o mapa local.");
