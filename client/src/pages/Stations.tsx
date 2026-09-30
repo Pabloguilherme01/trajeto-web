@@ -904,10 +904,7 @@ export default function Stations() {
                   <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-white/30">Referência municipal de preços</p>
                   <p className="mt-1 text-[0.56rem] text-white/45">{AGUAS_LINDAS_PRICE_REFERENCE.period} · ANP · não é preço individual em tempo real</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={saveMapOffline} className="min-h-9 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-[0.48rem] font-black text-white/55">Salvar mapa offline</button>
-                  <button type="button" onClick={() => void refreshStationData()} className="min-h-9 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-[0.48rem] font-black text-[#9FEFFF]">Atualizar</button>
-                </div>
+                <button type="button" onClick={() => void refreshStationData()} className="min-h-9 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-[0.48rem] font-black text-[#9FEFFF]">Atualizar dados</button>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-[0.52rem] text-white/45 sm:grid-cols-3">
                 <span>Gasolina <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
