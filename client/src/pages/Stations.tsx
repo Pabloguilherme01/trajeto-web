@@ -17,7 +17,7 @@ import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
-import { stationCatalogStatusLabel } from "@/lib/stationEntity";
+import { stationCatalogStatusLabel, stationDataConfidence } from "@/lib/stationEntity";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -124,6 +124,11 @@ export default function Stations() {
     }
     return cards;
   }, [aguasLindasCatalog, anpStations]);
+
+  const directoryConfidenceCount = useMemo(
+    () => directoryCards.filter(item => stationDataConfidence({ anp: item.anp, local: item.local }) >= 70).length,
+    [directoryCards],
+  );
 
   const directoryCardsFiltered = useMemo(() => {
     const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -935,7 +940,7 @@ export default function Stations() {
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
-              <button type="button" onClick={() => document.getElementById("complete-stations-title")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></button>
+              <div className="rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#D9FF91]">Confiança ≥70%</p><p className="mt-1 text-lg font-black text-[#D9FF91]">{directoryConfidenceCount}</p></div>
             </div>
 
             <div className="mt-3">
