@@ -18,24 +18,18 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const toRad = (value: number) => value * Math.PI / 180;
-  const earthKm = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * earthKm * Math.asin(Math.sqrt(a));
-}
-
-function isBroadAguasLindasQuery(value: string) {
-  const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  return normalized === "postos" ||
-    normalized === "aguas lindas" ||
-    normalized.includes("postos em aguas lindas") ||
-    normalized.includes("postos de aguas lindas");
-}
+import {
+  buildDirectoryCards,
+  buildStationMapItems,
+  directoryCardDistanceKm,
+  filterAndSortDirectoryCards,
+  filterLocalDirectory,
+  getLocalDirectoryFacets,
+  haversineKm,
+  isBroadAguasLindasQuery,
+  type DirectorySort,
+  type FuelFilter,
+} from "@/lib/stationDirectoryLogic";
 
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
@@ -57,7 +51,7 @@ export default function Stations() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
+  const [directorySort, setDirectorySort] = useState<DirectorySort>("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -71,14 +65,13 @@ export default function Stations() {
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
-  const [fuelFilter, setFuelFilter] = useState<"all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv">("all");
+  const [fuelFilter, setFuelFilter] = useState<FuelFilter>("all");
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
   const staticRuntime = isGitHubPagesRuntime();
-  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const broadAguasLindasQuery = isBroadAguasLindasQuery(query);
   const anpLiveQuery = trpc.stationDirectory.anp.useQuery(
     { municipio: "AGUASLINDASDEGOIAS", uf: "GO" },
@@ -88,87 +81,37 @@ export default function Stations() {
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
   const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
+  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
-    const matches = searchAguasLindasStations(query);
-    const filtered = matches.filter(station =>
-      (neighborhoodFilter === "all" || station.neighborhood === neighborhoodFilter) &&
-      (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter) &&
-      (!addressOnly || Boolean(station.address)) &&
-      (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP") &&
-      (!mappedOnly || Boolean(station.mapData))
-    );
-    return [...filtered].sort((a, b) =>
-      (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
-      a.displayName.localeCompare(b.displayName, "pt-BR")
-    );
+    return filterLocalDirectory(searchAguasLindasStations(query), {
+      neighborhood: neighborhoodFilter,
+      brand: brandFilter,
+      addressOnly,
+      verifiedOnly,
+      mappedOnly,
+    });
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
-  const localBrands = useMemo(() => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))).sort((a,b) => a.localeCompare(b, "pt-BR")), []);
-  const localNeighborhoods = useMemo(
-    () => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    []
+  const localFacets = useMemo(() => getLocalDirectoryFacets(aguasLindasCatalog), [aguasLindasCatalog]);
+  const localBrands = localFacets.brands;
+  const localNeighborhoods = localFacets.neighborhoods;
+
+  const directoryCards = useMemo(
+    () => buildDirectoryCards(aguasLindasCatalog, anpStations),
+    [aguasLindasCatalog, anpStations],
   );
 
-  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
-  const directoryCards = useMemo(() => {
-    const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
-    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
-      key: local.cnpj,
-      local,
-      anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
-    }));
-    for (const anp of anpStations) {
-      if (localByCnpj.has(anp.cnpj)) continue;
-      cards.push({ key: anp.cnpj, local: null, anp });
-    }
-    return cards;
-  }, [aguasLindasCatalog, anpStations]);
-
-  const directoryCardsFiltered = useMemo(() => {
-    const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const matches = directoryCards.filter(item => {
-      const text = [
-        item.local?.displayName,
-        item.local?.legalName,
-        item.local?.cnpj,
-        item.local?.neighborhood,
-        item.local?.address,
-        item.local?.brand,
-        item.anp?.razaoSocial,
-        item.anp?.cnpj,
-        item.anp?.bairro,
-        item.anp?.endereco,
-        item.anp?.distribuidora,
-      ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return !normalized || text.includes(normalized);
-    });
-
-    return [...matches].sort((a, b) => {
-      const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
-      if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) => {
-          const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-          const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-        };
-        const aCoords = getCoords(a);
-        const bCoords = getCoords(b);
-        const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
-        const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
-        return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      if (directorySort === "price") {
-        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
-        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
-        return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      if (directorySort === "brand") {
-        return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
-          stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-    });
-  }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj]);
+  const directoryCardsFiltered = useMemo(
+    () => filterAndSortDirectoryCards({
+      cards: directoryCards,
+      search: directorySearch,
+      sort: directorySort,
+      userCoords,
+      fuel: fuelFilter,
+      pricesByCnpj,
+    }),
+    [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj],
+  );
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -218,85 +161,16 @@ export default function Stations() {
     return all.filter(station => !seen.has(station.placeId) && (seen.add(station.placeId), true));
   }, [stationPages.data]);
 
-  const mapStations = useMemo<StationMapItem[]>(() => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
-    const official: StationMapItem[] = anpStations
-      .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
-      .map(station => ({
-        id: "anp-" + station.cnpj,
-        name: station.razaoSocial || "Posto " + station.cnpj,
-        address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
-        lat: station.latitude as number,
-        lng: station.longitude as number,
-        cnpj: station.cnpj,
-        brand: station.distribuidora,
-        source: "ANP" as const,
-      }));
-
-    const local: StationMapItem[] = aguasLindasCatalog.map(station => ({
-      id: "local-" + station.cnpj,
-      name: station.displayName || station.legalName,
-      address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
-      ...(Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude)
-        ? { lat: Number(station.anp?.latitude), lng: Number(station.anp?.longitude) }
-        : {}),
-      cnpj: station.cnpj,
-      brand: station.brand || station.mapData?.observedBrand,
-      source: "local" as const,
-    }));
-
-    const directory: StationMapItem[] = directoryCards.map(item => ({
-      id: "directory-" + item.key,
-      name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
-      address: [
-        item.anp?.endereco || item.local?.address,
-        item.anp?.complemento,
-        item.anp?.bairro || item.local?.neighborhood,
-        item.anp?.municipio || "Águas Lindas de Goiás",
-        item.anp?.uf || "GO",
-      ].filter(Boolean).join(" · "),
-      ...(Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)
-        ? { lat: Number(item.anp?.latitude), lng: Number(item.anp?.longitude) }
-        : Number.isFinite(item.local?.anp?.latitude) && Number.isFinite(item.local?.anp?.longitude)
-          ? { lat: Number(item.local?.anp?.latitude), lng: Number(item.local?.anp?.longitude) }
-          : {}),
-      cnpj: item.anp?.cnpj || item.local?.cnpj || null,
-      brand: item.anp?.distribuidora || item.local?.brand || item.local?.mapData?.observedBrand || null,
-      source: "local" as const,
-    }));
-
-    const live: StationMapItem[] = liveStations
-      .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
-      .map(item => ({
-        id: item.placeId,
-        placeId: item.placeId,
-        name: item.name,
-        address: item.address,
-        lat: item.lat,
-        lng: item.lng,
-        cnpj: null,
-        brand: null,
-        source: "Google" as const,
-      }));
-
-    const seen = new Set<string>();
-    const merged: StationMapItem[] = [];
-    for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
-      const key = station.cnpj
-        ? "cnpj:" + station.cnpj
-        : station.placeId
-          ? "place:" + station.placeId
-          : "address:" + normalize(station.address || station.name);
-      const coordinateKey = typeof station.lat === "number" && typeof station.lng === "number"
-        ? "coord:" + station.lat.toFixed(5) + "," + station.lng.toFixed(5)
-        : null;
-      if (seen.has(key) || (coordinateKey && seen.has(coordinateKey))) continue;
-      seen.add(key);
-      if (coordinateKey) seen.add(coordinateKey);
-      merged.push(station);
-    }
-    return merged;
-  }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
+  const mapStations = useMemo<StationMapItem[]>(
+    () => buildStationMapItems({
+      anpStations,
+      localStations: aguasLindasCatalog,
+      directoryCards,
+      liveStations: liveStations as MobileStation[],
+      offlineMap,
+    }),
+    [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap],
+  );
   const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
@@ -978,10 +852,6 @@ export default function Stations() {
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
-                .filter(item => fuelFilter === "all" || (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter) ?? false) || item.anp?.products?.some(product => {
-                  const text = (product.produto || "").toLocaleLowerCase("pt-BR");
-                  return fuelFilter === "gasolina-comum" ? text.includes("gasolina") && !text.includes("aditivada") : fuelFilter === "etanol" ? text.includes("etanol") : fuelFilter === "diesel-s10" ? text.includes("s10") : fuelFilter === "diesel-s500" ? text.includes("s500") : fuelFilter === "glp-p13" ? text.includes("glp") || text.includes("p13") : fuelFilter === "gnv" ? text.includes("gnv") : false;
-                }))
                 .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
@@ -991,12 +861,7 @@ export default function Stations() {
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
                   prices={pricesByCnpj.get(item.key) ?? []}
                   catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
-                  distanceKm={(() => {
-                    if (!userCoords) return null;
-                    const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-                    const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-                    return Number.isFinite(lat) && Number.isFinite(lng) ? haversineKm(userCoords.lat, userCoords.lng, lat, lng) : null;
-                  })()}
+                  distanceKm={directoryCardDistanceKm(item, userCoords)}
                   onToggleSaved={item.local || item.anp ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
