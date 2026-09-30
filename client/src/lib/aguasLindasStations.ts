@@ -64,10 +64,10 @@ export const AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE = {
 export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = null;
 
 export const AGUAS_LINDAS_ANP_CATALOG_REFERENCE = {
-  count: null,
+  count: 33,
   checkedAt: "2026-09-30",
   source: "Base oficial ANP disponível para exportação/API",
-  note: "Contagem municipal oficial ainda não materializada individualmente nesta versão; não apresentar estimativa como total oficial.",
+  note: "Snapshot municipal oficial materializado em 30/09/2026 com 33 CNPJs distintos retornados pela base usada no sincronismo.",
 } as const;
 
 export const AGUAS_LINDAS_PRICE_REFERENCE = {
@@ -82,7 +82,7 @@ export const AGUAS_LINDAS_PRICE_REFERENCE = {
   note: "Médias municipais da amostra semanal; não representam preço atual individual de cada posto.",
 } as const;
 
-export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-29";
+export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-30";
 export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
 export const AGUAS_LINDAS_DATA_POLICY = "ANP é a fonte primária para status cadastral; fontes secundárias apenas complementam nomes/endereço quando necessário.";
 
