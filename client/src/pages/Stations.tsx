@@ -868,7 +868,12 @@ export default function Stations() {
                   <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
                 </div>
 
-                <div className="mt-3 space-y-2">
+                <details className="mt-3 rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3.5 text-[0.58rem] font-black text-white/65">
+                    <span>Ver registros técnicos da ANP</span>
+                    <span className="text-[0.46rem] font-bold text-white/30">{Math.min(12, anpStations.length)} fichas · campos completos</span>
+                  </summary>
+                  <div className="space-y-2 border-t border-white/8 p-2.5">
                   {anpStations.slice(0, 12).map(station => (
                     <details key={station.cnpj} className="rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
                       <summary className="cursor-pointer list-none px-3.5 py-3">
@@ -897,8 +902,10 @@ export default function Stations() {
                       </div>
                     </details>
                   ))}
-                </div>
-                {anpStations.length > 12 && <p className="mt-3 text-center text-[0.55rem] text-white/25">Mostrando os primeiros 12 nesta visualização. O CSV contém todas as linhas retornadas pela ANP.</p>}
+                  </div>
+                  {anpStations.length > 12 && <p className="px-2.5 pb-2 text-center text-[0.55rem] text-white/25">Mostrando os primeiros 12. O CSV contém todas as linhas retornadas pela ANP.</p>}
+                </details>
+}
               </>
             )}
 
@@ -1110,7 +1117,7 @@ export default function Stations() {
             <div className="mt-3 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] p-3">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#C9F7FF]">Base oficial ANP</p>
-                <span className="text-[0.46rem] font-bold text-white/25">28/09/2026</span>
+                <span className="text-[0.46rem] font-bold text-white/25">{new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}</span>
               </div>
               <p className="mt-1 text-[0.55rem] leading-relaxed text-white/40">Cadastro oficial de revendedores em operação. A ausência de preço na semana pesquisada não indica fechamento ou ausência de autorização.</p>
               <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos","_blank","noopener,noreferrer")} className="mt-2 min-h-10 rounded-lg border border-white/8 px-3 text-[0.52rem] font-black text-white/60">Abrir base oficial da ANP</button>
