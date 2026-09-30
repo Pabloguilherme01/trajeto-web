@@ -47,7 +47,7 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Google Maps" });
     changeDestination("Hospital");
-    expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Google Maps" })).toBeNull();
     submit();
     await screen.findByRole("button", { name: "Google Maps" });
     fireEvent.click(screen.getByRole("button", { name: "Limpar" }));
