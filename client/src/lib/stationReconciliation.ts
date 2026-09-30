@@ -53,9 +53,9 @@ function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: num
 export function stationReferencesMatch(a: StationReference, b: StationReference) {
   const aCnpj = normalizedCnpj(a.cnpj);
   const bCnpj = normalizedCnpj(b.cnpj);
-  if (aCnpj && bCnpj) return aCnpj === bCnpj;
+  if (aCnpj && bCnpj && aCnpj === bCnpj) return true;
 
-  if (a.placeId && b.placeId) return a.placeId === b.placeId;
+  if (a.placeId && b.placeId && a.placeId === b.placeId) return true;
 
   const aCoords = coordinates(a);
   const bCoords = coordinates(b);
