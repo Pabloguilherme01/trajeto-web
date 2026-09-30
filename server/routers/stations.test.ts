@@ -8,7 +8,17 @@ describe("stationSearchInput", () => {
     expect(stationSearchInput.parse({ query: "Águas Lindas de Goiás, GO", cursor })).toEqual({
       query: "Águas Lindas de Goiás, GO",
       cursor,
+      limit: 20,
     });
+  });
+
+  it("aceita um lote econômico menor", () => {
+    expect(stationSearchInput.parse({ query: "postos", limit: 8 }).limit).toBe(8);
+  });
+
+  it("rejeita lotes fora do intervalo seguro", () => {
+    expect(() => stationSearchInput.parse({ query: "postos", limit: 5 })).toThrow();
+    expect(() => stationSearchInput.parse({ query: "postos", limit: 21 })).toThrow();
   });
 
   it("rejeita cursores maiores que o teto defensivo", () => {
