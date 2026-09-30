@@ -236,6 +236,8 @@ export function StationDirectoryCard({
           <p><strong className="text-white/65">ANP · origem:</strong> {anp?.origemInformacao || "não informada"}{anp?.observacao ? " · observação: " + anp.observacao : ""}</p>
           <p><strong className="text-white/65">Município/UF:</strong> {anp?.municipio || "Águas Lindas de Goiás"} / {anp?.uf || "GO"}</p>
           <p><strong className="text-white/65">Situação ANP/SIGAF:</strong> {anp?.situacaoConstatada || "não informada"} · {anp?.statusSigaf || "sem ocorrência informada"}</p>
+          <p><strong className="text-white/65">Origem cadastral API:</strong> {anp?.src || "não informada"}</p>
+          <p><strong className="text-white/65">PMQC retornado pela API:</strong> {anp?.inadimplenciaPMQC?.length ? JSON.stringify(anp.inadimplenciaPMQC) : "nenhum registro adicional retornado"}</p>
           <p><strong className="text-white/65">Origem:</strong> {anp?.origemInformacao || "não informada"} · obtido em {formatDate(anp?.dataObtencao)}</p>
           <p><strong className="text-white/65">Geografia:</strong> {coords ? coords.lat.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + coords.lng.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas consolidadas"} · validação {anp?.validacao || "—"} · acurácia {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : "—"} · SRID {anp?.srid || "—"}</p>
           <div className="rounded-xl border border-white/8 bg-black/10 p-2.5">
