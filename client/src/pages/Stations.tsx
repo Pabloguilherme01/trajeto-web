@@ -311,23 +311,9 @@ export default function Stations() {
       source: "local" as const,
     }));
 
-    const live: StationMapItem[] = liveStations
-      .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
-      .map(item => ({
-        id: item.placeId,
-        placeId: item.placeId,
-        name: item.name,
-        address: item.address,
-        lat: item.lat,
-        lng: item.lng,
-        cnpj: null,
-        brand: null,
-        source: "Google" as const,
-      }));
-
     const seen = new Set<string>();
     const merged: StationMapItem[] = [];
-    for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
+    for (const station of [...official, ...local, ...directory, ...offlineMap]) {
       const key = station.cnpj
         ? "cnpj:" + station.cnpj
         : station.placeId
@@ -342,7 +328,7 @@ export default function Stations() {
       merged.push(station);
     }
     return merged;
-  }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
+  }, [anpStations, aguasLindasCatalog, directoryCards, offlineMap]);
   const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
@@ -807,6 +793,7 @@ export default function Stations() {
                       <StationMap
                         stations={mapStations}
                         showTraffic={online}
+                        nearbyCenter={userCoords}
                         onSelectStation={handleMapStationSelect}
                       />
                     </div>
@@ -872,7 +859,7 @@ export default function Stations() {
                   <p className="mt-1 text-[0.6rem] leading-relaxed text-white/45">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis e navegáveis sem conexão.</p>
                 </div>
                 <div className="h-[min(68vh,620px)]">
-                  <StationMap stations={mapStations} showTraffic={false} />
+                  <StationMap stations={mapStations} showTraffic={false} nearbyCenter={userCoords} />
                 </div>
                 <div className="border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">{mapStations.length} referências armazenadas · {offlineMapAge}.</div>
               </section>
@@ -1132,7 +1119,7 @@ export default function Stations() {
 
             {showMap && !broadAguasLindasQuery && visibleStations.length > 0 && (
               <section id="station-results-map" className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
-                <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} /></div>
+                <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} nearbyCenter={userCoords} /></div>
               </section>
             )}
 
