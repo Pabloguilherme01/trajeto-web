@@ -1,4 +1,4 @@
-import { ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
+import { ChevronRight, ExternalLink, MapPinned, MessageCircle, Search, Siren, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { useMemo, useState } from "react";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWhatsAppShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
@@ -171,7 +171,7 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
                 aria-label={"Compartilhar " + destination.name + " no WhatsApp"}
                 title="WhatsApp"
               >
-                W
+                <MessageCircle className="size-4" />
               </a>
             </div>
           </article>
