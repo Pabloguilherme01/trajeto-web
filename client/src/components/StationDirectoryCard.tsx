@@ -4,7 +4,7 @@ import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
-import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
+import { stationDataConfidence, freshnessLabel, stationEvidence } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -89,6 +89,7 @@ export function StationDirectoryCard({
   const distributor = anp?.distribuidora || local?.brand || local?.mapData?.observedBrand || "Bandeira não consolidada";
   const primaryPrice = prices.find(item => item.productKey === "gasolina-comum") ?? prices[0] ?? null;
   const confidence = stationDataConfidence({ anp, local, price: primaryPrice });
+  const evidence = stationEvidence({ anp, local, price: primaryPrice });
   const priceDate = primaryPrice?.collectionDate ? new Date(primaryPrice.collectionDate).toLocaleDateString("pt-BR") : null;
   const products = useMemo(() => {
     const unique = new Map<string, AnpStation["products"][number]>();
@@ -222,6 +223,19 @@ export function StationDirectoryCard({
       <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[.02] px-3 py-2.5">
         <span className="text-[0.52rem] font-black text-white/45">Confiança dos dados</span>
         <span className="text-[0.58rem] font-black text-[#C9F7FF]">{confidence}% · fonte/data explícitas</span>
+      </div>
+      <div className="mt-2 rounded-2xl border border-white/8 bg-white/[.018] px-3 py-2.5" aria-label="Fontes e atualização dos dados">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[0.50rem] font-bold text-white/42">
+          {evidence.map(item => (
+            <span key={item.key}>
+              <strong className="text-white/60">{item.label}:</strong>{" "}
+              {item.source} · {item.at ? formatDate(item.at) : "sem data"}
+            </span>
+          ))}
+        </div>
+        <p className="mt-1 text-[0.48rem] leading-relaxed text-white/25">
+          A idade de cada informação é independente; preço ANP e funcionamento em mapa não significam estado em tempo real.
+        </p>
       </div>
 
 
