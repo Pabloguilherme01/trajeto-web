@@ -3,9 +3,9 @@ import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
 const steps = [
-  { n: "01", icon: RouteIcon, title: "Planeje", text: "Informe o destino. Você pode usar sua localização como origem ou digitar endereço/coordenadas." },
-  { n: "02", icon: Fuel, title: "Encontre", text: "Abra os postos, use “Perto de mim”, filtre por combustível e salve os favoritos." },
-  { n: "03", icon: MapPinned, title: "Navegue", text: "Veja a rota no Trajeto e, quando quiser trânsito ao vivo, abra Google Maps, Waze ou Apple Maps." },
+  { n: "01", icon: MapPinned, title: "Explore", text: "Abra o mapa, encontre postos e toque em uma referência para ver a ficha completa." },
+  { n: "02", icon: RouteIcon, title: "Planeje", text: "Informe o destino. O cálculo próprio é opcional e a navegação externa continua disponível." },
+  { n: "03", icon: Fuel, title: "Salve", text: "Guarde locais e rotas no aparelho para recuperar tudo depois, inclusive com conexão limitada." },
 ];
 
 export default function Help() {
@@ -21,7 +21,7 @@ export default function Help() {
         </header>
 
         <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
-          <p className="text-sm leading-relaxed text-white/60">O app foi organizado para três tarefas principais: planejar uma rota, encontrar um posto e recuperar o que você salvou. O restante fica como apoio, sem bloquear o fluxo principal.</p>
+          <p className="text-sm leading-relaxed text-white/60">O app foi organizado em quatro ações simples: abrir o mapa, planejar uma rota, encontrar postos e recuperar o que você salvou. O restante fica como apoio, sem bloquear o fluxo principal.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
             {steps.map(step => (
               <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0B1014] p-4">
@@ -43,7 +43,7 @@ export default function Help() {
             <p className="mt-1 text-xs text-white/45">Origem, destino, mapa, salvar e compartilhar.</p>
             <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir <ArrowRight className="size-3.5" /></span>
           </Link>
-          <Link href={appUrl("/postos") + "?q=postos"} className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.06] p-5">
+          <Link href={appUrl("/mapa")} className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.06] p-5">
             <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Começar</p>
             <p className="mt-2 text-lg font-black">Encontrar postos</p>
             <p className="mt-1 text-xs text-white/45">Mapa, fichas, filtros, favoritos e navegação.</p>
