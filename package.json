@@ -22,7 +22,8 @@
     "sync:anp:aguas-lindas": "node scripts/sync-anp-aguas-lindas.mjs",
     "prebuild": "node scripts/generate-pwa-icons.mjs",
     "test:e2e": "playwright test",
-    "prebuild:client": "node scripts/generate-pwa-icons.mjs"
+    "prebuild:client": "node scripts/generate-pwa-icons.mjs",
+    "sync:anp:precos:aguas-lindas": "node scripts/sync-anp-prices-aguas-lindas.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
