@@ -24,8 +24,8 @@ type Props = {
 };
 
 function statusLabel(value: ComparableStation["isOpen"]) {
-  if (value === true) return "Aberto";
-  if (value === false) return "Fechado";
+  if (value === true) return "Aberto · referência";
+  if (value === false) return "Fechado · referência";
   return "Não confirmado";
 }
 
