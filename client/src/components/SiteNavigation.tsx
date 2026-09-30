@@ -18,10 +18,11 @@ export default function SiteNavigation() {
   return (
     <nav aria-label="Navegação principal" className="hidden border-b border-white/8 bg-[#0B1014]/90 shadow-[0_10px_35px_rgba(0,0,0,.12)] backdrop-blur-xl md:block">
       <div className="container">
-        <div className="flex min-h-12 items-center gap-1 overflow-x-auto" role="list">
+        <ul className="flex min-h-12 items-center gap-1 overflow-x-auto">
           {items.map(({ href, label, icon: Icon, primary }) => {
             const active = current === href || (href !== "/" && current.startsWith(href + "/"));
             return (
+              <li key={href} className="shrink-0">
               <Link
                 key={href}
                 href={appUrl(href)}
@@ -40,10 +41,10 @@ export default function SiteNavigation() {
               </Link>
             );
           })}
-          <div className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D]">
+          <li className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D]">
             <span className="size-1.5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />
             Fluxo público · sem cadastro
-          </div>
+          </li>
         </div>
       </div>
     </nav>
