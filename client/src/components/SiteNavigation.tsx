@@ -16,9 +16,9 @@ export default function SiteNavigation() {
   const current = location.split("?")[0].replace(/\/$/, "") || "/";
 
   return (
-    <nav aria-label="Navegação principal" className="hidden border-b border-white/8 bg-[#0B1014]/95 backdrop-blur-xl md:block">
+    <nav aria-label="Navegação principal" className="hidden border-b border-white/8 bg-[#0B1014]/90 shadow-[0_10px_35px_rgba(0,0,0,.12)] backdrop-blur-xl md:block">
       <div className="container">
-        <div className="flex min-h-12 items-center gap-1 overflow-x-auto">
+        <div className="flex min-h-12 items-center gap-1 overflow-x-auto" role="list">
           {items.map(({ href, label, icon: Icon, primary }) => {
             const active = current === href || (href !== "/" && current.startsWith(href + "/"));
             return (
@@ -28,14 +28,15 @@ export default function SiteNavigation() {
                 aria-current={active ? "page" : undefined}
                 className={
                   primary
-                    ? "ml-1 inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg bg-[#C7FF3C] px-3.5 text-[0.68rem] font-extrabold text-[#0B1014] transition hover:bg-white"
+                    ? "group relative ml-1 inline-flex min-h-9 shrink-0 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3.5 text-[0.68rem] font-extrabold text-[#0B1014] shadow-[0_5px_18px_rgba(199,255,60,.12)] transition hover:bg-white"
                     : active
-                      ? "inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg bg-white/[0.09] px-3 text-[0.68rem] font-extrabold text-white ring-1 ring-white/10"
-                      : "inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-[0.68rem] font-bold text-[#91A3AC] transition hover:bg-white/[0.06] hover:text-white"
+                      ? "group relative inline-flex min-h-9 shrink-0 items-center gap-2 rounded-xl bg-white/[0.09] px-3 text-[0.68rem] font-extrabold text-white ring-1 ring-white/10"
+                      : "group relative inline-flex min-h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[0.68rem] font-bold text-[#91A3AC] transition hover:bg-white/[0.06] hover:text-white"
                 }
               >
                 <Icon className="size-3.5" aria-hidden="true" />
                 {label}
+                {active && !primary && <span className="absolute inset-x-3 -bottom-[1px] h-0.5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />}
               </Link>
             );
           })}
