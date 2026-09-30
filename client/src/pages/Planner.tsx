@@ -389,20 +389,19 @@ export default function Planner() {
           destination={destination}
           online={!offline}
           planned={Boolean(planned)}
-          distance={planned?.routes?.[0]?.distanceMeters ? (planned.routes[0].distanceMeters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km" : null}
-          duration={planned?.routes?.[0]?.durationSeconds ? minutes(planned.routes[0].durationSeconds) : null}
+          distance={planned ? selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km" : null}
+          duration={planned ? minutes(selectedRouteDuration) : null}
           onInvert={() => {
-            const nextOrigin = destination;
-            setDestination(origin);
-            setOrigin(nextOrigin);
+            const nextOrigin = origin;
+            setOrigin(destination);
+            setDestination(nextOrigin);
             setFormError(null);
           }}
           onNavigate={planned ? openDestinationNavigation : undefined}
           onShare={planned ? shareRoute : undefined}
           onSave={planned ? saveCurrentRouteOffline : undefined}
           onOpenSaved={() => setLocation(appUrl("/planejar?salvos=1"))}
-        />
-        {offline && <section role="status" aria-live="polite" className="mb-6 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]">
+        />        {offline && <section role="status" aria-live="polite" className="mb-6 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]">
           <div className="flex items-start gap-3">
             <WifiOff className="mt-0.5 size-4 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -564,28 +563,28 @@ export default function Planner() {
           </div>
         </section>
 
-        {planned && <section className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Resumo da rota">
-          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+        {planned && <section className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0" aria-label="Resumo da rota">
+          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#3DE3FF]">Distância</p>
             <p className="mt-1 text-lg font-black text-white">{selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
             <p className="text-[0.58rem] text-white/45">rota selecionada</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]">Tempo</p>
             <p className="mt-1 text-lg font-black text-white">{minutes(selectedRouteDuration)}</p>
             <p className="text-[0.58rem] text-white/45">estimativa atual</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#BDA5FF]">Paradas</p>
             <p className="mt-1 text-lg font-black text-white">{planned.stops.length}</p>
             <p className="text-[0.58rem] text-white/45">encontradas na rota</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFB86B]">Trânsito</p>
             <p className="mt-1 text-lg font-black text-white">{selectedRoute?.staticDurationSeconds != null ? Math.max(0, Math.round((selectedRouteDuration - selectedRoute.staticDurationSeconds) / 60)) + " min" : "—"}</p>
             <p className="text-[0.58rem] text-white/45">{selectedRoute?.staticDurationSeconds != null ? "acréscimo sobre o fluxo livre" : "dado não disponível"}</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFC928]">ANP</p>
             <p className="mt-1 text-lg font-black text-white">{planned.priceCoverage}</p>
             <p className="text-[0.58rem] text-white/45">referências vinculadas</p>
