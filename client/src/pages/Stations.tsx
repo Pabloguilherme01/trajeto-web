@@ -395,6 +395,7 @@ export default function Stations() {
                           ) : (
                             <p className="mt-2 text-[0.62rem] leading-relaxed text-white/30">Endereço físico não consolidado nesta coleta.</p>
                           )}
+                          <p className="mt-2 text-[0.54rem] leading-relaxed text-white/25">{station.sourceNote}</p>
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
