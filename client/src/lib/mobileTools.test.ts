@@ -66,7 +66,10 @@ describe("mobile tools", () => {
     expect(url).toContain("https://m.uber.com/looking?");
     expect(url).toContain("pickup=my_location");
     expect(url).toContain("drop%5B0%5D=");
-    expect(decodeURIComponent(url)).toContain("Águas Lindas de Goiás");
+    const drop = JSON.parse(new URL(url).searchParams.get("drop[0]") || "{}");
+    expect(drop.formatted_address).toContain("Águas Lindas de Goiás");
+    expect(drop.latitude).toBe(-15.86);
+    expect(drop.longitude).toBe(-48.03);
   });
 
   it("keeps 99 on its verified public entrypoint without inventing private destination parameters", () => {
