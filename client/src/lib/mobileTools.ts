@@ -167,3 +167,17 @@ export function vibration(pattern: number | number[] = 12) {
 }
 
 
+
+
+export function buildOfflineDestinationShareUrl(destinationId: string) {
+  return window.location.origin + "/trajeto/local/" + encodeURIComponent(destinationId);
+}
+
+export function buildOfflineDestinationShareText(destination: { name: string; shortName: string; address: string; description: string }) {
+  return [
+    "Trajeto · " + destination.shortName,
+    destination.address,
+    destination.description,
+    "Ver no Trajeto:",
+  ].join("\n");
+}
