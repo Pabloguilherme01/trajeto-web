@@ -82,7 +82,7 @@ export default function RouteSensitivityCard(props: {
         <div>
           <p className="text-[0.58rem] font-black uppercase tracking-[0.16em] text-[#C7FF3C]">Sensibilidade da rota</p>
           <h3 id="route-sensitivity-title" className="mt-1 font-display text-xl font-semibold tracking-[-0.045em]">Teste a decisão antes de sair.</h3>
-          <p className="mt-1 text-xs leading-relaxed text-white/45">Simule outro preço do combustível para descobrir quando cada alternativa muda de posição no custo.</p>
+          <p className="mt-1 text-xs leading-relaxed text-white/45">Simule outro preço do combustível e veja como a diferença de custo muda. Quando for calculável, o ponto de equilíbrio indica o preço por litro em que os dois custos se igualam.</p>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[.04] px-2.5 py-1.5 text-[0.55rem] font-bold text-white/50"><CarFront className="size-3.5 text-[#3DE3FF]" /> {vehicle.name || "Meu veículo"}</span>
       </div>
@@ -138,11 +138,13 @@ export default function RouteSensitivityCard(props: {
 
             <p className="mt-2 text-[0.53rem] leading-relaxed text-white/35">
               {breakEven != null
-                ? fuelPrice < breakEven
-                  ? "Neste preço simulado, a alternativa fica favorecida pelo custo."
-                  : fuelPrice > breakEven
-                    ? "Acima deste preço, a relação de distância e pedágio muda o custo relativo."
-                    : "Neste preço, os custos financeiros ficam no ponto de equilíbrio."
+                ? delta == null
+                  ? "O custo relativo não pôde ser calculado com os dados disponíveis."
+                  : delta < 0
+                    ? "Neste preço simulado, esta alternativa custa menos que a rota selecionada."
+                    : delta > 0
+                      ? "Neste preço simulado, esta alternativa custa mais que a rota selecionada."
+                      : "Neste preço simulado, os custos ficam iguais."
                 : "Sem pedágio conhecido nos dois lados ou sem diferença suficiente de distância, o ponto de equilíbrio não é calculável."}
             </p>
           </article>
