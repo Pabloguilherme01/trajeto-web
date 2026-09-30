@@ -241,7 +241,7 @@ export default function Home() {
           </div>
         </section>
 
-        <DailyCommandCenter />
+        <div className="hidden md:block"><DailyCommandCenter /></div>
 
         <TodayPulse />
 
