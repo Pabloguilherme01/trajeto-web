@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Check, Copy, ExternalLink, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
+import { Check, Copy, ExternalLink, Heart, MapPin, Navigation, Phone, Share2, ShieldCheck } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
@@ -13,7 +13,7 @@ import {
   vibration,
 } from "@/lib/mobileTools";
 import { appUrl } from "@/lib/appUrl";
-import { stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
+import { stationCatalogStatusLabel, stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -109,9 +109,9 @@ export function StationDirectoryCard({
   const status = local?.mapData?.operationalStatus;
   const statusLabel =
     status === "open"
-      ? "Aberto · referência de mapa"
+      ? "Aberto"
       : status === "closed"
-        ? "Fechado · referência de mapa"
+        ? "Fechado"
         : "Funcionamento não confirmado";
 
   const products = useMemo(() => {
@@ -245,7 +245,7 @@ export function StationDirectoryCard({
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[0.45rem] text-white/30">
         <span>Cadastro: {anp ? "ANP" : "catálogo local"}{anp ? " · " + formatDate(anp.dataObtencao ?? anp.dataVinculacao ?? anp.dataPublicacao) : ""}</span>
         <span>Localização: {coords ? (anp?.latitude != null && anp?.longitude != null ? "ANP" : "mapa") : "não confirmada"}</span>
-        {primaryPrice && <span>Frescor: {freshnessLabel(primaryPrice.collectionDate)}</span>}
+        {primaryPrice && <span>Preço coletado: {freshnessLabel(primaryPrice.collectionDate)}</span>}
       </div>
 
       <div className="mt-3 flex items-start gap-2 rounded-xl border border-white/8 bg-white/[.02] p-3">
@@ -300,8 +300,8 @@ export function StationDirectoryCard({
 
       <details className="mt-3 overflow-hidden rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/70">
-          <span>Detalhes e fontes</span>
-          <span className="text-[0.46rem] font-bold text-white/30">CNPJ · ANP · produtos</span>
+          <span>Dados completos e fontes</span>
+          <span className="text-[0.46rem] font-bold text-white/30">CNPJ · cadastro · produtos</span>
         </summary>
 
         <div className="space-y-3 border-t border-white/8 px-3 pb-3 pt-3">
