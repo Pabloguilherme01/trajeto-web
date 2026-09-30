@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
@@ -65,7 +65,6 @@ export default function Stations() {
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
-  const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -96,16 +95,16 @@ export default function Stations() {
       a.displayName.localeCompare(b.displayName, "pt-BR")
     );
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
-  const localBrands = useMemo(() => [...new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))].sort((a,b) => a.localeCompare(b, "pt-BR")), []);
+  const localBrands = useMemo(() => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))).sort((a,b) => a.localeCompare(b, "pt-BR")), []);
   const localNeighborhoods = useMemo(
-    () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
+    () => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
     []
   );
 
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const directoryCards = useMemo(() => {
     const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
-    const cards = aguasLindasCatalog.map(local => ({
+    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
       key: local.cnpj,
       local,
       anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
@@ -281,7 +280,7 @@ export default function Stations() {
     if (!staticRuntime || !broadAguasLindasQuery || showSavedOnly) return;
     let cancelled = false;
     fetch(appUrl("/data/aguas-lindas-anp.json"), { cache: "default" })
-      .then(response => response.ok ? response.json() as Promise<{ data?: unknown[] }> : Promise.reject(new Error("snapshot unavailable")))
+      .then(response => response.ok ? response.json() as Promise<{ data?: unknown[]; retrievedAt?: string }> : Promise.reject(new Error("snapshot unavailable")))
       .then(payload => {
         if (cancelled) return;
         const rows = (payload.data ?? []).map(item => item && typeof item === "object" ? normalizeAnpFuelRow(item as Record<string, unknown>) : null).filter((row): row is AnpFuelRow => Boolean(row));
@@ -323,7 +322,7 @@ export default function Stations() {
   }, [anpRows, staticAnpRetrievedAt, anpLiveQuery.data?.retrievedAt]);
 
   useEffect(() => {
-    if (mapStations.length) cacheOfflineMapStations(mapStations);
+    if (mapStations.length) cacheOfflineMapStations(mapStations.filter((station): station is StationMapItem & { id: string } => typeof station.id === "string"));
   }, [mapStations]);
 
 
@@ -923,7 +922,7 @@ export default function Stations() {
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
                 <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP</p>
                 <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count ?? "—"}</p>
-                <p className="text-[0.52rem] text-white/30">{AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0 ? AGUAS_LINDAS_ANP_VERIFIED_COUNT + " enriquecidos via API" : "sincronização individual pendente"}</p>
+                <p className="text-[0.52rem] text-white/30">snapshot municipal oficial + API disponível</p>
               </div>
             </div>
               </div>
