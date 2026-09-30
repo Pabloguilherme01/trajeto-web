@@ -1,0 +1,27 @@
+import { expect, test } from "@playwright/test";
+
+test("favorito: planejar preenche o novo destino sem carregar a viagem anterior", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("trajeto-mobile-station-favorites", JSON.stringify([{ placeId: "saved-station", name: "Posto salvo", address: "Rua de teste, Águas Lindas", lat: -15.76, lng: -48.28, openingHours: [], isOpen: true }]));
+  });
+  await page.goto("/salvos", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Aberto na consulta salva")).toBeVisible();
+  await page.locator("article").filter({ hasText: "Posto salvo" }).getByRole("button", { name: "Planejar", exact: true }).click();
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Rua de teste, Águas Lindas");
+  await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("");
+});
+
+test("mobile: Mais abre ajuda e pode ser fechado pelo teclado", async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes("mobile"), "Menu da navegação móvel");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const more = page.getByRole("button", { name: "Mais opções" });
+  await more.click();
+  await expect(page.getByRole("dialog", { name: "Mais opções" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(more).toBeFocused();
+  await more.click();
+  await page.getByRole("button", { name: "Ajuda e uso offline" }).click();
+  await expect(page).toHaveURL(/\/ajuda$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
