@@ -59,7 +59,7 @@ export default function Stations() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
+  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price" | "confidence">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -171,6 +171,11 @@ export default function Stations() {
       if (directorySort === "brand") {
         return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
           stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      }
+      if (directorySort === "confidence") {
+        const aConfidence = stationDataConfidence({ anp: a.anp, local: a.local });
+        const bConfidence = stationDataConfidence({ anp: b.anp, local: b.local });
+        return bConfidence - aConfidence || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
@@ -976,6 +981,7 @@ export default function Stations() {
                 {[
                   { id: "name" as const, label: "Nome" },
                   { id: "price" as const, label: "Menor preço" },
+                  { id: "confidence" as const, label: "Mais confiáveis" },
                   { id: "brand" as const, label: "Bandeira" },
                   { id: "distance" as const, label: "Mais perto", disabled: !userCoords },
                 ].map(option => {
