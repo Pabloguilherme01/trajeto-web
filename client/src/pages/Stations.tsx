@@ -303,6 +303,18 @@ export default function Stations() {
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório local</p>
                 <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
                 <p className="mt-2 text-[0.66rem] leading-relaxed text-white/45">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. Sincronização ANP de referência: {new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Cadastro local</p>
+                <p className="mt-1 text-lg font-black text-white">{AGUAS_LINDAS_STATIONS_COUNT}</p>
+                <p className="text-[0.52rem] text-white/30">registros catalogados</p>
+              </div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP individual</p>
+                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_VERIFIED_COUNT}</p>
+                <p className="text-[0.52rem] text-white/30">confirmados nesta base</p>
+              </div>
+            </div>
               </div>
               <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
             </div>
