@@ -142,6 +142,7 @@ export default function Home() {
             <span className="brand-wordmark text-xl text-white">trajeto</span>
           </a>
           <div className="flex items-center gap-2">
+            <span className={online ? "hidden rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.05] px-2.5 py-1 text-[0.55rem] font-black uppercase tracking-[0.1em] text-[#C7FF3C] sm:inline-flex" : "hidden rounded-full border border-[#FFC928]/20 bg-[#FFC928]/[0.05] px-2.5 py-1 text-[0.55rem] font-black uppercase tracking-[0.1em] text-[#FFC928] sm:inline-flex"} aria-live="polite">{online ? "online" : "offline"}</span>
             <a href={appUrl("/minha-conta")} className="hidden rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#9FB0B8] transition hover:bg-white/5 hover:text-white sm:inline-flex">Minha conta</a>
             <a href={appUrl("/planejar")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3.5 py-2 text-xs font-extrabold text-[#0B1014] transition hover:bg-white sm:hidden"><Navigation className="size-4" /> Planejar</a>
           </div>
@@ -170,12 +171,12 @@ export default function Home() {
         </section>
 
         <section className="premium-surface border-b border-white/8">
-          <div className="container grid gap-7 py-8 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
-            <div className="max-w-3xl">
+          <div className="container grid gap-5 py-6 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
+            <div className="order-2 max-w-3xl lg:order-1">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/8 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#D9FF91]">
                 <Navigation className="size-3.5" /> Águas Lindas de Goiás · Entorno
               </div>
-              <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
+              <h1 className="mt-5 font-display text-[clamp(2.55rem,12.5vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
                 Seu dia em movimento.<br /><span className="text-[#C7FF3C]">Mais simples.</span>
               </h1>
               <p className="mt-5 max-w-xl text-[0.95rem] leading-[1.55] text-[#B7C4CA] sm:mt-7 sm:text-lg sm:leading-[1.65]">
@@ -206,7 +207,7 @@ export default function Home() {
               </div>
             </div>
 
-            <section className="mobile-glass rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
+            <section className="order-1 mobile-glass rounded-[1.25rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Comece aqui</p>
@@ -260,6 +261,21 @@ export default function Home() {
                   {recentSearches.map(query => <button key={query} type="button" onClick={() => openSearch(query)} className="min-h-11 shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-3.5 text-xs font-bold text-[#D7E0E4] transition hover:border-[#3DE3FF] hover:bg-[#3DE3FF]/8 active:scale-[.98]">{query}</button>)}
                 </div>
               </div>}
+
+              <div className="mt-4 grid grid-cols-4 gap-1.5 sm:hidden" aria-label="Ações principais">
+                <a href={appUrl("/planejar")} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.06] px-1.5 text-center text-[0.55rem] font-black text-[#DFFF9D] active:scale-[.98]">
+                  <Navigation className="size-4 text-[#C7FF3C]" /> Planejar
+                </a>
+                <a href={appUrl("/postos")} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-xl border border-white/8 bg-white/[0.025] px-1.5 text-center text-[0.55rem] font-black text-[#D7E0E4] active:scale-[.98]">
+                  <MapPinned className="size-4 text-[#3DE3FF]" /> Postos
+                </a>
+                <a href={appUrl("/planejar?salvos=1")} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-xl border border-white/8 bg-white/[0.025] px-1.5 text-center text-[0.55rem] font-black text-[#D7E0E4] active:scale-[.98]">
+                  <Bookmark className="size-4 text-[#BDA5FF]" /> Salvos
+                </a>
+                <a href={appUrl("/minha-conta")} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-xl border border-white/8 bg-white/[0.025] px-1.5 text-center text-[0.55rem] font-black text-[#D7E0E4] active:scale-[.98]">
+                  <ShieldCheck className="size-4 text-[#FFB86B]" /> Conta
+                </a>
+              </div>
 
               <div className="mt-6">
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Buscas rápidas</p>
