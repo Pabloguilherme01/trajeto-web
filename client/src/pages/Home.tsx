@@ -5,8 +5,6 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 import QuickResolver from "@/components/QuickResolver";
-import VoiceSearchButton from "@/components/VoiceSearchButton";
-import OfflinePackCard from "@/components/OfflinePackCard";
 import { shareText, vibration } from "@/lib/mobileTools";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
@@ -136,7 +134,6 @@ export default function Home() {
                 autoComplete="street-address"
                 enterKeyHint="search"
               />
-              <VoiceSearchButton onResult={value => { setInput(value); searchPlaces(value); }} />
               <button type="submit" disabled={input.trim().length < 3} className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] disabled:opacity-25" aria-label="Pesquisar na cidade">
                 <ArrowRight className="size-5" />
               </button>
@@ -179,7 +176,6 @@ export default function Home() {
 
         <QuickResolver onMessage={setMessage} />
 
-        <OfflinePackCard />
 
         <section className="mt-3 grid grid-cols-3 gap-2" aria-label="Atalhos locais">
           <button type="button" onClick={() => setLocation(appUrl("/mapa") + "?q=Centro")} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl px-3 text-[0.56rem]">
