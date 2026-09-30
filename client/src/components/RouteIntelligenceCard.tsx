@@ -36,7 +36,14 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   const [tomtom, setTomtom] = useState<{ routes: Array<{ distanceMeters: number | null; durationSeconds: number | null; trafficDelaySeconds: number | null }> } | null>(null);
   const [trafficDetailed, setTrafficDetailed] = useState(false);
   const [fuelPrice, setFuelPrice] = useState(() => { try { return Number(localStorage.getItem("trajeto-route-fuel-price") || 0); } catch { return 0; } });
-  const [decisionMode, setDecisionMode] = useState<"balanced" | "fastest" | "cheapest" | "no-tolls">("balanced");
+  const [decisionMode, setDecisionMode] = useState<"balanced" | "fastest" | "cheapest" | "no-tolls">(() => {
+    try {
+      const saved = localStorage.getItem("trajeto-route-decision-mode");
+      return saved === "balanced" || saved === "fastest" || saved === "cheapest" || saved === "no-tolls" ? saved : "balanced";
+    } catch {
+      return "balanced";
+    }
+  });
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" ? !navigator.onLine : false);
   const vehicle = getMobileVehicle();
@@ -101,6 +108,21 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     const current = totalCost(route);
     return base != null && current != null ? base - current : null;
   };
+  const selectDecisionRoute = (mode: "balanced" | "fastest" | "cheapest" | "no-tolls") => {
+    if (!data?.routes.length) return;
+    const candidates = mode === "no-tolls"
+      ? data.routes.filter(route => route.toll?.amount === 0)
+      : data.routes;
+    const pool = candidates.length ? candidates : data.routes;
+    const ranked = [...pool].sort((a, b) => {
+      if (mode === "fastest") return Number(a.durationSeconds ?? Infinity) - Number(b.durationSeconds ?? Infinity);
+      if (mode === "cheapest") return Number(totalCost(a) ?? Infinity) - Number(totalCost(b) ?? Infinity);
+      if (mode === "no-tolls") return Number(a.durationSeconds ?? Infinity) - Number(b.durationSeconds ?? Infinity);
+      return Number(b.labels?.includes("FUEL_EFFICIENT") ?? false) - Number(a.labels?.includes("FUEL_EFFICIENT") ?? false);
+    });
+    if (ranked[0]) onSelectRoute?.(ranked[0].id);
+  };
+
   const routeAnalysis = (route: typeof main, index: number) => {
     if (!route) return { badges: [] as string[], deltaSeconds: null as number | null, savings: null as number | null };
     const base = data?.routes[0];
@@ -155,6 +177,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
               setDecisionMode(mode);
               const nextAvoidTolls = mode === "no-tolls" ? true : mode === "balanced" || mode === "fastest" ? false : avoidTollsState;
               setAvoidTollsState(nextAvoidTolls);
+              selectDecisionRoute(mode);
             }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
           ))}
         </div>
