@@ -123,6 +123,22 @@ export function StationDirectoryCard({
     return Array.from(unique.values());
   }, [anp]);
 
+  const fuelLabels = useMemo(() => {
+    const labels = new Set<string>();
+    for (const item of products) {
+      const normalized = (item.produto || "").toLocaleLowerCase("pt-BR");
+      if (normalized.includes("gasolina") && !normalized.includes("aditivada")) labels.add("Gasolina");
+      else if (normalized.includes("gasolina")) labels.add("Gasolina aditivada");
+      else if (normalized.includes("etanol")) labels.add("Etanol");
+      else if (normalized.includes("s10")) labels.add("Diesel S10");
+      else if (normalized.includes("s500")) labels.add("Diesel S500");
+      else if (normalized.includes("glp") || normalized.includes("p13")) labels.add("GLP P13");
+      else if (normalized.includes("gnv")) labels.add("GNV");
+      else if (item.produto) labels.add(item.produto);
+    }
+    return Array.from(labels).slice(0, 5);
+  }, [products]);
+
   const destination = coords ? coords.lat + "," + coords.lng : address;
   const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
   const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
@@ -246,6 +262,21 @@ export function StationDirectoryCard({
           </div>
         </div>
       </div>
+
+      {fuelLabels.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Combustíveis registrados">
+          {fuelLabels.map(label => (
+            <span key={label} className="rounded-full border border-white/8 bg-white/[.025] px-2 py-1 text-[0.43rem] font-bold text-white/50">
+              {label}
+            </span>
+          ))}
+          {products.length > fuelLabels.length && (
+            <span className="rounded-full border border-white/8 px-2 py-1 text-[0.43rem] font-bold text-white/30">
+              +{products.length - fuelLabels.length}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[0.45rem] text-white/30">
         <span>Cadastro: {anp ? "ANP" : "catálogo local"}{anp ? " · " + formatDate(anp.dataObtencao ?? anp.dataVinculacao ?? anp.dataPublicacao) : ""}</span>
