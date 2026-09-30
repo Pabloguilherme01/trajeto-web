@@ -82,7 +82,6 @@ export default function TripPrepCard() {
     };
   }, []);
 
-  const localRouteAvailable = Boolean(latestOfflineRoute);
   const routeNeedsReview = Boolean(latestOfflineRoute && isOfflineRouteStale(latestOfflineRoute.savedAt));
   const localRouteReady = localRouteAvailable && !routeNeedsReview;
   const hasTrip = Boolean(lastTrip);
