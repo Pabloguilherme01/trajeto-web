@@ -21,9 +21,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: package.json
-      - name: Resolve dependency lock
-        run: npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+          cache-dependency-path: package-lock.json
       - name: Install production dependencies from lock
         run: npm ci --omit=dev --legacy-peer-deps --ignore-scripts --no-audit --no-fund
       - name: Audit production dependencies
