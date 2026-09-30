@@ -29,7 +29,7 @@ import {
 } from "@/lib/mobileDestinations";
 import { getLastStation, getLastTrip, mobilePreferenceEvent, type LastStation } from "@/lib/mobilePreferences";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
-import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
+import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
 const OPEN_ACCESSIBILITY_EVENT = "trajeto-open-accessibility";
 
@@ -92,6 +92,12 @@ export default function DailyCommandCenter() {
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
   const completed = [favorite, vehicle, routes.length > 0, lastTrip, lastStation].filter(Boolean).length;
   const nextSetup = !favorite ? "destino" : !vehicle ? "veículo" : !lastTrip ? "primeira viagem" : routes.length === 0 ? "rota offline" : null;
+  const primaryOffline = routes[0] ?? null;
+  const offlineFresh = primaryOffline ? !isOfflineRouteStale(primaryOffline.savedAt) : false;
+  const contextSummary = !online
+    ? primaryOffline ? "Sem internet · uma rota salva está disponível." : "Sem internet · prepare uma rota antes de sair."
+    : favorite ? `${usage[favorite.id] ?? 0} uso${(usage[favorite.id] ?? 0) === 1 ? "" : "s"} do seu destino principal neste aparelho.`
+    : "Configure um destino para personalizar a próxima ação.";
   const readiness = [
     { label: "Destino", value: Boolean(favorite), detail: favorite ? favorite.label : "Cadastre um atalho", icon: MapPin },
     { label: "Veículo", value: Boolean(vehicle), detail: vehicle ? vehicle.name : "Ainda não cadastrado", icon: CarFront },
@@ -234,6 +240,21 @@ export default function DailyCommandCenter() {
             </div>
           )}
 
+          <div className="mt-4 rounded-2xl border border-white/8 bg-black/10 px-3.5 py-3">
+            <div className="flex items-start gap-3">
+              <div className={"mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg " + (online ? "bg-[#C7FF3C]/10 text-[#C7FF3C]" : "bg-[#FFC928]/10 text-[#FFD66B]")}>
+                {online ? <Compass className="size-4" /> : <WifiOff className="size-4" />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-white/40">Contexto agora</p>
+                <p className="mt-1 text-xs font-extrabold text-white">{contextSummary}</p>
+                <div className="mt-1 flex flex-wrap gap-1.5 text-[0.5rem] font-bold text-white/35">
+                  <span>{routes.length} rota{routes.length === 1 ? "" : "s"} salva{routes.length === 1 ? "" : "s"}</span>
+                  {primaryOffline && <span>{offlineFresh ? "cópia offline recente" : "cópia offline antiga"}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="mt-5 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
             <div className="min-w-[10rem] snap-start rounded-xl border border-white/8 bg-white/[.035] p-3 sm:min-w-0">
               <MapPin className="size-4 text-[#3DE3FF]" />
