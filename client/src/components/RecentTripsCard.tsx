@@ -35,6 +35,11 @@ export default function RecentTripsCard() {
 
   if (!trips.length) return null;
 
+  const mostUsedTrip = trips.reduce((best, trip) =>
+    getRouteUsage(trip.origin, trip.destination) > getRouteUsage(best.origin, best.destination) ? trip : best,
+  trips[0]);
+  const mostUsedCount = getRouteUsage(mostUsedTrip.origin, mostUsedTrip.destination);
+
   const openReverseTrip = async (trip: RecentTrip) => {
     const origin = trip.destination;
     const destination = trip.origin;
@@ -92,6 +97,20 @@ export default function RecentTripsCard() {
         <History className="mt-1 size-5 text-[#326575]" aria-hidden="true" />
       </div>
       {feedback && <p role="status" aria-live="polite" className="mt-4 rounded-xl border border-[#D8E0E3] bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}
+      {mostUsedCount > 1 && (
+        <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#F4F8F7] p-3.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[0.52rem] font-black uppercase tracking-[0.12em] text-[#326575]">Sua rota mais recorrente</p>
+              <p className="mt-1 truncate text-xs font-extrabold">{mostUsedTrip.origin} → {mostUsedTrip.destination}</p>
+              <p className="mt-1 text-[0.58rem] font-semibold text-[#718089]">{mostUsedCount} usos neste aparelho</p>
+            </div>
+            <button type="button" onClick={() => void openTrip(mostUsedTrip)} className="min-h-10 shrink-0 rounded-xl bg-[#0B1014] px-3 text-[0.58rem] font-black text-white">
+              Ir agora
+            </button>
+          </div>
+        </div>
+      )}
       <div className="mt-4 space-y-2">
         {trips.map((trip, index) => (
           <div key={trip.origin + "::" + trip.destination} className="flex items-center gap-2 rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-3">
