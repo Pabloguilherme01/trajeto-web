@@ -9,13 +9,13 @@ const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL
 
 export default function TripFuelBriefing({ distanceKm, durationSeconds, roundTrip = false }: Props) {
   const [vehicle, setVehicle] = useState<MobileVehicle | null>(() => getMobileVehicle());
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState(0);\n  const [priceDate, setPriceDate] = useState<string | null>(null);
 
   useEffect(() => {
     const refresh = () => {
       setVehicle(getMobileVehicle());
       const latest = listFuelLog()[0];
-      setPrice(latest && latest.liters > 0 ? latest.totalCost / latest.liters : 0);
+      setPrice(latest && latest.liters > 0 ? latest.totalCost / latest.liters : 0);\n      setPriceDate(latest?.date ?? null);
     };
     refresh();
     window.addEventListener(mobileVehicleEvent, refresh);
@@ -65,7 +65,7 @@ export default function TripFuelBriefing({ distanceKm, durationSeconds, roundTri
           <p className="mt-1 text-sm font-black">{stats.refuels === 0 ? "nenhum previsto" : stats.refuels + " necessário" + (stats.refuels === 1 ? "" : "s")}</p>
         </div>
       </div>
-      <p className="mt-3 text-[0.58rem] font-semibold text-white/35">{roundTrip ? "Ida e volta ativada · " : ""}{price > 0 ? `Preço usado: ${money.format(price)}/L, do último abastecimento registrado neste aparelho.` : "Registre um abastecimento para transformar litros estimados em custo."}{durationSeconds && durationSeconds > 0 ? ` · duração estimada ${Math.max(1, Math.round(durationSeconds / 60))} min.` : ""}</p>
+      <p className="mt-3 text-[0.58rem] font-semibold text-white/35">{roundTrip ? "Ida e volta ativada · " : ""}{price > 0 ? `Preço usado: ${money.format(price)}/L, do último abastecimento registrado neste aparelho${priceDate ? ` · ${new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(new Date(priceDate))}` : ""}.` : "Registre um abastecimento para transformar litros estimados em custo."}{durationSeconds && durationSeconds > 0 ? ` · duração estimada ${Math.max(1, Math.round(durationSeconds / 60))} min.` : ""}</p>
     </section>
   );
 }
