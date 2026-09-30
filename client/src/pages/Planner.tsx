@@ -7,7 +7,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
-import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
+import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
@@ -58,6 +58,7 @@ export default function Planner() {
   const [locating, setLocating] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
+  const [savedRouteQuery, setSavedRouteQuery] = useState("");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
@@ -319,6 +320,14 @@ export default function Planner() {
     window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
+  const filteredSavedRoutes = useMemo(() => {
+    const query = savedRouteQuery.trim().toLocaleLowerCase("pt-BR");
+    if (!query) return savedRoutes;
+    return savedRoutes.filter(route =>
+      (route.origin + " " + route.destination).toLocaleLowerCase("pt-BR").includes(query)
+    );
+  }, [savedRoutes, savedRouteQuery]);
+
   const publicRouteSource = planned
     ? (planned.route as typeof planned.route & { source?: "osrm" | "local-estimate" }).source
     : undefined;
@@ -446,27 +455,55 @@ export default function Planner() {
         {savedMode && (
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
-              <div><p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#BDA5FF]">Neste aparelho</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
+              <div><p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#BDA5FF]">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
               <span className="rounded-full border border-white/8 px-2.5 py-1 text-[0.5rem] font-black text-white/35">{savedRoutes.length + savedStations.length}</span>
             </div>
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70">{savedMessage}</p>}
+            {savedRoutes.length > 0 && (
+              <label className="mt-3 block">
+                <span className="sr-only">Filtrar rotas salvas</span>
+                <input
+                  value={savedRouteQuery}
+                  onChange={event => setSavedRouteQuery(event.target.value)}
+                  placeholder="Filtrar por origem ou destino"
+                  className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25"
+                />
+              </label>
+            )}
             {savedRoutes.length === 0 && savedStations.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
                 Nenhuma rota salva ainda. Calcule uma rota com origem e destino e o Trajeto criará automaticamente uma cópia neste aparelho.
               </div>
-            ) : (
-              <div className="mt-4 space-y-2">
-                {savedRoutes.map(route => (
-                  <article key={route.id} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
-                    <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
-                    <p className="mt-1 text-[0.58rem] text-white/35">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
-                    <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                      <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
-                      <button type="button" onClick={() => void removeSavedRoute(route)} aria-label="Excluir rota salva" className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-[#FF7D6A]/25 text-[#FFB7A9]"><Trash2 className="size-4" /></button>
-                    </div>
-                  </article>
-                ))}
+            ) : savedRoutes.length > 0 && filteredSavedRoutes.length === 0 ? (
+              <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
+                Nenhuma rota corresponde ao filtro.
               </div>
+            ) : (
+              filteredSavedRoutes.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {filteredSavedRoutes.map(route => {
+                    const stale = isOfflineRouteStale(route.savedAt);
+                    return (
+                      <article key={route.id} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
+                            <p className="mt-1 text-[0.58rem] text-white/35">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
+                          </div>
+                          <span className={"shrink-0 rounded-full border px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] " + (stale ? "border-amber-300/20 text-amber-200" : "border-[#C7FF3C]/15 text-[#C7FF3C]")}>
+                            {stale ? "revisar" : "pronta"}
+                          </span>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
+                          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(route.origin, route.destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Navegar agora</button>
+                        </div>
+                        <button type="button" onClick={() => void removeSavedRoute(route)} aria-label={"Excluir rota salva " + route.destination} className="mt-2 min-h-10 w-full rounded-xl border border-[#FF7D6A]/20 text-[0.58rem] font-black text-[#FFB7A9]"><Trash2 className="mr-1.5 inline size-3.5" />Excluir da biblioteca</button>
+                      </article>
+                    );
+                  })}
+                </div>
+              )
             )}
           </section>
         )}
