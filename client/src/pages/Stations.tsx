@@ -65,7 +65,7 @@ export default function Stations() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price" | "confidence">("name");
+  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -157,11 +157,6 @@ export default function Stations() {
         return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
           stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
-      if (directorySort === "confidence") {
-        const aConfidence = stationDataConfidence({ anp: a.anp, local: a.local });
-        const bConfidence = stationDataConfidence({ anp: b.anp, local: b.local });
-        return bConfidence - aConfidence || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
   }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly, priceOnly, distanceFilter]);
@@ -183,10 +178,6 @@ export default function Stations() {
     ],
     [],
   );
-  const fuelOptionCounts = useMemo(() => Object.fromEntries(
-    fuelOptions.map(option => [option.id, option.id === "all" ? directoryCardsFiltered.length : directoryCardsFiltered.filter(item => matchesFuelFilter(item, option.id, pricesByCnpj)).length]),
-  ) as Record<FuelFilter, number>, [directoryCardsFiltered, fuelOptions, pricesByCnpj]);
-
   const directoryFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly) + Number(priceOnly) + Number(fuelFilter !== "all") + Number(distanceFilter !== "all");
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
