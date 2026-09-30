@@ -1,7 +1,7 @@
-import { buildWhatsAppShareUrl,  ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
+import { ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { useMemo, useState } from "react";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWhatsAppShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import {
   OFFLINE_DESTINATION_CATEGORIES,
   searchOfflineDestinations,
@@ -163,6 +163,16 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
               >
                 ↗
               </button>
+              <a
+                href={buildWhatsAppShareUrl(buildOfflineDestinationShareText(destination), buildOfflineDestinationShareUrl(destination.id))}
+                target="_blank"
+                rel="noreferrer"
+                className="mobile-action mobile-action-icon border-[#25D366]/20 bg-[#25D366]/[.05] text-[#B8F6C8]"
+                aria-label={"Compartilhar " + destination.name + " no WhatsApp"}
+                title="WhatsApp"
+              >
+                W
+              </a>
             </div>
           </article>
         ))}
