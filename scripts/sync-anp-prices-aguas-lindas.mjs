@@ -55,9 +55,24 @@ function latestSpreadsheetUrl(html) {
 
 function dateToIso(value) {
   if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+  const number = Number(value);
+  if (Number.isFinite(number) && number > 20_000 && number < 80_000) {
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+    return new Date(excelEpoch.getTime() + Math.round(number) * 86_400_000).toISOString().slice(0, 10);
+  }
   const text = String(value ?? "").trim();
   const br = text.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/);
   return br ? br[3] + "-" + br[2] + "-" + br[1] : text || null;
+}
+
+function normalizeCnpj(value) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  return digits.length === 13 ? "0" + digits : digits;
+}
+
+function isGoState(value) {
+  const key = norm(value);
+  return key === "go" || key === "goias" || key === "estado de goias";
 }
 
 const pageResponse = await fetch(PAGE_URL, { headers: { "user-agent": "Trajeto-ANP-Price-Sync/1.0", accept: "text/html" } });
@@ -73,13 +88,14 @@ const workbook = XLSX.read(new Uint8Array(await workbookResponse.arrayBuffer()),
 const output = [];
 for (const sheetName of workbook.SheetNames) {
   const sheet = workbook.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null, raw: true });
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null, raw: true, range: 7 });
   for (const row of rows) {
-    const cnpj = String(pick(row, ["cnpj"]) ?? "").replace(/\D/g, "");
-    const uf = String(pick(row, ["uf", "estado"]) ?? "").trim().toUpperCase();
+    const cnpj = normalizeCnpj(pick(row, ["cnpj"]));
+    const state = pick(row, ["uf", "estado"]);
     const municipality = String(pick(row, ["municipio", "município", "municipio do posto"]) ?? "").trim();
     const municipalityNorm = norm(municipality);
-    if (cnpj.length !== 14 || (uf && uf !== "GO") || (municipalityNorm && !municipalityNorm.includes("aguas lindas de goias"))) continue;
+    if (cnpj.length !== 14 || (state != null && !isGoState(state)) || !municipalityNorm.includes("aguas lindas de goias")) continue;
+    const uf = "GO";
 
     const product = String(pick(row, ["produto", "combustivel", "combustível"]) ?? "").trim();
     const price = parseNumber(pick(row, ["preco de revenda", "preco revenda", "preço de revenda", "valor de venda", "preco"]) );
