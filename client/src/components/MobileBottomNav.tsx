@@ -1,7 +1,7 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
@@ -19,6 +19,7 @@ export default function MobileBottomNav() {
   const [location, setLocation] = useLocation();
   const search = useSearch();
   const [moreOpen, setMoreOpen] = useState(false);
+  const moreButton = useRef<HTMLButtonElement>(null);
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [savedRoutes, setSavedRoutes] = useState(0);
 
@@ -68,6 +69,7 @@ export default function MobileBottomNav() {
           return (
             <button
               key={item.key}
+              ref={item.key === "more" ? moreButton : undefined}
               type="button"
               onClick={() => go(item)}
               aria-current={active ? "page" : undefined}
@@ -90,7 +92,8 @@ export default function MobileBottomNav() {
       </div>
     </nav>
     <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
-      <DialogContent className="border-white/10 bg-[#121B22] text-white">
+      <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="border-white/10 bg-[#121B22] text-white">
+        <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-white/70"><X className="size-5" /></DialogClose>
         <DialogTitle>Mais opções</DialogTitle>
         <DialogDescription>Ajuda e recursos do Trajeto.</DialogDescription>
         <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">

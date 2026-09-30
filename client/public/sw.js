@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v10";
+const VERSION = "trajeto-v11";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -58,12 +58,12 @@ function collectManifestAssets(manifest) {
   const assets = new Set();
   const visit = entry => {
     if (!entry || typeof entry !== "object") return;
-    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\\//, ""));
+    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\//, ""));
     for (const css of Array.isArray(entry.css) ? entry.css : []) {
-      if (typeof css === "string") assets.add("./" + css.replace(/^\\//, ""));
+      if (typeof css === "string") assets.add("./" + css.replace(/^\//, ""));
     }
     for (const asset of Array.isArray(entry.assets) ? entry.assets : []) {
-      if (typeof asset === "string") assets.add("./" + asset.replace(/^\\//, ""));
+      if (typeof asset === "string") assets.add("./" + asset.replace(/^\//, ""));
     }
     for (const key of ["imports", "dynamicImports"]) {
       for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
@@ -132,7 +132,7 @@ async function staleWhileRevalidate(request, cacheName) {
     })
     .catch(() => cached);
 
-  return cached || network || new Response("", { status: 504 });
+  return cached || await network || new Response("", { status: 504 });
 }
 
 async function networkFirst(request, cacheName) {
