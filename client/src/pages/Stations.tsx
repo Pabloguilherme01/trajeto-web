@@ -183,8 +183,12 @@ export default function Stations() {
   };
 
   const navigateTo = (station: typeof stations[number]) => {
-    const urls = openNavigation(station.lat, station.lng, station.name);
-    window.open(urls.google, "_blank", "noopener,noreferrer");
+    if (typeof station.lat === "number" && typeof station.lng === "number") {
+      const urls = openNavigation(station.lat, station.lng, station.name);
+      window.open(urls.google, "_blank", "noopener,noreferrer");
+      return;
+    }
+    window.open(buildGoogleMapsSearchUrl([station.name, station.address].filter(Boolean).join(", ")), "_blank", "noopener,noreferrer");
   };
 
   const shareCurrent = async () => {
@@ -340,6 +344,13 @@ export default function Stations() {
         {staticRuntime && !showSavedOnly && (
           <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.57rem] leading-relaxed text-white/35">
             Fonte e natureza do dado: cadastro empresarial público e referências públicas locais. A ANP mantém o cadastro oficial de revendedores autorizados; preços e situação operacional podem mudar e devem ser verificados antes da viagem.
+          </section>
+        )}
+
+        {staticRuntime && !showSavedOnly && (
+          <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.58rem] leading-relaxed text-white/35">
+            <p><strong className="text-white/55">Confiabilidade:</strong> cadastro ativo é uma informação cadastral; não confirma funcionamento neste momento, preço atual ou coordenada exata.</p>
+            <p className="mt-1">A ANP disponibiliza cadastro oficial e, no ANP com VC - Postos, informações como autorização, produtos, fiscalização e qualidade por posto.</p>
           </section>
         )}
 
