@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v7";
+const VERSION = "trajeto-v8";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 
@@ -21,6 +21,8 @@ self.addEventListener("install", event => {
         const assets = collectManifestAssets(manifest);
         await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
       })
+      .then(() => caches.open(DATA_CACHE))
+      .then(cache => cache.add("./data/aguas-lindas-anp.json").catch(() => undefined))
       .then(() => self.skipWaiting())
   );
 });
@@ -69,7 +71,7 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  if (url.pathname.includes("/api/")) {
+  if (url.pathname.includes("/api/") || url.pathname.endsWith("/data/aguas-lindas-anp.json")) {
     event.respondWith(networkFirst(request, DATA_CACHE));
     return;
   }
