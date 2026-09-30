@@ -274,7 +274,7 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
   };
 
   if (isGitHubPagesRuntime()) {
-    return <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa independente da viagem">
+    return <section className="relative h-[min(68vh,620px)] min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa independente da viagem">
       <OfflineRoutePreview origin={origin} destination={destination} routes={routes} />
     </section>;
   }
