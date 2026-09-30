@@ -83,7 +83,7 @@ export default function TripPrepCard() {
   }, []);
 
   const routeNeedsReview = Boolean(latestOfflineRoute && isOfflineRouteStale(latestOfflineRoute.savedAt));
-  const localRouteReady = localRouteAvailable && !routeNeedsReview;
+  const localRouteReady = Boolean(latestOfflineRoute) && !routeNeedsReview;
   const hasTrip = Boolean(lastTrip);
   const activeOfflineDestination = !online && latestOfflineRoute ? latestOfflineRoute.destination : null;
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
