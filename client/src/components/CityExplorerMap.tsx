@@ -1,3 +1,4 @@
+import { Box, Map as MapIcon } from "lucide-react";
 import { MapView, loadGoogleMapsScript } from "@/components/Map";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -68,6 +69,7 @@ export default function CityExplorerMap({ category, query = "", center, online, 
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [threeD, setThreeD] = useState(false);
 
   const localFuel = useMemo<PlaceEntity[]>(() => {
     if (category !== "fuel") return [];
@@ -311,6 +313,13 @@ export default function CityExplorerMap({ category, query = "", center, online, 
     if (mapRef.current) void queryPlaces();
   }, [category, query, center.lat, center.lng, online]);
 
+  useEffect(() => {
+    if (!mapRef.current) return;
+    try {
+      mapRef.current.setTilt(threeD ? 45 : 0);
+    } catch {}
+  }, [threeD]);
+
   useEffect(() => () => clearMarkers(), []);
 
   if (!online && category === "fuel" && localResults.length) {
@@ -383,11 +392,23 @@ export default function CityExplorerMap({ category, query = "", center, online, 
         }
       />
       <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-2">
-        <span className="rounded-full border border-black/10 bg-white/94 px-3 py-2 text-[.58rem] font-black text-[#163840] shadow-lg">
-          {loading ? "Consultando…" : "Enriquecimento ao vivo"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-black/10 bg-white/94 px-3 py-2 text-[.58rem] font-black text-[#163840] shadow-lg">
+            {loading ? "Consultando…" : "Enriquecimento ao vivo"}
+          </span>
+          <button
+            type="button"
+            onClick={() => setThreeD(value => !value)}
+            className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-black/10 bg-white/94 text-[#163840] shadow-lg"
+            aria-pressed={threeD}
+            aria-label={threeD ? "Voltar para mapa 2D" : "Ativar perspectiva 3D"}
+            title={threeD ? "2D" : "3D"}
+          >
+            {threeD ? <MapIcon className="size-4" /> : <Box className="size-4" />}
+          </button>
+        </div>
         <span className="rounded-full border border-black/10 bg-white/94 px-3 py-2 text-[.55rem] font-bold text-[#5C6D65] shadow-lg">
-          até 5 km
+          {threeD ? "3D" : "2D"} · até 5 km
         </span>
       </div>
       {error && (
