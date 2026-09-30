@@ -24,7 +24,7 @@ export default function AccessibilityPanel() {
   const closePanel = () => setOpen(false);
 
   useEffect(()=>{
-    const openFromApp=()=>setOpen(true);
+    const openFromApp=()=>openPanel();
     window.addEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
     return()=>window.removeEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
   },[]);
