@@ -109,7 +109,7 @@ export default function QuickResolver({ onMessage }: Props) {
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <button type="button" onClick={() => go("perto de mim")} className="mobile-action mobile-action-secondary min-h-10 rounded-full px-3 text-[0.55rem]"><LocateFixed className="size-3.5" /> Perto de mim</button>
+        <button type="button" onClick={() => { rememberIntent("nearby"); setLocation(appUrl("/mapa")); }} className="mobile-action mobile-action-secondary min-h-10 rounded-full px-3 text-[0.55rem]"><LocateFixed className="size-3.5" /> Perto de mim</button>
         <button type="button" onClick={() => go("rodoviaria")} className="mobile-action mobile-action-secondary min-h-10 rounded-full px-3 text-[0.55rem]">Rodoviária</button>
         <button type="button" onClick={() => go("prefeitura")} className="mobile-action mobile-action-secondary min-h-10 rounded-full px-3 text-[0.55rem]">Prefeitura</button>
       </div>
