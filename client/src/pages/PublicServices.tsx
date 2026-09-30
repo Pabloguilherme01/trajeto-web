@@ -1,5 +1,5 @@
 import { ArrowRight, BookOpen, Building2, ExternalLink, HeartPulse, Landmark, MapPinned, Phone, ShieldAlert, Siren, TrafficCone, WifiOff, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { PUBLIC_SERVICE_CATEGORIES, PUBLIC_SERVICES, searchPublicServices, type PublicServiceCategory } from "@/lib/publicServices";
@@ -33,7 +33,18 @@ export default function PublicServices() {
     const value = params.get("categoria");
     return PUBLIC_SERVICE_CATEGORIES.some(item => item.id === value) ? value as PublicServiceCategory | "todos" : "todos";
   });
-  const online = typeof navigator === "undefined" || navigator.onLine;
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+
+  useEffect(() => {
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
@@ -107,7 +118,7 @@ export default function PublicServices() {
         </section>
 
         <section className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Serviços públicos">
-          {results.map((service, index) => {
+          {results.map(service => {
             const Icon = categoryIcons[service.category];
             const call = phoneHref(service.phone);
             return (
