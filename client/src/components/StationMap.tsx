@@ -78,15 +78,17 @@ function sourceLabel(source?: StationMapItem["source"]) {
   return "LOCAL";
 }
 
-function OfflineStationMap({ stations, onSelectStation }: { stations: Array<StationMapItem & { lat: number; lng: number }>; onSelectStation?: (station: StationMapItem) => void }) {
+function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations: Array<StationMapItem & { lat: number; lng: number }>; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
   const [selectedId, setSelectedId] = useState<string | null>(stations[0]?.id ?? null);
   const [zoom, setZoom] = useState(1);
   const points = useMemo(() => {
     if (!stations.length) return [];
-    const minLat = Math.min(...stations.map(item => item.lat));
-    const maxLat = Math.max(...stations.map(item => item.lat));
-    const minLng = Math.min(...stations.map(item => item.lng));
-    const maxLng = Math.max(...stations.map(item => item.lng));
+    const latitudes = [...stations.map(item => item.lat), ...(userCoords ? [userCoords.lat] : [])];
+    const longitudes = [...stations.map(item => item.lng), ...(userCoords ? [userCoords.lng] : [])];
+    const minLat = Math.min(...latitudes);
+    const maxLat = Math.max(...latitudes);
+    const minLng = Math.min(...longitudes);
+    const maxLng = Math.max(...longitudes);
     const latSpan = Math.max(maxLat - minLat, 0.003);
     const lngSpan = Math.max(maxLng - minLng, 0.003);
     return stations.map((station, index) => ({
@@ -113,6 +115,12 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
         <rect width="1000" height="560" fill="#E8F0EA" /><rect width="1000" height="560" fill="url(#station-map-grid)" />
         <text x="34" y="32" fontSize="18" fontWeight="800" fill="#41534A">Águas Lindas · mapa offline</text>
         <text x="34" y="54" fontSize="11" fontWeight="600" fill="#6C7E74">Coordenadas salvas neste aparelho · sem internet</text>
+        {userCoords && (
+          <g>
+            <circle cx={60 + ((userCoords.lng - Math.min(...[...stations.map(item => item.lng), userCoords.lng])) / Math.max(Math.max(...[...stations.map(item => item.lng), userCoords.lng]) - Math.min(...[...stations.map(item => item.lng), userCoords.lng]), 0.003)) * 880} cy={500 - ((userCoords.lat - Math.min(...[...stations.map(item => item.lat), userCoords.lat])) / Math.max(Math.max(...[...stations.map(item => item.lat), userCoords.lat]) - Math.min(...[...stations.map(item => item.lat), userCoords.lat]), 0.003)) * 440} r="13" fill="#3DE3FF" opacity=".22" />
+            <circle cx={60 + ((userCoords.lng - Math.min(...[...stations.map(item => item.lng), userCoords.lng])) / Math.max(Math.max(...[...stations.map(item => item.lng), userCoords.lng]) - Math.min(...[...stations.map(item => item.lng), userCoords.lng]), 0.003)) * 880} cy={500 - ((userCoords.lat - Math.min(...[...stations.map(item => item.lat), userCoords.lat])) / Math.max(Math.max(...[...stations.map(item => item.lat), userCoords.lat]) - Math.min(...[...stations.map(item => item.lat), userCoords.lat]), 0.003)) * 440} r="6" fill="#3DE3FF" stroke="#163840" strokeWidth="3" />
+          </g>
+        )}
         {points.map(point => {
           const active = point.station.id === selectedId;
           const official = point.station.source === "ANP";
@@ -144,7 +152,7 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
   );
 }
 
-export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", showTraffic = false, onSelectStation }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void }) {
+export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", showTraffic = false, onSelectStation, userCoords = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
@@ -228,6 +236,12 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
       .filter(station => station.source !== "Google" && typeof station.id === "string")
       .map(station => ({ ...station, id: station.id as string })));
   }, [resolvedStations]);
+
+  useEffect(() => {
+    if (!ready || !mapRef.current || !window.google?.maps || offline || !userCoords) return;
+    mapRef.current.setCenter(userCoords);
+    mapRef.current.setZoom(14);
+  }, [ready, offline, userCoords?.lat, userCoords?.lng]);
 
   useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps || offline) return;
@@ -316,7 +330,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   }
 
   if (offline || isGitHubPagesRuntime()) {
-    return <div className={"relative " + heightClassName}><OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} /></div>;
+    return <div className={"relative " + heightClassName}><OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} /></div>;
   }
 
   return (
@@ -333,7 +347,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
         </button>
       </div>
       {mapMessage && <div role="status" className="absolute left-3 right-3 top-[4.65rem] z-20 rounded-xl border border-white/10 bg-[#0B1014]/95 px-3 py-2 text-[0.58rem] font-bold text-white shadow-lg">{mapMessage}</div>}
-      <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
+      <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
       {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
       {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-[0.58rem] font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
     </div>
