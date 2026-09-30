@@ -449,11 +449,18 @@ export default function Stations() {
 
   useEffect(() => {
     setDirectoryVisibleCount(48);
-  }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
-
-  useEffect(() => {
-    setDirectoryVisibleCount(48);
-  }, [directorySearch, directorySort, fuelFilter, priceOnly]);
+  }, [
+    query,
+    neighborhoodFilter,
+    brandFilter,
+    addressOnly,
+    verifiedOnly,
+    mappedOnly,
+    priceOnly,
+    directorySearch,
+    directorySort,
+    fuelFilter,
+  ]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -518,7 +525,7 @@ export default function Stations() {
         setAddressOnly(false);
         setVerifiedOnly(false);
         setMappedOnly(false);
-    setPriceOnly(false);
+        setPriceOnly(false);
         vibration(18);
         setQuery("postos");
         setInput("postos próximos");
