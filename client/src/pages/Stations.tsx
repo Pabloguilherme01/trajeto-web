@@ -34,6 +34,7 @@ export default function Stations() {
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [mappedOnly, setMappedOnly] = useState(false);
   const [localVisibleCount, setLocalVisibleCount] = useState(12);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
 
@@ -49,7 +50,8 @@ export default function Stations() {
       (neighborhoodFilter === "all" || station.neighborhood === neighborhoodFilter) &&
       (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter) &&
       (!addressOnly || Boolean(station.address)) &&
-      (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP")
+      (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP") &&
+      (!mappedOnly || Boolean(station.mapData))
     );
     return [...filtered].sort((a, b) =>
       (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
@@ -85,7 +87,7 @@ export default function Stations() {
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
-  const activeLocalFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly);
+  const activeLocalFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly);
 
   const searchedAt = stationPages.data?.pages[0]?.queriedAt
     ? new Date(stationPages.data.pages[0].queriedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
@@ -117,7 +119,7 @@ export default function Stations() {
 
   useEffect(() => {
     setLocalVisibleCount(12);
-  }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly]);
+  }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -128,6 +130,7 @@ export default function Stations() {
     setBrandFilter("all");
     setAddressOnly(false);
     setVerifiedOnly(false);
+    setMappedOnly(false);
     setLocalVisibleCount(12);
   };
 
@@ -149,6 +152,7 @@ export default function Stations() {
     setBrandFilter("all");
     setAddressOnly(false);
     setVerifiedOnly(false);
+    setMappedOnly(false);
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
   };
 
@@ -469,6 +473,7 @@ export default function Stations() {
               <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
               <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço</label>
               <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold " + (verifiedFilterAvailable ? "text-white/70" : "text-white/35")}><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} disabled={!verifiedFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Dados ANP {verifiedFilterAvailable ? "(" + AGUAS_LINDAS_ANP_VERIFIED_COUNT + ")" : "(não sincronizados)"}</label>
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={mappedOnly} onChange={event => setMappedOnly(event.target.checked)} className="size-4 accent-[#3DE3FF]" /> Com dados de mapas</label>
             </div>
 
             {localDirectory.length ? (
@@ -497,7 +502,7 @@ export default function Stations() {
                               {station.mapData && <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2 py-1 text-[0.46rem] font-bold text-[#9FEFFF]">Mapa cruzado</span>}
                             </div>
                             </div>
-                            <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] px-2 py-1 text-[0.46rem] font-black text-[#D9FF91]">{statusText}</span>
+                            <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] px-2 py-1 text-[0.46rem] font-black text-[#D9FF91]">{station.mapData?.operationalStatus === "closed" ? "Mapa: fechado" : statusText}</span>
                           </div>
                           {station.address ? (
                             <p className="mt-2 text-[0.62rem] leading-relaxed text-white/45">{station.address}</p>
@@ -532,7 +537,8 @@ export default function Stations() {
                               <p className="font-black uppercase tracking-[.1em] text-[0.47rem] text-[#87DFF0]">Referência atual de mapas</p>
                               <p className="mt-1">{station.mapData.phone ? "Telefone: " + station.mapData.phone + " · " : ""}{station.mapData.rating != null ? "Nota: " + station.mapData.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " · " : ""}{station.mapData.reviewCount != null ? station.mapData.reviewCount.toLocaleString("pt-BR") + " avaliações" : ""}</p>
                               <p className="mt-1">{station.mapData.hours ? "Horário informado: " + station.mapData.hours + (station.mapData.observedBrand ? " · bandeira observada: " + station.mapData.observedBrand : "") : station.mapData.observedBrand ? "Bandeira observada: " + station.mapData.observedBrand : "Sem horário consolidado."}</p>
-                              <p className="mt-1 text-white/30">Fonte secundária de mapas; pode mudar sem aviso e não substitui cadastro ANP.</p>
+                              {station.mapData.operationalStatus && <p className={"mt-1 font-bold " + (station.mapData.operationalStatus === "closed" ? "text-[#FFB86B]" : "text-[#9FEFFF]")}>{station.mapData.operationalStatus === "closed" ? "Mapa indica fechamento permanente. Confirmar na fonte oficial antes de concluir que o cadastro foi encerrado." : "Status operacional observado em mapa: " + (station.mapData.operationalStatus === "open" ? "aberto" : "não confirmado")}</p>}
+                              <p className="mt-1 text-white/30">Fonte secundária de mapas, observada em {station.mapData.observedAt ?? "data não informada"}; não substitui cadastro ANP.</p>
                             </div>
                           )}
                         </div>
