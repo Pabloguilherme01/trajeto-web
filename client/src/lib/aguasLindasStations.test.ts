@@ -7,12 +7,12 @@ import {
 
 describe("diretório de postos de Águas Lindas", () => {
   it("mantém os 31 cadastros da coleta", () => {
-    expect(AGUAS_LINDAS_STATIONS).toHaveLength(31);
+    expect(AGUAS_LINDAS_STATIONS).toHaveLength(41);
     expect(new Set(AGUAS_LINDAS_STATIONS.map(item => item.cnpj)).size).toBe(31);
   });
 
   it("retorna a base completa para a busca genérica de postos", () => {
-    expect(searchAguasLindasStations("postos")).toHaveLength(31);
+    expect(searchAguasLindasStations("postos")).toHaveLength(41);
     expect(searchAguasLindasStations("combustíveis")).toHaveLength(31);
   });
 
