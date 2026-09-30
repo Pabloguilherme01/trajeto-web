@@ -198,6 +198,20 @@ export function StationDirectoryCard({
         <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
       </section>
 
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
+        <button type="button" onClick={() => void share()} className="min-h-11 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 text-[0.56rem] font-black text-[#D9FF91] transition-transform duration-200 active:scale-[.98]"><Share2 className="mr-1 inline size-3.5" />Compartilhar</button>
+      </div>
+
+      <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.018]">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-3 text-[0.62rem] font-black text-white/70">
+          <span>Detalhes do posto</span>
+          <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#C9F7FF]">{confidence}% confiança</span>
+        </summary>
+        <div className="px-3 pb-3 pt-1">
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#3DE3FF]" />
@@ -218,12 +232,7 @@ export function StationDirectoryCard({
         <span className="text-[0.58rem] font-black text-[#C9F7FF]">{confidence}% · fonte/data explícitas</span>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-3 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
-      </div>
+
 
       <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
         <div className="flex items-center justify-between gap-2">
@@ -276,6 +285,8 @@ export function StationDirectoryCard({
         <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
       </div>
       <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
+        </div>
+      </details>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/55">
