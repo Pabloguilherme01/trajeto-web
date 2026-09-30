@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v12";
+const VERSION = "trajeto-v13";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -20,10 +20,10 @@ self.addEventListener("install", event => {
     caches.open(STATIC_CACHE)
       .then(async cache => {
         await cache.addAll(STATIC_SHELL);
-        const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
+        const response = await fetch("./index.html?precache=" + VERSION, { cache: "no-store" });
         if (!response.ok) return;
-        const manifest = await response.json();
-        const assets = collectManifestAssets(manifest);
+        const html = await response.text();
+        const assets = collectIndexAssets(html);
         await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
       })
       .then(() => caches.open(DATA_CACHE))
@@ -53,6 +53,21 @@ self.addEventListener("activate", event => {
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
+
+function collectIndexAssets(html) {
+  const assets = new Set();
+  const matches = html.matchAll(/(?:src|href)="([^"]+)"/g);
+  for (const match of matches) {
+    const asset = match[1];
+    if (!asset || asset.startsWith("data:") || asset.startsWith("#") || asset.startsWith("http:") || asset.startsWith("https:")) continue;
+    if (!/\.(?:js|css|png|svg|webmanifest|ico)$/i.test(asset)) continue;
+    try {
+      const url = new URL(asset, self.location.href);
+      if (url.origin === self.location.origin) assets.add(url.toString());
+    } catch {}
+  }
+  return [...assets];
+}
 
 function collectManifestAssets(manifest) {
   const assets = new Set();
