@@ -98,7 +98,7 @@ export function StationDirectoryCard({
   const appleUrl = buildAppleMapsDirectionsUrl(destination);
   const anpUrl = "https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web";
   const shareUrl = typeof window !== "undefined"
-    ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName)
+    ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName) + (cnpj ? "#posto-" + encodeURIComponent(cnpj) : "")
     : address;
   const phone = local?.mapData?.phone;
   const status = local?.mapData?.operationalStatus;
@@ -121,7 +121,7 @@ export function StationDirectoryCard({
 
   return (
     <motion.article
-      id={"posto-" + (cnpj || "mapa-" + index)}
+      id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
       initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.12 }}
