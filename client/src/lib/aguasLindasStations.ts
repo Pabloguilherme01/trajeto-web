@@ -61,7 +61,7 @@ export const AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE = {
   source: "Torêva / consulta empresarial",
   note: "Referência externa de 31 empresas ativas no CNAE; não substitui a base oficial de revendedores autorizados da ANP.",
 } as const;
-export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = null;
+export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 0;
 
 export const AGUAS_LINDAS_ANP_CATALOG_REFERENCE = {
   count: null,
@@ -262,12 +262,14 @@ export function searchAguasLindasStations(query: string) {
     normalizedCompact === "postos" ||
     normalizedCompact === "combustiveis" ||
     normalizedCompact === "postos de combustiveis" ||
+    normalizedCompact.startsWith("combustiveis ") ||
+    normalizedCompact.startsWith("postos de combustiveis ") ||
     isAguasLindasQuery
   ) {
     return AGUAS_LINDAS_STATIONS;
   }
   return AGUAS_LINDAS_STATIONS.filter(station =>
-    getStationSearchText(station).includes(normalized),
+    getStationSearchText(station).includes(normalizedCompact),
   );
 }
 
@@ -288,7 +290,9 @@ export function getStationSearchText(station: LocalStationRecord) {
     .join(" ")
     .toLocaleLowerCase("pt-BR")
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 
