@@ -147,16 +147,6 @@ export default function Planner() {
       const publicOrigin = from;
       try {
         let resolvedOrigin = publicOrigin;
-        if (!resolvedOrigin && navigator.geolocation) {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 7000, maximumAge: 300000 });
-          }).catch(() => null);
-          if (position) {
-            resolvedOrigin = position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5);
-            setOrigin(resolvedOrigin);
-          }
-        }
-
         if (!resolvedOrigin) {
           if (version !== requestVersion.current) return;
           setFallbackReady(true);
