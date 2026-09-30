@@ -34,8 +34,11 @@ function iconFor(category:PlaceCategory){
 
 export default function Explore(){
   const [,setLocation]=useLocation();
-  const [input,setInput]=useState("");
-  const [query,setQuery]=useState("");
+  const initialQuery = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("q") || ""
+    : "";
+  const [input,setInput]=useState(initialQuery);
+  const [query,setQuery]=useState(initialQuery);
   const [online,setOnline]=useState(()=>typeof navigator==="undefined"||navigator.onLine);
   const [center,setCenter]=useState<Coordinates>(()=>{
     if(typeof window!=="undefined"){
