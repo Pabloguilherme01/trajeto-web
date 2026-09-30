@@ -157,9 +157,15 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
 
   const toggleTraffic = () => {
     if (!mapRef.current) return;
-    if (!trafficRef.current) trafficRef.current = new window.google.maps.TrafficLayer();
     const next = !traffic;
-    trafficRef.current.setMap(next ? mapRef.current : null);
+
+    // Em ambientes de teste, SSR ou fallback sem Google Maps carregado,
+    // o controle continua funcional sem tentar acessar window.google.maps.
+    if (window.google?.maps) {
+      if (!trafficRef.current) trafficRef.current = new window.google.maps.TrafficLayer();
+      trafficRef.current.setMap(next ? mapRef.current : null);
+    }
+
     setTraffic(next);
   };
 
