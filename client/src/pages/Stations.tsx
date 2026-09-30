@@ -1122,7 +1122,6 @@ export default function Stations() {
                             <div className="min-w-0">
                               <p className="text-sm font-black text-white">{station.displayName}</p>
                               <p className="mt-1 text-[0.58rem] font-semibold text-white/35">{station.legalName} · CNPJ {station.cnpj}</p>
-                            <p className="mt-1 text-[0.5rem] leading-relaxed text-white/25">Identidade principal: CNPJ. Nome comercial, telefone, bandeira e horário podem variar entre fontes.</p>
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               <span className="rounded-full border border-white/8 px-2 py-1 text-[0.46rem] font-bold text-white/35">{station.status === "cadastro_ativo" ? "Cadastro setorial ativo" : station.status}</span>
                               {station.mapData && <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2 py-1 text-[0.46rem] font-bold text-[#9FEFFF]">Mapa cruzado</span>}
@@ -1141,11 +1140,6 @@ export default function Stations() {
                         <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 flex-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
                         {station.address && <button type="button" onClick={() => void copyAddress(station)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar endereço</button>}
                         <button type="button" onClick={() => void copyCnpj(station.cnpj)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar CNPJ</button>
-                        <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web", "_blank", "noopener,noreferrer")} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF]">Verificar situação na ANP</button>
-                      </div>
-                      <div className="mt-3 rounded-xl border border-white/8 bg-white/[.02] p-3">
-                        <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Como interpretar</p>
-                        <p className="mt-1 text-[0.55rem] leading-relaxed text-white/35">Cadastro identifica o estabelecimento. Preço, horário, bandeira e situação operacional podem mudar e precisam de uma fonte e uma data de coleta próprias.</p>
                       </div>
                       <div className="mt-2 flex items-center justify-between gap-2 text-[0.5rem] text-white/25">
                         <span>{station.neighborhood ?? "Bairro não consolidado"}</span>
