@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
@@ -59,6 +59,7 @@ export function StationDirectoryCard({
   onToggleSaved?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState("");
   const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
@@ -108,15 +109,22 @@ export function StationDirectoryCard({
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
+      setActionFeedback("Informação copiada para a área de transferência.");
       vibration();
       window.setTimeout(() => setCopied(false), 1400);
-    } catch {}
+    } catch {
+      setActionFeedback("Não foi possível copiar. Selecione e copie o endereço ou CNPJ manualmente.");
+    }
   };
 
   const share = async () => {
     try {
       await shareText(stationName + " · " + address + (cnpj ? " · CNPJ " + formatCnpj(cnpj) : ""), shareUrl, "Trajeto · posto");
-    } catch {}
+      setActionFeedback("Posto compartilhado.");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setActionFeedback("Não foi possível compartilhar neste navegador.");
+    }
   };
 
   return (
@@ -178,23 +186,24 @@ export function StationDirectoryCard({
               key={provider}
               type="button"
               onClick={() => window.open(buildNavigationProviderUrl(provider, address, coords), "_blank", "noopener,noreferrer")}
-              className={"min-h-11 rounded-xl border px-2 text-xs font-black transition-transform duration-200 active:scale-[.98] " + className}
+              className={"min-h-11 rounded-xl border px-2 text-xs font-black transition-transform duration-200 active:scale-[.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7FF3C] " + className}
             >{label}</button>
           ))}
         </div>
         <button
           type="button"
           onClick={() => window.open(buildNavigationProviderUrl("google", address, coords), "_blank", "noopener,noreferrer")}
-          className="mt-2 min-h-12 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98]"
+          className="mt-2 min-h-12 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         ><Navigation className="mr-1.5 inline size-4" />Ir agora · Google Maps</button>
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Phone className="size-3.5" />Ligar</a>}
-        <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
-        <button type="button" onClick={() => void share()} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Share2 className="size-3.5" />Compartilhar</button>
+        <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#C7FF3C]">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
+        <button type="button" onClick={() => void share()} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#C7FF3C]"><Share2 className="size-3.5" />Compartilhar</button>
         <button type="button" onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/15 text-[0.55rem] font-black text-[#9FEFFF]"><ExternalLink className="size-3.5" />Consulta ANP</button>
       </div>
+      <p role="status" aria-live="polite" className="mt-2 min-h-5 text-xs text-[#C9F7FF]">{actionFeedback}</p>
       <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
