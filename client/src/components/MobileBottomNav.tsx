@@ -57,7 +57,7 @@ export default function MobileBottomNav() {
           const active = item.key === "saved"
             ? (current === "/salvos" || (current === "/planejar" && savedMode))
             : current === item.href || (item.href !== "/" && current.startsWith(item.href + "/"));
-          const primary = item.key === "plan";
+          const primary = item.key === "stations";
           const Icon = item.icon;
           return (
             <button
@@ -73,7 +73,7 @@ export default function MobileBottomNav() {
                   : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#8798A1] active:scale-[.97]"}
             >
               <Icon className="size-[1.05rem]" strokeWidth={primary || active ? 2.7 : 2} />
-              <span className="text-[0.55rem] font-extrabold">{primary && lastTrip ? resumeLabel : item.short}</span>
+              <span className="text-[0.55rem] font-extrabold">{primary ? "Postos" : (item.key === "plan" && lastTrip ? resumeLabel : item.short)}</span>
               {item.key === "saved" && savedRoutes > 0 && <span className="absolute right-2 top-1.5 grid min-w-4 place-items-center rounded-full bg-[#3DE3FF] px-1 text-[0.45rem] font-black text-[#0B1014]">{savedRoutes > 9 ? "9+" : savedRoutes}</span>}
               {active && !primary && <span className="absolute bottom-1 h-0.5 w-5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />}
             </button>
