@@ -20,6 +20,13 @@ export type LocalStationRecord = {
 
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
+export const AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE = {
+  count: 31,
+  cnae: "4731-8/00",
+  checkedAt: "2026-09-30",
+  source: "Torêva / consulta empresarial",
+  note: "Referência externa de 31 empresas ativas no CNAE; não substitui a base oficial de revendedores autorizados da ANP.",
+} as const;
 export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 0;
 
 export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
