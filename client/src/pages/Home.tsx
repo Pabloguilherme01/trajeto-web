@@ -87,7 +87,7 @@ export default function Home() {
     if (locating) return;
     rememberIntent("nearby");
     setMessage(null);
-    if (!online || !navigator.geolocation) {
+    if (!navigator.geolocation) {
       setLocation(appUrl("/mapa"));
       return;
     }
