@@ -35,7 +35,8 @@ export default function Home() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [savedRoutes, setSavedRoutes] = useState(0);
   const [offlineStorageError, setOfflineStorageError] = useState(false);
-  const [latestSavedRoute, setLatestSavedRoute] = useState<OfflineRoute | null>(null);\n  const [lastTrip, setLastTrip] = useState(() => getLastTrip());
+  const [latestSavedRoute, setLatestSavedRoute] = useState<OfflineRoute | null>(null);
+  const [lastTrip, setLastTrip] = useState(() => getLastTrip());
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
