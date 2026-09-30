@@ -13,7 +13,7 @@ export function inferPlaceCategory(query:string):PlaceCategory|"all"{
   if(/(policia|delegacia|bombeiro|seguranca)/.test(text)) return "security";
   if(/(parque|praca|lazer|esporte|quadra|area verde)/.test(text)) return "leisure";
   if(/(acessivel|acessibilidade|rampa)/.test(text)) return "accessibility";
-  if(/(bairro|setor|rua|avenida|quadra|cep|endereco|centro|jardim|mansoes|conjunto|quadra|br[- ]?\d+)/.test(text)) return "territory";
+  if(/(bairro|setor|rua|avenida|quadra|cep|endereco|centro|jardim|mansoes|conjunto|br[- ]?\d+)/.test(text)) return "territory";
   return "all";
 }
 export function placeMatchesQuery(fields:Array<string|null|undefined>,query:string){
