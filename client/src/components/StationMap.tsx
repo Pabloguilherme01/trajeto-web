@@ -261,7 +261,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     return <div className={"grid " + heightClassName + " place-items-center bg-[#0B1014] p-6 text-center"}><div><p className="text-sm font-black text-white/60">Mapa offline ainda sem coordenadas salvas.</p><p className="mt-2 text-xs leading-relaxed text-white/35">Abra o mapa uma vez com internet para posicionar os postos e armazenar as coordenadas neste aparelho.</p></div></div>;
   }
 
-  if (offline) {
+  if (offline || isGitHubPagesRuntime()) {
     return <div className={"relative " + heightClassName}><OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} /></div>;
   }
 
