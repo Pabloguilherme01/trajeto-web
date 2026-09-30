@@ -140,11 +140,26 @@ export function buildAppleMapsDirectionsUrl(
   return "https://maps.apple.com/directions?" + params.toString();
 }
 
+export type NavigationProvider = "google" | "waze" | "apple";
+
+export function setPreferredNavigationProvider(provider: NavigationProvider) {
+  try { localStorage.setItem("trajeto:navigation-provider", provider); } catch {}
+}
+
+export function getPreferredNavigationProvider(): NavigationProvider {
+  try {
+    const value = localStorage.getItem("trajeto:navigation-provider");
+    if (value === "waze" || value === "apple" || value === "google") return value;
+  } catch {}
+  return "google";
+}
+
 export function openNavigation(lat: number, lng: number, label?: string) {
   const encoded = encodeURIComponent(label ?? (lat + "," + lng));
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
   const waze = "https://www.waze.com/ul?ll=" + lat + "%2C" + lng + "&navigate=yes&zoom=17&q=" + encoded;
-  return { google, waze };
+  const apple = buildAppleMapsDirectionsUrl(lat + "," + lng);
+  return { google, waze, apple };
 }
 
 export function vibration(pattern: number | number[] = 12) {
