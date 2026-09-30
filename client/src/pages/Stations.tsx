@@ -750,7 +750,6 @@ export default function Stations() {
                   setAddressOnly(false);
                   setVerifiedOnly(false);
                   setMappedOnly(false);
-    setPriceOnly(false);
                   setPriceOnly(false);
                   setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
                 }} className="max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-[0.57rem] font-bold text-white/40">{item}</button>
@@ -987,10 +986,14 @@ export default function Stations() {
                 })}
               </div>
             </div>
-            {fuelFilter !== "all" && (
+            {(fuelFilter !== "all" || directoryFilterCount > 0) && (
               <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] px-3 py-2 text-[0.52rem] font-bold text-[#C9F7FF]" role="status" aria-live="polite">
-                <span>Filtro: {fuelOptions.find(option => option.id === fuelFilter)?.label} · {directoryCardsForDisplay.length} posto(s)</span>
-                <button type="button" onClick={() => setFuelFilter("all")} className="min-h-8 rounded-lg border border-white/10 px-2.5 text-[0.48rem] font-black text-white/70">Remover</button>
+                <span>
+                  {fuelFilter !== "all" ? "Filtro: " + (fuelOptions.find(option => option.id === fuelFilter)?.label || "combustível") : "Filtros ativos"}
+                  {" · " + directoryCardsForDisplay.length + " posto(s)"}
+                  {priceOnly ? " · preço individual ANP" : ""}
+                </span>
+                <button type="button" onClick={resetDirectoryView} className="min-h-8 rounded-lg border border-white/10 px-2.5 text-[0.48rem] font-black text-white/70">Limpar</button>
               </div>
             )}
               <details className="mt-2 rounded-2xl border border-white/8 bg-[#0B1014]">
