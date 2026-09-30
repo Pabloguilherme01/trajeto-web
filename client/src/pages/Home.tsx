@@ -175,27 +175,15 @@ export default function Home() {
           </section>
         )}
 
-        <section className="mt-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[0.5rem] font-black uppercase tracking-[.16em] text-white/25">Acesso rápido</p>
-              <h2 className="mt-1 text-lg font-black tracking-[-.03em]">O que você usa mais</h2>
+        <section className="mt-5 rounded-2xl border border-white/8 bg-[#111A21] p-3.5">
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#C7FF3C]"><Heart className="size-4" fill={savedCount ? "currentColor" : "none"} /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.48rem] font-black uppercase tracking-[.14em] text-white/25">Salvos</p>
+              <p className="mt-1 text-[0.64rem] font-black text-white">{savedCount ? savedCount + " posto(s) neste aparelho" : "Nenhum posto salvo ainda"}</p>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/salvos"))} className="inline-flex min-h-9 items-center gap-1 rounded-lg px-2 text-[0.5rem] font-black text-[#D9FF91]">
-              {savedCount} salvo(s) <ChevronRightIcon />
-            </button>
-          </div>
-
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <button type="button" onClick={() => setLocation(appUrl("/postos") + "?view=map&q=postos")} className="flex min-h-16 items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] px-4 text-left">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><MapPin className="size-5" /></span>
-              <span className="min-w-0 flex-1"><span className="block text-xs font-black">Abrir mapa</span><span className="mt-0.5 block text-[0.52rem] text-white/35">Veja todos os pontos no contexto</span></span>
-              <ArrowRight className="size-4 text-white/20" />
-            </button>
-            <button type="button" onClick={() => setLocation(appUrl("/salvos"))} className="flex min-h-16 items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] px-4 text-left">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#FF7D6A]/[.08] text-[#FFB7A9]"><Heart className="size-5" fill={savedCount ? "currentColor" : "none"} /></span>
-              <span className="min-w-0 flex-1"><span className="block text-xs font-black">Salvos</span><span className="mt-0.5 block text-[0.52rem] text-white/35">{savedCount ? savedCount + " posto(s) neste aparelho" : "Nenhum posto salvo ainda"}</span></span>
-              <ArrowRight className="size-4 text-white/20" />
+            <button type="button" onClick={() => setLocation(appUrl("/salvos"))} className="min-h-10 shrink-0 rounded-xl border border-white/8 px-3 text-[0.52rem] font-black text-white/60">
+              Abrir
             </button>
           </div>
         </section>
