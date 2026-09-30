@@ -4,6 +4,7 @@ import { Apple, LocateFixed, Navigation, Minus, Plus, RotateCcw } from "lucide-r
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import TileStationMap from "@/components/TileStationMap";
 
 export type StationMapItem = {
   id?: string;
@@ -329,7 +330,11 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     return <div className={"grid " + heightClassName + " place-items-center bg-[#0B1014] p-6 text-center"}><div><p className="text-sm font-black text-white/60">Mapa offline ainda sem coordenadas salvas.</p><p className="mt-2 text-xs leading-relaxed text-white/35">Abra o mapa uma vez com internet para posicionar os postos e armazenar as coordenadas neste aparelho.</p></div></div>;
   }
 
-  if (offline || isGitHubPagesRuntime()) {
+  if (isGitHubPagesRuntime()) {
+    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={userCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
+  }
+
+  if (offline) {
     return <div className={"relative " + heightClassName}><OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} /></div>;
   }
 
