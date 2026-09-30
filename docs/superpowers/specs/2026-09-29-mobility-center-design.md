@@ -3479,3 +3479,200 @@ A interface fica simples.
 **Não adicionar mais complexidade à superfície para resolver problemas de arquitetura.**
 
 Se algo está difícil de usar, a primeira resposta será simplificar o fluxo e consolidar estado, não criar outro card.
+
+
+## 135. Mobile Reliability Layer — funcionamento antes de expansão
+
+A reformulação passa a possuir uma camada explícita de confiabilidade do produto.
+
+### 135.1 App Self-Test
+Adicionar diagnóstico técnico local capaz de verificar:
+- inicialização React;
+- roteamento;
+- base path/GitHub Pages;
+- localStorage;
+- Service Worker;
+- cache;
+- conectividade;
+- providers configurados;
+- links externos;
+- estado de missão;
+- integridade de migrations.
+
+Resultado: **OK / Atenção / Indisponível**, sem score geral.
+
+### 135.2 Safe Startup
+Uma falha secundária não pode impedir a abertura do núcleo: **Home → destino → missão**.
+
+### 135.3 Feature Health
+Cada domínio declara disponível, degradado, offline, indisponível ou configuração ausente.
+
+### 135.4 Failure Containment
+Erros de provider, parser ou componente ficam confinados ao domínio correspondente.
+
+### 135.5 Recovery Actions
+Cada falha recuperável oferece tentar novamente, usar cache, abrir snapshot, continuar offline, limpar estado inválido, voltar ou recomeçar missão.
+
+## 136. Mobile Mission Engine
+
+### 136.1 Mission State Machine
+Estados oficiais: **idle → planning → route_ready → preparing → navigating → completed**.
+Interrupções: **blocked / interrupted / cancelled / expired**. Transições inválidas devem ser rejeitadas.
+
+### 136.2 Mission Checkpoint
+Antes de sair para navegação externa, registrar missão, destino, rota, timestamp, estado e ação externa.
+
+### 136.3 Resume After External Navigation
+Ao retornar: **“Você estava em uma viagem para X.”** Ações: continuar, concluir, revisar ou descartar checkpoint.
+
+### 136.4 Mission Timeout
+Checkpoints antigos deixam de ser tratados como viagem atual e podem ser retomados como nova missão.
+
+## 137. Fast Path 2.0
+
+Caminho otimizado: **Agora → destino recente → rota conhecida → Navegar**.
+
+Não repetir configurações desnecessárias.
+
+### 137.1 Smart Resume
+Missão ativa → **Continuar**. Sem missão → **Ir agora**.
+
+### 137.2 Destination Memory
+Separar recente, frequente, favorito e último usado. Não inferir estados com amostra insuficiente.
+
+### 137.3 Route Memory
+Registrar configurações explicitamente usadas: provedor, evitar pedágio, evitar rodovia, modo e paradas. Não converter memória em preferência automática sem confirmação.
+
+## 138. Trip Workspace 2.0
+
+Uma única superfície representa uma viagem:
+- Cabeçalho: destino + estado.
+- Corpo: próxima ação.
+- Detalhes: rota, combustível, custos, offline e checklist.
+- Rodapé: uma ação principal.
+
+Nenhum módulo externo poderá criar uma segunda versão da mesma missão.
+
+## 139. Navigation Handoff
+
+A navegação externa é um handoff. O Trajeto prepara contexto e entrega ao provedor.
+
+URLs universais do Google Maps permitem abrir pesquisa, rotas e navegação sem exigir chave de API; podem definir origem, destino, waypoints e modo. citeturn0search4turn0search5
+
+### 139.1 Handoff Validation
+Validar destino, parâmetros, origem quando fornecida, waypoints e provedor.
+
+### 139.2 Handoff Fallback
+Se o app externo não estiver disponível, abrir URL web compatível e informar que navegação guiada depende do provedor/dispositivo.
+
+### 139.3 Handoff Privacy
+Enviar somente a informação necessária para a ação.
+
+## 140. Mobile Action Rail
+
+Cada fluxo possui uma área contextual para a ação principal: **Calcular rota / Preparar / Navegar / Concluir**.
+
+Deve respeitar safe-area, não esconder foco, não cobrir campos e não coexistir com barras fixas redundantes.
+
+WCAG 2.2 exige que o foco não fique totalmente oculto por conteúdo criado pelo autor; isso será testado com barra fixa e teclado. citeturn0search2
+
+## 141. Mobile Touch Standard
+
+Controles principais terão alvo preferencial de 44×44 CSS px. WCAG 2.2 AA define 24×24 como mínimo em condições específicas, enquanto 44×44 é o critério aprimorado AAA; 44×44 será o padrão interno para ações importantes. citeturn0search0turn0search3
+
+Swipe, drag e long press serão opcionais. Toda ação essencial terá alternativa de toque simples. citeturn0search1
+
+## 142. Mobile Form Engine
+
+Formulários críticos terão labels persistentes, validação inline, mensagens próximas ao campo, preservação de valores válidos, teclado adequado, inputmode apropriado e prevenção de perda acidental.
+
+### 142.1 No Autofocus Abuse
+Não abrir teclado automaticamente sem intenção explícita.
+
+## 143. Mobile Search 2.0
+
+Busca única para destinos, viagens, veículos, postos, ações e dados.
+
+Estados: vazio, digitando, resultados, sem resultados, erro e offline.
+
+Resultados podem oferecer ações contextuais como **Destino → Ir**, **Viagem → Continuar**, **Veículo → Abrir**, **Combustível → Registrar**.
+
+## 144. Contextual Command System
+
+A busca pode executar **Ir para destino, Continuar viagem, Preparar, Registrar abastecimento, Abrir custos, Abrir veículo, Abrir rota salva**. Alterações de dados e ações externas exigem confirmação quando necessário.
+
+## 145. Data Trust Contract
+
+Dados importantes devem responder: **o que é + quando foi atualizado + de onde veio**.
+
+Categorias: REAL/EXTERNO, REGISTRADO, CALCULADO, ESTIMADO, PROJETADO, OFFLINE, DESATUALIZADO.
+
+Nunca misturar categorias visualmente.
+
+## 146. “Why this?”
+
+Toda recomendação contextual poderá explicar contexto detectado, dados utilizados, dados ausentes, regra aplicada e alternativa disponível.
+
+## 147. Data Sufficiency Gate
+
+**dados suficientes → executar; dados insuficientes → explicar; dados contraditórios → revisar.** Nunca preencher lacunas automaticamente.
+
+## 148. Local Data Safety
+
+Adicionar schema version, migration journal, validation, limits, quarantine, backup point e rollback quando possível. Dados inválidos não podem provocar JSON.parse fatal ou tela branca.
+
+## 149. PWA Update Safety
+
+Fluxo: **detectar → validar → migrar → testar → ativar**. Se migration falhar, preservar versão anterior.
+
+### 149.1 Update Center
+Mostrar versão atual, nova versão, mudanças relevantes e estado da atualização.
+
+## 150. Mobile Visual System 2.0
+
+Design baseado em **uma superfície → uma decisão → uma ação**.
+
+Prioridades: leitura, contraste, toque, hierarquia, espaçamento e feedback.
+
+Remover decoração sem função, cards repetidos, métricas duplicadas, badges excessivos, gráficos sem decisão e textos técnicos do fluxo principal.
+
+## 151. Mobile Navigation Recovery
+
+URLs profundas devem validar rota, recuperar contexto quando possível, redirecionar para superfície segura e preservar intenção apenas através de returnTo validado. Nunca confiar cegamente em URL externa para redirecionamento.
+
+## 152. GitHub Pages Compatibility
+
+Testar BASE_URL, refresh de rotas, links internos, assets, Service Worker scope, manifest, URLs com query/hash e navegação direta para rotas profundas.
+
+## 153. Production Smoke Test
+
+Antes de cada deploy:
+1. Home;
+2. destino;
+3. rota;
+4. alternativa;
+5. preparação;
+6. navegação;
+7. retorno;
+8. conclusão;
+9. histórico;
+10. offline;
+11. recuperação;
+12. mobile;
+13. console;
+14. links;
+15. Service Worker.
+
+Nenhum deploy será declarado concluído sem evidência desses testes.
+
+## 154. Reformulação de prioridade
+
+**1. funcionamento → 2. simplicidade → 3. velocidade → 4. recuperação → 5. acessibilidade → 6. transparência → 7. segurança → 8. recursos avançados.**
+
+## 155. Critério final de produto
+
+O usuário deve conseguir usar o celular sem conhecer arquitetura, providers, datasets, schemas, eventos, caches, Service Worker, provenance ou migrations. Tudo isso pertence ao motor.
+
+## 156. Regra de encerramento da expansão
+
+Qualquer novo recurso deve demonstrar pelo menos uma melhoria em: reduzir toques, reduzir tempo, reduzir erro, melhorar recuperação, transparência, segurança, acessibilidade, integração de dados ou preparação/conclusão. Caso contrário, fica fora da superfície principal.
