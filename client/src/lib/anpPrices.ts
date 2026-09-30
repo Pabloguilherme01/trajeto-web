@@ -1,6 +1,8 @@
 import type { AnpPriceRecord, AnpPriceSnapshot } from "@shared/anpPrices";
+import { idbGet, idbPut } from "@/lib/offlineDb";
 
 const PRICE_URL = import.meta.env.BASE_URL + "data/aguas-lindas-anp-precos.json";
+const PRICE_KEY = "trajeto-aguas-lindas-anp-precos-v1";
 
 export type { AnpPriceRecord, AnpPriceSnapshot };
 
@@ -10,9 +12,10 @@ export async function loadAguasLindasAnpPrices(signal?: AbortSignal): Promise<An
     if (!response.ok) return null;
     const snapshot = await response.json() as AnpPriceSnapshot;
     if (!snapshot || snapshot.source !== "ANP" || !Array.isArray(snapshot.data)) return null;
+    void idbPut("data", PRICE_KEY, snapshot);
     return snapshot;
   } catch {
-    return null;
+    return await idbGet<AnpPriceSnapshot>("data", PRICE_KEY);
   }
 }
 
