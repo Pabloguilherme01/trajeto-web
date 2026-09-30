@@ -3,7 +3,7 @@ import { ArrowLeftRight, ArrowRight, History, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { clearRecentTrips, getRecentTrips, mobilePreferenceEvent, removeRecentTrip, type RecentTrip } from "@/lib/mobilePreferences";
+import { clearRecentTrips, getRecentTrips, getRouteUsage, mobilePreferenceEvent, removeRecentTrip, type RecentTrip } from "@/lib/mobilePreferences";
 import { findOfflineRouteByTrip, listOfflineRoutes } from "@/lib/offlineStore";
 
 function formatAge(usedAt: string) {
@@ -98,7 +98,7 @@ export default function RecentTripsCard() {
             <div className="min-w-0 flex-1">
               {index === 0 && <span className="text-[0.5rem] font-black uppercase tracking-[0.1em] text-[#326575]">Mais recente</span>}
               <p className="mt-0.5 truncate text-xs font-extrabold">{trip.origin} → {trip.destination}</p>
-              <p className="mt-1 text-[0.6rem] text-[#718089]">Usada {formatAge(trip.usedAt)}</p>
+              <p className="mt-1 text-[0.6rem] text-[#718089]">Usada {formatAge(trip.usedAt)} · {getRouteUsage(trip.origin, trip.destination)} {getRouteUsage(trip.origin, trip.destination) === 1 ? "uso" : "usos"} registrados</p>
             </div>
             <div className="flex shrink-0 gap-1.5">
               <button type="button" onClick={() => void openTrip(trip)} className="inline-flex min-h-10 items-center gap-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
