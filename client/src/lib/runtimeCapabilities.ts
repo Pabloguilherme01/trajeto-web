@@ -1,4 +1,4 @@
-const configuredRoutingBase = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim() || "";
+const configuredRoutingBase = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim() || "";\nconst configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim() || "";
 const configuredStaticRuntime = import.meta.env.VITE_STATIC_RUNTIME?.trim().toLowerCase() === "true";
 
 export function isGitHubPagesRuntime() {
