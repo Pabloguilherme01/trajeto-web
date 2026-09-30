@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Bookmark, Clock3, MapPin, Navigation, Search, Wifi, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
+import { shareText } from "@/lib/mobileTools";
 import { getFavoriteDestination, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { getLastTrip, getRecentSearches, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
@@ -42,6 +43,18 @@ export default function TodayPulse() {
     if (!favorite) return;
     rememberDestinationUsage(favorite);
   };
+
+  const shareLastTrip = () => {
+    if (!lastTrip) return;
+    const url = `${window.location.origin}${appUrl("/planejar")}?origem=${encodeURIComponent(lastTrip.origin)}&destino=${encodeURIComponent(lastTrip.destination)}`;
+    void shareText(`Minha rota no Trajeto: ${lastTrip.origin} → ${lastTrip.destination}.`, url, "Trajeto");
+  };
+
+  const readiness = lastTrip
+    ? online
+      ? savedRoutes.length > 0 ? "pronto + offline" : "pronto para calcular"
+      : savedRoutes.length > 0 ? "pronto offline" : "conexão necessária"
+    : "primeira viagem";
 
   return (
     <section className="border-b border-white/8 bg-[#0A1116] py-4 sm:py-7 md:hidden" aria-labelledby="today-pulse-title">
@@ -96,6 +109,14 @@ export default function TodayPulse() {
               {recentSearch ? "Última busca" : "Postos"}
             </a>
           </div>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[0.045] px-3 py-2.5">
+          <div className="min-w-0">
+            <p className="text-[0.48rem] font-black uppercase tracking-[0.14em] text-[#C7FF3C]">Preparação</p>
+            <p className="mt-0.5 truncate text-[0.62rem] font-extrabold text-white">{readiness}</p>
+          </div>
+          {lastTrip && <button type="button" onClick={shareLastTrip} className="mobile-pressable inline-flex shrink-0 items-center justify-center rounded-lg border border-white/10 px-3 text-[0.58rem] font-black text-white/75">Enviar rota</button>}
         </div>
 
         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
