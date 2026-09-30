@@ -60,6 +60,11 @@ export default function LatestRouteRadar() {
   const rangeKm = vehicle ? Math.max(0, vehicle.consumption * vehicle.tank) : null;
   const rangeAfterTrip = rangeKm != null ? rangeKm - summary.distanceKm : null;
   const refuels = rangeKm != null && rangeKm > 0 ? Math.max(0, Math.ceil(summary.distanceKm / rangeKm) - 1) : null;
+  const litersNeeded = summary.estimatedFuelCost != null && fuelPrice != null ? summary.estimatedFuelCost / fuelPrice : null;
+  const costPerKm = summary.estimatedFuelCost != null && summary.distanceKm > 0 ? summary.estimatedFuelCost / summary.distanceKm : null;
+  const arrivalLabel = summary.durationMinutes != null
+    ? new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(Date.now() + summary.durationMinutes * 60000)
+    : null;
 
   return (
     <section className="border-b border-white/8 bg-[#10181F] py-4 sm:py-6" aria-labelledby="latest-route-radar-title">
@@ -75,12 +80,12 @@ export default function LatestRouteRadar() {
                   </span>
                 </div>
                 <h2 id="latest-route-radar-title" className="mt-2 truncate font-display text-xl font-semibold tracking-[-0.05em] text-white">{route.origin} → {route.destination}</h2>
-                <p className="mt-1 text-[0.62rem] text-[#71838C]">{ageLabel(route.savedAt)} · dados preservados neste aparelho</p>
+                <p className="mt-1 text-[0.62rem] text-[#71838C]">{ageLabel(route.savedAt)} · dados preservados neste aparelho{arrivalLabel ? ` · chegada estimada ${arrivalLabel}` : ""}</p>
               </div>
               <RouteIcon className="mt-1 size-5 shrink-0 text-[#C7FF3C]" aria-hidden="true" />
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
               <div className="rounded-2xl border border-white/8 bg-white/[0.025] p-3">
                 <RouteIcon className="size-3.5 text-[#3DE3FF]" />
                 <p className="mt-2 text-[0.5rem] font-black uppercase tracking-[0.1em] text-white/35">Distância</p>
@@ -95,6 +100,12 @@ export default function LatestRouteRadar() {
                 <Gauge className="size-3.5 text-[#BDA5FF]" />
                 <p className="mt-2 text-[0.5rem] font-black uppercase tracking-[0.1em] text-white/35">Combustível</p>
                 <p className="mt-1 text-sm font-black text-white">{summary.estimatedFuelCost != null ? money(summary.estimatedFuelCost) : "cadastre preço"}</p>
+                {litersNeeded != null && <p className="mt-0.5 text-[0.55rem] font-bold text-white/35">{litersNeeded.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L estimados</p>}
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-white/[0.025] p-3">
+                <Gauge className="size-3.5 text-[#FFB86B]" />
+                <p className="mt-2 text-[0.5rem] font-black uppercase tracking-[0.1em] text-white/35">Custo / km</p>
+                <p className="mt-1 text-sm font-black text-white">{costPerKm != null ? money(costPerKm) : "—"}</p>
               </div>
               <div className="rounded-2xl border border-white/8 bg-white/[0.025] p-3">
                 <BatteryMedium className="size-3.5 text-[#FFB86B]" />
