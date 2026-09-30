@@ -71,7 +71,7 @@ function Router() {
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/ferramentas" component={Tools} />
-          <Route path="/transparencia" component={Legal} />
+          <Route path="/transparencia"><Legal /></Route>
           <Route path="/privacidade" component={PrivacyRoute} />
           <Route path="/termos" component={TermsRoute} />
           <Route path="/404" component={NotFound} />
