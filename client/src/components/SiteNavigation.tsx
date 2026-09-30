@@ -2,7 +2,9 @@ import { Bookmark, HelpCircle, Home, MapPinned, Navigation, UserRound } from "lu
 import { Link, useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
-type NavigationItem = { href: string; label: string; icon: typeof Home; primary?: boolean };\n\nconst items: NavigationItem[] = [
+type NavigationItem = { href: string; label: string; icon: typeof Home; primary?: boolean };
+
+const items: NavigationItem[] = [
   { href: "/", label: "Início", icon: Home },
   { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
   { href: "/salvos", label: "Salvos", icon: Bookmark },
