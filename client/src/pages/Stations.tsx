@@ -124,6 +124,9 @@ export default function Stations() {
     setQuery(trimmed);
     setShowMap(false);
     setCompareIds([]);
+    setNeighborhoodFilter("all");
+    setBrandFilter("all");
+    setAddressOnly(false);
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
   };
 
