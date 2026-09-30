@@ -1,4 +1,4 @@
-import { LocateFixed, Search, Navigation, ExternalLink, WifiOff, MapPin, ChevronRight, HeartPulse, GraduationCap, Bus, Landmark, Shield, TreePine, Fuel, Accessibility } from "lucide-react";
+import { LocateFixed, Search, Navigation, ExternalLink, WifiOff, MapPin, ChevronRight, HeartPulse, GraduationCap, Bus, Landmark, Shield, TreePine, Fuel, Accessibility, Globe2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import CityExplorerMap, { placeDistanceLabel } from "@/components/CityExplorerMap";
@@ -10,7 +10,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getDistanceKm, type Coordinates } from "@/lib/stationDirectorySearch";
 import { buildWazeNavigationUrl, buildAppleMapsDirectionsUrl, openNavigation } from "@/lib/mobileTools";
 
-const categoryOptions:Array<{key:PlaceCategory;label:string;icon:typeof Fuel}>=[
+const categoryOptions:Array<{key:PlaceCategory|"all";label:string;icon:typeof Fuel}>=[
   {key:"fuel",label:"Postos",icon:Fuel},{key:"health",label:"Saúde",icon:HeartPulse},
   {key:"education",label:"Educação",icon:GraduationCap},{key:"transport",label:"Transporte",icon:Bus},
   {key:"government",label:"Serviços",icon:Landmark},{key:"security",label:"Segurança",icon:Shield},
@@ -27,9 +27,9 @@ function fallbackCenter():Coordinates{
   };
 }
 
-function iconFor(category:PlaceCategory){
+function iconFor(category:PlaceCategory|"all"){
   const map={fuel:Fuel,health:HeartPulse,education:GraduationCap,transport:Bus,government:Landmark,security:Shield,leisure:TreePine,accessibility:Accessibility};
-  return map[category];
+  return category==="all" ? Globe2 : map[category];
 }
 
 export default function Explore(){
@@ -42,7 +42,7 @@ export default function Explore(){
     const lat=Number(params.get("lat")); const lng=Number(params.get("lng"));
     return Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180 ? {lat,lng} : null;
   });
-  const [category,setCategory]=useState<PlaceCategory>(()=> {
+  const [category,setCategory]=useState<PlaceCategory|"all">(()=> {
     const q=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("q")||"":"";
     const inferred=inferPlaceCategory(q);
     return inferred==="all" ? "fuel" : inferred;
@@ -66,7 +66,7 @@ export default function Explore(){
     const next=input.trim();
     setQuery(next);
     const inferred=inferPlaceCategory(next);
-    if(inferred!=="all") setCategory(inferred);
+    setCategory(inferred);
   };
 
   const openNav=(place:PlaceEntity)=>{
@@ -115,7 +115,7 @@ export default function Explore(){
 
         <section className="mt-4">
           <div className="flex items-end justify-between gap-3">
-            <div><p className="text-[.48rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">{PLACE_CATEGORY_ICONS[category]} {PLACE_CATEGORY_LABELS[category]}</p><h2 className="mt-1 text-base font-black">Referências nesta região</h2></div>
+            <div><p className="text-[.48rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">{category==="all" ? "🌐" : PLACE_CATEGORY_ICONS[category]} {category==="all" ? "Tudo" : PLACE_CATEGORY_LABELS[category]}</p><h2 className="mt-1 text-base font-black">Referências nesta região</h2></div>
             <span className="text-[.55rem] font-bold text-white/30">{filtered.length} resultados</span>
           </div>
 
