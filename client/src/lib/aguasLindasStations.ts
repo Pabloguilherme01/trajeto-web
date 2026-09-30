@@ -22,7 +22,7 @@ export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
 export const AGUAS_LINDAS_DATA_AUDIT = {
   checkedAt: "2026-09-30",
-  officialAnpBaseUpdatedAt: "2026-09-29",
+  officialAnpBaseUpdatedAt: "2026-09-28",
   officialSource: "ANP - Dados Cadastrais dos Revendedores Varejistas de Combustíveis Automotivos",
   officialApiAvailable: true,
   officialFields: ["CNPJ", "endereço", "produtos", "distribuidor", "tancagem", "bicos", "situação Sigaf", "coordenadas"],
@@ -41,10 +41,10 @@ export const AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE = {
 export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 0;
 
 export const AGUAS_LINDAS_ANP_CATALOG_REFERENCE = {
-  count: 33,
+  count: null,
   checkedAt: "2026-09-30",
-  source: "Consulta pública baseada no cadastro de revendedores da ANP",
-  note: "Referência de cobertura; não substitui a conciliação individual via API oficial do revendedor.",
+  source: "Base oficial ANP disponível para exportação/API",
+  note: "Contagem municipal oficial ainda não materializada individualmente nesta versão; não apresentar estimativa como total oficial.",
 } as const;
 
 export const AGUAS_LINDAS_PRICE_REFERENCE = {
