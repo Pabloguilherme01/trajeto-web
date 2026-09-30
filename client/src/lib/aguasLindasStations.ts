@@ -178,7 +178,7 @@ const records: StationSeed[] = [
 
 
 const MAP_ENRICHMENTS: Record<string, NonNullable<LocalStationRecord["mapData"]>> = {
-  "aguas-lindas-combustiveis": { rating: 4.1, reviewCount: 214, hours: "06:00–23:00", observedBrand: "Shell", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
+  "aguas-lindas-combustiveis": { rating: 3.7, reviewCount: 466, hours: "06:00–23:00", observedBrand: "Shell", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "zm": { phone: "(61) 99620-0099", rating: 4.8, reviewCount: 163, hours: "04:00–00:00", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "sao-jose": { phone: "(61) 99292-5283", rating: 4.6, reviewCount: 30, hours: "05:00–00:00", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "formula-01": { phone: "(61) 3060-0591", email: "postoformula01@gmail.com", rating: 4.0, reviewCount: 272, hours: "05:00–22:00", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
@@ -186,10 +186,10 @@ const MAP_ENRICHMENTS: Record<string, NonNullable<LocalStationRecord["mapData"]>
   "rainha-da-paz": { rating: 3.8, reviewCount: 217, hours: "05:00–23:00", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "guaira": { rating: 4.0, reviewCount: 219, hours: "05:00–23:00", observedBrand: "Ipiranga", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "df-180": { rating: 4.0, reviewCount: 219, hours: "05:00–23:00", observedBrand: "Ipiranga", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
-  "rham": { phone: "0800 725 7333", rating: 4.3, reviewCount: 18, hours: "05:00–23:00", observedBrand: "Ipiranga", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
+  "rham": { rating: 4.3, reviewCount: 18, hours: "05:00–23:00", observedBrand: "Ipiranga", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "jardim-brasilia": { phone: "(61) 3618-3581", rating: 4.0, reviewCount: 459, operationalStatus: "closed", observedAt: "2026-09-30", source: "maps" },
   "ponteio-setor-10": { phone: "(61) 99881-2916", rating: 3.9, reviewCount: 835, hours: "24h", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
-  "perola": { phone: "(61) 3618-6496", email: "autopostoperola@hotmail.com", rating: 2.5, reviewCount: 2, hours: "07:00–22:00", observedBrand: "Petrobras", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
+  "perola": { phone: "(61) 3613-7641", email: "autopostoperola@hotmail.com", rating: 4.0, reviewCount: 191, hours: "05:00–23:00", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "village": { rating: 5.0, reviewCount: 58, hours: "08:00–21:10", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "premium-barragem-v": { rating: 3.9, reviewCount: 8, hours: "24h", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "mizuno": { phone: "(61) 98494-4864", rating: 4.2, reviewCount: 240, hours: "24h (seg–sex); 05:00–22:00 (sáb–dom)", operationalStatus: "open", observedBrand: "Petrobras", observedAt: "2026-09-30", source: "maps" },
