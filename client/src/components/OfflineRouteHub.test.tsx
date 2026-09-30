@@ -7,9 +7,9 @@ describe("OfflineRouteHub", () => {
     const onSelectDestination = vi.fn();
     render(<OfflineRouteHub compact onSelectDestination={onSelectDestination} />);
 
-    expect(screen.getByRole("heading", { name: /rotas rápidas para pontos essenciais/i })).toBeInTheDocument();
-    expect(screen.getByText("Hospital Bom Jesus")).toBeInTheDocument();
-    expect(screen.getByText(/Fonte: Prefeitura \/ CNES/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /rotas rápidas para pontos essenciais/i })).toBeTruthy();
+    expect(screen.getByText("Hospital Bom Jesus")).toBeTruthy();
+    expect(screen.getByText(/Fonte: Prefeitura \/ CNES/i)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /usar hospital municipal bom jesus como destino/i }));
 
     expect(onSelectDestination).toHaveBeenCalledTimes(1);
