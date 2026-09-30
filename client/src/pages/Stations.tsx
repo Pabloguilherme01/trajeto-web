@@ -669,7 +669,14 @@ export default function Stations() {
               <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.58rem] font-black text-[#0B1014] disabled:opacity-40">
                 <Navigation className="mr-1 inline size-3.5" /> {locating ? "GPS…" : "Perto"}
               </button>
-              <button type="button" onClick={() => { setShowMap(true); requestAnimationFrame(() => document.getElementById(broadAguasLindasQuery ? "aguas-lindas-map" : "station-results-map")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 text-[0.58rem] font-black text-[#C9F7FF]">
+              <button type="button" onClick={() => {
+                setShowMap(true);
+                if (broadAguasLindasQuery) {
+                  const technical = document.getElementById("anp-directory") as HTMLDetailsElement | null;
+                  if (technical) technical.open = true;
+                }
+                requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById(broadAguasLindasQuery ? "aguas-lindas-map" : "station-results-map")?.scrollIntoView({ behavior: "smooth", block: "start" })));
+              }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 text-[0.58rem] font-black text-[#C9F7FF]">
                 <MapIcon className="mr-1 inline size-3.5" /> Mapa
               </button>
               <button type="button" onClick={openSaved} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.58rem] font-black text-white/65">
@@ -868,11 +875,11 @@ export default function Stations() {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
-              <div className="rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#D9FF91]">Confiança ≥70%</p><p className="mt-1 text-lg font-black text-[#D9FF91]">{directoryConfidenceCount}</p></div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-white/8 bg-[#0B1014] px-3 py-2.5 text-[0.5rem] font-bold text-white/40">
+              <span><strong className="text-white/75">{directoryCards.length}</strong> fichas</span>
+              <span><strong className="text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</strong> conciliadas com ANP</span>
+              <span><strong className="text-[#D9FF91]">{directoryConfidenceCount}</strong> com confiança ≥70%</span>
+              {userCoords && <span><strong className="text-white/75">GPS</strong> ativo só nesta sessão</span>}
             </div>
 
             <div className="mt-3">
@@ -960,9 +967,24 @@ export default function Stations() {
                   {directoryFilterCount > 0 && <button type="button" onClick={resetDirectoryView} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.55rem] font-black text-white/55 sm:col-span-2">Limpar filtros adicionais</button>}
                 </div>
               </details>
+            <div className="sticky top-2 z-20 mt-3 flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-[#0B1014]/92 px-2.5 py-2 shadow-[0_12px_30px_rgba(0,0,0,.28)] backdrop-blur-xl">
+              <div className="min-w-0 px-1">
+                <p className="truncate text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Sua lista</p>
+                <p className="mt-0.5 text-[0.68rem] font-black text-white">{directoryCardsForDisplay.length} posto(s)</p>
+              </div>
+              <div className="grid shrink-0 grid-cols-2 gap-1">
+                <button type="button" onClick={() => { setShowMap(false); requestAnimationFrame(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className={"min-h-9 rounded-xl px-3 text-[0.52rem] font-black " + (!showMap ? "bg-white/10 text-white" : "text-white/45")}>Lista</button>
+                <button type="button" onClick={() => {
+                  setShowMap(true);
+                  const technical = document.getElementById("anp-directory") as HTMLDetailsElement | null;
+                  if (technical) technical.open = true;
+                  requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" })));
+                }} className={"min-h-9 rounded-xl px-3 text-[0.52rem] font-black " + (showMap ? "bg-[#3DE3FF]/10 text-[#C9F7FF]" : "text-white/45")}>Mapa</button>
+              </div>
+            </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
-              <span>{directoryCardsForDisplay.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
-              <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
+              <span>{directoryCardsForDisplay.length} de {directoryCards.length} fichas · {anpStations.length} ANP</span>
+              <span>{userCoords ? "distância local · sem envio do GPS ao catálogo" : "sem exigir localização"}</span>
             </div>
 
             {directoryCardsForDisplay.length > 0 && (
