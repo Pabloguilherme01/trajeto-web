@@ -384,7 +384,6 @@ export default function Planner() {
               <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
               <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
             </div>
-            <p className="mt-3 text-center text-[0.56rem] font-semibold text-white/30">Esse modo é compatível com hospedagem estática, como GitHub Pages.</p>
           </section>
         )}
 
@@ -405,17 +404,10 @@ export default function Planner() {
                 <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
-                  <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
-                  <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
-                  <p className="mt-1 text-[0.58rem] leading-relaxed text-white/35">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
-                </div>
-                <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
-                  <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">Pedágio</p>
-                  <p className="mt-1 text-xs font-black">Não informado</p>
-                  <p className="mt-1 text-[0.58rem] text-white/35">o retorno básico da rota não fornece pedágio</p>
-                </div>
+              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3">
+                <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
+                <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
+                <p className="mt-1 text-[0.58rem] leading-relaxed text-white/35">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
