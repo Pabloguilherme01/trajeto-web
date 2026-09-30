@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound } from "lucide-react";
+import { Bookmark, Fuel, HelpCircle, Home, Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -10,7 +10,7 @@ const baseItems = [
   { key: "plan", href: "/planejar", label: "Planejar", short: "Planejar", icon: Navigation },
   { key: "stations", href: "/postos", label: "Postos", short: "Postos", icon: Fuel },
   { key: "saved", href: "/salvos", label: "Salvos", short: "Salvos", icon: Bookmark },
-  { key: "account", href: "/minha-conta", label: "Conta", short: "Conta", icon: UserRound },
+  { key: "help", href: "/ajuda", label: "Ajuda", short: "Ajuda", icon: HelpCircle },
 ] as const;
 
 export default function MobileBottomNav() {
