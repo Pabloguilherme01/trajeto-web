@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, X } from "lucide-react";
+import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, X, MapPinned } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -9,9 +9,9 @@ import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
-  { key: "plan", href: "/planejar", label: "Planejar", short: "Planejar", icon: Navigation },
+  { key: "map", href: "/mapa", label: "Mapa", short: "Mapa", icon: MapPinned },
+  { key: "plan", href: "/planejar", label: "Rotas", short: "Rotas", icon: Navigation },
   { key: "stations", href: "/postos", label: "Postos", short: "Postos", icon: Fuel },
-  { key: "saved", href: "/salvos", label: "Salvos", short: "Salvos", icon: Bookmark },
   { key: "more", href: "/ajuda", label: "Mais opções", short: "Mais", icon: MoreHorizontal },
 ] as const;
 
@@ -95,10 +95,18 @@ export default function MobileBottomNav() {
       <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="border-white/10 bg-[#121B22] text-white">
         <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-white/70"><X className="size-5" /></DialogClose>
         <DialogTitle>Mais opções</DialogTitle>
-        <DialogDescription>Ajuda e recursos do Trajeto.</DialogDescription>
-        <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
-          <HelpCircle className="size-5" /> Ajuda e uso offline
-        </button>
+        <DialogDescription>Postos, salvos, ajuda e conta ficam aqui.</DialogDescription>
+        <div className="grid gap-2">
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <Fuel className="size-5" /> Encontrar postos
+          </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <Bookmark className="size-5" /> Salvos
+          </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <HelpCircle className="size-5" /> Ajuda e uso offline
+          </button>
+        </div>
         {!isGitHubPagesRuntime() && <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/minha-conta")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
           <UserRound className="size-5" /> Minha conta
         </button>}
