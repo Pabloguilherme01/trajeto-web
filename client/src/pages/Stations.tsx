@@ -88,6 +88,7 @@ export default function Stations() {
   const [addressOnly, setAddressOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
+  const [priceOnly, setPriceOnly] = useState(false);
   const initialOfflineAnp = getOfflineAnpSnapshot();
   const initialOfflineMap = getOfflineMapStations();
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
@@ -129,6 +130,11 @@ export default function Stations() {
     () => directoryCards.filter(item => stationDataConfidence({ anp: item.anp, local: item.local }) >= 70).length,
     [directoryCards],
   );
+  const directoryPriceCount = useMemo(
+    () => directoryCards.filter(item => (pricesByCnpj.get(item.key)?.length ?? 0) > 0).length,
+    [directoryCards, pricesByCnpj],
+  );
+  const priceFilterAvailable = directoryPriceCount > 0;
 
   const directoryBrands = useMemo(() => Array.from(new Set(directoryCards.map(item => item.anp?.distribuidora || item.local?.brand || "Sem bandeira"))).sort((a, b) => a.localeCompare(b, "pt-BR")), [directoryCards]);
   const directoryNeighborhoods = useMemo(() => Array.from(new Set(directoryCards.map(item => item.anp?.bairro || item.local?.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")), [directoryCards]);
@@ -154,7 +160,8 @@ export default function Stations() {
       const addressMatches = !addressOnly || Boolean(item.anp?.endereco || item.local?.address);
       const verifiedMatches = !verifiedOnly || Boolean(item.anp) || item.local?.dataQuality === "anp-confirmed" || item.local?.dataOrigin === "ANP";
       const mappedMatches = !mappedOnly || Boolean(item.local?.mapData);
-      return (!normalized || text.includes(normalized)) && neighborhoodMatches && brandMatches && addressMatches && verifiedMatches && mappedMatches;
+      const priceMatches = !priceOnly || (pricesByCnpj.get(item.key)?.length ?? 0) > 0;
+      return (!normalized || text.includes(normalized)) && neighborhoodMatches && brandMatches && addressMatches && verifiedMatches && mappedMatches && priceMatches;
     });
 
     return [...matches].sort((a, b) => {
@@ -187,7 +194,7 @@ export default function Stations() {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly, priceOnly]);
 
   const directoryCardsForDisplay = useMemo(
     () => directoryCardsFiltered.filter(item => matchesFuelFilter(item, fuelFilter, pricesByCnpj)),
@@ -210,7 +217,7 @@ export default function Stations() {
     fuelOptions.map(option => [option.id, option.id === "all" ? directoryCardsFiltered.length : directoryCardsFiltered.filter(item => matchesFuelFilter(item, option.id, pricesByCnpj)).length]),
   ) as Record<FuelFilter, number>, [directoryCardsFiltered, fuelOptions, pricesByCnpj]);
 
-  const directoryFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly);
+  const directoryFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly) + Number(priceOnly);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -446,7 +453,7 @@ export default function Stations() {
 
   useEffect(() => {
     setDirectoryVisibleCount(48);
-  }, [directorySearch, directorySort, fuelFilter]);
+  }, [directorySearch, directorySort, fuelFilter, priceOnly]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -461,6 +468,7 @@ export default function Stations() {
     setAddressOnly(false);
     setVerifiedOnly(false);
     setMappedOnly(false);
+    setPriceOnly(false);
     setDirectoryVisibleCount(48);
   };
 
@@ -483,6 +491,7 @@ export default function Stations() {
     setAddressOnly(false);
     setVerifiedOnly(false);
     setMappedOnly(false);
+    setPriceOnly(false);
     setDirectorySearch("");
     setDirectorySort("name");
     setFuelFilter("all");
@@ -509,6 +518,7 @@ export default function Stations() {
         setAddressOnly(false);
         setVerifiedOnly(false);
         setMappedOnly(false);
+    setPriceOnly(false);
         vibration(18);
         setQuery("postos");
         setInput("postos próximos");
@@ -555,6 +565,7 @@ export default function Stations() {
     setAddressOnly(false);
     setVerifiedOnly(false);
     setMappedOnly(false);
+    setPriceOnly(false);
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -706,7 +717,7 @@ export default function Stations() {
                 </button>
               )}
               {broadAguasLindasQuery && (
-                <button type="button" onClick={() => { setDirectorySort("price"); setFuelFilter("gasolina-comum"); requestAnimationFrame(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3.5 text-[0.6rem] font-black text-[#D9FF91]">
+                <button type="button" onClick={() => { setDirectorySort("price"); setFuelFilter("gasolina-comum"); if (priceFilterAvailable) setPriceOnly(true); requestAnimationFrame(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3.5 text-[0.6rem] font-black text-[#D9FF91]">
                   <Fuel className="mr-1 inline size-3.5" /> Mais baratos
                 </button>
               )}
@@ -732,6 +743,8 @@ export default function Stations() {
                   setAddressOnly(false);
                   setVerifiedOnly(false);
                   setMappedOnly(false);
+    setPriceOnly(false);
+                  setPriceOnly(false);
                   setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
                 }} className="max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-[0.57rem] font-bold text-white/40">{item}</button>
                 ))}
@@ -984,6 +997,7 @@ export default function Stations() {
                   <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold text-white/60"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço consolidado</label>
                   <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold " + (verifiedFilterAvailable ? "text-white/60" : "text-white/30")}><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} disabled={!verifiedFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Cadastro ANP disponível</label>
                   <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold text-white/60"><input type="checkbox" checked={mappedOnly} onChange={event => setMappedOnly(event.target.checked)} className="size-4 accent-[#3DE3FF]" /> Referência de mapa</label>
+                  <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold " + (priceFilterAvailable ? "text-white/60" : "text-white/30")}><input type="checkbox" checked={priceOnly} onChange={event => setPriceOnly(event.target.checked)} disabled={!priceFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Com preço individual ANP {priceFilterAvailable ? "· " + directoryPriceCount : "· indisponível"}</label>
                   {directoryFilterCount > 0 && <button type="button" onClick={resetDirectoryView} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.55rem] font-black text-white/55 sm:col-span-2">Limpar filtros adicionais</button>}
                 </div>
               </details>
