@@ -38,7 +38,7 @@ export default function QuickResolver({ onMessage }: Props) {
     const isSpecificOfflineMatch = Boolean(
       offline &&
       value.length >= 4 &&
-      (normalizedValue === normalizedName || normalizedValue === normalizedShortName || normalizedName.includes(normalizedValue)),
+      (normalizedValue === normalizedName || normalizedValue === normalizedShortName),
     );
     if (offline && isSpecificOfflineMatch) {
       rememberIntent("route");
