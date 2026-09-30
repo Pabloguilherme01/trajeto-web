@@ -158,7 +158,7 @@ export default function Home() {
 
         <section className="mt-6" aria-label="Ações principais">
           <div className="grid gap-2 sm:grid-cols-3">
-            <button type="button" onClick={openLastTrip} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.08] p-4 text-left active:scale-[.99]">
+            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.08] p-4 text-left active:scale-[.99]">
               <Route className="size-4 text-[#C7FF3C]" />
               <p className="mt-3 text-sm font-black">{lastTrip ? "Continuar última rota" : "Planejar uma rota"}</p>
               <p className="mt-1 text-[0.62rem] text-white/45">{lastTrip ? "Retomar sem preencher tudo de novo" : "Informe origem e destino"}</p>
