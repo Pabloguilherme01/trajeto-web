@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
-import { getMobileDestinations, type MobileDestination } from "@/lib/mobileDestinations";
+import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
