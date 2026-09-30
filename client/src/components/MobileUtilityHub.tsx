@@ -70,7 +70,7 @@ export default function MobileUtilityHub() {
                     <strong className="block text-sm font-extrabold text-white">{panel.title}</strong>
                     <span className="mt-0.5 block text-xs leading-relaxed text-[#7F919A]">{panel.detail}</span>
                   </span>
-                  <span className="hidden shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black uppercase tracking-[.1em] text-[#71838C] sm:inline-flex">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"}` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : "fontes visíveis"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
+                  <span className="inline-flex shrink-0 max-w-[6.5rem] truncate rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-[#71838C]">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"}` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : "fontes visíveis"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
                 </button>
 
                 {isOpen && (
