@@ -17,7 +17,7 @@ import StationDirectoryCard from "@/components/StationDirectoryCard";
 import StationCompareSheet from "@/components/StationCompareSheet";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot, cacheOfflineMapStations, hydrateOfflineAnpSnapshot } from "@/lib/stationMapOffline";
+import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot, getOfflineMapStations, cacheOfflineMapStations, hydrateOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { toast } from "sonner";
 import type { AnpStation } from "@shared/anpRevendedores";
 
@@ -148,6 +148,20 @@ export default function Stations() {
     return () => { cancelled = true; };
   }, [savedOnly, staticRuntime]);
 
+
+  const anpStations = useMemo<AnpStation[]>(() => {
+    const live = anpQuery.data?.rows ?? [];
+    if (live.length > 0) return groupAnpFuelRows(live);
+    return offlineAnpRows.length > 0 ? groupAnpFuelRows(offlineAnpRows) : [];
+  }, [anpQuery.data?.rows, offlineAnpRows]);
+
+  useEffect(() => {
+    const rows = anpQuery.data?.rows ?? [];
+    if (!rows.length) return;
+    cacheOfflineAnpSnapshot(rows, anpQuery.data?.retrievedAt ?? null);
+    setOfflineAnpRows(rows);
+    setOfflineAnpRetrievedAt(anpQuery.data?.retrievedAt ?? null);
+  }, [anpQuery.data?.rows, anpQuery.data?.retrievedAt]);
 
   const directoryCards = useMemo(
     () => buildDirectoryCards(AGUAS_LINDAS_STATIONS, anpStations),
