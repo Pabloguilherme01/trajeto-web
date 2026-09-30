@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  AGUAS_LINDAS_ANP_CATALOG_REFERENCE,
+  AGUAS_LINDAS_PRICE_REFERENCE,
   AGUAS_LINDAS_STATIONS,
   searchAguasLindasStations,
   stationMapsSearchUrl,
 } from "./aguasLindasStations";
 
 describe("diretório de postos de Águas Lindas", () => {
-  it("mantém os 41 cadastros da coleta e não confunde presença com verificação ANP", () => {
+  it("mantém os 41 cadastros da coleta e referências externas separadas", () => {
+    expect(AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count).toBe(33);
+    expect(AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average).toBe(6.78);
     expect(AGUAS_LINDAS_STATIONS).toHaveLength(41);
     expect(new Set(AGUAS_LINDAS_STATIONS.map(item => item.cnpj)).size).toBe(41);
     expect(AGUAS_LINDAS_STATIONS.every(item => item.dataQuality === "catalog-only")).toBe(true);

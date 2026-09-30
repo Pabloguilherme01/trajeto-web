@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -319,7 +319,26 @@ export default function Stations() {
             {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length > 0 && (
               <div className="mt-3 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-3 text-[0.57rem] leading-relaxed text-white/45">
                 <strong className="text-[#FFD09A]">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} referências de estabelecimentos apareceram em mapas. Elas são exibidas para auditoria, mas não são somadas automaticamente à base cadastral até haver identificação confiável por CNPJ/endereço.
-                {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => <div key={item.displayName} className="mt-1"><span className="font-bold text-white/60">{item.displayName}</span> · {item.address}</div>)}
+                <div className="mt-2 grid gap-2">
+                  {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => (
+                    <div key={item.displayName + item.address} className="rounded-xl border border-white/8 bg-[#0B1014]/70 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[0.62rem] font-black text-white">{item.displayName}</p>
+                          <p className="mt-1 text-[0.54rem] leading-relaxed text-white/35">{item.address}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-[#FFB86B]/20 px-2 py-1 text-[0.45rem] font-black text-[#FFD09A]">mapa</span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-[0.52rem] text-white/35 sm:grid-cols-4">
+                        <span>Telefone: {item.phone ?? "não informado"}</span>
+                        <span>Horário: {item.hours ?? "não informado"}</span>
+                        <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
+                        <span className="col-span-2 sm:col-span-1">{item.note}</span>
+                      </div>
+                      <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className="mt-3 min-h-10 rounded-xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -348,16 +367,19 @@ export default function Stations() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Referência de preços ANP</p>
-                  <p className="mt-1 text-[0.58rem] text-white/45">20/09 a 26/09/2026 · médias municipais</p>
+                  <p className="mt-1 text-[0.58rem] text-white/45">{AGUAS_LINDAS_PRICE_REFERENCE.period} · médias municipais</p>
                 </div>
                 <span className="text-[0.5rem] font-black text-white/30">não é preço em tempo real</span>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-[0.55rem] text-white/50">
-                <span>Gasolina: <strong className="text-white/75">R$ 6,78/L</strong></span>
-                <span>Etanol: <strong className="text-white/75">R$ 4,59/L</strong></span>
-                <span>Diesel S10: <strong className="text-white/75">R$ 7,27/L</strong></span>
-                <span>GLP P13: <strong className="text-white/75">R$ 107,53</strong></span>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-[0.55rem] text-white/50 sm:grid-cols-3">
+                <span>Gasolina: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>Etanol: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.ethanol.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>Diesel S10: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS10.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>Diesel S500: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS500.average.toFixed(2).replace(".", ",")}/L</strong></span>
+                <span>GLP P13: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.glpP13.average.toFixed(2).replace(".", ",")}</strong></span>
+                <span>GNV: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gnv.average.toFixed(2).replace(".", ",")}/m³</strong></span>
               </div>
+              <p className="mt-2 text-[0.5rem] leading-relaxed text-white/25">{AGUAS_LINDAS_PRICE_REFERENCE.note}</p>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
@@ -366,9 +388,14 @@ export default function Stations() {
                 <p className="text-[0.52rem] text-white/30">registros catalogados</p>
               </div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
-                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP individual</p>
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Referência ANP</p>
+                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count}</p>
+                <p className="text-[0.52rem] text-white/30">cobertura de referência</p>
+              </div>
+              <div className="col-span-2 rounded-xl border border-white/8 bg-[#0B1014] p-3 sm:col-span-1">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP enriquecido</p>
                 <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_VERIFIED_COUNT}</p>
-                <p className="text-[0.52rem] text-white/30">confirmados nesta base</p>
+                <p className="text-[0.52rem] text-white/30">verificados via API</p>
               </div>
             </div>
               </div>
