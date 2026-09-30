@@ -26,6 +26,11 @@ function minutes(seconds: number) {
   return `${Math.max(1, Math.round(seconds / 60))} min`;
 }
 
+function estimatedArrival(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "—";
+  return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
+}
+
 function RouteResultSkeleton() {
   return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white" role="status">
     <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse rounded-xl bg-white/[.06]" /><div className="h-16 flex-1 animate-pulse rounded-xl bg-white/[.06]" /></div>
@@ -450,7 +455,7 @@ export default function Planner() {
               <div className="flex h-full min-h-[340px] flex-col justify-between"><div className="grid size-14 place-items-center rounded-full bg-[#E9EFE9] text-[#BA5B45]"><Sparkles className="size-6" /></div><div><p className="eyebrow">O que aparece aqui</p><h2 className="font-display mt-4 max-w-md text-4xl font-semibold leading-[0.93] tracking-[-0.06em]">Postos reais,<br />dados com contexto.</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-[#627773]">A busca usa localização e rota para organizar os pontos de abastecimento. Quando a referência oficial da ANP estiver vinculada ao posto, ela aparece separada e com a data de coleta.</p></div><div className="flex flex-wrap gap-3 text-xs font-bold text-[#496760]"><span className="border border-[#C7D2C9] px-3 py-2">Google Maps</span><span className="border border-[#C7D2C9] px-3 py-2">ANP · atualização periódica</span></div></div>
             ) : (
               <div>
-                <div className="grid gap-3 border-b border-[#D8DED5] pb-6 sm:grid-cols-3"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Distância</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{planned.route.distanceLabel}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Tempo estimado</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{minutes(planned.route.durationSeconds)}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Trajeto</p><p className="mt-2 text-sm font-semibold leading-snug">{planned.route.summary || "Rota calculada"}</p></div></div>
+                <div className="grid grid-cols-2 gap-3 border-b border-[#D8DED5] pb-6 sm:grid-cols-4"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Distância</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{planned.route.distanceLabel}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Tempo estimado</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{minutes(planned.route.durationSeconds)}</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Chegada</p><p className="font-display mt-1 text-3xl font-semibold tracking-[-0.06em]">{estimatedArrival(selectedRouteDuration || planned.route.durationSeconds)}</p><p className="mt-1 text-[0.58rem] font-semibold text-[#71807B]">se sair agora</p></div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#BA5B45]">Trajeto</p><p className="mt-2 text-sm font-semibold leading-snug">{planned.route.summary || "Rota calculada"}</p></div></div>
                 <div className="mt-6"><RouteMap
                   origin={planned.route.origin}
                   destination={planned.route.destination}
