@@ -1073,3 +1073,306 @@ Uma nova função só entra no produto se satisfizer pelo menos uma destas condi
 - melhora preparação ou conclusão da viagem.
 
 Se apenas adicionar informação visual sem resolver uma tarefa, deve permanecer fora da superfície principal.
+
+
+## 31. Evolução 50.0 — Orquestração e interoperabilidade
+
+Esta fase amplia o Trajeto de centro contextual para uma camada de orquestração pessoal, sem criar navegação própria, rastreamento contínuo ou módulos isolados.
+
+### 31.1 Mobility Orchestrator
+Coordenar **Contexto → Objetivo → Missão → Dependências → Capacidades → Próxima ação → Execução → Eventos → Resultado**. O orquestrador resolve dependências; não substitui provedores nem controla apresentação.
+
+### 31.2 Mission Goal, Board e Dependencies
+Missões passam a possuir objetivo explícito, etapas, dependências, bloqueios, progresso e próxima ação. Dependências seguem **Destino → Rota → Veículo → Combustível → Checklist → Offline → Navegação → Registro**, com estados pronta, pendente, opcional, indisponível ou desatualizada.
+
+### 31.3 Mission Constraints
+Permitir restrições explícitas de horário, janela de parada, veículo, pedágio, orçamento e paradas obrigatórias. O Conflict Center deve identificar combinações incompatíveis e nunca escolher silenciosamente qual restrição sacrificar.
+
+### 31.4 Multi-stop e Stop Windows
+Missões podem ter múltiplas paradas, ordenação manual, conclusão por etapa, objetivo, duração e janela. Otimização automática só quando houver dados de rota reais suficientes; sem criar trânsito próprio.
+
+### 31.5 Agenda e Departure Window
+Adicionar agenda local de mobilidade para missões, manutenção, abastecimentos planejados e documentos. Calcular janela de saída somente quando houver duração e buffer suficientes, separando tempo externo, estimado e definido pelo usuário.
+
+### 31.6 Resource Scheduler
+Recursos como veículos e outros meios cadastrados podem estar disponíveis, reservados, em uso, em manutenção ou indisponíveis. Detectar conflitos antes da missão.
+
+### 31.7 Temporary Preferences
+Preferências temporárias podem valer somente para uma missão. Preferências permanentes só podem ser criadas após confirmação explícita quando derivadas de repetição observável.
+
+## 32. Histórico e reconstrução
+
+### 32.1 Mobility Timeline
+Unificar missões, rotas, navegação aberta, combustível, despesas, manutenção, incidentes, alterações e encerramento em eventos temporais.
+
+### 32.2 Trip Reconstruction
+Reconstruir apenas fatos conhecidos, separados em confirmado, registrado, calculado e desconhecido.
+
+### 32.3 Trip Outcome e Feedback
+Missões podem terminar como concluída, parcial, interrompida ou cancelada. Feedback é opcional e explícito; não inferir resultado subjetivo.
+
+### 32.4 Route Outcome
+Relacionar rota escolhida ao resultado registrado sem transformar histórico em ranking universal.
+
+## 33. Rota, destino e evidência
+
+### 33.1 Route Portfolio
+Organizar rotas por uso, último uso, configuração, provedor e snapshots.
+
+### 33.2 Route Fingerprint
+Identificar configuração por origem, destino, paradas, preferências, restrições, provedor e parâmetros.
+
+### 33.3 Route Snapshot Chain
+Comparar snapshots por timestamp, distância, duração, parâmetros e dados disponíveis.
+
+### 33.4 Destination Identity e Merge
+Normalizar nome, endereço e aliases. Detectar possíveis duplicidades e exigir confirmação antes de mesclar.
+
+### 33.5 Mobility Areas e Route Corridor
+Permitir áreas e corredores derivados de destinos e rotas explicitamente registrados. Histórico espacial contínuo permanece opt-in e fora do fluxo padrão.
+
+## 34. Dados, evidência e reconciliação
+
+### 34.1 Evidence Bundle
+Valores importantes podem carregar origem, timestamp, período, método, versão e limitações.
+
+### 34.2 Calculation Receipt
+Mostrar **resultado → fórmula → entradas → procedência → timestamp → limitações**.
+
+### 34.3 Calculation Sandbox
+Isolar cálculos e cenários dos dados reais.
+
+### 34.4 Comparability Engine
+Antes de comparar métricas, validar unidade, definição, período, metodologia, cobertura e dados faltantes.
+
+### 34.5 Mobility Baseline
+Quando houver amostra suficiente, criar referências históricas com período, número de registros e metodologia.
+
+### 34.6 Coverage e Data Quality Timeline
+Medir cobertura e consistência dos registros ao longo do tempo, sem transformar isso em nota pessoal.
+
+### 34.7 Anomaly Detector
+Detectar duplicações prováveis, datas inválidas, odômetro regressivo, valores incompatíveis, entidades ausentes e inconsistências temporais. Preservar o dado original.
+
+### 34.8 Reconciliation Queue
+Centralizar divergências de importação, fontes e registros. Oferecer resolver, corrigir, ignorar ou deixar desconhecido.
+
+## 35. Inbox e automação
+
+### 35.1 Mobility Inbox 2.0
+Consolidar bloqueios, registros incompletos, dados antigos, documentos, conflitos e missões interrompidas.
+
+### 35.2 Action Queue e Expiration
+Ordenar ações por dependência e expirar ações que perderam relevância.
+
+### 35.3 Local Automation Engine
+Permitir regras locais simples baseadas em eventos e entidades existentes.
+
+### 35.4 Rule Preview/Replay
+Antes de ativar uma regra, mostrar condições, ações e exemplos. Permitir simular sobre eventos históricos sem alterar dados.
+
+### 35.5 Automation Safety
+Automações não podem excluir dados, compartilhar informações, alterar configurações críticas ou executar ações irreversíveis sem confirmação.
+
+## 36. Custos, recibos e documentos
+
+### 36.1 Mobility Ledger
+Unificar combustível, estacionamento, pedágio registrado, manutenção e outras despesas.
+
+### 36.2 Cost Attribution/Reconciliation
+Relacionar despesas a missão, viagem, veículo e categoria; separar planejado, calculado e registrado.
+
+### 36.3 Cost Correction Journal
+Registrar alterações importantes com valor anterior, novo valor e timestamp.
+
+### 36.4 Receipt Inbox/Matching
+Permitir guardar recibos para processamento posterior e sugerir correspondência apenas quando houver evidência suficiente.
+
+### 36.5 Document Vault
+Associar documentos a veículo, missão, manutenção ou viagem. Controlar data, validade e observação.
+
+### 36.6 Document Checklist
+Missões podem exigir documentos selecionados pelo usuário. O Trajeto apenas verifica presença e datas registradas, sem afirmar validade jurídica além dos dados disponíveis.
+
+## 37. Veículos e recursos
+
+### 37.1 Vehicle Timeline 2.0
+Unificar cadastro, viagens, abastecimentos, manutenção, despesas e documentos.
+
+### 37.2 Vehicle Versioning
+Alterações relevantes de configuração podem preservar histórico.
+
+### 37.3 Resource Registry
+Preparar contratos para múltiplos meios de transporte e recursos compartilhados sem codificar o produto exclusivamente para carros.
+
+## 38. Portabilidade
+
+### 38.1 Mobility Package v3
+Pacote versionado para missões, rotas, destinos, veículos, combustível, despesas, manutenção, documentos e preferências selecionadas.
+
+### 38.2 Partial Import e Mapping
+Permitir importar categorias específicas e mapear campos externos para contratos internos.
+
+### 38.3 Import Validation/Dry Run
+Antes de gravar, apresentar válidos, incompletos, duplicados prováveis e incompatíveis. Dry run nunca altera dados reais.
+
+### 38.4 Schema Compatibility Lab
+Simular conversão entre versões de schema antes da migração.
+
+### 38.5 Export Profiles
+Completo, viagem, veículo, financeiro e compartilhamento.
+
+## 39. Privacidade e segurança
+
+### 39.1 Sensitive Data Zones
+Separar dados públicos, privados e sensíveis.
+
+### 39.2 Sensitive Field Policy
+Para campos sensíveis, definir armazenamento, exportação, compartilhamento e logging.
+
+### 39.3 Log Redaction
+Diagnósticos não podem expor endereço, token, segredo ou dado sensível.
+
+### 39.4 Privacy Preview/Share Manifest
+Antes do compartilhamento, mostrar exatamente os campos enviados e manter manifesto com tipo, versão, conteúdo e timestamp.
+
+### 39.5 Secure Delete e Recovery Before Delete
+Excluir seletivamente e, quando possível, preservar ponto de recuperação antes de exclusão destrutiva.
+
+### 39.6 Local Encryption Architecture
+Considerar Web Crypto API somente para áreas realmente sensíveis, com política explícita de recuperação e sem prometer recuperação de chave inexistente.
+
+## 40. Provedores e rede
+
+### 40.1 Provider Adapter
+Isolar cada provedor por capacidades: rota, alternativas, trânsito, pedágio e navegação.
+
+### 40.2 Capability Discovery/Fallback
+A UI só mostra capacidades realmente disponíveis. Fallback deve ser explicitamente classificado como cache, fonte alternativa ou indisponível.
+
+### 40.3 Provider Health Timeline
+Registrar somente fatos observáveis: sucesso, erro, timeout, latência e timestamp.
+
+### 40.4 Provider Conflict Resolution
+Divergências entre fontes devem ser preservadas e tratadas por política documentada.
+
+### 40.5 Request Dedup/API Budget/Cache
+Deduplicar chamadas idênticas, limitar chamadas por fluxo e aplicar políticas de cache por categoria.
+
+### 40.6 Low Connectivity
+Distinguir online, instável, limitado, offline e desconhecido somente quando mensurável. O modo economia reduz refresh e chamadas.
+
+## 41. PWA e recuperação
+
+### 41.1 Recovery Points
+Criar snapshots antes de migrations/importações relevantes.
+
+### 41.2 Storage Quarantine
+Dados inválidos ficam isolados em vez de apagados automaticamente.
+
+### 41.3 Storage Compaction
+Compactar eventos antigos preservando estado e metadados necessários.
+
+### 41.4 PWA Update Safety
+Fluxo **nova versão → compatibilidade → migration → validação → ativação**; falha deve preservar dados.
+
+### 41.5 Offline Update Queue
+Operações locais pendentes devem usar idempotência e resolução explícita de conflitos quando houver reconciliação futura.
+
+## 42. Event architecture
+
+### 42.1 Domain Event Bus
+Eventos centrais incluem `mission.created`, `mission.prepared`, `route.selected`, `navigation.opened`, `trip.completed`, `fuel.recorded`, `expense.recorded`, `maintenance.recorded` e `incident.recorded`.
+
+### 42.2 Causality/Replay/Compaction
+Eventos podem registrar causa, timestamp, entidade e schema. Replay serve para testes/diagnóstico; compactação preserva o estado necessário.
+
+## 43. Incidentes e encerramento
+
+### 43.1 Incident Center
+Registrar atraso, interrupção, problema de veículo, combustível, estacionamento, pedágio, alteração de destino e outros eventos explícitos.
+
+### 43.2 Trip Closure
+Ao encerrar, oferecer registro opcional de despesas, combustível, incidentes, observação e rota efetivamente utilizada.
+
+## 44. Experiência adaptativa
+
+### 44.1 Adaptive Density
+Rápido, Normal, Detalhado e Técnico devem reutilizar os mesmos componentes.
+
+### 44.2 One-Hand/Focus/Distraction Guard
+Priorizar ações na área de alcance do polegar, reduzir distrações durante missão e mostrar apenas contexto essencial no Focus Mode.
+
+### 44.3 Accessibility Journey
+Testar jornadas completas com teclado, leitor de tela, foco, toque, reduced motion, contraste e telas pequenas.
+
+## 45. Command Center
+
+### 45.1 Mobility Command Palette 2.0
+A busca universal pode executar ações como ir para destino, preparar missão, registrar combustível, abrir custos, consultar veículo e mostrar offline.
+
+### 45.2 Command Permissions/Preview
+Classificar comandos por leitura, alteração, exclusão, compartilhamento e ação externa. Ações relevantes mostram o efeito antes da execução.
+
+### 45.3 Action History/Undo
+Registrar ações relevantes e oferecer desfazer quando tecnicamente seguro.
+
+## 46. Control Plane e autoauditoria
+
+### 46.1 Mobility Control Plane
+Área técnica separada para feature flags locais, schema, migrations, providers, capabilities, cache, recovery, diagnósticos, performance e segurança.
+
+### 46.2 Safe Startup
+Se um módulo falhar, inicializar o restante e isolar a capacidade defeituosa quando possível.
+
+### 46.3 Invariant Monitor
+Verificar missão com estado válido, evento com timestamp, valor financeiro finito, rota ligada a destino e migration com schema conhecido.
+
+### 46.4 Architecture Health
+Detectar componentes duplicados, contratos divergentes, migrations pendentes, estados sem tratamento, dependências desnecessárias e recursos sem fallback.
+
+### 46.5 UX State Gallery/Self-Audit
+Modo técnico para validar loading, empty, error, offline, stale, unavailable, degraded, recovery e success, além de storage, PWA, Service Worker, rotas, links, acessibilidade, performance e capabilities.
+
+### 46.6 Golden Journeys
+Criar regressões para: destino→rota→preparação→navegação; offline→recuperação; missão→combustível→encerramento; storage corrompido→recuperação; mobile→busca→navegação externa; importação→validação→rollback.
+
+### 46.7 Deterministic Demo/Scenario Fixtures
+Dados de demonstração isolados dos dados reais e fixtures determinísticas para missão, rota, veículo, combustível, custos, offline, erros e provedores indisponíveis.
+
+## 47. Recursos futuros preparados
+
+Interfaces podem ser preparadas para transporte público multimodal, bicicleta, caminhada, GTFS/GTFS-RT quando houver fonte adequada, localização opt-in, colaboração, sincronização futura, backend futuro e múltiplos provedores. Nenhum desses recursos deve ser implementado apenas para preencher roadmap.
+
+## 48. Critério de integração máxima
+
+Uma nova capacidade deve preferencialmente conectar pelo menos duas entidades ou etapas existentes: viagem→custo, missão→veículo, veículo→manutenção, rota→evidência, destino→histórico, documento→missão, combustível→viagem, evento→timeline ou fonte→cálculo. Funções isoladas que não aumentem integração ficam fora da superfície principal.
+
+## 49. Ordem final de implementação
+
+1. Contratos e schema.
+2. storageSafety, recovery e migrations.
+3. Mobility Orchestrator.
+4. Mission Goal/Dependency/Constraint Engine.
+5. Destinos, templates e multi-stop.
+6. Agenda, saída e conflitos de recursos.
+7. Route Portfolio, fingerprints, snapshots e evidências.
+8. Offline Vault, capsules e recovery.
+9. Event Bus, timeline e reconstrução.
+10. Data Sufficiency, lineage, reconciliation e anomalias.
+11. Ledger, recibos, documentos e veículos.
+12. Import/export/portabilidade.
+13. Privacidade, compartilhamento e secure delete.
+14. Provider adapters, capabilities e fallback.
+15. Performance, dedup, budget e cache.
+16. Command Center, busca e undo.
+17. Accessibility, cognitive load e mobile.
+18. Control Plane, self-audit e golden journeys.
+19. Testes completos.
+20. Build/CI/deploy verification.
+21. Code review.
+22. Só então merge/deploy.
+
+## 50. Critério de aceitação final
+
+A arquitetura será considerada pronta quando uma missão puder ser criada, preparada, retomada e encerrada; múltiplas paradas puderem ser organizadas sem navegação própria; conflitos de horário/recursos forem detectados; rotas tiverem snapshots e procedência; custos diferenciarem planejado/calculado/registrado; cálculos forem auditáveis; dados incompletos/contraditórios forem identificados sem destruição silenciosa; missões puderem ser recuperadas offline; importações forem validadas antes de alterar dados; compartilhamentos mostrarem exatamente o que será enviado; provedores declararem capacidades; falhas externas degradarem com segurança; storage puder ser validado/recuperado; eventos puderem ser reproduzidos; busca puder encontrar entidades e executar ações; UI se adapte ao contexto sem duplicação; jornadas críticas tenham regressão; diagnósticos não exponham dados sensíveis; não haja promessa de dados inexistentes; o produto permaneça leve e compatível com GitHub Pages; e nenhuma feature exista apenas para aumentar quantidade.
