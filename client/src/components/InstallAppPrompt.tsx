@@ -21,8 +21,13 @@ export default function InstallAppPrompt() {
     if (dismissedUntil > Date.now()) return () => window.removeEventListener("beforeinstallprompt", handler);
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if (ios) setVisible(true);
+    const openInstall = () => setVisible(true);
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    window.addEventListener("trajeto:open-install", openInstall);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("trajeto:open-install", openInstall);
+    };
   }, []);
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
