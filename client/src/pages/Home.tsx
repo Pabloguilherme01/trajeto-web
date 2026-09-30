@@ -1,5 +1,5 @@
 import { ArrowRight, Heart, LocateFixed, MapPin, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
@@ -49,7 +49,7 @@ export default function Home() {
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(query));
   };
 
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     searchStations(input);
   };
