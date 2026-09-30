@@ -1,4 +1,4 @@
-import { ArrowRight, Compass, Fuel, HeartPulse, Landmark, MapPin, Navigation, Route, Search as SearchIcon, ShieldAlert, Siren, Store, X, Hospital, BusFront, ShoppingCart } from "lucide-react";
+import { ArrowRight, BookOpen, Compass, Fuel, HeartPulse, Landmark, MapPin, Navigation, Route, Search as SearchIcon, ShieldAlert, Siren, Store, X, Hospital, BusFront, ShoppingCart } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
