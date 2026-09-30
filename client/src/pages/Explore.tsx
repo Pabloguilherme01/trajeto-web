@@ -2,6 +2,7 @@ import { Accessibility, Bus, ChevronRight, ExternalLink, Fuel, Globe2, HeartPuls
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import CityExplorerMap, { placeDistanceLabel } from "@/components/CityExplorerMap";
+import DataHealthStrip from "@/components/DataHealthStrip";
 import type { PlaceCategory, PlaceEntity } from "@/lib/placeEntity";
 import { PLACE_CATEGORY_ICONS, PLACE_CATEGORY_LABELS } from "@/lib/placeEntity";
 import { inferPlaceCategory, placeMatchesQuery } from "@/lib/placeSearch";
@@ -106,6 +107,7 @@ export default function Explore(){
       </div>
 
       <section className="mt-4"><CityExplorerMap category={category} center={center} online={online} onResults={setResults} onSelect={setSelected}/></section>
+      <DataHealthStrip online={online} />
 
       <section className="mt-4 rounded-[1.25rem] border border-white/8 bg-white/[.025] p-3">
         <div className="flex items-start gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Globe2 className="size-4"/></div><div><p className="text-[.55rem] font-black text-white">Como ler o mapa</p><p className="mt-1 text-[.52rem] leading-relaxed text-white/38">ANP é usado como fonte cadastral e de preço para postos. MAPA identifica enriquecimento geográfico externo. Uma referência externa não vira automaticamente um registro oficial.</p></div></div>
