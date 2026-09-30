@@ -7,6 +7,7 @@ import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
 
 type Props = {
   category: PlaceCategory | "all";
+  query?: string;
   center: Coordinates;
   online: boolean;
   onResults: (places: PlaceEntity[]) => void;
@@ -29,7 +30,7 @@ function placeCoordinates(value:google.maps.LatLng|google.maps.LatLngLiteral|und
   return {lat:item.lat,lng:item.lng};
 }
 
-export default function CityExplorerMap({category,center,online,onResults,onSelect}:Props){
+export default function CityExplorerMap({category,query="",center,online,onResults,onSelect}:Props){
   const mapRef=useRef<google.maps.Map|null>(null);
   const markersRef=useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const [loading,setLoading]=useState(false);
@@ -131,10 +132,12 @@ export default function CityExplorerMap({category,center,online,onResults,onSele
         seen.add(place.id);
         const displayName=typeof place.displayName==="string" ? place.displayName : place.displayName?.text;
         const rawTypes=(place.types??[]) as string[];
+        const resolvedCategory=category==="all" ? categoryFromGoogleType(rawTypes) : category;
+        if(!resolvedCategory) return null;
         return {
           id:"google:"+place.id,
           name:displayName||"Local",
-          category:category==="all" ? categoryFromGoogleType(rawTypes) : category,
+          category:resolvedCategory,
           subcategory:rawTypes[0]??null,
           coordinates,
           address:place.formattedAddress??null,
