@@ -84,7 +84,10 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     markersRef.current.forEach(marker => marker.map = null);
     markersRef.current = [];
     const map = mapRef.current;
-    const bounds = new window.google.maps.LatLngBounds();
+    const maps = window.google?.maps;
+    if (!maps?.LatLngBounds || !maps.marker?.PinElement || !maps.marker?.AdvancedMarkerElement) return;
+
+    const bounds = new maps.LatLngBounds();
     [origin, destination, ...stops].forEach(point => bounds.extend(point));
     routes?.filter(route => route.polyline).forEach(route => decodePolyline(route.polyline as string).forEach(point => bounds.extend(point)));
     const makeMarker = (position: google.maps.LatLngLiteral, title: string, color: string) => {
