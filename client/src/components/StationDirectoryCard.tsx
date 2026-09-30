@@ -109,9 +109,9 @@ export function StationDirectoryCard({
   const status = local?.mapData?.operationalStatus;
   const statusLabel =
     status === "open"
-      ? "Aberto"
+      ? "Aberto · referência"
       : status === "closed"
-        ? "Fechado"
+        ? "Fechado · referência"
         : "Funcionamento não confirmado";
 
   const products = useMemo(() => {
