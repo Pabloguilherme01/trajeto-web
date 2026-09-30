@@ -42,7 +42,7 @@ function parseCoordinateInput(value: string): PublicCoordinate | null {
 
 async function fetchJson<T>(url: string): Promise<T> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -52,7 +52,7 @@ async function fetchJson<T>(url: string): Promise<T> {
     if (!response.ok) throw new Error("Serviço de rota indisponível.");
     return await response.json() as T;
   } finally {
-    window.clearTimeout(timeout);
+    globalThis.clearTimeout(timeout);
   }
 }
 
