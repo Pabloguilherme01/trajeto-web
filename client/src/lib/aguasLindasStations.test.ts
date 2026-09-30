@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
-  AGUAS_LINDAS_ANP_CATALOG_REFERENCE,
+  AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE,
   AGUAS_LINDAS_PRICE_REFERENCE,
+  AGUAS_LINDAS_STATION_STATS,
   AGUAS_LINDAS_STATIONS,
+  AGUAS_LINDAS_STATIONS_COUNT,
   searchAguasLindasStations,
   stationMapsSearchUrl,
 } from "./aguasLindasStations";
 
 describe("diretório de postos de Águas Lindas", () => {
   it("mantém os 41 cadastros da coleta e referências externas separadas", () => {
-    expect(AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count).toBe(33);
+    expect(AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE.count).toBe(31);
     expect(AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average).toBe(6.78);
+    expect(AGUAS_LINDAS_STATION_STATS.total).toBe(41);
+    expect(AGUAS_LINDAS_STATIONS_COUNT).toBe(41);
     expect(AGUAS_LINDAS_STATIONS).toHaveLength(41);
     expect(new Set(AGUAS_LINDAS_STATIONS.map(item => item.cnpj)).size).toBe(41);
-    expect(AGUAS_LINDAS_STATIONS.every(item => item.dataQuality === "catalog-only")).toBe(true);
-    expect(AGUAS_LINDAS_STATIONS.every(item => item.dataOrigin === "local-catalog")).toBe(true);
-    expect(AGUAS_LINDAS_STATIONS.every(item => !item.verificationFlags?.address && !item.verificationFlags?.brand)).toBe(true);
   });
 
   it("retorna a base completa para buscas genéricas e variações da cidade", () => {
@@ -30,6 +31,15 @@ describe("diretório de postos de Águas Lindas", () => {
     expect(searchAguasLindasStations("00.375.386/0002-05")[0]?.displayName).toContain("Mizuno");
     expect(searchAguasLindasStations("Jardim Querência").length).toBeGreaterThan(0);
     expect(searchAguasLindasStations("perola")[0]?.displayName).toContain("Pérola");
+  });
+
+  it("mantém referências de mapas separadas da confirmação ANP", () => {
+    expect(AGUAS_LINDAS_STATION_STATS.mapEnriched).toBeGreaterThan(0);
+    expect(AGUAS_LINDAS_STATIONS.some(item => item.dataOrigin === "cross-check")).toBe(true);
+    expect(AGUAS_LINDAS_STATIONS.some(item => item.dataOrigin === "ANP")).toBe(false);
+    expect(AGUAS_LINDAS_STATIONS.filter(item => item.dataOrigin === "cross-check").length).toBe(
+      AGUAS_LINDAS_STATION_STATS.mapEnriched,
+    );
   });
 
   it("gera um link seguro para consulta do posto no Google Maps", () => {
