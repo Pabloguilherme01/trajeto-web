@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 21256)
+Total output lines: 1124
+
 import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
@@ -627,123 +630,7 @@ export default function Stations() {
                       key={name}
                       type="button"
                       aria-pressed={neighborhoodFilter === name}
-                      onClick={() => {
-                        setNeighborhoodFilter(name);
-                        setBrandFilter("all");
-                        setAddressOnly(false);
-                        setVerifiedOnly(false);
-                        setMappedOnly(false);
-                        window.setTimeout(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" }), 30);
-                      }}
-                      className={"min-h-11 shrink-0 rounded-full border px-3.5 text-[0.57rem] font-bold transition-colors " + (neighborhoodFilter === name ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/8 bg-white/[.03] text-white/65")}
-                    >{name.toLocaleLowerCase("pt-BR").split(/(\s+)/).map(part => part.trim() ? part.charAt(0).toLocaleUpperCase("pt-BR") + part.slice(1) : part).join("")} <span className="ml-1 text-white/35">{count}</span></button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {!showSavedOnly && broadAguasLindasQuery && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Fonte oficial ANP</p>
-                <h2 id="anp-directory-title" className="mt-1 text-xl font-black">Cadastro técnico dos postos</h2>
-                <p className="mt-1 text-[0.63rem] leading-relaxed text-white/45">A API da ANP fornece autorização, CNPJ, endereço, distribuidora, produtos, tancagem, bicos, coordenadas, validação geográfica, situação constatada e status SIGAF.</p>
-              </div>
-              <span className="shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
-            </div>
-
-            {anpLiveQuery.isLoading && !staticRuntime && <div className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Consultando a base oficial da ANP…</div>}
-            {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/50">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/20 px-3 font-black text-[#FFD09A]">Tentar novamente</button></div>}
-            {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/50">O snapshot oficial ainda não chegou ao GitHub Pages. A sincronização automática da ANP foi configurada e a base local continua disponível enquanto isso.</div>}
-
-            {anpRows.length > 0 && (
-              <>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3">
-                  <div className="min-w-0">
-                    <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
-                    <p className="mt-1 text-[0.62rem] leading-relaxed text-white/50">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}. {mapSecondaryCount > 0 ? mapSecondaryCount + " referências secundárias também foram agregadas ao mapa." : ""}</p>
-                  </div>
-                  <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>
-                </div>
-
-                {showMap && mapStations.length > 0 && (
-                  <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
-                    <div className="h-[min(68vh,620px)]">
-                      <StationMap stations={mapStations} showTraffic />
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">
-                      <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
-                      <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
-                    </div>
-                  </section>
-                )}
-
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
-                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
-                </div>
-
-                <div className="mt-3 space-y-2">
-                  {anpStations.slice(0, 12).map(station => (
-                    <details key={station.cnpj} className="rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
-                      <summary className="cursor-pointer list-none px-3.5 py-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-sm font-black text-white">{station.razaoSocial ?? "Razão social não informada"}</p>
-                            <p className="mt-1 text-[0.56rem] text-white/35">CNPJ {station.cnpj} · Autorização {station.autorizacao ?? "não informada"}</p>
-                            <p className="mt-1 text-[0.58rem] leading-relaxed text-white/45">{station.endereco ?? "Endereço não informado"}{station.bairro ? " · " + station.bairro : ""}</p>
-                          </div>
-                          <span className="shrink-0 rounded-full border border-white/8 px-2 py-1 text-[0.46rem] font-black text-white/40">{station.products.length} produto(s)</span>
-                        </div>
-                      </summary>
-                      <div className="space-y-2 border-t border-white/8 px-3.5 py-3 text-[0.55rem] leading-relaxed text-white/45">
-                        <p><strong className="text-white/65">Código SIMP:</strong> {station.codigoSimp ?? "não informado"} · <strong className="text-white/65">CEP:</strong> {station.cep ?? "não informado"} · <strong className="text-white/65">Município/UF:</strong> {station.municipio ?? "—"}/{station.uf ?? "—"}</p>
-                        <p><strong className="text-white/65">Distribuidora/bandeira:</strong> {station.distribuidora ?? "bandeira branca/não informada"} · <strong className="text-white/65">Vinculação:</strong> {station.dataVinculacao ?? "não informada"}</p>
-                        <p><strong className="text-white/65">Publicação:</strong> {station.dataPublicacao ?? "não informada"} · <strong className="text-white/65">Classe:</strong> {station.products.map(item => item.classe).filter(Boolean).filter((item, index, arr) => arr.indexOf(item) === index).join(" · ") || "não informada"}</p>
-                        <p><strong className="text-white/65">Situação:</strong> {station.situacaoConstatada ?? "não informada"} · <strong className="text-white/65">SIGAF:</strong> {station.statusSigaf || "sem ocorrência informada"} </p>
-                        <p><strong className="text-white/65">Origem:</strong> {station.origemInformacao ?? "não informada"} · <strong className="text-white/65">Obtido em:</strong> {station.dataObtencao ?? "não informado"}</p>
-                        <div className="rounded-xl border border-white/8 bg-white/[.02] p-3">
-                          <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">Produtos, tancagem e bicos</p>
-                          {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
-                        </div>
-                        <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
-                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "_blank", "noopener,noreferrer")} className="min-h-10 rounded-xl border border-[#C7FF3C]/20 px-3 text-[0.58rem] font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
-                        {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
-                      </div>
-                    </details>
-                  ))}
-                </div>
-                {anpStations.length > 12 && <p className="mt-3 text-center text-[0.55rem] text-white/25">Mostrando os primeiros 12 nesta visualização. O CSV contém todas as linhas retornadas pela ANP.</p>}
-              </>
-            )}
-
-            {!anpRows.length && mapStations.length > 0 && (
-              <section id="aguas-lindas-map-offline" className="scroll-mt-24 mt-4 overflow-hidden rounded-[1.35rem] border border-[#FFB86B]/20 bg-[#0B1014]" aria-label="Mapa offline de referências dos postos">
-                <div className="border-b border-white/8 px-3.5 py-3">
-                  <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#FFCF96]">Mapa salvo no aparelho</p>
-                  <p className="mt-1 text-[0.6rem] leading-relaxed text-white/45">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis e navegáveis sem conexão.</p>
-                </div>
-                <div className="h-[min(68vh,620px)]">
-                  <StationMap stations={mapStations} showTraffic={false} />
-                </div>
-                <div className="border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">{mapStations.length} referências armazenadas · {offlineMapAge}.</div>
-              </section>
-            )}
-
-            <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
-          </section>
-        )}
-
-        {broadAguasLindasQuery && !showSavedOnly && (
-          <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
+     …3256 tokens truncated…              <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
                 <h2 id="complete-stations-title" className="mt-1 text-xl font-black">Cada posto, uma ficha completa</h2>
                 <p className="mt-2 text-[0.65rem] leading-relaxed text-white/45">
                   {directoryCards.length} fichas reunidas por CNPJ quando disponível. O cadastro local, a ANP e as referências de mapas aparecem separados; cada ficha oferece quatro opções de navegação.
