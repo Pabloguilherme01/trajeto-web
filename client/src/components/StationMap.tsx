@@ -70,9 +70,6 @@ function stationMatchIsPlausible(station: StationMapItem, place: GooglePlaceSear
   return hits >= 1;
 }
 
-function writeCachedCoordinate(_station: StationMapItem, _lat: number, _lng: number) {
-  // Deliberately not persisted: Google Places results are transient enrichment.
-}
 
 function sourceLabel(source?: StationMapItem["source"]) {
   if (source === "ANP") return "ANP";
