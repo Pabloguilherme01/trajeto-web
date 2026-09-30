@@ -1,5 +1,14 @@
 # Trajeto Web · Security Deploy Checklist
 
+## Auditoria atual · 29/09/2026
+
+- [x] Rate limit de processo sem divergência no contador por requisição
+- [x] Gateways de rotas externos com timeout e resposta de erro sanitizada
+- [x] Gateways de rotas rejeitam payloads maiores que 20 KB
+- [x] CORS dos gateways sem fallback permissivo `*`
+- [x] Metadata mobile/SEO revisado para a nova página pública
+- [x] Primitivas mobile para safe-area, toque e foco adicionadas
+
 ## Aplicado no código
 
 - [x] Cookies de sessão HTTP-only, SameSite=Lax e Secure quando HTTPS
