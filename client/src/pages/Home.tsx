@@ -6,6 +6,7 @@ import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "
 import { getMobileDestinations, type MobileDestination } from "@/lib/mobileDestinations";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileDataMode from "@/components/MobileDataMode";
@@ -95,7 +96,10 @@ export default function Home() {
 
   const findNearby = () => {
     rememberIntent("nearby");
-    if (!online) return;
+    if (!online) {
+      setLocation(appUrl("/postos") + "?q=postos");
+      return;
+    }
     if (!navigator.geolocation) {
       setLocation(appUrl("/postos"));
       return;
@@ -218,7 +222,7 @@ export default function Home() {
           <button type="button" onClick={findNearby} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
             <Fuel className="size-4 text-[#3DE3FF]" />
             <p className="mt-3 text-xs font-black">Postos perto</p>
-            <p className="mt-1 text-[0.63rem] text-white/40">Abrir os postos usando sua posição</p>
+            <p className="mt-1 text-[0.63rem] text-white/40">{online ? "Abrir os postos usando sua posição" : isGitHubPagesRuntime() ? "Abrir o diretório local sem internet" : "Abrir postos salvos/cached neste aparelho"}</p>
           </button>
           <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
             <Bookmark className="size-4 text-[#BDA5FF]" />
