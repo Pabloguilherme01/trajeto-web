@@ -3,7 +3,7 @@
   "short_name":"Trajeto",
   "description":"Encontre postos, compare opções de abastecimento, planeje rotas e retome locais salvos, com suporte offline.",
   "lang":"pt-BR",
-  "start_url":"./postos?q=postos",
+  "start_url":"./",
   "scope":"./",
   "id":"./",
   "display":"standalone",
