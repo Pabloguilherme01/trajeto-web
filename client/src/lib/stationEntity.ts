@@ -44,3 +44,58 @@ export function freshnessLabel(value?: string | null) {
   if (days === 1) return "há 1 dia";
   return "há " + days + " dias";
 }
+
+
+export type LocationEntity = {
+  id: string;
+  kind: "station";
+  name: string;
+  address: string;
+  neighborhood: string | null;
+  phone: string | null;
+  website: string | null;
+  coordinates: { lat: number; lng: number } | null;
+  source: string;
+  updatedAt: string | null;
+  confidence: number;
+  services: string[];
+};
+
+export function buildLocationEntity(local?: LocalStationRecord | null, anp?: AnpStation | null, price?: AnpPriceRecord | null): LocationEntity | null {
+  const id = local?.id || anp?.cnpj || null;
+  if (!id) return null;
+  const coordinates =
+    Number.isFinite(anp?.latitude) && Number.isFinite(anp?.longitude)
+      ? { lat: Number(anp?.latitude), lng: Number(anp?.longitude) }
+      : Number.isFinite(local?.anp?.latitude) && Number.isFinite(local?.anp?.longitude)
+        ? { lat: Number(local?.anp?.latitude), lng: Number(local?.anp?.longitude) }
+        : null;
+  const address = [
+    anp?.endereco || local?.address,
+    anp?.complemento,
+    anp?.bairro || local?.neighborhood,
+    anp?.municipio || "Águas Lindas de Goiás",
+    anp?.uf || "GO",
+  ].filter(Boolean).join(", ");
+  const services = [
+    ...(local?.mapData?.operationalStatus === "open" ? ["aberto na referência de mapa"] : []),
+    ...(local?.mapData?.hours ? ["horário informado"] : []),
+    ...(local?.mapData?.phone ? ["telefone"] : []),
+    ...(price ? ["preço ANP"] : []),
+    ...(anp?.products?.length ? ["produtos ANP"] : []),
+  ];
+  return {
+    id,
+    kind: "station",
+    name: local?.displayName || anp?.razaoSocial || "Posto",
+    address: address || "Endereço não consolidado",
+    neighborhood: anp?.bairro || local?.neighborhood || null,
+    phone: local?.mapData?.phone || null,
+    website: local?.mapData?.website || null,
+    coordinates,
+    source: anp ? "ANP" : local?.mapData ? "Catálogo + mapas" : "Catálogo local",
+    updatedAt: local?.mapData?.observedAt || anp?.dataObtencao || local?.verifiedAt || null,
+    confidence: stationDataConfidence({ anp, local, price }),
+    services,
+  };
+}
