@@ -3,6 +3,7 @@ import { CalendarDays, CarFront, Clock3, Fuel, Repeat2 } from "lucide-react";
 import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/mobileVehicle";
 import { calculateRouteTotalCost } from "@/lib/routeTotalCost";
 import { calculateRecurringRouteImpact } from "@/lib/routeRecurringImpact";
+import { getMobilityBudget } from "@/lib/mobilityBudget";
 import type { RouteIntelligenceRoute } from "@/lib/routeIntelligence";
 
 const PRICE_KEY = "trajeto-route-fuel-price";
@@ -16,10 +17,12 @@ export default function RouteRecurringImpactCard(props: { routes: RouteIntellige
   const [fuelPrice, setFuelPrice] = useState<number | null>(null);
   const [tripsPerWeek, setTripsPerWeek] = useState(5);
   const [roundTrip, setRoundTrip] = useState(false);
+  const [budget, setBudget] = useState(() => getMobilityBudget());
 
   useEffect(() => {
     const refresh = () => {
       setVehicle(getMobileVehicle());
+      setBudget(getMobilityBudget());
       try {
         const value = Number(localStorage.getItem(PRICE_KEY) || "");
         setFuelPrice(Number.isFinite(value) && value > 0 ? value : null);
@@ -134,6 +137,12 @@ export default function RouteRecurringImpactCard(props: { routes: RouteIntellige
               </div>
             ) : (
               <p className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3 text-[0.58rem] leading-relaxed text-white/40">Complete veículo e preço local para projetar o impacto recorrente.</p>
+            )}
+
+            {budget > 0 && impact != null && (
+              <p className="mt-2 text-[0.56rem] font-bold text-white/45">
+                Impacto no orçamento mensal: {impact.monthlyDelta >= 0 ? "+" : ""}{money(impact.monthlyDelta)} · {Math.abs(impact.monthlyDelta / budget * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% do orçamento de mobilidade.
+              </p>
             )}
 
             {impact?.costPerMinuteSaved != null && (
