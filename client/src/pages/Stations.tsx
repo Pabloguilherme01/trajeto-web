@@ -80,7 +80,6 @@ export default function Stations() {
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
   const staticRuntime = isGitHubPagesRuntime();
-  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const broadAguasLindasQuery = isBroadAguasLindasQuery(query);
   const anpLiveQuery = trpc.stationDirectory.anp.useQuery(
     { municipio: "AGUASLINDASDEGOIAS", uf: "GO" },
@@ -333,6 +332,8 @@ export default function Stations() {
   const stations = showSavedOnly ? saved : liveStations;
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
+  const openVisibleCount = visibleStations.filter(station => station.isOpen === true).length;
+  const withDistanceCount = visibleStations.filter(station => station.distanceMeters != null).length;
   const recentSearches = getRecentSearches();
   const activeLocalFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly);
 
@@ -1268,16 +1269,17 @@ export default function Stations() {
         )}
 
         {staticRuntime && !showSavedOnly && (
-          <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.57rem] leading-relaxed text-white/35">
-            Fonte e natureza do dado: cadastro empresarial público e referências públicas locais. A ANP mantém o cadastro oficial de revendedores autorizados; preços e situação operacional podem mudar e devem ser verificados antes da viagem.
-          </section>
-        )}
-
-        {staticRuntime && !showSavedOnly && (
-          <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.58rem] leading-relaxed text-white/35">
-            <p><strong className="text-white/55">Confiabilidade:</strong> cadastro ativo é uma informação cadastral; não confirma funcionamento neste momento, preço atual ou coordenada exata.</p>
-            <p className="mt-1">A ANP disponibiliza cadastro oficial e também uma API de revendedores com endereço, produtos, distribuidor, tancagem, bicos, situação de interdição e coordenadas quando disponíveis.</p>
-          </section>
+          <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.57rem] leading-relaxed text-white/35">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between text-[0.55rem] font-black text-white/55">
+              <span>Fonte, qualidade e limites dos dados</span>
+              <span className="text-[0.46rem] text-white/25">ANP + referências locais</span>
+            </summary>
+            <div className="mt-2 space-y-1.5">
+              <p>O diretório separa cadastro oficial da ANP e referências públicas locais. Um cadastro ativo não confirma funcionamento neste momento, preço atual ou coordenada exata.</p>
+              <p>A ANP disponibiliza cadastro de revendedores e dados de endereço, produtos, distribuidor, tancagem, bicos, situação e coordenadas quando disponíveis.</p>
+              <p>Preço, horário, bandeira e situação operacional são apresentados somente quando existe fonte e data correspondentes.</p>
+            </div>
+          </details>
         )}
 
         {nearby && (
@@ -1308,6 +1310,10 @@ export default function Stations() {
                 <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-white/25">{searchedAt ? "Consulta atual" : "Neste aparelho"}</p>
                 <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">{visibleStations.length} resultado(s)</h2>
                 <p className="mt-1 text-[0.56rem] text-white/30">{searchedAt ? "Consultado em " + searchedAt : "Favoritos locais"}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.46rem] font-bold text-white/45">{openVisibleCount} abertos</span>
+                  <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.46rem] font-bold text-white/45">{withDistanceCount} com distância</span>
+                </div>
               </div>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><MapIcon className="size-4" /></button>
