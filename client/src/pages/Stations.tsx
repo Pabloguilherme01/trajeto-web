@@ -11,6 +11,7 @@ import { buildGoogleMapsSearchUrl, openNavigation, vibration } from "@/lib/mobil
 import { getEconomyMode, getRecentSearches, rememberSearch, rememberIntent } from "@/lib/mobilePreferences";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import MobileDataMode from "@/components/MobileDataMode";
+import MobilePageHeader from "@/components/MobilePageHeader";
 import { AUTH_RETURN_KEY } from "@/lib/authReturn";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 import { applyStationSearchPreferences, filterAndSortStations, inferredBrand } from "@/lib/stationListControls";
@@ -348,6 +349,7 @@ ${url}`); toast.success("Link do posto copiado para compartilhar."); }
   return <div className="min-h-screen bg-[#0B1014] text-[#EAF0F2]">
     <header className="sticky top-0 z-40 border-b border-white/8 bg-[#0B1014]/90 backdrop-blur-xl"><div className="container flex h-[68px] items-center justify-between"><Link href="/" className="flex items-center gap-2.5"><img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" /><span className="brand-wordmark text-[1.25rem] text-white">trajeto</span><span className="hidden rounded-full border border-white/10 px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8DA0AB] sm:block">Consulta pública</span></Link><div className="flex items-center gap-2"><Link href="/ajuda"><span className="inline-flex min-h-10 items-center rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#C9F7FF] transition hover:bg-white hover:text-[#0B1014]">Ajuda</span></Link><button onClick={() => setLocation("/")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#C7FF3C] transition hover:bg-white hover:text-[#0B1014]"><ArrowLeft className="size-4" /> <span className="hidden sm:inline">Início</span></button></div></div></header>
     <main className="container pb-28 pt-7 lg:pt-10">
+      <MobilePageHeader eyebrow="Postos" title="Encontre a parada certa." description="Compare distância, horário, favoritos e navegação sem sair do fluxo." icon={Fuel} actionLabel="Encontrar perto de mim" actionHref={appUrl("/postos")} accent="cyan" />
       {cachedStationSnapshot && (
         <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3.5 py-3 text-[0.68rem] font-semibold text-[#A9BAC2]">
           <Clock3 className="size-4 shrink-0 text-[#3DE3FF]" />
