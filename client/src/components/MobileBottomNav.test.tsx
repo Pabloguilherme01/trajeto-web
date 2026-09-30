@@ -22,10 +22,11 @@ describe("mobile navigation", () => {
     expect(state.navigate).toHaveBeenCalledWith("/ajuda");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
-  it("marks only Saved as active for a saved-routes query", () => {
-    state.search = "salvos=1";
+  it("opens Saved routes from the More menu", async () => {
     render(<MobileBottomNav />);
-    expect(screen.getByRole("button", { name: "Salvos" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("button", { name: "Planejar" }).getAttribute("aria-current")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
+    fireEvent.click(screen.getByRole("button", { name: "Salvos" }));
+    expect(state.navigate).toHaveBeenCalledWith("/salvos");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 });
