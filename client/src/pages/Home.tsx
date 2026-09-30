@@ -46,7 +46,7 @@ export default function Home() {
     rememberIntent("stations");
     rememberSearch(query);
     vibration();
-    setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(query));
+    setLocation(appUrl("/postos") + "?q=postos&busca=" + encodeURIComponent(query));
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
