@@ -212,6 +212,8 @@ export default function DailyCommandCenter() {
                       onKeyDown={event => { if (event.key === "Enter") saveFirstDestination(); }}
                       placeholder="Ex.: Trabalho, Centro, faculdade"
                       aria-label="Destino principal"
+                      autoComplete="street-address"
+                      enterKeyHint="done"
                       className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#0B1014] px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780] focus:border-[#3DE3FF]"
                     />
                     <button
@@ -223,7 +225,7 @@ export default function DailyCommandCenter() {
                       Salvar
                     </button>
                   </div>
-                  {setupSaved && <p role="status" className="mt-2 text-[0.62rem] font-bold text-[#C7FF3C]">Destino salvo. O modo automático já está ativo.</p>}
+                  {setupSaved && <p role="status" aria-live="polite" className="mt-2 text-[0.62rem] font-bold text-[#C7FF3C]">Destino salvo. O modo automático já está ativo.</p>}
                 </div>
               </div>
             </div>
@@ -288,7 +290,8 @@ export default function DailyCommandCenter() {
           )}
         </div>
 
-        <div className="border-t border-white/8 px-5 py-3 sm:px-7"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-[0.55rem] font-black uppercase tracking-[.13em] text-[#71838C]">Atalhos do dia</p><span className="text-[0.55rem] font-bold text-white/35">{nextSetup ? `falta: ${nextSetup}` : "configuração completa"}</span></div></div>\n        <div className="grid grid-cols-2 sm:grid-cols-4">
+        <div className="border-t border-white/8 px-5 py-3 sm:px-7"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-[0.55rem] font-black uppercase tracking-[.13em] text-[#71838C]">Atalhos do dia</p><span className="text-[0.55rem] font-bold text-white/35">{nextSetup ? `falta: ${nextSetup}` : "configuração completa"}</span></div></div>
+        <div className="grid grid-cols-2 sm:grid-cols-4">
           <a href={favorite ? appUrl("/planejar") + "?destino=" + encodeURIComponent(favorite.value) : appUrl("/planejar")} className="group min-h-24 border-r border-white/8 p-4 transition hover:bg-white/[.035]">
             <MapPin className="size-4 text-[#3DE3FF]" />
             <p className="mt-5 text-xs font-extrabold text-white">Meu destino</p>
