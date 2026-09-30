@@ -9,7 +9,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { inferredBrand } from "@/lib/stationListControls";
+import { compareBestValue, inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
@@ -57,7 +57,7 @@ export default function Stations() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
+  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price" | "best-value">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -157,10 +157,24 @@ export default function Stations() {
         const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
-      if (directorySort === "price") {
-        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
-        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
-        return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      const priceKey = fuelFilter === "all" ? "gasolina-comum" : fuelFilter;
+      if (directorySort === "price" || directorySort === "best-value") {
+        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === priceKey)?.salePrice ?? null;
+        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === priceKey)?.salePrice ?? null;
+        if (directorySort === "best-value") {
+          const coordsOf = (item: typeof directoryCards[number]) => {
+            const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
+            const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
+            return Number.isFinite(lat) && Number.isFinite(lng) && userCoords
+              ? haversineKm(userCoords.lat, userCoords.lng, lat, lng)
+              : null;
+          };
+          return compareBestValue(
+            { distanceKm: coordsOf(a), price: aPrice, isOpen: a.local?.mapData?.operationalStatus === "open" ? true : a.local?.mapData?.operationalStatus === "closed" ? false : null, hasAnp: Boolean(a.anp) },
+            { distanceKm: coordsOf(b), price: bPrice, isOpen: b.local?.mapData?.operationalStatus === "open" ? true : b.local?.mapData?.operationalStatus === "closed" ? false : null, hasAnp: Boolean(b.anp) },
+          ) || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+        }
+        return (aPrice ?? Number.POSITIVE_INFINITY) - (bPrice ?? Number.POSITIVE_INFINITY) || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "brand") {
         return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
@@ -966,10 +980,11 @@ export default function Stations() {
               <select value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
                 <option value="price">Ordenar: menor preço ANP</option>
+                <option value="best-value" disabled={!userCoords && !priceSnapshot}>Ordenar: melhor combinação</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "best-value" : priceSnapshot ? "price" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Melhor combinação" : priceSnapshot ? "Menor preço" : "Ver todos"}</button>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
