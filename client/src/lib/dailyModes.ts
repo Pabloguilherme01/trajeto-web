@@ -39,7 +39,9 @@ export function chooseAutomaticDailyMode(input: {
   if (!input.online && input.savedRoutes > 0) return "offline";
   if (input.intent === "route" && input.lastTrip) return "repetir";
   if (input.favoriteDestination) return "proxima";
+  if (input.intent === "stations" || input.intent === "nearby") return "proxima";
   if (input.economy) return "economia";
+  if (input.lastTrip) return "repetir";
   if (input.savedRoutes > 0) return "offline";
   return "proxima";
 }
