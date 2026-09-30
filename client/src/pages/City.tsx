@@ -1,15 +1,17 @@
 import React from "react";
 import { useMemo, useState } from "react";
-import { Building2, BusFront, ExternalLink, HeartPulse, MapPinned, Navigation, Phone, Route, Search, Signpost, Wifi } from "lucide-react";
-import { Link } from "wouter";
+import { Building2, BusFront, BriefcaseBusiness, ExternalLink, HeartPulse, MapPinned, Navigation, Phone, Route, Search, Signpost, Wifi } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { buildNavigationProviderUrl, type NavigationProvider } from "@/lib/mobileTools";
 import { CITY_PLACES, CITY_SERVICES, searchCityPlaces, type CityCategory } from "@/lib/aguasLindasCity";
 import SmartCityMode from "@/components/SmartCityMode";
+import CityPlaceAutocomplete from "@/components/CityPlaceAutocomplete";
 
 const filters: { id: "todos" | CityCategory; label: string; icon: typeof MapPinned }[] = [
   { id: "todos", label: "Tudo", icon: MapPinned },
   { id: "saude", label: "Saúde", icon: HeartPulse },
+  { id: "servico", label: "Serviços públicos", icon: BriefcaseBusiness },
   { id: "transporte", label: "Transporte", icon: BusFront },
   { id: "via", label: "Vias principais", icon: Signpost },
 ];
@@ -21,11 +23,14 @@ const providers: { id: NavigationProvider; label: string }[] = [
   { id: "openstreetmap", label: "OpenStreetMap" },
 ];
 
-const categoryName: Record<CityCategory, string> = { saude: "Saúde", transporte: "Transporte", via: "Via principal" };
+const categoryName: Record<CityCategory, string> = { saude: "Saúde", servico: "Serviço público", transporte: "Transporte", via: "Via principal" };
 
 export default function City() {
-  const [filter, setFilter] = useState<"todos" | CityCategory>("todos");
-  const [query, setQuery] = useState("");
+  const [location] = useLocation();
+  const initialQuery = new URLSearchParams(location.split("?")[1] ?? "").get("q") ?? "";
+  const initialPlace = initialQuery ? searchCityPlaces(initialQuery)[0] : undefined;
+  const [filter, setFilter] = useState<"todos" | CityCategory>(initialPlace?.category ?? "todos");
+  const [query, setQuery] = useState(initialPlace?.name ?? initialQuery);
   const places = useMemo(() => searchCityPlaces(query, filter), [filter, query]);
 
   return (
@@ -42,7 +47,7 @@ export default function City() {
           </div>
           <div className="mt-5 grid grid-cols-3 gap-2">
             <div className="rounded-xl border border-white/8 bg-white/[.03] p-3"><p className="text-[.52rem] font-bold uppercase tracking-[.12em] text-white/35">Saúde</p><p className="mt-1 text-lg font-black">{CITY_PLACES.filter(place => place.category === "saude").length}</p><p className="text-[.55rem] text-white/40">unidades listadas</p></div>
-            <div className="rounded-xl border border-white/8 bg-white/[.03] p-3"><p className="text-[.52rem] font-bold uppercase tracking-[.12em] text-white/35">Vias</p><p className="mt-1 text-lg font-black">{CITY_PLACES.filter(place => place.category === "via").length}</p><p className="text-[.55rem] text-white/40">corredores oficiais</p></div>
+            <div className="rounded-xl border border-white/8 bg-white/[.03] p-3"><p className="text-[.52rem] font-bold uppercase tracking-[.12em] text-white/35">Serviços</p><p className="mt-1 text-lg font-black">{CITY_PLACES.filter(place => place.category === "servico").length}</p><p className="text-[.55rem] text-white/40">pontos públicos</p></div>
             <div className="rounded-xl border border-white/8 bg-white/[.03] p-3"><p className="text-[.52rem] font-bold uppercase tracking-[.12em] text-white/35">Acesso</p><p className="mt-1 text-lg font-black">Livre</p><p className="text-[.55rem] text-white/40">sem cadastro</p></div>
           </div>
         </header>
@@ -53,7 +58,7 @@ export default function City() {
           <label htmlFor="city-search" className="text-[.56rem] font-black uppercase tracking-[.13em] text-white/40">O que você procura?</label>
           <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] px-3">
             <Search className="size-4 shrink-0 text-[#3DE3FF]" />
-            <input id="city-search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Ex.: hospital, Barragem, BR-070…" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/30" />
+            <CityPlaceAutocomplete id="city-search" value={query} onValueChange={setQuery} onPlaceSelect={place => { setFilter(place.category); setQuery(place.name); }} placeholder="Ex.: hospital, Barragem, BR-070…" enterKeyHint="search" className="min-h-12 w-full min-w-0 bg-transparent text-base text-white outline-none placeholder:text-white/30" />
             {query && <button type="button" onClick={() => setQuery("")} className="min-h-10 px-2 text-xs font-bold text-white/50">Limpar</button>}
           </div>
           <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar por categoria">
@@ -69,7 +74,7 @@ export default function City() {
           {places.length ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {places.map(place => <article key={place.id} className="rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 shadow-[0_12px_35px_rgba(0,0,0,.14)]">
               <div className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]">{place.category === "saude" ? <HeartPulse className="size-4" /> : place.category === "transporte" ? <BusFront className="size-4" /> : <Signpost className="size-4" />}</span>
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]">{place.category === "saude" ? <HeartPulse className="size-4" /> : place.category === "transporte" ? <BusFront className="size-4" /> : place.category === "servico" ? <BriefcaseBusiness className="size-4" /> : <Signpost className="size-4" />}</span>
                 <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><h3 className="text-sm font-black leading-snug">{place.name}</h3><span className="shrink-0 rounded-full border border-white/8 px-2 py-1 text-[.47rem] font-bold text-white/45">{categoryName[place.category]}</span></div><p className="mt-2 text-xs leading-relaxed text-white/55">{place.address}</p></div>
               </div>
               {place.detail && <p className="mt-3 rounded-xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.035] p-2.5 text-[.62rem] leading-relaxed text-[#FFD59A]/75">{place.detail}</p>}
@@ -96,7 +101,7 @@ export default function City() {
 
         <section className="mt-5 rounded-2xl border border-white/8 bg-white/[.025] p-4 text-[.62rem] leading-relaxed text-white/40">
           <p className="flex items-center gap-2 font-black text-white/65"><Wifi className="size-3.5 text-[#C7FF3C]" />Como usar os dados</p>
-          <p className="mt-2">As unidades de saúde e contatos vêm de páginas oficiais consultadas em 30/09/2026. A página municipal não informa horário de atendimento de cada unidade. Vias estruturantes vêm da Lei municipal 341/2002, que descreve hierarquia e não o trânsito atual. A referência da rodoviária é de notícia municipal publicada em 2020; confirme o embarque no mapa.</p>
+          <p className="mt-2">Hospitais, serviços públicos, endereços e telefones vêm de páginas oficiais consultadas em 30/09/2026; confirme horários e atendimento antes de sair. Vias estruturantes vêm da Lei municipal 341/2002 e não indicam trânsito atual. A rodoviária usa referência municipal publicada em 2020; confirme o local de embarque.</p>
           <div className="mt-3 flex flex-wrap gap-3"><a className="font-bold text-[#9FEFFF]" href="https://legislacao.aguaslindasdegoias.go.gov.br/leis/394" target="_blank" rel="noopener noreferrer">Plano Diretor <ExternalLink className="inline size-3" /></a><a className="font-bold text-[#9FEFFF]" href="https://goias.gov.br/saude/heal/" target="_blank" rel="noopener noreferrer">HEAL · Goiás <ExternalLink className="inline size-3" /></a><Link className="font-bold text-[#C7FF3C]" href={appUrl("/planejar")}><Route className="mr-1 inline size-3" />Planejar outra rota</Link></div>
         </section>
       </div>
