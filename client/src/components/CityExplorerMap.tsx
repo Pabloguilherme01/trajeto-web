@@ -1,4 +1,5 @@
 import { MapView, loadGoogleMapsScript } from "@/components/Map";
+import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PlaceCategory, PlaceEntity } from "@/lib/placeEntity";
 import { categoryFromGoogleType, categoryToGoogleTypes, placeMatchesQuery } from "@/lib/placeSearch";
@@ -276,6 +277,28 @@ export default function CityExplorerMap({ category, query = "", center, online, 
   }, [category, query, center.lat, center.lng, online]);
 
   useEffect(() => () => clearMarkers(), []);
+
+  if (!online && category === "fuel" && localResults.length) {
+    const offlineStations: StationMapItem[] = localResults.map(place => ({
+      id: place.id,
+      name: place.name,
+      address: place.address ?? "",
+      lat: place.coordinates?.lat,
+      lng: place.coordinates?.lng,
+      cnpj: place.id.replace(/^local:/, ""),
+      source: place.source === "ANP" ? "ANP" as const : "local" as const,
+    }));
+    return (
+      <div className="overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#E8F0EA]">
+        <StationMap
+          stations={offlineStations}
+          heightClassName="h-[min(58dvh,520px)]"
+          nearbyCenter={center}
+          onSelectStation={() => undefined}
+        />
+      </div>
+    );
+  }
 
   if (!online) {
     const offlineMessage = category === "fuel" && localResults.length
