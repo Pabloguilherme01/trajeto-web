@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v7";
+const VERSION = "trajeto-v8";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 
