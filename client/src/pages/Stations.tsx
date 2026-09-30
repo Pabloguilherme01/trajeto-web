@@ -268,9 +268,7 @@ export default function Stations() {
                       </div>
                     </div>
 
-                    {station.priceReference && <p className="mt-3 rounded-xl bg-[#C7FF3C]/[.045] px-3 py-2 text-[0.58rem] font-black text-[#D9FF91]">Referência ANP: {Number(station.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>}
-
-                    <div className="mt-3 grid grid-cols-4 gap-1.5">
+                                        <div className="mt-3 grid grid-cols-4 gap-1.5">
                       <button type="button" onClick={() => navigateTo(station)} className="col-span-2 min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.6rem] font-black text-[#0B1014]"><Navigation className="mr-1 inline size-3.5" />Navegar</button>
                       <button type="button" onClick={() => toggleSaved(station)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isSaved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/[.06] text-[#FFB7A9]" : "border-white/8 text-white/55")} aria-label={isSaved ? "Remover dos salvos" : "Salvar posto"}><Heart className="size-4" fill={isSaved ? "currentColor" : "none"} /></button>
                       <button type="button" onClick={() => toggleCompare(station.placeId)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isCompared ? "border-[#3DE3FF]/40 bg-[#3DE3FF]/[.08] text-[#3DE3FF]" : "border-white/8 text-white/55")} aria-label={isCompared ? "Remover da comparação" : "Comparar posto"}><SlidersHorizontal className="size-4" /></button>
