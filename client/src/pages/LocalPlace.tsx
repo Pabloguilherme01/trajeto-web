@@ -68,6 +68,12 @@ export default function LocalPlace() {
             <button type="button" onClick={navigate} className="mobile-action mobile-action-primary min-h-12 rounded-2xl px-4"><Navigation className="size-4" /> Como chegar</button>
             <button type="button" onClick={() => void share()} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl px-4"><Share2 className="size-4" /> Compartilhar</button>
           </div>
+          <a
+            href={appUrl("/planejar") + "?offline=1&destino=" + encodeURIComponent(destination.address)}
+            className="mobile-action mobile-action-secondary mt-2 min-h-11 w-full rounded-2xl"
+          >
+            Planejar no Trajeto
+          </a>
 
           <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3.5">
             <p className="text-[0.48rem] font-black uppercase tracking-[.14em] text-white/25">Resumo</p>
