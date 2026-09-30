@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
+import { buildDirectoryCards, getDirectoryCoordinates, getDirectoryGasolinePrice, getDirectoryLabel, matchesFuelFilter, type DirectoryCardShape, type FuelFilter } from "@/lib/stationDirectoryModel";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel, stationDataConfidence } from "@/lib/stationEntity";
 
@@ -38,27 +39,6 @@ function isBroadAguasLindasQuery(value: string) {
     normalized.includes("postos de aguas lindas");
 }
 
-type FuelFilter = "all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv";
-type DirectoryCardShape = { key: string; local: ReturnType<typeof searchAguasLindasStations>[number] | null; anp: ReturnType<typeof groupAnpFuelRows>[number] | null };
-
-function matchesFuelFilter(item: DirectoryCardShape, filter: FuelFilter, pricesByCnpj: ReturnType<typeof indexAnpPricesByCnpj>) {
-  if (filter === "all") return true;
-  if (pricesByCnpj.get(item.key)?.some(price => price.productKey === filter)) return true;
-  return item.anp?.products?.some(product => {
-    const text = (product.produto || "").toLocaleLowerCase("pt-BR");
-    return filter === "gasolina-comum"
-      ? text.includes("gasolina") && !text.includes("aditivada")
-      : filter === "etanol"
-        ? text.includes("etanol")
-        : filter === "diesel-s10"
-          ? text.includes("s10")
-          : filter === "diesel-s500"
-            ? text.includes("s500")
-            : filter === "glp-p13"
-              ? text.includes("glp") || text.includes("p13")
-              : text.includes("gnv");
-  }) ?? false;
-}
 
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
@@ -112,19 +92,7 @@ export default function Stations() {
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
-  const directoryCards = useMemo(() => {
-    const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
-    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
-      key: local.cnpj,
-      local,
-      anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
-    }));
-    for (const anp of anpStations) {
-      if (localByCnpj.has(anp.cnpj)) continue;
-      cards.push({ key: anp.cnpj, local: null, anp });
-    }
-    return cards;
-  }, [aguasLindasCatalog, anpStations]);
+  const directoryCards = useMemo(() => buildDirectoryCards(aguasLindasCatalog, anpStations), [aguasLindasCatalog, anpStations]);
 
   const directoryConfidenceCount = useMemo(
     () => directoryCards.filter(item => stationDataConfidence({ anp: item.anp, local: item.local }) >= 70).length,
@@ -163,24 +131,18 @@ export default function Stations() {
       const priceMatches = !priceOnly || (pricesByCnpj.get(item.key)?.length ?? 0) > 0;
       return (!normalized || text.includes(normalized)) && neighborhoodMatches && brandMatches && addressMatches && verifiedMatches && mappedMatches && priceMatches;
     });
-
-    return [...matches].sort((a, b) => {
-      const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
+    return matches.sort((a, b) => {
+      const stationLabel = getDirectoryLabel;
       if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) => {
-          const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-          const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-        };
-        const aCoords = getCoords(a);
-        const bCoords = getCoords(b);
+        const aCoords = getDirectoryCoordinates(a);
+        const bCoords = getDirectoryCoordinates(b);
         const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
         const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "price") {
-        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
-        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
+        const aPrice = getDirectoryGasolinePrice(a, pricesByCnpj) ?? Number.POSITIVE_INFINITY;
+        const bPrice = getDirectoryGasolinePrice(b, pricesByCnpj) ?? Number.POSITIVE_INFINITY;
         return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "brand") {
