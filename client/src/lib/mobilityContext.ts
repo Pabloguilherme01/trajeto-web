@@ -67,6 +67,15 @@ export function getMobilityContext(input: MobilityContextInput): MobilityContext
     };
   }
 
+  if (!input.online && !hasOfflineRoute) {
+    return {
+      state: "idle",
+      primaryAction: "plan_trip",
+      checks,
+      summary: "Sem internet e sem rota salva. Uma nova rota só pode ser preparada quando a conexão voltar.",
+    };
+  }
+
   if (!input.hasDestination) {
     return {
       state: "preparing",

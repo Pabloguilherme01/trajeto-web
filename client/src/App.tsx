@@ -1,4 +1,4 @@
-/** Trajeto prioritizes dark, high-contrast navigation and fast route decisions. */
+/** Trajeto — app shell mobile-first. */
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -8,11 +8,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
-import MobileQuickActions from "./components/MobileQuickActions";
+import MobileBottomNav from "./components/MobileBottomNav";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
-import { ThemeProvider } from "./contexts/ThemeContext";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 import SiteNavigation from "./components/SiteNavigation";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 const Planner = lazy(() => import("./pages/Planner"));
@@ -26,7 +26,15 @@ const routerBase = import.meta.env.BASE_URL === "/"
   : import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function RouteLoading() {
-  return <div role="status" aria-live="polite" className="grid min-h-[65vh] place-items-center bg-[#0B1014] text-white"><div className="border-l-4 border-[#C7FF3C] bg-[#121B22] px-5 py-4 text-sm font-bold shadow-sm">Preparando sua rota…</div></div>;
+  return (
+    <div role="status" aria-live="polite" className="grid min-h-[70dvh] place-items-center bg-[#0B1014] px-5 text-white">
+      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#121B22] p-5">
+        <div className="size-2 animate-pulse rounded-full bg-[#C7FF3C]" />
+        <p className="mt-4 text-sm font-black">Abrindo o Trajeto…</p>
+        <p className="mt-1 text-xs leading-relaxed text-white/45">Carregando somente a tela necessária.</p>
+      </div>
+    </div>
+  );
 }
 
 function AdminOnly({ children }: { children: ReactNode }) {
@@ -42,7 +50,6 @@ function AuthReturnHandler() {
 
   useEffect(() => {
     if (loading || !isAuthenticated) return;
-
     const returnPath = consumeStationReturn(sessionStorage, location);
     if (returnPath) setLocation(returnPath);
   }, [isAuthenticated, loading, location, setLocation]);
@@ -80,9 +87,9 @@ export default function App() {
           <Toaster />
           <InstallAppPrompt />
           <PwaUpdatePrompt />
-          <MobileQuickActions />
           <AccessibilityPanel />
           <SiteNavigation />
+          <MobileBottomNav />
           <AuthReturnHandler />
           <Router />
         </TooltipProvider>

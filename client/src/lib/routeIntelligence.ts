@@ -11,6 +11,8 @@ export type RouteIntelligenceRoute = {
   trafficImpact: { slowPoints: number; jamPoints: number; affectedPoints: number; totalPoints: number } | null;
 };
 
+import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
+
 export type RouteIntelligence = {
   provider: "google-routes";
   generatedAt: string;
@@ -32,6 +34,12 @@ export async function fetchRouteIntelligence(input: {
   avoidHighways?: boolean;
   trafficDetailed?: boolean;
 }): Promise<RouteIntelligence> {
+  if (!supportsLiveRouting()) {
+    const error = new Error("A inteligência de rota ao vivo não está publicada neste endereço. Use a navegação externa ou configure VITE_ROUTING_API_BASE_URL.");
+    (error as Error & { code?: string }).code = "routing_not_deployed";
+    throw error;
+  }
+
   const response = await fetch(getEndpoint(), {
     method: "POST",
     headers: { "content-type": "application/json" },

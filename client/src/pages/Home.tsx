@@ -1,449 +1,308 @@
-import { useProductEvents } from "@/hooks/useProductEvents";
-import { appUrl } from "@/lib/appUrl";
-import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
-
-
-
-
-
-
-
-
-import DailyCommandCenter from "@/components/DailyCommandCenter";
-import MobileUtilityHub from "@/components/MobileUtilityHub";
-import TripReadinessCard from "@/components/TripReadinessCard";
-
-
-
-
-
-import { ArrowRight, BadgeCheck, Bookmark, Download, Fuel, History, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
-import { getLastStation, getLastTrip, getRecentSearches, mobilePreferenceEvent, rememberSearch, type LastStation } from "@/lib/mobilePreferences";
-import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
+import { ArrowRight, Bookmark, CheckCircle2, Fuel, LocateFixed, Navigation, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
-
-const anpQualityUrl = "https://anpcomvcpostos.anp.gov.br/";
-
-function savedRouteAge(savedAt: string) {
-  const elapsed = Date.now() - Date.parse(savedAt);
-  if (!Number.isFinite(elapsed) || elapsed < 0) return "idade indisponível";
-  const hours = Math.floor(elapsed / 3600000);
-  if (hours < 1) return "salva há menos de 1h";
-  if (hours < 24) return `salva há ${hours}h`;
-  const days = Math.floor(hours / 24);
-  return `salva há ${days}d`;
-}
+import { appUrl } from "@/lib/appUrl";
+import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { getFavoriteDestination, getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
+import { getMobileVehicle } from "@/lib/mobileVehicle";
+import { getMobilityContext } from "@/lib/mobilityContext";
+import { routingCapabilityLabel } from "@/lib/runtimeCapabilities";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { useProductEvents } from "@/hooks/useProductEvents";
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [search, setSearch] = useState("");
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [activePresetId, setActivePresetId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
-  const [recentSearches, setRecentSearches] = useState<string[]>(() => getRecentSearches());
-  const [locationMessage, setLocationMessage] = useState<string | null>(null);
-  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
-  const [savedRoutes, setSavedRoutes] = useState(0);
-  const [offlineStorageError, setOfflineStorageError] = useState(false);
-  const [latestSavedRoute, setLatestSavedRoute] = useState<OfflineRoute | null>(null);
-  const [lastTrip, setLastTrip] = useState(() => getLastTrip());
-  const [lastStation, setLastStation] = useState<LastStation | null>(() => getLastStation());
   const track = useProductEvents();
-  const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [lastTrip, setLastTrip] = useState(getLastTrip);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [offlineRoutes, setOfflineRoutes] = useState(0);
+  const [offlineRouteList, setOfflineRouteList] = useState<Array<{ savedAt?: string | null }>>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches);
+  const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
+  const [favoriteDestination, setFavoriteDestination] = useState<MobileDestination | null>(() => getFavoriteDestination());
+  const [locating, setLocating] = useState(false);
+  const [shareDone, setShareDone] = useState(false);
+  const [hasVehicle, setHasVehicle] = useState(() => Boolean(getMobileVehicle()));
 
   useEffect(() => {
     const refresh = () => {
+      setLastTrip(getLastTrip());
       setRecentSearches(getRecentSearches());
-      setLastStation(getLastStation());
-      void listOfflineRoutes().then(routes => {
-        setOfflineStorageError(false);
-        setSavedRoutes(routes.length);
-        setLatestSavedRoute(routes[0] ?? null);
-      }).catch(() => {
-        setOfflineStorageError(true);
-        setSavedRoutes(0);
-        setLatestSavedRoute(null);
-      });
+      setHasVehicle(Boolean(getMobileVehicle()));
+      const nextDestinations = getMobileDestinations();
+      setDestinations(nextDestinations);
+      setFavoriteDestination(getFavoriteDestination(nextDestinations));
+      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); setOfflineRouteList(routes); }).catch(() => { setOfflineRoutes(0); setOfflineRouteList([]); });
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
     refresh();
-    window.addEventListener(mobilePreferenceEvent, refresh);
-    window.addEventListener(offlineRouteEvent, refresh);
     window.addEventListener("focus", refresh);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
+    window.addEventListener(offlineRouteEvent, refresh);
     return () => {
-      window.removeEventListener(mobilePreferenceEvent, refresh);
-      window.removeEventListener(offlineRouteEvent, refresh);
       window.removeEventListener("focus", refresh);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
 
-  const openSearch = (query: string, presetId = activePreset?.id) => {
-    const normalized = query.trim() || activePreset?.query || "";
-    if (!online) {
-      setSearchError(savedRoutes > 0 ? "Sem internet. Abra uma rota salva para continuar neste aparelho." : "Sem internet. Prepare uma rota quando a conexão voltar.");
-      return;
-    }
-    if (normalized.length < 3) {
-      setSearchError("Digite pelo menos 3 caracteres para pesquisar.");
-      return;
-    }
-    setSearchError(null);
-    rememberSearch(normalized);
-    track("station_search", normalized);
-    setLocation(`${appUrl("/postos")}?region=${encodeURIComponent(presetId ?? "")}&q=${encodeURIComponent(normalized)}`);
+  const mobilityContext = useMemo(() => getMobilityContext({
+    online,
+    hasDestination: destination.trim().length >= 3 || destinations.length > 0,
+    hasVehicle,
+    hasLastTrip: Boolean(lastTrip),
+    offlineRoutes: offlineRouteList,
+  }), [online, destination, destinations.length, hasVehicle, lastTrip, offlineRouteList]);
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bom dia";
+    if (hour < 18) return "Boa tarde";
+    return "Boa noite";
+  }, []);
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const from = origin.trim();
+    const to = destination.trim();
+    if (to.length < 3) return;
+    rememberIntent("route");
+    if (from) rememberSearch(from);
+    rememberSearch(to);
+    track("route_open", to);
+    vibration();
+    const params = new URLSearchParams({ destino: to });
+    if (from) params.set("origem", from);
+    setLocation(appUrl("/planejar") + "?" + params.toString());
   };
 
-  const useMyLocation = () => {
-    if (!online) {
-      setSearchError(savedRoutes > 0 ? "Sem internet. A localização ao vivo precisa de conexão. Abra uma rota salva." : "Sem internet. A localização ao vivo precisa de conexão.");
-      return;
-    }
-    if (!navigator.geolocation || locating) { if (!navigator.geolocation) setSearchError("Seu navegador não oferece localização."); return; }
-    setSearchError(null);
-    setLocationMessage(null);
+  const useLocationAsOrigin = () => {
+    if (!online || locating || !navigator.geolocation) return;
     setLocating(true);
+    rememberIntent("route");
     navigator.geolocation.getCurrentPosition(
-      position => { setLocating(false); setLocationMessage("Localização encontrada. Abrindo postos próximos."); setLocation(`${appUrl("/postos")}?lat=${position.coords.latitude}&lng=${position.coords.longitude}&q=${encodeURIComponent("postos próximos")}`); },
-      () => { setLocating(false); setLocationMessage("Localização indisponível. Você ainda pode pesquisar por cidade ou destino."); setSearchError("Não foi possível obter sua localização. Verifique a permissão do navegador."); },
+      position => {
+        setLocating(false);
+        setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
+        vibration(16);
+      },
+      () => {
+        setLocating(false);
+      },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
   };
 
-  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    openSearch(search);
+  const openLastTrip = () => {
+    if (!lastTrip) return;
+    rememberIntent("route");
+    vibration();
+    setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
   };
 
-  const openSavedRoutes = () => {
-    if (latestSavedRoute) {
-      setLocation(
-        appUrl("/planejar") +
-        "?rota=" + encodeURIComponent(latestSavedRoute.id) +
-        "&origem=" + encodeURIComponent(latestSavedRoute.origin) +
-        "&destino=" + encodeURIComponent(latestSavedRoute.destination),
-      );
+  const openFavoriteDestination = () => {
+    if (!favoriteDestination) return;
+    rememberDestinationUsage(favoriteDestination);
+    rememberIntent("route");
+    vibration();
+    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(favoriteDestination.value));
+  };
+
+  const findNearby = () => {
+    rememberIntent("nearby");
+    if (!online) return;
+    if (!navigator.geolocation) {
+      setLocation(appUrl("/postos"));
       return;
     }
-    setLocation(appUrl("/planejar?salvos=1"));
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setLocating(false);
+        vibration(16);
+        setLocation(buildNearbyStationsUrl(appUrl("/postos"), position.coords.latitude, position.coords.longitude));
+      },
+      () => {
+        setLocating(false);
+        setLocation(appUrl("/postos"));
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+    );
+  };
+
+  const shareHome = async () => {
+    try {
+      const url = window.location.origin + appUrl("/");
+      await shareText("Trajeto · planeje viagens, encontre postos e guarde rotas.", url, "Trajeto");
+      setShareDone(true);
+      window.setTimeout(() => setShareDone(false), 1800);
+    } catch {}
   };
 
   return (
-    <div className="premium-surface min-h-screen overflow-x-hidden bg-[#0B1014] pb-20 text-[#EAF0F2] md:pb-0">
-      <header className="border-b border-white/8 bg-[#0B1014]">
-        <div className="container flex h-[68px] items-center justify-between gap-4">
-          <a href={appUrl("/")} className="flex items-center gap-2.5" aria-label="Trajeto — início">
-            <img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" />
-            <span className="brand-wordmark text-xl text-white">trajeto</span>
-          </a>
+    <main className="premium-surface min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-10">
+      <div className="container max-w-5xl pt-5 sm:pt-8 lg:pt-12">
+        <header className="flex items-center justify-between">
+          <div>
+            <p className="text-[0.58rem] font-black uppercase tracking-[.18em] text-[#71818A]">{greeting}</p>
+            <p className="mt-1 brand-wordmark text-[1.2rem] text-white">trajeto</p>
+          </div>
           <div className="flex items-center gap-2">
-            <a href={appUrl("/minha-conta")} className="hidden rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#9FB0B8] transition hover:bg-white/5 hover:text-white sm:inline-flex">Minha conta</a>
-            <a href={appUrl("/planejar")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3.5 py-2 text-xs font-extrabold text-[#0B1014] transition hover:bg-white sm:hidden"><Navigation className="size-4" /> Planejar</a>
+            <span className={"inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-[0.55rem] font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/5 text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/5 text-[#FFB86B]")}>
+              {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
+              {online ? "online" : "offline"}
+            </span>
+            <button type="button" onClick={() => void shareHome()} aria-label="Compartilhar Trajeto" className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-white/70 active:scale-[.97]">
+              <Share2 className="size-4" />
+            </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main>
-        <section className="border-b border-[#C7FF3C]/15 bg-[#0F171D]">
-          <div className="container py-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Assistente pessoal de mobilidade</p>
-                <p className="mt-1 text-sm font-bold text-white">{online ? "Prepare a rota antes de sair e deixe uma cópia no celular para quando a conexão falhar." : savedRoutes > 0 ? `Sem internet: ${savedRoutes} rota${savedRoutes === 1 ? "" : "s"} pronta${savedRoutes === 1 ? "" : "s"} para continuar neste aparelho.` : "Sem internet: não há uma rota pronta para continuar neste aparelho."}</p>
-              </div>
-              {online ? <a href={appUrl("/planejar")} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
-                <Navigation className="size-4" /> Planejar agora
-              </a> : offlineStorageError ? <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
-                <Navigation className="size-4" /> Tentar novamente
-              </button> : savedRoutes > 0 ? <button type="button" onClick={openSavedRoutes} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] sm:w-auto">
-                <Navigation className="size-4" /> Continuar última rota
-              </button> : <span className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-extrabold text-[#7F919A] sm:w-auto">
-                <WifiOff className="size-4" /> Sem rota salva
-              </span>}
-            </div>
-          </div>
+        <section className="mt-8">
+          <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mobilidade diária</p>
+          <h1 className="mobile-title mt-3 max-w-3xl font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
+            Chegue melhor.<br />
+            <span className="text-[#C7FF3C]">Decida antes de sair.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/50 sm:text-base">
+            Um fluxo simples para planejar a rota, encontrar uma parada e abrir a navegação certa sem atravessar várias telas.
+          </p>
         </section>
 
-        <section className="premium-surface border-b border-white/8">
-          <div className="container grid gap-7 py-8 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/8 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#D9FF91]">
-                <Navigation className="size-3.5" /> Águas Lindas de Goiás · Entorno
-              </div>
-              <h1 className="mt-5 font-display text-[clamp(2.9rem,14vw,7rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-white sm:mt-6">
-                Seu dia em movimento.<br /><span className="text-[#C7FF3C]">Mais simples.</span>
-              </h1>
-              <p className="mt-5 max-w-xl text-[0.95rem] leading-[1.55] text-[#B7C4CA] sm:mt-7 sm:text-lg sm:leading-[1.65]">
-                Planeje, compare e continue suas viagens pelo celular. Rotas, postos, custos e atalhos ficam organizados para a próxima saída.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-1.5 sm:mt-6">
-                <span className="rounded-full border border-white/10 bg-white/[.035] px-2.5 py-1.5 text-[0.55rem] font-black uppercase tracking-[.1em] text-white/55">sem cadastro</span>
-                <span className="rounded-full border border-white/10 bg-white/[.035] px-2.5 py-1.5 text-[0.55rem] font-black uppercase tracking-[.1em] text-white/55">dados locais</span>
-                <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2.5 py-1.5 text-[0.55rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]">offline preparado</span>
-              </div>
-
-              <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3">
-                <div className="border border-white/10 bg-white/[0.035] p-4">
-                  <MapPinned className="size-5 text-[#3DE3FF]" />
-                  <p className="mt-4 text-sm font-extrabold text-white">Postos reais</p>
-                  <p className="mt-1 text-xs leading-relaxed text-[#8799A2]">Localização, distância e dados disponíveis na consulta.</p>
-                </div>
-                <div className="border border-white/10 bg-white/[0.035] p-4">
-                  <TimerReset className="size-5 text-[#C7FF3C]" />
-                  <p className="mt-4 text-sm font-extrabold text-white">Menos desvio</p>
-                  <p className="mt-1 text-xs leading-relaxed text-[#8799A2]">Compare a parada com o impacto real na rota.</p>
-                </div>
-                <div className="border border-white/10 bg-white/[0.035] p-4">
-                  <BadgeCheck className="size-5 text-[#BDA5FF]" />
-                  <p className="mt-4 text-sm font-extrabold text-white">Fonte visível</p>
-                  <p className="mt-1 text-xs leading-relaxed text-[#8799A2]">Referências oficiais aparecem separadas das estimativas.</p>
-                </div>
-              </div>
+        <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Próxima viagem</p>
+              <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Planejar rota.</h2>
             </div>
+            <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-[0.5rem] font-bold text-white/40">sem cadastro</span>
+          </div>
 
-            <section className="mobile-glass rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Comece aqui</p>
-                  <h2 id="search-title" className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] text-white">{online ? "Onde você vai passar?" : "Continue sua viagem"}</h2>
-                </div>
-                <Fuel className="size-6 text-[#C7FF3C]" />
-              </div>
-
-              <form onSubmit={submitSearch} className={online ? "mt-5" : "hidden"} noValidate>
-                <label htmlFor="home-search" className="text-xs font-bold text-[#A9BAC2]">Cidade, bairro, posto ou destino</label>
-                <div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]">
-                  <Search className="ml-3 mt-3 size-5 shrink-0 text-[#3DE3FF]" />
-                  <input id="home-search" minLength={3} autoComplete="street-address" enterKeyHint="search" aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "home-search-error" : undefined} value={search} onChange={event => { setSearch(event.target.value); if (searchError) setSearchError(null); }} placeholder={activePreset?.query ?? "Ex.: Águas Lindas de Goiás"} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780]" />
-                  <button type="submit" aria-label={online ? "Pesquisar postos" : "Buscar quando houver internet"} disabled={!online} className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] transition hover:bg-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-40">
-                    <ArrowRight className="size-5" />
-                  </button>
-                </div>
-              </form>
-
-              {locationMessage && <p role="status" aria-live="polite" className="mt-2 rounded-xl border border-white/8 bg-white/[0.025] px-3 py-2 text-[0.62rem] font-bold text-[#8FA3AC]">{locationMessage}</p>}
-
-              {online && lastTrip && (
-                <a
-                  href={appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)}
-                  className="mt-2 flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.06] px-3.5 text-left transition hover:border-[#C7FF3C]/45 hover:bg-[#C7FF3C]/[0.1] active:scale-[.99]"
-                  aria-label={"Continuar viagem de " + lastTrip.origin + " para " + lastTrip.destination}
-                >
-                  <span className="min-w-0">
-                    <span className="block text-[0.55rem] font-black uppercase tracking-[0.12em] text-[#C7FF3C]">Próxima ação</span>
-                    <span className="mt-1 block truncate text-xs font-extrabold text-white">{lastTrip.origin} → {lastTrip.destination}</span>
-                  </span>
-                  <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]" aria-hidden="true" />
-                </a>
-              )}
-
-              <div className={online ? "mt-2 grid grid-cols-2 gap-2" : "hidden"}>
-                <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF] active:scale-[.98]" disabled={locating}>
-                  <LocateFixed className="size-4 text-[#3DE3FF]" /> {locating ? "Localizando…" : "Usar minha localização"}
+          <form onSubmit={submit} className="mt-5 space-y-2.5">
+            <label className="block">
+              <span className="mb-1.5 block text-[0.58rem] font-black uppercase tracking-[.12em] text-white/35">Origem</span>
+              <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
+                <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
+                <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
+                <button type="button" onClick={useLocationAsOrigin} disabled={!online || locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
+                  <LocateFixed className="size-4" />
                 </button>
-                <a href={appUrl("/planejar")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#C7FF3C]">
-                  <Navigation className="size-4 text-[#C7FF3C]" /> Planejar viagem
-                </a>
               </div>
+            </label>
 
-              {online && recentSearches.length > 0 && <div className="mt-5 border-t border-white/8 pt-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Pesquisas recentes</p>
-                  <span className="text-[0.58rem] font-semibold text-[#5F727B]">só neste aparelho</span>
-                </div>
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {recentSearches.map(query => <button key={query} type="button" onClick={() => openSearch(query)} className="min-h-11 shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-3.5 text-xs font-bold text-[#D7E0E4] transition hover:border-[#3DE3FF] hover:bg-[#3DE3FF]/8 active:scale-[.98]">{query}</button>)}
-                </div>
-              </div>}
-
-              <div className="mt-6">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Buscas rápidas</p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {corridorPresets.slice(0, 4).map(preset => (
-                    <button key={preset.id} onClick={() => { setActivePresetId(preset.id); openSearch(preset.query, preset.id); }} className="min-h-16 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C] hover:bg-[#C7FF3C]/8">
-                      <span className="block text-xs font-extrabold text-white">{preset.label}</span>
-                      <span className="mt-1 block text-[0.65rem] text-[#7F919A]">{preset.detail}</span>
-                    </button>
-                  ))}
-                </div>
+            <label className="block">
+              <span className="mb-1.5 block text-[0.58rem] font-black uppercase tracking-[.12em] text-white/35">Destino</span>
+              <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
+                <div className="size-2.5 rounded-full bg-[#C7FF3C]" />
+                <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
               </div>
+            </label>
 
-              <p className="mt-5 border-t border-white/8 pt-4 text-xs leading-relaxed text-[#7F919A]">
-                {online ? "Consulta pública. Entre somente se quiser salvar favoritos, veículos, rotas ou alertas." : latestSavedRoute ? "Esta rota já está no aparelho. Abra e continue sem recalcular." : "Quando a conexão voltar, prepare uma rota e salve-a para uso offline."}
-              </p>
-            </section>
+            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]">
+              <span>{locating ? "Obtendo localização…" : "Calcular rota"}</span>
+              <ArrowRight className="size-5" />
+            </button>
+          </form>
+
+          {favoriteDestination && (
+            <button type="button" onClick={openFavoriteDestination} className="mt-3 flex min-h-11 w-full items-center justify-between rounded-xl border border-white/8 bg-white/[.025] px-3.5 text-left active:scale-[.99]">
+              <span>
+                <span className="block text-[0.52rem] font-black uppercase tracking-[.12em] text-white/30">Destino mais usado</span>
+                <span className="mt-0.5 block truncate text-xs font-extrabold text-white">{favoriteDestination.label}</span>
+              </span>
+              <Navigation className="size-4 text-[#3DE3FF]" />
+            </button>
+          )}
+        </section>
+
+        <section className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4" aria-labelledby="mobility-status-title">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Próximo passo</p>
+              <h2 id="mobility-status-title" className="mt-1 text-base font-black">{mobilityContext.summary}</h2>
+            </div>
+            <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-white/40">{routingCapabilityLabel()}</span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {mobilityContext.checks.slice(0, 4).map(check => (
+              <div key={check.id} className="rounded-xl bg-white/[.035] p-3">
+                <CheckCircle2 className={"size-3.5 " + (check.ready ? "text-[#C7FF3C]" : "text-white/20")} />
+                <p className="mt-2 text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">{check.id === "connection" ? "Conexão" : check.id === "destination" ? "Destino" : check.id === "vehicle" ? "Veículo" : "Offline"}</p>
+                <p className="mt-1 text-[0.62rem] font-bold text-white/65">{check.label}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {(lastTrip || latestSavedRoute || lastStation) && (
-          <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-6" aria-labelledby="next-trip-title">
-            <div className="container">
-              <div className="mobile-card overflow-hidden rounded-3xl border border-[#C7FF3C]/15 bg-[#10181F]">
-                <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                  <div className="min-w-0">
-                    <p className="text-[0.58rem] font-black uppercase tracking-[0.15em] text-[#C7FF3C]">Próxima viagem</p>
-                    <h2 id="next-trip-title" className="mt-1 truncate font-display text-xl font-semibold tracking-[-0.045em] text-white">
-                      {lastTrip ? `${lastTrip.origin} → ${lastTrip.destination}` : latestSavedRoute ? `${latestSavedRoute.origin} → ${latestSavedRoute.destination}` : lastStation?.name}
-                    </h2>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">última viagem</span>}
-                      {latestSavedRoute && <span className={isOfflineRouteStale(latestSavedRoute.savedAt) ? "rounded-full bg-[#FFC928]/10 px-2 py-1 text-[0.5rem] font-black text-[#FFD66B]" : "rounded-full bg-[#C7FF3C]/10 px-2 py-1 text-[0.5rem] font-black text-[#C7FF3C]"}>{isOfflineRouteStale(latestSavedRoute.savedAt) ? "revisar rota" : online ? "rota salva" : "offline pronta"}</span>}
-                      {latestSavedRoute && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/45">{savedRouteAge(latestSavedRoute.savedAt)}</span>}
-                      {lastStation && !lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">último posto</span>}
-                    </div>
-                  </div>
-                  <a
-                    href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : latestSavedRoute ? appUrl("/planejar") + "?rota=" + encodeURIComponent(latestSavedRoute.id) + "&origem=" + encodeURIComponent(latestSavedRoute.origin) + "&destino=" + encodeURIComponent(latestSavedRoute.destination) : appUrl("/postos") + "?station=" + encodeURIComponent(lastStation?.placeId ?? "") + "&q=" + encodeURIComponent(lastStation?.query || lastStation?.name || "")}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]"
-                  >
-                    {lastTrip ? "Preparar viagem" : latestSavedRoute ? (online ? "Abrir rota salva" : "Continuar offline") : "Reabrir posto"}
-                  </a>
-                </div>
-              </div>
+        <section className="mt-4 grid gap-3 sm:grid-cols-3">
+          <button type="button" onClick={openLastTrip} disabled={!lastTrip} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left disabled:opacity-40 active:scale-[.99]">
+            <Route className="size-4 text-[#C7FF3C]" />
+            <p className="mt-3 text-xs font-black">Última rota</p>
+            <p className="mt-1 truncate text-[0.63rem] text-white/40">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Ainda não há viagem registrada"}</p>
+          </button>
+          <button type="button" onClick={findNearby} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
+            <Fuel className="size-4 text-[#3DE3FF]" />
+            <p className="mt-3 text-xs font-black">Postos perto</p>
+            <p className="mt-1 text-[0.63rem] text-white/40">Abrir os postos usando sua posição</p>
+          </button>
+          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
+            <Bookmark className="size-4 text-[#BDA5FF]" />
+            <p className="mt-3 text-xs font-black">Rotas salvas</p>
+            <p className="mt-1 text-[0.63rem] text-white/40">{offlineRoutes > 0 ? offlineRoutes + " rota(s) disponíveis offline" : "Nenhuma rota salva offline"}</p>
+          </button>
+        </section>
+
+        {recentSearches.length > 0 && (
+          <section className="mt-7">
+            <div className="flex items-center justify-between">
+              <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-white/30">Consultas recentes</p>
+              {shareDone && <span className="text-[0.56rem] font-bold text-[#C7FF3C]">Link copiado/compartilhado</span>}
+            </div>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+              {recentSearches.slice(0, 5).map(item => (
+                <button key={item} type="button" onClick={() => { setDestination(item); rememberSearch(item); }} className="max-w-[13rem] shrink-0 truncate rounded-full border border-white/8 bg-white/[.035] px-3.5 py-2.5 text-xs font-bold text-white/65">
+                  {item}
+                </button>
+              ))}
             </div>
           </section>
         )}
 
-        <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-7" aria-labelledby="mobile-snapshot-title">
-          <div className="container">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-[0.58rem] font-black uppercase tracking-[0.16em] text-[#3DE3FF]">Resumo operacional</p>
-                <h2 id="mobile-snapshot-title" className="mt-1 font-display text-xl font-semibold tracking-[-0.045em] text-white sm:text-2xl">Tudo que importa agora.</h2>
-              </div>
-              <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D] sm:block">dados deste aparelho</span>
+        {destinations.length > 0 && (
+          <section className="mt-7 rounded-3xl border border-white/8 bg-white/[.025] p-4">
+            <div className="flex items-center gap-2 text-[0.56rem] font-black uppercase tracking-[.16em] text-white/30">
+              <Sparkles className="size-3 text-[#C7FF3C]" /> Atalhos salvos neste aparelho
             </div>
-            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-5 md:overflow-visible" aria-label="Resumo operacional do aparelho">
-              <article className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><WifiOff className={online ? "size-4 text-[#C7FF3C]" : "size-4 text-[#FFC928]"} /><span className={online ? "text-[0.55rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]" : "text-[0.55rem] font-black uppercase tracking-[.1em] text-[#FFC928]"}>{online ? "Conectado" : "Offline"}</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{online ? "Consultas ao vivo disponíveis" : "Modo local ativo"}</p>
-                <p className="mt-1 text-[0.62rem] leading-relaxed text-[#73858E]">{online ? "Mapas e consultas novas podem ser abertas." : savedRoutes ? "Rotas já preparadas continuam acessíveis." : "Prepare uma rota quando a conexão voltar."}</p>
-              </article>
-              <button type="button" onClick={openSavedRoutes} className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 text-left transition hover:border-[#C7FF3C]/35 active:scale-[.99] md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><Bookmark className="size-4 text-[#C7FF3C]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Offline</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{savedRoutes} {savedRoutes === 1 ? "rota salva" : "rotas salvas"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{latestSavedRoute ? latestSavedRoute.origin + " → " + latestSavedRoute.destination : "Nenhuma rota preparada ainda"}</p>
-                {latestSavedRoute && <p className={isOfflineRouteStale(latestSavedRoute.savedAt) ? "mt-1 text-[0.58rem] font-bold text-[#FFD66B]" : "mt-1 text-[0.58rem] font-semibold text-[#60737D]"}>{isOfflineRouteStale(latestSavedRoute.savedAt) ? "Rota antiga · confirme antes de sair" : savedRouteAge(latestSavedRoute.savedAt)}</p>}
-              </button>
-              <a href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : appUrl("/planejar")} className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 transition hover:border-[#BDA5FF]/35 active:scale-[.99] md:min-w-0">
-                <div className="flex items-center justify-between gap-2"><History className="size-4 text-[#BDA5FF]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Última viagem</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{lastTrip ? "Repetir agora" : "Ainda não registrada"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Planeje a primeira viagem"}</p>
-              </a>
-              <button type="button" onClick={() => openSearch(recentSearches[0] ?? "")} className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 text-left transition hover:border-[#3DE3FF]/35 active:scale-[.99] md:min-w-0" aria-label={recentSearches[0] ? `Reabrir pesquisa recente: ${recentSearches[0]}` : "Abrir pesquisa de postos"}>
-                <div className="flex items-center justify-between gap-2"><Search className="size-4 text-[#3DE3FF]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Pesquisa</span></div>
-                <p className="mt-2 text-xs font-extrabold text-white">{recentSearches.length} {recentSearches.length === 1 ? "consulta recente" : "consultas recentes"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{recentSearches[0] ?? "Toque para iniciar uma busca"}</p>
-              </button>
-              <a
-                href={lastStation ? appUrl("/postos") + "?station=" + encodeURIComponent(lastStation.placeId) + "&q=" + encodeURIComponent(lastStation.query || lastStation.name) : appUrl("/postos")}
-                className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 transition hover:border-[#FFB86B]/35 active:scale-[.99] md:min-w-0"
-                aria-label={lastStation ? "Reabrir último posto consultado" : "Abrir busca de postos"}
-              >
-                <div className="flex items-center justify-between gap-2"><MapPinned className="size-4 text-[#FFB86B]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Último posto</span></div>
-                <p className="mt-2 truncate text-xs font-extrabold text-white">{lastStation?.name ?? "Encontrar postos"}</p>
-                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{lastStation?.address ?? "Abra a busca para descobrir paradas."}</p>
-              </a>
+            <div className="mt-3 grid gap-2">
+              {destinations.slice(0, 4).map(place => (
+                <button key={place.id} type="button" onClick={() => { rememberDestinationUsage(place); setDestination(place.value); }} className="flex min-h-11 items-center justify-between rounded-xl bg-[#0B1014] px-3 text-left">
+                  <span className="min-w-0"><span className="block truncate text-xs font-black text-white">{place.label}</span><span className="block truncate text-[0.58rem] text-white/35">{place.value}</span></span>
+                  <ArrowRight className="size-3.5 shrink-0 text-white/30" />
+                </button>
+              ))}
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-7" aria-label="Prontidão para a próxima viagem">
-          <div className="container">
-            <TripReadinessCard />
-          </div>
-        </section>
-
-        <MobileUtilityHub />
-
-        <section className="border-y border-white/8 bg-[#0F171D] py-14 text-white sm:py-18">
-          <div className="container">
-            <div className="max-w-2xl">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#3DE3FF]">Seu copiloto de deslocamento</p>
-              <h2 className="mt-3 font-display text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.07em]">Escolha → decida → salve → <em>continue mais rápido.</em></h2>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#52636C]">Você informa para onde vai. O Trajeto organiza o próximo passo. O que você repete fica no aparelho: destinos, viagens, buscas e rotas salvas. Se a conexão cair, o que já foi preparado continua acessível.</p>
+        {!online && (
+          <section className="mt-7 rounded-3xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-4">
+            <div className="flex items-start gap-3">
+              <WifiOff className="mt-0.5 size-4 shrink-0 text-[#FFB86B]" />
+              <div><p className="text-xs font-black text-white">Modo offline</p><p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Rotas que já foram salvas neste aparelho continuam disponíveis. Novas consultas precisam de internet.</p></div>
             </div>
+          </section>
+        )}
 
-            <div className="mt-8 grid gap-3 md:grid-cols-3">
-              <article className="rounded-2xl border border-white/10 bg-[#111A21] p-5">
-                <span className="text-xs font-black text-[#7F919A]">01</span>
-                <h3 className="mt-8 text-xl font-extrabold text-white">Encontre</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#9FB0B8]">Encontre o destino e as paradas que fazem sentido para a viagem.</p>
-              </article>
-              <article className="rounded-2xl border border-white/10 bg-[#111A21] p-5">
-                <span className="text-xs font-black text-[#7F919A]">02</span>
-                <h3 className="mt-8 text-xl font-extrabold text-white">Decida</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#9FB0B8]">Compare distância, duração e desvio antes de decidir.</p>
-              </article>
-              <article className="rounded-2xl border border-white/10 bg-[#111A21] p-5">
-                <span className="text-xs font-black text-[#7F919A]">03</span>
-                <h3 className="mt-8 text-xl font-extrabold text-white">Continue</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#9FB0B8]">Salve a decisão no aparelho. Depois, reabra a viagem mesmo sem conexão.</p>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section id="instalar-app" className="border-b border-white/8 bg-[#10181F] py-10 sm:py-14">
-          <div className="container">
-            <div className="rounded-3xl border border-[#C7FF3C]/20 bg-[#121B22] p-5 sm:p-7">
-              <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-                <div>
-                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#C7FF3C]">Funciona como aplicativo</p>
-                  <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-0.055em] text-white">Instale o Trajeto no celular.</h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#A8B9C0]">Na primeira visita com internet, abra o menu de instalação do navegador. O Trajeto salva o aplicativo e os recursos necessários para reabrir a interface sem conexão.</p>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs leading-relaxed text-[#9FB0B8]"><strong className="block text-white">Android / Chrome</strong>Use “Instalar app” ou “Adicionar à tela inicial”.</div>
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs leading-relaxed text-[#9FB0B8]"><strong className="block text-white">iPhone / Safari</strong>Use Compartilhar → “Adicionar à Tela de Início”.</div>
-                  </div>
-                  <p className="mt-4 text-xs leading-relaxed text-[#74878F]">Sem conexão, a interface e os dados que já foram armazenados no aparelho continuam acessíveis. Consultas novas a Google Maps e outros serviços exigem internet.</p>
-                </div>
-                <div className="hidden lg:grid size-24 place-items-center rounded-3xl bg-[#C7FF3C] text-[#0B1014]">
-                  <Download className="size-10" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-t border-white/8 bg-[#10181F] py-14 sm:py-18">
-          <div className="container grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <div className="flex items-center gap-2 text-[#C7FF3C]"><ShieldCheck className="size-5" /><span className="text-[0.62rem] font-bold uppercase tracking-[0.15em]">Transparência</span></div>
-              <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.055em] text-white sm:text-4xl">Preço de referência não é preço de bomba.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#9BAEB7]">Quando houver vínculo verificável, o Trajeto mostra a referência da ANP com data e fonte. Dados de mapas e estimativas próprias ficam identificados separadamente.</p>
-            </div>
-            <a href={anpQualityUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-extrabold text-white transition hover:border-[#C7FF3C] hover:text-[#C7FF3C]">
-              <BadgeCheck className="size-4" /> Ver fonte oficial
-            </a>
-          </div>
-        </section>
-
-        <section className="border-t border-white/8 bg-[#0B1014] py-12">
-          <div className="container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-extrabold text-white">Próximo passo</p>
-              <p className="mt-1 text-xs text-[#7F919A]">Prepare uma rota antes de sair ou abra uma rota salva para continuar.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <a href={appUrl("/postos")} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014]">Consultar postos <ArrowRight className="size-4" /></a>
-              <a href={appUrl("/planejar")} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-xs font-extrabold text-white">Planejar rota <Navigation className="size-4" /></a>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-white/8 bg-[#070B0E] py-6">
-        <div className="container flex flex-col gap-2 text-xs text-[#71828B] sm:flex-row sm:items-center sm:justify-between">
-          <span>Trajeto · informação para quem se move no Entorno.</span>
-          <a href={appUrl("/ajuda")} className="hover:text-white">Como funciona e fontes</a>
-        </div>
-      </footer>
-    </div>
+        <footer className="mt-10 pb-4 text-center text-[0.55rem] leading-relaxed text-white/25">
+          Dados de rota e locais são apresentados com a fonte correspondente quando disponível. O Trajeto não substitui o aplicativo de navegação.
+        </footer>
+      </div>
+    </main>
   );
 }

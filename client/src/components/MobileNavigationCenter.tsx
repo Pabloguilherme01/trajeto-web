@@ -1,6 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { getNavigationPreferences, saveNavigationPreferences, type NavigationProvider } from "@/lib/navigationPreferences";
 import RouteIntelligenceCard from "./RouteIntelligenceCard";
+import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { CheckCircle2, Fuel, Navigation, RefreshCw, Route, Save, Share2, WifiOff, Map, Plus, X } from "lucide-react";
 
 type Props = {
@@ -167,7 +168,7 @@ export default function MobileNavigationCenter({
         )}
       </div>
 
-      {!offline && <RouteIntelligenceCard origin={origin} destination={destination} waypoints={stops} />}
+      {!offline && supportsLiveRouting() && <RouteIntelligenceCard origin={origin} destination={destination} waypoints={stops} />}
 
       <p className="border-t border-white/8 px-4 py-2.5 text-center text-[0.56rem] font-semibold leading-relaxed text-white/40">
         {offline
