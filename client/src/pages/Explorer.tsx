@@ -7,7 +7,7 @@ type Mission = { id: string; title: string; detail: string; xp: number; href: st
 
 const missions: Mission[] = [
   { id: "mapa", title: "Explore o mapa", detail: "Abra o mapa da cidade e conheça os postos disponíveis.", xp: 20, href: "/mapa", icon: MapPinned },
-  { id: "ficha", title: "Abra uma ficha", detail: "Veja fonte, confiança e como chegar em um local.", xp: 25, href: "/mapa", icon: Fuel },
+  { id: "ficha", title: "Abra uma ficha", detail: "Veja fonte, confiança e como chegar em um local.", xp: 25, href: "/local/rham", icon: Fuel },
   { id: "rota", title: "Planeje uma saída", detail: "Informe um destino e abra a navegação.", xp: 30, href: "/planejar", icon: RouteIcon },
 ];
 
