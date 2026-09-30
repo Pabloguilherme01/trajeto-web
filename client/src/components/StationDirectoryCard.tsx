@@ -95,7 +95,8 @@ export function StationDirectoryCard({
   const destination = coords ? coords.lat + "," + coords.lng : address;
   const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
   const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
-  const appleUrl = buildAppleMapsDirectionsUrl(destination);\n  const preferredProvider = getPreferredNavigationProvider();\n  const preferredUrl = preferredProvider === "waze" ? wazeUrl : preferredProvider === "apple" ? appleUrl : googleUrl;
+  const appleUrl = buildAppleMapsDirectionsUrl(destination);
+  const preferredProvider = getPreferredNavigationProvider();\n  const preferredUrl = preferredProvider === "waze" ? wazeUrl : preferredProvider === "apple" ? appleUrl : googleUrl;
   const anpUrl = "https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web";
   const shareUrl = typeof window !== "undefined"
     ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName) + (cnpj ? "#posto-" + encodeURIComponent(cnpj) : "")
