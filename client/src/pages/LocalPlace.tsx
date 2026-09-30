@@ -83,6 +83,14 @@ export default function LocalPlace() {
           >
             Planejar no Trajeto
           </a>
+          {destination.phone && (
+            <a
+              href={"tel:" + destination.phone}
+              className="mobile-action mobile-action-secondary mt-2 min-h-11 w-full rounded-2xl border-[#FF7D6A]/20 bg-[#FF7D6A]/[.05] text-[#FFB7A9]"
+            >
+              Ligar agora · {destination.phone}
+            </a>
+          )}
 
           <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3.5">
             <p className="text-[0.48rem] font-black uppercase tracking-[.14em] text-white/25">Resumo</p>
