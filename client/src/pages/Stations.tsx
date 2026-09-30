@@ -221,6 +221,21 @@ export default function Stations() {
         source: "ANP" as const,
       }));
 
+    // Mesmo sem snapshot ANP disponível no runtime estático, usa as coordenadas
+    // já consolidadas no catálogo local como segunda camada de cobertura.
+    const local = aguasLindasCatalog
+      .filter(station => Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude))
+      .map(station => ({
+        id: `local-${station.cnpj}`,
+        name: station.displayName || station.legalName,
+        address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
+        lat: Number(station.anp?.latitude),
+        lng: Number(station.anp?.longitude),
+        cnpj: station.cnpj,
+        brand: station.brand || station.mapData?.observedBrand,
+        source: "local" as const,
+      }));
+
     const seen = new Set<string>();
     const keyFor = (station: StationMapItem) =>
       station.cnpj
@@ -234,6 +249,7 @@ export default function Stations() {
     const merged: StationMapItem[] = [];
     for (const station of [
       ...official,
+      ...local,
       ...liveStations
         .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
         .map(item => ({
@@ -401,10 +417,45 @@ export default function Stations() {
   };
 
   const handleMapStationSelect = (station: StationMapItem) => {
-    const cnpj = station.cnpj?.trim();
-    if (cnpj) {
-      document.getElementById("posto-" + encodeURIComponent(cnpj))?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+    const normalizedAddress = normalize(station.address);
+    let targetCnpj = station.cnpj?.trim();
+
+    if (!targetCnpj) {
+      const stationName = normalize(station.name);
+      const matched = directoryCards.find(item => {
+        const itemAddress = normalize([
+          item.anp?.endereco || item.local?.address,
+          item.anp?.bairro || item.local?.neighborhood,
+          item.anp?.municipio || "Águas Lindas de Goiás",
+          item.anp?.uf || "GO",
+        ].filter(Boolean).join(" · "));
+        const itemName = normalize(item.local?.displayName || item.anp?.razaoSocial || "");
+        return (normalizedAddress && itemAddress === normalizedAddress) || (stationName && itemName === stationName);
+      });
+      targetCnpj = matched?.anp?.cnpj || matched?.local?.cnpj || undefined;
     }
+
+    if (!targetCnpj) {
+      toast.message("A referência do mapa ainda não possui ficha consolidada.");
+      return;
+    }
+
+    // Um clique no marcador deve sempre revelar a ficha, mesmo se filtros antigos
+    // estiverem escondendo o posto no diretório.
+    setDirectorySearch("");
+    setNeighborhoodFilter("all");
+    setBrandFilter("all");
+    setAddressOnly(false);
+    setVerifiedOnly(false);
+    setMappedOnly(false);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById("posto-" + encodeURIComponent(targetCnpj as string))
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
   };
 
   const saveMapOffline = () => {
