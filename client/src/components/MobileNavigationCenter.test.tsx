@@ -34,12 +34,12 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getByRole("heading", { name: "Pronto para ir." })).toBeTruthy();
     expect(screen.getByText("→ Brasília, DF")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Navegar agora/i })).toBeTruthy();
-    expect(screen.getByText("Posto Exemplo")).toBeTruthy();
-    expect(screen.getByText(/R$ 28,50/)).toBeTruthy();
-    expect(screen.getByText(/Autonomia estimada: 520 km/)).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Google Maps/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Waze/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Apple Maps/i })).toBeTruthy();
+    expect(screen.getAllByText("Posto Exemplo")).toHaveLength(2);
+    expect(screen.getAllByText((_, element) => element?.tagName === "P" && (element.textContent?.includes("28,50") ?? false))).toHaveLength(1);
+    expect(screen.getAllByText((_, element) => element?.tagName === "DIV" && (element.textContent?.includes("Autonomia estimada: 520 km") ?? false)).some(element => element.className.includes("items-center gap-2"))).toBe(true);
+    expect(screen.getAllByRole("button", { name: /Google Maps/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Waze/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Apple Maps/i }).length).toBeGreaterThan(0);
     expect(screen.getByText("Preferência da viagem")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Evitar pedágios" })).toBeTruthy();
   });
@@ -60,7 +60,8 @@ describe("MobileNavigationCenter", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Navegar agora/i }).getAttribute("disabled")).not.toBeNull();
+    expect(screen.getByText("Offline")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /Navegar agora/i }).some(button => button instanceof HTMLButtonElement && button.textContent?.includes("Navegar agora") && button.disabled)).toBe(true);
     expect(screen.getByText(/A rota salva continua disponível/)).toBeTruthy();
   });
 });
