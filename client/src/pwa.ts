@@ -11,8 +11,12 @@ export function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
   window.addEventListener("load", () => {
-    void navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL }).then(registration => {
+    void navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", {
+      scope: import.meta.env.BASE_URL,
+      updateViaCache: "none",
+    }).then(registration => {
       currentRegistration = registration;
+      void registration.update().catch(() => undefined);
       announceUpdate(registration);
 
       registration.addEventListener("updatefound", () => {
