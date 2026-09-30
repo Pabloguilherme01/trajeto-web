@@ -137,7 +137,7 @@ export default function RecentTripsCard() {
         <History className="mt-1 size-5 text-[#326575]" aria-hidden="true" />
       </div>
       {feedback && <p role="status" aria-live="polite" className="mt-4 rounded-xl border border-[#D8E0E3] bg-[#F2F5F6] px-3 py-2 text-[0.62rem] font-bold text-[#52636C]">{feedback}</p>}
-      {mostUsedCount > 1 && (
+      {mostUsedTrip && mostUsedCount > 1 && (
         <div className="mt-4 rounded-2xl border border-[#326575]/20 bg-[#F4F8F7] p-3.5">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
