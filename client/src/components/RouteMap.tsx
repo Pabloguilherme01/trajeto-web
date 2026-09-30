@@ -90,7 +90,7 @@ function OfflineRoutePreview({ origin, destination, routes = [] }: Pick<RouteMap
         </div>
         <button
           type="button"
-          onClick={() => window.open("https://www.google.com/maps/dir/?api=1&origin=" + origin.lat + "," + origin.lng + "&destination=" + destination.lat + "," + destination.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")}
+          onClick={() => window.open("https://www.google.com/maps/dir/?api=1&origin=" + safeOrigin.lat + "," + safeOrigin.lng + "&destination=" + safeDestination.lat + "," + safeDestination.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")}
           className="min-h-11 rounded-xl bg-[#163840] px-3 text-[0.58rem] font-black text-white shadow-lg"
         >
           Navegar
