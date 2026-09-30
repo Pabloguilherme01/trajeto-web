@@ -33,17 +33,21 @@ export default function RecentTripsCard() {
     };
   }, []);
 
-  if (!trips.length) return null;
-
-  const mostUsedTrip = trips.reduce((best, trip) =>
-    getRouteUsage(trip.origin, trip.destination) > getRouteUsage(best.origin, best.destination) ? trip : best,
-  trips[0]);
-  const mostUsedCount = getRouteUsage(mostUsedTrip.origin, mostUsedTrip.destination);
+  const mostUsedTrip = trips.length
+    ? trips.reduce((best, trip) =>
+        getRouteUsage(trip.origin, trip.destination) > getRouteUsage(best.origin, best.destination) ? trip : best,
+      trips[0])
+    : null;
+  const mostUsedCount = mostUsedTrip ? getRouteUsage(mostUsedTrip.origin, mostUsedTrip.destination) : 0;
   const totalRecordedUses = trips.reduce((sum, trip) => sum + getRouteUsage(trip.origin, trip.destination), 0);
   const recurringRoutes = trips.filter(trip => getRouteUsage(trip.origin, trip.destination) > 1).length;
   const [offlineInfo, setOfflineInfo] = useState<{ ready: boolean; savedAt?: string } | null>(null);
 
   useEffect(() => {
+    if (!mostUsedTrip) {
+      setOfflineInfo(null);
+      return;
+    }
     let active = true;
     void listOfflineRoutes().then(routes => {
       if (!active) return;
@@ -56,7 +60,9 @@ export default function RecentTripsCard() {
       if (active) setOfflineInfo(null);
     });
     return () => { active = false; };
-  }, [mostUsedTrip.origin, mostUsedTrip.destination]);
+  }, [mostUsedTrip?.origin, mostUsedTrip?.destination]);
+
+  if (!trips.length) return null;
 
   const offlineAge = (() => {
     if (!offlineInfo?.savedAt) return null;
@@ -69,6 +75,7 @@ export default function RecentTripsCard() {
   })();
 
   const prepareRoutine = () => {
+    if (!mostUsedTrip) return;
     const query = "?origem=" + encodeURIComponent(mostUsedTrip.origin) + "&destino=" + encodeURIComponent(mostUsedTrip.destination);
     setLocation(appUrl("/planejar") + query);
   };
