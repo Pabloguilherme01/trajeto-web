@@ -34,6 +34,9 @@ jobs:
       - name: Install from lock
         run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
+      - name: Service worker syntax
+        run: node --check client/public/sw.js
+
       - name: Typecheck
         run: npm run check
 
