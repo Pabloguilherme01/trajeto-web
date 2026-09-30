@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, Building2, Fuel, LocateFixed, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Building2, Fuel, LocateFixed, MapPin, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -13,7 +13,11 @@ import MobileDataMode from "@/components/MobileDataMode";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import VoiceInputButton from "@/components/VoiceInputButton";
 import CityPlaceAutocomplete from "@/components/CityPlaceAutocomplete";
-import { formatCityPlaceSearchValue } from "@/lib/aguasLindasCity";
+import { CITY_PLACES, formatCityPlaceSearchValue } from "@/lib/aguasLindasCity";
+
+const quickDestinations = ["hospital-bom-jesus", "heal", "prefeitura", "terminal-nelson-alves"]
+  .map(id => CITY_PLACES.find(place => place.id === id))
+  .filter((place): place is (typeof CITY_PLACES)[number] => Boolean(place));
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -150,11 +154,11 @@ export default function Home() {
       <div className="container max-w-5xl pt-5 sm:pt-8 lg:pt-12">
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-[0.58rem] font-black uppercase tracking-[.18em] text-[#71818A]">{greeting}</p>
+            <p className="text-xs font-bold text-[#9AAAB1]">{greeting}</p>
             <p className="mt-1 brand-wordmark text-[1.2rem] text-white">trajeto</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className={"inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-[0.55rem] font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/5 text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/5 text-[#FFB86B]")}>
+            <span className={"inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/5 text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/5 text-[#FFB86B]")}>
               {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
               {online ? "online" : "offline"}
             </span>
@@ -165,41 +169,39 @@ export default function Home() {
         </header>
         {shareDone && <p className="mt-2 text-right text-[.6rem] font-bold text-[#C7FF3C]" role="status" aria-live="polite">Link do Trajeto compartilhado.</p>}
 
-        <section className="mt-8">
-          <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mobilidade diária</p>
-          <h1 className="mobile-title mt-3 max-w-3xl font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
-            Chegue melhor.<br />
-            <span className="text-[#C7FF3C]">Decida antes de sair.</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/50 sm:text-base">
-            Um fluxo simples para planejar a rota, encontrar uma parada e abrir a navegação certa sem atravessar várias telas.
-          </p>
+        <section className="mt-5 flex items-end justify-between gap-3 sm:mt-7">
+          <div>
+            <p className="text-xs font-bold text-[#C7FF3C]">Mobilidade em Águas Lindas</p>
+            <h1 className="mt-1 font-display text-[clamp(1.8rem,7vw,3rem)] font-semibold leading-tight tracking-[-.06em]">Para onde você vai?</h1>
+            <p className="mt-1 text-sm text-white/50">Monte a rota ou escolha um destino frequente.</p>
+          </div>
+          {offlineRoutes > 0 && <span className="shrink-0 rounded-full border border-white/10 px-2.5 py-1.5 text-xs font-bold text-white/65">{offlineRoutes} salva(s)</span>}
         </section>
 
-        <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
+        <section className="mt-4 rounded-[1.5rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:mt-5 sm:rounded-[1.7rem] sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Próxima viagem</p>
-              <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Planejar rota.</h2>
+              <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Planejar rota</p>
+              <p className="mt-1 text-sm text-white/50">Origem e destino para abrir no seu navegador.</p>
             </div>
-            <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-[0.5rem] font-bold text-white/40">sem cadastro</span>
+            <Route className="size-5 shrink-0 text-[#C7FF3C]" aria-hidden="true" />
           </div>
 
           <form onSubmit={submit} className="mt-5 space-y-2.5">
             <label className="block">
-              <span className="mb-1.5 block text-[0.58rem] font-black uppercase tracking-[.12em] text-white/35">Origem</span>
+              <span className="mb-1.5 block text-xs font-bold text-white/60">Origem</span>
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
                 <CityPlaceAutocomplete id="home-origin" value={origin} onValueChange={setOrigin} onPlaceSelect={place => setOrigin(formatCityPlaceSearchValue(place))} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 w-full min-w-0 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
                 <VoiceInputButton label="a origem" onTranscript={setOrigin} />
-                <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem" title="Usar GPS como origem">
+                <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 shrink-0 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#C7FF3C]" aria-label="Usar minha localização como origem" title="Usar GPS como origem">
                   <LocateFixed className="size-4" />
                 </button>
               </div>
             </label>
 
             <label className="block">
-              <span className="mb-1.5 block text-[0.58rem] font-black uppercase tracking-[.12em] text-white/35">Destino</span>
+              <span className="mb-1.5 block text-xs font-bold text-white/60">Destino</span>
               <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#C7FF3C]" />
                 <CityPlaceAutocomplete id="home-destination" value={destination} onValueChange={setDestination} onPlaceSelect={place => setDestination(formatCityPlaceSearchValue(place))} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 w-full min-w-0 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
@@ -207,7 +209,16 @@ export default function Home() {
               </div>
             </label>
 
-            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
+            <div className="pt-1">
+              <p className="mb-2 text-xs font-bold text-white/55">Destinos rápidos</p>
+              <div className="mobile-scroll-x flex gap-2 overflow-x-auto pb-1" aria-label="Escolha um destino frequente">
+                {quickDestinations.map(place => <button key={place.id} type="button" onClick={() => { setDestination(place.name); setFormMessage(null); }} className="min-h-10 shrink-0 rounded-full border border-white/10 bg-white/[.035] px-3 text-xs font-bold text-white/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#C7FF3C]">
+                  <MapPin className="mr-1 inline size-3.5 text-[#3DE3FF]" aria-hidden="true" />{place.id === "hospital-bom-jesus" ? "Hospital Municipal" : place.id === "terminal-nelson-alves" ? "Rodoviária" : place.name}
+                </button>)}
+              </div>
+            </div>
+
+            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-describedby={formMessage ? "home-form-message" : undefined}>
               <span>{locating ? "Obtendo localização…" : "Calcular rota"}</span>
               <ArrowRight className="size-5" />
             </button>
@@ -238,7 +249,7 @@ export default function Home() {
           <MobileDataMode />
         </section>
 
-        <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mt-4 hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-4">
           <button type="button" onClick={openLastTrip} disabled={!lastTrip} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left disabled:opacity-40 active:scale-[.99]">
             <Route className="size-4 text-[#C7FF3C]" />
             <p className="mt-3 text-xs font-black">Última rota</p>
