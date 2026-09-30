@@ -74,7 +74,7 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false }
           <input
             id="offline-route-search"
             value={query}
-            onChange={event => setQuery(event.target.value)}
+            onChange={event => { const value = event.target.value; setQuery(value); if (value.trim()) setCategory("todos"); }}
             className="min-h-11 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25"
             placeholder="Hospital, Vapt Vupt, rodoviária…"
             enterKeyHint="search"
