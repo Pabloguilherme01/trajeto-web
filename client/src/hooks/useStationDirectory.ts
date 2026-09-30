@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { FuelFilter, DirectoryCardShape, DirectoryPriceIndex } from "@/lib/stationDirectoryModel";
 import { getDirectoryCoordinates, getDirectoryGasolinePrice, matchesFuelFilter } from "@/lib/stationDirectoryModel";
 import { getDistanceKm, stationMatchesSearch, type Coordinates } from "@/lib/stationDirectorySearch";
@@ -122,4 +121,3 @@ export function useStationDirectory({ cards, pricesByCnpj, search, userCoords, f
   }, [cards, pricesByCnpj, search, userCoords, filters]);
 }
 
-export type { AnpPriceRecord };
