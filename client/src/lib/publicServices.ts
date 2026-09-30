@@ -1,0 +1,325 @@
+export type PublicServiceCategory =
+  | "saude"
+  | "seguranca"
+  | "assistencia"
+  | "transito"
+  | "educacao"
+  | "cidadania";
+
+export type PublicService = {
+  id: string;
+  name: string;
+  category: PublicServiceCategory;
+  description: string;
+  address?: string;
+  phone?: string;
+  extraPhone?: string;
+  hours?: string;
+  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás";
+  sourceUrl: string;
+  mapQuery: string;
+};
+
+export const PUBLIC_SERVICE_CATEGORIES: Array<{
+  id: PublicServiceCategory | "todos";
+  label: string;
+  shortLabel: string;
+}> = [
+  { id: "todos", label: "Tudo", shortLabel: "Tudo" },
+  { id: "saude", label: "Saúde", shortLabel: "Saúde" },
+  { id: "seguranca", label: "Segurança", shortLabel: "Segurança" },
+  { id: "assistencia", label: "Assistência", shortLabel: "Assistência" },
+  { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
+  { id: "educacao", label: "Educação", shortLabel: "Educação" },
+  { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
+];
+
+const PREFEITURA_CONTATOS = "https://aguaslindasdegoias.go.gov.br/contatos/";
+const TELEFONES_UTEIS = "https://aguaslindasdegoias.go.gov.br/telefones-uteis/";
+const UPA = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/upa/";
+const HMBJ = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/hospital-municipal-bom-jesus/";
+const UNIDADES_SAUDE = "https://aguaslindasdegoias.go.gov.br/unidades-de-saude/";
+const TRANSITO = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/";
+const CT = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
+const PCGO = "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-atendimento/";
+const SEDUC = "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
+
+export const PUBLIC_SERVICES: PublicService[] = [
+  {
+    id: "upa-mansoes-odisseia",
+    name: "UPA Mansões Odisseia",
+    category: "saude",
+    description: "Atendimento de urgência e emergência municipal.",
+    address: "Quadra 3B, Lote 1/3, Mansões Odisseia, Águas Lindas de Goiás - GO",
+    phone: "(61) 3618-1602",
+    hours: "24 horas",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: UPA,
+    mapQuery: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "hospital-bom-jesus",
+    name: "Hospital Municipal Bom Jesus",
+    category: "saude",
+    description: "Hospital municipal com atendimento contínuo.",
+    address: "Q 109, Conjunto B, Lote 30/32, Setor 10, Águas Lindas de Goiás - GO",
+    phone: "(61) 3548-7604",
+    hours: "24 horas",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: HMBJ,
+    mapQuery: "Hospital Municipal Bom Jesus, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "secretaria-saude",
+    name: "Secretaria Municipal de Saúde",
+    category: "saude",
+    description: "Contato institucional e encaminhamentos da saúde municipal.",
+    phone: "(61) 3902-1097 / (61) 99227-7937",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
+    mapQuery: "Secretaria Municipal de Saúde, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "unidades-saude",
+    name: "Unidades de Saúde do município",
+    category: "saude",
+    description: "Lista oficial com Hospital, ESF e UBS de Águas Lindas.",
+    address: "Diversas unidades na cidade",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: UNIDADES_SAUDE,
+    mapQuery: "UBS Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "policia-civil-1",
+    name: "1ª Delegacia de Polícia de Águas Lindas",
+    category: "seguranca",
+    description: "Unidade da Polícia Civil para registros e atendimento policial.",
+    address: "Rua Adélia, Quadra 3, Área Especial, Setor Sol Nascente, Águas Lindas de Goiás - GO",
+    phone: "(61) 3618-2716",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: PCGO,
+    mapQuery: "1ª Delegacia de Polícia de Águas Lindas de Goiás",
+  },
+  {
+    id: "pcgo-17-drp",
+    name: "17ª Delegacia Regional de Polícia",
+    category: "seguranca",
+    description: "Delegacia regional da Polícia Civil com atendimento em Águas Lindas.",
+    address: "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO",
+    phone: "(61) 3618-7202",
+    extraPhone: "(62) 99506-5190",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: PCGO,
+    mapQuery: "17ª Delegacia Regional de Polícia, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "policia-militar",
+    name: "Polícia Militar / COPOM",
+    category: "seguranca",
+    description: "Canal de atendimento policial e emergência.",
+    phone: "190",
+    extraPhone: "(61) 3613-2517 / (61) 3613-1190",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "Polícia Militar, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "bombeiros",
+    name: "Corpo de Bombeiros",
+    category: "seguranca",
+    description: "Emergências de incêndio, resgate e salvamento.",
+    phone: "193",
+    extraPhone: "(61) 3618-2069",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "Corpo de Bombeiros, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "conselho-tutelar",
+    name: "Conselho Tutelar",
+    category: "assistencia",
+    description: "Proteção de crianças e adolescentes e recebimento de denúncias.",
+    address: "Quadra 11, Lote 13, Jardim Querência, Águas Lindas de Goiás - GO",
+    phone: "(61) 99303-8040",
+    extraPhone: "(61) 99303-9204",
+    hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: CT,
+    mapQuery: "Conselho Tutelar, Jardim Querência, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "cras-1",
+    name: "CRAS I · Jardim Brasília",
+    category: "assistencia",
+    description: "Atendimento da assistência social para famílias e benefícios.",
+    address: "Quadra 53, Lote 1B, Jardim Brasília, Águas Lindas de Goiás - GO",
+    phone: "(61) 99294-2109",
+    hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/centro-de-referencia-da-assistencia-social-cras-i-jardim-brasilia/",
+    mapQuery: "CRAS I Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "transito-mobilidade",
+    name: "Secretaria de Trânsito e Mobilidade Urbana",
+    category: "transito",
+    description: "Atendimento municipal de trânsito, mobilidade e agentes.",
+    address: "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
+    phone: "(61) 92003-6668",
+    extraPhone: "(61) 92003-6674",
+    hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TRANSITO,
+    mapQuery: "Secretaria de Trânsito e Mobilidade Urbana, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "superintendencia-transito",
+    name: "Superintendência Municipal de Trânsito",
+    category: "transito",
+    description: "Atendimento e operação municipal de trânsito.",
+    address: "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
+    phone: "(61) 99310-4493",
+    extraPhone: "(61) 99310-4219",
+    hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/superintendencia-municipal-de-transito/",
+    mapQuery: "Superintendência Municipal de Trânsito, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "educacao-estado",
+    name: "Rede Estadual de Educação",
+    category: "educacao",
+    description: "Lista oficial de escolas estaduais, com logradouro e município.",
+    sourceLabel: "SEDUC Goiás",
+    sourceUrl: SEDUC,
+    mapQuery: "escolas estaduais, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "cepi-juscelino",
+    name: "CEPI Juscelino Kubitschek de Oliveira",
+    category: "educacao",
+    description: "Centro estadual em período integral.",
+    address: "Rua Mansões Odisseia, Parque Mansões Odisseia, Águas Lindas de Goiás - GO",
+    sourceLabel: "SEDUC Goiás",
+    sourceUrl: SEDUC,
+    mapQuery: "CEPI Juscelino Kubitschek de Oliveira, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "coralina",
+    name: "Colégio Estadual Cora Coralina",
+    category: "educacao",
+    description: "Colégio estadual com Ensino Fundamental e Ensino Médio.",
+    address: "Rua 38, esq. com 4ª Avenida, Mansões Village, Águas Lindas de Goiás - GO",
+    sourceLabel: "SEDUC Goiás",
+    sourceUrl: SEDUC,
+    mapQuery: "Colégio Estadual Cora Coralina, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "pm-go-aguas-lindas",
+    name: "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas",
+    category: "educacao",
+    description: "Unidade estadual de educação vinculada à rede da SEDUC.",
+    address: "Quadra 31, Área Especial, Avenida 02/03, Águas Lindas I, Águas Lindas de Goiás - GO",
+    sourceLabel: "SEDUC Goiás",
+    sourceUrl: SEDUC,
+    mapQuery: "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas, GO",
+  },
+  {
+    id: "paulo-freire",
+    name: "Colégio Estadual Paulo Freire",
+    category: "educacao",
+    description: "Colégio estadual com Ensino Fundamental e Ensino Médio.",
+    address: "Área Especial I, Quadra 53, Lote 01-H, Jardim Brasília, Águas Lindas de Goiás - GO",
+    sourceLabel: "SEDUC Goiás",
+    sourceUrl: SEDUC,
+    mapQuery: "Colégio Estadual Paulo Freire, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "prefeitura",
+    name: "Prefeitura de Águas Lindas de Goiás",
+    category: "cidadania",
+    description: "Portal institucional, contatos, serviços e atendimento ao cidadão.",
+    address: "Área Especial 4, Avenida 2, Jardim Querência, Águas Lindas de Goiás - GO, CEP 72910-733",
+    phone: "(61) 3618-4007",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
+    mapQuery: "Prefeitura de Águas Lindas de Goiás",
+  },
+  {
+    id: "sic",
+    name: "Serviço de Informação ao Cidadão · SIC",
+    category: "cidadania",
+    description: "Canal oficial para informação e atendimento ao cidadão.",
+    phone: "(61) 99303-9204",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
+    mapQuery: "Serviço de Informação ao Cidadão, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "procon",
+    name: "Procon Águas Lindas",
+    category: "cidadania",
+    description: "Atendimento ao consumidor e orientação sobre direitos.",
+    phone: "(61) 3616-1133",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "Procon Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "saneago",
+    name: "Saneago",
+    category: "cidadania",
+    description: "Canal municipal listado pela Prefeitura para atendimento de água e saneamento.",
+    phone: "(61) 3618-2488",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "Saneago, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "vapt-vupt",
+    name: "Vapt Vupt",
+    category: "cidadania",
+    description: "Atendimento de serviços públicos presenciais.",
+    phone: "(61) 3613-0075",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "Vapt Vupt, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "detran",
+    name: "Detran-GO",
+    category: "cidadania",
+    description: "Canal local listado pela Prefeitura para atendimento do Detran.",
+    phone: "(61) 3613-4058",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "Detran-GO, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "samu",
+    name: "SAMU",
+    category: "saude",
+    description: "Atendimento móvel de urgência. Em emergência, acione o serviço.",
+    phone: "192",
+    extraPhone: "(61) 3618-2013",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: TELEFONES_UTEIS,
+    mapQuery: "SAMU, Águas Lindas de Goiás, GO",
+  },
+];
+
+export function searchPublicServices(query = "", category: PublicServiceCategory | "todos" = "todos") {
+  const normalized = query.trim().toLocaleLowerCase("pt-BR");
+  return PUBLIC_SERVICES.filter(service => {
+    if (category !== "todos" && service.category !== category) return false;
+    if (!normalized) return true;
+    return [
+      service.name,
+      service.description,
+      service.address,
+      service.phone,
+      service.extraPhone,
+      service.category,
+    ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(normalized);
+  });
+}
