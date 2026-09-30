@@ -352,7 +352,8 @@ export default function Stations() {
   }, [anpRows, staticAnpRetrievedAt, anpLiveQuery.data?.retrievedAt]);
 
   useEffect(() => {
-    if (mapStations.length) cacheOfflineMapStations(mapStations.filter((station): station is StationMapItem & { id: string } => typeof station.id === "string"));
+    const mapped = mapStations.filter((station): station is StationMapItem & { id: string; lat: number; lng: number } => typeof station.id === "string" && typeof station.lat === "number" && Number.isFinite(station.lat) && typeof station.lng === "number" && Number.isFinite(station.lng));
+    if (mapped.length) cacheOfflineMapStations(mapped);
   }, [mapStations]);
 
 
