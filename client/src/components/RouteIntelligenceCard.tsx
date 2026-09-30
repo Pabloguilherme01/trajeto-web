@@ -25,6 +25,13 @@ function formatDuration(seconds: number | null) {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
 }
 
+function formatGeneratedAt(value: string | number | null | undefined) {
+  if (value == null) return "horário não informado";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "horário não informado";
+  return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(date);
+}
+
 export default function RouteIntelligenceCard({ origin, destination, waypoints = [], avoidTolls, avoidHighways, selectedRouteId = "principal", onSelectRoute, onConfirmRoute, routeConfirmed = false, onRoutesChange }: Props) {
   const [data, setData] = useState<RouteIntelligence | null>(null);
   const [loading, setLoading] = useState(false);
@@ -283,6 +290,26 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <p><strong className="text-white/70">Combustível:</strong> distância ÷ km/L × preço/L.</p>
             <p className="mt-1"><strong className="text-white/70">Custo da viagem:</strong> combustível + pedágio informado.</p>
             <p className="mt-1"><strong className="text-white/70">Comparação:</strong> tempo, distância, pedágio e custo são avaliados separadamente.</p>
+          </div>
+        </div>
+      )}
+
+      {data && (
+        <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] px-3.5 py-3" role="status" aria-label="Qualidade e atualização dos dados da rota">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-white/45">Dados da rota</p>
+              <p className="mt-1 text-[0.58rem] text-white/45">
+                {data.trafficAware ? "Trânsito considerado" : "Trânsito básico"} · atualizado às {formatGeneratedAt(data.generatedAt)}
+              </p>
+            </div>
+            <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">
+              {data.alternativesAvailable ? "alternativas" : "rota principal"}
+            </span>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="rounded-full bg-white/[.05] px-2 py-1 text-[0.5rem] font-bold text-white/50">{main?.toll ? (main.toll.estimated ? "pedágio estimado" : "pedágio informado") : "pedágio não informado"}</span>
+            <span className="rounded-full bg-white/[.05] px-2 py-1 text-[0.5rem] font-bold text-white/50">{fuelCost(main) != null ? "combustível calculável" : "combustível incompleto"}</span>
           </div>
         </div>
       )}
