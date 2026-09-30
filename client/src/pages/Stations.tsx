@@ -716,15 +716,18 @@ export default function Stations() {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Fonte oficial ANP</p>
-                <h2 id="anp-directory-title" className="mt-1 text-xl font-black">Cadastro técnico dos postos</h2>
-                <p className="mt-1 text-[0.63rem] leading-relaxed text-white/45">A API da ANP fornece autorização, CNPJ, endereço, distribuidora, produtos, tancagem, bicos, coordenadas, validação geográfica, situação constatada e status SIGAF.</p>
+          <details id="anp-directory" className="mt-4 rounded-[1.35rem] border border-[#3DE3FF]/15 bg-[#0F171D] overflow-hidden">
+            <summary className="cursor-pointer list-none px-4 py-3.5 sm:px-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[0.5rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Fonte oficial</p>
+                  <h2 className="mt-1 text-base font-black tracking-[-.02em]">Dados técnicos da ANP</h2>
+                  <p className="mt-1 text-[0.56rem] leading-relaxed text-white/35">Cadastro, coordenadas, produtos e exportação. Fica recolhido para não competir com a decisão no celular.</p>
+                </div>
+                <span className="shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.46rem] font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
               </div>
-              <span className="shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
-            </div>
+            </summary>
+            <div className="border-t border-white/8 p-3 sm:p-5">
 
             {anpLiveQuery.isLoading && !staticRuntime && <div className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Consultando a base oficial da ANP…</div>}
             {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/50">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/20 px-3 font-black text-[#FFD09A]">Tentar novamente</button></div>}
@@ -827,7 +830,8 @@ export default function Stations() {
             )}
 
             <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
-          </section>
+            </div>
+          </details>
         )}
 
         {broadAguasLindasQuery && !showSavedOnly && (
