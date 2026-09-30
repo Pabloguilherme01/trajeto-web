@@ -1073,7 +1073,7 @@ export default function Stations() {
           </section>
         )}
 
-        {(!staticRuntime && (stations.length > 0 || showSavedOnly)) && (
+        {(!staticRuntime && !broadAguasLindasQuery && (stations.length > 0 || showSavedOnly)) && (
           <>
             <section className="mt-5 flex items-end justify-between gap-3">
               <div>
