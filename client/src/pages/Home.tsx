@@ -1,4 +1,4 @@
-import { ArrowRight, Heart, LocateFixed, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Heart, LocateFixed, MapPinned, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -102,7 +102,7 @@ export default function Home() {
               {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
               {online ? "online" : "offline"}
             </span>
-            <button type="button" onClick={() => void shareHome()} className="grid size-10 place-items-center rounded-xl border border-white/8 bg-white/[.025] text-white/55" aria-label="Compartilhar Trajeto">
+            <button type="button" onClick={() => void shareHome()} className="mobile-action-icon border-white/8 bg-white/[.025] text-white/55" aria-label="Compartilhar Trajeto">
               <Share2 className="size-4" />
             </button>
           </div>
@@ -147,23 +147,36 @@ export default function Home() {
         </section>
 
         <section className="mt-3 grid gap-2 sm:grid-cols-2">
-          <button type="button" onClick={findNearby} disabled={locating} className="flex min-h-14 items-center gap-3 rounded-2xl bg-[#C7FF3C] px-4 text-left text-[#0B1014] disabled:opacity-45">
+          <button type="button" onClick={findNearby} disabled={locating} className="mobile-action mobile-action-primary flex min-h-14 items-center gap-3 rounded-2xl px-4 text-left disabled:opacity-45">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-black/10"><LocateFixed className="size-5" /></span>
             <span className="min-w-0 flex-1"><span className="block text-xs font-black">{locating ? "Localizando…" : "Perto de mim"}</span><span className="mt-0.5 block text-[0.52rem] font-bold text-[#19323A]/65">Usar GPS somente quando você pedir</span></span>
             <ArrowRight className="size-4" />
           </button>
 
-          <button type="button" onClick={() => { rememberIntent("route"); setLocation(appUrl("/planejar")); }} className="flex min-h-14 items-center gap-3 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-4 text-left">
+          <button type="button" onClick={() => { rememberIntent("route"); setLocation(appUrl("/planejar")); }} className="mobile-action mobile-action-secondary flex min-h-14 items-center gap-3 rounded-2xl border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-4 text-left">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></span>
             <span className="min-w-0 flex-1"><span className="block text-xs font-black text-white">No caminho</span><span className="mt-0.5 block text-[0.52rem] font-bold text-white/35">Rota + postos + desvio</span></span>
             <ArrowRight className="size-4 text-white/25" />
           </button>
         </section>
 
+        <button
+          type="button"
+          onClick={() => { rememberIntent("route"); setLocation(appUrl("/planejar") + "?offline=1"); }}
+          className="mobile-action mobile-action-secondary mt-2 min-h-14 w-full justify-start rounded-2xl border-[#3DE3FF]/15 bg-[#3DE3FF]/[.045] px-4 text-left"
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><MapPinned className="size-5" /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-black text-white">Pontos essenciais offline</span>
+            <span className="mt-0.5 block text-[0.52rem] font-bold text-white/35">Hospitais, UPA, Vapt Vupt, rodoviária e serviços públicos já prontos</span>
+          </span>
+          <ArrowRight className="size-4 text-white/30" />
+        </button>
+
         <section className="mt-5">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-[0.5rem] font-black uppercase tracking-[.16em] text-white/25">Explorar a cidade</p><h2 className="mt-1 text-base font-black">O que você precisa?</h2></div>
-            <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="text-[.52rem] font-black text-[#3DE3FF]">Abrir mapa</button>
+            <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="mobile-action mobile-action-secondary min-h-10 rounded-xl border-0 bg-transparent px-2 text-[.52rem] font-black text-[#3DE3FF]">Abrir mapa</button>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {[
@@ -173,7 +186,7 @@ export default function Home() {
               ["🚌","Transporte","transporte"],
               ["🏛","Serviços","servico publico"],
             ].map(([icon,label,query]) => (
-              <button key={label} type="button" onClick={() => { rememberSearch(query); setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(query)); }} className="min-h-14 rounded-2xl border border-white/8 bg-white/[.025] px-3 text-left">
+              <button key={label} type="button" onClick={() => { rememberSearch(query); setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(query)); }} className="mobile-action mobile-action-secondary min-h-14 rounded-2xl border-white/8 bg-white/[.025] px-3 text-left">
                 <span className="text-base" aria-hidden="true">{icon}</span>
                 <span className="mt-1 block text-[.55rem] font-black text-white/70">{label}</span>
               </button>
@@ -189,7 +202,7 @@ export default function Home() {
                 <p className="text-[0.48rem] font-black uppercase tracking-[.14em] text-white/25">Última rota</p>
                 <p className="mt-1 truncate text-[0.66rem] font-black text-white">{lastTrip.origin} → {lastTrip.destination}</p>
               </div>
-              <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination))} className="min-h-10 shrink-0 rounded-xl border border-white/8 px-3 text-[0.52rem] font-black text-white/60">
+              <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination))} className="mobile-action mobile-action-secondary min-h-10 shrink-0 rounded-xl px-3 text-[0.52rem] font-black text-white/65">
                 Retomar
               </button>
             </div>
