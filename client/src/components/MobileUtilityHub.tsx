@@ -108,6 +108,7 @@ export default function MobileUtilityHub() {
                         <OfficialSourcesCard />
                       </div>
                     )}
+                    {panel.id === "inteligencia" && <MobilityInsightsCard />}
                   </div>
                 )}
               </div>
