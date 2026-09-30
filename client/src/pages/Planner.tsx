@@ -296,6 +296,10 @@ export default function Planner() {
     window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
+  const publicRouteSource = planned
+    ? (planned.route as typeof planned.route & { source?: "osrm" | "local-estimate" }).source
+    : undefined;
+
   const routeForMap = planned ? [{
     id: "principal",
     polyline: planned.route.polyline ?? null,
@@ -530,7 +534,7 @@ export default function Planner() {
               <details>
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-white/35" /></summary>
                 <div className="mt-3 grid gap-2 text-[0.62rem] leading-relaxed text-white/45">
-                  <p>Fonte da rota: {planned.route.source === "local-estimate"
+                  <p>Fonte da rota: {publicRouteSource === "local-estimate"
                     ? "estimativa local baseada nas coordenadas"
                     : staticRuntime
                       ? "rede viária OpenStreetMap/OSRM, calculada no navegador"
