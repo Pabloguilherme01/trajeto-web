@@ -207,6 +207,14 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => void share()} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Share2 className="size-3.5" />Compartilhar</button>
         <button type="button" onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/15 text-[0.55rem] font-black text-[#9FEFFF]"><ExternalLink className="size-3.5" />Consulta ANP</button>
       </div>
+      <div className="mt-2 rounded-xl border border-[#3DE3FF]/12 bg-[#3DE3FF]/[.025] p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">ANP com VC · consulta complementar</p>
+          <span className="text-[0.45rem] font-bold text-white/25">oficial</span>
+        </div>
+        <p className="mt-1 text-[0.52rem] leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
+        <a href="https://anpcomvcpostos.anp.gov.br/" target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC</a>
+      </div>
       <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
