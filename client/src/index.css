@@ -176,3 +176,26 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
 @media (prefers-color-scheme: dark) {
   :root { color-scheme: dark; }
 }
+
+
+/* Primitivos reutilizáveis para interação mobile. */
+@layer components {
+  .mobile-pressable {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  .mobile-pressable:active { transform: scale(.985); }
+  .mobile-focus-ring:focus-visible { outline: 3px solid #3DE3FF; outline-offset: 3px; }
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-pressable:active { transform: none; }
+}
