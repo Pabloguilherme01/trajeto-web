@@ -181,7 +181,7 @@ export default function Planner() {
 
   const removeSavedRoute = async (route: OfflineRoute) => {
     try {
-      await deleteOfflineRoute(route.id);
+      await removeOfflineRoute(route.id);
       refreshSavedRoutes();
     } catch {}
   };
