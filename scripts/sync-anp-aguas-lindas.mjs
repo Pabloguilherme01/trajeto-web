@@ -33,12 +33,17 @@ for (let page = 1; page <= MAX_PAGES; page += 1) {
 }
 
 await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
+if (rows.length === 0) {
+  throw new Error("A consulta da ANP retornou zero registros; snapshot anterior deve ser preservado.");
+}
+
 const snapshot = {
   source: API_URL,
   municipality: "Águas Lindas de Goiás",
   uf: "GO",
   retrievedAt: new Date().toISOString(),
   totalRawRows: rows.length,
+  totalStations: new Set(rows.map(row => String(row.cnpj ?? row.CNPJ ?? "")).filter(Boolean)).size,
   data: rows,
 };
 await writeFile(OUTPUT, JSON.stringify(snapshot, null, 2) + "\n", "utf8");
