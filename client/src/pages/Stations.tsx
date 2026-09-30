@@ -1185,14 +1185,15 @@ export default function Stations() {
             )}
 
             {compared.length > 0 && (
-              <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#121B22] p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div><p className="text-[0.55rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Comparação</p><h3 className="mt-1 text-xl font-black">{compared.length} parada(s)</h3></div>
+              <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#121B22] p-4" aria-label="Comparar postos">
+                <div className="flex items-center justify-between gap-3">
+                  <div><p className="text-[0.55rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Comparar</p><h3 className="mt-1 text-lg font-black">{compared.length} de 3 postos</h3></div>
                   <button type="button" onClick={() => setCompareIds([])} className="grid size-9 place-items-center rounded-lg border border-white/8 text-white/40" aria-label="Limpar comparação"><X className="size-4" /></button>
                 </div>
-                <div className="mt-3 space-y-2">
-                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="flex min-h-12 w-full items-center justify-between rounded-xl bg-[#0B1014] px-3 text-left"><span className="min-w-0 truncate text-xs font-black">{item.name}<span className="ml-2 text-[0.55rem] font-normal text-white/35">{item.distanceLabel || "sem distância"}</span></span><ChevronRight className="size-4 shrink-0 text-[#3DE3FF]" /></button>)}
+                <div className="mt-3 grid gap-2 md:grid-cols-3">
+                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="min-h-20 rounded-xl bg-[#0B1014] p-3 text-left"><span className="block truncate text-xs font-black">{item.name}</span><span className="mt-1 block text-[0.55rem] text-white/40">{item.distanceLabel || "distância indisponível"}</span><span className="mt-2 block text-[0.52rem] font-bold text-[#3DE3FF]">Abrir ficha <ChevronRight className="inline size-3" /></span></button>)}
                 </div>
+                <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">A comparação mostra apenas dados disponíveis para cada posto. Ela não cria uma nota ou ranking.</p>
               </section>
             )}
 
