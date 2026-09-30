@@ -12,37 +12,10 @@ import { AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchA
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
-import { aguasLindasStations } from "@/data/aguasLindasStations";
 
 function getInitialQuery() {
-  if (typeof window === "undefined") return "Águas Lindas de Goiás";
-  return new URLSearchParams(window.location.search).get("q") || "Águas Lindas de Goiás";
-}
-
-function isAguasLindasQuery(value: string) {
-  const normalized = value.toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
-  return normalized.includes("aguas lindas");
-}
-
-function toLocalCatalogStation(item: (typeof aguasLindasStations)[number]): MobileStation {
-  return {
-    placeId: "aguas-lindas-cnpj-" + item.cnpj.replace(/\\D/g, ""),
-    name: item.name,
-    address: item.address ? item.address + ", " + item.neighborhood + ", Águas Lindas de Goiás - GO" : item.neighborhood + ", Águas Lindas de Goiás - GO",
-    lat: null,
-    lng: null,
-    phone: item.phone ?? null,
-    openingHours: [],
-    isOpen: null,
-    distanceLabel: "catálogo local",
-    anpMatch: item.anpConfirmed ? {
-      status: "probable",
-      confidence: 0.85,
-      legalName: item.legalName ?? item.name,
-      brand: null,
-      authorization: null,
-    } : null,
-  };
+  if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
+  return new URLSearchParams(window.location.search).get("q") || corridorPresets[0]?.query || "postos";
 }
 
 export default function Stations() {
@@ -65,8 +38,6 @@ export default function Stations() {
   const staticRuntime = isGitHubPagesRuntime();
   const localDirectory = useMemo(() => staticRuntime && !showSavedOnly ? searchAguasLindasStations(query) : [], [query, showSavedOnly, staticRuntime]);
 
-  const localCatalogStations = staticRuntime && isAguasLindasQuery(query) ? aguasLindasStations.map(toLocalCatalogStation) : [];
-
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     hasCoordinates ? { query, lat, lng } : { query },
     {
@@ -83,9 +54,8 @@ export default function Stations() {
   }, [stationPages.data]);
 
   const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
-  const stations = showSavedOnly ? saved : localCatalogStations.length > 0 ? localCatalogStations : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
+  const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen !== false) : stations;
-  const mappedStations = visibleStations.filter(station => typeof station.lat === "number" && typeof station.lng === "number");
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
 
@@ -183,12 +153,8 @@ export default function Stations() {
   };
 
   const navigateTo = (station: typeof stations[number]) => {
-    if (typeof station.lat === "number" && typeof station.lng === "number") {
-      const urls = openNavigation(station.lat, station.lng, station.name);
-      window.open(urls.google, "_blank", "noopener,noreferrer");
-      return;
-    }
-    window.open(buildGoogleMapsSearchUrl(station.name + ", " + station.address), "_blank", "noopener,noreferrer");
+    const urls = openNavigation(station.lat, station.lng, station.name);
+    window.open(urls.google, "_blank", "noopener,noreferrer");
   };
 
   const shareCurrent = async () => {
@@ -276,7 +242,7 @@ export default function Stations() {
                 <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
                 <p className="mt-2 text-[0.66rem] leading-relaxed text-white/45">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
               </div>
-              <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">41 base</span>
+              <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">31 base</span>
             </div>
 
             {localDirectory.length ? (
@@ -360,10 +326,10 @@ export default function Stations() {
               <div>
                 <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-white/25">{usingCache ? "Cache local" : searchedAt ? "Consulta atual" : "Neste aparelho"}</p>
                 <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">{visibleStations.length} resultado(s)</h2>
-                <p className="mt-1 text-[0.56rem] text-white/30">{localCatalogStations.length ? "41 empresas ativas no CNAE 47.31-8/00 · fonte cadastral 2026" : usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
+                <p className="mt-1 text-[0.56rem] text-white/30">{usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!mappedStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><Map className="size-4" /></button>
+                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><Map className="size-4" /></button>
                 {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">{compareIds.length} comparar</button>}
               </div>
             </section>
