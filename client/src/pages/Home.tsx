@@ -362,7 +362,7 @@ export default function Home() {
               ))}
             </div>
             <p className="mt-3 text-[0.55rem] leading-relaxed text-white/28">
-              Estas rotas ficam guardadas localmente como histórico. Use “Salvar offline” no planejador quando quiser uma cópia do trajeto para contingência sem internet.
+              Estas rotas ficam guardadas localmente como histórico. Quando uma rota é calculada com origem e destino, o Trajeto cria automaticamente uma cópia offline para contingência.
             </p>
           </section>
         )}
