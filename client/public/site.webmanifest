@@ -22,9 +22,9 @@
   "shortcuts":[
     {"name":"No caminho","short_name":"No caminho","description":"Planejar uma rota e encontrar postos no caminho","url":"./planejar","id":"no-caminho","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]},
     {"name":"Encontrar postos","short_name":"Postos","description":"Abrir a busca de postos","url":"./postos?q=postos","id":"postos","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]},
-    {"name":"Perto de mim","short_name":"Perto","description":"Abrir a busca de postos usando sua localização quando disponível","url":"./postos?q=postos%20pr%C3%B3ximos","id":"perto","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]},
     {"name":"Mapa de postos","short_name":"Mapa","description":"Abrir o mapa de postos","url":"./postos?q=postos&view=map","id":"mapa","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]},
-    {"name":"Salvos neste aparelho","short_name":"Salvos","description":"Abrir favoritos e rotas armazenados neste dispositivo","url":"./salvos","id":"salvos","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]}
+    {"name":"Salvos neste aparelho","short_name":"Salvos","description":"Abrir favoritos e rotas armazenados neste dispositivo","url":"./salvos","id":"salvos","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]},
+    {"name":"Calculadora","short_name":"Calculadora","description":"Calcular custo de viagem e relação gasolina e etanol","url":"./ferramentas","id":"ferramentas","icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png"}]}
   ],
   "launch_handler":{"client_mode":"navigate-existing"}
 }
