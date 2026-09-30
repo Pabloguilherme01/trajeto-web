@@ -373,6 +373,7 @@ export default function Stations() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 flex-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
                         {station.address && <button type="button" onClick={() => void copyAddress(station)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar endereço</button>}
+                        <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web", "_blank", "noopener,noreferrer")} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF]">Verificar situação na ANP</button>
                       </div>
                       <div className="mt-2 flex items-center justify-between gap-2 text-[0.5rem] text-white/25">
                         <span>{station.neighborhood ?? "Bairro não consolidado"}</span>
