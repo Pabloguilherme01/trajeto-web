@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsSearchUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -15,6 +15,16 @@ import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const toRad = (value: number) => value * Math.PI / 180;
+  const earthKm = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * earthKm * Math.asin(Math.sqrt(a));
+}
 
 function isBroadAguasLindasQuery(value: string) {
   const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -41,6 +51,9 @@ export default function Stations() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [directorySearch, setDirectorySearch] = useState("");
+  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
@@ -103,6 +116,47 @@ export default function Stations() {
     }
     return cards;
   }, [aguasLindasCatalog, anpStations]);
+
+  const directoryCardsFiltered = useMemo(() => {
+    const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const matches = directoryCards.filter(item => {
+      const text = [
+        item.local?.displayName,
+        item.local?.legalName,
+        item.local?.cnpj,
+        item.local?.neighborhood,
+        item.local?.address,
+        item.local?.brand,
+        item.anp?.razaoSocial,
+        item.anp?.cnpj,
+        item.anp?.bairro,
+        item.anp?.endereco,
+        item.anp?.distribuidora,
+      ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return !normalized || text.includes(normalized);
+    });
+
+    return [...matches].sort((a, b) => {
+      const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
+      if (directorySort === "distance" && userCoords) {
+        const getCoords = (item: typeof directoryCards[number]) => {
+          const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
+          const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
+          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+        };
+        const aCoords = getCoords(a);
+        const bCoords = getCoords(b);
+        const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
+        const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
+        return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      }
+      if (directorySort === "brand") {
+        return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
+          stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      }
+      return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+    });
+  }, [directoryCards, directorySearch, directorySort, userCoords]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -314,8 +368,8 @@ export default function Stations() {
   };
 
   const useNearby = () => {
-    if (!online || !navigator.geolocation || locating) {
-      if (!online) toast.message("Sem internet. Uma nova busca por perto precisa de conexão.");
+    if (!navigator.geolocation || locating) {
+      toast.message("Este navegador não disponibilizou a localização.");
       return;
     }
     setLocating(true);
@@ -323,6 +377,9 @@ export default function Stations() {
       position => {
         setLocating(false);
         rememberIntent("nearby");
+        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserCoords(coords);
+        setShowMap(true);
         setNearby(true);
         setOnlyOpen(false);
         setNeighborhoodFilter("all");
@@ -331,10 +388,6 @@ export default function Stations() {
         setVerifiedOnly(false);
         setMappedOnly(false);
         vibration(18);
-        if (staticRuntime) {
-          window.location.assign(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude));
-          return;
-        }
         setQuery("postos");
         setInput("postos próximos");
         setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
@@ -345,6 +398,44 @@ export default function Stations() {
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
+  };
+
+  const handleMapStationSelect = (station: StationMapItem) => {
+    const cnpj = station.cnpj?.trim();
+    if (cnpj) {
+      document.getElementById("posto-" + encodeURIComponent(cnpj))?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
+  const saveMapOffline = () => {
+    if (!mapStations.length) {
+      toast.message("Ainda não há coordenadas suficientes para salvar o mapa.");
+      return;
+    }
+    const saved = cacheOfflineMapStations(mapStations);
+    toast.message(saved ? `Mapa salvo neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar o mapa local.");
+  };
+
+  const refreshStationData = async () => {
+    try {
+      if (staticRuntime) {
+        const response = await fetch(appUrl("/data/aguas-lindas-anp.json?refresh=" + Date.now()), { cache: "no-store" });
+        if (!response.ok) throw new Error("snapshot indisponível");
+        const payload = await response.json() as { data?: unknown[]; retrievedAt?: string };
+        const rows = (payload.data ?? [])
+          .map(item => item && typeof item === "object" ? normalizeAnpFuelRow(item as Record<string, unknown>) : null)
+          .filter((row): row is AnpFuelRow => Boolean(row));
+        if (!rows.length) throw new Error("snapshot vazio");
+        setStaticAnpRows(rows);
+        setStaticAnpRetrievedAt(payload.retrievedAt ?? new Date().toISOString());
+        cacheOfflineAnpSnapshot(rows, payload.retrievedAt ?? null);
+      } else {
+        await anpLiveQuery.refetch();
+      }
+      toast.message("Dados oficiais atualizados.");
+    } catch {
+      toast.error("Não foi possível atualizar agora. O último cache continua disponível.");
+    }
   };
 
   const copyCnpj = async (cnpj: string) => {
@@ -625,7 +716,11 @@ export default function Stations() {
                 {showMap && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="h-[min(68vh,620px)]">
-                      <StationMap stations={mapStations} showTraffic />
+                      <StationMap
+                        stations={mapStations}
+                        showTraffic={online}
+                        onSelectStation={handleMapStationSelect}
+                      />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">
                       <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
@@ -711,7 +806,10 @@ export default function Stations() {
                   <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-white/30">Referência municipal de preços</p>
                   <p className="mt-1 text-[0.56rem] text-white/45">{AGUAS_LINDAS_PRICE_REFERENCE.period} · ANP · não é preço individual em tempo real</p>
                 </div>
-                <span className="text-[0.46rem] font-black text-white/25">amostra municipal</span>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={saveMapOffline} className="min-h-9 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-[0.48rem] font-black text-white/55">Salvar mapa offline</button>
+                  <button type="button" onClick={() => void refreshStationData()} className="min-h-9 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-[0.48rem] font-black text-[#9FEFFF]">Atualizar</button>
+                </div>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-[0.52rem] text-white/45 sm:grid-cols-3">
                 <span>Gasolina <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
@@ -731,13 +829,19 @@ export default function Stations() {
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCards.map((item, index) => (
+              {directoryCardsFiltered.map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
                   index={index + 1}
                   local={item.local}
                   anp={item.anp}
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
+                  distanceKm={(() => {
+                    if (!userCoords) return null;
+                    const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
+                    const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
+                    return Number.isFinite(lat) && Number.isFinite(lng) ? haversineKm(userCoords.lat, userCoords.lng, lat, lng) : null;
+                  })()}
                   onToggleSaved={item.local || item.anp ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
