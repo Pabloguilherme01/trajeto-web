@@ -19,6 +19,7 @@ const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
 const Help = lazy(() => import("./pages/Help"));
 const Tools = lazy(() => import("./pages/Tools"));
+const Legal = lazy(() => import("./pages/Legal"));
 const Explore = lazy(() => import("./pages/Explore"));
 
 
@@ -60,6 +61,9 @@ function Router() {
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/ferramentas" component={Tools} />
+          <Route path="/transparencia" component={Legal} />
+          <Route path="/privacidade"><Legal defaultSection="privacy" /></Route>
+          <Route path="/termos"><Legal defaultSection="terms" /></Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
