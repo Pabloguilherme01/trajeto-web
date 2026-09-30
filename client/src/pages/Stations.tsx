@@ -168,7 +168,7 @@ export default function Stations() {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -991,7 +991,7 @@ export default function Stations() {
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
                   prices={pricesByCnpj.get(item.key) ?? []}
                   catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
-                  distanceKm={(() => {}
+                  distanceKm={(() => {
                     if (!userCoords) return null;
                     const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
                     const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
