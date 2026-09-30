@@ -1,6 +1,7 @@
 import { AlertTriangle, Home, RotateCcw } from "lucide-react";
 import { Component, type ReactNode } from "react";
 import { Link } from "wouter";
+import { appUrl } from "@/lib/appUrl";
 
 interface Props {
   children: ReactNode;
@@ -37,7 +38,7 @@ class ErrorBoundary extends Component<Props, State> {
               <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-5 py-2.5 font-bold text-[#0B1014] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DE3FF]">
                 <RotateCcw size={16} aria-hidden="true" /> Recarregar
               </button>
-              <Link href="/" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-5 py-2.5 font-bold text-white transition hover:border-[#3DE3FF] hover:text-[#3DE3FF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DE3FF]">
+              <Link href={appUrl("/")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-5 py-2.5 font-bold text-white transition hover:border-[#3DE3FF] hover:text-[#3DE3FF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DE3FF]">
                 <Home size={16} aria-hidden="true" /> Voltar ao início
               </Link>
             </div>
