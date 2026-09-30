@@ -8,7 +8,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
-import MobileQuickActions from "./components/MobileQuickActions";
 import MobileBottomNav from "./components/MobileBottomNav";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -81,7 +80,6 @@ export default function App() {
           <Toaster />
           <InstallAppPrompt />
           <PwaUpdatePrompt />
-          <MobileQuickActions />
           <MobileBottomNav />
           <AccessibilityPanel />
           <SiteNavigation />
