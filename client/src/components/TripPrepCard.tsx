@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
-import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
+import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
 const KEY = "trajeto-trip-checklist";
 
@@ -82,7 +82,9 @@ export default function TripPrepCard() {
     };
   }, []);
 
-  const localRouteReady = Boolean(latestOfflineRoute);
+  const localRouteAvailable = Boolean(latestOfflineRoute);
+  const routeNeedsReview = Boolean(latestOfflineRoute && isOfflineRouteStale(latestOfflineRoute.savedAt));
+  const localRouteReady = localRouteAvailable && !routeNeedsReview;
   const hasTrip = Boolean(lastTrip);
   const activeOfflineDestination = !online && latestOfflineRoute ? latestOfflineRoute.destination : null;
   const toggle = (id: string) => setChecked(current => ({ ...current, [id]: !current[id] }));
@@ -121,7 +123,7 @@ export default function TripPrepCard() {
         <div className="min-w-0">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#3DE3FF]">Antes de sair</p>
           <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em]">{online ? "Deixe a próxima viagem pronta." : latestOfflineRoute ? "Sua viagem continua pronta." : "Prepare uma rota para usar offline."}</h2>
-          <p className="mt-2 text-xs leading-relaxed text-[#8FA3AC]">{online ? `${progress}/${defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.` : latestOfflineRoute ? "A rota salva pode ser reaberta neste aparelho sem recalcular." : "Sem uma rota salva, o modo offline não consegue preparar uma nova viagem."}</p>
+          <p className="mt-2 text-xs leading-relaxed text-[#8FA3AC]">{online ? `${progress}/${defaults.length} itens preparados. O Trajeto reconhece o que já está pronto neste aparelho.` : latestOfflineRoute ? (routeNeedsReview ? "A rota salva continua acessível, mas está antiga e deve ser revisada antes de sair." : "A rota salva pode ser reaberta neste aparelho sem recalcular.") : "Sem uma rota salva, o modo offline não consegue preparar uma nova viagem."}</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><div className="h-full rounded-full bg-[#3DE3FF] transition-all" style={{ width: `${(progress / defaults.length) * 100}%` }} /></div>
         </div>
       </div>
@@ -136,7 +138,7 @@ export default function TripPrepCard() {
           <Smartphone className="size-4 text-[#3DE3FF]" />
           <p className="mt-2 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#8FA3AC]">Rotas locais</p>
           <p className="mt-1 text-xs font-extrabold">{storageError ? "Armazenamento indisponível" : savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas")}</p>
-          {latestOfflineRoute && !storageError && <p className="mt-1 text-[0.55rem] font-semibold text-[#8FA3AC]">{formatRouteAge(latestOfflineRoute.savedAt)} · referência local</p>}
+          {latestOfflineRoute && !storageError && <p className={routeNeedsReview ? "mt-1 text-[0.55rem] font-bold text-[#FFD66B]" : "mt-1 text-[0.55rem] font-semibold text-[#8FA3AC]"}>{formatRouteAge(latestOfflineRoute.savedAt)} · {routeNeedsReview ? "revisar antes de sair" : "referência local"}</p>}
         </div>
       </div>
 
