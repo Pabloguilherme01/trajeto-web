@@ -21,7 +21,8 @@
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "sync:anp:aguas-lindas": "node scripts/sync-anp-aguas-lindas.mjs",
     "prebuild": "node scripts/generate-pwa-icons.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "prebuild:client": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
