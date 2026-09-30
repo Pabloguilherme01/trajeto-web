@@ -7,7 +7,6 @@ import { normalizePlaceSearchText } from "@/lib/placeSearch";
 import { rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { searchOfflineDestinations } from "@/lib/offlineDestinations";
 import { vibration } from "@/lib/mobileTools";
-import VoiceSearchButton from "@/components/VoiceSearchButton";
 
 type Props = { onMessage?: (message: string) => void };
 
@@ -88,7 +87,6 @@ export default function QuickResolver({ onMessage }: Props) {
             placeholder="hospital perto do Centro, posto, Vapt Vupt…"
             enterKeyHint="search"
           />
-          <VoiceSearchButton onResult={value => { setInput(value); go(value); }} />
           <button type="button" onClick={() => go(input)} className="mobile-action-icon border-0 bg-transparent text-[#C7FF3C]" aria-label="Resolver busca">
             <ArrowRight className="size-4" />
           </button>
