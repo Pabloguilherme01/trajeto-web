@@ -1,10 +1,10 @@
-import { Bookmark, Fuel, HelpCircle, Home, Navigation } from "lucide-react";
+import { Bookmark, Compass, Fuel, HelpCircle, Home, Navigation } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
 const items = [
-  { href: "/", label: "Início", icon: Home, primary: false },
-  { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
+  { href: "/", label: "Início", icon: Home, primary: false },  { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
+  { href: "/mapa", label: "Mapa", icon: Compass, primary: false },
   { href: "/postos", label: "Postos", icon: Fuel, primary: false },
   { href: "/salvos", label: "Salvos", icon: Bookmark, primary: false },
   { href: "/ajuda", label: "Ajuda", icon: HelpCircle, primary: false },
