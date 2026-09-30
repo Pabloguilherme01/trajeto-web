@@ -247,7 +247,7 @@ export function StationDirectoryCard({
       <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
-          <span className="text-[0.48rem] font-bold text-white/25">sem conta no Trajeto</span>
+          <span className="text-[0.48rem] font-bold text-white/25">sem cadastro no Trajeto</span>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button type="button" onClick={() => window.open(uberUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">Uber</button>
@@ -259,7 +259,7 @@ export function StationDirectoryCard({
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Contato e redes</p>
-          <span className="text-[0.48rem] font-bold text-white/20">sem login</span>
+          <span className="text-[0.48rem] font-bold text-white/20">sem cadastro</span>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-[0.55rem] font-black text-white/70">Instagram</button>
