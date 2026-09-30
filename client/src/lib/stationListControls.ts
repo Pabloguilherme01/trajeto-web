@@ -1,6 +1,6 @@
 export type StationListItem = { name: string; isOpen: boolean | null; distanceMeters: number | null };
 export type StationHoursFilter = "all" | "open" | "closed" | "unknown";
-export type StationSort = "distance" | "relevance" | "brand" | "hours";
+export type StationSort = "distance" | "relevance" | "brand" | "hours" | "best-value";
 
 export function inferredBrand(name: string) {
   const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -42,4 +42,45 @@ export function applyStationSearchPreferences(preferences: StationSearchPreferen
     resultsPerView,
     visibleResultCount: resultsPerView,
   };
+}
+
+
+export type StationDecisionInput = {
+  distanceKm: number | null;
+  price: number | null;
+  isOpen: boolean | null;
+  hasAnp: boolean;
+};
+
+export function compareBestValue(a: StationDecisionInput, b: StationDecisionInput) {
+  const valid = (value: number | null) => value != null && Number.isFinite(value) && value > 0;
+  const aPrice = valid(a.price) ? a.price as number : Number.POSITIVE_INFINITY;
+  const bPrice = valid(b.price) ? b.price as number : Number.POSITIVE_INFINITY;
+  const aDistance = valid(a.distanceKm) ? a.distanceKm as number : Number.POSITIVE_INFINITY;
+  const bDistance = valid(b.distanceKm) ? b.distanceKm as number : Number.POSITIVE_INFINITY;
+
+  const prices = [aPrice, bPrice].filter(Number.isFinite);
+  const distances = [aDistance, bDistance].filter(Number.isFinite);
+  const minPrice = prices.length ? Math.min(...prices) : 1;
+  const minDistance = distances.length ? Math.min(...distances) : 1;
+
+  const score = (item: StationDecisionInput) => {
+    const pricePart = valid(item.price) ? ((item.price as number) / minPrice) * 0.58 : 1.35;
+    const distancePart = valid(item.distanceKm) ? ((item.distanceKm as number) / minDistance) * 0.32 : 1.15;
+    const openPart = item.isOpen === true ? -0.12 : item.isOpen === false ? 0.12 : 0.04;
+    const anpPart = item.hasAnp ? -0.03 : 0.03;
+    return pricePart + distancePart + openPart + anpPart;
+  };
+
+  return score(a) - score(b);
+}
+
+export function stationSortLabel(sortBy: StationSort) {
+  return {
+    distance: "Mais perto",
+    relevance: "Relevância",
+    brand: "Bandeira",
+    hours: "Funcionamento",
+    "best-value": "Melhor combinação",
+  }[sortBy];
 }
