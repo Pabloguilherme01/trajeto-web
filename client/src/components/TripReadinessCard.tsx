@@ -16,6 +16,15 @@ function routeAge(savedAt: string) {
   return `${Math.floor(hours / 24)}d`;
 }
 
+function connectionDetail(online: boolean) {
+  if (!online) return { label: "offline", detail: "Sem internet · use uma rota salva como contingência." };
+  if (typeof navigator === "undefined") return { label: "online", detail: "Conexão disponível para consultas atualizadas." };
+  const connection = (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } }).connection;
+  if (!connection?.effectiveType) return { label: "online", detail: "Conexão disponível para consultas atualizadas." };
+  const type = connection.effectiveType.toUpperCase();
+  return { label: type, detail: connection.saveData ? `Conexão ${type} · economia de dados ativada.` : `Conexão ${type} · consultas atualizadas disponíveis.` };
+}
+
 function fuelDetail(vehicle: MobileVehicle | null) {
   if (!vehicle) return { ok: false, detail: "Cadastre o veículo para calcular combustível." };
   if (vehicle.fuel && vehicle.consumption > 0) return { ok: true, detail: `${vehicle.consumption.toLocaleString("pt-BR")} km/L · ${vehicle.fuel}` };
@@ -60,10 +69,12 @@ export default function TripReadinessCard() {
   }, []);
 
   const latestRoute = routes[0] ?? null;
+  const freshOfflineRoutes = routes.filter(route => !isOfflineRouteStale(route.savedAt)).length;
+  const connection = connectionDetail(online);
   const maintenanceWarning = maintenance.some(item => getMaintenanceStatus(item.dueDate) !== "ok");
   const fuel = fuelDetail(vehicle);
   const items = useMemo<Item[]>(() => [
-    { label: "Conexão", detail: online ? "Consultas atualizadas disponíveis." : latestRoute ? "Sem internet · rota local disponível." : "Sem internet e sem rota local.", ok: online || Boolean(latestRoute), warn: !online && !latestRoute },
+    { label: "Conexão", detail: online ? connection.detail : latestRoute ? `${connection.detail} ${freshOfflineRoutes} rota${freshOfflineRoutes === 1 ? "" : "s"} recente${freshOfflineRoutes === 1 ? "" : "s"}.` : connection.detail, ok: online || Boolean(latestRoute), warn: !online && !latestRoute },
     { label: "Rota", detail: latestRoute ? (isOfflineRouteStale(latestRoute.savedAt) ? `salva há ${routeAge(latestRoute.savedAt)} · revisar antes de sair` : `salva há ${routeAge(latestRoute.savedAt)}`) : lastTrip ? "Última viagem registrada, mas não há cópia offline." : "Nenhuma viagem preparada.", ok: Boolean(latestRoute) && !isOfflineRouteStale(latestRoute.savedAt), warn: Boolean(latestRoute && isOfflineRouteStale(latestRoute.savedAt)) },
     { label: "Veículo", detail: vehicle ? vehicle.name || `${vehicle.fuel} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Nenhum veículo cadastrado.", ok: Boolean(vehicle) },
     { label: "Manutenção", detail: maintenance.length ? (maintenanceWarning ? "Há item vencido ou próximo do vencimento." : "Itens cadastrados dentro do prazo.") : "Nenhum prazo de manutenção cadastrado.", ok: maintenance.length > 0 && !maintenanceWarning, warn: maintenanceWarning },
@@ -96,9 +107,9 @@ export default function TripReadinessCard() {
           {routineOffline && <p className={"mt-1 text-[0.55rem] font-bold " + (isOfflineRouteStale(routineOffline.savedAt) ? "text-amber-200" : "text-[#C7FF3C]")}>{isOfflineRouteStale(routineOffline.savedAt) ? "Cópia offline antiga · revisar antes de depender dela." : "Cópia offline disponível para contingência."}</p>}
         </div>
       )}
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible">
         {items.map(item => (
-          <div key={item.label} className={"rounded-2xl border p-3 " + (item.ok ? "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04]" : item.warn ? "border-[#FFC928]/20 bg-[#FFC928]/[.05]" : "border-white/8 bg-white/[.025]")}>
+          <div key={item.label} className={"min-w-[10.5rem] snap-start rounded-2xl border p-3 sm:min-w-0 " + (item.ok ? "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04]" : item.warn ? "border-[#FFC928]/20 bg-[#FFC928]/[.05]" : "border-white/8 bg-white/[.025]")}>
             {item.label === "Conexão" ? <CloudOff className="size-4 text-[#3DE3FF]" /> : item.label === "Veículo" ? <ShieldCheck className="size-4 text-[#3DE3FF]" /> : item.label === "Manutenção" ? <Wrench className="size-4 text-[#C7FF3C]" /> : item.label === "Combustível" ? <Fuel className="size-4 text-[#C7FF3C]" /> : <CheckCircle2 className="size-4 text-[#C7FF3C]" />}
             <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[.1em] text-white/50">{item.label}</p>
             <p className="mt-1 text-[0.65rem] font-bold leading-relaxed text-white/80">{item.detail}</p>
