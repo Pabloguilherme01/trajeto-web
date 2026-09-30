@@ -167,22 +167,44 @@ if (officialCsvRows.length > 0) {
 }
 
 await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
+let previousSnapshot = null;
+try {
+  previousSnapshot = JSON.parse(await readFile(OUTPUT, "utf8"));
+} catch {
+  previousSnapshot = null;
+}
+
 if (rows.length === 0) {
-  try {
-    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
-    const previousRows = extractRows(previous?.data ?? previous);
-    if (previousRows.length > 0) {
-      console.warn(JSON.stringify({
-        warning: "ANP retornou zero registros; snapshot anterior preservado.",
-        previousRawRows: previousRows.length,
-        output: OUTPUT.pathname,
-      }));
-      process.exit(0);
-    }
-  } catch {
-    // Não existe snapshot anterior utilizável; falha para não publicar uma base vazia.
+  const previousRows = extractRows(previousSnapshot?.data ?? previousSnapshot);
+  if (previousRows.length > 0) {
+    console.warn(JSON.stringify({
+      warning: "ANP retornou zero registros; snapshot anterior preservado.",
+      previousRawRows: previousRows.length,
+      output: OUTPUT.pathname,
+    }));
+    process.exit(0);
   }
   console.warn("ANP sem dados utilizáveis. O snapshot não será substituído por um arquivo vazio.");
+  process.exit(0);
+}
+
+const currentStations = new Set(
+  rows
+    .map(row => String(row.cnpj ?? row.CNPJ ?? "").replace(/\D/g, ""))
+    .filter(Boolean),
+).size;
+const previousStations = new Set(
+  extractRows(previousSnapshot?.data ?? previousSnapshot)
+    .map(row => String(row.cnpj ?? row.CNPJ ?? "").replace(/\D/g, ""))
+    .filter(Boolean),
+).size;
+
+if (previousStations >= 10 && currentStations < previousStations * 0.5) {
+  console.warn(JSON.stringify({
+    warning: "Queda anormal na cobertura ANP; snapshot anterior preservado.",
+    previousStations,
+    currentStations,
+  }));
   process.exit(0);
 }
 
