@@ -158,7 +158,7 @@ export function StationDirectoryCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[0.48rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
+              <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
               <h3 className="mt-1 text-base font-black leading-tight text-white">{stationName}</h3>
               <p className="mt-1 text-[0.56rem] leading-relaxed text-white/35">{legalName}</p>
             </div>
@@ -168,13 +168,13 @@ export function StationDirectoryCard({
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">{catalogStatus}</span>
-            {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/35">sem cruzamento ANP</span>}
-            <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/45">{distributor}</span>
-            {anp?.products?.length ? <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">ANP enriquecida</span> : null}
-            {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">coordenada</span>}
-            {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
-            {status && <span className={"rounded-full border px-2 py-1 text-[0.45rem] font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
+            <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.50rem] font-black text-[#D9FF91]">{catalogStatus}</span>
+            {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.50rem] font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-[0.50rem] font-black text-white/35">sem cruzamento ANP</span>}
+            <span className="rounded-full border border-white/8 px-2 py-1 text-[0.50rem] font-black text-white/45">{distributor}</span>
+            {anp?.products?.length ? <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.50rem] font-black text-[#D9FF91]">ANP enriquecida</span> : null}
+            {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.50rem] font-black text-[#D9FF91]">coordenada</span>}
+            {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.50rem] font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
+            {status && <span className={"rounded-full border px-2 py-1 text-[0.50rem] font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
           </div>
         </div>
       </div>
@@ -190,12 +190,12 @@ export function StationDirectoryCard({
             )}
           </div>
           <div className="text-right">
-            <p className="text-[0.48rem] font-black text-white/35">{primaryPrice ? primaryPrice.produto : "gasolina comum"}</p>
-            <p className="mt-1 text-[0.48rem] font-bold text-white/25">{priceDate ? "coleta " + priceDate : "sem coleta individual"}</p>
+            <p className="text-[0.52rem] font-black text-white/35">{primaryPrice ? primaryPrice.produto : "gasolina comum"}</p>
+            <p className="mt-1 text-[0.52rem] font-bold text-white/25">{priceDate ? "coleta " + priceDate : "sem coleta individual"}</p>
           </div>
         </div>
         {prices.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{prices.slice(0, 5).map(price => <span key={price.productKey + price.salePrice} className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.47rem] font-black text-white/55">{price.produto}: {price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/{price.unit}</span>)}</div>}
-        <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
+        <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
       </section>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
@@ -228,19 +228,19 @@ export function StationDirectoryCard({
       <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
-          <span className="text-[0.48rem] font-bold text-white/25">sem conta no Trajeto</span>
+          <span className="text-[0.52rem] font-bold text-white/25">sem conta no Trajeto</span>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button type="button" onClick={() => window.open(uberUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">Uber</button>
           <button type="button" onClick={() => window.open(nineNineUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#FF6B35]/20 bg-[#FF6B35]/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">99</button>
         </div>
-        <p className="mt-2 text-[0.48rem] leading-relaxed text-white/30">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
+        <p className="mt-2 text-[0.52rem] leading-relaxed text-white/30">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
       </div>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Contato e redes</p>
-          <span className="text-[0.48rem] font-bold text-white/20">sem login</span>
+          <span className="text-[0.52rem] font-bold text-white/20">sem login</span>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-[0.55rem] font-black text-white/70">Instagram</button>
@@ -269,20 +269,20 @@ export function StationDirectoryCard({
       </div>
       <div className="mt-2 rounded-xl border border-[#3DE3FF]/12 bg-[#3DE3FF]/[.025] p-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">ANP com VC · consulta complementar</p>
-          <span className="text-[0.45rem] font-bold text-white/25">oficial</span>
+          <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">ANP com VC · consulta complementar</p>
+          <span className="text-[0.50rem] font-bold text-white/25">oficial</span>
         </div>
         <p className="mt-1 text-[0.52rem] leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
         <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
       </div>
-      <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
+      <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/55">
           <span>Todos os dados disponíveis</span>
           <Fuel className="size-4 text-white/25" />
         </summary>
-        <div className="space-y-2 border-t border-white/8 px-3 py-3 text-[0.54rem] leading-relaxed text-white/45">
+        <div className="space-y-2 border-t border-white/8 px-3 py-3 text-[0.60rem] leading-relaxed text-white/45">
           <p><strong className="text-white/65">Identidade:</strong> {local?.aliases?.join(" · ") || "sem aliases consolidados"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · identificação:</strong> código SIMP {anp?.codigoSimp || "—"} · autorização {anp?.autorizacao || "—"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · datas:</strong> publicação {formatDate(anp?.dataPublicacao)} · vinculação {formatDate(anp?.dataVinculacao)} · obtenção dos dados {formatDate(anp?.dataObtencao)}</p>
@@ -298,13 +298,13 @@ export function StationDirectoryCard({
           <p><strong className="text-white/65">Origem:</strong> {anp?.origemInformacao || "não informada"} · obtido em {formatDate(anp?.dataObtencao)}</p>
           <p><strong className="text-white/65">Geografia:</strong> {coords ? coords.lat.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + coords.lng.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas consolidadas"} · validação {anp?.validacao || "—"} · acurácia {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : "—"} · SRID {anp?.srid || "—"}</p>
           <div className="rounded-xl border border-white/8 bg-black/10 p-2.5">
-            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#87DFF0]">Produtos / tancagem / bicos</p>
+            <p className="font-black uppercase tracking-[.11em] text-[0.50rem] text-[#87DFF0]">Produtos / tancagem / bicos</p>
             {products.length ? products.map((item, productIndex) => (
               <p key={productIndex} className="mt-1">{item.produto || "produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem || ""} · bicos {item.quantidadeBicos ?? "—"} · classe {item.classe || "—"}</p>
             )) : <p className="mt-1">Nenhum produto ANP materializado nesta consulta.</p>}
           </div>
           <div className="rounded-xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.025] p-2.5">
-            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#D9FF91]">Referência secundária de mapas</p>
+            <p className="font-black uppercase tracking-[.11em] text-[0.50rem] text-[#D9FF91]">Referência secundária de mapas</p>
             <p className="mt-1">Telefone {phone || "—"} · nota {local?.mapData?.rating ?? "—"} · avaliações {local?.mapData?.reviewCount ?? "—"} · horário {local?.mapData?.hours || "—"} · bandeira observada {local?.mapData?.observedBrand || "—"}</p>
             <p className="mt-1">Status observado: {statusLabel} · coletado em {formatDate(local?.mapData?.observedAt)}</p>
           </div>
@@ -313,7 +313,7 @@ export function StationDirectoryCard({
           {coords && <p className="text-white/25">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
         </div>
       </details>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-[0.48rem] text-white/25">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-[0.52rem] text-white/25">
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
         <span>Sem conta · uso direto</span>
       </div>
