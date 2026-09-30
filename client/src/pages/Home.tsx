@@ -5,6 +5,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 import QuickResolver from "@/components/QuickResolver";
+import VoiceSearchButton from "@/components/VoiceSearchButton";
 import { shareText, vibration } from "@/lib/mobileTools";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
@@ -134,6 +135,7 @@ export default function Home() {
                 autoComplete="street-address"
                 enterKeyHint="search"
               />
+              <VoiceSearchButton onResult={value => { setInput(value); searchPlaces(value); }} />
               <button type="submit" disabled={input.trim().length < 3} className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] disabled:opacity-25" aria-label="Pesquisar na cidade">
                 <ArrowRight className="size-5" />
               </button>
