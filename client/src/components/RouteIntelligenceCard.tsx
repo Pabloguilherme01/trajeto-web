@@ -226,6 +226,23 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </div>
       )}
 
+      {data && main && (
+        <div className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3.5">
+          <div className="flex items-start gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Route className="size-4" /></span>
+            <div className="min-w-0">
+              <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Decisão da viagem</p>
+              <p className="mt-1 text-sm font-black">{trafficDelay != null && trafficDelay > 120 ? "Reserve margem: o trânsito está adicionando tempo à rota." : totalCost(main) != null ? "Custo estimado do percurso: " + totalCost(main)!.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) + "." : toll != null ? "Pedágio informado; complete o combustível para estimar o custo total." : "Confira tempo, distância e dados de custo antes de sair."}</p>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[0.52rem] font-bold text-white/45">
+                <span className="rounded-full bg-white/[.05] px-2 py-1">{formatDuration(main.durationSeconds)} de percurso</span>
+                {trafficDelay != null && trafficDelay > 0 && <span className="rounded-full bg-white/[.05] px-2 py-1">+{formatDuration(trafficDelay)} trânsito</span>}
+                {toll != null && <span className="rounded-full bg-white/[.05] px-2 py-1">pedágio {toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" })}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {data && <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
         <div className="flex items-center justify-between gap-3">
           <div><p className="text-xs font-black">Custo da viagem</p><p className="mt-1 text-[0.58rem] text-white/40">{vehicle ? `${vehicle.name} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Cadastre o veículo para calcular combustível."}</p></div>
