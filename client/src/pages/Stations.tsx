@@ -85,6 +85,7 @@ export default function Stations() {
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
+  const activeLocalFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly);
 
   const searchedAt = stationPages.data?.pages[0]?.queriedAt
     ? new Date(stationPages.data.pages[0].queriedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
@@ -121,6 +122,14 @@ export default function Stations() {
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
   }, [query]);
+
+  const resetLocalFilters = () => {
+    setNeighborhoodFilter("all");
+    setBrandFilter("all");
+    setAddressOnly(false);
+    setVerifiedOnly(false);
+    setLocalVisibleCount(12);
+  };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -337,7 +346,11 @@ export default function Stations() {
               <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
             </div>
 
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <p className="text-[0.55rem] font-black uppercase tracking-[.12em] text-white/30">Filtros locais{activeLocalFilterCount ? " · " + activeLocalFilterCount + " ativo(s)" : ""}</p>
+              {activeLocalFilterCount > 0 && <button type="button" onClick={resetLocalFilters} className="min-h-10 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-black text-white/55">Limpar filtros</button>}
+            </div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <label className="min-w-0 flex-1">
                 <span className="sr-only">Filtrar diretório por bairro</span>
                 <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none">
@@ -414,7 +427,11 @@ export default function Stations() {
               </div>
               </>
             ) : (
-              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Nenhum cadastro local corresponde à busca “{query}” nesse bairro.</div>
+              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-4" role="status" aria-live="polite">
+                <p className="text-xs font-black text-white/70">Nenhum cadastro corresponde aos filtros atuais.</p>
+                <p className="mt-1 text-[0.65rem] leading-relaxed text-white/35">Tente remover bairro, bandeira ou a exigência de endereço para ampliar os resultados.</p>
+                {activeLocalFilterCount > 0 && <button type="button" onClick={resetLocalFilters} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">Limpar filtros</button>}
+              </div>
             )}
           </section>
         )}
