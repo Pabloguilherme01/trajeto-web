@@ -6,6 +6,7 @@ import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { findNearbyStations, type NearbyStation } from "@/lib/stationNearby";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
@@ -74,6 +75,9 @@ export default function Stations() {
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [fuelFilter, setFuelFilter] = useState<"all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv">("all");
   const [withIndividualPriceOnly, setWithIndividualPriceOnly] = useState(false);
+  const [nearbyStations, setNearbyStations] = useState<NearbyStation[]>([]);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [nearbyError, setNearbyError] = useState<string | null>(null);
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -143,6 +147,29 @@ export default function Stations() {
     })),
     [directoryCards, pricesByCnpj],
   );
+
+  const loadNearbyStations = async () => {
+    if (!userCoords) {
+      setNearbyError("Ative a localização para buscar postos próximos.");
+      return;
+    }
+    const place = (window as Window & { google?: { maps?: { places?: { Place?: { searchNearby?: unknown } } } } }).google?.maps?.places?.Place;
+    if (typeof place?.searchNearby !== "function") {
+      setNearbyError("Busca de proximidade do Google Maps indisponível neste momento.");
+      return;
+    }
+    setNearbyLoading(true);
+    setNearbyError(null);
+    try {
+      const searchNearby = place.searchNearby as (request: unknown) => Promise<{ places?: unknown[] }>;
+      const result = await findNearbyStations({ searchNearby: searchNearby.bind(place) as never }, userCoords);
+      setNearbyStations(result);
+    } catch {
+      setNearbyError("Não foi possível carregar os postos próximos.");
+    } finally {
+      setNearbyLoading(false);
+    }
+  };
 
   const directoryDistanceByKey = useMemo(() => {
     if (!userCoords) return new Map<string, number>();
@@ -1207,6 +1234,18 @@ export default function Stations() {
                 {stationPages.isFetchingNextPage ? "Carregando mais postos…" : "Mostrar mais postos"}
               </button>
             )}
+
+            <section className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/15 bg-[#121B22] p-4" aria-label="Postos próximos">
+              <div className="flex items-center justify-between gap-3">
+                <div><p className="text-[0.55rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Perto de você</p><h3 className="mt-1 text-lg font-black">Postos próximos</h3></div>
+                <button type="button" onClick={() => void loadNearbyStations()} disabled={nearbyLoading} className="min-h-10 rounded-xl bg-[#C7FF3C] px-3 text-[0.55rem] font-black text-[#0B1014]">{nearbyLoading ? "Buscando…" : "Atualizar"}</button>
+              </div>
+              {nearbyError && <p className="mt-3 text-[0.55rem] text-[#FFB4A8]">{nearbyError}</p>}
+              {!nearbyError && nearbyStations.length > 0 && <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {nearbyStations.slice(0, 6).map(station => <a key={station.id} href={station.mapsUrl ?? buildGoogleMapsSearchUrl(station.name)} target="_blank" rel="noreferrer" className="rounded-xl bg-[#0B1014] p-3 transition-colors hover:bg-white/[.04]"><span className="block truncate text-xs font-black">{station.name}</span><span className="mt-1 block truncate text-[0.53rem] text-white/40">{station.address ?? "Endereço não informado"}</span><span className="mt-2 text-[0.52rem] font-bold text-[#3DE3FF]">Abrir no Google Maps</span></a>)}
+              </div>}
+              {!nearbyError && nearbyStations.length === 0 && <p className="mt-3 text-[0.55rem] leading-relaxed text-white/30">Consulte referências próximas no Google Maps. Elas complementam o cadastro ANP e não entram automaticamente no catálogo oficial.</p>}
+            </section>
 
             {compared.length > 0 && (
               <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#121B22] p-4" aria-label="Comparar postos">
