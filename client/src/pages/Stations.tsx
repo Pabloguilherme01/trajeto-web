@@ -8,6 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import { AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -35,6 +36,7 @@ export default function Stations() {
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
   const staticRuntime = isGitHubPagesRuntime();
+  const localDirectory = useMemo(() => staticRuntime && !showSavedOnly ? searchAguasLindasStations(query) : [], [query, showSavedOnly, staticRuntime]);
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     hasCoordinates ? { query, lat, lng } : { query },
@@ -232,6 +234,71 @@ export default function Stations() {
           </section>
         )}
 
+        {staticRuntime && !showSavedOnly && (
+          <section className="mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="local-directory-title">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório local</p>
+                <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
+                <p className="mt-2 text-[0.66rem] leading-relaxed text-white/45">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
+              </div>
+              <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">31 base</span>
+            </div>
+
+            {localDirectory.length ? (
+              <div className="mt-4 space-y-2">
+                {localDirectory.map(station => {
+                  const statusText = station.status === "encerramento_indicado"
+                    ? "operação possivelmente encerrada"
+                    : station.status === "operacao_nao_verificada"
+                      ? "operação não verificada"
+                      : "cadastro ativo";
+                  const statusClass = station.status === "encerramento_indicado"
+                    ? "border-[#FF7D6A]/20 bg-[#FF7D6A]/[.04] text-[#FFC0B7]"
+                    : station.status === "operacao_nao_verificada"
+                      ? "border-[#FFB86B]/20 bg-[#FFB86B]/[.04] text-[#FFD39E]"
+                      : "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] text-[#D9FF91]";
+                  return (
+                    <article key={station.cnpj} className="rounded-[1.25rem] border border-white/8 bg-[#0B1014] p-3.5">
+                      <div className="flex items-start gap-3">
+                        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+                          <Fuel className="size-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="text-sm font-black text-white">{station.displayName}</p>
+                              <p className="mt-1 text-[0.58rem] font-semibold text-white/35">{station.legalName} · CNPJ {station.cnpj}</p>
+                            </div>
+                            <span className={"shrink-0 rounded-full border px-2 py-1 text-[0.46rem] font-black " + statusClass}>{statusText}</span>
+                          </div>
+                          {station.address ? (
+                            <p className="mt-2 text-[0.62rem] leading-relaxed text-white/45">{station.address}</p>
+                          ) : (
+                            <p className="mt-2 text-[0.62rem] leading-relaxed text-white/30">Endereço físico não consolidado nesta coleta.</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
+                        <span className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 px-3 text-center text-[0.54rem] font-bold text-white/35">{station.brand ?? "Bandeira não consolidada"}</span>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Nenhum cadastro local corresponde à busca “{query}”.</div>
+            )}
+          </section>
+        )}
+
+        {staticRuntime && !showSavedOnly && (
+          <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.57rem] leading-relaxed text-white/35">
+            Fonte e natureza do dado: cadastro empresarial público e referências públicas locais. A ANP mantém o cadastro oficial de revendedores autorizados; preços e situação operacional podem mudar e devem ser verificados antes da viagem.
+          </section>
+        )}
+
         {nearby && (
           <section className="mt-3 flex items-start gap-3 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] p-3">
             <MapPin className="mt-0.5 size-4 shrink-0 text-[#3DE3FF]" />
@@ -253,7 +320,7 @@ export default function Stations() {
           </section>
         )}
 
-        {(stations.length > 0 || showSavedOnly) && (
+        {(!staticRuntime && (stations.length > 0 || showSavedOnly)) && (
           <>
             <section className="mt-5 flex items-end justify-between gap-3">
               <div>
