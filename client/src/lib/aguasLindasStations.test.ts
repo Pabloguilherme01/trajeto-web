@@ -19,6 +19,7 @@ describe("diretório de postos de Águas Lindas", () => {
   it("permite localizar por nome, alias ou CNPJ", () => {
     expect(searchAguasLindasStations("ponteio")[0]?.displayName).toContain("Ponteio");
     expect(searchAguasLindasStations("00.375.386/0002-05")[0]?.displayName).toContain("Mizuno");
+    expect(searchAguasLindasStations("Jardim Querência").length).toBeGreaterThan(0);
   });
 
   it("gera um link seguro para consulta do posto no Google Maps", () => {
