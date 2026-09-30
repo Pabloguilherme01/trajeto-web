@@ -28,6 +28,7 @@ type Props = {
   priceFilterAvailable: boolean;
   directoryPriceCount: number;
   verifiedFilterAvailable: boolean;
+  hasUserCoords: boolean;
   onClear: () => void;
 };
 
@@ -35,7 +36,7 @@ export default function StationFiltersSheet({
   open, onClose, fuelOptions, fuelFilter, setFuelFilter, distanceFilter, setDistanceFilter,
   neighborhoodFilter, setNeighborhoodFilter, brandFilter, setBrandFilter, addressOnly, setAddressOnly,
   verifiedOnly, setVerifiedOnly, mappedOnly, setMappedOnly, priceOnly, setPriceOnly, neighborhoods, brands,
-  priceFilterAvailable, directoryPriceCount, verifiedFilterAvailable, onClear,
+  priceFilterAvailable, directoryPriceCount, verifiedFilterAvailable, hasUserCoords, onClear,
 }: Props) {
   if (!open) return null;
   const toggle = (value: boolean, setValue: (next: boolean) => void) => setValue(!value);
@@ -56,9 +57,9 @@ export default function StationFiltersSheet({
             </div>
           </section>
           <section>
-            <p className="text-[0.5rem] font-black uppercase tracking-[.14em] text-white/30">Distância</p>
+            <p className="text-[0.5rem] font-black uppercase tracking-[.14em] text-white/30">Distância {hasUserCoords ? "" : "· GPS necessário"}</p>
             <div className="mt-2 grid grid-cols-4 gap-2">
-              {(["all", 2, 5, 10] as DistanceFilter[]).map(value => { const active = distanceFilter === value; return <button key={String(value)} type="button" aria-pressed={active} onClick={() => setDistanceFilter(value)} className={"min-h-11 rounded-xl border px-2 text-[0.55rem] font-black " + (active ? "border-[#3DE3FF]/25 bg-[#3DE3FF]/10 text-[#C9F7FF]" : "border-white/8 bg-white/[.025] text-white/50")}>{value === "all" ? "Todas" : "Até " + value + " km"}</button>; })}
+              {(["all", 2, 5, 10] as DistanceFilter[]).map(value => { const active = distanceFilter === value; return <button key={String(value)} type="button" aria-pressed={active} onClick={() => setDistanceFilter(value)} disabled={value !== "all" && !hasUserCoords} className={"min-h-11 rounded-xl border px-2 text-[0.55rem] font-black disabled:opacity-25 " + (active ? "border-[#3DE3FF]/25 bg-[#3DE3FF]/10 text-[#C9F7FF]" : "border-white/8 bg-white/[.025] text-white/50")}>{value === "all" ? "Todas" : "Até " + value + " km"}</button>; })}
             </div>
           </section>
           <section className="grid gap-2">
