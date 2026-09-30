@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE,
+  AGUAS_LINDAS_ANP_VERIFIED_COUNT,
   AGUAS_LINDAS_PRICE_REFERENCE,
   AGUAS_LINDAS_STATION_STATS,
   AGUAS_LINDAS_STATIONS,
@@ -12,6 +13,7 @@ import {
 describe("diretório de postos de Águas Lindas", () => {
   it("mantém os 41 cadastros da coleta e referências externas separadas", () => {
     expect(AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE.count).toBe(31);
+    expect(AGUAS_LINDAS_ANP_VERIFIED_COUNT).toBe(33);
     expect(AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average).toBe(6.78);
     expect(AGUAS_LINDAS_STATION_STATS.total).toBe(41);
     expect(AGUAS_LINDAS_STATIONS_COUNT).toBe(41);
