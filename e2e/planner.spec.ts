@@ -51,3 +51,15 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
   await page.getByRole("button", { name: "Ver mapa" }).click();
   await expect(page.getByRole("img", { name: /Prévia offline da rota/ })).toBeVisible();
 });
+
+
+test("planejar: mantém a rota utilizável quando o OSRM está indisponível", async ({ page }) => {
+  await page.route("https://router.project-osrm.org/**", route => route.abort());
+  await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Calcular rota" }).click();
+
+  await expect(page.getByText(/Estimativa local/)).toBeVisible();
+  await expect(page.getByText(/km/).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Google Maps" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Waze" })).toBeVisible();
+});
