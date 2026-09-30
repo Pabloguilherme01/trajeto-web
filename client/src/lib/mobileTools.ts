@@ -185,9 +185,8 @@ export function buildUberRideUrl(destination: string, coordinates?: { lat: numbe
 
 export function build99MobilityUrl(destination: string) {
   const query = destination.trim();
-  return query
-    ? "https://99app.com/?destination=" + encodeURIComponent(query)
-    : "https://99app.com/";
+  void query;
+  return "https://99app.com/";
 }
 
 export function buildMobilityLinks(destination: string, coordinates?: { lat: number; lng: number }) {
