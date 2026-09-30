@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeStops, routeSummary } from "./routePlanner";
+import { normalizeStops, routeCorridorPoints, routeSummary } from "./routePlanner";
 
 describe("routePlanner", () => {
   it("deduplicates real-place results by the Google place identifier", () => {
@@ -10,6 +10,37 @@ describe("routePlanner", () => {
 
     expect(stops).toHaveLength(2);
     expect(stops.map(stop => stop.placeId)).toEqual(["a", "b"]);
+  });
+
+
+  it("extracts intermediate points for corridor searches", () => {
+    const result = {
+      status: "OK",
+      routes: [{
+        summary: "BR-070",
+        overview_polyline: { points: "encoded" },
+        warnings: [],
+        waypoint_order: [],
+        legs: [{
+          distance: { text: "50 km", value: 50000 },
+          duration: { text: "45 min", value: 2700 },
+          start_address: "Origem",
+          end_address: "Destino",
+          start_location: { lat: -15.7, lng: -47.8 },
+          end_location: { lat: -15.8, lng: -47.9 },
+          steps: [
+            { start_location: { lat: -15.70, lng: -47.80 } },
+            { start_location: { lat: -15.71, lng: -47.81 } },
+            { start_location: { lat: -15.72, lng: -47.82 } },
+            { start_location: { lat: -15.73, lng: -47.83 } },
+            { start_location: { lat: -15.74, lng: -47.84 } },
+            { start_location: { lat: -15.75, lng: -47.85 } },
+          ],
+        }],
+      }],
+    };
+
+    expect(routeCorridorPoints(result as never, 4)).toHaveLength(4);
   });
 
   it("normalizes a Google route response into application metrics", () => {
