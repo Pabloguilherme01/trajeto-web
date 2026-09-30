@@ -62,7 +62,7 @@ export default function RecentTripsCard() {
     return () => { active = false; };
   }, [mostUsedTrip?.origin, mostUsedTrip?.destination]);
 
-  if (!trips.length) return null;
+  if (!trips.length || !mostUsedTrip) return null;
 
   const offlineAge = (() => {
     if (!offlineInfo?.savedAt) return null;
