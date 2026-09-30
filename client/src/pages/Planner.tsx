@@ -157,7 +157,15 @@ export default function Planner() {
           }
         }
 
-        if (!resolvedOrigin) throw new Error("Informe a origem ou permita a localização para calcular a rota no próprio Trajeto.");
+        if (!resolvedOrigin) {
+          if (version !== requestVersion.current) return;
+          setFallbackReady(true);
+          setSavedMessage("Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho.");
+          rememberTrip("", to);
+          track("route_open", to);
+          vibration(12);
+          return;
+        }
         const publicRoute = await calculatePublicRoute(resolvedOrigin, to);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute);
