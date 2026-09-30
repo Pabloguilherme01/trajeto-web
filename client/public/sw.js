@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v11";
+const VERSION = "trajeto-v12";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -6,6 +6,7 @@ const MAP_CACHE = VERSION + "-map";
 const STATIC_SHELL = [
   "./",
   "./index.html",
+  "./manifest.json",
   "./site.webmanifest",
   "./favicon.svg",
   "./icon-192.png",
@@ -24,7 +25,7 @@ self.addEventListener("install", event => {
         );
 
         try {
-          const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
+          const response = await fetch("./manifest.json", { cache: "no-store" });
           if (!response.ok) return;
           const manifest = await response.json();
           const assets = collectManifestAssets(manifest);
@@ -32,7 +33,7 @@ self.addEventListener("install", event => {
             assets.map(asset => cache.add(asset).catch(() => undefined))
           );
         } catch {
-          // O shell mínimo continua utilizável mesmo sem o manifest de build.
+          // Os assets são enriquecidos novamente pelo cache de runtime.
         }
       })
       .then(() => caches.open(DATA_CACHE))
@@ -52,7 +53,7 @@ self.addEventListener("activate", event => {
     caches.keys()
       .then(keys => Promise.all(
         keys
-          .filter(key => key !== STATIC_CACHE && key !== DATA_CACHE && key !== MAP_CACHE)
+          .filter(key => ![STATIC_CACHE, DATA_CACHE, MAP_CACHE].includes(key))
           .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
@@ -134,14 +135,14 @@ async function networkFirstNavigation(request) {
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  const network = fetch(request)
-    .then(response => {
-      if (response.ok) void cache.put(request, response.clone());
-      return response;
-    })
-    .catch(() => cached);
 
-  return cached || network || new Response("", { status: 504 });
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch {
+    return cached || new Response("", { status: 504 });
+  }
 }
 
 async function networkFirst(request, cacheName) {
