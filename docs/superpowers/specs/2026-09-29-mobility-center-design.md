@@ -2019,3 +2019,71 @@ Será considerado avançado quando conseguir:
 **entender o estado → identificar dependências → verificar dados → explicar limitações → preparar a missão → operar com conectividade limitada → registrar resultado → reconstruir o que aconteceu → aprender somente com evidência → proteger os dados → exportar o conhecimento → continuar funcionando sem depender de uma única fonte.**
 
 Essa é a arquitetura-alvo desta especificação.
+
+
+## 66. Observatório territorial e inteligência de contexto
+
+### 66.1 Public Mobility Observatory
+Catálogo de indicadores públicos por município, região metropolitana, corredor, sistema e período, sempre com fonte, cobertura e natureza do dado.
+
+### 66.2 PEMOB Adapter
+Preparar integração versionada para PEMOB Municipal 2025 e PEMOB Metropolitana 2025. Esses dados são estruturais/históricos e nunca devem ser apresentados como trânsito atual.
+
+### 66.3 Mobility Brasil Adapter
+Preparar adapter para o conjunto Mobilidade Brasil do BNDES, incluindo indicadores, projetos e visão de futuro das regiões cobertas. Registrar atualização e frequência da fonte.
+
+### 66.4 Infrastructure Layer
+Preparar entidades para terminais, estações, corredores, ciclovias, BRT, trilhos e projetos de transporte quando houver dataset verificável.
+
+### 66.5 Historical/Structural/Operational/Projected
+Todo dado territorial deve ser classificado como operacional, histórico, estrutural ou projetado. Projeto futuro nunca pode aparecer como infraestrutura existente.
+
+## 67. Mobility Scenario Studio
+Laboratório isolado para comparar rota, veículo, custo, modo, horário, paradas, orçamento e combustível sem alterar dados reais.
+
+Cada cenário terá ID, parâmetros, resultados, fontes e versão do cálculo. Cenários podem ser comparados, exportados e reabertos.
+
+## 68. Mobility Decision Surface
+Unificar decisões em **objetivo → opções → evidências → restrições → próxima ação**.
+Antes de ações relevantes, mostrar dados usados, dados ausentes, efeitos esperados e possibilidade de desfazer. Depois, registrar ação, timestamp, contexto e resultado.
+
+## 69. Mobility Knowledge Layer
+Índice local de métricas, campos, fontes, fórmulas, frescor, estados offline, limitações de provedores e políticas de privacidade.
+
+Estados vazios e erros devem explicar o que falta, por que falta e qual próxima ação é possível.
+
+## 70. Personal Mobility Profile
+Perfil local explícito para veículo padrão, modos, preferências, orçamento, buffer e unidades. Preferências recorrentes podem ser sugeridas, mas só se tornam permanentes após confirmação. Preferências temporárias expiram.
+
+## 71. Mobility Rules 2.0
+Motor local de regras com condições, eventos, dependências, ações, prioridade e expiração. Incluir detector de conflitos, sandbox e auditoria. Regras não podem excluir, compartilhar ou executar ações irreversíveis sem confirmação.
+
+## 72. Mission Risk Flags
+Mostrar condições objetivas como snapshot offline antigo, trânsito indisponível, combustível sem dados, veículo em manutenção, documento sem validade cadastrada, conflito de agenda ou provedor indisponível. Cada flag deve apontar para evidência e ação possível, sem nota geral.
+
+## 73. Long Trip Readiness
+Consolidar missão, rota, alternativas, combustível, autonomia, paradas, documentos, contatos, offline e dados públicos relevantes em uma preparação compacta para viagens longas.
+
+## 74. Mobility Package 4
+Ampliar portabilidade para missão, cenário, snapshots, evidências, eventos, referências a dados públicos, preferências, schema e manifest. Grandes datasets públicos devem ser referenciados por fonte/dataset/versão, não incorporados automaticamente.
+
+## 75. Data Governance Center
+Registrar fontes, datasets, schemas, licenças, períodos, cobertura, freshness, migrations, adapters, retenção e privacidade. Criar grafo **feature → adapter → dataset → fonte**.
+
+## 76. Regional Mobility Packs
+Pacotes territoriais selecionáveis pelo usuário com indicadores, infraestrutura, transporte coletivo, fontes, período, licença e limites geográficos. Não exigem rastreamento contínuo.
+
+## 77. Mobility Context Diff
+Ao retornar a uma missão ou região, mostrar apenas mudanças observáveis desde a última consulta: dataset atualizado, rota alterada, snapshot envelhecido, fonte indisponível ou mudança efetivamente registrada.
+
+## 78. External Data Budget
+Cada integração pública deve possuir orçamento de tamanho, requests, atualização, cache, memória e processamento. Datasets grandes nunca devem bloquear a Home.
+
+## 79. External Data Pipeline
+Fluxo obrigatório: **Source Registry → Adapter → Validation → Normalization → Provenance → Cache/Snapshot → Domain Query → UI**. React nunca consome diretamente formato bruto externo.
+
+## 80. Ordem adicional
+Após a infraestrutura de contratos, storage, missão, rotas, offline, eventos, dados e privacidade, implementar os adapters públicos ANTT/PEMOB/BNDES somente quando houver caso de uso validado; depois infraestrutura territorial, Scenario Studio, Decision Surface, Knowledge Layer, Profile/Rules, Governance e testes de integração.
+
+## 81. Critério máximo adicional
+O Trajeto deve conectar dados públicos, dados pessoais, fontes externas, contexto territorial, missão, rota, recursos, custos, eventos, histórico e evidências sem confundir atual com histórico, estimado com registrado, projetado com existente, público com privado ou offline com tempo real.
