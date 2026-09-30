@@ -5,7 +5,6 @@ import NotFound from "@/pages/NotFound";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { consumeStationReturn } from "@/lib/authReturn";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -19,7 +18,7 @@ const Planner = lazy(() => import("./pages/Planner"));
 const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
 const Help = lazy(() => import("./pages/Help"));
-const Personal = lazy(() => import("./pages/Personal"));
+
 
 const routerBase = import.meta.env.BASE_URL === "/"
   ? undefined
@@ -44,19 +43,6 @@ function AdminOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function AuthReturnHandler() {
-  const { isAuthenticated, loading } = useAuth();
-  const [location, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (loading || !isAuthenticated) return;
-    const returnPath = consumeStationReturn(sessionStorage, location);
-    if (returnPath) setLocation(returnPath);
-  }, [isAuthenticated, loading, location, setLocation]);
-
-  return null;
-}
-
 function Router() {
   return (
     <WouterRouter base={routerBase}>
@@ -70,7 +56,6 @@ function Router() {
           <Route path="/postos" component={Stations} />
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
-          <Route path="/minha-conta" component={Personal} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
@@ -90,7 +75,6 @@ export default function App() {
           <AccessibilityPanel />
           <SiteNavigation />
           <MobileBottomNav />
-          <AuthReturnHandler />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
