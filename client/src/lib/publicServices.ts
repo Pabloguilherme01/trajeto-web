@@ -41,7 +41,7 @@ const HMBJ = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude
 const UNIDADES_SAUDE = "https://aguaslindasdegoias.go.gov.br/unidades-de-saude/";
 const TRANSITO = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/";
 const CT = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
-const PCGO = "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-atendimento/";
+const PCGO = "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-de-atendimento/";
 const SEDUC = "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
 const HEAL = "https://goias.gov.br/saude/heal/";
 
