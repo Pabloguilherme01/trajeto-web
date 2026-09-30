@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNavigationProviderUrl, buildNearbyStationsUrl, buildOpenStreetMapDirectionsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -49,6 +49,20 @@ describe("mobile tools", () => {
   it("builds Apple Maps driving directions", () => {
     expect(buildAppleMapsDirectionsUrl("Brasília, DF")).toBe("https://maps.apple.com/directions?destination=Bras%C3%ADlia%2C+DF&mode=driving");
     expect(buildAppleMapsDirectionsUrl("Brasília, DF", "Águas Lindas, GO")).toBe("https://maps.apple.com/directions?destination=Bras%C3%ADlia%2C+DF&mode=driving&source=%C3%81guas+Lindas%2C+GO");
+  });
+
+  it("creates navigation links for all supported map providers", () => {
+    const coords = { lat: -15.86, lng: -48.03 };
+    expect(buildNavigationProviderUrl("google", "Praça, Águas Lindas", coords)).toContain("destination=-15.86%2C-48.03");
+    expect(buildNavigationProviderUrl("waze", "Praça, Águas Lindas", coords)).toContain("ll=-15.86%2C-48.03");
+    expect(buildNavigationProviderUrl("apple", "Praça, Águas Lindas", coords)).toContain("destination=-15.86%2C-48.03");
+    expect(buildNavigationProviderUrl("openstreetmap", "Praça, Águas Lindas", coords)).toBe("https://www.openstreetmap.org/search?query=Pra%C3%A7a%2C%20%C3%81guas%20Lindas");
+    expect(buildNavigationProviderUrl("waze", "Praça, Águas Lindas")).toContain("q=Pra%C3%A7a%2C+%C3%81guas+Lindas");
+  });
+
+  it("builds OpenStreetMap direction links with and without an origin", () => {
+    expect(buildOpenStreetMapDirectionsUrl("Posto Águas Lindas")).toBe("https://www.openstreetmap.org/search?query=Posto%20%C3%81guas%20Lindas");
+    expect(buildOpenStreetMapDirectionsUrl("Posto", "Brasília")).toContain("route=Bras%C3%ADlia%3BPosto");
   });
 
   it("shares the native route decision with useful context", () => {
