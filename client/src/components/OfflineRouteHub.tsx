@@ -1,4 +1,4 @@
-import { ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
+import { buildWhatsAppShareUrl,  ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { useMemo, useState } from "react";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
