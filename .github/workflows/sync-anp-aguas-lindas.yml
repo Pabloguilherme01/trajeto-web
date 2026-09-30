@@ -1,11 +1,6 @@
 name: Sync ANP Águas Lindas
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - "client/public/data/aguas-lindas-anp.json"
-      - "client/public/data/aguas-lindas-anp-precos.json"
   schedule:
     - cron: "0 */12 * * *"
   workflow_dispatch:
