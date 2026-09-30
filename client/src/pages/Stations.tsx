@@ -172,6 +172,7 @@ export default function Stations() {
         setBrandFilter("all");
         setAddressOnly(false);
         setVerifiedOnly(false);
+        setMappedOnly(false);
         vibration(18);
         if (staticRuntime) {
           window.location.assign(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude));
@@ -342,6 +343,7 @@ export default function Stations() {
                   setBrandFilter("all");
                   setAddressOnly(false);
                   setVerifiedOnly(false);
+                  setMappedOnly(false);
                   setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
                 }} className="max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-[0.57rem] font-bold text-white/40">{item}</button>
                 ))}
