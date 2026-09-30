@@ -208,6 +208,46 @@ export default function Stations() {
     }
   };
 
+
+  const exportLocalCsv = () => {
+    const headers = [
+      "id","nome_comercial","razao_social","cnpj","bairro","endereco","bandeira","situacao","aliases",
+      "qualidade_dado","origem_dado","observacao_cadastro","telefone_mapa","avaliacao_mapa","avaliacoes_mapa",
+      "horario_mapa","bandeira_observada_mapa"
+    ];
+    const csvValue = (value: unknown) => {
+      const text = value == null ? "" : String(value);
+      return '"' + text.replace(/"/g, '""') + '"';
+    };
+    const rows = localDirectory.map(station => [
+      station.id,
+      station.displayName,
+      station.legalName,
+      station.cnpj,
+      station.neighborhood ?? "",
+      station.address ?? "",
+      station.brand ?? "",
+      station.status,
+      station.aliases.join(" | "),
+      getStationDataQualityLabel(station),
+      station.dataOrigin ?? "",
+      station.sourceNote,
+      station.mapData?.phone ?? "",
+      station.mapData?.rating ?? "",
+      station.mapData?.reviewCount ?? "",
+      station.mapData?.hours ?? "",
+      station.mapData?.observedBrand ?? "",
+    ]);
+    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "trajeto-postos-aguas-lindas-2026-09-30.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.message(localDirectory.length + " cadastro(s) exportado(s).");
+  };
+
   const toggleSaved = (station: typeof stations[number]) => {
     const result = toggleMobileStationFavorite(station as unknown as MobileStation);
     setSaved(result.stations);
@@ -408,7 +448,10 @@ export default function Stations() {
 
             <div className="mt-4 flex items-center justify-between gap-2">
               <p className="text-[0.55rem] font-black uppercase tracking-[.12em] text-white/30">Filtros locais{activeLocalFilterCount ? " · " + activeLocalFilterCount + " ativo(s)" : ""}</p>
-              {activeLocalFilterCount > 0 && <button type="button" onClick={resetLocalFilters} className="min-h-10 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-black text-white/55">Limpar filtros</button>}
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={exportLocalCsv} className="min-h-10 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.58rem] font-black text-[#C9F7FF]">Exportar CSV</button>
+                {activeLocalFilterCount > 0 && <button type="button" onClick={resetLocalFilters} className="min-h-10 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-black text-white/55">Limpar filtros</button>}
+              </div>
             </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <label className="min-w-0 flex-1">
@@ -444,6 +487,10 @@ export default function Stations() {
                               <p className="text-sm font-black text-white">{station.displayName}</p>
                               <p className="mt-1 text-[0.58rem] font-semibold text-white/35">{station.legalName} · CNPJ {station.cnpj}</p>
                             <p className="mt-1 text-[0.5rem] leading-relaxed text-white/25">Identidade principal: CNPJ. Nome comercial, telefone, bandeira e horário podem variar entre fontes.</p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              <span className="rounded-full border border-white/8 px-2 py-1 text-[0.46rem] font-bold text-white/35">{station.status === "cadastro_ativo" ? "Cadastro setorial ativo" : station.status}</span>
+                              {station.mapData && <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2 py-1 text-[0.46rem] font-bold text-[#9FEFFF]">Mapa cruzado</span>}
+                            </div>
                             </div>
                             <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] px-2 py-1 text-[0.46rem] font-black text-[#D9FF91]">{statusText}</span>
                           </div>
@@ -468,17 +515,35 @@ export default function Stations() {
                         <span>{station.neighborhood ?? "Bairro não consolidado"}</span>
                         <span>{station.brand ?? "Bandeira não consolidada"}</span>
                       </div>
+                      <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02]">
+                        <summary className="cursor-pointer list-none px-3 py-2.5 text-[0.58rem] font-black text-white/55">Ver dados completos deste cadastro</summary>
+                        <div className="space-y-2 border-t border-white/8 px-3 py-3 text-[0.55rem] leading-relaxed text-white/45">
+                          <p><strong className="text-white/65">Situação:</strong> {station.status === "cadastro_ativo" ? "cadastro setorial ativo" : station.status}</p>
+                          <p><strong className="text-white/65">Aliases:</strong> {station.aliases.length ? station.aliases.join(" · ") : "não informados"}</p>
+                          <p><strong className="text-white/65">Observação da coleta:</strong> {station.sourceNote}</p>
+                          <p><strong className="text-white/65">Qualidade:</strong> {statusText} · {station.dataOrigin === "ANP" ? "fonte ANP" : station.dataOrigin === "cross-check" ? "dados cruzados com referência secundária" : "catálogo local"}</p>
+                          {station.mapData && (
+                            <div className="rounded-lg border border-[#3DE3FF]/10 bg-[#3DE3FF]/[.025] p-2.5">
+                              <p className="font-black uppercase tracking-[.1em] text-[0.47rem] text-[#87DFF0]">Referência atual de mapas</p>
+                              <p className="mt-1">{station.mapData.phone ? "Telefone: " + station.mapData.phone + " · " : ""}{station.mapData.rating != null ? "Nota: " + station.mapData.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " · " : ""}{station.mapData.reviewCount != null ? station.mapData.reviewCount.toLocaleString("pt-BR") + " avaliações" : ""}</p>
+                              <p className="mt-1">{station.mapData.hours ? "Horário informado: " + station.mapData.hours + (station.mapData.observedBrand ? " · bandeira observada: " + station.mapData.observedBrand : "") : station.mapData.observedBrand ? "Bandeira observada: " + station.mapData.observedBrand : "Sem horário consolidado."}</p>
+                              <p className="mt-1 text-white/30">Fonte secundária de mapas; pode mudar sem aviso e não substitui cadastro ANP.</p>
+                            </div>
+                          )}
+                        </div>
+                      </details>
                     </article>
                   );
                 })}
               {hasMoreLocalStations && (
-                <button
-                  type="button"
-                  onClick={() => setLocalVisibleCount(current => Math.min(current + 12, localDirectory.length))}
-                  className="mt-3 min-h-12 w-full rounded-2xl border border-white/8 bg-white/[.025] text-xs font-black text-white/65"
-                >
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <button type="button" onClick={() => setLocalVisibleCount(current => Math.min(current + 12, localDirectory.length))} className="min-h-12 w-full rounded-2xl border border-white/8 bg-white/[.025] text-xs font-black text-white/65">
                   Mostrar mais {Math.min(12, localDirectory.length - visibleLocalDirectory.length)} postos
                 </button>
+                <button type="button" onClick={() => setLocalVisibleCount(localDirectory.length)} className="min-h-12 w-full rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] text-xs font-black text-[#D9FF91]">
+                  Mostrar todos os {localDirectory.length} cadastros
+                </button>
+              </div>
               )}
               {visibleLocalDirectory.length > 12 && (
                 <button
