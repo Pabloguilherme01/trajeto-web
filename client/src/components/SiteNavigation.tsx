@@ -24,7 +24,7 @@ export default function SiteNavigation() {
             return (
               <li key={href} className="shrink-0">
               <Link
-                key={href}
+                
                 href={appUrl(href)}
                 aria-current={active ? "page" : undefined}
                 className={
@@ -39,13 +39,14 @@ export default function SiteNavigation() {
                 {label}
                 {active && !primary && <span className="absolute inset-x-3 -bottom-[1px] h-0.5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />}
               </Link>
+              </li>
             );
           })}
           <li className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D]">
             <span className="size-1.5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />
             Fluxo público · sem cadastro
           </li>
-        </div>
+        </ul>
       </div>
     </nav>
   );
