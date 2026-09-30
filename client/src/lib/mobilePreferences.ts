@@ -9,7 +9,7 @@ const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
 
-export type MobileIntent = "route" | "stations" | "nearby" | "saved";
+export type MobileIntent = "route" | "stations" | "nearby" | "saved" | "search";
 
 function notifyPreferenceChange() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(PREFERENCE_EVENT));
@@ -190,7 +190,7 @@ export function rememberStation(station: LastStation) {
 export function getLastIntent(): MobileIntent | null {
   try {
     const value = localStorage.getItem(LAST_INTENT_KEY);
-    return value === "route" || value === "stations" || value === "nearby" || value === "saved" ? value : null;
+    return value === "route" || value === "stations" || value === "nearby" || value === "saved" || value === "search" ? value : null;
   } catch { return null; }
 }
 
