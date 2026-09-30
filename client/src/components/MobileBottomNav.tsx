@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, HelpCircle, Home, Navigation } from "lucide-react";
+import { Bookmark, Fuel, Home, Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -8,10 +8,9 @@ import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
-  { key: "plan", href: "/planejar", label: "Planejar", short: "Planejar", icon: Navigation },
   { key: "stations", href: "/postos", label: "Postos", short: "Postos", icon: Fuel },
+  { key: "plan", href: "/planejar", label: "Planejar", short: "Planejar", icon: Navigation },
   { key: "saved", href: "/salvos", label: "Salvos", short: "Salvos", icon: Bookmark },
-  { key: "help", href: "/ajuda", label: "Ajuda", short: "Ajuda", icon: HelpCircle },
 ] as const;
 
 export default function MobileBottomNav() {
@@ -55,7 +54,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav aria-label="Navegação móvel" className="fixed inset-x-0 bottom-0 z-[60] px-2 pb-[max(.45rem,env(safe-area-inset-bottom))] md:hidden">
-      <div className="mx-auto grid max-w-md grid-cols-5 gap-1 rounded-[1.35rem] border border-white/10 bg-[#090E12]/95 p-1.5 shadow-[0_-10px_40px_rgba(0,0,0,.42)] backdrop-blur-2xl">
+      <div className="mx-auto grid max-w-md grid-cols-4 gap-1 rounded-[1.35rem] border border-white/10 bg-[#090E12]/95 p-1.5 shadow-[0_-10px_40px_rgba(0,0,0,.42)] backdrop-blur-2xl">
         {baseItems.map(item => {
           const active = item.key === "saved"
             ? (current === "/salvos" || (current === "/planejar" && savedMode))
