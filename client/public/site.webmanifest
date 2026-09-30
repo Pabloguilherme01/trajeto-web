@@ -1,7 +1,7 @@
 {
   "name": "Trajeto · Rotas e Postos",
   "short_name": "Trajeto",
-  "description": "Decida a próxima parada, planeje a viagem e retome rotas salvas mesmo sem internet.",
+  "description": "Encontre postos, compare opções de abastecimento, planeje rotas e retome locais salvos, com suporte offline.",
   "lang": "pt-BR",
   "start_url": "./postos?q=postos",
   "scope": "./",
@@ -11,7 +11,8 @@
   "theme_color": "#0B1014",
   "categories": [
     "navigation",
-    "travel"
+    "travel",
+    "utilities"
   ],
   "prefer_related_applications": false,
   "icons": [
