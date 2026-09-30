@@ -80,7 +80,7 @@ export default function Home() {
   const shareHome = async () => {
     try {
       await shareText(
-        "Trajeto · encontre postos, veja preço, compare dados e abra a navegação.",
+        "Trajeto · explore Águas Lindas, encontre lugares, serviços e postos e navegue.",
         window.location.origin + appUrl("/"),
         "Trajeto",
       );
@@ -121,7 +121,7 @@ export default function Home() {
 
         <section className="mt-6">
           <form onSubmit={submit} className="rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 shadow-[0_22px_60px_rgba(0,0,0,.28)]">
-            <label htmlFor="home-station-search" className="sr-only">Buscar posto</label>
+            <label htmlFor="home-place-search" className="sr-only">Buscar posto</label>
             <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
               <Search className="size-4 shrink-0 text-[#3DE3FF]" />
               <input
@@ -219,7 +219,7 @@ export default function Home() {
             </div>
             <div className="mobile-scroll-x mt-2 flex gap-2 overflow-x-auto pb-1">
               {recentSearches.slice(0, 6).map(item => (
-                <button key={item} type="button" onClick={() => searchStations(item)} className="min-h-10 max-w-[13rem] shrink-0 truncate rounded-xl border border-white/8 bg-white/[.02] px-3 text-[0.55rem] font-bold text-white/50">
+                <button key={item} type="button" onClick={() => searchPlaces(item)} className="min-h-10 max-w-[13rem] shrink-0 truncate rounded-xl border border-white/8 bg-white/[.02] px-3 text-[0.55rem] font-bold text-white/50">
                   {item}
                 </button>
               ))}
