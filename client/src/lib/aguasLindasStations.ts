@@ -29,6 +29,7 @@ export type LocalStationRecord = {
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
 export const AGUAS_LINDAS_ANP_CATALOG_COUNT = 33;
+export const AGUAS_LINDAS_ANP_CATALOG_COUNT_NOTE = "Referência pública baseada no cadastro ANP citada em consulta de preços; não substitui a conciliação individual via API oficial.";
 export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 0;
 
 export const AGUAS_LINDAS_PRICE_REFERENCE = {
