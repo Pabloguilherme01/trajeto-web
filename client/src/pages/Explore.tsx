@@ -85,7 +85,8 @@ export default function Explore(){
 
   const shareMap=async()=>{
     const title=selected?.name || (query.trim() ? query.trim() : "Águas Lindas");
-    const url=window.location.origin + appUrl("/mapa") + (query.trim() ? "?q=" + encodeURIComponent(query.trim()) : "");
+    const shareQuery = selected?.name || query.trim();
+    const url=window.location.origin + appUrl("/mapa") + (shareQuery ? "?q=" + encodeURIComponent(shareQuery) : "");
     try {
       await shareText(
         "Trajeto · " + title + (selected?.address ? " · " + selected.address : ""),
