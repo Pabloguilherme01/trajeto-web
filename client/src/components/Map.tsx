@@ -20,7 +20,7 @@ const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
 
 let mapScriptPromise: Promise<void> | null = null;
 
-function loadMapScript() {
+export function loadGoogleMapsScript() {
   if (window.google?.maps) return Promise.resolve();
   if (mapScriptPromise) return mapScriptPromise;
   mapScriptPromise = new Promise((resolve, reject) => {
@@ -76,7 +76,7 @@ export function MapView({
   const init = usePersistFn(async () => {
     try {
       setLoadError(null);
-      await loadMapScript();
+      await loadGoogleMapsScript();
     if (!mapContainer.current || map.current) {
       return;
     }
