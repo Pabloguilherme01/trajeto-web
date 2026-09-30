@@ -11,6 +11,7 @@ import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
+import StationFiltersSheet from "@/components/StationFiltersSheet";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import StationComparePanel from "@/components/StationComparePanel";
 import { toast } from "sonner";
@@ -72,6 +73,8 @@ export default function Stations() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
   const [priceOnly, setPriceOnly] = useState(false);
+  const [distanceFilter, setDistanceFilter] = useState<"all" | 2 | 5 | 10>("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const initialOfflineAnp = getOfflineAnpSnapshot();
   const initialOfflineMap = getOfflineMapStations();
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
@@ -132,7 +135,9 @@ export default function Stations() {
       const verifiedMatches = !verifiedOnly || Boolean(item.anp) || item.local?.dataQuality === "anp-confirmed" || item.local?.dataOrigin === "ANP";
       const mappedMatches = !mappedOnly || Boolean(item.local?.mapData);
       const priceMatches = !priceOnly || (pricesByCnpj.get(item.key)?.length ?? 0) > 0;
-      return (!normalized || text.includes(normalized)) && neighborhoodMatches && brandMatches && addressMatches && verifiedMatches && mappedMatches && priceMatches;
+      const coords = getDirectoryCoordinates(item);
+      const distanceMatches = distanceFilter === "all" || !userCoords || !coords || haversineKm(userCoords.lat, userCoords.lng, coords.lat, coords.lng) <= distanceFilter;
+      return (!normalized || text.includes(normalized)) && neighborhoodMatches && brandMatches && addressMatches && verifiedMatches && mappedMatches && priceMatches && distanceMatches;
     });
     return matches.sort((a, b) => {
       const stationLabel = getDirectoryLabel;
@@ -159,7 +164,7 @@ export default function Stations() {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly, priceOnly]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly, priceOnly, distanceFilter]);
 
   const directoryCardsForDisplay = useMemo(
     () => directoryCardsFiltered.filter(item => matchesFuelFilter(item, fuelFilter, pricesByCnpj)),
@@ -182,7 +187,7 @@ export default function Stations() {
     fuelOptions.map(option => [option.id, option.id === "all" ? directoryCardsFiltered.length : directoryCardsFiltered.filter(item => matchesFuelFilter(item, option.id, pricesByCnpj)).length]),
   ) as Record<FuelFilter, number>, [directoryCardsFiltered, fuelOptions, pricesByCnpj]);
 
-  const directoryFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly) + Number(priceOnly);
+  const directoryFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly) + Number(priceOnly) + Number(fuelFilter !== "all") + Number(distanceFilter !== "all");
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -411,6 +416,7 @@ export default function Stations() {
     directorySearch,
     directorySort,
     fuelFilter,
+    distanceFilter,
   ]);
 
   useEffect(() => {
@@ -427,6 +433,7 @@ export default function Stations() {
     setVerifiedOnly(false);
     setMappedOnly(false);
     setPriceOnly(false);
+    setDistanceFilter("all");
     setDirectoryVisibleCount(48);
   };
 
@@ -715,6 +722,7 @@ export default function Stations() {
                   setMappedOnly(false);
                   setPriceOnly(false);
                   setFuelFilter("all");
+                  setDistanceFilter("all");
                   setDirectorySort("name");
                   setShowMap(isBroadAguasLindasQuery(item));
                   setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
@@ -894,55 +902,21 @@ export default function Stations() {
                   <button type="button" onClick={resetDirectoryView} className="shrink-0 rounded-lg px-2 py-1 text-[0.48rem] font-black text-[#D9FF91]">Limpar</button>
                 )}
               </label>
-              <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Ordenar diretório">
-                {[
-                  { id: "name" as const, label: "Nome" },
-                  { id: "price" as const, label: "Menor preço" },
-                  { id: "confidence" as const, label: "Mais confiáveis" },
-                  { id: "brand" as const, label: "Bandeira" },
-                  { id: "distance" as const, label: "Mais perto", disabled: !userCoords },
-                ].map(option => {
-                  const active = directorySort === option.id;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      disabled={option.disabled}
-                      aria-pressed={active}
-                      onClick={() => setDirectorySort(option.id)}
-                      className={"min-h-10 shrink-0 rounded-full border px-3 text-[0.55rem] font-black transition-colors disabled:cursor-not-allowed disabled:opacity-30 " + (
-                        active
-                          ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10 text-[#D9FF91]"
-                          : "border-white/8 bg-white/[.025] text-white/50"
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Filtrar por combustível">
-                {fuelOptions.map(option => {
-                  const active = fuelFilter === option.id;
-                  const count = fuelOptionCounts[option.id];
-                  const disabled = option.id !== "all" && count === 0;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      aria-pressed={active}
-                      disabled={disabled}
-                      onClick={() => setFuelFilter(option.id)}
-                      className={"min-h-9 shrink-0 rounded-full border px-3 text-[0.52rem] font-black disabled:cursor-not-allowed disabled:opacity-25 " + (
-                        active
-                          ? "border-[#3DE3FF]/25 bg-[#3DE3FF]/10 text-[#C9F7FF]"
-                          : "border-white/8 bg-white/[.025] text-white/45"
-                      )}
-                    >
-                      {option.label} · {count}
-                    </button>
-                  );
-                })}
+              <div className="flex items-center gap-2">
+                <div className="mobile-scroll-x flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Ordenar diretório">
+                  {[
+                    { id: "name" as const, label: "Nome" },
+                    { id: "price" as const, label: "Menor preço" },
+                    { id: "brand" as const, label: "Bandeira" },
+                    { id: "distance" as const, label: "Mais perto", disabled: !userCoords },
+                  ].map(option => {
+                    const active = directorySort === option.id;
+                    return <button key={option.id} type="button" disabled={option.disabled} aria-pressed={active} onClick={() => setDirectorySort(option.id)} className={"min-h-10 shrink-0 rounded-full border px-3 text-[0.55rem] font-black disabled:cursor-not-allowed disabled:opacity-30 " + (active ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/8 bg-white/[.025] text-white/50")}>{option.label}</button>;
+                  })}
+                </div>
+                <button type="button" onClick={() => setFiltersOpen(true)} className={"min-h-10 shrink-0 rounded-full border px-3 text-[0.55rem] font-black " + (directoryFilterCount ? "border-[#3DE3FF]/25 bg-[#3DE3FF]/10 text-[#C9F7FF]" : "border-white/8 bg-white/[.025] text-white/55")}>
+                  <SlidersHorizontal className="mr-1 inline size-3.5" /> Filtros{directoryFilterCount ? " " + directoryFilterCount : ""}
+                </button>
               </div>
             </div>
             {(fuelFilter !== "all" || directoryFilterCount > 0) && (
@@ -955,21 +929,7 @@ export default function Stations() {
                 <button type="button" onClick={resetDirectoryView} className="min-h-8 rounded-lg border border-white/10 px-2.5 text-[0.48rem] font-black text-white/70">Limpar</button>
               </div>
             )}
-              <details className="mt-2 rounded-2xl border border-white/8 bg-[#0B1014]">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.55rem] font-black text-white/65">
-                  <span>Mais filtros{directoryFilterCount ? " · " + directoryFilterCount + " ativo(s)" : ""}</span>
-                  <span className="text-[0.46rem] text-white/25">bairro · bandeira · qualidade</span>
-                </summary>
-                <div className="grid gap-2 border-t border-white/8 p-3 sm:grid-cols-2">
-                  <label><span className="sr-only">Filtrar por bairro</span><select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold text-white outline-none"><option value="all">Todos os bairros</option>{directoryNeighborhoods.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
-                  <label><span className="sr-only">Filtrar por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{directoryBrands.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
-                  <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold text-white/60"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço consolidado</label>
-                  <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold " + (verifiedFilterAvailable ? "text-white/60" : "text-white/30")}><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} disabled={!verifiedFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Cadastro ANP disponível</label>
-                  <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold text-white/60"><input type="checkbox" checked={mappedOnly} onChange={event => setMappedOnly(event.target.checked)} className="size-4 accent-[#3DE3FF]" /> Referência de mapa</label>
-                  <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#10181F] px-3 text-[0.58rem] font-bold " + (priceFilterAvailable ? "text-white/60" : "text-white/30")}><input type="checkbox" checked={priceOnly} onChange={event => setPriceOnly(event.target.checked)} disabled={!priceFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Com preço individual ANP {priceFilterAvailable ? "· " + directoryPriceCount : "· indisponível"}</label>
-                  {directoryFilterCount > 0 && <button type="button" onClick={resetDirectoryView} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.55rem] font-black text-white/55 sm:col-span-2">Limpar filtros adicionais</button>}
-                </div>
-              </details>
+
             <div className="sticky top-2 z-20 mt-3 flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-[#0B1014]/92 px-2.5 py-2 shadow-[0_12px_30px_rgba(0,0,0,.28)] backdrop-blur-xl">
               <div className="min-w-0 px-1">
                 <p className="truncate text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Sua lista</p>
@@ -985,6 +945,34 @@ export default function Stations() {
                 }} className={"min-h-9 rounded-xl px-3 text-[0.52rem] font-black " + (showMap ? "bg-[#3DE3FF]/10 text-[#C9F7FF]" : "text-white/45")}>Mapa</button>
               </div>
             </div>
+            <StationFiltersSheet
+              open={filtersOpen}
+              onClose={() => setFiltersOpen(false)}
+              fuelOptions={fuelOptions}
+              fuelFilter={fuelFilter}
+              setFuelFilter={setFuelFilter}
+              distanceFilter={distanceFilter}
+              setDistanceFilter={setDistanceFilter}
+              neighborhoodFilter={neighborhoodFilter}
+              setNeighborhoodFilter={setNeighborhoodFilter}
+              brandFilter={brandFilter}
+              setBrandFilter={setBrandFilter}
+              addressOnly={addressOnly}
+              setAddressOnly={setAddressOnly}
+              verifiedOnly={verifiedOnly}
+              setVerifiedOnly={setVerifiedOnly}
+              mappedOnly={mappedOnly}
+              setMappedOnly={setMappedOnly}
+              priceOnly={priceOnly}
+              setPriceOnly={setPriceOnly}
+              neighborhoods={directoryNeighborhoods}
+              brands={directoryBrands}
+              priceFilterAvailable={priceFilterAvailable}
+              directoryPriceCount={directoryPriceCount}
+              verifiedFilterAvailable={verifiedFilterAvailable}
+              hasUserCoords={Boolean(userCoords)}
+              onClear={() => { resetDirectoryView(); setFiltersOpen(false); }}
+            />
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
               <span>{directoryCardsForDisplay.length} de {directoryCards.length} fichas · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância local · sem envio do GPS ao catálogo" : "sem exigir localização"}</span>
