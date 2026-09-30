@@ -155,17 +155,49 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="mt-8">
-          <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mobilidade diária</p>
-          <h1 className="mobile-title mt-3 max-w-3xl font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
-            Chegue melhor.<br />
-            <span className="text-[#C7FF3C]">Decida antes de sair.</span>
+        <section className="mt-7">
+          <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Abastecimento + mobilidade</p>
+          <h1 className="mt-3 max-w-3xl font-display text-[clamp(2.35rem,9vw,4.8rem)] font-semibold leading-[.94] tracking-[-.07em]">
+            Encontre o posto certo
+            <span className="block text-[#C7FF3C]">em poucos toques.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/50 sm:text-base">
-            Um fluxo simples para planejar a rota, encontrar uma parada e abrir a navegação certa sem atravessar várias telas.
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50 sm:text-base">
+            Comece pelo que você precisa agora. O detalhe técnico fica em segundo plano.
           </p>
         </section>
 
+        <section className="mt-5 grid grid-cols-2 gap-2" aria-label="Ações principais">
+          <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=postos")} className="min-h-14 rounded-2xl bg-[#C7FF3C] px-3 text-left text-[#0B1014] active:scale-[.98]">
+            <Fuel className="size-4" />
+            <span className="mt-2 block text-xs font-black">Abastecer agora</span>
+            <span className="mt-0.5 block text-[0.56rem] font-bold opacity-65">Preço + postos</span>
+          </button>
+          <button type="button" onClick={findNearby} disabled={locating} className="min-h-14 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.06] px-3 text-left text-[#C9F7FF] disabled:opacity-40 active:scale-[.98]">
+            <LocateFixed className="size-4" />
+            <span className="mt-2 block text-xs font-black">Perto de mim</span>
+            <span className="mt-0.5 block text-[0.56rem] font-bold text-white/40">Usar GPS local</span>
+          </button>
+          <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=postos#complete-stations")} className="min-h-14 rounded-2xl border border-white/8 bg-[#121B22] px-3 text-left active:scale-[.98]">
+            <Fuel className="size-4 text-[#3DE3FF]" />
+            <span className="mt-2 block text-xs font-black">Comparar postos</span>
+            <span className="mt-0.5 block text-[0.56rem] font-bold text-white/40">Preço e distância</span>
+          </button>
+          <button type="button" onClick={() => window.open("https://www.google.com/maps/search/postos+abertos+Águas+Lindas+de+Goiás", "_blank", "noopener,noreferrer")} className="min-h-14 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-left text-[#FFD09A] active:scale-[.98]">
+            <Navigation className="size-4" />
+            <span className="mt-2 block text-xs font-black">Emergência</span>
+            <span className="mt-0.5 block text-[0.56rem] font-bold">Postos abertos</span>
+          </button>
+        </section>
+
+        <details className="mt-4 rounded-[1.5rem] border border-white/8 bg-[#121B22] px-4 py-3 shadow-[0_18px_55px_rgba(0,0,0,.22)]">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3">
+            <span>
+              <span className="block text-[0.55rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Viagem</span>
+              <span className="mt-1 block text-sm font-black">Planejar rota</span>
+            </span>
+            <ArrowRight className="size-4 text-white/30" />
+          </summary>
+          <div className="pt-2">
         <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -207,6 +239,8 @@ export default function Home() {
           )}
 
         </section>
+          </div>
+        </details>
 
         <MobileCopilot />
 
