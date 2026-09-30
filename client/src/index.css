@@ -176,3 +176,26 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
 @media (prefers-color-scheme: dark) {
   :root { color-scheme: dark; }
 }
+/* Ajustes finais de ergonomia mobile: teclado, safe-area, foco e rolagem de componentes. */
+@media (max-width: 767px) {
+  :where(input, select, textarea) {
+    scroll-margin-top: 5rem;
+  }
+  :where(button, a, [role="button"]) {
+    min-height: 44px;
+  }
+  :where(input, select, textarea):focus {
+    scroll-margin-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+  .mobile-scroll-x {
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mobile-scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-bottom-nav-safe {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  }
+}
