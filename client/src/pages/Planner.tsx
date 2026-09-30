@@ -591,7 +591,7 @@ export default function Planner() {
             <p className="mt-1 text-lg font-black text-white">{planned.priceCoverage}</p>
             <p className="text-[0.58rem] text-white/45">referências vinculadas</p>
           </div>
-        </section>
+        </section>}
 
         {planned && routeConfirmed && (
           <div className="mb-3 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.07] px-3 py-2.5 text-[0.62rem] font-black text-[#D9FF91]" role="status" aria-live="polite">
