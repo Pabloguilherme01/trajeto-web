@@ -241,17 +241,17 @@ export default function DailyCommandCenter() {
               <p className="mt-1 truncate text-xs font-extrabold text-white">{favorite?.label ?? "Configurar"}</p>
               {favorite && <p className="mt-0.5 truncate text-[0.52rem] font-bold text-white/35">{usage[favorite.id] ?? 0} {usage[favorite.id] === 1 ? "uso" : "usos"} neste aparelho</p>}
             </div>
-            <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
+            <div className="min-w-[10rem] snap-start rounded-xl border border-white/8 bg-white/[.035] p-3 sm:min-w-0">
               <Route className="size-4 text-[#BDA5FF]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Rotas</p>
               <p className="mt-1 text-xs font-extrabold text-white">{routes.length ? routes.length + " salva" + (routes.length === 1 ? "" : "s") : "Nenhuma"}</p>
             </div>
-            <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
+            <div className="min-w-[10rem] snap-start rounded-xl border border-white/8 bg-white/[.035] p-3 sm:min-w-0">
               <CarFront className="size-4 text-[#C7FF3C]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Veículo</p>
               <p className="mt-1 truncate text-xs font-extrabold text-white">{vehicle?.name ?? "Configurar"}</p>
             </div>
-            <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
+            <div className="min-w-[10rem] snap-start rounded-xl border border-white/8 bg-white/[.035] p-3 sm:min-w-0">
               <CheckCircle2 className="size-4 text-[#C7FF3C]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Pronto</p>
               <p className="mt-1 text-xs font-extrabold text-white">{completed}/5 itens</p><p className="mt-0.5 truncate text-[0.52rem] text-white/35">{nextSetup ? `Próximo: ${nextSetup}` : "Tudo preparado"}</p>
