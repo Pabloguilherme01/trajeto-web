@@ -127,13 +127,33 @@ function arrayFor(row: Record<string, unknown>, key: keyof AnpFuelRow) {
   return Array.isArray(value) ? value : null;
 }
 
-function numberFor(row: Record<string, unknown>, key: keyof AnpFuelRow) {
-  const value = valueFor(row, aliases[key]);
-  if (value == null) return null;
+function parseLocalizedNumber(value: unknown) {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  const normalized = String(value).trim().replace(/\./g, "").replace(",", ".");
+
+  const raw = String(value).trim().replace(/\s+/g, "");
+  if (!raw) return null;
+
+  const lastComma = raw.lastIndexOf(",");
+  const lastDot = raw.lastIndexOf(".");
+  let normalized = raw;
+
+  if (lastComma >= 0 && lastDot >= 0) {
+    // ANP exports commonly use pt-BR grouping (10.500,50), but accepting
+    // decimal-dot values is essential for coordinates such as -15.70.
+    normalized = lastComma > lastDot
+      ? raw.replace(/\./g, "").replace(",", ".")
+      : raw.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    normalized = raw.replace(",", ".");
+  }
+
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function numberFor(row: Record<string, unknown>, key: keyof AnpFuelRow) {
+  const value = valueFor(row, aliases[key]);
+  return value == null ? null : parseLocalizedNumber(value);
 }
 
 export function normalizeAnpFuelRow(input: Record<string, unknown>): AnpFuelRow | null {
