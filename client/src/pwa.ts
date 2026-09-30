@@ -12,10 +12,13 @@ export function registerServiceWorker() {
 
   // Register immediately instead of waiting for window.load. This avoids a race
   // where the app is already interactive/offline before the worker is installed.
-  void navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", {
-    scope: import.meta.env.BASE_URL,
-  }).then(registration => {
+  const baseUrl = new URL(import.meta.env.BASE_URL, window.location.href);
+  const serviceWorkerUrl = new URL("sw.js", baseUrl);
+  void navigator.serviceWorker.register(serviceWorkerUrl, {
+    scope: baseUrl.href,
+  }).then(async registration => {
     currentRegistration = registration;
+    await registration.update().catch(() => undefined);
     announceUpdate(registration);
 
     registration.addEventListener("updatefound", () => {
