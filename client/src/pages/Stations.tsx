@@ -157,6 +157,18 @@ export default function Stations() {
     return distances;
   }, [directoryCards, userCoords]);
 
+  const directoryActiveFilterCount = [
+    directorySearch.trim(),
+    directorySort !== "name" ? directorySort : "",
+    neighborhoodFilter !== "all" ? neighborhoodFilter : "",
+    brandFilter !== "all" ? brandFilter : "",
+    addressOnly ? "address" : "",
+    verifiedOnly ? "verified" : "",
+    mappedOnly ? "mapped" : "",
+    fuelFilter !== "all" ? fuelFilter : "",
+    withIndividualPriceOnly ? "price" : "",
+  ].filter(Boolean).length;
+
   const directoryCardsFiltered = useMemo(() => {
     const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const matches = directoryCards.filter(item => {
@@ -870,6 +882,7 @@ export default function Stations() {
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[0.5rem] text-white/30" aria-live="polite">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas · {anpStations.length} ANP</span>
+              {directoryActiveFilterCount > 0 && <span>{directoryActiveFilterCount} filtro{directoryActiveFilterCount === 1 ? "" : "s"} ativo{directoryActiveFilterCount === 1 ? "" : "s"}</span>}
               <span>{userCoords ? "distância local · GPS não enviado" : "sem localização"}</span>
               {fuelFilter !== "all" && <span className="rounded-full border border-[#C7FF3C]/10 px-2 py-1 text-[#D9FF91]">combustível filtrado</span>}
               {withIndividualPriceOnly && <span className="rounded-full border border-[#3DE3FF]/10 px-2 py-1 text-[#9FEFFF]">preço individual ANP</span>}
