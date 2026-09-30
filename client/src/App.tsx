@@ -17,6 +17,7 @@ import SiteNavigation from "./components/SiteNavigation";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
+const SearchPage = lazy(() => import("./pages/Search"));
 const Planner = lazy(() => import("./pages/Planner"));
 const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
@@ -73,6 +74,7 @@ function Router() {
       <Suspense fallback={<RouteLoading />}>
         <Switch>
           <Route path="/" component={Home} />
+          <Route path="/buscar" component={SearchPage} />
           <Route path="/planejar" component={Planner} />
           <Route path="/rota" component={Planner} />
           <Route path="/salvos"><Planner /></Route>
@@ -81,7 +83,6 @@ function Router() {
           <Route path="/postos" component={Stations} />
           <Route path="/local/:id" component={Local} />
           <Route path="/explorar" component={Explorer} />
-          <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
           <Route path="/404" component={NotFound} />
