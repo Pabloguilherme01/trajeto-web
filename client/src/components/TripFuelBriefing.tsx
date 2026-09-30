@@ -38,7 +38,7 @@ export default function TripFuelBriefing({ distanceKm, durationSeconds, roundTri
     const refuels = autonomyKm > 0 ? Math.max(0, Math.ceil(tripDistanceKm / autonomyKm) - 1) : 0;
     const tankCoverage = autonomyKm > 0 ? Math.min(999, (tripDistanceKm / autonomyKm) * 100) : 0;
     return { autonomyKm, liters, fuelCost, reserve, refuels, tankCoverage, tripDistanceKm };
-  }, [vehicle, distanceKm, price]);
+  }, [vehicle, distanceKm, price, roundTrip]);
 
   if (!stats || !vehicle) return null;
 
