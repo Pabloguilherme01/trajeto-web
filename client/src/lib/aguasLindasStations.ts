@@ -25,13 +25,28 @@ export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
 export const AGUAS_LINDAS_DATA_POLICY = "ANP é a fonte primária para status cadastral; fontes secundárias apenas complementam nomes/endereço quando necessário.";
 
 export const AGUAS_LINDAS_MAP_ONLY_DISCOVERIES = [
-  {
-    displayName: "Posto Milenium Águas Lindas de Goiás",
-    address: "Condomínio Bela Vista, Águas Lindas de Goiás, GO",
-    note: "Encontrado em pesquisa de mapas; CNPJ não localizado em fonte empresarial confiável nesta coleta. Não incorporado à contagem cadastral até conciliação por CNPJ/endereço.",
-  },
+  { displayName: "Posto Ponteio", address: "Av. Brasília, 3379, Parque da Barragem, Águas Lindas de Goiás - GO", phone: "(61) 99881-2916", rating: 3.9, reviews: 835, hours: "24h", note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "Posto gasolina Petrobrás", address: "Quadra 76, Cidade Jardim, Águas Lindas de Goiás - GO", phone: "(77) 98120-7995", rating: 3.8, reviews: 19, hours: "06:00–23:00", note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "Posto Petrobras", address: "Gleba 2B, Fazenda Cachoeira e Saltador, Águas Lindas de Goiás - GO", phone: "(61) 98494-4864", rating: 4.2, reviews: 240, hours: "24h em parte da semana", note: "Mapa; possível correspondência com Mizuno Kay & Cia." },
+  { displayName: "Posto BR", address: "Rua Doze, Jardim Querência, Águas Lindas de Goiás - GO", phone: "0800 281 5000", rating: 4.2, reviews: 113, hours: null, note: "Mapa; possível correspondência com Auto Posto Pérola ou outro cadastro deve ser validada por CNPJ." },
+  { displayName: "Posto Ipiranga", address: "Q. 08, lotes 16, 17 e 18, Jardim Querência, Águas Lindas de Goiás - GO", phone: "0800 725 7333", rating: 4.0, reviews: 396, hours: null, note: "Mapa; endereço coincide com Auto Posto DF 180." },
+  { displayName: "Posto Shell - Aguas Lindas", address: "BR-070, 285, Mansões Centroeste, Águas Lindas de Goiás - GO", phone: null, rating: 3.7, reviews: 466, hours: "06:00–23:00", note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "Auto Posto J J Junior", address: "Av. Comercial, 12, Cidade do Entorno, Águas Lindas de Goiás - GO", phone: "(61) 3616-1226", rating: 4.0, reviews: 279, hours: "24h", note: "Mapa; possível correspondência com Auto Posto JJR/J.J., endereço requer validação." },
+  { displayName: "Posto Premium", address: "Av. Brasília, 17, Jardim da Barragem II, Águas Lindas de Goiás - GO", phone: null, rating: 3.9, reviews: 8, hours: "24h", note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "ZM Combustíveis", address: "Recreio das Águas Lindas, Águas Lindas de Goiás - GO", phone: "(61) 99620-0099", rating: 4.8, reviews: 163, hours: "04:00–00:00", note: "Mapa; corresponde ao cadastro ZM Combustíveis, CNPJ 55.846.090/0001-28." },
+  { displayName: "Posto Formula 1", address: "BR-070, Parque da Barragem, Águas Lindas de Goiás - GO", phone: "(61) 3060-0591", rating: 4.0, reviews: 272, hours: "05:00–22:00", note: "Mapa; há múltiplos Fórmula 1 na cidade, conciliar por endereço/CNPJ." },
+  { displayName: "Auto Posto Pérola", address: "R. 17, 1291-1397, Parque da Barragem, Águas Lindas de Goiás - GO", phone: null, rating: 4.0, reviews: 191, hours: "05:00–23:00", note: "Mapa; corresponde ao cadastro Auto Posto Pérola Águas Lindas, CNPJ 12.768.583/0001-84." },
+  { displayName: "Posto De Gasolina - Formula 1", address: "R. 32, 162, Cidade Jardim, Águas Lindas de Goiás - GO", phone: null, rating: 4.0, reviews: 97, hours: "05:00–22:00", note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "Posto Recreio", address: "R. 7, 158-206, Jardim Querência, Águas Lindas de Goiás - GO", phone: null, rating: 3.9, reviews: 92, hours: null, note: "Mapa; não incorporado à contagem cadastral sem CNPJ." },
+  { displayName: "Posto Ipiranga", address: "BR-070, Q. 28, lote 16/17, Jardim Guaíra II, Águas Lindas de Goiás - GO", phone: null, rating: 4.0, reviews: 219, hours: "05:00–23:00", note: "Mapa; corresponde ao cadastro Posto Guaíra, CNPJ 12.560.575/0001-48." },
+  { displayName: "ALE", address: "Av. Águas Lindas, 2042-2360, Parque da Barragem, Águas Lindas de Goiás - GO", phone: "0800 281 5000", rating: 4.0, reviews: 104, hours: null, note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "Posto Shell", address: "Jardim América IV, Águas Lindas de Goiás - GO", phone: null, rating: 4.3, reviews: 137, hours: "05:30–23:00", note: "Mapa; conciliação cadastral pendente." },
+  { displayName: "Posto Fórmula 1", address: "Q. 34, conjunto A, lote 40B, Setor 8, Águas Lindas de Goiás - GO", phone: "(61) 3060-0591", rating: 4.2, reviews: 111, hours: "05:00–22:00", note: "Mapa; corresponde ao cadastro Posto Formula 01, CNPJ 31.405.435/0001-40." },
+  { displayName: "Meu Posto", address: "Lote Área B, Q. 01, Mansões, Águas Lindas de Goiás - GO", phone: null, rating: 4.4, reviews: 55, hours: "05:00–22:00", note: "Mapa; corresponde ao cadastro Meu Posto, CNPJ 42.783.063/0001-01." },
+  { displayName: "Auto Posto Rainha Da Paz", address: "Q. 4, lotes 4/5, Jardim da Barragem V, Águas Lindas de Goiás - GO", phone: null, rating: 3.8, reviews: 217, hours: "05:00–23:00", note: "Mapa; corresponde ao cadastro Auto Posto Rainha da Paz, CNPJ 23.679.372/0001-91." },
+  { displayName: "Posto de gasolina", address: "Parque da Barragem, Águas Lindas de Goiás - GO", phone: null, rating: 5.0, reviews: 1, hours: null, note: "Mapa com apenas 1 avaliação; não incorporado à contagem cadastral sem identificação confiável." },
+  { displayName: "Posto Milenium Águas Lindas de Goiás", address: "Condomínio Bela Vista, Águas Lindas de Goiás - GO", phone: null, rating: null, reviews: null, hours: null, note: "Mapa; CNPJ não localizado nesta coleta. Não incorporado à contagem cadastral." },
 ] as const;
-
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
 
