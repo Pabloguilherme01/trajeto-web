@@ -1,21 +1,70 @@
-import { ArrowLeft, BadgeInfo, CheckCircle2, Clock3, ExternalLink, Fuel, MapPinned, Route as RouteIcon, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Fuel, MapPinned, Route as RouteIcon, ShieldCheck, WifiOff } from "lucide-react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
-const helpCards = [
-  { icon: MapPinned, title: "Postos e distância", text: "O catálogo local e os dados da ANP formam a base pública. Quando dados de mapas estão disponíveis, endereço, horário e distância aparecem como enriquecimento separado." },
-  { icon: ShieldCheck, title: "Cadastro e qualidade", text: "Bairro, bandeira e autorizações vêm do cadastro oficial da ANP. A área ANP com VC é aberta em fonte oficial quando você decide seguir." },
-  { icon: RouteIcon, title: "Rotas e trânsito", text: "No site público, o Trajeto prepara origem e destino e abre a navegação no provedor escolhido. Ambientes com servidor podem acrescentar rota e trânsito com fonte e horário." },
-  { icon: Fuel, title: "Preços e economia", text: "Referências de preço aparecem somente quando a origem oficial, a data e a ligação com o posto são verificáveis. Nenhum preço é inventado." },
-];
-
-const loadingStates = [
-  { icon: Clock3, title: "Buscando o primeiro lote", text: "A consulta está reunindo postos, horários e distâncias. Aguarde a lista inicial." },
-  { icon: Clock3, title: "Preparando o próximo lote", text: "O Google Maps pode precisar de alguns segundos para liberar mais resultados." },
-  { icon: CheckCircle2, title: "Tentativa automática", text: "Se o próximo lote ainda não estiver pronto, a Trajeto tenta uma vez sem remover os postos que você já viu." },
-  { icon: BadgeInfo, title: "Resultados parciais", text: "Se a continuação continuar indisponível, seus resultados permanecem na tela e você pode escolher Tentar novamente." },
+const steps = [
+  { n: "01", icon: RouteIcon, title: "Planeje", text: "Informe o destino. Você pode usar sua localização como origem ou digitar endereço/coordenadas." },
+  { n: "02", icon: Fuel, title: "Encontre", text: "Abra os postos, use “Perto de mim”, filtre por combustível e salve os favoritos." },
+  { n: "03", icon: MapPinned, title: "Navegue", text: "Veja a rota no Trajeto e, quando quiser trânsito ao vivo, abra Google Maps, Waze ou Apple Maps." },
 ];
 
 export default function Help() {
-  return <div className="min-h-screen bg-[#0B1014] text-[#EAF0F2]"><header className="sticky top-0 z-40 border-b border-white/8 bg-[#0B1014]/90 backdrop-blur-xl"><div className="container flex h-[68px] items-center justify-between"><Link href="/" className="flex items-center gap-2.5"><img className="size-9 rounded-xl bg-[#C7FF3C] p-1.5" src={appUrl("/favicon.svg")} alt="" /><span className="brand-wordmark text-[1.25rem] text-white">trajeto</span><span className="hidden rounded-full border border-white/10 px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8DA0AB] sm:block">Ajuda</span></Link><Link href="/postos"><span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-[#C7FF3C] transition hover:bg-white hover:text-[#0B1014]"><ArrowLeft className="size-4" /> Consultar postos</span></Link></div></header><main className="container max-w-5xl pb-20 pt-8 sm:pt-12"><p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#3DE3FF]">Ajuda rápida</p><h1 className="mt-4 max-w-3xl font-display text-[clamp(3.2rem,8vw,6rem)] font-semibold leading-[0.88] tracking-[-0.07em] text-white">Dados claros.<br /><span className="text-[#C7FF3C]">Consulta sem surpresa.</span></h1><p className="mt-6 max-w-3xl text-base leading-relaxed text-[#A5B5BC]">Esta página explica de onde vêm as informações e o que cada estado de carregamento significa. A busca é pública. Preferências, favoritos e rotas salvas ficam neste aparelho; recursos de conta só aparecem em instalações com servidor habilitado.</p><section className="mt-12"><h2 className="font-display text-3xl font-semibold tracking-[-0.055em] text-white">Fontes exibidas</h2><div className="mt-5 grid gap-4 sm:grid-cols-2">{helpCards.map(card => <article key={card.title} className="rounded-2xl border border-white/10 bg-[#121B22] p-5"><card.icon className="size-5 text-[#3DE3FF]" /><h3 className="mt-5 text-lg font-extrabold text-white">{card.title}</h3><p className="mt-2 text-sm leading-relaxed text-[#A5B5BC]">{card.text}</p></article>)}</div><p className="mt-5 text-sm leading-relaxed text-[#A5B5BC]">Você pode confirmar qualidade, fiscalização e atendimento diretamente no <a className="font-bold text-[#BDA5FF] underline underline-offset-4 hover:text-white" href="https://anpcomvcpostos.anp.gov.br/" target="_blank" rel="noopener noreferrer">ANP com VC <ExternalLink className="inline size-3.5" /></a>.</p></section><section className="mt-12 rounded-3xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/8 p-6 sm:p-8"><h2 className="font-display text-3xl font-semibold tracking-[-0.055em] text-white">Estados de carregamento</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#B7DCE5]">Os nomes abaixo descrevem o que acontece na tela. Eles não indicam falha dos postos já exibidos.</p><div className="mt-6 space-y-3">{loadingStates.map(state => <article key={state.title} className="flex gap-4 rounded-2xl border border-[#3DE3FF]/20 bg-[#0B1014]/55 p-4"><state.icon className="mt-0.5 size-5 shrink-0 text-[#C7FF3C]" /><div><h3 className="font-bold text-white">{state.title}</h3><p className="mt-1 text-sm leading-relaxed text-[#A5C8D0]">{state.text}</p></div></article>)}</div></section><section className="mt-12 rounded-3xl border border-[#C7FF3C]/30 bg-[#C7FF3C]/10 p-6 sm:p-8"><h2 className="font-display text-3xl font-semibold tracking-[-0.055em] text-white">Dica para redes lentas</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#D9E9D1]">Use a busca do diretório e o filtro de combustível antes de carregar mais fichas. A lista é exibida progressivamente, e os dados oficiais já disponíveis continuam acessíveis mesmo quando a conexão oscila.</p><Link href="/postos"><span className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-[#C7FF3C] px-4 py-2 text-sm font-bold text-[#0B1014] transition hover:bg-white">Abrir consulta de postos</span></Link></section></main></div>;
+  return (
+    <main className="min-h-[100dvh] bg-[#0B1014] pb-24 text-white md:pb-12">
+      <div className="container max-w-4xl pt-6 sm:pt-10">
+        <header className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[0.58rem] font-black uppercase tracking-[.17em] text-[#3DE3FF]">Ajuda</p>
+            <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">Use o Trajeto em poucos passos.</h1>
+          </div>
+          <Link href={appUrl("/")} className="min-h-11 shrink-0 rounded-xl border border-white/10 px-3 text-xs font-black text-white/70">Início</Link>
+        </header>
+
+        <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
+          <p className="text-sm leading-relaxed text-white/60">O app foi organizado para três tarefas principais: planejar uma rota, encontrar um posto e recuperar o que você salvou. O restante fica como apoio, sem bloquear o fluxo principal.</p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            {steps.map(step => (
+              <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0B1014] p-4">
+                <div className="flex items-center justify-between">
+                  <step.icon className="size-4 text-[#C7FF3C]" />
+                  <span className="text-[0.5rem] font-black tracking-[.16em] text-white/25">{step.n}</span>
+                </div>
+                <h2 className="mt-5 text-sm font-black">{step.title}</h2>
+                <p className="mt-1.5 text-[0.64rem] leading-relaxed text-white/45">{step.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-4 grid gap-3 sm:grid-cols-2">
+          <Link href={appUrl("/planejar")} className="rounded-[1.4rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.08] p-5">
+            <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Começar</p>
+            <p className="mt-2 text-lg font-black">Planejar uma rota</p>
+            <p className="mt-1 text-xs text-white/45">Origem, destino, mapa, salvar e compartilhar.</p>
+            <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir <ArrowRight className="size-3.5" /></span>
+          </Link>
+          <Link href={appUrl("/postos") + "?q=postos"} className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.06] p-5">
+            <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Começar</p>
+            <p className="mt-2 text-lg font-black">Encontrar postos</p>
+            <p className="mt-1 text-xs text-white/45">Mapa, fichas, filtros, favoritos e navegação.</p>
+            <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#3DE3FF]/25 px-3 text-xs font-black text-[#C9F7FF]">Abrir <ArrowRight className="size-3.5" /></span>
+          </Link>
+        </section>
+
+        <section className="mt-4 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-5">
+          <h2 className="text-base font-black">O que continua funcionando sem conta</h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <p className="flex gap-2 text-xs leading-relaxed text-white/50"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" />Favoritos e rotas salvas ficam neste aparelho.</p>
+            <p className="flex gap-2 text-xs leading-relaxed text-white/50"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" />O mapa próprio do Trajeto não exige Google para aparecer.</p>
+            <p className="flex gap-2 text-xs leading-relaxed text-white/50"><WifiOff className="mt-0.5 size-4 shrink-0 text-[#FFB86B]" />Com internet perdida, o app usa cache e dados já armazenados quando disponíveis.</p>
+            <p className="flex gap-2 text-xs leading-relaxed text-white/50"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#3DE3FF]" />Dados oficiais e referências secundárias são identificados separadamente.</p>
+          </div>
+        </section>
+
+        <section className="mt-4 pb-4 text-center text-[0.56rem] leading-relaxed text-white/25">
+          Para trânsito, incidentes e chegada em tempo real, use o navegador externo escolhido.
+        </section>
+      </div>
+    </main>
+  );
 }
