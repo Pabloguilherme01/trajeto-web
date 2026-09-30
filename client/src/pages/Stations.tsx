@@ -18,6 +18,7 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
+import { buildStationDirectoryModel } from "@/lib/stationDirectoryModel";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -124,6 +125,24 @@ export default function Stations() {
     }
     return cards;
   }, [aguasLindasCatalog, anpStations]);
+
+  const directoryModels = useMemo(
+    () => directoryCards.map(item => buildStationDirectoryModel({
+      key: item.key,
+      name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
+      cnpj: item.anp?.cnpj || item.local?.cnpj,
+      address: item.anp?.endereco || item.local?.address,
+      neighborhood: item.anp?.bairro || item.local?.neighborhood,
+      brand: item.anp?.distribuidora || item.local?.brand || item.local?.mapData?.observedBrand,
+      lat: item.anp?.latitude ?? item.local?.anp?.latitude,
+      lng: item.anp?.longitude ?? item.local?.anp?.longitude,
+      source: item.anp ? "ANP" : item.local?.mapData ? "mapa" : "local",
+      official: Boolean(item.anp),
+      price: pricesByCnpj.get(item.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? null,
+      priceDate: pricesByCnpj.get(item.key)?.find(price => price.productKey === "gasolina-comum")?.collectionDate ?? null,
+    })),
+    [directoryCards, pricesByCnpj],
+  );
 
   const directoryDistanceByKey = useMemo(() => {
     if (!userCoords) return new Map<string, number>();
@@ -803,9 +822,9 @@ export default function Stations() {
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Postos</p><p className="mt-1 text-lg font-black">{directoryModels.length}</p><p className="text-[0.48rem] text-white/25">sem duplicação por CNPJ</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryModels.filter(item => item.hasOfficialRecord).length}</p><p className="text-[0.48rem] text-white/25">cadastro oficial</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Preço individual</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryModels.filter(item => item.hasPrice).length}</p><p className="text-[0.48rem] text-white/25">gasolina comum</p></div>
               <button type="button" onClick={() => document.getElementById("complete-stations-title")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></button>
             </div>
 
@@ -822,6 +841,7 @@ export default function Stations() {
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              {(directorySearch || directorySort !== "name" || withIndividualPriceOnly) && <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); setWithIndividualPriceOnly(false); }} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.56rem] font-bold text-white/45">Limpar filtros</button>}
               <button type="button" onClick={() => setWithIndividualPriceOnly(value => !value)} className={withIndividualPriceOnly ? "min-h-11 rounded-2xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014]" : "min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-bold text-white/55"}>{withIndividualPriceOnly ? "Com preço ANP" : "Preço individual"}</button>
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[0.5rem] text-white/30" aria-live="polite">
