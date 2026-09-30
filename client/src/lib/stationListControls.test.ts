@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterAndSortStations, inferredBrand } from "./stationListControls";
+import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, stationSupportsFuel } from "./stationListControls";
 
 describe("station list controls", () => {
   const stations = [
@@ -17,5 +17,13 @@ describe("station list controls", () => {
     expect(filterAndSortStations(stations, "all", "open", "distance").map(station => station.name)).toEqual(["Posto Shell"]);
     expect(filterAndSortStations(stations, "all", "all", "distance").map(station => station.name)).toEqual(["Posto Ipiranga", "Posto Shell", "Posto Local"]);
     expect(filterAndSortStations(stations, "all", "all", "relevance").map(station => station.name)).toEqual(["Posto Shell", "Posto Ipiranga", "Posto Local"]);
+  });
+
+  it("reconhece combustíveis sem confundir gasolina comum com aditivada", () => {
+    expect(stationSupportsFuel(["etanol"], [], "etanol")).toBe(true);
+    expect(stationSupportsFuel([], ["ÓLEO DIESEL S10"], "diesel-s10")).toBe(true);
+    expect(stationSupportsFuel([], ["GASOLINA ADITIVADA"], "gasolina-comum")).toBe(false);
+    expect(fuelFilterPriceKey("all")).toBe("gasolina-comum");
+    expect(fuelFilterPriceKey("gnv")).toBe("gnv");
   });
 });
