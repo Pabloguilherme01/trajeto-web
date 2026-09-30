@@ -25,12 +25,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: package.json
+          cache-dependency-path: package-lock.json
 
       - name: Instalar dependências
-        run: |
-          npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
-          npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+        run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
       - name: Sincronizar ANP cadastral
         run: node scripts/sync-anp-aguas-lindas.mjs
