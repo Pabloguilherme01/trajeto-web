@@ -72,7 +72,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
-  const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");\n\n  useEffect(() => { if (mapFirst) setShowMap(true); }, [mapFirst]);
+  const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
+
+  useEffect(() => { if (mapFirst) setShowMap(true); }, [mapFirst]);
 
   const latParam = params.get("lat");
   const lngParam = params.get("lng");
@@ -650,7 +652,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       station.mapData?.hours ?? "",
       station.mapData?.observedBrand ?? "",
     ]);
-    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
+    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("
+");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -670,7 +673,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       row.codigoSimp,row.autorizacao,row.dataPublicacao,row.razaoSocial,row.cnpj,row.endereco,row.complemento,row.bairro,row.cep,row.uf,row.municipio,row.distribuidora,row.dataVinculacao,row.classe,row.produto,row.tancagem,row.unidadeMedidaTancagem,row.quantidadeBicos,row.latitude,row.longitude,row.latitudeAnp4c,row.longitudeAnp4c,row.validacao,row.estimativaAcuraciaM,row.srid,row.sistemaReferenciaCoordenadas,row.dataObtencao,row.origemInformacao,row.situacaoConstatada,row.observacao,row.statusSigaf
     ]);
     const csvValue = (value: unknown) => '"' + (value == null ? "" : String(value)).replace(/"/g, '""') + '"';
-    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
+    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("
+");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
