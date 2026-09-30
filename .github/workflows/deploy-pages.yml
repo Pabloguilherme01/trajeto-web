@@ -35,29 +35,14 @@ jobs:
       - name: Install from lock
         run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
-      - name: Sync ANP snapshot for Pages
-        shell: bash
-        run: |
-          set -euo pipefail
-          if npm run sync:anp:aguas-lindas; then
-            echo "Snapshot ANP atualizado para o build."
-          elif [ -f client/public/data/aguas-lindas-anp.json ]; then
-            echo "ANP indisponível agora; usando snapshot existente."
-          else
-            echo "ANP indisponível e sem snapshot; o build segue com o diretório local e cache do aparelho."
-          fi
 
-      - name: Sync ANP station prices for Pages
+      - name: Validate committed data snapshots
         shell: bash
         run: |
           set -euo pipefail
-          if npm run sync:anp:precos:aguas-lindas; then
-            echo "Snapshot de preços ANP atualizado para o build."
-          elif [ -f client/public/data/aguas-lindas-anp-precos.json ]; then
-            echo "ANP preços indisponível agora; usando snapshot existente."
-          else
-            echo "ANP preços indisponível e sem snapshot; o build segue sem preço individual."
-          fi
+          test -f client/public/data/aguas-lindas-anp.json
+          test -f client/public/data/aguas-lindas-anp-precos.json
+          node -e 'JSON.parse(require("node:fs").readFileSync("client/public/data/aguas-lindas-anp.json","utf8")); JSON.parse(require("node:fs").readFileSync("client/public/data/aguas-lindas-anp-precos.json","utf8"));'
 
       - name: Build static client
         run: npm run build:client
