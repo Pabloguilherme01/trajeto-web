@@ -39,6 +39,12 @@ export default function Stations() {
   const [localVisibleCount, setLocalVisibleCount] = useState(12);
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>([]);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
+
+  const lat = Number(params.get("lat"));
+  const lng = Number(params.get("lng"));
+  const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const showSavedOnly = params.get("salvos") === "1";
+  const staticRuntime = isGitHubPagesRuntime();
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const broadAguasLindasQuery = normalizedQuery === "postos" || normalizedQuery === "aguas lindas" || normalizedQuery.includes("postos em aguas lindas") || normalizedQuery.includes("postos de aguas lindas");
   const anpLiveQuery = trpc.stationDirectory.anp.useQuery(
@@ -47,12 +53,6 @@ export default function Stations() {
   );
   const anpRows = staticRuntime ? staticAnpRows : anpLiveQuery.data?.rows ?? [];
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
-
-  const lat = Number(params.get("lat"));
-  const lng = Number(params.get("lng"));
-  const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
-  const showSavedOnly = params.get("salvos") === "1";
-  const staticRuntime = isGitHubPagesRuntime();
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -67,7 +67,7 @@ export default function Stations() {
       (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
       a.displayName.localeCompare(b.displayName, "pt-BR")
     );
-  }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly]);
+  }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
   const localBrands = useMemo(() => [...new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))].sort((a,b) => a.localeCompare(b, "pt-BR")), []);
   const localNeighborhoods = useMemo(
     () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
