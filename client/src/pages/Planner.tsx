@@ -6,7 +6,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration, type GoogleMapsTravelMode } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, buildWhatsAppShareUrl, shareText, vibration, type GoogleMapsTravelMode } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import OfflineRouteHub from "@/components/OfflineRouteHub";
@@ -476,6 +476,22 @@ export default function Planner() {
                 <button type="button" onClick={() => openExternal("apple")} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/70">Apple Maps</button>
                 <button type="button" onClick={() => void shareRoute()} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
+              <a
+                href={buildWhatsAppShareUrl(
+                  buildRouteShareText(origin, destination, planned.recommendation ? {
+                    name: planned.recommendation.name,
+                    price: planned.recommendation.price,
+                    detourKm: planned.recommendation.detourKm,
+                    detourSource: planned.recommendation.detourSource,
+                  } : null),
+                  window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(origin.trim()) + "&destino=" + encodeURIComponent(destination.trim()),
+                )}
+                target="_blank"
+                rel="noreferrer"
+                className="mobile-action mobile-action-secondary min-h-11 rounded-2xl border-[#25D366]/20 bg-[#25D366]/[.05] px-3 text-[0.65rem] text-[#B8F6C8] sm:col-span-2"
+              >
+                Compartilhar no WhatsApp
+              </a>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => void saveCurrentRoute()} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/65"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
