@@ -1,7 +1,7 @@
-import { ChevronRight, ExternalLink, MapPinned, MessageCircle, Search, Siren, WifiOff } from "lucide-react";
+import { ChevronRight, MapPinned, Search, Share2, Siren, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
 import { useMemo, useState } from "react";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWhatsAppShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import {
   OFFLINE_DESTINATION_CATEGORIES,
   searchOfflineDestinations,
@@ -146,33 +146,15 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
                 Navegar
                 <ChevronRight className="ml-auto size-4" />
               </button>
-              <a
-                href={destination.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mobile-action mobile-action-icon border-white/10 bg-white/[.025] text-white/55"
-                aria-label={"Abrir fonte de " + destination.name}
-              >
-                <ExternalLink className="size-4" />
-              </a>
               <button
                 type="button"
                 onClick={() => void share(destination)}
                 className="mobile-action mobile-action-icon border-white/10 bg-white/[.025] text-white/55"
                 aria-label={"Compartilhar " + destination.name}
+                title="Compartilhar"
               >
-                ↗
+                <Share2 className="size-4" />
               </button>
-              <a
-                href={buildWhatsAppShareUrl(buildOfflineDestinationShareText(destination), buildOfflineDestinationShareUrl(destination.id))}
-                target="_blank"
-                rel="noreferrer"
-                className="mobile-action mobile-action-icon border-[#25D366]/20 bg-[#25D366]/[.05] text-[#B8F6C8]"
-                aria-label={"Compartilhar " + destination.name + " no WhatsApp"}
-                title="WhatsApp"
-              >
-                <MessageCircle className="size-4" />
-              </a>
             </div>
           </article>
         ))}
