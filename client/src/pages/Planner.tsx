@@ -452,7 +452,7 @@ export default function Planner() {
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70">{savedMessage}</p>}
             {savedRoutes.length === 0 && savedStations.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
-                Nenhuma rota salva ainda. Calcule uma rota e use “Salvar offline” para manter o plano neste aparelho.
+                Nenhuma rota salva ainda. Calcule uma rota com origem e destino e o Trajeto criará automaticamente uma cópia neste aparelho.
               </div>
             ) : (
               <div className="mt-4 space-y-2">
