@@ -1,5 +1,5 @@
 import { ArrowRight, BarChart3, Download, History, Navigation, Share2, ShieldCheck, Sparkles } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
 import {
@@ -8,10 +8,11 @@ import {
   getRecentTrips,
   getRouteUsage,
   mobilePreferenceEvent,
+  restoreLocalMobilityProfile,
   type RouteUsage,
 } from "@/lib/mobilePreferences";
-import { getMobileDestinations, mobileDestinationEvent, type MobileDestination } from "@/lib/mobileDestinations";
-import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/mobileVehicle";
+import { getMobileDestinations, mobileDestinationEvent, removeMobileDestination, saveMobileDestination, type MobileDestination } from "@/lib/mobileDestinations";
+import { getMobileVehicle, mobileVehicleEvent, removeMobileVehicle, saveMobileVehicle, type MobileVehicle } from "@/lib/mobileVehicle";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
 function routeKey(origin: string, destination: string) {
@@ -51,6 +52,8 @@ export default function MobilityInsightsCard() {
   const [stamp, setStamp] = useState(0);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [offlineRoutes, setOfflineRoutes] = useState<OfflineRoute[]>([]);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const refresh = () => setStamp(value => value + 1);
@@ -139,6 +142,66 @@ export default function MobilityInsightsCard() {
     try {
       await shareText(text, window.location.href, "Resumo do Trajeto");
     } catch {}
+  };
+
+  const restoreLocalData = async (file: File) => {
+    setFeedback(null);
+    if (file.size > 300_000) {
+      setFeedback("Arquivo recusado: o limite para importação é 300 KB.");
+      return;
+    }
+
+    try {
+      const raw = await file.text();
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("formato");
+      const data = parsed as Record<string, unknown>;
+      if (data.version !== 1 || data.scope !== "aparelho") throw new Error("versao");
+
+      const prefsRestored = restoreLocalMobilityProfile(parsed);
+      if (!prefsRestored) throw new Error("perfil");
+
+      if (Array.isArray(data.destinations)) {
+        const ids = new Set<MobileDestination["id"]>();
+        for (const item of data.destinations) {
+          if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+          const destination = item as Record<string, unknown>;
+          const id = destination.id;
+          const value = destination.value;
+          if ((id === "casa" || id === "trabalho" || id === "outro") && typeof value === "string" && value.trim().length >= 3) {
+            if (saveMobileDestination(id, value)) ids.add(id);
+          }
+        }
+        for (const id of (["casa", "trabalho", "outro"] as const)) {
+          if (!ids.has(id)) removeMobileDestination(id);
+        }
+      }
+
+      if (data.vehicle && typeof data.vehicle === "object" && !Array.isArray(data.vehicle)) {
+        const vehicle = data.vehicle as Record<string, unknown>;
+        if (
+          typeof vehicle.name === "string" &&
+          (vehicle.fuel === "gasolina" || vehicle.fuel === "etanol" || vehicle.fuel === "diesel") &&
+          typeof vehicle.consumption === "number" &&
+          typeof vehicle.tank === "number"
+        ) {
+          saveMobileVehicle({
+            name: vehicle.name,
+            fuel: vehicle.fuel,
+            consumption: vehicle.consumption,
+            tank: vehicle.tank,
+          });
+        }
+      } else {
+        removeMobileVehicle();
+      }
+
+      setFeedback("Perfil local restaurado. Rotas offline existentes não são sobrescritas.");
+    } catch {
+      setFeedback("Não foi possível importar. Use um arquivo JSON exportado pelo Trajeto.");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const exportLocalData = async () => {
@@ -260,13 +323,31 @@ export default function MobilityInsightsCard() {
         </div>
       </div>
 
+      {feedback && (
+        <p role="status" aria-live="polite" className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.62rem] font-bold text-[#B7C5CA]">{feedback}</p>
+      )}
+
       <div className="mt-4 flex flex-wrap gap-2 border-t border-white/8 pt-4">
         <button type="button" onClick={() => void shareSummary()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3.5 text-[0.62rem] font-black text-white/80">
           <Share2 className="size-3.5 text-[#3DE3FF]" /> Compartilhar resumo
         </button>
         <button type="button" onClick={() => void exportLocalData()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3.5 text-[0.62rem] font-black text-white/80">
-          <Download className="size-3.5 text-[#C7FF3C]" /> Exportar dados locais
+          <Download className="size-3.5 text-[#C7FF3C]" /> Exportar dados
         </button>
+        <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3.5 text-[0.62rem] font-black text-white/80">
+          Restaurar backup
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          className="sr-only"
+          aria-label="Selecionar backup JSON do Trajeto"
+          onChange={event => {
+            const file = event.target.files?.[0];
+            if (file) void restoreLocalData(file);
+          }}
+        />
       </div>
 
       <p className="mt-3 flex items-center gap-2 text-[0.54rem] leading-relaxed text-white/35">
