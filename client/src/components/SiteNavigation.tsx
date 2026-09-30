@@ -38,7 +38,7 @@ export default function SiteNavigation() {
               </li>
             );
           })}
-          <li className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D]">
+          <li className="ml-auto flex shrink-0 items-center gap-2 pl-3 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#8FA5AF]">
             <span className="size-1.5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />
             Fluxo público · sem cadastro
           </li>
