@@ -1,7 +1,9 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import OfflineRouteHub from "./OfflineRouteHub";
+
+afterEach(() => cleanup());
 
 describe("OfflineRouteHub", () => {
   it("mostra destinos essenciais e devolve um destino selecionado ao planejador", () => {
@@ -19,7 +21,7 @@ describe("OfflineRouteHub", () => {
 
   it("filtra por categoria e usa busca textual local", () => {
     render(<OfflineRouteHub compact onSelectDestination={vi.fn()} />);
-    fireEvent.click(screen.getAllByRole("button", { name: "Saúde" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
     expect(screen.getByText("Hospital Bom Jesus")).toBeTruthy();
     expect(screen.queryByText("Rodoviária")).toBeNull();
 
