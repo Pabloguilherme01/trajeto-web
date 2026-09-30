@@ -5,10 +5,17 @@ test("postos: continua navegável depois de perder a conexão", async ({ page, c
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
 
   await page.evaluate(async () => {
-    if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker.ready;
-    }
+    if (!("serviceWorker" in navigator)) return;
+    await navigator.serviceWorker.ready;
   });
+
+  await expect.poll(
+    () => page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
+    { timeout: 10_000, message: "O Service Worker precisa controlar a página antes do teste offline." },
+  ).toBe(true);
+
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
 
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
