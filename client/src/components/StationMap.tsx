@@ -271,13 +271,24 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     return () => { cancelled = true; };
   }, [ready, offline, resolvedStations.map(item => item.cnpj || item.id || item.name).join("|")]);
 
-  const drawableStations = dedupeStationReferences([
+  const canonicalStations: StationMapItem[] = dedupeStationReferences([
     ...resolvedStations.map(station => ({
       ...station,
       source: station.source ?? "local",
     })),
     ...nearbyStations,
-  ]).filter(hasCoordinates) as StationMapItem[];
+  ]).map(reference => ({
+    id: reference.id,
+    placeId: reference.placeId,
+    name: reference.name,
+    address: reference.address ?? "",
+    lat: reference.lat,
+    lng: reference.lng,
+    cnpj: reference.cnpj ?? null,
+    brand: reference.brand ?? null,
+    source: reference.source,
+  }));
+  const drawableStations = canonicalStations.filter(hasCoordinates);
 
   useEffect(() => {
     if (!drawableStations.length) return;
