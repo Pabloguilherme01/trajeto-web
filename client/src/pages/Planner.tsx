@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Bookmark, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
+import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -11,7 +11,7 @@ import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, r
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
-import { buildPublicRoutePayload, calculatePublicRoute } from "@/lib/publicRouting";
+import { buildPublicRoutePayload, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -46,6 +46,10 @@ export default function Planner() {
   const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
   const [origin, setOrigin] = useState(() => queryParams.get("origem") || getLastTrip()?.origin || "");
   const [destination, setDestination] = useState(() => queryParams.get("destino") || getLastTrip()?.destination || "");
+  const [mode, setMode] = useState<PublicTravelMode>(() => {
+    const value = queryParams.get("modo");
+    return value === "walking" || value === "cycling" || value === "transit" ? value : "driving";
+  });
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
@@ -156,7 +160,7 @@ export default function Planner() {
           vibration(12);
           return;
         }
-        const publicRoute = await calculatePublicRoute(resolvedOrigin, to);
+        const publicRoute = await calculatePublicRoute(resolvedOrigin, to, mode);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute);
         setPlanned(publicPayload as unknown as PlannedRoute);
@@ -280,8 +284,9 @@ export default function Planner() {
   };
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
+    const googleMode = mode === "walking" ? "walking" : mode === "cycling" ? "bicycling" : mode === "transit" ? "transit" : "driving";
     const target = provider === "google"
-      ? buildGoogleMapsDirectionsUrl(origin, destination, "driving", true)
+      ? buildGoogleMapsDirectionsUrl(origin, destination, googleMode, true)
       : provider === "waze"
         ? buildWazeNavigationUrl(destination)
         : buildAppleMapsDirectionsUrl(destination, origin);
@@ -350,6 +355,26 @@ export default function Planner() {
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                 {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; resetResult(); setOrigin(trip.origin); setDestination(trip.destination); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/60">Última rota</button>}
                 <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/50 disabled:opacity-30">Limpar</button>
+              </div>
+
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">Modo</span>
+                  <span className="text-[0.52rem] font-bold text-white/25">{mode === "driving" ? "carro" : mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : "transporte"}</span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {([
+                    ["driving", "Carro", Car],
+                    ["walking", "A pé", PersonStanding],
+                    ["cycling", "Bicicleta", Bike],
+                    ["transit", "Transporte", Bus],
+                  ] as const).map(([value, label, Icon]) => (
+                    <button key={value} type="button" onClick={() => { resetResult(); setMode(value); }} className={"flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-[0.52rem] font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/45")}>
+                      <Icon className="size-3.5" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <button type="submit" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
