@@ -18,7 +18,7 @@ function routeAge(savedAt: string) {
 
 function fuelDetail(vehicle: MobileVehicle | null) {
   if (!vehicle) return { ok: false, detail: "Cadastre o veículo para calcular combustível." };
-  if (vehicle.fuelType && vehicle.consumption > 0) return { ok: true, detail: `${vehicle.consumption.toLocaleString("pt-BR")} km/L · ${vehicle.fuelType}` };
+  if (vehicle.fuel && vehicle.consumption > 0) return { ok: true, detail: `${vehicle.consumption.toLocaleString("pt-BR")} km/L · ${vehicle.fuel}` };
   return { ok: false, detail: "Complete combustível e consumo do veículo." };
 }
 
@@ -63,7 +63,7 @@ export default function TripReadinessCard() {
   const items = useMemo<Item[]>(() => [
     { label: "Conexão", detail: online ? "Consultas atualizadas disponíveis." : latestRoute ? "Sem internet · rota local disponível." : "Sem internet e sem rota local.", ok: online || Boolean(latestRoute), warn: !online && !latestRoute },
     { label: "Rota", detail: latestRoute ? (isOfflineRouteStale(latestRoute.savedAt) ? `salva há ${routeAge(latestRoute.savedAt)} · revisar antes de sair` : `salva há ${routeAge(latestRoute.savedAt)}`) : lastTrip ? "Última viagem registrada, mas não há cópia offline." : "Nenhuma viagem preparada.", ok: Boolean(latestRoute) && !isOfflineRouteStale(latestRoute.savedAt), warn: Boolean(latestRoute && isOfflineRouteStale(latestRoute.savedAt)) },
-    { label: "Veículo", detail: vehicle ? vehicle.name || `${vehicle.fuelType} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Nenhum veículo cadastrado.", ok: Boolean(vehicle) },
+    { label: "Veículo", detail: vehicle ? vehicle.name || `${vehicle.fuel} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Nenhum veículo cadastrado.", ok: Boolean(vehicle) },
     { label: "Manutenção", detail: maintenance.length ? (maintenanceWarning ? "Há item vencido ou próximo do vencimento." : "Itens cadastrados dentro do prazo.") : "Nenhum prazo de manutenção cadastrado.", ok: maintenance.length > 0 && !maintenanceWarning, warn: maintenanceWarning },
     { label: "Combustível", detail: fuel.detail, ok: fuel.ok },
   ], [online, latestRoute, vehicle, maintenance, maintenanceWarning, fuel, lastTrip]);
