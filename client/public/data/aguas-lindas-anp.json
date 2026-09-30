@@ -2,742 +2,10 @@
   "source": "https://revendedoresapi.anp.gov.br/v1/combustivel por CNPJ + CSV oficial",
   "municipality": "Águas Lindas de Goiás",
   "uf": "GO",
-  "retrievedAt": "2026-09-30T07:03:03.542Z",
-  "totalRawRows": 84,
+  "retrievedAt": "2026-09-30T07:06:51.329Z",
+  "totalRawRows": 77,
   "totalStations": 33,
   "data": [
-    {
-      "codigoSIMP": "1309453",
-      "autorizacao": "PR/GO0249639",
-      "dataPublicacao": "30/04/2025",
-      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
-      "cnpj": "54438110000169",
-      "endereco": "QUADRA 09, RUA 02,  10",
-      "complemento": "",
-      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
-      "cep": "72910990",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "30/04/2025",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.6811689",
-      "longitude": "-48.2680336",
-      "latitude_ANP4C": "-15:40:52,208",
-      "longitude_ANP4C": "-48:16:04,921",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 4
-    },
-    {
-      "codigoSIMP": "1309453",
-      "autorizacao": "PR/GO0249639",
-      "dataPublicacao": "30/04/2025",
-      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
-      "cnpj": "54438110000169",
-      "endereco": "QUADRA 09, RUA 02,  10",
-      "complemento": "",
-      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
-      "cep": "72910990",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "30/04/2025",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.6811689",
-      "longitude": "-48.2680336",
-      "latitude_ANP4C": "-15:40:52,208",
-      "longitude_ANP4C": "-48:16:04,921",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 6
-    },
-    {
-      "codigoSIMP": "1309453",
-      "autorizacao": "PR/GO0249639",
-      "dataPublicacao": "30/04/2025",
-      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
-      "cnpj": "54438110000169",
-      "endereco": "QUADRA 09, RUA 02,  10",
-      "complemento": "",
-      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
-      "cep": "72910990",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "30/04/2025",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.6811689",
-      "longitude": "-48.2680336",
-      "latitude_ANP4C": "-15:40:52,208",
-      "longitude_ANP4C": "-48:16:04,921",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM ADITIVADA",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 4
-    },
-    {
-      "codigoSIMP": "1309453",
-      "autorizacao": "PR/GO0249639",
-      "dataPublicacao": "30/04/2025",
-      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
-      "cnpj": "54438110000169",
-      "endereco": "QUADRA 09, RUA 02,  10",
-      "complemento": "",
-      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
-      "cep": "72910990",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "30/04/2025",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.6811689",
-      "longitude": "-48.2680336",
-      "latitude_ANP4C": "-15:40:52,208",
-      "longitude_ANP4C": "-48:16:04,921",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S10 - COMUM",
-      "tancagem": 15,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1309453",
-      "autorizacao": "PR/GO0249639",
-      "dataPublicacao": "30/04/2025",
-      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
-      "cnpj": "54438110000169",
-      "endereco": "QUADRA 09, RUA 02,  10",
-      "complemento": "",
-      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
-      "cep": "72910990",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "30/04/2025",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.6811689",
-      "longitude": "-48.2680336",
-      "latitude_ANP4C": "-15:40:52,208",
-      "longitude_ANP4C": "-48:16:04,921",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S500 - COMUM",
-      "tancagem": 15,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1177396",
-      "autorizacao": "PR/GO0097123",
-      "dataPublicacao": "02/09/2011",
-      "razaoSocial": "AUTO POSTO GUAIRA EIRELI",
-      "cnpj": "12560575000148",
-      "endereco": "RODOVIA BR 070 QUADRA 28,  S/N",
-      "complemento": "LOTE  16/17",
-      "bairro": "JARDIM GUAIRA II",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "IPIRANGA",
-      "dataVinculacao": "19/06/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.76082747",
-      "longitude": "-48.24490218",
-      "latitude_ANP4C": "-15:45:38,979",
-      "longitude_ANP4C": "-48:14:41,648",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "27/12/2017",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1177396",
-      "autorizacao": "PR/GO0097123",
-      "dataPublicacao": "02/09/2011",
-      "razaoSocial": "AUTO POSTO GUAIRA EIRELI",
-      "cnpj": "12560575000148",
-      "endereco": "RODOVIA BR 070 QUADRA 28,  S/N",
-      "complemento": "LOTE  16/17",
-      "bairro": "JARDIM GUAIRA II",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "IPIRANGA",
-      "dataVinculacao": "19/06/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.76082747",
-      "longitude": "-48.24490218",
-      "latitude_ANP4C": "-15:45:38,979",
-      "longitude_ANP4C": "-48:14:41,648",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "27/12/2017",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 15,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 6
-    },
-    {
-      "codigoSIMP": "1177396",
-      "autorizacao": "PR/GO0097123",
-      "dataPublicacao": "02/09/2011",
-      "razaoSocial": "AUTO POSTO GUAIRA EIRELI",
-      "cnpj": "12560575000148",
-      "endereco": "RODOVIA BR 070 QUADRA 28,  S/N",
-      "complemento": "LOTE  16/17",
-      "bairro": "JARDIM GUAIRA II",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "IPIRANGA",
-      "dataVinculacao": "19/06/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.76082747",
-      "longitude": "-48.24490218",
-      "latitude_ANP4C": "-15:45:38,979",
-      "longitude_ANP4C": "-48:14:41,648",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "27/12/2017",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S500 - COMUM",
-      "tancagem": 15,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1179297",
-      "autorizacao": "PR/GO0103143",
-      "dataPublicacao": "18/10/2011",
-      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
-      "cnpj": "13244310000101",
-      "endereco": "QUADRA 08,  SN",
-      "complemento": "LOTE  25, 26 E 27",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72910001",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "21/02/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7625852",
-      "longitude": "-48.2652142",
-      "latitude_ANP4C": "-15:45:45,307",
-      "longitude_ANP4C": "-48:15:54,771",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 15,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1179297",
-      "autorizacao": "PR/GO0103143",
-      "dataPublicacao": "18/10/2011",
-      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
-      "cnpj": "13244310000101",
-      "endereco": "QUADRA 08,  SN",
-      "complemento": "LOTE  25, 26 E 27",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72910001",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "21/02/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7625852",
-      "longitude": "-48.2652142",
-      "latitude_ANP4C": "-15:45:45,307",
-      "longitude_ANP4C": "-48:15:54,771",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1179297",
-      "autorizacao": "PR/GO0103143",
-      "dataPublicacao": "18/10/2011",
-      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
-      "cnpj": "13244310000101",
-      "endereco": "QUADRA 08,  SN",
-      "complemento": "LOTE  25, 26 E 27",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72910001",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "21/02/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7625852",
-      "longitude": "-48.2652142",
-      "latitude_ANP4C": "-15:45:45,307",
-      "longitude_ANP4C": "-48:15:54,771",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM ADITIVADA",
-      "tancagem": 15,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 6
-    },
-    {
-      "codigoSIMP": "1179297",
-      "autorizacao": "PR/GO0103143",
-      "dataPublicacao": "18/10/2011",
-      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
-      "cnpj": "13244310000101",
-      "endereco": "QUADRA 08,  SN",
-      "complemento": "LOTE  25, 26 E 27",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72910001",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "21/02/2018",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 15,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7625852",
-      "longitude": "-48.2652142",
-      "latitude_ANP4C": "-15:45:45,307",
-      "longitude_ANP4C": "-48:15:54,771",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S500 - COMUM",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
     {
       "codigoSIMP": "1212579",
       "autorizacao": "PR/GO0168347",
@@ -1069,30 +337,30 @@
       "qtdeBicos": 2
     },
     {
-      "codigoSIMP": "1290070",
-      "autorizacao": "PR/GO0239869",
-      "dataPublicacao": "24/04/2023",
-      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
-      "cnpj": "19090135000113",
-      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "codigoSIMP": "1309453",
+      "autorizacao": "PR/GO0249639",
+      "dataPublicacao": "30/04/2025",
+      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
+      "cnpj": "54438110000169",
+      "endereco": "QUADRA 09, RUA 02,  10",
       "complemento": "",
-      "bairro": "PARQUE DA BARRAGEM SETOR 08",
-      "cep": "72910022",
+      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
+      "cep": "72910990",
       "uf": "GO",
       "municipio": "AGUAS LINDAS DE GOIAS",
       "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "24/04/2023",
+      "dataVinculacao": "30/04/2025",
       "classe": "",
       "produtos": [
         {
           "produto": "ETANOL HIDRATADO COMUM",
           "tancagem": 20,
           "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
+          "qtdeBicos": 4
         },
         {
           "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
+          "tancagem": 30,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 6
         },
@@ -1104,21 +372,27 @@
         },
         {
           "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 2
         }
       ],
-      "latitude": "-15.7457739",
-      "longitude": "-48.2767689",
-      "latitude_ANP4C": "-15:44:44,786",
-      "longitude_ANP4C": "-48:16:36,368",
+      "latitude": "-15.6811689",
+      "longitude": "-48.2680336",
+      "latitude_ANP4C": "-15:40:52,208",
+      "longitude_ANP4C": "-48:16:04,921",
       "validacao": "Posição Geográfica não validada",
       "estimativaAcuracia": "4",
       "srid": "4674",
       "src": "SIRGAS2000",
-      "dataObtencao": "22/04/2026",
-      "origemInformacao": "Agente de fiscalização da ANP",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
       "situacaoConstatada": "200",
       "observacao": "",
       "statusSIGAF": "",
@@ -1126,33 +400,33 @@
       "produto": "ETANOL HIDRATADO COMUM",
       "tancagem": 20,
       "unidMedidaTancagem": "m³",
-      "qtdeBicos": 6
+      "qtdeBicos": 4
     },
     {
-      "codigoSIMP": "1290070",
-      "autorizacao": "PR/GO0239869",
-      "dataPublicacao": "24/04/2023",
-      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
-      "cnpj": "19090135000113",
-      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "codigoSIMP": "1309453",
+      "autorizacao": "PR/GO0249639",
+      "dataPublicacao": "30/04/2025",
+      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
+      "cnpj": "54438110000169",
+      "endereco": "QUADRA 09, RUA 02,  10",
       "complemento": "",
-      "bairro": "PARQUE DA BARRAGEM SETOR 08",
-      "cep": "72910022",
+      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
+      "cep": "72910990",
       "uf": "GO",
       "municipio": "AGUAS LINDAS DE GOIAS",
       "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "24/04/2023",
+      "dataVinculacao": "30/04/2025",
       "classe": "",
       "produtos": [
         {
           "produto": "ETANOL HIDRATADO COMUM",
           "tancagem": 20,
           "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
+          "qtdeBicos": 4
         },
         {
           "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
+          "tancagem": 30,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 6
         },
@@ -1164,55 +438,61 @@
         },
         {
           "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 2
         }
       ],
-      "latitude": "-15.7457739",
-      "longitude": "-48.2767689",
-      "latitude_ANP4C": "-15:44:44,786",
-      "longitude_ANP4C": "-48:16:36,368",
+      "latitude": "-15.6811689",
+      "longitude": "-48.2680336",
+      "latitude_ANP4C": "-15:40:52,208",
+      "longitude_ANP4C": "-48:16:04,921",
       "validacao": "Posição Geográfica não validada",
       "estimativaAcuracia": "4",
       "srid": "4674",
       "src": "SIRGAS2000",
-      "dataObtencao": "22/04/2026",
-      "origemInformacao": "Agente de fiscalização da ANP",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
       "situacaoConstatada": "200",
       "observacao": "",
       "statusSIGAF": "",
       "inadimplenciaPMQC": [],
       "produto": "GASOLINA C COMUM",
-      "tancagem": 20,
+      "tancagem": 30,
       "unidMedidaTancagem": "m³",
       "qtdeBicos": 6
     },
     {
-      "codigoSIMP": "1290070",
-      "autorizacao": "PR/GO0239869",
-      "dataPublicacao": "24/04/2023",
-      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
-      "cnpj": "19090135000113",
-      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "codigoSIMP": "1309453",
+      "autorizacao": "PR/GO0249639",
+      "dataPublicacao": "30/04/2025",
+      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
+      "cnpj": "54438110000169",
+      "endereco": "QUADRA 09, RUA 02,  10",
       "complemento": "",
-      "bairro": "PARQUE DA BARRAGEM SETOR 08",
-      "cep": "72910022",
+      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
+      "cep": "72910990",
       "uf": "GO",
       "municipio": "AGUAS LINDAS DE GOIAS",
       "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "24/04/2023",
+      "dataVinculacao": "30/04/2025",
       "classe": "",
       "produtos": [
         {
           "produto": "ETANOL HIDRATADO COMUM",
           "tancagem": 20,
           "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
+          "qtdeBicos": 4
         },
         {
           "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
+          "tancagem": 30,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 6
         },
@@ -1224,21 +504,27 @@
         },
         {
           "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 2
         }
       ],
-      "latitude": "-15.7457739",
-      "longitude": "-48.2767689",
-      "latitude_ANP4C": "-15:44:44,786",
-      "longitude_ANP4C": "-48:16:36,368",
+      "latitude": "-15.6811689",
+      "longitude": "-48.2680336",
+      "latitude_ANP4C": "-15:40:52,208",
+      "longitude_ANP4C": "-48:16:04,921",
       "validacao": "Posição Geográfica não validada",
       "estimativaAcuracia": "4",
       "srid": "4674",
       "src": "SIRGAS2000",
-      "dataObtencao": "22/04/2026",
-      "origemInformacao": "Agente de fiscalização da ANP",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
       "situacaoConstatada": "200",
       "observacao": "",
       "statusSIGAF": "",
@@ -1249,30 +535,30 @@
       "qtdeBicos": 4
     },
     {
-      "codigoSIMP": "1290070",
-      "autorizacao": "PR/GO0239869",
-      "dataPublicacao": "24/04/2023",
-      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
-      "cnpj": "19090135000113",
-      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "codigoSIMP": "1309453",
+      "autorizacao": "PR/GO0249639",
+      "dataPublicacao": "30/04/2025",
+      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
+      "cnpj": "54438110000169",
+      "endereco": "QUADRA 09, RUA 02,  10",
       "complemento": "",
-      "bairro": "PARQUE DA BARRAGEM SETOR 08",
-      "cep": "72910022",
+      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
+      "cep": "72910990",
       "uf": "GO",
       "municipio": "AGUAS LINDAS DE GOIAS",
       "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "24/04/2023",
+      "dataVinculacao": "30/04/2025",
       "classe": "",
       "produtos": [
         {
           "produto": "ETANOL HIDRATADO COMUM",
           "tancagem": 20,
           "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
+          "qtdeBicos": 4
         },
         {
           "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
+          "tancagem": 30,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 6
         },
@@ -1284,26 +570,500 @@
         },
         {
           "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
           "unidMedidaTancagem": "m³",
           "qtdeBicos": 2
         }
       ],
-      "latitude": "-15.7457739",
-      "longitude": "-48.2767689",
-      "latitude_ANP4C": "-15:44:44,786",
-      "longitude_ANP4C": "-48:16:36,368",
+      "latitude": "-15.6811689",
+      "longitude": "-48.2680336",
+      "latitude_ANP4C": "-15:40:52,208",
+      "longitude_ANP4C": "-48:16:04,921",
       "validacao": "Posição Geográfica não validada",
       "estimativaAcuracia": "4",
       "srid": "4674",
       "src": "SIRGAS2000",
-      "dataObtencao": "22/04/2026",
-      "origemInformacao": "Agente de fiscalização da ANP",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
       "situacaoConstatada": "200",
       "observacao": "",
       "statusSIGAF": "",
       "inadimplenciaPMQC": [],
       "produto": "ÓLEO DIESEL B S10 - COMUM",
+      "tancagem": 15,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
+      "codigoSIMP": "1309453",
+      "autorizacao": "PR/GO0249639",
+      "dataPublicacao": "30/04/2025",
+      "razaoSocial": "AUTO POSTO FORQUILHA II LTDA",
+      "cnpj": "54438110000169",
+      "endereco": "QUADRA 09, RUA 02,  10",
+      "complemento": "",
+      "bairro": "COLONIAL PARQUE I PADRE LUCIO",
+      "cep": "72910990",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "30/04/2025",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 30,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.6811689",
+      "longitude": "-48.2680336",
+      "latitude_ANP4C": "-15:40:52,208",
+      "longitude_ANP4C": "-48:16:04,921",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S500 - COMUM",
+      "tancagem": 15,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
+      "codigoSIMP": "1177396",
+      "autorizacao": "PR/GO0097123",
+      "dataPublicacao": "02/09/2011",
+      "razaoSocial": "AUTO POSTO GUAIRA EIRELI",
+      "cnpj": "12560575000148",
+      "endereco": "RODOVIA BR 070 QUADRA 28,  S/N",
+      "complemento": "LOTE  16/17",
+      "bairro": "JARDIM GUAIRA II",
+      "cep": "72910000",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "IPIRANGA",
+      "dataVinculacao": "19/06/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 30,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.76082747",
+      "longitude": "-48.24490218",
+      "latitude_ANP4C": "-15:45:38,979",
+      "longitude_ANP4C": "-48:14:41,648",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "5",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "27/12/2017",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ETANOL HIDRATADO COMUM",
+      "tancagem": 30,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 8
+    },
+    {
+      "codigoSIMP": "1177396",
+      "autorizacao": "PR/GO0097123",
+      "dataPublicacao": "02/09/2011",
+      "razaoSocial": "AUTO POSTO GUAIRA EIRELI",
+      "cnpj": "12560575000148",
+      "endereco": "RODOVIA BR 070 QUADRA 28,  S/N",
+      "complemento": "LOTE  16/17",
+      "bairro": "JARDIM GUAIRA II",
+      "cep": "72910000",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "IPIRANGA",
+      "dataVinculacao": "19/06/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 30,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.76082747",
+      "longitude": "-48.24490218",
+      "latitude_ANP4C": "-15:45:38,979",
+      "longitude_ANP4C": "-48:14:41,648",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "5",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "27/12/2017",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM",
+      "tancagem": 15,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 6
+    },
+    {
+      "codigoSIMP": "1177396",
+      "autorizacao": "PR/GO0097123",
+      "dataPublicacao": "02/09/2011",
+      "razaoSocial": "AUTO POSTO GUAIRA EIRELI",
+      "cnpj": "12560575000148",
+      "endereco": "RODOVIA BR 070 QUADRA 28,  S/N",
+      "complemento": "LOTE  16/17",
+      "bairro": "JARDIM GUAIRA II",
+      "cep": "72910000",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "IPIRANGA",
+      "dataVinculacao": "19/06/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 30,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.76082747",
+      "longitude": "-48.24490218",
+      "latitude_ANP4C": "-15:45:38,979",
+      "longitude_ANP4C": "-48:14:41,648",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "5",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "27/12/2017",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S500 - COMUM",
+      "tancagem": 15,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
+      "codigoSIMP": "1179297",
+      "autorizacao": "PR/GO0103143",
+      "dataPublicacao": "18/10/2011",
+      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
+      "cnpj": "13244310000101",
+      "endereco": "QUADRA 08,  SN",
+      "complemento": "LOTE  25, 26 E 27",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72910001",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "21/02/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7625852",
+      "longitude": "-48.2652142",
+      "latitude_ANP4C": "-15:45:45,307",
+      "longitude_ANP4C": "-48:15:54,771",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "13/08/2021",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ETANOL HIDRATADO COMUM",
+      "tancagem": 15,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 8
+    },
+    {
+      "codigoSIMP": "1179297",
+      "autorizacao": "PR/GO0103143",
+      "dataPublicacao": "18/10/2011",
+      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
+      "cnpj": "13244310000101",
+      "endereco": "QUADRA 08,  SN",
+      "complemento": "LOTE  25, 26 E 27",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72910001",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "21/02/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7625852",
+      "longitude": "-48.2652142",
+      "latitude_ANP4C": "-15:45:45,307",
+      "longitude_ANP4C": "-48:15:54,771",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "13/08/2021",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 8
+    },
+    {
+      "codigoSIMP": "1179297",
+      "autorizacao": "PR/GO0103143",
+      "dataPublicacao": "18/10/2011",
+      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
+      "cnpj": "13244310000101",
+      "endereco": "QUADRA 08,  SN",
+      "complemento": "LOTE  25, 26 E 27",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72910001",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "21/02/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7625852",
+      "longitude": "-48.2652142",
+      "latitude_ANP4C": "-15:45:45,307",
+      "longitude_ANP4C": "-48:15:54,771",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "13/08/2021",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM ADITIVADA",
+      "tancagem": 15,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 6
+    },
+    {
+      "codigoSIMP": "1179297",
+      "autorizacao": "PR/GO0103143",
+      "dataPublicacao": "18/10/2011",
+      "razaoSocial": "AUTO POSTO CAMPING CLUBE LTDA",
+      "cnpj": "13244310000101",
+      "endereco": "QUADRA 08,  SN",
+      "complemento": "LOTE  25, 26 E 27",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72910001",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "21/02/2018",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 15,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7625852",
+      "longitude": "-48.2652142",
+      "latitude_ANP4C": "-15:45:45,307",
+      "longitude_ANP4C": "-48:15:54,771",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "13/08/2021",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S500 - COMUM",
       "tancagem": 10,
       "unidMedidaTancagem": "m³",
       "qtdeBicos": 2
@@ -1879,6 +1639,246 @@
       "qtdeBicos": 2
     },
     {
+      "codigoSIMP": "1290070",
+      "autorizacao": "PR/GO0239869",
+      "dataPublicacao": "24/04/2023",
+      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
+      "cnpj": "19090135000113",
+      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "complemento": "",
+      "bairro": "PARQUE DA BARRAGEM SETOR 08",
+      "cep": "72910022",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "24/04/2023",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7457739",
+      "longitude": "-48.2767689",
+      "latitude_ANP4C": "-15:44:44,786",
+      "longitude_ANP4C": "-48:16:36,368",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "22/04/2026",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ETANOL HIDRATADO COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 6
+    },
+    {
+      "codigoSIMP": "1290070",
+      "autorizacao": "PR/GO0239869",
+      "dataPublicacao": "24/04/2023",
+      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
+      "cnpj": "19090135000113",
+      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "complemento": "",
+      "bairro": "PARQUE DA BARRAGEM SETOR 08",
+      "cep": "72910022",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "24/04/2023",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7457739",
+      "longitude": "-48.2767689",
+      "latitude_ANP4C": "-15:44:44,786",
+      "longitude_ANP4C": "-48:16:36,368",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "22/04/2026",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 6
+    },
+    {
+      "codigoSIMP": "1290070",
+      "autorizacao": "PR/GO0239869",
+      "dataPublicacao": "24/04/2023",
+      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
+      "cnpj": "19090135000113",
+      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "complemento": "",
+      "bairro": "PARQUE DA BARRAGEM SETOR 08",
+      "cep": "72910022",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "24/04/2023",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7457739",
+      "longitude": "-48.2767689",
+      "latitude_ANP4C": "-15:44:44,786",
+      "longitude_ANP4C": "-48:16:36,368",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "22/04/2026",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM ADITIVADA",
+      "tancagem": 10,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 4
+    },
+    {
+      "codigoSIMP": "1290070",
+      "autorizacao": "PR/GO0239869",
+      "dataPublicacao": "24/04/2023",
+      "razaoSocial": "AUTO POSTO DO HOSPITAL LTDA",
+      "cnpj": "19090135000113",
+      "endereco": "QUADRA 29 CONJUNTO A LOTE,  05A",
+      "complemento": "",
+      "bairro": "PARQUE DA BARRAGEM SETOR 08",
+      "cep": "72910022",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "24/04/2023",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 6
+        },
+        {
+          "produto": "GASOLINA C COMUM ADITIVADA",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7457739",
+      "longitude": "-48.2767689",
+      "latitude_ANP4C": "-15:44:44,786",
+      "longitude_ANP4C": "-48:16:36,368",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "22/04/2026",
+      "origemInformacao": "Agente de fiscalização da ANP",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S10 - COMUM",
+      "tancagem": 10,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
       "codigoSIMP": "1223417",
       "autorizacao": "PR/GO0175485",
       "dataPublicacao": "12/05/2016",
@@ -2371,6 +2371,486 @@
       "qtdeBicos": 4
     },
     {
+      "codigoSIMP": "1300269",
+      "autorizacao": "PR/GO0246044",
+      "dataPublicacao": "25/03/2024",
+      "razaoSocial": "POSTO PRIME LTDA",
+      "cnpj": "46080060000162",
+      "endereco": "QUADRA QUADRA 5  LOTES,  02",
+      "complemento": "LOTE  03 04 E 05",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72914126",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "25/03/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7608683",
+      "longitude": "-48.2637742",
+      "latitude_ANP4C": "-15:45:39,126",
+      "longitude_ANP4C": "-48:15:49,587",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ETANOL HIDRATADO COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 8
+    },
+    {
+      "codigoSIMP": "1300269",
+      "autorizacao": "PR/GO0246044",
+      "dataPublicacao": "25/03/2024",
+      "razaoSocial": "POSTO PRIME LTDA",
+      "cnpj": "46080060000162",
+      "endereco": "QUADRA QUADRA 5  LOTES,  02",
+      "complemento": "LOTE  03 04 E 05",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72914126",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "25/03/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7608683",
+      "longitude": "-48.2637742",
+      "latitude_ANP4C": "-15:45:39,126",
+      "longitude_ANP4C": "-48:15:49,587",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 8
+    },
+    {
+      "codigoSIMP": "1300269",
+      "autorizacao": "PR/GO0246044",
+      "dataPublicacao": "25/03/2024",
+      "razaoSocial": "POSTO PRIME LTDA",
+      "cnpj": "46080060000162",
+      "endereco": "QUADRA QUADRA 5  LOTES,  02",
+      "complemento": "LOTE  03 04 E 05",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72914126",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "25/03/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7608683",
+      "longitude": "-48.2637742",
+      "latitude_ANP4C": "-15:45:39,126",
+      "longitude_ANP4C": "-48:15:49,587",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S10 - COMUM",
+      "tancagem": 10,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
+      "codigoSIMP": "1300269",
+      "autorizacao": "PR/GO0246044",
+      "dataPublicacao": "25/03/2024",
+      "razaoSocial": "POSTO PRIME LTDA",
+      "cnpj": "46080060000162",
+      "endereco": "QUADRA QUADRA 5  LOTES,  02",
+      "complemento": "LOTE  03 04 E 05",
+      "bairro": "CAMPING CLUBE",
+      "cep": "72914126",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "25/03/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 8
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.7608683",
+      "longitude": "-48.2637742",
+      "latitude_ANP4C": "-15:45:39,126",
+      "longitude_ANP4C": "-48:15:49,587",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "4",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "20/11/2025",
+      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
+      "situacaoConstatada": "200",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S500 - COMUM",
+      "tancagem": 10,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
+      "codigoSIMP": "1303285",
+      "autorizacao": "PR/GO0247339",
+      "dataPublicacao": "06/08/2024",
+      "razaoSocial": "POSTO SAO JOSE LTDA",
+      "cnpj": "52505400000152",
+      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
+      "complemento": "",
+      "bairro": "JARDIM BRASÍLIA II",
+      "cep": "72917561",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "06/08/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.71203508",
+      "longitude": "-48.28228578",
+      "latitude_ANP4C": "-15:42:43,326",
+      "longitude_ANP4C": "-48:16:56,229",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "19/07/2024",
+      "origemInformacao": "Preposto da empresa",
+      "situacaoConstatada": "",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ETANOL HIDRATADO COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 4
+    },
+    {
+      "codigoSIMP": "1303285",
+      "autorizacao": "PR/GO0247339",
+      "dataPublicacao": "06/08/2024",
+      "razaoSocial": "POSTO SAO JOSE LTDA",
+      "cnpj": "52505400000152",
+      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
+      "complemento": "",
+      "bairro": "JARDIM BRASÍLIA II",
+      "cep": "72917561",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "06/08/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.71203508",
+      "longitude": "-48.28228578",
+      "latitude_ANP4C": "-15:42:43,326",
+      "longitude_ANP4C": "-48:16:56,229",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "19/07/2024",
+      "origemInformacao": "Preposto da empresa",
+      "situacaoConstatada": "",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "GASOLINA C COMUM",
+      "tancagem": 20,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 4
+    },
+    {
+      "codigoSIMP": "1303285",
+      "autorizacao": "PR/GO0247339",
+      "dataPublicacao": "06/08/2024",
+      "razaoSocial": "POSTO SAO JOSE LTDA",
+      "cnpj": "52505400000152",
+      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
+      "complemento": "",
+      "bairro": "JARDIM BRASÍLIA II",
+      "cep": "72917561",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "06/08/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.71203508",
+      "longitude": "-48.28228578",
+      "latitude_ANP4C": "-15:42:43,326",
+      "longitude_ANP4C": "-48:16:56,229",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "19/07/2024",
+      "origemInformacao": "Preposto da empresa",
+      "situacaoConstatada": "",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S10 - COMUM",
+      "tancagem": 10,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
+      "codigoSIMP": "1303285",
+      "autorizacao": "PR/GO0247339",
+      "dataPublicacao": "06/08/2024",
+      "razaoSocial": "POSTO SAO JOSE LTDA",
+      "cnpj": "52505400000152",
+      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
+      "complemento": "",
+      "bairro": "JARDIM BRASÍLIA II",
+      "cep": "72917561",
+      "uf": "GO",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "distribuidora": "BANDEIRA BRANCA",
+      "dataVinculacao": "06/08/2024",
+      "classe": "",
+      "produtos": [
+        {
+          "produto": "ETANOL HIDRATADO COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "GASOLINA C COMUM",
+          "tancagem": 20,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 4
+        },
+        {
+          "produto": "ÓLEO DIESEL B S10 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        },
+        {
+          "produto": "ÓLEO DIESEL B S500 - COMUM",
+          "tancagem": 10,
+          "unidMedidaTancagem": "m³",
+          "qtdeBicos": 2
+        }
+      ],
+      "latitude": "-15.71203508",
+      "longitude": "-48.28228578",
+      "latitude_ANP4C": "-15:42:43,326",
+      "longitude_ANP4C": "-48:16:56,229",
+      "validacao": "Posição Geográfica não validada",
+      "estimativaAcuracia": "",
+      "srid": "4674",
+      "src": "SIRGAS2000",
+      "dataObtencao": "19/07/2024",
+      "origemInformacao": "Preposto da empresa",
+      "situacaoConstatada": "",
+      "observacao": "",
+      "statusSIGAF": "",
+      "inadimplenciaPMQC": [],
+      "produto": "ÓLEO DIESEL B S500 - COMUM",
+      "tancagem": 10,
+      "unidMedidaTancagem": "m³",
+      "qtdeBicos": 2
+    },
+    {
       "codigoSIMP": "1181823",
       "autorizacao": "PR/GO0103642",
       "dataPublicacao": "11/01/2012",
@@ -2611,486 +3091,6 @@
       "qtdeBicos": 4
     },
     {
-      "codigoSIMP": "1300269",
-      "autorizacao": "PR/GO0246044",
-      "dataPublicacao": "25/03/2024",
-      "razaoSocial": "POSTO PRIME LTDA",
-      "cnpj": "46080060000162",
-      "endereco": "QUADRA QUADRA 5  LOTES,  02",
-      "complemento": "LOTE  03 04 E 05",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72914126",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "25/03/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7608683",
-      "longitude": "-48.2637742",
-      "latitude_ANP4C": "-15:45:39,126",
-      "longitude_ANP4C": "-48:15:49,587",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1300269",
-      "autorizacao": "PR/GO0246044",
-      "dataPublicacao": "25/03/2024",
-      "razaoSocial": "POSTO PRIME LTDA",
-      "cnpj": "46080060000162",
-      "endereco": "QUADRA QUADRA 5  LOTES,  02",
-      "complemento": "LOTE  03 04 E 05",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72914126",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "25/03/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7608683",
-      "longitude": "-48.2637742",
-      "latitude_ANP4C": "-15:45:39,126",
-      "longitude_ANP4C": "-48:15:49,587",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1300269",
-      "autorizacao": "PR/GO0246044",
-      "dataPublicacao": "25/03/2024",
-      "razaoSocial": "POSTO PRIME LTDA",
-      "cnpj": "46080060000162",
-      "endereco": "QUADRA QUADRA 5  LOTES,  02",
-      "complemento": "LOTE  03 04 E 05",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72914126",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "25/03/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7608683",
-      "longitude": "-48.2637742",
-      "latitude_ANP4C": "-15:45:39,126",
-      "longitude_ANP4C": "-48:15:49,587",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S10 - COMUM",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1300269",
-      "autorizacao": "PR/GO0246044",
-      "dataPublicacao": "25/03/2024",
-      "razaoSocial": "POSTO PRIME LTDA",
-      "cnpj": "46080060000162",
-      "endereco": "QUADRA QUADRA 5  LOTES,  02",
-      "complemento": "LOTE  03 04 E 05",
-      "bairro": "CAMPING CLUBE",
-      "cep": "72914126",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "25/03/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7608683",
-      "longitude": "-48.2637742",
-      "latitude_ANP4C": "-15:45:39,126",
-      "longitude_ANP4C": "-48:15:49,587",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "20/11/2025",
-      "origemInformacao": "Agente de Fiscalização de órgão conveniado",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S500 - COMUM",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1303285",
-      "autorizacao": "PR/GO0247339",
-      "dataPublicacao": "06/08/2024",
-      "razaoSocial": "POSTO SAO JOSE LTDA",
-      "cnpj": "52505400000152",
-      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
-      "complemento": "",
-      "bairro": "JARDIM BRASÍLIA II",
-      "cep": "72917561",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "06/08/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.71203508",
-      "longitude": "-48.28228578",
-      "latitude_ANP4C": "-15:42:43,326",
-      "longitude_ANP4C": "-48:16:56,229",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "19/07/2024",
-      "origemInformacao": "Preposto da empresa",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 4
-    },
-    {
-      "codigoSIMP": "1303285",
-      "autorizacao": "PR/GO0247339",
-      "dataPublicacao": "06/08/2024",
-      "razaoSocial": "POSTO SAO JOSE LTDA",
-      "cnpj": "52505400000152",
-      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
-      "complemento": "",
-      "bairro": "JARDIM BRASÍLIA II",
-      "cep": "72917561",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "06/08/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.71203508",
-      "longitude": "-48.28228578",
-      "latitude_ANP4C": "-15:42:43,326",
-      "longitude_ANP4C": "-48:16:56,229",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "19/07/2024",
-      "origemInformacao": "Preposto da empresa",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 4
-    },
-    {
-      "codigoSIMP": "1303285",
-      "autorizacao": "PR/GO0247339",
-      "dataPublicacao": "06/08/2024",
-      "razaoSocial": "POSTO SAO JOSE LTDA",
-      "cnpj": "52505400000152",
-      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
-      "complemento": "",
-      "bairro": "JARDIM BRASÍLIA II",
-      "cep": "72917561",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "06/08/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.71203508",
-      "longitude": "-48.28228578",
-      "latitude_ANP4C": "-15:42:43,326",
-      "longitude_ANP4C": "-48:16:56,229",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "19/07/2024",
-      "origemInformacao": "Preposto da empresa",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S10 - COMUM",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1303285",
-      "autorizacao": "PR/GO0247339",
-      "dataPublicacao": "06/08/2024",
-      "razaoSocial": "POSTO SAO JOSE LTDA",
-      "cnpj": "52505400000152",
-      "endereco": "QUADRA QUADRA 97 LOTE,  83,83A",
-      "complemento": "",
-      "bairro": "JARDIM BRASÍLIA II",
-      "cep": "72917561",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "BANDEIRA BRANCA",
-      "dataVinculacao": "06/08/2024",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.71203508",
-      "longitude": "-48.28228578",
-      "latitude_ANP4C": "-15:42:43,326",
-      "longitude_ANP4C": "-48:16:56,229",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "19/07/2024",
-      "origemInformacao": "Preposto da empresa",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S500 - COMUM",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
       "codigoSIMP": "1215726",
       "autorizacao": "PR/GO0170905",
       "dataPublicacao": "01/07/2015",
@@ -3421,336 +3421,6 @@
       "qtdeBicos": 2
     },
     {
-      "codigoSIMP": "1290288",
-      "autorizacao": "PR/GO0240449",
-      "dataPublicacao": "02/05/2023",
-      "razaoSocial": "MEU POSTO DE COMBUSTIVEIS LTDA",
-      "cnpj": "42783063000101",
-      "endereco": "AVENIDA QUADRA 1 PRIMEIRA AVENIDA,  SN",
-      "complemento": "LOTE  01/02",
-      "bairro": "MANSOES AGUAS LINDAS",
-      "cep": "72915180",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "12/05/2026",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7349462",
-      "longitude": "-48.2799449",
-      "latitude_ANP4C": "-15:44:05,806",
-      "longitude_ANP4C": "-48:16:47,802",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "10/01/2024",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 6
-    },
-    {
-      "codigoSIMP": "1290288",
-      "autorizacao": "PR/GO0240449",
-      "dataPublicacao": "02/05/2023",
-      "razaoSocial": "MEU POSTO DE COMBUSTIVEIS LTDA",
-      "cnpj": "42783063000101",
-      "endereco": "AVENIDA QUADRA 1 PRIMEIRA AVENIDA,  SN",
-      "complemento": "LOTE  01/02",
-      "bairro": "MANSOES AGUAS LINDAS",
-      "cep": "72915180",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "12/05/2026",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7349462",
-      "longitude": "-48.2799449",
-      "latitude_ANP4C": "-15:44:05,806",
-      "longitude_ANP4C": "-48:16:47,802",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "10/01/2024",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1290288",
-      "autorizacao": "PR/GO0240449",
-      "dataPublicacao": "02/05/2023",
-      "razaoSocial": "MEU POSTO DE COMBUSTIVEIS LTDA",
-      "cnpj": "42783063000101",
-      "endereco": "AVENIDA QUADRA 1 PRIMEIRA AVENIDA,  SN",
-      "complemento": "LOTE  01/02",
-      "bairro": "MANSOES AGUAS LINDAS",
-      "cep": "72915180",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "12/05/2026",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7349462",
-      "longitude": "-48.2799449",
-      "latitude_ANP4C": "-15:44:05,806",
-      "longitude_ANP4C": "-48:16:47,802",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "10/01/2024",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM ADITIVADA",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 6
-    },
-    {
-      "codigoSIMP": "1290288",
-      "autorizacao": "PR/GO0240449",
-      "dataPublicacao": "02/05/2023",
-      "razaoSocial": "MEU POSTO DE COMBUSTIVEIS LTDA",
-      "cnpj": "42783063000101",
-      "endereco": "AVENIDA QUADRA 1 PRIMEIRA AVENIDA,  SN",
-      "complemento": "LOTE  01/02",
-      "bairro": "MANSOES AGUAS LINDAS",
-      "cep": "72915180",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "12/05/2026",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7349462",
-      "longitude": "-48.2799449",
-      "latitude_ANP4C": "-15:44:05,806",
-      "longitude_ANP4C": "-48:16:47,802",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "10/01/2024",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S10 - COMUM",
-      "tancagem": 20,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
-      "codigoSIMP": "1290288",
-      "autorizacao": "PR/GO0240449",
-      "dataPublicacao": "02/05/2023",
-      "razaoSocial": "MEU POSTO DE COMBUSTIVEIS LTDA",
-      "cnpj": "42783063000101",
-      "endereco": "AVENIDA QUADRA 1 PRIMEIRA AVENIDA,  SN",
-      "complemento": "LOTE  01/02",
-      "bairro": "MANSOES AGUAS LINDAS",
-      "cep": "72915180",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "12/05/2026",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 6
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 20,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        },
-        {
-          "produto": "ÓLEO DIESEL B S500 - COMUM",
-          "tancagem": 10,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7349462",
-      "longitude": "-48.2799449",
-      "latitude_ANP4C": "-15:44:05,806",
-      "longitude_ANP4C": "-48:16:47,802",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "4",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "10/01/2024",
-      "origemInformacao": "Agente de fiscalização da ANP",
-      "situacaoConstatada": "200",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S500 - COMUM",
-      "tancagem": 10,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
-    },
-    {
       "codigoSIMP": "1264579",
       "autorizacao": "PR/GO0199974",
       "dataPublicacao": "17/06/2020",
@@ -3913,244 +3583,34 @@
       "qtdeBicos": 2
     },
     {
-      "codigoSIMP": "1289032",
-      "autorizacao": "PR/GO0236904",
-      "dataPublicacao": "17/02/2023",
-      "razaoSocial": "POSTO NOSSA SENHORA DE SANT¿ANA LTDA",
-      "cnpj": "40833628000192",
-      "endereco": "AL GOIAS,  SN",
-      "complemento": "KM 28, RODOVIA BR 070",
-      "bairro": "MANSOES CENTRO OESTE",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "17/02/2023",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7383298",
-      "longitude": "-48.2721733",
-      "latitude_ANP4C": "-15:44:17,987",
-      "longitude_ANP4C": "-48:16:19,824",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Sucessão da empresa - indicada por analista do SIMP",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ETANOL HIDRATADO COMUM",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 4
+      "CODIGOISIMP": "1290288",
+      "AUTORIZACAO": "PR/GO0240449",
+      "DATAPUBLICACAO": "02/05/2023",
+      "RAZAOSOCIAL": "MEU POSTO DE COMBUSTIVEIS LTDA",
+      "CNPJ": "42783063000101",
+      "ENDERECO": "AVENIDA QUADRA 1 PRIMEIRA AVENIDA,  SN",
+      "COMPLEMENTO": "LOTE  01/02",
+      "BAIRRO": "MANSOES AGUAS LINDAS",
+      "CEP": "72915180",
+      "UF": "GO",
+      "MUNICIPIO": "AGUAS LINDAS DE GOIAS",
+      "BANDEIRA": "RAIZEN",
+      "DATAVINCULACAO": "12/05/2026"
     },
     {
-      "codigoSIMP": "1289032",
-      "autorizacao": "PR/GO0236904",
-      "dataPublicacao": "17/02/2023",
-      "razaoSocial": "POSTO NOSSA SENHORA DE SANT¿ANA LTDA",
-      "cnpj": "40833628000192",
-      "endereco": "AL GOIAS,  SN",
-      "complemento": "KM 28, RODOVIA BR 070",
-      "bairro": "MANSOES CENTRO OESTE",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "17/02/2023",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7383298",
-      "longitude": "-48.2721733",
-      "latitude_ANP4C": "-15:44:17,987",
-      "longitude_ANP4C": "-48:16:19,824",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Sucessão da empresa - indicada por analista do SIMP",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 8
-    },
-    {
-      "codigoSIMP": "1289032",
-      "autorizacao": "PR/GO0236904",
-      "dataPublicacao": "17/02/2023",
-      "razaoSocial": "POSTO NOSSA SENHORA DE SANT¿ANA LTDA",
-      "cnpj": "40833628000192",
-      "endereco": "AL GOIAS,  SN",
-      "complemento": "KM 28, RODOVIA BR 070",
-      "bairro": "MANSOES CENTRO OESTE",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "17/02/2023",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7383298",
-      "longitude": "-48.2721733",
-      "latitude_ANP4C": "-15:44:17,987",
-      "longitude_ANP4C": "-48:16:19,824",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Sucessão da empresa - indicada por analista do SIMP",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "GASOLINA C COMUM ADITIVADA",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 4
-    },
-    {
-      "codigoSIMP": "1289032",
-      "autorizacao": "PR/GO0236904",
-      "dataPublicacao": "17/02/2023",
-      "razaoSocial": "POSTO NOSSA SENHORA DE SANT¿ANA LTDA",
-      "cnpj": "40833628000192",
-      "endereco": "AL GOIAS,  SN",
-      "complemento": "KM 28, RODOVIA BR 070",
-      "bairro": "MANSOES CENTRO OESTE",
-      "cep": "72910000",
-      "uf": "GO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "distribuidora": "RAIZEN",
-      "dataVinculacao": "17/02/2023",
-      "classe": "",
-      "produtos": [
-        {
-          "produto": "ETANOL HIDRATADO COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "GASOLINA C COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 8
-        },
-        {
-          "produto": "GASOLINA C COMUM ADITIVADA",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 4
-        },
-        {
-          "produto": "ÓLEO DIESEL B S10 - COMUM",
-          "tancagem": 30,
-          "unidMedidaTancagem": "m³",
-          "qtdeBicos": 2
-        }
-      ],
-      "latitude": "-15.7383298",
-      "longitude": "-48.2721733",
-      "latitude_ANP4C": "-15:44:17,987",
-      "longitude_ANP4C": "-48:16:19,824",
-      "validacao": "Posição Geográfica não validada",
-      "estimativaAcuracia": "5",
-      "srid": "4674",
-      "src": "SIRGAS2000",
-      "dataObtencao": "13/08/2021",
-      "origemInformacao": "Sucessão da empresa - indicada por analista do SIMP",
-      "situacaoConstatada": "",
-      "observacao": "",
-      "statusSIGAF": "",
-      "inadimplenciaPMQC": [],
-      "produto": "ÓLEO DIESEL B S10 - COMUM",
-      "tancagem": 30,
-      "unidMedidaTancagem": "m³",
-      "qtdeBicos": 2
+      "CODIGOISIMP": "1289032",
+      "AUTORIZACAO": "PR/GO0236904",
+      "DATAPUBLICACAO": "17/02/2023",
+      "RAZAOSOCIAL": "POSTO NOSSA SENHORA DE SANT¿ANA LTDA",
+      "CNPJ": "40833628000192",
+      "ENDERECO": "AL GOIAS,  SN",
+      "COMPLEMENTO": "KM 28, RODOVIA BR 070",
+      "BAIRRO": "MANSOES CENTRO OESTE",
+      "CEP": "72910000",
+      "UF": "GO",
+      "MUNICIPIO": "AGUAS LINDAS DE GOIAS",
+      "BANDEIRA": "RAIZEN",
+      "DATAVINCULACAO": "17/02/2023"
     },
     {
       "CODIGOISIMP": "1289830",
