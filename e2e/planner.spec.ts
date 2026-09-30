@@ -60,8 +60,8 @@ test("planejar: mantém a rota utilizável quando o OSRM está indisponível", a
 
   await expect(page.getByText(/Estimativa local/)).toBeVisible();
   await expect(page.getByText(/km/).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Google Maps" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Waze" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Waze", exact: true })).toBeVisible();
 });
 
 
@@ -70,7 +70,7 @@ test("planejar: aceita destino sem GPS e oferece navegação externa", async ({ 
   await page.getByRole("button", { name: "Calcular rota" }).click();
 
   await expect(page.getByRole("heading", { name: /Navegação pronta/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Abrir Google Maps" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Abrir Waze" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Abrir Apple Maps" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir Google Maps", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir Waze", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir Apple Maps", exact: true })).toBeVisible();
 });
