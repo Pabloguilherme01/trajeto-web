@@ -215,16 +215,16 @@ export default function Home() {
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { label: "Centro", hint: "Explorar a região", icon: MapPin, query: "Centro Águas Lindas de Goiás, GO" },
-              { label: "Saúde", hint: "Hospitais e UBS", icon: HeartPulse, query: "hospitais e UBS Águas Lindas de Goiás, GO" },
-              { label: "Serviços", hint: "Atendimento público", icon: Landmark, query: "serviços públicos Águas Lindas de Goiás, GO" },
-              { label: "Emergência", hint: "Atendimento urgente", icon: Siren, query: "emergência Águas Lindas de Goiás, GO" },
+              { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => openServiceSearch("Centro Águas Lindas de Goiás, GO") },
+              { label: "Saúde", hint: "UPA, hospital e UBS", icon: HeartPulse, action: () => setLocation(appUrl("/servicos") + "?categoria=saude") },
+              { label: "Serviços", hint: "Prefeitura e cidadania", icon: Landmark, action: () => setLocation(appUrl("/servicos") + "?categoria=cidadania") },
+              { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?categoria=seguranca") },
             ].map(item => (
               <button
                 key={item.label}
                 type="button"
-                onClick={() => openServiceSearch(item.query)}
-                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition active:scale-[.985]"
+                onClick={item.action}
+                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/15 active:scale-[.985]"
               >
                 <item.icon className="size-4 text-[#C7FF3C]" aria-hidden="true" />
                 <span className="mt-2 block text-xs font-black">{item.label}</span>
