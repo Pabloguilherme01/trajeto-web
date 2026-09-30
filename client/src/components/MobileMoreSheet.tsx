@@ -1,5 +1,7 @@
 import { Accessibility, Calculator, ChevronRight, CircleHelp, Download, ExternalLink, Map, Navigation, Settings, X } from "lucide-react";
 import { useLocation } from "wouter";
+import { useState } from "react";
+import { getPreferredNavigationProvider, setPreferredNavigationProvider, type NavigationProvider } from "@/lib/mobileTools";
 import { appUrl } from "@/lib/appUrl";
 
 const OPEN_ACCESSIBILITY_EVENT = "trajeto:open-accessibility";
@@ -11,6 +13,7 @@ type Props = {
 
 export default function MobileMoreSheet({ open, onClose }: Props) {
   const [, setLocation] = useLocation();
+  const [provider, setProvider] = useState<NavigationProvider>(() => getPreferredNavigationProvider());
 
   if (!open) return null;
 
@@ -54,6 +57,35 @@ export default function MobileMoreSheet({ open, onClose }: Props) {
             <span className="min-w-0 flex-1"><span className="block text-[0.65rem] font-black text-white">No caminho</span><span className="mt-0.5 block text-[0.52rem] text-white/35">Planeje uma rota e encontre paradas no corredor</span></span>
             <ChevronRight className="size-4 text-white/20" />
           </button>
+
+          <div className="rounded-2xl border border-white/8 bg-white/[.02] p-3">
+            <div className="flex items-center gap-3">
+              <Navigation className="size-4 text-[#3DE3FF]" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[0.65rem] font-black text-white">App de navegação preferido</p>
+                <p className="mt-0.5 text-[0.52rem] text-white/35">Usado ao tocar em “Navegar” nas referências locais.</p>
+              </div>
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-1.5" role="group" aria-label="Provedor de navegação">
+              {([
+                ["google", "Google"],
+                ["waze", "Waze"],
+                ["apple", "Apple"],
+              ] as const).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setProvider(id); setPreferredNavigationProvider(id); }}
+                  aria-pressed={provider === id}
+                  className={provider === id
+                    ? "min-h-10 rounded-xl bg-[#C7FF3C] px-2 text-[0.5rem] font-black text-[#0B1014]"
+                    : "min-h-10 rounded-xl border border-white/8 bg-white/[.025] px-2 text-[0.5rem] font-bold text-white/50"}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <button type="button" onClick={() => go("/ajuda")} className="flex min-h-12 items-center gap-3 rounded-2xl border border-white/8 bg-white/[.025] px-3 text-left">
             <CircleHelp className="size-4 text-[#3DE3FF]" />
