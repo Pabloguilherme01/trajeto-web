@@ -254,7 +254,7 @@ export default function CityExplorerMap({ category, query = "", center, online, 
         ? {
             textQuery: textQuery + " Águas Lindas de Goiás",
             fields: ["id", "displayName", "formattedAddress", "location", "googleMapsURI", "businessStatus", "types"],
-            locationRestriction: { center, radius: 5000 },
+            locationBias: { center, radius: 5000 },
             maxResultCount: 10,
             rankPreference: "DISTANCE",
             language: "pt-BR",
