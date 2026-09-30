@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/mobileVehicle";
 import { getMaintenanceItems, getMaintenanceStatus, vehicleMaintenanceEvent } from "@/lib/vehicleMaintenance";
 import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
-import { getLastTrip, getMostUsedRoute, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 
 type Item = { label: string; detail: string; ok: boolean; warn?: boolean };
 
@@ -37,14 +37,12 @@ export default function TripReadinessCard() {
   const [vehicle, setVehicle] = useState<MobileVehicle | null>(() => getMobileVehicle());
   const [maintenance, setMaintenance] = useState(() => getMaintenanceItems());
   const [lastTrip, setLastTrip] = useState(() => getLastTrip());
-  const [mostUsedTrip, setMostUsedTrip] = useState(() => getMostUsedRoute());
 
   useEffect(() => {
     const refresh = () => {
       setVehicle(getMobileVehicle());
       setMaintenance(getMaintenanceItems());
       setLastTrip(getLastTrip());
-      setMostUsedTrip(getMostUsedRoute());
       void listOfflineRoutes().then(setRoutes).catch(() => setRoutes([]));
     };
     const onlineHandler = () => setOnline(true);
@@ -79,16 +77,13 @@ export default function TripReadinessCard() {
   const items = useMemo<Item[]>(() => [
     { label: "Conexão", detail: online ? connection.detail : latestRoute ? `${connection.detail} ${freshOfflineRoutes} rota${freshOfflineRoutes === 1 ? "" : "s"} recente${freshOfflineRoutes === 1 ? "" : "s"}.` : connection.detail, ok: online || Boolean(latestRoute), warn: !online && !latestRoute },
     { label: "Rota", detail: latestRoute ? (isOfflineRouteStale(latestRoute.savedAt) ? `salva há ${routeAge(latestRoute.savedAt)} · revisar antes de sair` : `salva há ${routeAge(latestRoute.savedAt)}`) : lastTrip ? "Última viagem registrada, mas não há cópia offline." : "Nenhuma viagem preparada.", ok: Boolean(latestRoute) && !isOfflineRouteStale(latestRoute.savedAt), warn: Boolean(latestRoute && isOfflineRouteStale(latestRoute.savedAt)) },
-    { label: "Veículo", detail: vehicle ? vehicle.name || `${vehicle.fuel} · ${vehicle.consumption.toLocaleString("pt-BR")} km/L` : "Nenhum veículo cadastrado.", ok: Boolean(vehicle) },
+    { label: "Veículo", detail: vehicle ? `${vehicle.name || "Veículo cadastrado"} · ${fuel.detail}` : "Nenhum veículo cadastrado.", ok: Boolean(vehicle) && fuel.ok, warn: Boolean(vehicle) && !fuel.ok },
     { label: "Manutenção", detail: maintenance.length ? (maintenanceWarning ? "Há item vencido ou próximo do vencimento." : "Itens cadastrados dentro do prazo.") : "Nenhum prazo de manutenção cadastrado.", ok: maintenance.length > 0 && !maintenanceWarning, warn: maintenanceWarning },
-    { label: "Combustível", detail: fuel.detail, ok: fuel.ok },
   ], [online, latestRoute, vehicle, maintenance, maintenanceWarning, fuel, lastTrip]);
 
   const readyCount = items.filter(item => item.ok).length;
   const hasWarning = items.some(item => item.warn);
   const status = readyCount === items.length ? "Pronto para sair" : hasWarning ? "Revisar antes de sair" : "Preparação incompleta";
-  const routineLabel = mostUsedTrip ? `${mostUsedTrip.origin} → ${mostUsedTrip.destination}` : lastTrip ? `${lastTrip.origin} → ${lastTrip.destination}` : null;
-  const routineOffline = mostUsedTrip ? routes.find(route => route.origin.trim().toLocaleLowerCase("pt-BR") === mostUsedTrip.origin.trim().toLocaleLowerCase("pt-BR") && route.destination.trim().toLocaleLowerCase("pt-BR") === mostUsedTrip.destination.trim().toLocaleLowerCase("pt-BR")) : null;
 
   return (
     <section className="mobile-card rounded-3xl border border-white/10 bg-[#10181F] p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,.2)] sm:p-6" aria-labelledby="trip-readiness-title">
@@ -102,14 +97,6 @@ export default function TripReadinessCard() {
           {hasWarning ? <CircleAlert className="size-5" /> : <ShieldCheck className="size-5" />}
         </div>
       </div>
-      {routineLabel && (
-        <div className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-3">
-          <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Rotina detectada localmente</p>
-          <p className="mt-1 truncate text-xs font-extrabold text-white">{routineLabel}</p>
-          <p className="mt-1 text-[0.58rem] text-white/45">{mostUsedTrip ? "Esta é a rota mais usada na memória deste aparelho." : "Última rota registrada neste aparelho."}</p>
-          {routineOffline && <p className={"mt-1 text-[0.55rem] font-bold " + (isOfflineRouteStale(routineOffline.savedAt) ? "text-amber-200" : "text-[#C7FF3C]")}>{isOfflineRouteStale(routineOffline.savedAt) ? "Cópia offline antiga · revisar antes de depender dela." : "Cópia offline disponível para contingência."}</p>}
-        </div>
-      )}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible">
         {items.map(item => (
           <div key={item.label} className={"min-w-[10.5rem] snap-start rounded-2xl border p-3 sm:min-w-0 " + (item.ok ? "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04]" : item.warn ? "border-[#FFC928]/20 bg-[#FFC928]/[.05]" : "border-white/8 bg-white/[.025]")}>
