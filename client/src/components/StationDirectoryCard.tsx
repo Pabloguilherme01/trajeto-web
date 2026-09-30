@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
-import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
+import { stationDataConfidence, freshnessLabel, stationEvidence } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -67,7 +66,6 @@ export function StationDirectoryCard({
   catalogStatus?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
   const cnpj = anp?.cnpj || local?.cnpj || "";
@@ -91,6 +89,7 @@ export function StationDirectoryCard({
   const distributor = anp?.distribuidora || local?.brand || local?.mapData?.observedBrand || "Bandeira não consolidada";
   const primaryPrice = prices.find(item => item.productKey === "gasolina-comum") ?? prices[0] ?? null;
   const confidence = stationDataConfidence({ anp, local, price: primaryPrice });
+  const evidence = stationEvidence({ anp, local, price: primaryPrice });
   const priceDate = primaryPrice?.collectionDate ? new Date(primaryPrice.collectionDate).toLocaleDateString("pt-BR") : null;
   const products = useMemo(() => {
     const unique = new Map<string, AnpStation["products"][number]>();
@@ -142,14 +141,8 @@ export function StationDirectoryCard({
   };
 
   return (
-    <motion.article
+    <article
       id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
-      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
-      whileHover={reduceMotion ? undefined : { y: -3 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.997 }}
       className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
@@ -237,6 +230,14 @@ export function StationDirectoryCard({
       <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[.02] px-3 py-2.5">
         <span className="text-[0.52rem] font-black text-white/45">Confiança dos dados</span>
         <span className="text-[0.58rem] font-black text-[#C9F7FF]">{confidence}% · fonte/data explícitas</span>
+      </div>
+      <div className="mt-2 rounded-2xl border border-white/8 bg-white/[.018] px-3 py-2.5" aria-label="Fontes e atualização dos dados">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[0.50rem] font-bold text-white/42">
+          {evidence.map(item => (
+            <span key={item.key}><strong className="text-white/60">{item.label}:</strong> {item.source} · {item.at ? formatDate(item.at) : "sem data"}</span>
+          ))}
+        </div>
+        <p className="mt-1 text-[0.48rem] leading-relaxed text-white/25">Cada informação tem sua própria fonte e data; preço ANP e funcionamento em mapa não significam estado em tempo real.</p>
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
@@ -338,6 +339,6 @@ export function StationDirectoryCard({
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
         <span>Sem conta · uso direto</span>
       </div>
-    </motion.article>
+    </article>
   );
 }
