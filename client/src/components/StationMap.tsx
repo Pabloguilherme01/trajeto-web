@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
-import { dedupeStationReferences } from "@/lib/stationReconciliation";
+import { dedupeStationReferences, type StationReference } from "@/lib/stationReconciliation";
 
 export type StationMapItem = {
   id?: string;
@@ -271,24 +271,36 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     return () => { cancelled = true; };
   }, [ready, offline, resolvedStations.map(item => item.cnpj || item.id || item.name).join("|")]);
 
-  const canonicalStations: StationMapItem[] = dedupeStationReferences([
-    ...resolvedStations.map(station => ({
-      ...station,
-      source: station.source ?? "local",
-    })),
-    ...nearbyStations,
-  ]).map(reference => ({
-    id: reference.id,
-    placeId: reference.placeId,
-    name: reference.name,
-    address: reference.address ?? "",
-    lat: reference.lat,
-    lng: reference.lng,
-    cnpj: reference.cnpj ?? null,
-    brand: reference.brand ?? null,
-    source: reference.source,
-  }));
-  const drawableStations = canonicalStations.filter(hasCoordinates);
+  const canonicalStations = useMemo<StationMapItem[]>(() => {
+    const reconciliationInputs: StationReference[] = [
+      ...resolvedStations.map(station => ({
+        id: station.id,
+        placeId: station.placeId,
+        name: station.name,
+        address: station.address,
+        lat: station.lat,
+        lng: station.lng,
+        cnpj: station.cnpj ?? null,
+        brand: station.brand ?? null,
+        source: station.source ?? "local",
+      })),
+      ...nearbyStations,
+    ];
+
+    return dedupeStationReferences(reconciliationInputs).map(reference => ({
+      id: reference.id,
+      placeId: reference.placeId,
+      name: reference.name,
+      address: reference.address ?? "",
+      lat: typeof reference.lat === "number" ? reference.lat : undefined,
+      lng: typeof reference.lng === "number" ? reference.lng : undefined,
+      cnpj: reference.cnpj ?? null,
+      brand: reference.brand ?? null,
+      source: reference.source,
+    }));
+  }, [resolvedStations, nearbyStations]);
+
+  const drawableStations = useMemo(() => canonicalStations.filter(hasCoordinates), [canonicalStations]);
 
   useEffect(() => {
     if (!drawableStations.length) return;
@@ -334,7 +346,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     map.fitBounds(bounds, 44);
     const listener = window.google.maps.event.addListenerOnce(map, "idle", () => { if ((map.getZoom() ?? 12) > 15) map.setZoom(15); });
     return () => window.google?.maps?.event.removeListener(listener);
-  }, [ready, resolvedStations, offline]);
+  }, [ready, canonicalStations, offline]);
 
   if (!drawableStations.length && offline) {
     return <div className={"grid " + heightClassName + " place-items-center bg-[#0B1014] p-6 text-center"}><div><p className="text-sm font-black text-white/60">Mapa offline ainda sem coordenadas salvas.</p><p className="mt-2 text-xs leading-relaxed text-white/35">Abra o mapa uma vez com internet para posicionar os postos e armazenar as coordenadas neste aparelho.</p></div></div>;
