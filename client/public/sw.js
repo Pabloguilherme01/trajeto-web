@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v10";
+const VERSION = "trajeto-v11";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -19,12 +19,13 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(async cache => {
-        await cache.addAll(STATIC_SHELL);
-        const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
-        if (!response.ok) return;
-        const manifest = await response.json();
-        const assets = collectManifestAssets(manifest);
-        await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
+        await Promise.all(STATIC_SHELL.map(asset => cache.add(asset).catch(() => undefined)));
+        try {
+          const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
+          if (!response.ok) return;
+          const manifest = await response.json();
+          await Promise.all(collectManifestAssets(manifest).map(asset => cache.add(asset).catch(() => undefined)));
+        } catch {}
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
@@ -41,11 +42,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key !== STATIC_CACHE && key !== DATA_CACHE && key !== MAP_CACHE)
-          .map(key => caches.delete(key))
-      ))
+      .then(keys => Promise.all(keys.filter(key => ![STATIC_CACHE, DATA_CACHE, MAP_CACHE].includes(key)).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
@@ -58,18 +55,12 @@ function collectManifestAssets(manifest) {
   const assets = new Set();
   const visit = entry => {
     if (!entry || typeof entry !== "object") return;
-    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\\//, ""));
-    for (const css of Array.isArray(entry.css) ? entry.css : []) {
-      if (typeof css === "string") assets.add("./" + css.replace(/^\\//, ""));
-    }
-    for (const asset of Array.isArray(entry.assets) ? entry.assets : []) {
-      if (typeof asset === "string") assets.add("./" + asset.replace(/^\\//, ""));
-    }
-    for (const key of ["imports", "dynamicImports"]) {
-      for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
-        const target = manifest[imported];
-        if (target) visit(target);
-      }
+    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\//, ""));
+    for (const css of Array.isArray(entry.css) ? entry.css : []) if (typeof css === "string") assets.add("./" + css.replace(/^\//, ""));
+    for (const asset of Array.isArray(entry.assets) ? entry.assets : []) if (typeof asset === "string") assets.add("./" + asset.replace(/^\//, ""));
+    for (const key of ["imports","dynamicImports"]) for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
+      const target = manifest[imported];
+      if (target) visit(target);
     }
   };
   for (const entry of Object.values(manifest)) visit(entry);
@@ -79,30 +70,21 @@ function collectManifestAssets(manifest) {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
-
   const url = new URL(request.url);
 
   if (url.pathname.includes("/api/") || url.pathname.includes("/data/")) {
     event.respondWith(networkFirst(request, DATA_CACHE));
-    return;
-  }
-
-  if (url.pathname.includes("/maps/") || url.pathname.includes("/tiles/")) {
+  } else if (url.pathname.includes("/maps/") || url.pathname.includes("/tiles/")) {
     event.respondWith(staleWhileRevalidate(request, MAP_CACHE));
-    return;
-  }
-
-  if (request.mode === "navigate") {
+  } else if (request.mode === "navigate") {
     event.respondWith(networkFirstNavigation(request));
-    return;
+  } else {
+    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
   }
-
-  event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
 });
 
 async function networkFirstNavigation(request) {
   const cache = await caches.open(STATIC_CACHE);
-
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -111,44 +93,31 @@ async function networkFirstNavigation(request) {
     }
     return response;
   } catch {
-    return (
-      await cache.match(request) ||
-      await cache.match("./index.html") ||
-      new Response("Trajeto indisponível offline.", {
-        status: 503,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      })
-    );
+    return await cache.match(request) || await cache.match("./index.html") ||
+      new Response("Trajeto indisponível offline.", { status: 503, headers: {"Content-Type":"text/plain; charset=utf-8"} });
   }
 }
 
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  const network = fetch(request)
-    .then(response => {
-      if (response.ok) void cache.put(request, response.clone());
-      return response;
-    })
-    .catch(() => cached);
-
-  return cached || network || new Response("", { status: 504 });
-}
-
-async function networkFirst(request, cacheName) {
-  const cache = await caches.open(cacheName);
-
   try {
     const response = await fetch(request);
     if (response.ok) await cache.put(request, response.clone());
     return response;
   } catch {
-    return (
-      await cache.match(request) ||
-      new Response("Sem conexão. Os dados dessa consulta ainda não foram armazenados neste dispositivo.", {
-        status: 503,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      })
-    );
+    return cached || new Response("", { status: 504 });
+  }
+}
+
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch {
+    return await cache.match(request) ||
+      new Response("Sem conexão. Os dados dessa consulta ainda não foram armazenados neste dispositivo.", { status: 503, headers: {"Content-Type":"text/plain; charset=utf-8"} });
   }
 }
