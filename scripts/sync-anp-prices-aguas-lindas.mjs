@@ -119,7 +119,20 @@ if (!data.length) {
       process.exit(0);
     }
   } catch {}
-  throw new Error("A planilha abriu, mas nenhum preço de Águas Lindas foi reconhecido.");
+  await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
+  const emptySnapshot = {
+    source: "ANP",
+    sourceUrl,
+    retrievedAt: new Date().toISOString(),
+    referencePeriod,
+    totalRows: 0,
+    totalStations: 0,
+    data: [],
+    warning: "A fonte semanal foi acessada, mas nenhum registro municipal foi reconhecido. Não exibir preço como atual."
+  };
+  await writeFile(OUTPUT, JSON.stringify(emptySnapshot, null, 2) + "\n", "utf8");
+  console.warn(JSON.stringify({ warning: "Nenhum preço individual ANP reconhecido; snapshot vazio materializado.", referencePeriod }));
+  process.exit(0);
 }
 
 const snapshot = {
