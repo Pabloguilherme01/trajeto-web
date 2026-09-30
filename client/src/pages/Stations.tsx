@@ -1383,6 +1383,7 @@ export default function Stations() {
               <StationComparePanel
                 stations={compared.map(station => ({
                   ...station,
+                  isOpen: station.isOpen ?? null,
                   distanceLabel: station.distanceLabel ?? null,
                   distanceMeters: station.distanceMeters ?? null,
                 }))}
