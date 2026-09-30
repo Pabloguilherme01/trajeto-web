@@ -60,8 +60,8 @@
   html { scroll-behavior: smooth; background: #0B1014; }
   body { @apply bg-background font-sans text-foreground antialiased; }
   button, a { -webkit-tap-highlight-color: transparent; }
-  html, body { min-height: 100%; }
-  body { overscroll-behavior-y: none; }
+  html, body { min-height: 100%; scroll-padding-bottom: calc(7rem + env(safe-area-inset-bottom)); }
+  body { overscroll-behavior-x: none; min-height: 100dvh; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   button, a, input, select, textarea { font-size: 16px; }
   @supports (padding: env(safe-area-inset-bottom)) {
     body { padding-bottom: env(safe-area-inset-bottom); }
@@ -115,7 +115,7 @@
   .mobile-glass { background: rgba(18,27,34,.88); border: 1px solid rgba(255,255,255,.09); box-shadow: 0 18px 48px rgba(0,0,0,.28); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
   .mobile-title { text-wrap: balance; letter-spacing: -.055em; }
   .mobile-touch { min-height: 48px; min-width: 48px; }
-  .mobile-bottom-space { padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)); }
+  .mobile-bottom-space { padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)); }\n  .mobile-nav-space { padding-bottom: calc(6.75rem + env(safe-area-inset-bottom)); }
   .mobile-section-title { text-wrap: balance; }
   .mobile-card { content-visibility: auto; contain-intrinsic-size: 420px; }
   .mobile-card button, .mobile-card a { min-height: 44px; }
