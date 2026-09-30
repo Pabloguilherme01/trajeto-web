@@ -3,6 +3,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RouteMap } from "./RouteMap";
 
+Object.defineProperty(window, "google", { value: { maps: { TrafficLayer: vi.fn(() => ({ setMap: vi.fn() })) } }, configurable: true });
+
 vi.mock("@/components/Map", () => ({
   MapView: ({ onMapReady }: { onMapReady: (map: any) => void }) => {
     const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11), addListener: vi.fn(() => ({ remove: vi.fn() })) };
