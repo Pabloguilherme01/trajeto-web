@@ -5,7 +5,7 @@ import { RouteMap } from "./RouteMap";
 
 vi.mock("@/components/Map", () => ({
   MapView: ({ onMapReady }: { onMapReady: (map: any) => void }) => {
-    const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11) };
+    const map = { fitBounds: vi.fn(), setMapTypeId: vi.fn(), setZoom: vi.fn(), getZoom: vi.fn(() => 11), addListener: vi.fn(() => ({ remove: vi.fn() })) };
     React.useEffect(() => onMapReady(map), [onMapReady]);
     return <div data-testid="map-view" />;
   },
@@ -13,6 +13,7 @@ vi.mock("@/components/Map", () => ({
 
 describe("RouteMap", () => {
   it("oferece mapa grande, enquadramento, trânsito, satélite e zoom", () => {
+    Object.defineProperty(window, "google", { configurable: true, value: { maps: { TrafficLayer: class { setMap = vi.fn(); }, LatLngBounds: class { extend = vi.fn(); }, marker: { PinElement: class { element = document.createElement("div"); }, AdvancedMarkerElement: class { map: unknown; constructor(options: { map: unknown }) { this.map = options.map; } } } } } });
     render(<RouteMap origin={{ lat: -15.8, lng: -48 }} destination={{ lat: -15.9, lng: -47.9 }} stops={[]} />);
     expect(screen.getByRole("region", { name: "Mapa interativo da viagem" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Enquadrar viagem" })).toBeTruthy();
