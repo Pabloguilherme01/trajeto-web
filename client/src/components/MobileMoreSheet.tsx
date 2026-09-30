@@ -16,20 +16,22 @@ export default function MobileMoreSheet({ open, onClose }: Props) {
   const [provider, setProvider] = useState<NavigationProvider>(() => getPreferredNavigationProvider());
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const lastActiveRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return;
     lastActiveRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeButtonRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       lastActiveRef.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
