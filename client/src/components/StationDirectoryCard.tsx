@@ -216,7 +216,7 @@ export function StationDirectoryCard({
           <span className="text-[0.45rem] font-bold text-white/25">oficial</span>
         </div>
         <p className="mt-1 text-[0.52rem] leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
-        <a href="https://anpcomvcpostos.anp.gov.br/" target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC</a>
+        <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
       </div>
       <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
 
