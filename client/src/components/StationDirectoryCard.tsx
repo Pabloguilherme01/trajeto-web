@@ -179,6 +179,27 @@ export function StationDirectoryCard({
         </div>
       </div>
 
+      <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3" aria-label="Confiança e atualização dos dados">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-white/45">Confiança dos dados</p>
+            <p className="mt-1 text-xs font-black text-white">{confidence.label}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-lg font-black text-[#C7FF3C]">{confidence.score}%</p>
+            <p className="text-[0.46rem] font-bold text-white/25">qualidade/frescor</p>
+          </div>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
+          <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence.score + "%" }} />
+        </div>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.48rem] text-white/30">
+          <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
+          <span>Preço: {primaryPrice ? "ANP" : "não disponível"}</span>
+          <span>Localização: {coords ? "coordenada" : "não confirmada"}</span>
+        </div>
+      </section>
+
       <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
         <div className="flex items-end justify-between gap-3">
           <div>
