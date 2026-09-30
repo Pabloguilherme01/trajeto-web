@@ -162,6 +162,26 @@ export default function Home() {
           </p>
         </section>
 
+        <section className="mt-6" aria-label="Ações principais">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <button type="button" onClick={openLastTrip} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.08] p-4 text-left active:scale-[.99]">
+              <Route className="size-4 text-[#C7FF3C]" />
+              <p className="mt-3 text-sm font-black">{lastTrip ? "Continuar última rota" : "Planejar uma rota"}</p>
+              <p className="mt-1 text-[0.62rem] text-white/45">{lastTrip ? "Retomar sem preencher tudo de novo" : "Informe origem e destino"}</p>
+            </button>
+            <button type="button" onClick={findNearby} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-4 text-left active:scale-[.99]">
+              <Fuel className="size-4 text-[#3DE3FF]" />
+              <p className="mt-3 text-sm font-black">Encontrar postos</p>
+              <p className="mt-1 text-[0.62rem] text-white/45">Perto de você ou no diretório</p>
+            </button>
+            <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="mobile-card min-h-24 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
+              <Bookmark className="size-4 text-[#BDA5FF]" />
+              <p className="mt-3 text-sm font-black">Abrir salvos</p>
+              <p className="mt-1 text-[0.62rem] text-white/45">Rotas e postos guardados neste aparelho</p>
+            </button>
+          </div>
+        </section>
+
         <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -220,24 +240,6 @@ export default function Home() {
 
         <section className="mt-4">
           <MobileDataMode />
-        </section>
-
-        <section className="mt-4 grid gap-3 sm:grid-cols-3">
-          <button type="button" onClick={openLastTrip} disabled={!lastTrip} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left disabled:opacity-40 active:scale-[.99]">
-            <Route className="size-4 text-[#C7FF3C]" />
-            <p className="mt-3 text-xs font-black">Última rota</p>
-            <p className="mt-1 truncate text-[0.63rem] text-white/40">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Ainda não há viagem registrada"}</p>
-          </button>
-          <button type="button" onClick={findNearby} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
-            <Fuel className="size-4 text-[#3DE3FF]" />
-            <p className="mt-3 text-xs font-black">Postos perto</p>
-            <p className="mt-1 text-[0.63rem] text-white/40">{online ? "Abrir os postos usando sua posição" : isGitHubPagesRuntime() ? "Abrir o diretório local sem internet" : "Abrir postos salvos/cached neste aparelho"}</p>
-          </button>
-          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
-            <Bookmark className="size-4 text-[#BDA5FF]" />
-            <p className="mt-3 text-xs font-black">Rotas salvas</p>
-            <p className="mt-1 text-[0.63rem] text-white/40">{offlineRoutes > 0 ? offlineRoutes + " rota(s) disponíveis offline" : "Nenhuma rota salva offline"}</p>
-          </button>
         </section>
 
         {recentSearches.length > 0 && (
