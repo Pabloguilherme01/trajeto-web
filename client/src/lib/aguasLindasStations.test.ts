@@ -40,6 +40,7 @@ describe("diretório de postos de Águas Lindas", () => {
     expect(AGUAS_LINDAS_STATIONS.filter(item => item.dataOrigin === "cross-check").length).toBe(
       AGUAS_LINDAS_STATION_STATS.mapEnriched,
     );
+    expect(AGUAS_LINDAS_STATIONS.find(item => item.id === "jardim-brasilia")?.mapData?.operationalStatus).toBe("closed");
   });
 
   it("gera um link seguro para consulta do posto no Google Maps", () => {
