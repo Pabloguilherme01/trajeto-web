@@ -25,15 +25,15 @@ describe("mobilePreferences recent trips", () => {
     expect(trips[1]).toMatchObject({ origin: "Casa", destination: "Shopping" });
   });
 
-  it("limits history to eight trips", () => {
-    for (let index = 0; index < 10; index += 1) {
+  it("limits history to twenty trips", () => {
+    for (let index = 0; index < 22; index += 1) {
       rememberTrip("Origem " + index, "Destino " + index);
     }
 
     const trips = getRecentTrips();
 
-    expect(trips).toHaveLength(8);
-    expect(trips[0].destination).toBe("Destino 9");
+    expect(trips).toHaveLength(20);
+    expect(trips[0].destination).toBe("Destino 21");
     expect(trips.at(-1)?.destination).toBe("Destino 2");
   });
 
