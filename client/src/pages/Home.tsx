@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, Fuel, LocateFixed, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Building2, Fuel, LocateFixed, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -229,7 +229,7 @@ export default function Home() {
           <MobileDataMode />
         </section>
 
-        <section className="mt-4 grid gap-3 sm:grid-cols-3">
+        <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <button type="button" onClick={openLastTrip} disabled={!lastTrip} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left disabled:opacity-40 active:scale-[.99]">
             <Route className="size-4 text-[#C7FF3C]" />
             <p className="mt-3 text-xs font-black">Última rota</p>
@@ -244,6 +244,11 @@ export default function Home() {
             <Bookmark className="size-4 text-[#BDA5FF]" />
             <p className="mt-3 text-xs font-black">Rotas salvas</p>
             <p className="mt-1 text-[0.63rem] text-white/40">{offlineRoutes > 0 ? offlineRoutes + " rota(s) disponíveis offline" : "Nenhuma rota salva offline"}</p>
+          </button>
+          <button type="button" onClick={() => setLocation(appUrl("/cidade"))} className="mobile-card min-h-28 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
+            <Building2 className="size-4 text-[#BDA5FF]" />
+            <p className="mt-3 text-xs font-black">Serviços da cidade</p>
+            <p className="mt-1 text-[0.63rem] text-white/40">Saúde, transporte, vias e contatos públicos</p>
           </button>
         </section>
 
