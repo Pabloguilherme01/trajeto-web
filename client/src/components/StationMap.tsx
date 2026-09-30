@@ -1,8 +1,9 @@
-import { MapView } from "@/components/Map";
+import { MapView, loadGoogleMapsScript } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
+import { dedupeStationReferences } from "@/lib/stationReconciliation";
 
 export type StationMapItem = {
   id?: string;
@@ -135,7 +136,7 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
   );
 }
 
-export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", showTraffic = false, onSelectStation }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void }) {
+export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", showTraffic = false, nearbyCenter, onSelectStation }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; nearbyCenter?: { lat: number; lng: number } | null; onSelectStation?: (station: StationMapItem) => void }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
@@ -143,6 +144,7 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
   const [resolvingCount, setResolvingCount] = useState(0);
+  const [nearbyStations, setNearbyStations] = useState<StationMapItem[]>([]);
 
   useEffect(() => {
     setResolvedStations(stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
@@ -155,6 +157,67 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     window.addEventListener("offline", onOffline);
     return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
   }, []);
+
+  useEffect(() => {
+    if (!nearbyCenter || offline) {
+      setNearbyStations([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        await loadGoogleMapsScript();
+        const placesLibrary = await google.maps.importLibrary("places") as unknown as {
+          Place: {
+            searchNearby: (request: Record<string, unknown>) => Promise<{ places?: Array<{
+              id?: string;
+              displayName?: string | { text?: string };
+              formattedAddress?: string;
+              location?: google.maps.LatLng | google.maps.LatLngLiteral;
+              googleMapsURI?: string;
+              businessStatus?: string;
+            }> }>;
+          };
+          SearchNearbyRankPreference: { DISTANCE: string };
+        };
+        const result = await placesLibrary.Place.searchNearby({
+          fields: ["id", "displayName", "formattedAddress", "location", "googleMapsURI", "businessStatus"],
+          includedPrimaryTypes: ["gas_station"],
+          locationRestriction: {
+            center: nearbyCenter,
+            radius: 5000,
+          },
+          maxResultCount: 20,
+          rankPreference: placesLibrary.SearchNearbyRankPreference.DISTANCE,
+          language: "pt-BR",
+          region: "BR",
+        });
+        if (cancelled) return;
+        const next: StationMapItem[] = (result.places ?? []).flatMap((place, index) => {
+          const name = typeof place.displayName === "string" ? place.displayName : place.displayName?.text;
+          const location = place.location && "toJSON" in place.location
+            ? place.location.toJSON()
+            : place.location;
+          if (!name || !location || typeof location.lat !== "number" || typeof location.lng !== "number") return [];
+          return [{
+            id: place.id ?? "nearby-" + index,
+            placeId: place.id,
+            name,
+            address: place.formattedAddress ?? "",
+            lat: location.lat,
+            lng: location.lng,
+            cnpj: null,
+            brand: null,
+            source: "Google" as const,
+          }];
+        });
+        setNearbyStations(next);
+      } catch {
+        if (!cancelled) setNearbyStations([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [nearbyCenter?.lat, nearbyCenter?.lng, offline]);
 
   useEffect(() => {
     if (!ready || offline || !mapRef.current || !window.google?.maps?.places) return;
@@ -208,7 +271,13 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     return () => { cancelled = true; };
   }, [ready, offline, resolvedStations.map(item => item.cnpj || item.id || item.name).join("|")]);
 
-  const drawableStations = resolvedStations.filter(hasCoordinates);
+  const drawableStations = dedupeStationReferences([
+    ...resolvedStations.map(station => ({
+      ...station,
+      source: station.source ?? "local",
+    })),
+    ...nearbyStations,
+  ]).filter(hasCoordinates) as StationMapItem[];
 
   useEffect(() => {
     if (!drawableStations.length) return;
@@ -267,7 +336,8 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   return (
     <div className="relative">
       <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
-      {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
+      {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP/local continuam sendo a base cadastral.</div>}
+      {nearbyStations.length > 0 && nearbyCenter && <div className="pointer-events-none absolute left-3 right-3 top-14 z-10 rounded-2xl border border-[#3DE3FF]/20 bg-[#0B1014]/85 px-3 py-2 text-[0.52rem] font-black text-[#C9F7FF] shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Perto de mim · {nearbyStations.length} referências Google · ordenadas por distância. Duplicatas são conciliadas com a base principal.</div>}
       {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-[0.58rem] font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
     </div>
   );
