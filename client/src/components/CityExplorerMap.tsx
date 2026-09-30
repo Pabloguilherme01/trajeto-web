@@ -99,9 +99,16 @@ export default function CityExplorerMap({category,center,online,onResults,onSele
     setError(null);
     try{
       await loadGoogleMapsScript();
-      const placesLib=await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
+      const placesLib=await google.maps.importLibrary("places") as unknown as {
+        Place:{searchNearby:(request:Record<string,unknown>)=>Promise<{places?:Array<{
+          id?:string; displayName?:string|{text?:string}; formattedAddress?:string;
+          location?:google.maps.LatLng|google.maps.LatLngLiteral; googleMapsURI?:string;
+          businessStatus?:string; types?:string[];
+        }>}>};
+        SearchNearbyRankPreference:{DISTANCE:string};
+      };
       const types=category==="all" ? [] : categoryToGoogleTypes(category);
-      const request:google.maps.places.SearchNearbyRequest={
+      const request:Record<string,unknown>={
         fields:["id","displayName","formattedAddress","location","googleMapsURI","businessStatus","types"],
         locationRestriction:{center,radius:5000},
         maxResultCount:20,
