@@ -16,6 +16,8 @@ describe("offlineDestinations", () => {
     expect(searchOfflineDestinations("vapt vupt")[0]?.id).toBe("vapt-vupt");
     expect(searchOfflineDestinations("mansões odisseia")[0]?.id).toBe("upa-mansoes-odisseia");
     expect(searchOfflineDestinations("avenida jk")[0]?.id).toBe("rodoviaria-nelson-alves");
+    expect(searchOfflineDestinations("rodoviária")[0]?.id).toBe("rodoviaria-nelson-alves");
+    expect(searchOfflineDestinations("assistência social")[0]?.id).toBe("assistencia-social");
   });
 
   it("filtra por categoria sem perder a precisão da busca", () => {
