@@ -34,6 +34,7 @@ export default function Stations() {
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [localVisibleCount, setLocalVisibleCount] = useState(12);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
 
   const lat = Number(params.get("lat"));
@@ -60,6 +61,9 @@ export default function Stations() {
     () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
     []
   );
+
+  const visibleLocalDirectory = localDirectory.slice(0, localVisibleCount);
+  const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     hasCoordinates ? { query, lat, lng } : { query },
@@ -109,6 +113,10 @@ export default function Stations() {
       cacheStations(query, liveStations as unknown as MobileStation[], hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
     }
   }, [liveStations, query, hasCoordinates, lat, lng]);
+
+  useEffect(() => {
+    setLocalVisibleCount(12);
+  }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -339,7 +347,7 @@ export default function Stations() {
                 <span className="text-[0.55rem] text-white/25">ordenado por bairro</span>
               </div>
               <div className="mt-3 space-y-2">
-                {localDirectory.map(station => {
+                {visibleLocalDirectory.map(station => {
                   const statusText = getStationDataQualityLabel(station);
                   return (
                     <article key={station.cnpj} className="rounded-[1.25rem] border border-white/8 bg-[#0B1014] p-3.5">
@@ -373,6 +381,24 @@ export default function Stations() {
                     </article>
                   );
                 })}
+              {hasMoreLocalStations && (
+                <button
+                  type="button"
+                  onClick={() => setLocalVisibleCount(current => Math.min(current + 12, localDirectory.length))}
+                  className="mt-3 min-h-12 w-full rounded-2xl border border-white/8 bg-white/[.025] text-xs font-black text-white/65"
+                >
+                  Mostrar mais {Math.min(12, localDirectory.length - visibleLocalDirectory.length)} postos
+                </button>
+              )}
+              {visibleLocalDirectory.length > 12 && (
+                <button
+                  type="button"
+                  onClick={() => setLocalVisibleCount(12)}
+                  className="mt-2 min-h-10 w-full text-[0.6rem] font-bold text-white/35"
+                >
+                  Mostrar apenas os primeiros 12
+                </button>
+              )}
               </div>
               </>
             ) : (
