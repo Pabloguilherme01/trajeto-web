@@ -37,7 +37,21 @@ jobs:
         run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
 
-      - name: Configure public runtime\n        env:\n          PUBLIC_API_BASE: ${{ secrets.VITE_API_BASE_URL }}\n        shell: bash\n        run: |\n          set -euo pipefail\n          if [ -n "$PUBLIC_API_BASE" ]; then\n            echo "VITE_API_BASE_URL=$PUBLIC_API_BASE" >> "$GITHUB_ENV"\n            echo 'VITE_STATIC_RUNTIME=false' >> "$GITHUB_ENV"\n            echo "Public API configured; enabling live planner runtime."\n          else\n            echo 'VITE_STATIC_RUNTIME=true' >> "$GITHUB_ENV"\n            echo "No VITE_API_BASE_URL secret; keeping the self-contained Pages fallback."\n          fi\n\n      - name: Validate committed data snapshots
+      - name: Configure public runtime
+        env:
+          PUBLIC_API_BASE: ${{ secrets.VITE_API_BASE_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "$PUBLIC_API_BASE" ]; then
+            echo "VITE_API_BASE_URL=$PUBLIC_API_BASE" >> "$GITHUB_ENV"
+            echo 'VITE_STATIC_RUNTIME=false' >> "$GITHUB_ENV"
+            echo "Public API configured; enabling live planner runtime."
+          else
+            echo 'VITE_STATIC_RUNTIME=true' >> "$GITHUB_ENV"
+            echo "No VITE_API_BASE_URL secret; keeping the self-contained Pages fallback."
+          fi
+\n      - name: Validate committed data snapshots
         shell: bash
         run: |
           set -euo pipefail
