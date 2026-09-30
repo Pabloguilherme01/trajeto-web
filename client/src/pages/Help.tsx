@@ -91,6 +91,16 @@ export default function Help() {
           </div>
         </section>
 
+        <section className="mt-5 rounded-2xl border border-white/8 bg-[#10191F] p-4">
+          <h2 className="text-sm font-black">Transparência e privacidade</h2>
+          <p className="mt-1 text-[0.62rem] leading-relaxed text-white/40">Consulte como o Trajeto usa localização, armazenamento local e serviços externos.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href="/privacidade" className="inline-flex min-h-10 items-center rounded-xl border border-white/8 px-3 text-[.55rem] font-black text-white/65">Privacidade</Link>
+            <Link href="/termos" className="inline-flex min-h-10 items-center rounded-xl border border-white/8 px-3 text-[.55rem] font-black text-white/65">Termos</Link>
+            <Link href="/transparencia" className="inline-flex min-h-10 items-center rounded-xl bg-[#C7FF3C] px-3 text-[.55rem] font-black text-[#0B1014]">Ver tudo</Link>
+          </div>
+        </section>
+
         <p className="mt-6 text-center text-[0.48rem] leading-relaxed text-white/20">Google Maps e Google Places fornecem referências de mapa e navegação; a base oficial continua identificada separadamente.</p>
       </div>
     </main>
