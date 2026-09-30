@@ -336,6 +336,14 @@ export default function Stations() {
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório local</p>
                 <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
                 <p className="mt-2 text-[0.66rem] leading-relaxed text-white/45">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. Sincronização ANP de referência: {new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
+            <div className="mt-3 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#C9F7FF]">Base oficial ANP</p>
+                <span className="text-[0.46rem] font-bold text-white/25">28/09/2026</span>
+              </div>
+              <p className="mt-1 text-[0.55rem] leading-relaxed text-white/40">Cadastro oficial de revendedores em operação. A ausência de preço na semana pesquisada não indica fechamento ou ausência de autorização.</p>
+              <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos","_blank","noopener,noreferrer")} className="mt-2 min-h-10 rounded-lg border border-white/8 px-3 text-[0.52rem] font-black text-white/60">Abrir base oficial da ANP</button>
+            </div>
             <div className="mt-3 rounded-xl border border-white/8 bg-[#0B1014] p-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
