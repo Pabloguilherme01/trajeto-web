@@ -62,11 +62,21 @@ function finitePositive(value: number | null) {
 }
 
 export function stationDecisionScore(item: StationDecisionInput, baseline: StationDecisionBaseline) {
-  const minPrice = finitePositive(baseline.minPrice) ? baseline.minPrice as number : 1;
-  const minDistance = finitePositive(baseline.minDistanceKm) ? baseline.minDistanceKm as number : 1;
+  const minPrice = finitePositive(baseline.minPrice) ? baseline.minPrice as number : null;
+  const minDistance = finitePositive(baseline.minDistanceKm) ? baseline.minDistanceKm as number : null;
 
-  const pricePart = finitePositive(item.price) ? ((item.price as number) / minPrice) * 0.58 : 1.35;
-  const distancePart = finitePositive(item.distanceKm) ? ((item.distanceKm as number) / minDistance) * 0.32 : 1.15;
+  // Trabalha com o quanto cada opção está acima do melhor preço/distância,
+  // em vez de somar razões absolutas. Isso evita que 1 km de diferença
+  // esconda uma economia relevante e mantém o comparador determinístico.
+  const priceDelta = finitePositive(item.price) && minPrice
+    ? Math.min(1.5, Math.max(0, ((item.price as number) - minPrice) / minPrice))
+    : 1.15;
+  const distanceDelta = finitePositive(item.distanceKm) && minDistance
+    ? Math.min(8, Math.max(0, ((item.distanceKm as number) - minDistance) / minDistance))
+    : 1.1;
+
+  const pricePart = priceDelta * 0.72;
+  const distancePart = distanceDelta * 0.05;
   const openPart = item.isOpen === true ? -0.12 : item.isOpen === false ? 0.12 : 0.04;
   const anpPart = item.hasAnp ? -0.03 : 0.03;
   return pricePart + distancePart + openPart + anpPart;
