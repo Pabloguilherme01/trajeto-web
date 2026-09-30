@@ -33,7 +33,7 @@ export function categoryToGoogleTypes(category:PlaceCategory):string[]{
     case "accessibility": return [];
   }
 }
-export function categoryFromGoogleType(types:string[]|undefined):PlaceCategory{
+export function categoryFromGoogleType(types:string[]|undefined):PlaceCategory|null{
   const joined=(types??[]).join(" ");
   if(/gas_station/.test(joined)) return "fuel";
   if(/hospital|medical|pharmacy|doctor|clinic/.test(joined)) return "health";
@@ -41,5 +41,5 @@ export function categoryFromGoogleType(types:string[]|undefined):PlaceCategory{
   if(/bus_station|transit|train_station/.test(joined)) return "transport";
   if(/city_hall|government|courthouse|post_office/.test(joined)) return "government";
   if(/police|fire_station/.test(joined)) return "security";
-  return "leisure";
+  return null;
 }
