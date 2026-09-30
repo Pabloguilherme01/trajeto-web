@@ -98,6 +98,14 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
   }, [stations]);
   const selected = points.find(point => point.station.id === selectedId)?.station ?? points[0]?.station ?? null;
   const viewBox = (1 - 1 / zoom) * 500 + " " + (1 - 1 / zoom) * 280 + " " + 1000 / zoom + " " + 560 / zoom;
+  if (!stations.length) {
+    return <div className="grid h-full w-full place-items-center bg-[#E8F0EA] p-6 text-center text-[#163840]">
+      <div className="max-w-sm rounded-2xl border border-black/10 bg-white/90 p-5 shadow-lg">
+        <p className="text-sm font-black">Mapa sem coordenadas suficientes.</p>
+        <p className="mt-2 text-xs leading-relaxed text-[#607169]">A ficha dos postos continua disponível. Quando uma coordenada for encontrada, o marcador aparecerá automaticamente aqui.</p>
+      </div>
+    </div>;
+  }
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#E8F0EA]">
       <svg viewBox={viewBox} className="absolute inset-0 h-full w-full" role="img" aria-label={"Mapa offline esquemático com " + stations.length + " postos"}>
