@@ -55,6 +55,7 @@ export const AGUAS_LINDAS_MAP_ONLY_DISCOVERIES = [
   { displayName: "Auto Posto Rainha Da Paz", address: "Q. 4, lotes 4/5, Jardim da Barragem V, Águas Lindas de Goiás - GO", phone: null, rating: 3.8, reviews: 217, hours: "05:00–23:00", note: "Mapa; corresponde ao cadastro Auto Posto Rainha da Paz, CNPJ 23.679.372/0001-91." },
   { displayName: "Posto de gasolina", address: "Parque da Barragem, Águas Lindas de Goiás - GO", phone: null, rating: 5.0, reviews: 1, hours: null, note: "Mapa com apenas 1 avaliação; não incorporado à contagem cadastral sem identificação confiável." },
   { displayName: "Posto Milenium Águas Lindas de Goiás", address: "Condomínio Bela Vista, Águas Lindas de Goiás - GO", phone: null, rating: null, reviews: null, hours: null, note: "Mapa; CNPJ não localizado nesta coleta. Não incorporado à contagem cadastral." },
+  { displayName: "Posto Ipiranga", address: "Qd 1, R. 1, 24, Lote N, Jardim da Barragem I, Águas Lindas de Goiás - GO, 72920-001", phone: "0800 725 7333", rating: 4.3, reviews: 18, hours: "05:00–23:00", note: "Mapa; mesmo endereço do Rham Auto Posto (CNPJ 43.774.756/0001-09). Tratar como possível mudança de bandeira/nome, não como novo posto, até confirmação por CNPJ/ANP." },
 ] as const;
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
