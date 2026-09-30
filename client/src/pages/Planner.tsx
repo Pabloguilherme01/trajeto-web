@@ -49,7 +49,6 @@ export default function Planner() {
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
-  const [roundTrip, setRoundTrip] = useState(false);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
   const staticRuntime = isGitHubPagesRuntime();
