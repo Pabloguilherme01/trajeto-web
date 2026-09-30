@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -96,6 +96,8 @@ export function StationDirectoryCard({
   const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
   const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
   const appleUrl = buildAppleMapsDirectionsUrl(destination);
+  const uberUrl = buildUberRideUrl(address, coords || undefined);
+  const nineNineUrl = build99MobilityUrl(address);
   const preferredProvider = getPreferredNavigationProvider();
   const preferredUrl = preferredProvider === "waze" ? wazeUrl : preferredProvider === "apple" ? appleUrl : googleUrl;
   const anpUrl = "https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web";
@@ -187,6 +189,18 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
+      </div>
+
+      <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
+          <span className="text-[0.48rem] font-bold text-white/25">sem conta no Trajeto</span>
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => window.open(uberUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">Uber</button>
+          <button type="button" onClick={() => window.open(nineNineUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#FF6B35]/20 bg-[#FF6B35]/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">99</button>
+        </div>
+        <p className="mt-2 text-[0.48rem] leading-relaxed text-white/30">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
       </div>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
