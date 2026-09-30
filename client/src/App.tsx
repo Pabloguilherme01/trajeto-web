@@ -24,12 +24,10 @@ const Stations = lazy(() => import("./pages/Stations"));
 const Local = lazy(() => import("./pages/Local"));
 const Explorer = lazy(() => import("./pages/Explorer"));
 const Help = lazy(() => import("./pages/Help"));
-const PublicServices = lazy(() => import("./pages/PublicServices"));
 const Personal = lazy(() => import("./pages/Personal"));
+const PublicServices = lazy(() => import("./pages/PublicServices"));
 
-const routerBase = import.meta.env.BASE_URL === "/"
-  ? undefined
-  : import.meta.env.BASE_URL.replace(/\/$/, "");
+const routerBase = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function RouteLoading() {
   return (
@@ -53,13 +51,11 @@ function AdminOnly({ children }: { children: ReactNode }) {
 function AuthenticatedReturnHandler() {
   const { isAuthenticated, loading } = useAuth();
   const [location, setLocation] = useLocation();
-
   useEffect(() => {
     if (loading || !isAuthenticated) return;
     const returnPath = consumeStationReturn(sessionStorage, location);
     if (returnPath) setLocation(returnPath);
   }, [isAuthenticated, loading, location, setLocation]);
-
   return null;
 }
 
@@ -70,47 +66,46 @@ function AuthReturnHandler() {
 
 function Router() {
   const staticRuntime = isGitHubPagesRuntime();
-
   return (
-      <Suspense fallback={<RouteLoading />}>
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/buscar" component={SearchPage} />
-          <Route path="/planejar" component={Planner} />
-          <Route path="/rota" component={Planner} />
-          <Route path="/salvos"><Planner /></Route>
-          <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
-          <Route path="/mapa"><Stations mapFirst /></Route>
-          <Route path="/postos"><Stations /></Route>
-          <Route path="/local/:id" component={Local} />
-          <Route path="/explorar" component={Explorer} />
-          <Route path="/ajuda" component={Help} />
-          <Route path="/servicos" component={PublicServices} />
-          <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
-          <Route path="/404" component={NotFound} />
-          <Route component={NotFound} />
-        </Switch>
-      </Suspense>
+    <Suspense fallback={<RouteLoading />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/buscar" component={SearchPage} />
+        <Route path="/planejar" component={Planner} />
+        <Route path="/rota" component={Planner} />
+        <Route path="/salvos"><Planner /></Route>
+        <Route path="/servicos" component={PublicServices} />
+        <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
+        <Route path="/mapa"><Stations mapFirst /></Route>
+        <Route path="/postos"><Stations /></Route>
+        <Route path="/local/:id" component={Local} />
+        <Route path="/explorar" component={Explorer} />
+        <Route path="/ajuda" component={Help} />
+        <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
 export default function App() {
   return (
     <WouterRouter base={routerBase} hrefs={target => normalizeRouterTarget(target)} aroundNav={(navigate, target, options) => navigate(normalizeRouterTarget(target), options)}>
-    <ErrorBoundary>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <InstallAppPrompt />
-          <PwaUpdatePrompt />
-          <AccessibilityPanel />
-          <SiteNavigation />
-          <MobileBottomNav />
-          <AuthReturnHandler />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <InstallAppPrompt />
+            <PwaUpdatePrompt />
+            <AccessibilityPanel />
+            <SiteNavigation />
+            <MobileBottomNav />
+            <AuthReturnHandler />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
     </WouterRouter>
   );
 }
