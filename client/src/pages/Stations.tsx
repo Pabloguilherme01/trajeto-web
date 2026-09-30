@@ -990,6 +990,9 @@ export default function Stations() {
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
             </div>
+            <p className="mt-2 text-[0.58rem] leading-relaxed text-white/35">
+              “Melhor combinação” considera preço ANP disponível, proximidade calculada no aparelho, funcionamento observado e confirmação cadastral. É uma ordenação de utilidade, não uma avaliação da qualidade do posto.
+            </p>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
