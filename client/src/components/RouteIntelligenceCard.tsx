@@ -271,11 +271,11 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {([
-              ["rápida", "Mais rápida", (route: typeof data.routes[number]) => route.durationSeconds ?? Infinity, "menor duração"],
+              ["rápida", "Mais rápida", (route: RouteIntelligence["routes"][number]) => route.durationSeconds ?? Infinity, "menor duração"],
               ["custo", "Menor custo", (route: typeof data.routes[number]) => totalCost(route), "combustível + pedágio"],
               ["distância", "Menor distância", (route: typeof data.routes[number]) => route.distanceMeters, "distância total"],
               ["pedágio", "Menor pedágio", (route: typeof data.routes[number]) => route.toll?.amount, "valor informado"],
-            ] as Array<[string, string, (route: typeof data.routes[number]) => number | null, string]>).map(([key, label, metric, hint]) => {
+            ] as Array<[string, string, (route: RouteIntelligence["routes"][number]) => number | null, string]>).map(([key, label, metric, hint]) => {
               const ranked = data.routes.filter(route => metric(route) != null);
               const route = ranked.length ? [...ranked].sort((a, b) => Number(metric(a)) - Number(metric(b)))[0] : data.routes[0];
               const active = selectedRouteId === route.id;
