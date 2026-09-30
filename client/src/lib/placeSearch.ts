@@ -32,6 +32,7 @@ export function categoryToGoogleTypes(category:PlaceCategory):string[]{
     case "security": return ["police","fire_station"];
     case "leisure": return ["park","playground","stadium"];
     case "accessibility": return [];
+    case "territory": return [];
   }
 }
 export function categoryFromGoogleType(types:string[]|undefined):PlaceCategory|null{
