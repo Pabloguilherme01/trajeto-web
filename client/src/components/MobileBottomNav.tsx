@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, MoreHorizontal } from "lucide-react";
+import { Bookmark, Home, Map, MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -9,7 +9,7 @@ import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
-  { key: "map", href: "/postos", label: "Mapa", short: "Mapa", icon: Fuel },
+  { key: "map", href: "/postos", label: "Mapa", short: "Mapa", icon: Map },
   { key: "saved", href: "/salvos", label: "Salvos", short: "Salvos", icon: Bookmark },
   { key: "more", href: "#", label: "Mais", short: "Mais", icon: MoreHorizontal },
 ] as const;
