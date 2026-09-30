@@ -416,12 +416,13 @@ export default function Stations() {
 
   useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
-    if (!hash.startsWith("#posto-")) return;
-    const target = decodeURIComponent(hash.slice("#posto-".length));
-    if (!target) return;
+    if (!hash) return;
+    const raw = decodeURIComponent(hash.slice(1));
+    if (!raw) return;
+    const elementId = raw.startsWith("posto-") ? "posto-" + encodeURIComponent(raw.slice("posto-".length)) : raw;
     const timer = window.setTimeout(() => {
-      document.getElementById("posto-" + encodeURIComponent(target))?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 120);
+      document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 160);
     return () => window.clearTimeout(timer);
   }, [directoryCards.length, directorySearch, location]);
 
