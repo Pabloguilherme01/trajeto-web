@@ -11,6 +11,7 @@ import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
 
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
+import TripReadinessCard from "@/components/TripReadinessCard";
 
 
 
@@ -349,6 +350,12 @@ export default function Home() {
                 <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{lastStation?.address ?? "Abra a busca para descobrir paradas."}</p>
               </a>
             </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-7" aria-label="Prontidão para a próxima viagem">
+          <div className="container">
+            <TripReadinessCard />
           </div>
         </section>
 
