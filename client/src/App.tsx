@@ -24,6 +24,7 @@ const Stations = lazy(() => import("./pages/Stations"));
 const Local = lazy(() => import("./pages/Local"));
 const Explorer = lazy(() => import("./pages/Explorer"));
 const Help = lazy(() => import("./pages/Help"));
+const PublicServices = lazy(() => import("./pages/PublicServices"));
 const Personal = lazy(() => import("./pages/Personal"));
 
 const routerBase = import.meta.env.BASE_URL === "/"
@@ -84,6 +85,7 @@ function Router() {
           <Route path="/local/:id" component={Local} />
           <Route path="/explorar" component={Explorer} />
           <Route path="/ajuda" component={Help} />
+          <Route path="/servicos" component={PublicServices} />
           <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
