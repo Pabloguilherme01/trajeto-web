@@ -199,3 +199,13 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Contraste mínimo para textos utilitários que antes usavam opacidades abaixo de WCAG AA. */
+:where([class~="text-white/20"],
+       [class~="text-white/25"],
+       [class~="text-white/30"],
+       [class~="text-white/35"],
+       [class~="text-white/40"],
+       [class~="text-white/45"]) {
+  color: #9AAAB2 !important;
+}
