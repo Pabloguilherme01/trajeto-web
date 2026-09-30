@@ -88,7 +88,7 @@ export const AGUAS_LINDAS_MAP_ONLY_DISCOVERIES = [
   { displayName: "Posto Ipiranga", address: "Qd 1, R. 1, 24, Lote N, Jardim da Barragem I, Águas Lindas de Goiás - GO, 72920-001", phone: "0800 725 7333", rating: 4.3, reviews: 18, hours: "05:00–23:00", note: "Mapa; mesmo endereço do Rham Auto Posto (CNPJ 43.774.756/0001-09). Tratar como possível mudança de bandeira/nome, não como novo posto, até confirmação por CNPJ/ANP." },
 ] as const;
 export const AGUAS_LINDAS_STATIONS_SOURCE =
-  "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
+  "41 registros cadastrais identificados para o diretório local, cruzados com uma referência externa de 31 empresas ativas no CNAE 4731-8/00 e com referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
 
 export const AGUAS_LINDAS_PRICE_REFERENCE = {
   period: "20/09/2026 a 26/09/2026",
