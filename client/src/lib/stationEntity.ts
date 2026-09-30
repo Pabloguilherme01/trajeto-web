@@ -43,6 +43,21 @@ export function stationDataConfidence(params: {
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
+export function freshnessDays(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86_400_000));
+}
+
+export function freshnessLevel(value?: string | null): "unknown" | "fresh" | "recent" | "stale" {
+  const days = freshnessDays(value);
+  if (days == null) return "unknown";
+  if (days <= 7) return "fresh";
+  if (days <= 21) return "recent";
+  return "stale";
+}
+
 export function freshnessLabel(value?: string | null) {
   if (!value) return "data não informada";
   const date = new Date(value);
