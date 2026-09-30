@@ -65,6 +65,10 @@ export function Terms() {
           <p className="mt-2 text-xs">Preços exibidos identificam a fonte e o período de referência quando disponíveis. Cálculos de economia, custo ou desvio são apresentados como cálculos do Trajeto quando não forem fornecidos por fonte externa.</p>
         </div>
         <p className="text-xs text-white/35">O uso de serviços externos também está sujeito aos termos e políticas dos respectivos provedores.</p>
+        <div className="flex flex-wrap gap-2">
+          <a href="https://policies.google.com/terms" target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center rounded-xl border border-white/8 px-3 text-[.52rem] font-black text-white/55">Termos do Google</a>
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center rounded-xl border border-white/8 px-3 text-[.52rem] font-black text-white/55">Privacidade do Google</a>
+        </div>
       </section>
     </Layout>
   );
