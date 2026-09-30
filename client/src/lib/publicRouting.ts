@@ -7,6 +7,7 @@ const REQUEST_TIMEOUT_MS = 9_000;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
+export type PublicTravelMode = "driving" | "walking" | "cycling" | "transit";
 export type PublicRoute = {
   origin: PublicCoordinate;
   destination: PublicCoordinate;
@@ -14,6 +15,7 @@ export type PublicRoute = {
   durationSeconds: number;
   polyline: string;
   source: PublicRouteSource;
+  mode: PublicTravelMode;
 };
 
 type NominatimResult = {
@@ -214,11 +216,11 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   return geocodedCoordinate;
 }
 
-function buildLocalEstimate(origin: PublicCoordinate, destination: PublicCoordinate): PublicRoute {
+function buildLocalEstimate(origin: PublicCoordinate, destination: PublicCoordinate, mode: PublicTravelMode): PublicRoute {
   const directDistance = haversineMeters(origin, destination);
   const distanceMeters = Math.max(200, directDistance * 1.18);
   const directKm = directDistance / 1000;
-  const speedKmh = directKm <= 20 ? 38 : directKm <= 80 ? 58 : 72;
+  const speedKmh = mode === "walking" ? 5 : mode === "cycling" ? 17 : mode === "transit" ? 28 : directKm <= 20 ? 38 : directKm <= 80 ? 58 : 72;
   const durationSeconds = Math.max(60, (distanceMeters / 1000 / speedKmh) * 3600);
 
   return {
@@ -228,10 +230,11 @@ function buildLocalEstimate(origin: PublicCoordinate, destination: PublicCoordin
     durationSeconds,
     polyline: encodePolyline([origin, destination]),
     source: "local-estimate",
+    mode,
   };
 }
 
-export async function calculatePublicRoute(originText: string, destinationText: string): Promise<PublicRoute> {
+export async function calculatePublicRoute(originText: string, destinationText: string, mode: PublicTravelMode = "driving"): Promise<PublicRoute> {
   const origin = await geocode(originText);
   const destination = await geocode(destinationText);
   const coordinateKey = [
@@ -239,12 +242,14 @@ export async function calculatePublicRoute(originText: string, destinationText: 
     origin.lng.toFixed(5),
     destination.lat.toFixed(5),
     destination.lng.toFixed(5),
-  ].join(",");
+  ].join(",") + ":" + mode;
 
   const cached = cacheGet<PublicRoute>("route:" + coordinateKey);
   if (cached) return cached;
 
-  const url = OSRM_URL + "/" +
+  const profile = mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
+  const routingBase = OSRM_URL.replace(/\/route\/v1\/[^/]+$/, "/route/v1/" + profile);
+  const url = routingBase + "/" +
     origin.lng + "," + origin.lat + ";" +
     destination.lng + "," + destination.lat +
     "?alternatives=false&overview=full&geometries=polyline";
@@ -264,6 +269,7 @@ export async function calculatePublicRoute(originText: string, destinationText: 
         durationSeconds: Number(durationSeconds),
         polyline,
         source: "osrm",
+        mode,
       };
       cacheSet("route:" + coordinateKey, result);
       return result;
@@ -273,7 +279,7 @@ export async function calculatePublicRoute(originText: string, destinationText: 
     // service is throttled, unavailable, or the device is offline.
   }
 
-  const estimated = buildLocalEstimate(origin, destination);
+  const estimated = buildLocalEstimate(origin, destination, mode);
   cacheSet("route:" + coordinateKey, estimated);
   return estimated;
 }
@@ -307,9 +313,10 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       durationLabel: publicDurationLabel(result.durationSeconds),
       polyline: result.polyline,
       summary: estimated
-        ? "Estimativa local baseada nas coordenadas disponíveis."
+        ? "Estimativa local baseada nas coordenadas disponíveis para o modo selecionado."
         : "Rota viária calculada com OpenStreetMap/OSRM.",
       source: result.source,
+      mode: result.mode,
     },
     stops: [],
     priceCoverage: 0,
