@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CarFront, ChevronDown, CircleDollarSign, MapPinned, ShieldCheck } from "lucide-react";
+import { CarFront, ChevronDown, CircleDollarSign, MapPinned, ShieldCheck, Sparkles } from "lucide-react";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import RecentTripsCard from "@/components/RecentTripsCard";
@@ -17,14 +17,16 @@ import { getMobileDestinations, mobileDestinationEvent } from "@/lib/mobileDesti
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { getRecentTrips, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import MobilityInsightsCard from "@/components/MobilityInsightsCard";
 
-type PanelId = "rotina" | "veiculo" | "custos" | "fontes";
+type PanelId = "rotina" | "veiculo" | "custos" | "fontes" | "inteligencia";
 
 const panels: Array<{id: PanelId; title: string; detail: string; icon: typeof MapPinned}> = [
   { id: "rotina", title: "Minha rotina", detail: "Destinos, viagens e preparação para sair.", icon: MapPinned },
   { id: "veiculo", title: "Meu veículo", detail: "Veículo, manutenção e serviços oficiais.", icon: CarFront },
   { id: "custos", title: "Custos e consumo", detail: "Combustível, despesas e impacto da viagem.", icon: CircleDollarSign },
   { id: "fontes", title: "Dados e fontes", detail: "ANP e serviços oficiais, sem misturar estimativas.", icon: ShieldCheck },
+  { id: "inteligencia", title: "Inteligência pessoal", detail: "Frequência, atalhos e backup dos seus dados locais.", icon: Sparkles },
 ];
 
 export default function MobileUtilityHub() {
@@ -117,6 +119,7 @@ export default function MobileUtilityHub() {
                         <OfficialSourcesCard />
                       </div>
                     )}
+                    {panel.id === "inteligencia" && <MobilityInsightsCard />}
                   </div>
                 )}
               </div>
