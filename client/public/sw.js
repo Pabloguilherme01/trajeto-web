@@ -19,7 +19,7 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(async cache => {
-        await cache.addAll(STATIC_SHELL);
+        await Promise.all(STATIC_SHELL.map(asset => cache.add(asset).catch(() => undefined)));
         const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
         if (!response.ok) return;
         const manifest = await response.json();
