@@ -281,7 +281,7 @@ export default function Home() {
                     </h2>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">última viagem</span>}
-                      {latestSavedRoute && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">offline pronta</span>}
+                      {latestSavedRoute && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">{online ? "rota salva" : "offline pronta"}</span>}
                       {lastStation && !lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">último posto</span>}
                     </div>
                   </div>
@@ -289,7 +289,7 @@ export default function Home() {
                     href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : latestSavedRoute ? appUrl("/planejar") + "?rota=" + encodeURIComponent(latestSavedRoute.id) + "&origem=" + encodeURIComponent(latestSavedRoute.origin) + "&destino=" + encodeURIComponent(latestSavedRoute.destination) : appUrl("/postos") + "?station=" + encodeURIComponent(lastStation?.placeId ?? "") + "&q=" + encodeURIComponent(lastStation?.query || lastStation?.name || "")}
                     className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]"
                   >
-                    {lastTrip ? "Preparar viagem" : latestSavedRoute ? "Continuar offline" : "Reabrir posto"}
+                    {lastTrip ? "Preparar viagem" : latestSavedRoute ? (online ? "Abrir rota salva" : "Continuar offline") : "Reabrir posto"}
                   </a>
                 </div>
               </div>
