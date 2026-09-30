@@ -186,7 +186,7 @@ export default function CityExplorerMap({ category, query = "", center, online, 
       return;
     }
 
-    if (category === "accessibility") {
+    if (category === "accessibility" || (category === "territory" && query.trim().length < 2)) {
       onResults([]);
       clearMarkers();
       setError(null);
