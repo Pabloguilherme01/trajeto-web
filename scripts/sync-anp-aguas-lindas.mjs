@@ -34,7 +34,21 @@ for (let page = 1; page <= MAX_PAGES; page += 1) {
 
 await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
 if (rows.length === 0) {
-  throw new Error("A consulta da ANP retornou zero registros; snapshot anterior deve ser preservado.");
+  try {
+    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
+    const previousRows = extractRows(previous?.data ?? previous);
+    if (previousRows.length > 0) {
+      console.warn(JSON.stringify({
+        warning: "ANP retornou zero registros; snapshot anterior preservado.",
+        previousRawRows: previousRows.length,
+        output: OUTPUT.pathname,
+      }));
+      process.exit(0);
+    }
+  } catch {
+    // Não existe snapshot anterior utilizável; falha para não publicar uma base vazia.
+  }
+  throw new Error("A consulta da ANP retornou zero registros e não existe snapshot anterior utilizável.");
 }
 
 const snapshot = {
