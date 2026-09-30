@@ -76,7 +76,7 @@ export default function Explore(){
 
   const openNav=(place:PlaceEntity)=>{
     if(!place.coordinates)return;
-    openNavigation(place.name,place.address??undefined,{lat:place.coordinates.lat,lng:place.coordinates.lng},"google");
+    const links=openNavigation(place.coordinates.lat,place.coordinates.lng,place.name); window.open(links.google,"_blank","noopener,noreferrer");
   };
 
   const categoryTitle=category==="all"?"Tudo":PLACE_CATEGORY_LABELS[category];
