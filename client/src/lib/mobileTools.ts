@@ -153,6 +153,20 @@ export function buildOpenStreetMapDirectionsUrl(destination: string, origin?: st
 
 export type NavigationProvider = "google" | "waze" | "apple" | "openstreetmap";
 
+/** Build a turn-by-turn route from a location explicitly provided by the user. */
+export function buildRouteProviderUrl(
+  provider: NavigationProvider,
+  origin: { lat: number; lng: number },
+  destination: string,
+) {
+  const from = `${origin.lat},${origin.lng}`;
+  const to = destination.trim();
+  if (provider === "google") return buildGoogleMapsDirectionsUrl(from, to, "driving", true);
+  if (provider === "waze") return buildWazeNavigationUrl(to);
+  if (provider === "apple") return buildAppleMapsDirectionsUrl(to, from);
+  return buildOpenStreetMapDirectionsUrl(to, from);
+}
+
 /** Create a destination link for the selected provider, falling back to the address when coordinates are absent. */
 export function buildNavigationProviderUrl(
   provider: NavigationProvider,
