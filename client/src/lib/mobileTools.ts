@@ -64,12 +64,10 @@ export function buildGoogleMapsDirectionsUrl(
 ) {
   const normalizedOrigin = origin.trim();
   const normalizedDestination = destination.trim();
-  const params = new URLSearchParams({
-    api: "1",
-    origin: normalizedOrigin,
-    destination: normalizedDestination,
-    travelmode: travelMode,
-  });
+  const params = new URLSearchParams({ api: "1" });
+  if (normalizedOrigin) params.set("origin", normalizedOrigin);
+  params.set("destination", normalizedDestination);
+  params.set("travelmode", travelMode);
   if (navigate) params.set("dir_action", "navigate");
   return "https://www.google.com/maps/dir/?" + params.toString();
 }

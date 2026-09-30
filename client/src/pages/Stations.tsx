@@ -138,13 +138,14 @@ export default function Stations() {
         setLocating(false);
         rememberIntent("nearby");
         setNearby(true);
+        vibration(18);
+        if (staticRuntime) {
+          window.location.assign(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude));
+          return;
+        }
         setQuery("postos");
         setInput("postos próximos");
         setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
-        vibration(18);
-        if (staticRuntime) {
-          window.open(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude), "_blank", "noopener,noreferrer");
-        }
       },
       () => {
         setLocating(false);

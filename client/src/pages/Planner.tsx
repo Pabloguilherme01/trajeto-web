@@ -95,11 +95,15 @@ export default function Planner() {
     const from = origin.trim();
     const to = destination.trim();
 
-    if (from.length < 3 || to.length < 3) {
-      setError("Preencha origem e destino com pelo menos 3 caracteres.");
+    if (to.length < 3) {
+      setError("Preencha o destino com pelo menos 3 caracteres.");
       return;
     }
-    if (from.toLocaleLowerCase("pt-BR") === to.toLocaleLowerCase("pt-BR")) {
+    if (!staticRuntime && from.length < 3) {
+      setError("Preencha a origem com pelo menos 3 caracteres.");
+      return;
+    }
+    if (from && from.toLocaleLowerCase("pt-BR") === to.toLocaleLowerCase("pt-BR")) {
       setError("Origem e destino precisam ser diferentes.");
       return;
     }
@@ -110,9 +114,11 @@ export default function Planner() {
 
     if (staticRuntime) {
       setError(null);
-      setSavedMessage("Modo público ativo: abra a navegação externa para obter distância, trânsito e chegada atualizados.");
+      setSavedMessage(from
+        ? "Modo público ativo: abra a navegação externa para obter distância, trânsito e chegada atualizados."
+        : "Modo público ativo: sem origem informada, a navegação externa tentará usar sua localização atual.");
       setFallbackReady(true);
-      rememberTrip(from, to);
+      if (from) rememberTrip(from, to);
       track("route_open", to);
       return;
     }
@@ -259,7 +265,7 @@ export default function Planner() {
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form onSubmit={submit}>
               <label className="block">
-                <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">Origem</span>
+                <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
                   <input value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
@@ -295,7 +301,7 @@ export default function Planner() {
             {error && (
               <div className="mt-3 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] p-3" role="alert">
                 <p className="text-xs font-bold text-[#FFD59B]">{error}</p>
-                {!online && origin.trim() && destination.trim() && <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination), "_blank", "noopener,noreferrer")} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-[0.62rem] font-black text-[#FFD59B]">Abrir no Google Maps</button>}
+                {!online && destination.trim() && <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination), "_blank", "noopener,noreferrer")} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-[0.62rem] font-black text-[#FFD59B]">Abrir no Google Maps</button>}
               </div>
             )}
           </section>

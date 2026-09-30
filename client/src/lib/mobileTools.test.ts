@@ -11,6 +11,9 @@ describe("mobile tools", () => {
     expect(buildGoogleMapsDirectionsUrl("Águas Lindas, GO", "Brasília, DF")).toBe(
       "https://www.google.com/maps/dir/?api=1&origin=%C3%81guas+Lindas%2C+GO&destination=Bras%C3%ADlia%2C+DF&travelmode=driving",
     );
+    expect(buildGoogleMapsDirectionsUrl("", "Brasília, DF")).toBe(
+      "https://www.google.com/maps/dir/?api=1&destination=Bras%C3%ADlia%2C+DF&travelmode=driving",
+    );
     expect(buildGoogleMapsSearchUrl("postos perto de Águas Lindas")).toBe(
       "https://www.google.com/maps/search/?api=1&query=postos%20perto%20de%20%C3%81guas%20Lindas",
     );
