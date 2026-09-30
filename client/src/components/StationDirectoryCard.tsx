@@ -101,6 +101,10 @@ export function StationDirectoryCard({
     ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName) + (cnpj ? "#posto-" + encodeURIComponent(cnpj) : "")
     : address;
   const phone = local?.mapData?.phone;
+  const socialQuery = encodeURIComponent([stationName, address, "Águas Lindas de Goiás"].filter(Boolean).join(" "));
+  const instagramSearchUrl = "https://www.google.com/search?q=" + encodeURIComponent("site:instagram.com " + decodeURIComponent(socialQuery));
+  const facebookSearchUrl = "https://www.google.com/search?q=" + encodeURIComponent("site:facebook.com " + decodeURIComponent(socialQuery));
+  const webSearchUrl = "https://www.google.com/search?q=" + socialQuery;
   const status = local?.mapData?.operationalStatus;
   const statusLabel = status === "open" ? "Aberto em referência de mapa" : status === "closed" ? "Fechado em referência de mapa" : "Funcionamento não confirmado";
 
@@ -178,6 +182,9 @@ export function StationDirectoryCard({
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-[0.55rem] font-black text-white/65">Instagram</button>
+        <button type="button" onClick={() => window.open(facebookSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#1877F2]/20 bg-[#1877F2]/[.05] text-[0.55rem] font-black text-white/65">Facebook</button>
+        <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55">Mais na web</button>
         {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Phone className="size-3.5" />Ligar</a>}
         <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
         <button type="button" onClick={() => void share()} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Share2 className="size-3.5" />Compartilhar</button>
