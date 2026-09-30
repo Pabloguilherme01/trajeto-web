@@ -9,6 +9,8 @@ import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileSta
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
+import OfflineRouteHub from "@/components/OfflineRouteHub";
+import type { OfflineDestination } from "@/lib/offlineDestinations";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
@@ -246,6 +248,19 @@ export default function Planner() {
     window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
+  const chooseOfflineDestination = (destination: OfflineDestination) => {
+    setDestination(destination.address);
+    setPlanned(null);
+    setFallbackReady(false);
+    setSavedMessage(destination.shortName + " carregado como destino. Este ponto também funciona sem internet.");
+    setError(null);
+    window.requestAnimationFrame(() => {
+      document.getElementById("planner-destination")?.focus();
+      document.getElementById("planner-destination")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    vibration(10);
+  };
+
   const routeForMap = planned ? [{
     id: "principal",
     polyline: planned.route.polyline ?? null,
@@ -270,6 +285,14 @@ export default function Planner() {
         </header>
 
         {!savedMode && (
+          <OfflineRouteHub
+            compact
+            onSelectDestination={chooseOfflineDestination}
+            highlightedDestinationId={null}
+          />
+        )}
+
+        {!savedMode && (
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form onSubmit={submit}>
               <label className="block">
@@ -277,12 +300,12 @@ export default function Planner() {
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
                   <input value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
-                  <button type="button" onClick={useCurrentLocation} disabled={!online || locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
+                  <button type="button" onClick={useCurrentLocation} disabled={!online || locating} className="mobile-action-icon border-0 bg-transparent text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
 
               <div className="my-2 flex justify-end">
-                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-white/8 text-white/45 disabled:opacity-25" aria-label="Inverter origem e destino">
+                <button type="button" onClick={swap} disabled={!origin && !destination} className="mobile-action-icon border-white/8 bg-white/[.025] text-white/55 disabled:opacity-25" aria-label="Inverter origem e destino">
                   <ArrowLeftRight className="size-4" />
                 </button>
               </div>
@@ -291,16 +314,16 @@ export default function Planner() {
                 <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                  <input value={destination} onChange={event => { setDestination(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
+                  <input id="planner-destination" value={destination} onChange={event => { setDestination(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
               </label>
 
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setOrigin(trip.origin); setDestination(trip.destination); setPlanned(null); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/60">Última rota</button>}
-                <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/50 disabled:opacity-30">Limpar</button>
+                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setOrigin(trip.origin); setDestination(trip.destination); setPlanned(null); }} className="mobile-action mobile-action-secondary min-h-11 shrink-0 rounded-full px-3">Última rota</button>}
+                <button type="button" onClick={clear} disabled={!origin && !destination} className="mobile-action mobile-action-secondary min-h-11 shrink-0 rounded-full px-3 disabled:opacity-30">Limpar</button>
               </div>
 
-              <button type="submit" disabled={planRoute.isPending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
+              <button type="submit" disabled={planRoute.isPending || destination.trim().length < 3} className="mobile-action mobile-action-primary mt-4 min-h-13 w-full rounded-2xl px-4 disabled:opacity-35">
                 <span>{planRoute.isPending ? "Calculando rota…" : "Calcular rota"}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
@@ -309,7 +332,7 @@ export default function Planner() {
             {error && (
               <div className="mt-3 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] p-3" role="alert">
                 <p className="text-xs font-bold text-[#FFD59B]">{error}</p>
-                {!online && destination.trim() && <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination), "_blank", "noopener,noreferrer")} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-[0.62rem] font-black text-[#FFD59B]">Abrir no Google Maps</button>}
+                {!online && destination.trim() && <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination), "_blank", "noopener,noreferrer")} className="mobile-action mobile-action-secondary mt-2 min-h-10 border-[#FFB86B]/25 px-3 text-[#FFD59B]">Abrir no Google Maps</button>}
               </div>
             )}
           </section>
@@ -332,8 +355,8 @@ export default function Planner() {
                     <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
                     <p className="mt-1 text-[0.58rem] text-white/35">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
                     <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                      <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
-                      <button type="button" onClick={() => void removeSavedRoute(route)} aria-label="Excluir rota salva" className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-[#FF7D6A]/25 text-[#FFB7A9]"><Trash2 className="size-4" /></button>
+                      <button type="button" onClick={() => openSavedRoute(route)} className="mobile-action mobile-action-primary min-h-11 rounded-xl px-3">Abrir rota</button>
+                      <button type="button" onClick={() => void removeSavedRoute(route)} aria-label="Excluir rota salva" className="mobile-action-icon border-[#FF7D6A]/25 bg-[#FF7D6A]/[.04] text-[#FFB7A9]"><Trash2 className="size-4" /></button>
                     </div>
                   </article>
                 ))}
@@ -361,7 +384,7 @@ export default function Planner() {
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir agora</button>
-                    <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(station.address || station.name))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Planejar</button>
+                    <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(station.address || station.name))} className="mobile-action mobile-action-secondary min-h-11 rounded-xl px-3 text-white/70">Planejar</button>
                   </div>
                 </article>
               ))}
@@ -418,7 +441,7 @@ export default function Planner() {
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
+                <button type="button" onClick={() => void saveCurrentRoute()} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/65"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 
