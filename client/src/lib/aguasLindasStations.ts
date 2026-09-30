@@ -9,10 +9,14 @@ export type LocalStationRecord = {
   aliases: string[];
   status: "cadastro_ativo";
   sourceNote: string;
+  anp?: { authorization?: string | null; anpCode?: string | null; lastAnpUpdate?: string | null; products?: string[]; distributor?: string | null; tankCapacityLiters?: number | null; nozzleCount?: number | null; interdicted?: boolean | null; latitude?: number | null; longitude?: number | null };
+  dataQuality?: "anp-confirmed" | "cross-checked" | "catalog-only";
 };
 
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
+
+export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
 
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
@@ -81,7 +85,7 @@ const records: StationSeed[] = [
 
 function tupleToRecord(row: StationSeed): LocalStationRecord {
   const [id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, sourceNote] = row;
-  return { id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, status: "cadastro_ativo", sourceNote };
+  return { id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, status: "cadastro_ativo", sourceNote, dataQuality: "catalog-only" };
 }
 
 export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
@@ -113,4 +117,19 @@ export function searchAguasLindasStations(query: string) {
 export function stationMapsSearchUrl(station: LocalStationRecord) {
   const query = [station.displayName, station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
+}
+
+
+export function getStationDataQualityLabel(station: LocalStationRecord) {
+  if (station.dataQuality === "anp-confirmed") return "ANP confirmado";
+  if (station.dataQuality === "cross-checked") return "Dados cruzados";
+  return "Cadastro local";
+}
+
+export function getStationSearchText(station: LocalStationRecord) {
+  return [station.displayName, station.legalName, station.cnpj, station.neighborhood ?? "", station.address ?? "", station.brand ?? "", ...station.aliases]
+    .join(" ")
+    .toLocaleLowerCase("pt-BR")
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "");
 }
