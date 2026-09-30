@@ -18,7 +18,7 @@ describe("mobile navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Minha conta" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Ajuda e uso offline" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ajuda e offline" }));
     expect(state.navigate).toHaveBeenCalledWith("/ajuda");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
