@@ -11,12 +11,17 @@ export type LocalStationRecord = {
   sourceNote: string;
   anp?: { authorization?: string | null; anpCode?: string | null; lastAnpUpdate?: string | null; products?: string[]; distributor?: string | null; tankCapacityLiters?: number | null; nozzleCount?: number | null; interdicted?: boolean | null; latitude?: number | null; longitude?: number | null };
   dataQuality?: "anp-confirmed" | "cross-checked" | "catalog-only";
+  dataOrigin?: "ANP" | "cross-check" | "local-catalog";
+  verifiedAt?: string | null;
+  verificationFlags?: { address?: boolean; coordinates?: boolean; authorization?: boolean; brand?: boolean };
 };
 
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
 
 export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
+export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
+export const AGUAS_LINDAS_DATA_POLICY = "ANP é a fonte primária para status cadastral; fontes secundárias apenas complementam nomes/endereço quando necessário.";
 
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
@@ -85,7 +90,7 @@ const records: StationSeed[] = [
 
 function tupleToRecord(row: StationSeed): LocalStationRecord {
   const [id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, sourceNote] = row;
-  return { id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, status: "cadastro_ativo", sourceNote, dataQuality: "catalog-only" };
+  return { id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, status: "cadastro_ativo", sourceNote, dataQuality: "catalog-only", dataOrigin: "local-catalog", verifiedAt: null, verificationFlags: { address: Boolean(address), coordinates: false, authorization: false, brand: Boolean(brand) } };
 }
 
 export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
@@ -132,4 +137,17 @@ export function getStationSearchText(station: LocalStationRecord) {
     .toLocaleLowerCase("pt-BR")
     .normalize("NFD")
     .replace(/[\\u0300-\\u036f]/g, "");
+}
+
+
+export function getStationVerificationSummary(station: LocalStationRecord) {
+  const flags = station.verificationFlags ?? {};
+  const confirmed = [flags.address, flags.coordinates, flags.authorization, flags.brand].filter(Boolean).length;
+  return { confirmed, total: 4, label: confirmed === 4 ? "Cadastro completo" : confirmed >= 2 ? "Parcialmente confirmado" : "Cadastro básico" };
+}
+
+export function getStationSourceLabel(station: LocalStationRecord) {
+  if (station.dataOrigin === "ANP") return "Fonte ANP";
+  if (station.dataOrigin === "cross-check") return "Dados cruzados";
+  return "Catálogo local";
 }
