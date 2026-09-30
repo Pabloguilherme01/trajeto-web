@@ -1,6 +1,6 @@
 import { Accessibility, Calculator, ChevronRight, CircleHelp, Download, ExternalLink, Map, Navigation, Settings, X } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPreferredNavigationProvider, setPreferredNavigationProvider, type NavigationProvider } from "@/lib/mobileTools";
 import { appUrl } from "@/lib/appUrl";
 
@@ -14,6 +14,22 @@ type Props = {
 export default function MobileMoreSheet({ open, onClose }: Props) {
   const [, setLocation] = useLocation();
   const [provider, setProvider] = useState<NavigationProvider>(() => getPreferredNavigationProvider());
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lastActiveRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    lastActiveRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      lastActiveRef.current?.focus?.();
+    };
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -41,7 +57,7 @@ export default function MobileMoreSheet({ open, onClose }: Props) {
             <p className="text-[0.5rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Mais</p>
             <h2 id="mobile-more-title" className="mt-1 text-base font-black text-white">Configurações e fontes</h2>
           </div>
-          <button type="button" onClick={onClose} className="grid size-10 place-items-center rounded-xl border border-white/8 text-white/50" aria-label="Fechar"><X className="size-4" /></button>
+          <button ref={closeButtonRef} type="button" onClick={onClose} className="grid size-10 place-items-center rounded-xl border border-white/8 text-white/50" aria-label="Fechar"><X className="size-4" /></button>
         </div>
 
         <div className="grid gap-2 p-3">
