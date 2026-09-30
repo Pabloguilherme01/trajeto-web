@@ -381,6 +381,15 @@ export function StationDirectoryCard({
                 {copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}
                 {copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}
               </button>
+              {coords && (
+                <button
+                  type="button"
+                  onClick={() => void copy(coords.lat.toFixed(6) + ", " + coords.lng.toFixed(6))}
+                  className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/65"
+                >
+                  <MapPin className="size-3.5" /> Copiar coordenadas
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")}
