@@ -182,12 +182,16 @@ export default function Home() {
             <span className="mt-2 block text-xs font-black">Comparar postos</span>
             <span className="mt-0.5 block text-[0.56rem] font-bold text-white/40">Preço e distância</span>
           </button>
-          <button type="button" onClick={() => window.open("https://www.google.com/maps/search/postos+abertos+Águas+Lindas+de+Goiás", "_blank", "noopener,noreferrer")} className="min-h-14 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-left text-[#FFD09A] active:scale-[.98]">
+          <button type="button" onClick={() => window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("postos abertos Águas Lindas de Goiás"), "_blank", "noopener,noreferrer")} className="min-h-14 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-left text-[#FFD09A] active:scale-[.98]">
             <Navigation className="size-4" />
             <span className="mt-2 block text-xs font-black">Emergência</span>
             <span className="mt-0.5 block text-[0.56rem] font-bold">Postos abertos</span>
           </button>
         </section>
+
+        <button type="button" onClick={() => void shareHome()} className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-[0.62rem] font-black text-white/70 active:scale-[.99]">
+          <Share2 className="size-3.5 text-[#C7FF3C]" /> Compartilhar o Trajeto com alguém
+        </button>
 
         <details className="mt-4 rounded-[1.5rem] border border-white/8 bg-[#121B22] px-4 py-3 shadow-[0_18px_55px_rgba(0,0,0,.22)]">
           <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3">
