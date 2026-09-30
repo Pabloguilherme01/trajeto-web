@@ -21,7 +21,7 @@ export default function Personal() {
   return <DashboardLayout accessCopy={personalAccessCopy}>
     <div className="mx-auto max-w-7xl">
       <MobilePageHeader eyebrow="Minha conta" title="Seu painel de viagem." description="Rotas, postos favoritos, veículo e alertas organizados para a próxima saída." icon={History} actionLabel="Planejar uma rota" actionHref="/planejar" accent="violet" />
-      <header className="mb-9 hidden flex-col gap-6 border-b border-white/10 pb-7 sm:flex md:flex">
+      <header className="mb-9 hidden flex-col gap-6 border-b border-white/10 pb-7 md:flex">
         <div><p className="eyebrow">Minha rota</p><h1 className="font-display mt-3 text-5xl font-semibold leading-none tracking-[-0.065em] text-white">Tudo que você guardou.</h1><p className="mt-4 max-w-xl text-sm leading-relaxed text-[#9FB1BA]">Guarde apenas o que ajuda nas próximas viagens: postos, veículos, rotas e alertas.</p></div>
         <Link href="/postos?q=Bras%C3%ADlia%2C%20DF"><Button className="rounded-xl bg-[#C7FF3C] font-bold text-[#0B1014] hover:bg-white">Consultar postos <ArrowRight className="ml-2 size-4" /></Button></Link>
       </header>
