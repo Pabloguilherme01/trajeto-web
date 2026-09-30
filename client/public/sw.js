@@ -13,6 +13,7 @@ const STATIC_SHELL = [
   "./icon-512-maskable.png",
   "./icon-1024.png",
   "./robots.txt",
+  "./404.html",
 ];
 
 self.addEventListener("install", event => {
@@ -125,8 +126,14 @@ async function networkFirstNavigation(request) {
     if (response.ok) {
       await cache.put(request, response.clone());
       await cache.put("./index.html", response.clone());
+      return response;
     }
-    return response;
+
+    return (
+      await cache.match(request, { ignoreVary: true }) ||
+      await cache.match("./index.html", { ignoreVary: true }) ||
+      response
+    );
   } catch {
     return (
       await cache.match(request, { ignoreVary: true }) ||
