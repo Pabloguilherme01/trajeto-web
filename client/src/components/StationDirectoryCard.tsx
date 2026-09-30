@@ -14,6 +14,7 @@ import {
 } from "@/lib/mobileTools";
 import { appUrl } from "@/lib/appUrl";
 import { stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
+import StationIntegrityPanel from "@/components/StationIntegrityPanel";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -350,6 +351,8 @@ export function StationDirectoryCard({
         </summary>
 
         <div className="space-y-3 border-t border-white/8 px-3 pb-3 pt-3">
+          <StationIntegrityPanel anp={anp} local={local} price={primaryPrice} />
+
           <section aria-label="Identificação do posto">
             <p className="text-[0.46rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">Identificação</p>
             <div className="mt-2 grid gap-1.5 text-[0.54rem] leading-relaxed text-white/45">
