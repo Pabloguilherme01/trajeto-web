@@ -112,7 +112,13 @@ export default function Explore(){
       <section className="mt-4"><CityExplorerMap category={category} query={query} center={center} online={online} onResults={setResults} onSelect={setSelected}/></section>
       <DataHealthStrip online={online} />
 
-      <section className="mt-4 rounded-[1.25rem] border border-white/8 bg-white/[.025] p-3">
+            {filtered.some(place => place.source === "Google") && (
+        <p className="mt-3 rounded-xl border border-white/6 bg-white/[.02] px-3 py-2 text-[.48rem] leading-relaxed text-white/30">
+          Google Maps · dados de mapa e Places exibidos como enriquecimento desta sessão.
+        </p>
+      )}
+
+<section className="mt-4 rounded-[1.25rem] border border-white/8 bg-white/[.025] p-3">
         <div className="flex items-start gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Globe2 className="size-4"/></div><div><p className="text-[.55rem] font-black text-white">Como ler o mapa</p><p className="mt-1 text-[.52rem] leading-relaxed text-white/38">ANP é usado como fonte cadastral e de preço para postos. MAPA identifica enriquecimento geográfico externo. Uma referência externa não vira automaticamente um registro oficial.</p></div></div>
       </section>
 
