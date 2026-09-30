@@ -24,6 +24,7 @@ export default function Home() {
   const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
   const [locating, setLocating] = useState(false);
   const [shareDone, setShareDone] = useState(false);
+  const [formMessage, setFormMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const refresh = () => {
@@ -59,7 +60,11 @@ export default function Home() {
     event.preventDefault();
     const from = origin.trim();
     const to = destination.trim();
-    if (to.length < 3) return;
+    if (to.length < 3) {
+      setFormMessage("Informe um destino com pelo menos 3 caracteres.");
+      return;
+    }
+    setFormMessage(null);
     rememberIntent("route");
     if (from) rememberSearch(from);
     rememberSearch(to);
@@ -82,6 +87,7 @@ export default function Home() {
       },
       () => {
         setLocating(false);
+        setFormMessage("Não foi possível obter sua localização. Digite a origem ou tente novamente.");
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
@@ -125,7 +131,9 @@ export default function Home() {
       await shareText("Trajeto · planeje viagens, encontre postos e guarde rotas.", url, "Trajeto");
       setShareDone(true);
       window.setTimeout(() => setShareDone(false), 1800);
-    } catch {}
+    } catch {
+      setFormMessage("Não foi possível abrir o compartilhamento.");
+    }
   };
 
   return (
@@ -187,11 +195,16 @@ export default function Home() {
               </div>
             </label>
 
-            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]">
+            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
               <span>{locating ? "Obtendo localização…" : "Calcular rota"}</span>
               <ArrowRight className="size-5" />
             </button>
           </form>
+          {formMessage && (
+            <p id="home-form-message" className="mt-3 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 py-2.5 text-xs font-bold text-[#FFD59B]" role="status" aria-live="polite">
+              {formMessage}
+            </p>
+          )}
 
         </section>
 
