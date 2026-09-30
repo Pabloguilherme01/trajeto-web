@@ -111,10 +111,7 @@ export function searchAguasLindasStations(query: string) {
     return AGUAS_LINDAS_STATIONS;
   }
   return AGUAS_LINDAS_STATIONS.filter(station =>
-    [station.displayName, station.legalName, station.cnpj, station.neighborhood ?? "", station.address ?? "", station.brand ?? "", ...station.aliases]
-      .join(" ")
-      .toLocaleLowerCase("pt-BR")
-      .includes(normalized),
+    getStationSearchText(station).includes(normalized),
   );
 }
 
