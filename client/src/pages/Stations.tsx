@@ -53,6 +53,36 @@ export default function Stations() {
   );
   const anpRows = staticRuntime ? staticAnpRows : anpLiveQuery.data?.rows ?? [];
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
+  const mapStations = useMemo<StationMapItem[]>(() => {
+    const official = anpStations
+      .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
+      .map(station => ({
+        id: `anp-${station.cnpj}`,
+        name: station.razaoSocial || `Posto ${station.cnpj}`,
+        address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
+        lat: station.latitude as number,
+        lng: station.longitude as number,
+        cnpj: station.cnpj,
+        brand: station.distribuidora,
+        source: "ANP" as const,
+      }));
+
+    if (official.length > 0) return official;
+
+    return liveStations
+      .filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lng))
+      .map(station => ({
+        id: station.placeId,
+        placeId: station.placeId,
+        name: station.name,
+        address: station.address,
+        lat: station.lat,
+        lng: station.lng,
+        source: "Google" as const,
+      }));
+  }, [anpStations, liveStations]);
+  const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
+  const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -457,6 +487,26 @@ export default function Stations() {
 
             {anpRows.length > 0 && (
               <>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3">
+                  <div className="min-w-0">
+                    <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
+                    <p className="mt-1 text-[0.62rem] leading-relaxed text-white/50">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas e serão marcados no mapa{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}.</p>
+                  </div>
+                  <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>
+                </div>
+
+                {showMap && mapStations.length > 0 && (
+                  <section className="mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
+                    <div className="h-[min(68vh,620px)]">
+                      <StationMap stations={mapStations} showTraffic />
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">
+                      <span>{mapStations.length} marcadores · fonte principal: coordenadas ANP</span>
+                      <span>Toque em um marcador para ver endereço, CNPJ e navegar.</span>
+                    </div>
+                  </section>
+                )}
+
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
                   <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
@@ -735,7 +785,7 @@ export default function Stations() {
               </div>
             </section>
 
-            {showMap && visibleStations.length > 0 && (
+            {showMap && !broadAguasLindasQuery && visibleStations.length > 0 && (
               <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
                 <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} /></div>
               </section>
