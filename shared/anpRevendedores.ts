@@ -208,7 +208,7 @@ export function groupAnpFuelRows(rows: AnpFuelRow[]): AnpStation[] {
     }
     current.products.push(product);
   }
-  return [...grouped.values()].sort((a, b) =>
+  return Array.from(grouped.values()).sort((a, b) =>
     (a.bairro ?? "").localeCompare(b.bairro ?? "", "pt-BR") ||
     (a.razaoSocial ?? "").localeCompare(b.razaoSocial ?? "", "pt-BR")
   );
