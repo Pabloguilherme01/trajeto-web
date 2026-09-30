@@ -56,6 +56,8 @@ export default function TripReadinessCard() {
     window.addEventListener(vehicleMaintenanceEvent, refresh);
     window.addEventListener(offlineRouteEvent, refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
+    const connection = typeof navigator !== "undefined" ? (navigator as Navigator & { connection?: EventTarget }).connection : undefined;
+    connection?.addEventListener("change", refresh);
     window.addEventListener("focus", refresh);
     return () => {
       window.removeEventListener("online", onlineHandler);
@@ -64,6 +66,7 @@ export default function TripReadinessCard() {
       window.removeEventListener(vehicleMaintenanceEvent, refresh);
       window.removeEventListener(offlineRouteEvent, refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
+      connection?.removeEventListener("change", refresh);
       window.removeEventListener("focus", refresh);
     };
   }, []);
