@@ -19,7 +19,7 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import { buildDirectoryCards, getDirectoryCoordinates, getDirectoryGasolinePrice, getDirectoryLabel, matchesFuelFilter, type FuelFilter } from "@/lib/stationDirectoryModel";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
-import { stationCatalogStatusLabel, stationDataConfidence } from "@/lib/stationEntity";
+import { stationDataConfidence } from "@/lib/stationEntity";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -998,7 +998,6 @@ export default function Stations() {
                   anp={item.anp}
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
                   prices={pricesByCnpj.get(item.key) ?? []}
-                  catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
                   distanceKm={(() => {
                     if (!userCoords) return null;
                     const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
