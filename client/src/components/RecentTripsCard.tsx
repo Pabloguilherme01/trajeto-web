@@ -39,6 +39,8 @@ export default function RecentTripsCard() {
     getRouteUsage(trip.origin, trip.destination) > getRouteUsage(best.origin, best.destination) ? trip : best,
   trips[0]);
   const mostUsedCount = getRouteUsage(mostUsedTrip.origin, mostUsedTrip.destination);
+  const totalRecordedUses = trips.reduce((sum, trip) => sum + getRouteUsage(trip.origin, trip.destination), 0);
+  const recurringRoutes = trips.filter(trip => getRouteUsage(trip.origin, trip.destination) > 1).length;
 
   const openReverseTrip = async (trip: RecentTrip) => {
     const origin = trip.destination;
@@ -111,6 +113,18 @@ export default function RecentTripsCard() {
           </div>
         </div>
       )}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="rounded-2xl bg-[#F4F7F6] p-3">
+          <p className="text-[0.52rem] font-black uppercase tracking-[0.12em] text-[#718089]">Uso registrado</p>
+          <p className="mt-1 text-lg font-black text-[#0B1014]">{totalRecordedUses}</p>
+          <p className="text-[0.55rem] font-semibold text-[#718089]">nesta memória local</p>
+        </div>
+        <div className="rounded-2xl bg-[#F4F7F6] p-3">
+          <p className="text-[0.52rem] font-black uppercase tracking-[0.12em] text-[#718089]">Rotas recorrentes</p>
+          <p className="mt-1 text-lg font-black text-[#0B1014]">{recurringRoutes}</p>
+          <p className="text-[0.55rem] font-semibold text-[#718089]">{recurringRoutes === 1 ? "rota repetida" : "rotas repetidas"}</p>
+        </div>
+      </div>
       <div className="mt-4 space-y-2">
         {trips.map((trip, index) => (
           <div key={trip.origin + "::" + trip.destination} className="flex items-center gap-2 rounded-2xl border border-[#D8E0E3] bg-[#FCFDFD] p-3">
