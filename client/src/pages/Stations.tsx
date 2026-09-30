@@ -975,6 +975,34 @@ export default function Stations() {
                   );
                 })}
               </div>
+              <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Filtrar por combustível">
+                {[
+                  { id: "all" as const, label: "Todos" },
+                  { id: "gasolina-comum" as const, label: "Gasolina" },
+                  { id: "etanol" as const, label: "Etanol" },
+                  { id: "diesel-s10" as const, label: "Diesel S10" },
+                  { id: "diesel-s500" as const, label: "Diesel S500" },
+                  { id: "glp-p13" as const, label: "GLP P13" },
+                  { id: "gnv" as const, label: "GNV" },
+                ].map(option => {
+                  const active = fuelFilter === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setFuelFilter(option.id)}
+                      className={"min-h-9 shrink-0 rounded-full border px-3 text-[0.52rem] font-black " + (
+                        active
+                          ? "border-[#3DE3FF]/25 bg-[#3DE3FF]/10 text-[#C9F7FF]"
+                          : "border-white/8 bg-white/[.025] text-white/45"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
