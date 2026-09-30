@@ -63,9 +63,9 @@ export function buildDailyModes(online: boolean, savedRoutes: number): DailyMode
     { id: "automatico", label: "Automático", detail: "Escolhe a próxima ação com seus dados salvos.", href: "/"},
     { id: "proxima", label: favorite ? "Destino frequente" : "Próxima viagem", detail: favorite ? favorite.value : "Planejar um novo destino", href: favorite ? "/planejar?destino=" + encodeURIComponent(favorite.value) : "/planejar" },
     { id: "repetir", label: "Repetir", detail: trip ? trip.origin + " → " + trip.destination : "Última viagem", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) : "/planejar" },
-    { id: "economia", label: "Economia", detail: "Calcular custo, consumo e impacto mensal.", href: "/#calculadora" },
+    { id: "economia", label: "Economia", detail: "Calcular custo, consumo e impacto mensal.", href: "/planejar?economia=1" },
     { id: "offline", label: "Sem internet", detail: savedRoutes ? savedRoutes + (savedRoutes === 1 ? " rota salva" : " rotas salvas") : "Preparar uma rota para usar offline.", href: "/planejar?salvos=1" },
-    { id: "conducao", label: "Condução", detail: trip ? "Abrir sua última viagem com menos distração." : "Abrir o planejamento com foco na direção.", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) + "&modo=conducao" : "/planejar?modo=conducao" },
+    { id: "conducao", label: "Condução", detail: trip ? "Abrir sua última viagem com menos distração." : "Abrir o planejamento com foco na direção.", href: trip ? "/planejar?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) + "&modo=driving&conducao=1" : "/planejar?conducao=1" },
   ];
   return online ? modes : modes.filter(mode => mode.id === "automatico" || mode.id === "offline");
 }
