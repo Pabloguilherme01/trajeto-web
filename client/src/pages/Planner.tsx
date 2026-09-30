@@ -9,7 +9,8 @@ import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileSta
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
-import { hasConfiguredRoutingApi, isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import { isGitHubPagesRuntime, supportsLiveRouting } from "@/lib/runtimeCapabilities";
+import { buildPublicRoutePayload, calculatePublicRoute } from "@/lib/publicRouting";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -53,9 +54,10 @@ export default function Planner() {
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
+  const [publicRoutePending, setPublicRoutePending] = useState(false);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
-  const staticRuntime = isGitHubPagesRuntime() && !hasConfiguredRoutingApi();
+  const staticRuntime = !supportsLiveRouting();
   const requestVersion = useRef(0);
 
   const resetResult = () => {
@@ -139,13 +141,41 @@ export default function Planner() {
 
     if (staticRuntime) {
       setError(null);
-      setSavedMessage(from
-        ? "Modo público ativo: abra a navegação externa para obter distância, trânsito e chegada atualizados."
-        : "Modo público ativo: sem origem informada, a navegação externa tentará usar sua localização atual.");
-      setFallbackReady(true);
-      if (from) rememberTrip(from, to);
-      track("route_open", to);
-      return;
+      setFallbackReady(false);
+      setPublicRoutePending(true);
+      const publicOrigin = from;
+      try {
+        let resolvedOrigin = publicOrigin;
+        if (!resolvedOrigin && navigator.geolocation) {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 7000, maximumAge: 300000 });
+          }).catch(() => null);
+          if (position) {
+            resolvedOrigin = position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5);
+            setOrigin(resolvedOrigin);
+          }
+        }
+
+        if (!resolvedOrigin) throw new Error("Informe a origem ou permita a localização para calcular a rota no próprio Trajeto.");
+        const publicRoute = await calculatePublicRoute(resolvedOrigin, to);
+        if (version !== requestVersion.current) return;
+        setPlanned(buildPublicRoutePayload(publicRoute) as PlannedRoute);
+        setSavedMessage("Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.");
+        if (resolvedOrigin) rememberTrip(resolvedOrigin, to);
+        track("route_open", to);
+        vibration(14);
+        return;
+      } catch (routeError) {
+        if (version !== requestVersion.current) return;
+        setSavedMessage(null);
+        setFallbackReady(true);
+        setError(routeError instanceof Error ? routeError.message : "Não foi possível calcular a rota pública.");
+        if (publicOrigin) rememberTrip(publicOrigin, to);
+        vibration(8);
+        return;
+      } finally {
+        if (version === requestVersion.current) setPublicRoutePending(false);
+      }
     }
 
     setError(null);
@@ -314,8 +344,8 @@ export default function Planner() {
                 <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/50 disabled:opacity-30">Limpar</button>
               </div>
 
-              <button type="submit" disabled={planRoute.isPending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
-                <span>{planRoute.isPending ? "Calculando rota…" : staticRuntime ? "Preparar navegação" : "Calcular rota"}</span>
+              <button type="submit" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
+                <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : "Calcular rota"}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
             </form>
