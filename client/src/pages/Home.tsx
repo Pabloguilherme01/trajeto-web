@@ -95,7 +95,7 @@ export default function Home() {
         <header className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="brand-wordmark text-[1.25rem] text-white">trajeto</p>
-            <p className="mt-1 text-[0.5rem] font-black uppercase tracking-[.18em] text-white/30">abastecer · decidir · chegar</p>
+            <p className="mt-1 text-[0.5rem] font-black uppercase tracking-[.18em] text-white/30">explorar · decidir · chegar</p>
           </div>
           <div className="flex items-center gap-1.5">
             <span className={"inline-flex min-h-9 items-center gap-1.5 rounded-full border px-2.5 text-[0.5rem] font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/[.04] text-[#FFB86B]")}>
