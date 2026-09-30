@@ -797,7 +797,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-[0.5rem] font-black text-white/45">{mapStations.length} referências</span>
             </div>
             <div className="h-[min(70vh,680px)]">
-              <StationMap stations={mapStations} showTraffic={online} onSelectStation={handleMapStationSelect} />
+              <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
               <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">Mais perto</button>
@@ -905,6 +905,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                       <StationMap
                         stations={mapStations}
                         showTraffic={online}
+                        userCoords={userCoords}
                         onSelectStation={handleMapStationSelect}
                       />
                     </div>
@@ -964,7 +965,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <p className="mt-1 text-[0.6rem] leading-relaxed text-white/65">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis e navegáveis sem conexão.</p>
                 </div>
                 <div className="h-[min(68vh,620px)]">
-                  <StationMap stations={mapStations} showTraffic={false} />
+                  <StationMap stations={mapStations} showTraffic={false} userCoords={userCoords} />
                 </div>
                 <div className="border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/65">{mapStations.length} referências armazenadas · {offlineMapAge}.</div>
               </section>
@@ -1338,7 +1339,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             {showMap && !broadAguasLindasQuery && visibleStations.length > 0 && (
               <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
-                <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} /></div>
+                <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} userCoords={userCoords} /></div>
               </section>
             )}
 
