@@ -158,6 +158,7 @@ export default function CityExplorerMap({ category, query = "", center, online, 
           label: "Catálogo local offline",
           source: "Local",
           updatedAt: null,
+          value: item.sourceLabel,
         }],
       }));
   }, [category, query]);
