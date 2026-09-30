@@ -190,10 +190,11 @@ const MAP_ENRICHMENTS: Record<string, NonNullable<LocalStationRecord["mapData"]>
   "jardim-brasilia": { phone: "(61) 3618-3581", rating: 4.0, reviewCount: 459, operationalStatus: "closed", observedAt: "2026-09-30", source: "maps" },
   "ponteio-setor-10": { phone: "(61) 99881-2916", rating: 3.9, reviewCount: 835, hours: "24h", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "perola": { phone: "(61) 3618-6496", rating: 2.5, reviewCount: 2, hours: "07:00–22:00", observedBrand: "Petrobras", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
-  "village": { rating: 4.3, reviewCount: 14, operationalStatus: "unknown", observedAt: "2026-09-30", source: "maps" },
+  "village": { rating: 5.0, reviewCount: 58, hours: "08:00–21:10", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "premium-barragem-v": { rating: 3.9, reviewCount: 8, hours: "24h", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "mizuno": { phone: "(61) 98494-4864", rating: 4.2, reviewCount: 240, hours: "24h (seg–sex); 05:00–22:00 (sáb–dom)", operationalStatus: "open", observedBrand: "Petrobras", observedAt: "2026-09-30", source: "maps" },
   "posto-aguas-lindas": { operationalStatus: "unknown", observedAt: "2026-09-30", source: "maps" },
+  "jj": { phone: "(61) 3616-1226", rating: 4.0, reviewCount: 279, hours: "24h", operationalStatus: "open", observedAt: "2026-09-30", source: "maps" },
   "pitstop": { operationalStatus: "unknown", observedAt: "2026-09-30", source: "maps" },
   "coimbra": { rating: 1.0, reviewCount: 1, operationalStatus: "unknown", observedAt: "2026-09-30", source: "maps" },
 };
