@@ -8,7 +8,9 @@ type RoutePreview = { id: string; polyline: string | null; selected?: boolean; t
 type RouteMapProps = { origin?: { lat: number; lng: number }; destination?: { lat: number; lng: number }; stops: Stop[]; routes?: RoutePreview[] };
 
 
-function OfflineRoutePreview({ origin, destination, routes = [] }: RouteMapProps) {
+function OfflineRoutePreview({ origin, destination, routes = [] }: Pick<RouteMapProps, "origin" | "destination" | "routes">) {
+  const safeOrigin = origin ?? { lat: -15.7545, lng: -48.2816 };
+  const safeDestination = destination ?? { lat: -15.7942, lng: -47.8822 };
   const decode = (encoded: string) => {
     const points: google.maps.LatLngLiteral[] = [];
     let index = 0;
@@ -37,13 +39,12 @@ function OfflineRoutePreview({ origin, destination, routes = [] }: RouteMapProps
     return points;
   };
 
-  const pathPoints = routes.find(route => route.selected && route.polyline)?.polyline
-    ? decode(routes.find(route => route.selected && route.polyline)?.polyline as string)
-    : routes.find(route => route.polyline)?.polyline
-      ? decode(routes.find(route => route.polyline)?.polyline as string)
-      : [origin, destination];
+  const encodedRoute = routes.find(route => route.selected && route.polyline)?.polyline ??
+    routes.find(route => route.polyline)?.polyline ??
+    null;
+  const pathPoints = encodedRoute ? decode(encodedRoute) : [safeOrigin, safeDestination];
 
-  const allPoints = [origin, destination, ...pathPoints];
+  const allPoints: google.maps.LatLngLiteral[] = [safeOrigin, safeDestination, ...pathPoints];
   const minLat = Math.min(...allPoints.map(point => point.lat));
   const maxLat = Math.max(...allPoints.map(point => point.lat));
   const minLng = Math.min(...allPoints.map(point => point.lng));
@@ -74,7 +75,7 @@ function OfflineRoutePreview({ origin, destination, routes = [] }: RouteMapProps
         <path d="M20 410 C 260 360, 420 470, 620 400 S 820 340, 980 430" fill="none" stroke="#D4DFD7" strokeWidth="12" strokeLinecap="round" />
         {line && <path d={line} fill="none" stroke="#163840" strokeOpacity=".16" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" />}
         {line && <path d={line} fill="none" stroke="#163840" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />}
-        {[{ label: "A", point: project(origin), fill: "#3DE3FF" }, { label: "B", point: project(destination), fill: "#C7FF3C" }].map(item => (
+        {[{ label: "A", point: project(safeOrigin), fill: "#3DE3FF" }, { label: "B", point: project(safeDestination), fill: "#C7FF3C" }].map(item => (
           <g key={item.label}>
             <circle cx={item.point.x} cy={item.point.y} r="22" fill={item.fill} opacity=".24" />
             <circle cx={item.point.x} cy={item.point.y} r="12" fill={item.fill} stroke="#163840" strokeWidth="4" filter="url(#route-preview-shadow)" />
@@ -97,8 +98,8 @@ function OfflineRoutePreview({ origin, destination, routes = [] }: RouteMapProps
       </div>
       <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-black/10 bg-white/92 p-3 text-[#163840] shadow-lg backdrop-blur">
         <div className="grid grid-cols-2 gap-2 text-[0.58rem] font-bold">
-          <span><strong>Origem</strong><br />{origin.lat.toFixed(5)}, {origin.lng.toFixed(5)}</span>
-          <span><strong>Destino</strong><br />{destination.lat.toFixed(5)}, {destination.lng.toFixed(5)}</span>
+          <span><strong>Origem</strong><br />{safeOrigin.lat.toFixed(5)}, {safeOrigin.lng.toFixed(5)}</span>
+          <span><strong>Destino</strong><br />{safeDestination.lat.toFixed(5)}, {safeDestination.lng.toFixed(5)}</span>
         </div>
         <p className="mt-2 text-[0.5rem] font-semibold text-[#64746B]">Prévia local da geometria da rota. A navegação ao vivo fica no navegador escolhido.</p>
       </div>
@@ -273,7 +274,7 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa interativo da viagem">
-<MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} fallback={<OfflineRoutePreview origin={origin ?? { lat: -15.7545, lng: -48.2816 }} destination={destination ?? { lat: -15.7942, lng: -47.8822 }} routes={routes} />} onMapReady={map => { mapRef.current = map; setMapReady(true); }} />
+<MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} fallback={<OfflineRoutePreview origin={origin} destination={destination} routes={routes} />} onMapReady={map => { mapRef.current = map; setMapReady(true); }} />
       <div className="absolute left-3 top-3 flex max-w-[calc(100%-24px)] flex-wrap gap-2">
         <button type="button" onClick={fitRoute} disabled={!mapReady} aria-label="Enquadrar viagem" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur disabled:opacity-40"><LocateFixed className="size-4" />Viagem</button>
         <button type="button" onClick={toggleTraffic} disabled={!mapReady} aria-pressed={traffic} className={"inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " + (traffic ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-[#0B1014]/90 text-white")}><TrafficCone className="size-4" />Trânsito</button>
