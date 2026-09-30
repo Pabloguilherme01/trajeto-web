@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned } from "lucide-react";
+import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -87,6 +87,18 @@ export default function MobileBottomNav() {
         <div className="grid gap-2">
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Search className="size-5" /> Buscar no Trajeto
+          </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("Centro Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <MapPinned className="size-5" /> Explorar o Centro
+          </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("saúde Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <HeartPulse className="size-5" /> Saúde
+          </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("serviço público Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <Landmark className="size-5" /> Serviços públicos
+          </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("emergência Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <Siren className="size-5" /> Emergência
           </button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Fuel className="size-5" /> Encontrar postos
