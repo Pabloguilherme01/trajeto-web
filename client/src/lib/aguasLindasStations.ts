@@ -28,7 +28,20 @@ export type LocalStationRecord = {
 
 export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
+export const AGUAS_LINDAS_ANP_CATALOG_COUNT = 33;
 export const AGUAS_LINDAS_ANP_VERIFIED_COUNT = 0;
+
+export const AGUAS_LINDAS_PRICE_REFERENCE = {
+  period: "20/09/2026 a 26/09/2026",
+  gasolineCommon: { average: 6.78, sampledStations: 8 },
+  ethanol: { average: 4.59, sampledStations: 8 },
+  dieselS10: { average: 7.27, sampledStations: 7 },
+  dieselS500: { average: 6.94, sampledStations: 6 },
+  glpP13: { average: 107.53, sampledStations: 13 },
+  gnv: { average: 3.89, sampledStations: 1 },
+  source: "ANP",
+  note: "Médias municipais; não representam preço atual individual de cada posto.",
+} as const;
 
 export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
 export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
