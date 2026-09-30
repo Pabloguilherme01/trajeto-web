@@ -53,10 +53,7 @@ export default function Stations() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [economyMode, setEconomyMode] = useState(getEconomyMode);
   const [nearby, setNearby] = useState(false);
-  const [showMap, setShowMap] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return isBroadAguasLindasQuery(getInitialQuery()) && window.matchMedia("(min-width: 768px)").matches;
-  });
+  const [showMap, setShowMap] = useState(false);
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
