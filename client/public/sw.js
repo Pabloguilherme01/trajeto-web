@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v15";
+const VERSION = "trajeto-v16";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -26,6 +26,18 @@ self.addEventListener("install", event => {
         const html = await response.text();
         const assets = collectIndexAssets(html);
         await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
+
+        // Vite's manifest contains dynamically imported route chunks that are not
+        // referenced by index.html. Cache them during installation so public routes
+        // remain bootable after an offline reload.
+        try {
+          const manifestResponse = await fetch("./.vite/manifest.json?precache=" + VERSION, { cache: "no-store" });
+          if (manifestResponse.ok) {
+            const manifest = await manifestResponse.json();
+            const manifestAssets = collectManifestAssets(manifest);
+            await Promise.all(manifestAssets.map(asset => cache.add(asset).catch(() => undefined)));
+          }
+        } catch {}
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
