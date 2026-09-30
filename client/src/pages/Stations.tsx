@@ -64,7 +64,7 @@ export default function Stations() {
   const [locating, setLocating] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
-  const [directorySearch, setDirectorySearch] = useState("");
+  const [directorySearch, setDirectorySearch] = useState(() => typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("busca") || "");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
@@ -438,8 +438,8 @@ export default function Stations() {
     rememberIntent("stations");
     rememberSearch(trimmed);
     vibration();
-    setQuery(trimmed);
-    setShowMap(isBroadAguasLindasQuery(trimmed));
+    setQuery("postos");
+    setShowMap(false);
     setCompareIds([]);
     setOnlyOpen(false);
     setNeighborhoodFilter("all");
@@ -448,11 +448,11 @@ export default function Stations() {
     setVerifiedOnly(false);
     setMappedOnly(false);
     setPriceOnly(false);
-    setDirectorySearch("");
+    setDirectorySearch(trimmed);
     setDirectorySort("name");
     setFuelFilter("all");
     setDistanceFilter("all");
-    setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
+    setLocation(appUrl("/postos") + "?q=postos&busca=" + encodeURIComponent(trimmed));
   };
 
   const useNearby = () => {
@@ -709,7 +709,8 @@ export default function Stations() {
                 {recentSearches.slice(0, 4).map(item => (
                   <button key={item} type="button" onClick={() => {
                   setInput(item);
-                  setQuery(item);
+                  setQuery("postos");
+                  setDirectorySearch(item);
                   setOnlyOpen(false);
                   setNeighborhoodFilter("all");
                   setBrandFilter("all");
@@ -720,8 +721,8 @@ export default function Stations() {
                   setFuelFilter("all");
                   setDistanceFilter("all");
                   setDirectorySort("name");
-                  setShowMap(isBroadAguasLindasQuery(item));
-                  setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
+                  setShowMap(false);
+                  setLocation(appUrl("/postos") + "?q=postos&busca=" + encodeURIComponent(item));
                 }} className="max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-[0.57rem] font-bold text-white/40">{item}</button>
                 ))}
               </div>
