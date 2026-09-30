@@ -271,12 +271,12 @@ function DashboardLayoutContent({
 
       <SidebarInset className="bg-[#0B1014] text-[#EAF0F2]">
         {isMobile && (
-          <div className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-white/8 bg-[#0B1014]/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+          <div className="safe-top sticky top-0 z-40 flex min-h-14 items-center justify-between border-b border-white/8 bg-[#0B1014]/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="size-9 rounded-lg bg-white/8 text-white" />
+              <SidebarTrigger className="mobile-pressable size-10 rounded-xl bg-white/8 text-white" />
               <div className="flex items-center gap-3">
                 <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-white">
+                  <span className="font-display text-[0.68rem] font-black uppercase tracking-[0.12em] text-[#C7FF3C]">trajeto</span><span className="tracking-tight text-white">
                     {activeMenuItem?.label ?? "Menu"}
                   </span>
                 </div>
