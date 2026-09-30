@@ -63,3 +63,14 @@ test("planejar: mantém a rota utilizável quando o OSRM está indisponível", a
   await expect(page.getByRole("button", { name: "Google Maps" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Waze" })).toBeVisible();
 });
+
+
+test("planejar: aceita destino sem GPS e oferece navegação externa", async ({ page }) => {
+  await page.goto("/planejar?destino=Águas%20Lindas%20de%20Goiás", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Calcular rota" }).click();
+
+  await expect(page.getByRole("heading", { name: /Navegação pronta/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir Google Maps" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir Waze" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir Apple Maps" })).toBeVisible();
+});
