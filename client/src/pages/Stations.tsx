@@ -57,6 +57,7 @@ export default function Stations() {
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [offlineAnpRows, setOfflineAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
   const [offlineAnpRetrievedAt, setOfflineAnpRetrievedAt] = useState<string | null>(() => getOfflineAnpSnapshot().retrievedAt);
+  const [offlineMapStations, setOfflineMapStations] = useState(() => getOfflineMapStations().stations);
   const [priceState, setPriceState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [filters, setFilters] = useState<StationDirectoryFilters>({
     fuelFilter: "all",
@@ -217,15 +218,14 @@ export default function Stations() {
       } satisfies StationMapItem;
     });
 
-    const offline = getOfflineMapStations().stations;
     const seen = new Set<string>();
-    return [...source, ...offline].filter(item => {
+    return [...source, ...offlineMapStations].filter(item => {
       const key = item.cnpj ? "cnpj:" + item.cnpj : item.id || item.name + "|" + item.address;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-  }, [directory.results, showMap]);
+  }, [directory.results, showMap, offlineMapStations]);
 
   const resetFilters = () => {
     setFilters({
@@ -340,6 +340,7 @@ export default function Stations() {
       return;
     }
     cacheOfflineMapStations(normalized);
+    setOfflineMapStations(getOfflineMapStations().stations);
     toast.message("Mapa local salvo neste aparelho.");
   };
 
