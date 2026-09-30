@@ -58,6 +58,11 @@ export default function MobileNavigationCenter({
   })() : null;
 
   const canNavigate = !offline && routeConfirmed;
+  const navigationReason = offline
+    ? "Sem conexão: a navegação externa precisa de internet."
+    : !routeConfirmed
+      ? "Selecione uma rota para liberar a navegação."
+      : null;
   const status = offline ? "Offline" : snapshot ? `Snapshot salvo${snapshotAge ? ` · ${snapshotAge}` : ""}` : "Dados atuais";
 
   return (
@@ -123,9 +128,10 @@ export default function MobileNavigationCenter({
       </div>
 
       <div className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-4">
-        <button type="button" onClick={onNavigate} disabled={!canNavigate} className="col-span-2 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] shadow-[0_10px_28px_rgba(199,255,60,.12)] active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-2">
+        <button type="button" onClick={onNavigate} disabled={!canNavigate} aria-describedby={navigationReason ? "navigation-lock-help" : undefined} className="col-span-2 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] shadow-[0_10px_28px_rgba(199,255,60,.12)] active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-2">
           <Navigation className="size-5" /> Navegar agora
         </button>
+        {navigationReason && <p id="navigation-lock-help" className="col-span-2 rounded-xl border border-white/8 bg-white/[.025] px-3 py-2 text-center text-[0.62rem] font-bold leading-relaxed text-white/50" role="status" aria-live="polite">{navigationReason}</p>}
         <button type="button" onClick={onStations} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-white/[.07] px-3 text-xs font-black text-white active:scale-[.98]">
           <Fuel className="size-4" /> Paradas
         </button>
