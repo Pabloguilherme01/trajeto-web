@@ -8,7 +8,8 @@ describe("MobileUtilityHub", () => {
   it("prioriza a rotina e permite abrir outro contexto", async () => {
     const user = userEvent.setup();
     render(<MobileUtilityHub />);
-    expect(screen.getByText("Minha rotina")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Minha rotina/i })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /Minha rotina/i }));
     expect(screen.getAllByText("Antes de sair").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
