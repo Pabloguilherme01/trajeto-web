@@ -1,30 +1,21 @@
-import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
+import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNavigationProviderUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { rememberDestinationUsage } from "@/lib/mobileDestinations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const toRad = (value: number) => value * Math.PI / 180;
-  const earthKm = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * earthKm * Math.asin(Math.sqrt(a));
-}
 
 function isBroadAguasLindasQuery(value: string) {
   const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -51,10 +42,6 @@ export default function Stations() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const verifiedFilterAvailable = false;
-  const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
@@ -66,6 +53,7 @@ export default function Stations() {
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
+  const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -81,6 +69,8 @@ export default function Stations() {
   const liveAnpRows = anpLiveQuery.data?.rows ?? [];
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
+  const officialStationCount = anpStations.length;
+  const officialStationsWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -104,10 +94,10 @@ export default function Stations() {
 
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const directoryCards = useMemo(() => {
-    const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
-    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
+    const localByCnpj = new globalThis.Map<string, (typeof aguasLindasCatalog)[number]>(aguasLindasCatalog.map(station => [station.cnpj, station]));
+    const cards = aguasLindasCatalog.map(local => ({
       key: local.cnpj,
-      local,
+      local: local as (typeof aguasLindasCatalog)[number] | null,
       anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
     }));
     for (const anp of anpStations) {
@@ -116,47 +106,6 @@ export default function Stations() {
     }
     return cards;
   }, [aguasLindasCatalog, anpStations]);
-
-  const directoryCardsFiltered = useMemo(() => {
-    const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const matches = directoryCards.filter(item => {
-      const text = [
-        item.local?.displayName,
-        item.local?.legalName,
-        item.local?.cnpj,
-        item.local?.neighborhood,
-        item.local?.address,
-        item.local?.brand,
-        item.anp?.razaoSocial,
-        item.anp?.cnpj,
-        item.anp?.bairro,
-        item.anp?.endereco,
-        item.anp?.distribuidora,
-      ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return !normalized || text.includes(normalized);
-    });
-
-    return [...matches].sort((a, b) => {
-      const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
-      if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) => {
-          const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-          const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-        };
-        const aCoords = getCoords(a);
-        const bCoords = getCoords(b);
-        const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
-        const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
-        return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      if (directorySort === "brand") {
-        return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
-          stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-    });
-  }, [directoryCards, directorySearch, directorySort, userCoords]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -221,21 +170,6 @@ export default function Stations() {
         source: "ANP" as const,
       }));
 
-    // Mesmo sem snapshot ANP disponível no runtime estático, usa as coordenadas
-    // já consolidadas no catálogo local como segunda camada de cobertura.
-    const local = aguasLindasCatalog
-      .filter(station => Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude))
-      .map(station => ({
-        id: `local-${station.cnpj}`,
-        name: station.displayName || station.legalName,
-        address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
-        lat: Number(station.anp?.latitude),
-        lng: Number(station.anp?.longitude),
-        cnpj: station.cnpj,
-        brand: station.brand || station.mapData?.observedBrand,
-        source: "local" as const,
-      }));
-
     const seen = new Set<string>();
     const keyFor = (station: StationMapItem) =>
       station.cnpj
@@ -249,7 +183,6 @@ export default function Stations() {
     const merged: StationMapItem[] = [];
     for (const station of [
       ...official,
-      ...local,
       ...liveStations
         .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
         .map(item => ({
@@ -339,7 +272,7 @@ export default function Stations() {
   }, [anpRows, staticAnpRetrievedAt, anpLiveQuery.data?.retrievedAt]);
 
   useEffect(() => {
-    if (mapStations.length) cacheOfflineMapStations(mapStations.filter((station): station is StationMapItem & { id: string } => typeof station.id === "string"));
+    if (mapStations.length) cacheOfflineMapStations(mapStations.filter((station): station is StationMapItem & { id: string } => Boolean(station.id)));
   }, [mapStations]);
 
 
@@ -384,8 +317,8 @@ export default function Stations() {
   };
 
   const useNearby = () => {
-    if (!navigator.geolocation || locating) {
-      toast.message("Este navegador não disponibilizou a localização.");
+    if (!online || !navigator.geolocation || locating) {
+      if (!online) toast.message("Sem internet. Uma nova busca por perto precisa de conexão.");
       return;
     }
     setLocating(true);
@@ -393,9 +326,6 @@ export default function Stations() {
       position => {
         setLocating(false);
         rememberIntent("nearby");
-        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
-        setUserCoords(coords);
-        setShowMap(true);
         setNearby(true);
         setOnlyOpen(false);
         setNeighborhoodFilter("all");
@@ -404,6 +334,10 @@ export default function Stations() {
         setVerifiedOnly(false);
         setMappedOnly(false);
         vibration(18);
+        if (staticRuntime) {
+          window.location.assign(buildGoogleMapsNearbyStationsUrl(position.coords.latitude, position.coords.longitude));
+          return;
+        }
         setQuery("postos");
         setInput("postos próximos");
         setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
@@ -414,81 +348,6 @@ export default function Stations() {
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
-  };
-
-  const handleMapStationSelect = (station: StationMapItem) => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-    const normalizedAddress = normalize(station.address);
-    let targetCnpj = station.cnpj?.trim();
-
-    if (!targetCnpj) {
-      const stationName = normalize(station.name);
-      const matched = directoryCards.find(item => {
-        const itemAddress = normalize([
-          item.anp?.endereco || item.local?.address,
-          item.anp?.bairro || item.local?.neighborhood,
-          item.anp?.municipio || "Águas Lindas de Goiás",
-          item.anp?.uf || "GO",
-        ].filter(Boolean).join(" · "));
-        const itemName = normalize(item.local?.displayName || item.anp?.razaoSocial || "");
-        return (normalizedAddress && itemAddress === normalizedAddress) || (stationName && itemName === stationName);
-      });
-      targetCnpj = matched?.anp?.cnpj || matched?.local?.cnpj || undefined;
-    }
-
-    if (!targetCnpj) {
-      toast.message("A referência do mapa ainda não possui ficha consolidada.");
-      return;
-    }
-
-    // Um clique no marcador deve sempre revelar a ficha, mesmo se filtros antigos
-    // estiverem escondendo o posto no diretório.
-    setDirectorySearch("");
-    setNeighborhoodFilter("all");
-    setBrandFilter("all");
-    setAddressOnly(false);
-    setVerifiedOnly(false);
-    setMappedOnly(false);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById("posto-" + encodeURIComponent(targetCnpj as string))
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-    });
-  };
-
-  const saveMapOffline = () => {
-    if (!mapStations.length) {
-      toast.message("Ainda não há coordenadas suficientes para salvar o mapa.");
-      return;
-    }
-    const normalized = mapStations.map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
-    const saved = cacheOfflineMapStations(normalized);
-    if (saved) setOfflineMap(getOfflineMapStations().stations);
-    toast.message(saved ? `Mapa salvo neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar o mapa local.");
-  };
-
-  const refreshStationData = async () => {
-    try {
-      if (staticRuntime) {
-        const response = await fetch(appUrl("/data/aguas-lindas-anp.json?refresh=" + Date.now()), { cache: "no-store" });
-        if (!response.ok) throw new Error("snapshot indisponível");
-        const payload = await response.json() as { data?: unknown[]; retrievedAt?: string };
-        const rows = (payload.data ?? [])
-          .map(item => item && typeof item === "object" ? normalizeAnpFuelRow(item as Record<string, unknown>) : null)
-          .filter((row): row is AnpFuelRow => Boolean(row));
-        if (!rows.length) throw new Error("snapshot vazio");
-        setStaticAnpRows(rows);
-        setStaticAnpRetrievedAt(payload.retrievedAt ?? new Date().toISOString());
-        cacheOfflineAnpSnapshot(rows, payload.retrievedAt ?? null);
-      } else {
-        await anpLiveQuery.refetch();
-      }
-      toast.message("Dados oficiais atualizados.");
-    } catch {
-      toast.error("Não foi possível atualizar agora. O último cache continua disponível.");
-    }
   };
 
   const copyCnpj = async (cnpj: string) => {
@@ -684,7 +543,7 @@ export default function Stations() {
               </div>
             </div>
             {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length > 0 && (
-              <div className="mt-3 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-3 text-[0.57rem] leading-relaxed text-white/45">
+              <div className="mt-3 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-3 text-xs leading-relaxed text-white/60">
                 <strong className="text-[#FFD09A]">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} referências de estabelecimentos apareceram em mapas. Elas são exibidas para auditoria, mas não são somadas automaticamente à base cadastral até haver identificação confiável por CNPJ/endereço.
                 <div className="mt-2 grid gap-2">
                   {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => (
@@ -702,7 +561,16 @@ export default function Stations() {
                         <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
                         <span className="col-span-2 sm:col-span-1">{item.note}</span>
                       </div>
-                      <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className="mt-3 min-h-10 rounded-xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
+                      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {([
+                          ["google", "Google Maps"],
+                          ["waze", "Waze"],
+                          ["apple", "Apple Maps"],
+                          ["openstreetmap", "OpenStreetMap"],
+                        ] as const).map(([provider, label], index) => (
+                          <button key={provider} type="button" onClick={() => window.open(buildNavigationProviderUrl(provider, item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className={"min-h-11 rounded-xl border px-2 text-xs font-black " + (index === 0 ? "border-[#C7FF3C]/20 bg-[#C7FF3C] text-[#0B1014]" : "border-white/8 bg-white/[.03] text-white/75")}>{label}</button>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -733,9 +601,9 @@ export default function Stations() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><MapIcon className="mr-1 inline size-3.5" />Abrir mapa</button>
+              <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><Map className="mr-1 inline size-3.5" />Abrir mapa</button>
               <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-[0.6rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
-              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
+              <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
               <div className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.53rem] font-black text-white/45"><ShieldCheck className="size-3.5 text-[#C7FF3C]" />ANP + cache local</div>
             </div>
           </section>
@@ -769,16 +637,11 @@ export default function Stations() {
                 {showMap && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="h-[min(68vh,620px)]">
-                      <StationMap
-                        stations={mapStations}
-                        showTraffic={online}
-                        onSelectStation={handleMapStationSelect}
-                      />
+                      <StationMap stations={mapStations} showTraffic />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">
                       <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
                       <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
-                      <span>{anpWithoutCoordinates > 0 ? String(anpWithoutCoordinates) + " cadastro(s) ANP sem coordenada · ficha continua disponível" : "cobertura coordenada ANP completa nesta consulta"}</span>
                     </div>
                   </section>
                 )}
@@ -848,10 +711,10 @@ export default function Stations() {
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
                 <h2 id="complete-stations-title" className="mt-1 text-xl font-black">Cada posto, uma ficha completa</h2>
                 <p className="mt-2 text-[0.65rem] leading-relaxed text-white/45">
-                  {directoryCards.length} fichas consolidadas por CNPJ quando disponível, cruzando cadastro local, ANP e referências secundárias. Cada ficha tem rota para Google Maps, Waze e Apple Maps.
+                  {directoryCards.length} fichas reunidas por CNPJ quando disponível. O cadastro local, a ANP e as referências de mapas aparecem separados; cada ficha oferece quatro opções de navegação.
                 </p>
               </div>
-              <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#D9FF91]">{directoryCards.length} postos</span>
+              <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{directoryCards.length} fichas</span>
             </div>
 
             <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3">
@@ -860,10 +723,7 @@ export default function Stations() {
                   <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-white/30">Referência municipal de preços</p>
                   <p className="mt-1 text-[0.56rem] text-white/45">{AGUAS_LINDAS_PRICE_REFERENCE.period} · ANP · não é preço individual em tempo real</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={saveMapOffline} className="min-h-9 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-[0.48rem] font-black text-white/55">Salvar mapa offline</button>
-                  <button type="button" onClick={() => void refreshStationData()} className="min-h-9 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-[0.48rem] font-black text-[#9FEFFF]">Atualizar</button>
-                </div>
+                <span className="text-[0.46rem] font-black text-white/25">amostra municipal</span>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-[0.52rem] text-white/45 sm:grid-cols-3">
                 <span>Gasolina <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
@@ -876,50 +736,26 @@ export default function Stations() {
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/45">Catálogo local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length} registros</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/45">ANP no snapshot</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{officialStationCount || "—"}</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/45">Coordenadas ANP</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{officialStationsWithCoordinates}</p></div>
               <button type="button" onClick={() => document.getElementById("complete-stations-title")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></button>
             </div>
 
-            <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto]">
-              <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
-                <Search className="size-4 text-white/25" />
-                <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-[0.62rem] text-white outline-none placeholder:text-white/25" aria-label="Filtrar diretório de postos" />
-                {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-7 place-items-center rounded-lg text-white/30" aria-label="Limpar busca"><X className="size-3.5" /></button>}
-              </label>
-              <select value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
-                <option value="name">Ordenar: nome</option>
-                <option value="brand">Ordenar: bandeira</option>
-                <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
-              </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
-            </div>
-            <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
-              <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis</span>
-              <span>{userCoords ? "distância calculada no aparelho" : "lista sem exigir localização"}</span>
-            </div>
-
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsFiltered.map((item, index) => (
+              {directoryCards.map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
                   index={index + 1}
                   local={item.local}
                   anp={item.anp}
                   saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
-                  distanceKm={(() => {
-                    if (!userCoords) return null;
-                    const lat = Number(item.anp?.latitude ?? item.local?.anp?.latitude);
-                    const lng = Number(item.anp?.longitude ?? item.local?.anp?.longitude);
-                    return Number.isFinite(lat) && Number.isFinite(lng) ? haversineKm(userCoords.lat, userCoords.lng, lat, lng) : null;
-                  })()}
                   onToggleSaved={item.local || item.anp ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.55rem] leading-relaxed text-white/35">
+              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-xs leading-relaxed text-white/55">
               <strong className="text-white/55">Rota:</strong> o Trajeto envia o destino ao provedor escolhido. Google Maps, Waze e Apple Maps calculam a rota, trânsito e instruções de navegação. O site não inventa distância ou tempo quando não possui um motor de roteamento próprio.
             </div>
           </section>
@@ -977,7 +813,7 @@ export default function Stations() {
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
                 <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP</p>
                 <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count ?? "—"}</p>
-                <p className="text-[0.52rem] text-white/30">snapshot municipal oficial + API disponível</p>
+                <p className="text-[0.52rem] text-white/30">{AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0 ? AGUAS_LINDAS_ANP_VERIFIED_COUNT + " enriquecidos via API" : "sincronização individual pendente"}</p>
               </div>
             </div>
               </div>
@@ -1005,7 +841,7 @@ export default function Stations() {
               </label>
               <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
               <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço</label>
-              <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold " + (verifiedFilterAvailable ? "text-white/70" : "text-white/35")}><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} disabled={!verifiedFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Dados ANP {verifiedFilterAvailable ? "(confirmados)" : "(snapshot oficial disponível)"}</label>
+              <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold " + (verifiedFilterAvailable ? "text-white/70" : "text-white/35")}><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} disabled={!verifiedFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Dados ANP {verifiedFilterAvailable ? "(" + AGUAS_LINDAS_ANP_VERIFIED_COUNT + ")" : "(não sincronizados)"}</label>
               <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={mappedOnly} onChange={event => setMappedOnly(event.target.checked)} className="size-4 accent-[#3DE3FF]" /> Com dados de mapas</label>
             </div>
 
@@ -1044,8 +880,20 @@ export default function Stations() {
                           )}
                         </div>
                       </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 flex-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
+                      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {([
+                          ["google", "Google Maps"],
+                          ["waze", "Waze"],
+                          ["apple", "Apple Maps"],
+                          ["openstreetmap", "OpenStreetMap"],
+                        ] as const).map(([provider, label], index) => (
+                          <button
+                            key={provider}
+                            type="button"
+                            onClick={() => window.open(buildNavigationProviderUrl(provider, [station.displayName, station.address, station.neighborhood, "Águas Lindas de Goiás - GO"].filter(Boolean).join(", "), station.anp?.latitude != null && station.anp?.longitude != null ? { lat: station.anp.latitude, lng: station.anp.longitude } : null), "_blank", "noopener,noreferrer")}
+                            className={"min-h-11 rounded-xl border px-2 text-xs font-black " + (index === 0 ? "border-[#C7FF3C]/20 bg-[#C7FF3C] text-[#0B1014]" : "border-white/8 bg-white/[.03] text-white/75")}
+                          >{label}</button>
+                        ))}
                         {station.address && <button type="button" onClick={() => void copyAddress(station)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar endereço</button>}
                         <button type="button" onClick={() => void copyCnpj(station.cnpj)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar CNPJ</button>
                         <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web", "_blank", "noopener,noreferrer")} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF]">Verificar situação na ANP</button>
@@ -1153,7 +1001,7 @@ export default function Stations() {
                 <p className="mt-1 text-[0.56rem] text-white/30">{usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><MapIcon className="size-4" /></button>
+                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><Map className="size-4" /></button>
                 {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">{compareIds.length} comparar</button>}
               </div>
             </section>
