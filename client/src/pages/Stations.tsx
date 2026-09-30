@@ -451,6 +451,7 @@ export default function Stations() {
     setDirectorySearch("");
     setDirectorySort("name");
     setFuelFilter("all");
+    setDistanceFilter("all");
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
   };
 
