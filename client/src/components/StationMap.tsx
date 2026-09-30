@@ -61,7 +61,7 @@ function OfflineStationMap({ stations }: { stations: StationMapItem[] }) {
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#E8F0EA]">
-      <svg viewBox={viewBox} className="absolute inset-0 h-full w-full" role="img" aria-label={`Mapa offline com ${stations.length} postos`}>
+      <svg viewBox={viewBox} className="absolute inset-0 h-full w-full" role="img" aria-label={`Mapa offline esquemático com ${stations.length} postos`}>
         <defs>
           <pattern id="station-map-grid" width="48" height="48" patternUnits="userSpaceOnUse">
             <path d="M48 0H0V48" fill="none" stroke="#B9C9BD" strokeWidth="1" opacity=".55" />
@@ -69,11 +69,8 @@ function OfflineStationMap({ stations }: { stations: StationMapItem[] }) {
         </defs>
         <rect width="1000" height="560" fill="#E8F0EA" />
         <rect width="1000" height="560" fill="url(#station-map-grid)" />
-        <path d="M20 395 C190 340 260 420 400 340 S690 270 980 335" fill="none" stroke="#B8C6BA" strokeWidth="28" opacity=".5" />
-        <path d="M120 40 C190 170 420 110 520 220 S730 430 930 490" fill="none" stroke="#D7E0D8" strokeWidth="18" opacity=".9" />
-        <path d="M35 180 C240 220 330 170 510 145 S780 165 980 120" fill="none" stroke="#D0DAD2" strokeWidth="11" opacity=".75" />
-        <text x="34" y="32" fontSize="18" fontWeight="800" fill="#41534A">Águas Lindas · mapa offline</text>
-        <text x="34" y="54" fontSize="11" fontWeight="600" fill="#6C7E74">Posições salvas no aparelho · sem depender do Google Maps</text>
+        <text x="34" y="32" fontSize="18" fontWeight="800" fill="#41534A">Águas Lindas · mapa offline esquemático</text>
+        <text x="34" y="54" fontSize="11" fontWeight="600" fill="#6C7E74">Posições reais salvas no aparelho · sem depender do Google Maps</text>
 
         {points.map(point => {
           const isSelected = point.station.id === selectedId;
