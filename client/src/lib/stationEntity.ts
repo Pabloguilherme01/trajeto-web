@@ -38,18 +38,31 @@ export function stationDataConfidence(params: {
   local?: LocalStationRecord | null;
   price?: AnpPriceRecord | null;
 }) {
-  const scores = [
-    params.anp ? 100 * freshnessMultiplier(params.anp.dataObtencao ?? params.anp.dataVinculacao ?? params.anp.dataPublicacao) : 0,
-    Number.isFinite(params.anp?.latitude) && Number.isFinite(params.anp?.longitude)
-      ? 90 * freshnessMultiplier(params.anp?.dataObtencao ?? params.anp?.dataVinculacao ?? params.anp?.dataPublicacao)
-      : params.local?.mapData
-        ? 70 * freshnessMultiplier(params.local.mapData.observedAt)
-        : 0,
-    params.local?.mapData?.phone ? 75 * freshnessMultiplier(params.local.mapData.observedAt) : 0,
-    params.local?.mapData?.hours ? 70 * freshnessMultiplier(params.local.mapData.observedAt) : 0,
-    params.price ? 92 * freshnessMultiplier(params.price.collectionDate) : 0,
-  ].filter(score => score > 0);
-  return scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
+  const anpFreshness = freshnessMultiplier(params.anp?.dataObtencao ?? params.anp?.dataVinculacao ?? params.anp?.dataPublicacao);
+  const mapFreshness = freshnessMultiplier(params.local?.mapData?.observedAt);
+  const priceFreshness = freshnessMultiplier(params.price?.collectionDate);
+  const identity = params.anp
+    ? 100 * anpFreshness
+    : params.local?.mapData
+      ? 60 * mapFreshness
+      : 0;
+  const location = Number.isFinite(params.anp?.latitude) && Number.isFinite(params.anp?.longitude)
+    ? 100 * anpFreshness
+    : params.local?.mapData
+      ? 70 * mapFreshness
+      : 0;
+  const contact = params.local?.mapData?.phone ? 100 * mapFreshness : 0;
+  const hours = params.local?.mapData?.hours ? 100 * mapFreshness : 0;
+  const price = params.price ? 100 * priceFreshness : 0;
+
+  const weightedScore =
+    identity * 0.30 +
+    location * 0.25 +
+    contact * 0.15 +
+    hours * 0.10 +
+    price * 0.20;
+
+  return Math.round(weightedScore);
 }
 
 export type StationDataConfidenceBand = "Baixa" | "Parcial" | "Boa" | "Alta";
