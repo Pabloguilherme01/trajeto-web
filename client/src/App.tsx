@@ -2,8 +2,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
-import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
+import { lazy, Suspense, type ReactNode } from "react";
+import { Route, Router as WouterRouter, Switch } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
