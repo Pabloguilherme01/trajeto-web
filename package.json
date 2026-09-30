@@ -18,7 +18,8 @@
     "test:client-lib": "vitest run client/src/lib --maxWorkers=1 --minWorkers=1",
     "test:client-station-sheet": "vitest run client/src/components/StationSheet.test.tsx --maxWorkers=1 --minWorkers=1",
     "test:client-stations-page": "vitest run client/src/pages/Stations.preferences.test.tsx --maxWorkers=1 --minWorkers=1",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "sync:anp:aguas-lindas": "node scripts/sync-anp-aguas-lindas.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
