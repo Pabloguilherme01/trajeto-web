@@ -23,7 +23,7 @@ test("postos: sincroniza busca da URL e expõe filtro de combustível", async ({
 
   const search = page.getByRole("textbox", { name: "Cidade, bairro ou posto" });
   await search.fill("Ceilândia");
-  await page.getByRole("button", { name: "Pesquisar" }).click();
+  await page.getByRole("button", { name: "Pesquisar", exact: true }).click();
   await expect(page).toHaveURL(/[?&]q=Ceil%C3%A2ndia/);
 
   await page.goBack();
