@@ -13,14 +13,13 @@ import {
 type Props = {
   onSelectDestination: (destination: OfflineDestination) => void;
   compact?: boolean;
-  highlightedDestinationId?: string | null;
 };
 
 function categoryLabel(category: OfflineDestinationCategory) {
   return OFFLINE_DESTINATION_CATEGORIES.find(item => item.id === category)?.label ?? category;
 }
 
-export default function OfflineRouteHub({ onSelectDestination, compact = false, highlightedDestinationId = null }: Props) {
+export default function OfflineRouteHub({ onSelectDestination, compact = false }: Props) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<OfflineDestinationCategory | "todos">("todos");
   const [showAll, setShowAll] = useState(false);
@@ -106,8 +105,7 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
         {visible.map(destination => (
           <article
             key={destination.id}
-            className={"group rounded-[1.25rem] border bg-[#121B22] p-3.5 transition-colors " +
-              (highlightedDestinationId === destination.id ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/[.045]" : "border-white/8")}
+            className="group rounded-[1.25rem] border border-white/8 bg-[#121B22] p-3.5 transition-colors"
           >
             <div className="flex items-start gap-3">
               <div className={"grid size-10 shrink-0 place-items-center rounded-xl " +
