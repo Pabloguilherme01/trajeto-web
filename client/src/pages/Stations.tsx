@@ -864,7 +864,7 @@ export default function Stations() {
             {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/20 px-3 font-black text-[#FFD09A]">Tentar novamente</button></div>}
             {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">O snapshot oficial ainda não chegou ao GitHub Pages. A sincronização automática da ANP foi configurada e a base local continua disponível enquanto isso.</div>}
 
-            {anpRows.length > 0 && (
+            {(anpRows.length > 0 || mapStations.length > 0) && (
               <>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3">
                   <div className="min-w-0">
