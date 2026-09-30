@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
+import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 
@@ -10,7 +11,7 @@ function normalize(value: string) {
 }
 
 function brandConfig(local?: LocalStationRecord | null, anp?: AnpStation | null) {
-  const key = normalize(anp?.distribuidora || local?.brand || local?.mapData?.observedBrand || local?.displayName || anp?.razaoSocial || "");
+  const key = normalize(anp?.distribuidora || local?.brand || "");
   if (key.includes("shell")) return { label: "SHELL", className: "bg-[#FFD43B] text-[#8B1E24] border-[#8B1E24]/15" };
   if (key.includes("ipiranga")) return { label: "IP", className: "bg-[#F4A623] text-[#153B80] border-[#153B80]/15" };
   if (key.includes("petrobras") || key.includes("petrobr")) return { label: "BR", className: "bg-[#1A8B4D] text-white border-white/10" };
@@ -20,8 +21,8 @@ function brandConfig(local?: LocalStationRecord | null, anp?: AnpStation | null)
   if (key.includes("formula")) return { label: "F1", className: "bg-[#F24822] text-white border-white/10" };
   if (key.includes("ponteio")) return { label: "P", className: "bg-[#C7FF3C] text-[#163840] border-[#163840]/10" };
   if (key.includes("premium")) return { label: "PREM", className: "bg-[#D8DDE3] text-[#2E3740] border-black/10" };
-  const name = (local?.displayName || anp?.razaoSocial || "POSTO").replace(/[^A-Za-z0-9À-ÿ ]/g, "").trim();
-  return { label: name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").slice(0, 3).toUpperCase() || "POSTO", className: "bg-[#C7FF3C]/10 text-[#D9FF91] border-[#C7FF3C]/15" };
+  if (local?.mapData?.observedBrand) return { label: "MAPA", className: "bg-[#3DE3FF]/10 text-[#9FEFFF] border-[#3DE3FF]/15" };
+  return { label: "POSTO", className: "bg-[#C7FF3C]/10 text-[#D9FF91] border-[#C7FF3C]/15" };
 }
 
 function BrandMark({ local, anp }: { local?: LocalStationRecord | null; anp?: AnpStation | null }) {
@@ -52,6 +53,8 @@ export function StationDirectoryCard({
   saved,
   distanceKm = null,
   onToggleSaved,
+  prices = [],
+  catalogStatus = "unreconciled",
 }: {
   index: number;
   local?: LocalStationRecord | null;
@@ -59,6 +62,8 @@ export function StationDirectoryCard({
   saved?: boolean;
   distanceKm?: number | null;
   onToggleSaved?: () => void;
+  prices?: AnpPriceRecord[];
+  catalogStatus?: string;
 }) {
   const [copied, setCopied] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -83,6 +88,9 @@ export function StationDirectoryCard({
       ? { lat: Number(local?.anp?.latitude), lng: Number(local?.anp?.longitude) }
       : null;
   const distributor = anp?.distribuidora || local?.brand || local?.mapData?.observedBrand || "Bandeira não consolidada";
+  const primaryPrice = prices.find(item => item.productKey === "gasolina-comum") ?? prices[0] ?? null;
+  const confidence = stationDataConfidence({ anp, local, price: primaryPrice });
+  const priceDate = primaryPrice?.collectionDate ? new Date(primaryPrice.collectionDate).toLocaleDateString("pt-BR") : null;
   const products = useMemo(() => {
     const unique = new Map<string, AnpStation["products"][number]>();
     (anp?.products || []).forEach(item => {
@@ -159,6 +167,7 @@ export function StationDirectoryCard({
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">{catalogStatus}</span>
             {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/35">sem cruzamento ANP</span>}
             <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/45">{distributor}</span>
             {anp?.products?.length ? <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">ANP enriquecida</span> : null}
@@ -168,6 +177,25 @@ export function StationDirectoryCard({
           </div>
         </div>
       </div>
+
+      <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-[#D9FF91]">Preço pesquisado pela ANP</p>
+            {primaryPrice ? (
+              <p className="mt-1 text-2xl font-black tracking-[-.04em] text-white">{primaryPrice.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}<span className="ml-1 text-xs font-bold text-white/45">/{primaryPrice.unit}</span></p>
+            ) : (
+              <p className="mt-1 text-sm font-black text-white/70">Sem preço ANP nesta amostra</p>
+            )}
+          </div>
+          <div className="text-right">
+            <p className="text-[0.48rem] font-black text-white/35">{primaryPrice ? primaryPrice.produto : "gasolina comum"}</p>
+            <p className="mt-1 text-[0.48rem] font-bold text-white/25">{priceDate ? "coleta " + priceDate : "sem coleta individual"}</p>
+          </div>
+        </div>
+        {prices.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{prices.slice(0, 5).map(price => <span key={price.productKey + price.salePrice} className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.47rem] font-black text-white/55">{price.produto}: {price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/{price.unit}</span>)}</div>}
+        <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
+      </section>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
         <div className="flex items-start gap-2">
@@ -182,6 +210,11 @@ export function StationDirectoryCard({
           <span>Horário: {local?.mapData?.hours || "não informado"}</span>
           <span>Avaliação: {local?.mapData?.rating != null ? local.mapData.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " · " + (local.mapData.reviewCount ?? 0).toLocaleString("pt-BR") + " avaliações" : "não informado"}</span>
         </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[.02] px-3 py-2.5">
+        <span className="text-[0.52rem] font-black text-white/45">Confiança dos dados</span>
+        <span className="text-[0.58rem] font-black text-[#C9F7FF]">{confidence}% · fonte/data explícitas</span>
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
