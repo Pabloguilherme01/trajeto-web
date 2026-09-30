@@ -168,8 +168,7 @@ export function vibration(pattern: number | number[] = 12) {
 }
 
 export function buildWhatsAppShareUrl(text: string, url: string) {
-  const message = [text.trim(), url.trim()].filter(Boolean).join("
-");
+  const message = [text.trim(), url.trim()].filter(Boolean).join("\n");
   return "https://wa.me/?text=" + encodeURIComponent(message);
 }
 
