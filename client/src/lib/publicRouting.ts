@@ -141,11 +141,13 @@ export async function calculatePublicRoute(originText: string, destinationText: 
     throw new Error("Não foi possível calcular uma rota para estes pontos.");
   }
 
+  const safeDistanceMeters = Number(distanceMeters);
+  const safeDurationSeconds = Number(durationSeconds);
   const result: PublicRoute = {
     origin,
     destination,
-    distanceMeters,
-    durationSeconds,
+    distanceMeters: safeDistanceMeters,
+    durationSeconds: safeDurationSeconds,
     polyline,
   };
   cacheSet("route:" + coordinateKey, result);
