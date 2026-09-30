@@ -1,4 +1,4 @@
-import { ArrowRight, Fuel, LocateFixed, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Fuel, LocateFixed, Share2, Sparkles, Wifi } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
