@@ -9,7 +9,7 @@ export function isGitHubPagesRuntime() {
 }
 
 export function hasConfiguredRoutingApi() {
-  return Boolean(configuredRoutingBase);
+  return Boolean(configuredRoutingBase || configuredApiBase);
 }
 
 export function supportsLiveRouting() {
