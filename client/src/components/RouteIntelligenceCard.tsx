@@ -67,10 +67,18 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
     try {
       const nextAvoidTolls = overrides?.avoidTolls ?? avoidTollsState;
       const nextAvoidHighways = overrides?.avoidHighways ?? avoidHighwaysState;
-      const nextData = await fetchRouteIntelligence({ origin, destination, waypoints, avoidTolls: nextAvoidTolls, avoidHighways: nextAvoidHighways, trafficDetailed });
-      setData(nextData);
-      setLastUpdatedAt(Date.now());
-      onRoutesChange?.(nextData.routes);
+      const cacheKey = JSON.stringify({v:1,origin:origin.trim().toLocaleLowerCase("pt-BR"),destination:destination.trim().toLocaleLowerCase("pt-BR"),waypoints:waypoints.map(item=>item.trim().toLocaleLowerCase("pt-BR")),avoidTolls:nextAvoidTolls,avoidHighways:nextAvoidHighways,trafficDetailed});
+      const cacheStorageKey = "trajeto-route-intelligence:" + btoa(unescape(encodeURIComponent(cacheKey))).slice(0,180);
+      const now = Date.now();
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheStorageKey) || "null");
+        if(cached && typeof cached==="object" && typeof cached.savedAt==="number" && now-cached.savedAt<120000 && cached.data){
+          setData(cached.data as RouteIntelligence); setLastUpdatedAt(cached.savedAt); onRoutesChange?.((cached.data as RouteIntelligence).routes); return;
+        }
+      } catch {}
+      const nextData = await fetchRouteIntelligence({origin,destination,waypoints,avoidTolls:nextAvoidTolls,avoidHighways:nextAvoidHighways,trafficDetailed});
+      setData(nextData); setLastUpdatedAt(now); onRoutesChange?.(nextData.routes);
+      try { sessionStorage.setItem(cacheStorageKey,JSON.stringify({savedAt:now,data:nextData})); } catch {}
       if (!selectedRouteId && nextData.routes[0]) onSelectRoute?.(nextData.routes[0].id);
     } catch (error) {
       const code = error instanceof Error && "code" in error ? (error as Error & { code?: string }).code : undefined;
@@ -219,7 +227,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
 
       {data && main && (
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-white/[.04] p-3"><Route className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Distância</p><strong className="text-sm">{(main.distanceMeters ?? 0) / 1000 < 1 ? "< 1 km" : `${((main.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km`}</strong></div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Route className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Rota principal</p><strong className="text-sm">{(main.distanceMeters ?? 0) / 1000 < 1 ? "< 1 km" : `${((main.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km`}</strong></div>
           <div className="rounded-xl bg-white/[.04] p-3"><Clock3 className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Com trânsito</p><strong className="text-sm">{formatDuration(main.durationSeconds)}</strong>{trafficDelay != null && trafficDelay > 30 && <p className="mt-1 text-[0.55rem] text-amber-200">+{formatDuration(trafficDelay)} por trânsito</p>}</div>
           <div className="rounded-xl bg-white/[.04] p-3"><Wallet className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Pedágio</p><strong className="text-sm">{toll != null ? toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) : "Não informado"}</strong>{main.toll?.estimated && <p className="mt-1 text-[0.52rem] text-amber-200">estimado</p>}</div>
           <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} {Math.max(0, data.routes.length - 1) === 1 ? "alternativa" : "alternativas"}</strong><p className="mt-1 text-[0.52rem] text-white/35">{data.trafficAware ? "trânsito considerado" : "trânsito básico"}</p></div>
