@@ -3983,3 +3983,343 @@ O objetivo final não é fazer o Trajeto “ter tudo”.
 É fazer o Trajeto **resolver a próxima necessidade com o mínimo de esforço**, enquanto toda a complexidade técnica permanece invisível até ser necessária.
 
 A partir daqui, novas ideias devem ser avaliadas contra esse princípio.
+
+
+## 177. Mobile Quality Gate — última camada antes da implementação
+
+A reconstrução deverá possuir um gate específico para garantir que o aplicativo realmente funciona em condições móveis reais.
+
+### 177.1 Mobile Cockpit
+Criar uma superfície mínima para o estado atual:
+
+- missão atual;
+- destino;
+- próxima ação;
+- conectividade;
+- offline;
+- bloqueios.
+
+Nenhum gráfico, indicador secundário ou dado territorial entra no cockpit.
+
+### 177.2 One-Hand Mode
+Quando ativado, ações principais, busca, voltar e confirmação ficam posicionados para uso com uma mão. A função deve ser apenas uma adaptação de layout, sem duplicar lógica.
+
+### 177.3 Data Saver
+Modo opcional que reduz:
+
+- refresh externo;
+- imagens;
+- consultas secundárias;
+- atualização de fontes;
+- pré-carregamento.
+
+A missão continua prioritária.
+
+### 177.4 Battery-Aware Behavior
+Sem rastreamento contínuo, o app pode reduzir tarefas não essenciais quando o navegador indicar condições de economia de energia ou quando o usuário ativar Economia.
+
+Não criar dependência de APIs de bateria que não estejam disponíveis no navegador.
+
+### 177.5 Install Experience
+A instalação PWA deve ser contextual e não invasiva.
+
+Nunca bloquear o uso para pedir instalação.
+
+### 177.6 Update Communication
+Quando houver atualização disponível, explicar de forma curta:
+
+- o que mudou;
+- se há migration;
+- se é necessário reiniciar;
+- se os dados estão protegidos.
+
+### 177.7 Accessibility Preferences
+Respeitar preferências do sistema e, quando útil, permitir:
+
+- reduzir movimento;
+- maior densidade de toque;
+- contraste;
+- texto maior;
+- foco reforçado.
+
+Não criar um “modo acessibilidade” que esconda recursos essenciais.
+
+### 177.8 Screen Reader Journey
+Validar verbalmente a sequência:
+
+**título → contexto → ação principal → estado → resultado → próxima ação.**
+
+### 177.9 Voice Input Compatibility
+Campos de destino e busca devem permanecer compatíveis com entrada por voz do sistema. Não depender de eventos exclusivos de teclado físico.
+
+### 177.10 Orientation Resilience
+A missão não pode ser perdida ao alternar orientação. Estado e foco devem ser preservados quando tecnicamente possível.
+
+## 178. Mobile Performance Gate
+
+Performance será tratada por métricas observáveis, não por sensação.
+
+Medir:
+
+- carregamento inicial;
+- interação inicial;
+- INP;
+- LCP;
+- CLS;
+- tamanho de JavaScript;
+- requests;
+- memória quando mensurável.
+
+INP é uma Core Web Vital voltada à responsividade das interações; código executado em listeners pode bloquear a atualização da interface e aumentar a latência percebida. citeturn0search13turn0search14
+
+### 178.1 Interaction Budget
+As ações principais não podem executar trabalho pesado síncrono desnecessário no thread principal.
+
+### 178.2 Render Budget
+Listas longas, histórico e datasets não devem provocar renderização integral quando apenas uma parte está visível.
+
+### 178.3 Input Budget
+Digitação na busca deve permanecer responsiva mesmo enquanto resultados externos são atualizados.
+
+### 178.4 Navigation Budget
+A abertura de uma ação externa não deve esperar módulos secundários.
+
+## 179. Mobile Privacy UX
+
+Privacidade será compreensível no fluxo:
+
+- o que fica local;
+- o que vai para provedor externo;
+- o que é público;
+- o que é compartilhado;
+- o que pode ser apagado.
+
+### 179.1 External Handoff Preview
+Antes de uma ação externa relevante:
+
+**Destino enviado: X**
+
+**Origem enviada: Y**
+
+**Waypoints: Z**
+
+Somente quando isso for relevante para a decisão.
+
+### 179.2 Privacy-Minimal URLs
+Evitar parâmetros desnecessários em URLs externas.
+
+### 179.3 Sensitive Log Redaction
+Logs técnicos não devem registrar endereço completo, tokens, identificadores sensíveis ou conteúdo de campos privados.
+
+## 180. Mobile Recovery Center
+
+Criar uma área secundária para recuperação:
+
+- última missão;
+- última rota;
+- snapshots offline;
+- dados isolados;
+- migrations;
+- backups locais;
+- erros recuperáveis.
+
+O usuário comum só vê essa área quando precisa dela.
+
+## 181. Data Repair Wizard
+
+Quando houver corrupção ou inconsistência:
+
+1. detectar;
+2. preservar original;
+3. explicar;
+4. oferecer correção;
+5. validar resultado;
+6. registrar migration/recovery;
+7. permitir rollback quando suportado.
+
+Nunca apagar silenciosamente dados inválidos.
+
+## 182. Mission Journal
+
+Cada missão pode possuir uma timeline compacta:
+
+**criada → rota calculada → preparada → navegador aberto → retornou → concluída**
+
+Somente eventos realmente registrados entram como fatos.
+
+### 182.1 Unknown Events
+Se não houver evidência do que ocorreu fora do Trajeto:
+
+**não registrado**
+
+em vez de inventar.
+
+## 183. Mobile Decision Log
+
+Para decisões importantes, armazenar localmente:
+
+- ação;
+- contexto;
+- timestamp;
+- dados utilizados;
+- resultado.
+
+O usuário pode apagar esse histórico.
+
+## 184. Mobile Share Card
+
+Compartilhamento deverá usar informação mínima:
+
+- destino;
+- rota;
+- data;
+- dados selecionados.
+
+Antes do compartilhamento:
+
+**Pré-visualizar → Confirmar → Compartilhar**
+
+Nunca incluir automaticamente:
+
+- histórico completo;
+- localização precisa desnecessária;
+- documentos;
+- dados privados.
+
+## 185. Mobile Observability
+
+Modo técnico deve permitir diagnosticar:
+
+- versão;
+- build;
+- base path;
+- Service Worker;
+- cache;
+- storage;
+- provider;
+- requests;
+- tempo;
+- erro;
+- recovery.
+
+Logs devem ser sanitizados.
+
+## 186. Contract Test Matrix
+
+Criar testes para:
+
+### Domain
+- estados;
+- transições;
+- cálculos;
+- suficiência.
+
+### Storage
+- migration;
+- corrupção;
+- limite;
+- recuperação.
+
+### Provider
+- sucesso;
+- vazio;
+- timeout;
+- schema inválido;
+- erro.
+
+### UI
+- loading;
+- empty;
+- error;
+- offline;
+- stale;
+- degraded.
+
+### Mobile
+- keyboard;
+- orientation;
+- focus;
+- touch;
+- safe-area.
+
+## 187. Golden Mobile Journeys
+
+As seguintes jornadas tornam-se contratos:
+
+**J1:** primeiro acesso → destino → rota → navegação.
+
+**J2:** destino recente → Fast Path → navegação.
+
+**J3:** missão ativa → retorno → continuar.
+
+**J4:** offline → rota salva → continuar.
+
+**J5:** provider indisponível → fallback.
+
+**J6:** storage corrompido → recovery.
+
+**J7:** missão → combustível → custo → conclusão.
+
+**J8:** busca → comando → confirmação.
+
+**J9:** compartilhamento → preview → confirmação.
+
+**J10:** atualização PWA → migration → retorno.
+
+## 188. Release Gate
+
+Uma versão só poderá avançar para deploy quando:
+
+- TypeScript passar;
+- testes unitários passarem;
+- testes de domínio passarem;
+- testes de storage passarem;
+- golden journeys passarem;
+- smoke test passar;
+- visual regression não apresentar regressão crítica;
+- acessibilidade não apresentar bloqueio crítico;
+- não houver loading infinito conhecido;
+- não houver tela branca conhecida;
+- build de produção concluir;
+- GitHub Pages funcionar;
+- Service Worker funcionar;
+- navegação externa funcionar;
+- nenhuma chave/segredo estiver exposta.
+
+## 189. Post-Deploy Verification
+
+Depois do deploy:
+
+1. abrir URL pública;
+2. testar mobile;
+3. testar refresh;
+4. testar rota profunda;
+5. testar Home;
+6. testar busca;
+7. testar Planner;
+8. testar navegação;
+9. testar PWA;
+10. testar offline;
+11. verificar console;
+12. verificar assets;
+13. verificar Service Worker.
+
+Somente após essa verificação o deploy será considerado operacional.
+
+## 190. Regra máxima da reconstrução
+
+**O Trajeto não será otimizado para quantidade de funções.**
+
+Será otimizado para:
+
+**clareza + ação + velocidade + recuperação + confiança.**
+
+A arquitetura avançada continua existindo, mas fica subordinada à experiência mobile.
+
+## 191. Encerramento da especificação
+
+Esta especificação deixa de crescer por adição de módulos. A partir deste ponto, novas necessidades devem ser resolvidas durante o plano técnico ou implementação, preferencialmente consolidando componentes existentes em vez de criar novas superfícies.
+
+A próxima etapa é obrigatoriamente:
+
+**especificação → aprovação → plano técnico → implementação TDD → verificação → code review → deploy.**
