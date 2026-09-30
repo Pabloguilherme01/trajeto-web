@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, Fuel, LocateFixed, Route, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Fuel, LocateFixed, Route, Search as SearchIcon, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -142,6 +142,21 @@ export default function Home() {
             </button>
           </div>
         </header>
+
+        <section className="mt-5" aria-label="Busca universal">
+          <button
+            type="button"
+            onClick={() => setLocation(appUrl("/buscar"))}
+            className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] px-4 text-left shadow-[0_12px_35px_rgba(0,0,0,.16)] active:scale-[.995]"
+          >
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><SearchIcon className="size-4" /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-black text-white">O que você procura?</span>
+              <span className="mt-0.5 block truncate text-[0.58rem] text-white/35">Posto, endereço, bairro ou serviço</span>
+            </span>
+            <ArrowRight className="size-4 shrink-0 text-white/25" />
+          </button>
+        </section>
 
         <section className="mt-8">
           <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mobilidade diária</p>
