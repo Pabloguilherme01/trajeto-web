@@ -90,6 +90,20 @@ export function clearRecentTrips() {
   notifyPreferenceChange();
 }
 
+export function getRouteUsageTrend(origin: string, destination: string, days = 30) {
+  const usage = getRouteUsage(origin, destination);
+  const safeDays = Math.max(1, Math.min(365, Math.floor(days)));
+  return { total: usage, averagePerDay: usage / safeDays, windowDays: safeDays };
+}
+
+export function getMostUsedRoute(): RecentTrip | null {
+  const trips = getRecentTrips();
+  if (!trips.length) return null;
+  return trips.reduce((best, trip) =>
+    getRouteUsage(trip.origin, trip.destination) > getRouteUsage(best.origin, best.destination) ? trip : best,
+  trips[0]);
+}
+
 export function getRouteUsage(origin: string, destination: string) {
   const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
   try {
