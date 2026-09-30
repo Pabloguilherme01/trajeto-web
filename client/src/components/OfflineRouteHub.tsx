@@ -1,4 +1,5 @@
 import { ChevronRight, ExternalLink, MapPinned, Search, Siren, WifiOff } from "lucide-react";
+import { appUrl } from "@/lib/appUrl";
 import { useMemo, useState } from "react";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOfflineDestinationShareText, buildOfflineDestinationShareUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import {
@@ -116,7 +117,7 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-[0.49rem] font-black uppercase tracking-[.12em] text-white/25">{categoryLabel(destination.category)}</p>
-                    <h3 className="mt-0.5 text-sm font-black leading-snug"><a className="hover:underline" href={"/local/" + encodeURIComponent(destination.id)}>{destination.shortName}</a></h3>
+                    <h3 className="mt-0.5 text-sm font-black leading-snug"><a className="hover:underline" href={appUrl("/local/" + encodeURIComponent(destination.id))}>{destination.shortName}</a></h3>
                   </div>
                   {destination.emergency && <span className="rounded-full border border-[#FF7D6A]/20 bg-[#FF7D6A]/[.05] px-2 py-1 text-[0.46rem] font-black text-[#FFB7A9]">urgência</span>}
                 </div>
