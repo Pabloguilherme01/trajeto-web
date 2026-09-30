@@ -13,7 +13,7 @@ import {
   vibration,
 } from "@/lib/mobileTools";
 import { appUrl } from "@/lib/appUrl";
-import { stationCatalogStatusLabel, stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
+import { stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -195,11 +195,6 @@ export function StationDirectoryCard({
             <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.43rem] font-black text-[#9FEFFF]">
               {catalogStatus}
             </span>
-            {anp && (
-              <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.43rem] font-black text-[#D9FF91]">
-                ANP
-              </span>
-            )}
             {Number.isFinite(distanceKm) && (
               <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.43rem] font-black text-white/65">
                 {Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km
