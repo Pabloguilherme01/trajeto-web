@@ -183,15 +183,15 @@ export function StationDirectoryCard({
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-white/45">Confiança dos dados</p>
-            <p className="mt-1 text-xs font-black text-white">{confidence.label}</p>
+            <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-black text-[#C7FF3C]">{confidence.score}%</p>
+            <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
             <p className="text-[0.46rem] font-bold text-white/25">qualidade/frescor</p>
           </div>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence.score + "%" }} />
+          <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
         </div>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.48rem] text-white/30">
           <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
