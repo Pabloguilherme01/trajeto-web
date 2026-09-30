@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v10";
+const VERSION = "trajeto-v11";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -19,12 +19,21 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(async cache => {
-        await cache.addAll(STATIC_SHELL);
-        const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
-        if (!response.ok) return;
-        const manifest = await response.json();
-        const assets = collectManifestAssets(manifest);
-        await Promise.all(assets.map(asset => cache.add(asset).catch(() => undefined)));
+        await Promise.all(
+          STATIC_SHELL.map(asset => cache.add(asset).catch(() => undefined))
+        );
+
+        try {
+          const response = await fetch("./.vite/manifest.json", { cache: "no-store" });
+          if (!response.ok) return;
+          const manifest = await response.json();
+          const assets = collectManifestAssets(manifest);
+          await Promise.all(
+            assets.map(asset => cache.add(asset).catch(() => undefined))
+          );
+        } catch {
+          // O shell mínimo continua utilizável mesmo sem o manifest de build.
+        }
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
@@ -58,12 +67,12 @@ function collectManifestAssets(manifest) {
   const assets = new Set();
   const visit = entry => {
     if (!entry || typeof entry !== "object") return;
-    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\\//, ""));
+    if (typeof entry.file === "string") assets.add("./" + entry.file.replace(/^\//, ""));
     for (const css of Array.isArray(entry.css) ? entry.css : []) {
-      if (typeof css === "string") assets.add("./" + css.replace(/^\\//, ""));
+      if (typeof css === "string") assets.add("./" + css.replace(/^\//, ""));
     }
     for (const asset of Array.isArray(entry.assets) ? entry.assets : []) {
-      if (typeof asset === "string") assets.add("./" + asset.replace(/^\\//, ""));
+      if (typeof asset === "string") assets.add("./" + asset.replace(/^\//, ""));
     }
     for (const key of ["imports", "dynamicImports"]) {
       for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
