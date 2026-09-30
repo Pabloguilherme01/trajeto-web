@@ -183,7 +183,7 @@ export function StationDirectoryCard({
       <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3" aria-label="Confiança e atualização dos dados">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-white/45">Confiança dos dados</p>
+            <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-white/45">Qualidade dos dados</p>
             <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
           </div>
           <div className="text-right">
@@ -195,9 +195,9 @@ export function StationDirectoryCard({
           <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
         </div>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.48rem] text-white/30">
-          <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
-          <span>Preço: {primaryPrice ? "ANP" : "não disponível"}</span>
-          <span>Localização: {coords ? "coordenada" : "não confirmada"}</span>
+          <span>{anp ? "cadastro ANP" : "catálogo local"}</span>
+          <span>{primaryPrice ? "preço ANP" : "sem preço individual"}</span>
+          <span>{coords ? "coordenada" : "localização não confirmada"}</span>
         </div>
       </section>
 
