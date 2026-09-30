@@ -164,7 +164,9 @@ export function buildRouteProviderUrl(
   if (provider === "google") return buildGoogleMapsDirectionsUrl(from, to, "driving", true);
   if (provider === "waze") return buildWazeNavigationUrl(to);
   if (provider === "apple") return buildAppleMapsDirectionsUrl(to, from);
-  return buildOpenStreetMapDirectionsUrl(to, from);
+  // OSM's public router expects coordinates at both ends. Without destination
+  // coordinates, open a valid place search so users can start directions there.
+  return "https://www.openstreetmap.org/search?query=" + encodeURIComponent(to);
 }
 
 /** Create a destination link for the selected provider, falling back to the address when coordinates are absent. */
