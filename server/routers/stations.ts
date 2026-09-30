@@ -11,7 +11,7 @@ import { dedupePlaceDetailsRequest } from "../lib/placeDetailsRequest";
 import { stationPaginationMetricRegion } from "../lib/stationPaginationMetrics";
 import { fetchAnpStations } from "../lib/anpRevendedores";
 
-export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional(), lat: z.number().finite().min(-90).max(90).optional(), lng: z.number().finite().min(-180).max(180).optional() });
+export const stationSearchInput = z.object({ query: z.string().trim().min(3).max(240), cursor: z.string().trim().min(1).max(2_048).optional(), lat: z.number().finite().min(-90).max(90).optional(), lng: z.number().finite().min(-180).max(180).optional(), limit: z.number().int().min(6).max(20).default(20) });
 const detailsInput = z.object({ placeId: z.string().trim().min(1).max(255) });
 type StationSearchPage = {
   query: string;
@@ -24,7 +24,7 @@ type StationSearchPage = {
 export const stationsRouter = router({
   search: publicProcedure.input(stationSearchInput).query(async ({ input }) => {
     if (!input.cursor) {
-      const cached = getCachedStationSearch<StationSearchPage>(input.query);
+      const cached = getCachedStationSearch<StationSearchPage>(input.query, input.lat, input.lng, Date.now(), input.limit);
       if (cached) return cached;
     }
     let sawUnavailableToken = false;
@@ -46,7 +46,7 @@ export const stationsRouter = router({
       } satisfies StationSearchPage;
     }
     if (search.status !== "OK" && search.status !== "ZERO_RESULTS") throw new Error("Não foi possível carregar mais postos agora.");
-    const candidates = search.results.slice(0, 20);
+    const candidates = search.results.slice(0, input.limit);
     void rememberGooglePlaceIds(candidates.map(station => station.place_id));
     const stations = candidates.map(station => publicStationInfo(station));
     const authorizedStations = await getAuthorizedStationsForQuery(input.query);
@@ -54,7 +54,7 @@ export const stationsRouter = router({
     const matrices = await Promise.all(distanceBatches.map(batch => makeRequest<DistanceMatrixResult>("/maps/api/distancematrix/json", { origins: input.lat != null && input.lng != null ? `${input.lat},${input.lng}` : input.query, destinations: batch.map(station => `${station.geometry.location.lat},${station.geometry.location.lng}`).join("|"), mode: "driving", units: "metric" }).catch(() => null)));
     const distances = mergeStationDistances(matrices, stations.length);
     const result: StationSearchPage = { query: input.query, queriedAt: Date.now(), stations: stations.map((station, index) => ({ ...station, ...distances[index], anpMatch: resolveStationIdentity(station, authorizedStations) })), nextCursor: search.next_page_token ?? null, paginationWarning: null };
-    return input.cursor ? result : cacheStationSearch(input.query, result, Date.now(), input.lat, input.lng);
+    return input.cursor ? result : cacheStationSearch(input.query, result, Date.now(), input.lat, input.lng, input.limit);
   }),
   anp: publicProcedure.input(z.object({ municipio: z.string().trim().min(3).max(80).default("AGUASLINDASDEGOIAS"), uf: z.string().trim().length(2).default("GO") })).query(async ({ input }) => {
     const normalizedMunicipio = input.municipio.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
