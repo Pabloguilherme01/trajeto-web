@@ -44,14 +44,16 @@ export default function Stations() {
     const matches = searchAguasLindasStations(query);
     const filtered = matches.filter(station =>
       (neighborhoodFilter === "all" || station.neighborhood === neighborhoodFilter) &&
-      (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter) &&\n      (!addressOnly || Boolean(station.address))
+      (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter) &&
+      (!addressOnly || Boolean(station.address))
     );
     return [...filtered].sort((a, b) =>
       (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
       a.displayName.localeCompare(b.displayName, "pt-BR")
     );
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly]);
-  const localBrands = useMemo(() => [...new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))].sort((a,b) => a.localeCompare(b, "pt-BR")), []);\n  const localNeighborhoods = useMemo(
+  const localBrands = useMemo(() => [...new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))].sort((a,b) => a.localeCompare(b, "pt-BR")), []);
+  const localNeighborhoods = useMemo(
     () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
     []
   );
@@ -290,7 +292,8 @@ export default function Stations() {
                   {localNeighborhoods.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
                 </select>
               </label>
-              <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>\n              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Somente com endereço</label>
+              <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Somente com endereço</label>
             </div>
 
             {localDirectory.length ? (
