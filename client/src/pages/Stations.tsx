@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
-import { buildDirectoryCards, getDirectoryCoordinates, getDirectoryGasolinePrice, getDirectoryLabel, matchesFuelFilter, type DirectoryCardShape, type FuelFilter } from "@/lib/stationDirectoryModel";
+import { buildDirectoryCards, getDirectoryCoordinates, getDirectoryGasolinePrice, getDirectoryLabel, matchesFuelFilter, type FuelFilter } from "@/lib/stationDirectoryModel";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel, stationDataConfidence } from "@/lib/stationEntity";
 
