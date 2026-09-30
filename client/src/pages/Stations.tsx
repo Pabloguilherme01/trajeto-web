@@ -781,6 +781,25 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           </section>
         )}
 
+        {mapFirst && !showSavedOnly && broadAguasLindasQuery && mapStations.length > 0 && (
+          <section className="mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121B22] shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
+            <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
+              <div>
+                <p className="text-[0.52rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Mapa principal</p>
+                <h2 id="map-first-title" className="mt-1 text-lg font-black">Postos de Águas Lindas</h2>
+              </div>
+              <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-[0.5rem] font-black text-white/45">{mapStations.length} referências</span>
+            </div>
+            <div className="h-[min(70vh,680px)]">
+              <StationMap stations={mapStations} showTraffic={online} onSelectStation={handleMapStationSelect} />
+            </div>
+            <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
+              <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">Mais perto</button>
+              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/70">Ver fichas</button>
+            </div>
+          </section>
+        )}
+
         {staticRuntime && !showSavedOnly && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
             <div className="flex items-start gap-3">
