@@ -759,7 +759,7 @@ export default function Stations() {
           </section>
         )}
 
-        {staticRuntime && !showSavedOnly && (
+        {staticRuntime && !showSavedOnly && !broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/15 bg-[#0F1A20] p-4" aria-labelledby="public-stations-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
@@ -1074,9 +1074,6 @@ export default function Stations() {
               </button>
             )}
 
-            <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.55rem] leading-relaxed text-white/35">
-              <strong className="text-white/55">Rota:</strong> o Trajeto envia o destino ao provedor escolhido. Google Maps, Waze e Apple Maps calculam a rota, trânsito e instruções de navegação. O site não inventa distância ou tempo quando não possui um motor de roteamento próprio.
-            </div>
           </section>
         )}
 
