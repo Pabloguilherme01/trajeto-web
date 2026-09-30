@@ -273,6 +273,12 @@ export function RouteMap({ origin, destination, stops, routes = [] }: RouteMapPr
     setTraffic(next);
   };
 
+  if (isGitHubPagesRuntime()) {
+    return <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa independente da viagem">
+      <OfflineRoutePreview origin={origin} destination={destination} routes={routes} />
+    </section>;
+  }
+
   return (
     <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]" aria-label="Mapa interativo da viagem">
 <MapView className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden" initialCenter={{ lat: -15.7942, lng: -47.8822 }} initialZoom={11} fallback={<OfflineRoutePreview origin={origin} destination={destination} routes={routes} />} onMapReady={map => { mapRef.current = map; setMapReady(true); }} />
