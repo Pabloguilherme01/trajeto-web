@@ -25,7 +25,7 @@ describe("getMobilityContext", () => {
   });
 
   it("não promete navegação offline sem uma rota salva", () => {
-    expect(getMobilityContext({ ...base, online: false, hasLastTrip: false, offlineRoutes: [] })).toMatchObject({
+    expect(getMobilityContext({ ...base, online: false, hasLastTrip: false, hasVehicle: false, offlineRoutes: [] })).toMatchObject({
       state: "idle",
       primaryAction: "plan_trip",
     });
