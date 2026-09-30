@@ -527,7 +527,8 @@ export default function Stations() {
       toast.message("Ainda não há coordenadas suficientes para salvar o mapa.");
       return;
     }
-    const normalized = mapStations
+    const offlineCandidates = mapStations.filter(station => station.source === "ANP" || station.source === "local");
+    const normalized = offlineCandidates
       .filter((station): station is StationMapItem & { id: string; lat: number; lng: number } =>
         (typeof station.id === "string" || typeof station.placeId === "string") &&
         typeof station.lat === "number" && Number.isFinite(station.lat) &&
@@ -536,7 +537,7 @@ export default function Stations() {
       .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
     const saved = cacheOfflineMapStations(normalized);
     if (saved) setOfflineMap(getOfflineMapStations().stations);
-    toast.message(saved ? `Mapa salvo neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar o mapa local.");
+    toast.message(saved ? `Mapa oficial/local salvo neste aparelho · ${normalized.length} referências` : "Não foi possível gravar o mapa local.");
   };
 
   const refreshStationData = async () => {
@@ -726,7 +727,7 @@ export default function Stations() {
                   <Fuel className="mr-1 inline size-3.5" /> Mais baratos
                 </button>
               )}
-              <button type="button" onClick={() => { setShowMap(true); requestAnimationFrame(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3.5 text-[0.6rem] font-black text-[#C9F7FF]">
+              <button type="button" onClick={() => { setShowMap(true); requestAnimationFrame(() => document.getElementById(broadAguasLindasQuery ? "aguas-lindas-map" : "station-results-map")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3.5 text-[0.6rem] font-black text-[#C9F7FF]">
                 <MapIcon className="mr-1 inline size-3.5" /> Mapa
               </button>
               <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65 disabled:opacity-35">
@@ -1282,7 +1283,7 @@ export default function Stations() {
             </section>
 
             {showMap && !broadAguasLindasQuery && visibleStations.length > 0 && (
-              <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
+              <section id="station-results-map" className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
                 <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} /></div>
               </section>
             )}
