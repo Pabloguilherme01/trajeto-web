@@ -938,19 +938,38 @@ export default function Stations() {
               <button type="button" onClick={() => document.getElementById("complete-stations-title")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></button>
             </div>
 
-            <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto]">
+            <div className="mt-3">
               <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 text-white/25" />
                 <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-[0.62rem] text-white outline-none placeholder:text-white/25" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-7 place-items-center rounded-lg text-white/30" aria-label="Limpar busca"><X className="size-3.5" /></button>}
               </label>
-              <select value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
-                <option value="name">Ordenar: nome</option>
-                <option value="price">Ordenar: menor preço ANP</option>
-                <option value="brand">Ordenar: bandeira</option>
-                <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
-              </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Ordenar diretório">
+                {[
+                  { id: "name" as const, label: "Nome" },
+                  { id: "price" as const, label: "Menor preço" },
+                  { id: "brand" as const, label: "Bandeira" },
+                  { id: "distance" as const, label: "Mais perto", disabled: !userCoords },
+                ].map(option => {
+                  const active = directorySort === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      disabled={option.disabled}
+                      aria-pressed={active}
+                      onClick={() => setDirectorySort(option.id)}
+                      className={"min-h-10 shrink-0 rounded-full border px-3 text-[0.55rem] font-black transition-colors disabled:cursor-not-allowed disabled:opacity-30 " + (
+                        active
+                          ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10 text-[#D9FF91]"
+                          : "border-white/8 bg-white/[.025] text-white/50"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
