@@ -21,6 +21,12 @@ import MobileNavigationCenter from "@/components/MobileNavigationCenter";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import TripFuelBriefing from "@/components/TripFuelBriefing";
 import TripDecisionPanel from "@/components/TripDecisionPanel";
+import RouteTotalCostCard from "@/components/RouteTotalCostCard";
+import RouteCostComparisonCard from "@/components/RouteCostComparisonCard";
+import RouteRecurringImpactCard from "@/components/RouteRecurringImpactCard";
+import RouteSensitivityCard from "@/components/RouteSensitivityCard";
+import RouteDataProvenanceCard from "@/components/RouteDataProvenanceCard";
+import ArrivalTimePlannerCard from "@/components/ArrivalTimePlannerCard";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -521,6 +527,23 @@ export default function Planner() {
                   alternatives={routeAlternatives}
                   online={typeof navigator === "undefined" || navigator.onLine}
                 />}
+                {selectedRoute && !drivingMode && (
+                  <>
+                    <RouteTotalCostCard
+                      distanceKm={selectedRouteDistanceKm}
+                      durationMinutes={selectedRouteDuration / 60}
+                      tollAmount={selectedRoute.toll?.amount ?? null}
+                      tollKnown={Boolean(selectedRoute.toll)}
+                      routeLabel={selectedRouteLabel}
+                      stale={loadedFromOffline}
+                    />
+                    <RouteCostComparisonCard routes={routeAlternatives} selectedRouteId={selectedRouteId} />
+                    <RouteRecurringImpactCard routes={routeAlternatives} selectedRouteId={selectedRouteId} />
+                    <RouteSensitivityCard routes={routeAlternatives} selectedRouteId={selectedRouteId} />
+                    <RouteDataProvenanceCard route={selectedRoute} />
+                    <ArrivalTimePlannerCard route={selectedRoute} />
+                  </>
+                )}
                 <section className="mt-6 border border-[#C7D2C9] bg-[#F2F5EF] p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#54706A]">Situação da rota</p><h3 className="font-display mt-2 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">{planned.traffic.label}</h3><p className="mt-2 max-w-2xl text-xs leading-relaxed text-[#54706A]">{planned.traffic.detail} Consulta registrada em {new Date(planned.traffic.checkedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.</p></div><span className={`rounded-full px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.12em] ${planned.traffic.state === "active" ? "bg-[#DDEFD4] text-[#315227]" : "bg-[#FFF1BF] text-[#6C4E00]"}`}>{planned.traffic.state === "active" ? "Fonte ao vivo" : "Cobertura pendente"}</span></div>{planned.traffic.incidents.length > 0 && <div className="mt-5 grid gap-3 border-y border-[#D1DBD1] py-4">{planned.traffic.incidents.map(incident => <article key={incident.id} className="border-l-2 border-[#BA5B45] bg-white p-3"><div className="flex flex-wrap items-start justify-between gap-3"><p className="text-sm font-bold text-[#163840]">{incident.description}</p><span className="text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[#8A4434]">{incident.severity === "major" ? "Impacto alto" : incident.severity === "moderate" ? "Impacto moderado" : "Impacto leve"}</span></div><p className="mt-2 text-xs leading-relaxed text-[#58716B]">{[incident.from, incident.to].filter(Boolean).join(" → ") || "Local informado pela fonte"}{incident.delaySeconds ? ` · atraso estimado de ${Math.round(incident.delaySeconds / 60)} min` : ""}{incident.reportedAt ? ` · atualização ${new Date(incident.reportedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}` : ""}</p></article>)}</div>}<div className="mt-4 flex flex-wrap gap-2">{planned.traffic.officialSources.map(source => <a key={source.label} href={source.url} target="_blank" rel="noopener noreferrer" className="border border-[#C7D2C9] bg-white px-3 py-2 text-xs font-bold text-[#36564E] transition hover:border-[#163840] hover:bg-[#163840] hover:text-white">{source.label} · {source.detail}</a>)}<a href={planned.traffic.anpComVcUrl} target="_blank" rel="noopener noreferrer" onClick={() => track("anp_quality_open", destination || origin)} className="border border-[#C7D2C9] bg-white px-3 py-2 text-xs font-bold text-[#36564E] transition hover:border-[#163840] hover:bg-[#163840] hover:text-white">ANP com VC · qualidade do posto</a></div></section>
                 <div className="mt-6 flex items-center gap-3 rounded-sm bg-[#EFF3EE] px-4 py-3 text-xs leading-relaxed text-[#54706A]"><ShieldCheck className="size-4 shrink-0 text-[#BA5B45]" />{planned.priceCoverage > 0 ? `${planned.priceCoverage} referência(s) de preço da ANP foram vinculadas a esta pesquisa.` : "Os postos abaixo são reais. Ainda não há referência ANP vinculada aos identificadores retornados."}</div>
                 {planned.recommendation && <section className="mt-6 border border-[#C6DA65] bg-[#F4F8D9] p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#567100]">Opção que atende sua prioridade</p><h3 className="font-display mt-2 text-2xl font-semibold tracking-[-0.045em] text-[#163840]">{planned.recommendation.name}</h3></div><span className={`border px-2 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] ${planned.recommendation.detourSource === "real" ? "border-[#8AAA42] bg-white text-[#486800]" : "border-[#C8B569] bg-[#FFFBE9] text-[#695B17]"}`}>{planned.recommendation.detourSource === "real" ? "Desvio real" : "Desvio aproximado"}</span></div><p className="mt-2 text-sm leading-relaxed text-[#52644A]">Preço de referência: <strong>{planned.recommendation.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> · desvio {planned.recommendation.detourSource === "real" ? "real" : "estimado"} de <strong>{planned.recommendation.detourKm.toLocaleString("pt-BR")} km</strong>.</p>{planned.recommendation.netSavings && <div className="mt-3 border-l-2 border-[#789C28] bg-white/60 p-3"><p className="text-xs font-bold text-[#426100]">Economia líquida estimada (gasolina): {planned.recommendation.netSavings.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p><p className="mt-1 text-xs leading-relaxed text-[#5B6C4B]">Economia no percurso: {planned.recommendation.netSavings.grossFuelSaving.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} · custo estimado do desvio: {planned.recommendation.netSavings.detourFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}. {planned.recommendation.netSavingsMethod}</p></div>}<p className="mt-2 text-xs leading-relaxed text-[#5B6C4B]">{planned.recommendation.rationale} {planned.recommendation.method}</p><p className="mt-2 text-xs font-medium text-[#52644A]">{planned.recommendationDiagnostics.realDetoursCalculated}/{planned.recommendationDiagnostics.requestedCandidates} candidato(s) tiveram o desvio calculado pela rota real.</p></section>}
