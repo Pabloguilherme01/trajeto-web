@@ -69,7 +69,8 @@ export default function Stations() {
   });
 
   const params = useMemo(() => new URLSearchParams(location.split("?")[1] ?? ""), [location]);
-  const savedOnly = params.get("salvos") === "1";
+  const pathname = location.split("?")[0];
+  const savedOnly = pathname.endsWith("/salvos") || params.get("salvos") === "1";
   const nearbyMode = Boolean(readCoordinates(location));
 
   const anpQuery = trpc.stationDirectory.anp.useQuery(
