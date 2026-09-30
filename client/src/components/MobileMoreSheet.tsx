@@ -1,4 +1,4 @@
-import { Accessibility, Calculator, ChevronRight, CircleHelp, Download, ExternalLink, Navigation, Settings, X } from "lucide-react";
+import { Accessibility, Calculator, ChevronRight, CircleHelp, Download, ExternalLink, Map, Navigation, Settings, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
@@ -42,6 +42,13 @@ export default function MobileMoreSheet({ open, onClose }: Props) {
         </div>
 
         <div className="grid gap-2 p-3">
+          <button type="button" onClick={() => go("/mapa")} className="flex min-h-12 items-center gap-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-left">
+            <Map className="size-4 text-[#C7FF3C]" />
+            <span className="min-w-0 flex-1"><span className="block text-[0.65rem] font-black text-white">Explorar a cidade</span><span className="mt-0.5 block text-[0.52rem] text-white/35">Mapa, serviços, perto de mim e referências</span></span>
+            <ChevronRight className="size-4 text-white/20" />
+          </button>
+
+
           <button type="button" onClick={() => go("/planejar")} className="flex min-h-12 items-center gap-3 rounded-2xl border border-white/8 bg-white/[.025] px-3 text-left">
             <Navigation className="size-4 text-[#C7FF3C]" />
             <span className="min-w-0 flex-1"><span className="block text-[0.65rem] font-black text-white">No caminho</span><span className="mt-0.5 block text-[0.52rem] text-white/35">Planeje uma rota e encontre paradas no corredor</span></span>
