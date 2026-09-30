@@ -23,7 +23,19 @@ export const AGUAS_LINDAS_STATIONS_SOURCES = {
   directory: "Diretório público de postos em Águas Lindas de Goiás, usado para consolidar nomes comerciais e endereços quando disponíveis.",
 };
 
-const records: Array<Omit<LocalStationRecord, "sourceNote"> & { sourceNote?: string }> = [
+type StationSeed = [
+  string,
+  string,
+  string,
+  string,
+  string | null,
+  string | null,
+  string | null,
+  string[],
+  string
+];
+
+const records: StationSeed[] = [
   ["aguas-lindas-combustiveis","Aguas Lindas Combustiveis LTDA","Aguas Lindas Combustiveis","13.902.675/0001-78","CAMPING CLUBE","Quadra 07, s/n, lote 33 A, Camping Clube","Branca",["Águas Lindas Combustíveis"],"Cadastro setorial ativo."],
   ["zm","Zm Combustiveis","ZM Combustíveis","55.846.090/0001-28","RECREIO DAS ÁGUAS LINDAS I","Recreio das Águas Lindas I",null,["ZM Combustíveis"],"Cadastro setorial ativo."],
   ["forquilha","Forquilha","Auto Posto Forquilha II","54.438.110/0001-69","COLONIAL PARQUE I PADRE LUCIO",null,null,["Forquilha","Auto Posto Forquilha II"],"Cadastro setorial ativo; endereço completo não consolidado nesta coleta."],
@@ -67,17 +79,13 @@ const records: Array<Omit<LocalStationRecord, "sourceNote"> & { sourceNote?: str
   ["mizuno","Mizuno Kay & CIA LTDA","Mizuno Kay & Cia","00.375.386/0002-05","AGUAS LINDAS","Gleba 2-B, Fazenda Cachoeira e Saltos",null,["Mizuno Kay","Mizuno Kay & Cia"],"Cadastro setorial ativo."],
 ];
 
-function tupleToRecord(row: [
-  string,string,string,string,string,string|null,string|null,string[],string
-]): LocalStationRecord {
+function tupleToRecord(row: StationSeed): LocalStationRecord {
   const [id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, sourceNote] = row;
   return { id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, status: "cadastro_ativo", sourceNote };
 }
 
 export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
-  records.map(row => tupleToRecord(row as [
-    string,string,string,string,string,string|null,string|null,string[],string
-  ]));
+  records.map(tupleToRecord);
 
 export function searchAguasLindasStations(query: string) {
   const normalized = query.trim().toLocaleLowerCase("pt-BR");

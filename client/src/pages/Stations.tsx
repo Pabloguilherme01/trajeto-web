@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -30,13 +30,28 @@ export default function Stations() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
+  const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
   const staticRuntime = isGitHubPagesRuntime();
-  const localDirectory = useMemo(() => staticRuntime && !showSavedOnly ? searchAguasLindasStations(query) : [], [query, showSavedOnly, staticRuntime]);
+  const localDirectory = useMemo(() => {
+    if (!staticRuntime || showSavedOnly) return [];
+    const matches = searchAguasLindasStations(query);
+    const filtered = neighborhoodFilter === "all"
+      ? matches
+      : matches.filter(station => station.neighborhood === neighborhoodFilter);
+    return [...filtered].sort((a, b) =>
+      (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
+      a.displayName.localeCompare(b.displayName, "pt-BR")
+    );
+  }, [query, showSavedOnly, staticRuntime, neighborhoodFilter]);
+  const localNeighborhoods = useMemo(
+    () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
+    []
+  );
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     hasCoordinates ? { query, lat, lng } : { query },
@@ -134,6 +149,19 @@ export default function Stations() {
     );
   };
 
+  const copyAddress = async (station: typeof localDirectory[number]) => {
+    if (!station.address) {
+      toast.message("Este cadastro não possui endereço consolidado.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(`${station.address}, ${station.neighborhood ?? ""}, Águas Lindas de Goiás - GO`);
+      toast.message("Endereço copiado.");
+    } catch {
+      toast.error("Não foi possível copiar o endereço.");
+    }
+  };
+
   const toggleSaved = (station: typeof stations[number]) => {
     const result = toggleMobileStationFavorite(station as unknown as MobileStation);
     setSaved(result.stations);
@@ -200,9 +228,11 @@ export default function Stations() {
               <button type="button" onClick={useNearby} disabled={locating || !online} className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#C7FF3C] px-3.5 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>
-              <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-[#3DE3FF] px-3.5 text-[0.6rem] font-black text-[#0B1014]" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"}>
-                <CircleCheck className="mr-1 inline size-3.5" /> Abertos
-              </button>
+              {!staticRuntime && (
+                <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-[#3DE3FF] px-3.5 text-[0.6rem] font-black text-[#0B1014]" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 py-2 text-[0.6rem] font-bold text-white/65"}>
+                  <CircleCheck className="mr-1 inline size-3.5" /> Abertos agora
+                </button>
+              )}
               <button type="button" onClick={() => void shareCurrent()} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Share2 className="mr-1 inline size-3.5" /> Enviar</button>
               <button type="button" onClick={openSaved} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}</button>
             </div>
@@ -242,22 +272,29 @@ export default function Stations() {
                 <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
                 <p className="mt-2 text-[0.66rem] leading-relaxed text-white/45">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
               </div>
-              <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">31 base</span>
+              <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <label className="min-w-0 flex-1">
+                <span className="sr-only">Filtrar diretório por bairro</span>
+                <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none">
+                  <option value="all">Todos os bairros</option>
+                  {localNeighborhoods.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
+                </select>
+              </label>
+              <button type="button" onClick={() => { setNeighborhoodFilter("all"); setQuery("postos"); setInput("postos"); }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/65">Mostrar todos</button>
             </div>
 
             {localDirectory.length ? (
-              <div className="mt-4 space-y-2">
+              <>
+              <div className="mt-4 flex items-center justify-between gap-2" aria-live="polite">
+                <p className="text-[0.58rem] font-black uppercase tracking-[.12em] text-white/30">{localDirectory.length} resultado(s)</p>
+                <span className="text-[0.55rem] text-white/25">ordenado por bairro</span>
+              </div>
+              <div className="mt-3 space-y-2">
                 {localDirectory.map(station => {
-                  const statusText = station.status === "encerramento_indicado"
-                    ? "operação possivelmente encerrada"
-                    : station.status === "operacao_nao_verificada"
-                      ? "operação não verificada"
-                      : "cadastro ativo";
-                  const statusClass = station.status === "encerramento_indicado"
-                    ? "border-[#FF7D6A]/20 bg-[#FF7D6A]/[.04] text-[#FFC0B7]"
-                    : station.status === "operacao_nao_verificada"
-                      ? "border-[#FFB86B]/20 bg-[#FFB86B]/[.04] text-[#FFD39E]"
-                      : "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] text-[#D9FF91]";
+                  const statusText = "empresa ativa no cadastro";
                   return (
                     <article key={station.cnpj} className="rounded-[1.25rem] border border-white/8 bg-[#0B1014] p-3.5">
                       <div className="flex items-start gap-3">
@@ -270,7 +307,7 @@ export default function Stations() {
                               <p className="text-sm font-black text-white">{station.displayName}</p>
                               <p className="mt-1 text-[0.58rem] font-semibold text-white/35">{station.legalName} · CNPJ {station.cnpj}</p>
                             </div>
-                            <span className={"shrink-0 rounded-full border px-2 py-1 text-[0.46rem] font-black " + statusClass}>{statusText}</span>
+                            <span className="shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] px-2 py-1 text-[0.46rem] font-black text-[#D9FF91]">{statusText}</span>
                           </div>
                           {station.address ? (
                             <p className="mt-2 text-[0.62rem] leading-relaxed text-white/45">{station.address}</p>
@@ -279,16 +316,21 @@ export default function Stations() {
                           )}
                         </div>
                       </div>
-                      <div className="mt-3 grid grid-cols-2 gap-2">
-                        <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
-                        <span className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 px-3 text-center text-[0.54rem] font-bold text-white/35">{station.brand ?? "Bandeira não consolidada"}</span>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 flex-1 rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</button>
+                        {station.address && <button type="button" onClick={() => void copyAddress(station)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar endereço</button>}
+                      </div>
+                      <div className="mt-2 flex items-center justify-between gap-2 text-[0.5rem] text-white/25">
+                        <span>{station.neighborhood ?? "Bairro não consolidado"}</span>
+                        <span>{station.brand ?? "Bandeira não consolidada"}</span>
                       </div>
                     </article>
                   );
                 })}
               </div>
+              </>
             ) : (
-              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Nenhum cadastro local corresponde à busca “{query}”.</div>
+              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Nenhum cadastro local corresponde à busca “{query}” nesse bairro.</div>
             )}
           </section>
         )}
