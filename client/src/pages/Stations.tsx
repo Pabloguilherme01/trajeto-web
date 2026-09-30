@@ -247,7 +247,7 @@ export default function Stations() {
               </div>
             </form>
 
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1">
               <button type="button" onClick={useNearby} disabled={locating || !online} className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#C7FF3C] px-3.5 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>
@@ -261,7 +261,7 @@ export default function Stations() {
             </div>
 
             {recentSearches.length > 0 && (
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1">
                 {recentSearches.slice(0, 4).map(item => (
                   <button key={item} type="button" onClick={() => {
                   setInput(item);
