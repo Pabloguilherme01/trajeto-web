@@ -22,10 +22,13 @@ export default function TripDecisionPanel({ route, alternatives, online }: Props
   const trafficDelay = route.durationSeconds != null && route.staticDurationSeconds != null
     ? Math.max(0, route.durationSeconds - route.staticDurationSeconds) : null;
   const trafficMinutes = trafficDelay != null ? Math.round(trafficDelay / 60) : null;
-  const tollKnown = route.toll?.amount != null;
-  const tollText = tollKnown
-    ? route.toll!.amount === 0 ? "sem pedágio informado" : route.toll!.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll!.currency || "BRL" }) + (route.toll!.estimated ? " · estimado" : "")
-    : "pedágio não informado";
+  const tollAmount = route.toll?.amount ?? null;
+  const tollKnown = tollAmount != null;
+  const tollText = tollAmount == null
+    ? "pedágio não informado"
+    : tollAmount === 0
+      ? "sem pedágio informado"
+      : tollAmount.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" }) + (route.toll?.estimated ? " · estimado" : "");
   const liters = route.fuelConsumptionLiters;
   const fuelConfigured = Boolean(vehicle?.consumption && vehicle.consumption > 0);
   const routeEfficiency = liters != null
