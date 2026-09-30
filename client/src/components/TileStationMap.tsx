@@ -51,6 +51,7 @@ export default function TileStationMap({
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
   const [selectedId, setSelectedId] = useState<string | null>(drawable[0]?.id ?? null);
   const [threeD, setThreeD] = useState(false);
+  const [tileErrors, setTileErrors] = useState(0);
   const [dragging, setDragging] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: number; x: number; y: number; cx: number; cy: number } | null>(null);
@@ -115,11 +116,12 @@ export default function TileStationMap({
     setZoom(value => Math.max(11, Math.min(17, value + delta)));
   };
 
-  if (!drawable.length) {
+  if (!drawable.length || tileFallback) {
     return <div className={"grid " + heightClassName + " place-items-center bg-[#E8F0EA] p-6 text-center text-[#163840]"}>{fallback ?? <div><p className="text-sm font-black">Mapa sem coordenadas suficientes.</p><p className="mt-2 text-xs text-[#607169]">Os locais continuam disponíveis em lista.</p></div>}</div>;
   }
 
   const selected = drawable.find(item => item.id === selectedId) ?? null;
+  const tileFallback = Boolean(fallback && tileErrors >= Math.min(5, tiles.length));
 
   return (
     <div className={"relative overflow-hidden rounded-[1.25rem] bg-[#dfe9e2] " + heightClassName}>
@@ -147,6 +149,7 @@ export default function TileStationMap({
               key={tile.key}
               src={"https://tile.openstreetmap.org/" + zoom + "/" + tile.x + "/" + tile.y + ".png"}
               alt=""
+              onError={() => setTileErrors(value => Math.min(tiles.length, value + 1))}
               draggable={false}
               className="absolute size-64 max-w-none"
               style={{ left: tile.left, top: tile.top }}
