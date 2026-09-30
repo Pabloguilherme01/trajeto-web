@@ -343,7 +343,10 @@ export default function Stations() {
               </div>
             </div>
               </div>
-              <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
+                <span className="text-[0.46rem] font-bold text-white/25">sincronização: {new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}</span>
+              </div>
             </div>
 
             <div className="mt-4 flex items-center justify-between gap-2">
