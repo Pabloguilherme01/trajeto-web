@@ -90,7 +90,7 @@ export default function DailyCommandCenter() {
   const modes = buildDailyModes(online, routes.length);
   const activeId = selected === "automatico" ? automatic : selected;
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
-  const completed = [favorite, lastTrip, vehicle, routes.length > 0].filter(Boolean).length;
+  const completed = [favorite, vehicle, routes.length > 0, lastTrip, lastStation].filter(Boolean).length;
   const nextSetup = !favorite ? "destino" : !vehicle ? "veículo" : !lastTrip ? "primeira viagem" : routes.length === 0 ? "rota offline" : null;
   const readiness = [
     { label: "Destino", value: Boolean(favorite), detail: favorite ? favorite.label : "Cadastre um atalho", icon: MapPin },
