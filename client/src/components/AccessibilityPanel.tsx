@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
 import { setEconomyMode } from "@/lib/mobilePreferences";
 import { clearLocalAppData, exportLocalAppData, listLocalAppKeys, localDataEvent } from "@/lib/localData";
-import { OPEN_ACCESSIBILITY_EVENT } from "@/components/DailyCommandCenter";
+
+const OPEN_ACCESSIBILITY_EVENT = "trajeto:open-accessibility";
 
 const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:string}> = [
   { key:"largeText", label:"Texto maior", detail:"Aumenta a leitura sem alterar os dados." },
