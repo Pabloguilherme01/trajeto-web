@@ -9,6 +9,7 @@ import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileSta
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
+import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { isGitHubPagesRuntime, supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePublicRoute } from "@/lib/publicRouting";
 
@@ -524,13 +525,17 @@ export default function Planner() {
               <details>
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-white/35" /></summary>
                 <div className="mt-3 grid gap-2 text-[0.62rem] leading-relaxed text-white/45">
-                  <p>Fonte da rota: consulta realizada pelo serviço de rota do Trajeto.</p>
+                  <p>Fonte da rota: {staticRuntime ? "rede viária OpenStreetMap/OSRM, calculada no navegador" : "serviço de rota do Trajeto"}.</p>
                   <p>Referências de preço, quando presentes, são identificadas separadamente e têm data de coleta própria.</p>
                   <p>Tempo de chegada é uma estimativa calculada a partir da duração retornada; a navegação ao vivo fica sob responsabilidade do app externo escolhido.</p>
                 </div>
               </details>
             </section>
           </section>
+        )}
+
+        {!savedMode && planned && (
+          <LocalRouteCalculator initialDistanceKm={(planned.route.distanceMeters ?? 0) / 1000} compact />
         )}
 
         <section className="mt-8 pb-3 text-center text-[0.55rem] leading-relaxed text-white/25">
