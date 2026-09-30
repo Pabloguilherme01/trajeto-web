@@ -1,4 +1,4 @@
-import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map, MapPin, Navigation, Search, Share2, SlidersHorizontal, Wifi, WifiOff, X } from "lucide-react";
+import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -470,7 +470,7 @@ export default function Stations() {
   };
 
   return (
-    <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_15%_0%,rgba(61,227,255,.08),transparent_28%),radial-gradient(circle_at_90%_8%,rgba(199,255,60,.06),transparent_24%),#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
           <div>
@@ -572,6 +572,32 @@ export default function Stations() {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
+          <section className="mt-4 overflow-hidden rounded-[1.7rem] border border-white/8 bg-white/[.025] p-4 shadow-[0_18px_65px_rgba(0,0,0,.20)] backdrop-blur sm:p-5" aria-label="Painel rápido dos postos">
+            <div className="flex items-start gap-3">
+              <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+                <Sparkles className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#C7FF3C]">Águas Lindas · posto em 1 toque</p>
+                  <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">sem conta</span>
+                  <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/45">{online ? "online + cache" : "offline"}</span>
+                </div>
+                <h2 className="mt-1 text-xl font-black tracking-[-.03em]">Mapa, ficha e rota no mesmo lugar.</h2>
+                <p className="mt-1 text-[0.63rem] leading-relaxed text-white/40">Abra o mapa, escolha um posto e saia direto para o navegador que você usa. Os dados locais ficam disponíveis no aparelho sem cadastro.</p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><Map className="mr-1 inline size-3.5" />Abrir mapa</button>
+              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-[0.6rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
+              <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
+              <div className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.53rem] font-black text-white/45"><ShieldCheck className="size-3.5 text-[#C7FF3C]" />ANP + cache local</div>
+            </div>
+          </section>
+        )}
+
+        {!showSavedOnly && broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -597,7 +623,7 @@ export default function Stations() {
                 </div>
 
                 {showMap && mapStations.length > 0 && (
-                  <section className="mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
+                  <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="h-[min(68vh,620px)]">
                       <StationMap stations={mapStations} showTraffic />
                     </div>
@@ -650,7 +676,7 @@ export default function Stations() {
             )}
 
             {!anpRows.length && mapStations.length > 0 && (
-              <section className="mt-4 overflow-hidden rounded-[1.35rem] border border-[#FFB86B]/20 bg-[#0B1014]" aria-label="Mapa offline de referências dos postos">
+              <section id="aguas-lindas-map-offline" className="scroll-mt-24 mt-4 overflow-hidden rounded-[1.35rem] border border-[#FFB86B]/20 bg-[#0B1014]" aria-label="Mapa offline de referências dos postos">
                 <div className="border-b border-white/8 px-3.5 py-3">
                   <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#FFCF96]">Mapa salvo no aparelho</p>
                   <p className="mt-1 text-[0.6rem] leading-relaxed text-white/45">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis e navegáveis sem conexão.</p>
@@ -667,7 +693,7 @@ export default function Stations() {
         )}
 
         {broadAguasLindasQuery && !showSavedOnly && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
+          <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
