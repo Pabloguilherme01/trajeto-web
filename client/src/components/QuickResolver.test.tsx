@@ -18,6 +18,15 @@ describe("QuickResolver", () => {
     expect(setLocation).toHaveBeenCalledWith("/local/vapt-vupt");
   });
 
+  it("mantém busca genérica de saúde no mapa", () => {
+    render(<QuickResolver />);
+    fireEvent.change(screen.getByLabelText("Resolver uma necessidade"), {
+      target: { value: "hospital" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Resolver busca" }));
+    expect(setLocation.mock.calls.at(-1)?.[0]).toContain("/mapa?q=hospital");
+  });
+
   it("manda intenção de navegação para o planejador", () => {
     render(<QuickResolver />);
     fireEvent.change(screen.getByLabelText("Resolver uma necessidade"), {
