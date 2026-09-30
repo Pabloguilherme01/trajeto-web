@@ -95,6 +95,7 @@ export default function PublicServices() {
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">{PUBLIC_SERVICES.length} registros públicos</span>
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">6 categorias</span>
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">offline por padrão</span>
+              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/35">catálogo revisado · 30/09/2026</span>
             </div>
           </div>
           <button type="button" onClick={() => setLocation(appUrl("/"))} className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/10 px-3 text-xs font-black text-white/70">Início</button>
