@@ -6,14 +6,14 @@ export function inferPlaceCategory(query:string):PlaceCategory|"all"{
   const text=normalizePlaceSearchText(query);
   if(!text) return "all";
   if(/(posto|combustivel|gasolina|etanol|diesel|abastecer)/.test(text)) return "fuel";
-  if(/(hospital|upa|clinica|saude|farmacia|pronto)/.test(text)) return "health";
+  if(/(hospital|upa|clinica|saude|farmacia|pronto|emergencia|samu)/.test(text)) return "health";
   if(/(escola|colegio|creche|faculdade|universidade|educacao)/.test(text)) return "education";
   if(/(onibus|terminal|rodoviaria|transporte|ponto)/.test(text)) return "transport";
   if(/(prefeitura|vapt|secretaria|cras|creas|orgao|servico publico)/.test(text)) return "government";
   if(/(policia|delegacia|bombeiro|seguranca)/.test(text)) return "security";
   if(/(parque|praca|lazer|esporte|quadra|area verde)/.test(text)) return "leisure";
   if(/(acessivel|acessibilidade|rampa)/.test(text)) return "accessibility";
-  if(/(bairro|setor|rua|avenida|quadra|cep|endereco|br[- ]?\d+)/.test(text)) return "territory";
+  if(/(bairro|setor|rua|avenida|quadra|cep|endereco|centro|br[- ]?\d+)/.test(text)) return "territory";
   return "all";
 }
 export function placeMatchesQuery(fields:Array<string|null|undefined>,query:string){
