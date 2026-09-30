@@ -34,7 +34,9 @@ function compareDistance(stations: ComparableStation[]) {
     .map((station, index) => ({ station, index, value: station.distanceMeters }))
     .filter(item => item.value != null && Number.isFinite(item.value));
   if (!withDistance.length) return new Set<number>();
-  const min = Math.min(...withDistance.map(item => item.value));
+  const values = withDistance.map(item => item.value).filter((value): value is number => value != null && Number.isFinite(value));
+  if (!values.length) return new Set<number>();
+  const min = Math.min(...values);
   return new Set(withDistance.filter(item => item.value === min).map(item => item.index));
 }
 
