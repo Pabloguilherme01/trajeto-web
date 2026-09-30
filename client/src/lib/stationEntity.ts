@@ -25,14 +25,22 @@ export function stationDataConfidence(params: {
   local?: LocalStationRecord | null;
   price?: AnpPriceRecord | null;
 }) {
-  const scores = [
-    params.anp ? 100 : 0,
-    Number.isFinite(params.anp?.latitude) && Number.isFinite(params.anp?.longitude) ? 90 : params.local?.mapData ? 70 : 0,
-    params.local?.mapData?.phone ? 75 : 0,
-    params.local?.mapData?.hours ? 70 : 0,
-    params.price ? 92 : 0,
-  ].filter(score => score > 0);
-  return scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
+  // Weighted completeness score. Missing dimensions reduce confidence instead of
+  // disappearing from the denominator, so ANP cadastro alone cannot become 100%.
+  const score =
+    (params.anp ? 35 : 0) +
+    (Number.isFinite(params.anp?.latitude) && Number.isFinite(params.anp?.longitude)
+      ? 20
+      : Number.isFinite(params.local?.anp?.latitude) && Number.isFinite(params.local?.anp?.longitude)
+        ? 15
+        : params.local?.mapData
+          ? 5
+          : 0) +
+    (params.local?.mapData?.phone ? 10 : 0) +
+    (params.local?.mapData?.hours ? 10 : 0) +
+    (params.price ? 25 : 0);
+
+  return Math.max(0, Math.min(100, Math.round(score)));
 }
 
 export function freshnessLabel(value?: string | null) {
