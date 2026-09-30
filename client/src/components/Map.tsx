@@ -2,7 +2,7 @@
 
 /// <reference types="@types/google.maps" />
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePersistFn } from "@/hooks/usePersistFn";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +54,7 @@ interface MapViewProps {
   showTraffic?: boolean;
   mapTypeId?: google.maps.MapTypeId;
   heightClassName?: string;
+  fallback?: ReactNode;
 }
 
 export function MapView({
@@ -65,6 +66,7 @@ export function MapView({
   showTraffic = false,
   mapTypeId = "roadmap" as google.maps.MapTypeId,
   heightClassName = "h-[520px]",
+  fallback,
 }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
@@ -145,7 +147,7 @@ export function MapView({
   return (
     <div ref={mapContainer} role="region" aria-label="Mapa da rota" className={cn("relative w-full " + heightClassName + " bg-[#EDF2EE]", className)}>
       {!shouldLoad && <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#EDF2EE_35%,#F8FBF7_50%,#EDF2EE_65%)]" aria-label="Mapa será carregado quando estiver próximo" />}
-      {loadError && <div role="alert" className="absolute inset-0 grid place-items-center bg-[#0B1014]/95 p-6 text-center text-sm font-bold text-white"><div><p>O mapa não pôde ser carregado agora.</p><p className="mt-2 text-xs font-normal text-[#A5B5BC]">Os resultados da consulta continuam disponíveis abaixo.</p></div></div>}
+      {loadError && (fallback ? <div className="absolute inset-0">{fallback}</div> : <div role="alert" className="absolute inset-0 grid place-items-center bg-[#0B1014]/95 p-6 text-center text-sm font-bold text-white"><div><p>O mapa não pôde ser carregado agora.</p><p className="mt-2 text-xs font-normal text-[#A5B5BC]">Os resultados da consulta continuam disponíveis abaixo.</p></div></div>)}
     </div>
   );
 }
