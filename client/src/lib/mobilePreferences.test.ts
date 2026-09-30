@@ -4,6 +4,7 @@ import {
   clearRecentTrips,
   getRecentTrips,
   rememberTrip,
+  getRouteUsageStats,
   removeRecentTrip,
 } from "./mobilePreferences";
 
@@ -51,5 +52,23 @@ describe("mobilePreferences recent trips", () => {
   it("ignores invalid trip input", () => {
     rememberTrip("a", "b");
     expect(getRecentTrips()).toEqual([]);
+  });
+});
+
+
+describe("mobilePreferences route usage", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("keeps a real timestamped usage history for route windows", () => {
+    rememberTrip("Casa", "Trabalho");
+    rememberTrip("Casa", "Trabalho");
+
+    const stats = getRouteUsageStats("Casa", "Trabalho", 30);
+
+    expect(stats.total).toBe(2);
+    expect(stats.recordedEvents).toBe(2);
+    expect(stats.windowDays).toBe(30);
   });
 });
