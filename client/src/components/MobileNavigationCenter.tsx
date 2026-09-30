@@ -71,7 +71,7 @@ export default function MobileNavigationCenter({
           </div>
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[.04] px-2.5 py-2 text-[0.58rem] font-black text-white/65">
             {offline ? <WifiOff className="size-3.5" /> : <CheckCircle2 className="size-3.5 text-[#C7FF3C]" />}
-            {status}
+            <span aria-live="polite">{status}</span>
           </span>
         </div>
 
