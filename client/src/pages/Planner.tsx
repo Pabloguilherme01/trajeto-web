@@ -562,6 +562,11 @@ export default function Planner() {
             <p className="text-[0.58rem] text-white/45">encontradas na rota</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
+            <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFB86B]">Trânsito</p>
+            <p className="mt-1 text-lg font-black text-white">{selectedRoute?.staticDurationSeconds != null ? Math.max(0, Math.round((selectedRouteDuration - selectedRoute.staticDurationSeconds) / 60)) + " min" : "sem dado"}</p>
+            <p className="text-[0.58rem] text-white/45">{selectedRoute?.staticDurationSeconds != null ? "impacto sobre o tempo livre" : "comparação indisponível"}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFC928]">ANP</p>
             <p className="mt-1 text-lg font-black text-white">{planned.priceCoverage}</p>
             <p className="text-[0.58rem] text-white/45">referências vinculadas</p>
