@@ -285,7 +285,17 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
         brand: station.brand ?? null,
         source: station.source ?? "local",
       })),
-      ...nearbyStations,
+      ...nearbyStations.map(station => ({
+        id: station.id,
+        placeId: station.placeId,
+        name: station.name,
+        address: station.address,
+        lat: station.lat,
+        lng: station.lng,
+        cnpj: station.cnpj ?? null,
+        brand: station.brand ?? null,
+        source: station.source ?? "Google",
+      })),
     ];
 
     return dedupeStationReferences(reconciliationInputs).map(reference => ({
