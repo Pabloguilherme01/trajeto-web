@@ -15,6 +15,7 @@ export default defineConfig({
   test: {
     environment: "node",
     environmentMatchGlobs: [
+      ["client/src/lib/mobileStationStore.test.ts", "jsdom"],
       ["client/src/**/*.test.tsx", "jsdom"],
       ["client/src/**/*.spec.tsx", "jsdom"],
     ],
