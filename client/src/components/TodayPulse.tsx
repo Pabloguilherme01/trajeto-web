@@ -44,7 +44,7 @@ export default function TodayPulse() {
   };
 
   return (
-    <section className="border-b border-white/8 bg-[#0A1116] py-4 sm:py-7" aria-labelledby="today-pulse-title">
+    <section className="border-b border-white/8 bg-[#0A1116] py-4 sm:py-7 md:hidden" aria-labelledby="today-pulse-title">
       <div className="container">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
