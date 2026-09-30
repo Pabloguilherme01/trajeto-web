@@ -36,7 +36,7 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
       routes: [{
         distance: 12340,
         duration: 920,
-        geometry: "}_miDvv}uH??",
+        geometry: "r`d_B~~teHbwFg_mA",
       }],
     }),
   }));
