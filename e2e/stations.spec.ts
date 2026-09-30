@@ -15,7 +15,9 @@ test("postos: sincroniza busca da URL e expõe filtro de combustível", async ({
   await page.goto("/postos?q=postos", { waitUntil: "domcontentloaded" });
 
   const fuel = page.getByRole("combobox", { name: "Filtrar por combustível" });
+  const sort = page.getByRole("combobox", { name: "Ordenar diretório de postos" });
   await expect(fuel).toBeVisible();
+  await expect(sort.locator('option[value="distance"]')).toBeDisabled();
   await fuel.selectOption("etanol");
   await expect(fuel).toHaveValue("etanol");
 
