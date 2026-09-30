@@ -16,6 +16,7 @@ import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
+import CityPlaceAutocomplete from "@/components/CityPlaceAutocomplete";
 
 function isBroadAguasLindasQuery(value: string) {
   const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -318,8 +319,15 @@ export default function Stations() {
   };
 
   const useNearby = () => {
-    if (!online || !navigator.geolocation || locating) {
-      if (!online) toast.message("Sem internet. Uma nova busca por perto precisa de conexão.");
+    if (!online) {
+      toast.message("Sem internet. Uma nova busca por perto precisa de conexão.");
+      return;
+    }
+    if (!navigator.geolocation) {
+      toast.error("Este navegador não oferece localização. Pesquise por bairro ou nome do posto.");
+      return;
+    }
+    if (locating) {
       return;
     }
     setLocating(true);
@@ -465,7 +473,10 @@ export default function Stations() {
     try {
       const url = window.location.origin + appUrl("/postos") + "?q=" + encodeURIComponent(query);
       await shareText("Postos em " + query + " · consulta do Trajeto", url, "Trajeto · postos");
-    } catch {}
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast.error("Não foi possível compartilhar. Verifique as permissões do navegador.");
+    }
   };
 
   const openSaved = () => {
@@ -493,7 +504,7 @@ export default function Stations() {
               <label className="block text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35" htmlFor="station-search">Cidade, bairro ou posto</label>
               <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 shrink-0 text-[#3DE3FF]" />
-                <input id="station-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Ex.: Águas Lindas de Goiás" />
+                <CityPlaceAutocomplete id="station-search" value={input} onValueChange={setInput} onPlaceSelect={place => setLocation(appUrl("/cidade") + "?q=" + encodeURIComponent(place.name))} autoComplete="street-address" enterKeyHint="search" className="min-h-12 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Posto, bairro ou ponto da cidade" />
                 <button type="submit" className="grid size-10 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar">
                   <ChevronRight className="size-5" />
                 </button>
