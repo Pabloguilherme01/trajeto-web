@@ -1,6 +1,6 @@
 import { ArrowLeftRight, Bookmark, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useLocation } from "wouter";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
@@ -45,7 +45,8 @@ function estimateDetourFuelCost(detourKm: number | null | undefined, price: numb
 
 export default function Planner() {
   const [location, setLocation] = useLocation();
-  const queryParams = useMemo(() => new URLSearchParams(window.location.search), [location]);
+  const search = useSearch();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const pathname = location.split("?")[0].replace(/\/$/, "") || "/";
   const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
   const offlineFocus = queryParams.get("offline") === "1";
@@ -65,6 +66,18 @@ export default function Planner() {
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
   const staticRuntime = isGitHubPagesRuntime();
+  const requestVersion = useRef(0);
+
+  const resetResult = () => {
+    requestVersion.current += 1;
+    setPlanned(null);
+    setFallbackReady(false);
+    setShowMap(false);
+    setError(null);
+    setSavedMessage(null);
+  };
+
+  useEffect(() => () => { requestVersion.current += 1; }, []);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -97,17 +110,31 @@ export default function Planner() {
   }, [offlineFocus, savedMode]);
 
   useEffect(() => {
+    resetResult();
     const routeId = queryParams.get("rota");
-    if (!routeId || planned) return;
-    void getOfflineRoute(routeId).then(route => {
-      if (!route) return;
-      setOrigin(route.origin);
-      setDestination(route.destination);
-      setPlanned(route.payload as PlannedRoute);
-      setFallbackReady(false);
-      setSavedMessage("Rota salva aberta neste aparelho.");
-    }).catch(() => {});
-  }, [planned, queryParams]);
+    let active = true;
+
+    if (routeId) {
+      void getOfflineRoute(routeId).then(route => {
+        if (!active) return;
+        if (!route) {
+          setError("Esta rota não está salva neste aparelho.");
+          return;
+        }
+        setOrigin(route.origin);
+        setDestination(route.destination);
+        setPlanned(route.payload as PlannedRoute);
+        setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
+      }).catch(() => {
+        if (active) setError("Não foi possível abrir a rota salva.");
+      });
+    } else if (queryParams.has("origem") || queryParams.has("destino")) {
+      setOrigin(queryParams.get("origem") ?? "");
+      setDestination(queryParams.get("destino") ?? "");
+    }
+
+    return () => { active = false; };
+  }, [queryParams]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -142,18 +169,18 @@ export default function Planner() {
       return;
     }
 
-    setError(null);
-    setSavedMessage(null);
-    setFallbackReady(false);
-    setShowMap(false);
+    resetResult();
+    const version = requestVersion.current;
     rememberTrip(from, to);
     track("route_open", to);
     try {
       const result = await planRoute.mutateAsync({ origin: from, destination: to });
+      if (version !== requestVersion.current) return;
       setPlanned(result);
       setFallbackReady(false);
       vibration(14);
     } catch {
+      if (version !== requestVersion.current) return;
       setError(null);
       setFallbackReady(true);
       vibration(8);
@@ -166,6 +193,7 @@ export default function Planner() {
     navigator.geolocation.getCurrentPosition(
       position => {
         setLocating(false);
+        resetResult();
         setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
         vibration(14);
       },
@@ -178,19 +206,16 @@ export default function Planner() {
   };
 
   const swap = () => {
+    resetResult();
     setOrigin(destination);
     setDestination(origin);
-    setPlanned(null);
-    setError(null);
     vibration();
   };
 
   const clear = () => {
+    resetResult();
     setOrigin("");
     setDestination("");
-    setPlanned(null);
-    setError(null);
-    setSavedMessage(null);
   };
 
   const saveCurrentRoute = async () => {
@@ -213,11 +238,7 @@ export default function Planner() {
   };
 
   const openSavedRoute = (route: OfflineRoute) => {
-    setOrigin(route.origin);
-    setDestination(route.destination);
-    setPlanned(route.payload as PlannedRoute);
-    setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
-    setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(route.origin) + "&destino=" + encodeURIComponent(route.destination));
+    setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(route.id));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -225,7 +246,9 @@ export default function Planner() {
     try {
       await removeOfflineRoute(route.id);
       refreshSavedRoutes();
-    } catch {}
+    } catch {
+      setSavedMessage("Não foi possível excluir a rota. Tente novamente.");
+    }
   };
 
   const shareRoute = async () => {
@@ -253,7 +276,11 @@ export default function Planner() {
     track("route_open", destination || origin);
   };
 
-  const openStation = (stop: PlannedRoute["stops"][number]) => {
+  const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
+    if (!stop) {
+      setSavedMessage("Não há endereço disponível para esta parada.");
+      return;
+    }
     window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
@@ -308,7 +335,7 @@ export default function Planner() {
                 <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                  <input value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
+                  <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
                   <button type="button" onClick={useCurrentLocation} disabled={!online || locating} className="mobile-action-icon border-0 bg-transparent text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
@@ -323,12 +350,12 @@ export default function Planner() {
                 <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                  <input id="planner-destination" value={destination} onChange={event => { setDestination(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
+                  <input id="planner-destination" value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
               </label>
 
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setOrigin(trip.origin); setDestination(trip.destination); setPlanned(null); }} className="mobile-action mobile-action-secondary min-h-11 shrink-0 rounded-full px-3">Última rota</button>}
+                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; resetResult(); setOrigin(trip.origin); setDestination(trip.destination); }} className="mobile-action mobile-action-secondary min-h-11 shrink-0 rounded-full px-3">Última rota</button>}
                 <button type="button" onClick={clear} disabled={!origin && !destination} className="mobile-action mobile-action-secondary min-h-11 shrink-0 rounded-full px-3 disabled:opacity-30">Limpar</button>
               </div>
 
@@ -401,7 +428,7 @@ export default function Planner() {
           </section>
         )}
 
-        {fallbackReady && !planned && !savedMode && origin.trim() && destination.trim() && (
+        {fallbackReady && !planned && !savedMode && destination.trim() && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="navigation-fallback-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
@@ -419,7 +446,7 @@ export default function Planner() {
           </section>
         )}
 
-        {planned && (
+        {!savedMode && planned && (
           <section className="mt-5 animate-route-in">
             <div className="rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[#10191F] p-4 shadow-[0_24px_60px_rgba(0,0,0,.3)] sm:p-5">
               <div className="flex items-start justify-between gap-3">
