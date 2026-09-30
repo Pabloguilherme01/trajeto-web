@@ -10,6 +10,8 @@ export type LocalStationRecord = {
   status: "cadastro_ativo";
   sourceNote: string;
   anp?: { authorization?: string | null; anpCode?: string | null; lastAnpUpdate?: string | null; products?: string[]; distributor?: string | null; tankCapacityLiters?: number | null; nozzleCount?: number | null; interdicted?: boolean | null; latitude?: number | null; longitude?: number | null };
+  mapData?: { phone?: string | null; rating?: number | null; reviewCount?: number | null; hours?: string | null; source?: "maps" };
+  priceData?: { referenceDate?: string | null; gasoline?: number | null; ethanol?: number | null; dieselS10?: number | null; dieselS500?: number | null; glpP13?: number | null; gnv?: number | null; source?: "ANP" };
   dataQuality?: "anp-confirmed" | "cross-checked" | "catalog-only";
   dataOrigin?: "ANP" | "cross-check" | "local-catalog";
   verifiedAt?: string | null;
