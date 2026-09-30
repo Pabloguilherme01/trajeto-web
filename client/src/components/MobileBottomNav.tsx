@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import MobileMoreSheet from "@/components/MobileMoreSheet";
 import { mobilePreferenceEvent } from "@/lib/mobilePreferences";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { mobileStationStoreEvent } from "@/lib/mobileStationStore";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
 const baseItems = [
@@ -21,18 +21,20 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     const refresh = () => {
-      void Promise.all([listOfflineRoutes(), Promise.resolve(listMobileStationFavorites())])
-        .then(([routes, stations]) => setSavedTotal(routes.length + stations.length))
-        .catch(() => setSavedTotal(0));
+      try {
+        setSavedTotal(listMobileStationFavorites().length);
+      } catch {
+        setSavedTotal(0);
+      }
     };
     refresh();
     window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
-    window.addEventListener(offlineRouteEvent, refresh);
+    window.addEventListener(mobileStationStoreEvent, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
-      window.removeEventListener(offlineRouteEvent, refresh);
+      window.removeEventListener(mobileStationStoreEvent, refresh);
     };
   }, []);
 
