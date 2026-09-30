@@ -127,14 +127,22 @@ for (const record of output) {
   if (!deduped.has(key)) deduped.set(key, record);
 }
 const data = [...deduped.values()];
+
+let previousSnapshot = null;
+try {
+  previousSnapshot = JSON.parse(await readFile(OUTPUT, "utf8"));
+} catch {
+  previousSnapshot = null;
+}
+
 if (!data.length) {
-  try {
-    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
-    if (previous?.data?.length) {
-      console.warn(JSON.stringify({ warning: "Nenhum preço ANP foi extraído; snapshot anterior preservado.", previousRows: previous.data.length }));
-      process.exit(0);
-    }
-  } catch {}
+  if (previousSnapshot?.data?.length) {
+    console.warn(JSON.stringify({
+      warning: "Nenhum preço ANP foi extraído; snapshot anterior preservado.",
+      previousRows: previousSnapshot.data.length,
+    }));
+    process.exit(0);
+  }
   await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
   const emptySnapshot = {
     source: "ANP",
@@ -148,6 +156,20 @@ if (!data.length) {
   };
   await writeFile(OUTPUT, JSON.stringify(emptySnapshot, null, 2) + "\n", "utf8");
   console.warn(JSON.stringify({ warning: "Nenhum preço individual ANP reconhecido; snapshot vazio materializado.", referencePeriod }));
+  process.exit(0);
+}
+
+const currentStations = new Set(data.map(item => item.cnpj)).size;
+const previousStations = new Set(
+  Array.isArray(previousSnapshot?.data) ? previousSnapshot.data.map(item => item?.cnpj).filter(Boolean) : [],
+).size;
+
+if (previousStations >= 10 && currentStations < previousStations * 0.5) {
+  console.warn(JSON.stringify({
+    warning: "Queda anormal na cobertura de preços ANP; snapshot anterior preservado.",
+    previousStations,
+    currentStations,
+  }));
   process.exit(0);
 }
 
