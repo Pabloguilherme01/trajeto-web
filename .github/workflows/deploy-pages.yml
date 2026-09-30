@@ -29,10 +29,8 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: package.json
+          cache-dependency-path: package-lock.json
 
-      - name: Resolve dependency lock
-        run: npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
       - name: Install from lock
         run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
@@ -78,8 +76,7 @@ jobs:
           test -f dist/public/icon-1024.png
           test -f dist/public/.vite/manifest.json
           cp dist/public/index.html dist/public/404.html
-          printf '%s
-' "GitHub Pages artifact validated."
+          echo "GitHub Pages artifact validated."
 
       - name: Validate mobile offline assets
         shell: bash
@@ -97,8 +94,7 @@ jobs:
           grep -q '"sizes": "512x512"' dist/public/site.webmanifest
           grep -q '"purpose": "maskable"' dist/public/site.webmanifest
           grep -q '"scope": "./"' dist/public/site.webmanifest
-          printf '%s
-' "Mobile/offline assets validated."
+          echo "Mobile/offline assets validated."
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
