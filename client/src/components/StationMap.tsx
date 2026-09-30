@@ -2,7 +2,8 @@ import { MapView } from "@/components/Map";
 import { useEffect, useRef, useState } from "react";
 
 export type StationMapItem = {
-  id: string;
+  id?: string;
+  placeId?: string;
   name: string;
   address: string;
   lat: number;
