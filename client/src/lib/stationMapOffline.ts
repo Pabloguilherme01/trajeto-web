@@ -1,4 +1,5 @@
 import { normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
+import { idbGet, idbPut } from "@/lib/offlineDb";
 
 export type OfflineStationMapEntry = {
   id: string;
