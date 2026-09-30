@@ -9,6 +9,8 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNav
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import CityPlaceAutocomplete from "@/components/CityPlaceAutocomplete";
+import { formatCityPlaceSearchValue } from "@/lib/aguasLindasCity";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -141,11 +143,16 @@ export default function Planner() {
   };
 
   const useCurrentLocation = () => {
-    if (!online || !navigator.geolocation || locating) return;
+    if (locating) return;
+    if (!navigator.geolocation) {
+      setError("Este navegador não oferece localização. Digite uma origem ou escolha um ponto sugerido.");
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       position => {
         setLocating(false);
+        setError(null);
         setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
         vibration(14);
       },
@@ -205,7 +212,9 @@ export default function Planner() {
     try {
       await removeOfflineRoute(route.id);
       refreshSavedRoutes();
-    } catch {}
+    } catch {
+      setSavedMessage("Não foi possível remover esta rota salva.");
+    }
   };
 
   const shareRoute = async () => {
@@ -220,7 +229,10 @@ export default function Planner() {
       const url = window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(origin.trim()) + "&destino=" + encodeURIComponent(destination.trim());
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
-    } catch {}
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setSavedMessage("Não foi possível compartilhar a rota neste navegador.");
+    }
   };
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
@@ -267,8 +279,8 @@ export default function Planner() {
                 <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                  <input value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
-                  <button type="button" onClick={useCurrentLocation} disabled={!online || locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
+                  <CityPlaceAutocomplete id="planner-origin" value={origin} onValueChange={value => { setOrigin(value); setPlanned(null); }} onPlaceSelect={place => { setOrigin(formatCityPlaceSearchValue(place)); setPlanned(null); }} className="min-h-12 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
+      <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual" title="Usar GPS como origem"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
 
@@ -282,7 +294,7 @@ export default function Planner() {
                 <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                  <input value={destination} onChange={event => { setDestination(event.target.value); setPlanned(null); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
+                  <CityPlaceAutocomplete id="planner-destination" value={destination} onValueChange={value => { setDestination(value); setPlanned(null); }} onPlaceSelect={place => { setDestination(formatCityPlaceSearchValue(place)); setPlanned(null); }} className="min-h-12 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
               </label>
 
