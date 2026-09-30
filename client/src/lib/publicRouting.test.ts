@@ -40,6 +40,7 @@ describe("public routing fallback", () => {
       durationSeconds: 600,
       polyline: "encoded",
       source: "osrm",
+      mode: "driving",
     });
     expect(payload.route.distanceMeters).toBe(5000);
     expect(payload.route.durationSeconds).toBe(600);
