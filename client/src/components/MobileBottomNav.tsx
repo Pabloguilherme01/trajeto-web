@@ -36,7 +36,7 @@ export default function MobileBottomNav() {
 
   const current = location.split("?")[0].replace(/\/$/, "") || "/";
   const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
-  const resumeLabel = savedRoutes > 0 ? "Salvos" : lastTrip ? "Planejar" : "Planejar";
+  const resumeLabel = lastTrip ? "Continuar" : "Planejar";
 
   const go = (item: typeof baseItems[number]) => {
     if (item.key === "plan" && lastTrip) {
