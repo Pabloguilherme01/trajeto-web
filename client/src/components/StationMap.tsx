@@ -105,7 +105,24 @@ function OfflineStationMap({ stations, onSelectStation }: { stations: Array<Stat
         {points.map(point => {
           const active = point.station.id === selectedId;
           const official = point.station.source === "ANP";
-          return <g key={point.station.id || "offline-" + point.index} onClick={() => { setSelectedId(point.station.id ?? null); onSelectStation?.(point.station); }} className="cursor-pointer">
+          const select = () => {
+            setSelectedId(point.station.id ?? null);
+            onSelectStation?.(point.station);
+          };
+          return <g
+            key={point.station.id || "offline-" + point.index}
+            onClick={select}
+            onKeyDown={event => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                select();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={"Selecionar " + point.station.name}
+            className="cursor-pointer outline-none"
+          >
             {active && <circle cx={point.x} cy={point.y} r="18" fill={official ? "#C7FF3C" : "#3DE3FF"} opacity=".22" /> }
             <circle cx={point.x} cy={point.y} r={active ? 10 : 8} fill={official ? "#C7FF3C" : "#3DE3FF"} stroke="#163840" strokeWidth="3" />
             <text x={point.x} y={point.y + 4} textAnchor="middle" fontSize="8" fontWeight="900" fill="#163840">{point.index + 1}</text>
