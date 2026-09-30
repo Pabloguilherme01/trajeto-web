@@ -808,7 +808,7 @@ export default function Stations() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#C7FF3C]">Águas Lindas · posto em 1 toque</p>
-                  <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">sem conta</span>
+                  <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">sem cadastro</span>
                   <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/45">{online ? "online + cache" : "offline"}</span>
                 </div>
                 <h2 className="mt-1 text-xl font-black tracking-[-.03em]">Mapa, ficha e rota no mesmo lugar.</h2>
