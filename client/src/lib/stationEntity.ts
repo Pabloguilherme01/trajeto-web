@@ -84,3 +84,35 @@ export function freshnessLabel(value?: string | null) {
   if (days === 1) return "há 1 dia";
   return "há " + days + " dias";
 }
+
+export type StationFieldSource = "ANP" | "Google" | "Local" | "Indisponível";
+export type StationFieldKey = "name" | "cnpj" | "address" | "coordinates" | "price" | "priceDate" | "status";
+
+export type StationFieldEvidence = {
+  field: StationFieldKey;
+  label: string;
+  source: StationFieldSource;
+  available: boolean;
+  updatedAt?: string | null;
+};
+
+export function stationFieldEvidence(params: {
+  anp?: AnpStation | null;
+  local?: LocalStationRecord | null;
+  price?: AnpPriceRecord | null;
+}): StationFieldEvidence[] {
+  const { anp, local, price } = params;
+  const hasAnpAddress = Boolean(anp?.endereco);
+  const hasLocalAddress = Boolean(local?.address);
+  const hasAnpCoordinates = Number.isFinite(anp?.latitude) && Number.isFinite(anp?.longitude);
+  const hasLocalCoordinates = Number.isFinite(local?.anp?.latitude) && Number.isFinite(local?.anp?.longitude);
+  return [
+    { field: "name", label: "Nome", available: Boolean(anp?.razaoSocial || local?.displayName), source: anp?.razaoSocial ? "ANP" : local?.displayName ? "Local" : "Indisponível", updatedAt: anp?.dataObtencao ?? local?.verifiedAt },
+    { field: "cnpj", label: "CNPJ", available: Boolean(anp?.cnpj || local?.cnpj), source: anp?.cnpj ? "ANP" : local?.cnpj ? "Local" : "Indisponível", updatedAt: anp?.dataObtencao ?? local?.verifiedAt },
+    { field: "address", label: "Endereço", available: hasAnpAddress || hasLocalAddress, source: hasAnpAddress ? "ANP" : hasLocalAddress ? "Local" : "Indisponível", updatedAt: anp?.dataObtencao ?? local?.mapData?.observedAt },
+    { field: "coordinates", label: "Coordenada", available: hasAnpCoordinates || hasLocalCoordinates, source: hasAnpCoordinates ? "ANP" : hasLocalCoordinates ? (local?.mapData?.source === "maps" ? "Google" : "Local") : "Indisponível", updatedAt: anp?.dataObtencao ?? local?.mapData?.observedAt },
+    { field: "price", label: "Preço", available: Boolean(price), source: price ? "ANP" : "Indisponível", updatedAt: price?.collectionDate },
+    { field: "priceDate", label: "Data do preço", available: Boolean(price?.collectionDate), source: price?.collectionDate ? "ANP" : "Indisponível", updatedAt: price?.collectionDate },
+    { field: "status", label: "Status", available: Boolean(local?.mapData?.operationalStatus && local.mapData.operationalStatus !== "unknown"), source: local?.mapData?.operationalStatus && local.mapData.operationalStatus !== "unknown" ? (local.mapData.source === "maps" ? "Google" : "Local") : "Indisponível", updatedAt: local?.mapData?.observedAt },
+  ];
+}
