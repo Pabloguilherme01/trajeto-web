@@ -235,12 +235,15 @@ export default function Planner() {
     distanceKm: selectedRouteDistanceKm,
     durationSeconds: selectedRouteDuration,
     toll: selectedRoute.toll?.amount ?? null,
-    savedAt: new Date().toISOString(),
   } : null;
   const saveRouteSnapshot = () => {
     if (!selectedRouteSnapshot) return;
     try {
-      localStorage.setItem("trajeto-route-simulator", JSON.stringify(selectedRouteSnapshot));
+      const snapshot = {
+        ...selectedRouteSnapshot,
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("trajeto-route-simulator", JSON.stringify(snapshot));
       setShareMessage("Simulação salva neste aparelho para consulta offline.");
     } catch {
       setShareMessage("Não foi possível salvar a simulação neste aparelho.");
