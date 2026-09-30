@@ -4,6 +4,7 @@ const LAST_TRIP_KEY = "trajeto-last-trip";
 const RECENT_TRIPS_KEY = "trajeto-recent-trips";
 const MAX_RECENT_TRIPS = 8;
 const ROUTE_USAGE_KEY = "trajeto-route-usage";
+const ROUTE_USAGE_EVENTS_KEY = "trajeto-route-usage-events";
 const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
@@ -104,6 +105,32 @@ export function getMostUsedRoute(): RecentTrip | null {
   trips[0]);
 }
 
+export type RouteUsageStats = {
+  total: number;
+  recordedEvents: number;
+  windowDays: number;
+  averagePerDay: number | null;
+};
+
+export function getRouteUsageStats(origin: string, destination: string, days = 30): RouteUsageStats {
+  const safeDays = Math.max(1, Math.min(365, Math.floor(days)));
+  const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  try {
+    const raw = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    const events = raw && typeof raw === "object" && Array.isArray(raw[key]) ? raw[key] : [];
+    const cutoff = Date.now() - safeDays * 24 * 60 * 60 * 1000;
+    const recent = events.filter((value: unknown): value is string => typeof value === "string" && Number.isFinite(Date.parse(value)) && Date.parse(value) >= cutoff);
+    return {
+      total: getRouteUsage(origin, destination),
+      recordedEvents: recent.length,
+      windowDays: safeDays,
+      averagePerDay: recent.length ? recent.length / safeDays : null,
+    };
+  } catch {
+    return { total: getRouteUsage(origin, destination), recordedEvents: 0, windowDays: safeDays, averagePerDay: null };
+  }
+}
+
 export function getRouteUsage(origin: string, destination: string) {
   const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
   try {
@@ -127,6 +154,10 @@ export function rememberTrip(origin: string, destination: string) {
     const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
     usage[usageKey] = Number.isFinite(Number(usage[usageKey])) ? Number(usage[usageKey]) + 1 : 1;
     localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(usage));
+    const events = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    const currentEvents = Array.isArray(events[usageKey]) ? events[usageKey].filter((value: unknown) => typeof value === "string" && Number.isFinite(Date.parse(value))) : [];
+    events[usageKey] = [...currentEvents, trip.usedAt].slice(-200);
+    localStorage.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(events));
     localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: normalizedOrigin, destination: normalizedDestination }));
   } catch {}
   rememberIntent("route");
