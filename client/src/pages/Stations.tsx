@@ -429,7 +429,7 @@ export default function Stations() {
 
   useEffect(() => {
     setDirectoryVisibleCount(48);
-  }, [directorySearch, directorySort]);
+  }, [directorySearch, directorySort, fuelFilter]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -1031,7 +1031,7 @@ export default function Stations() {
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsFiltered
+              {directoryCardsForDisplay
                 .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
