@@ -1058,8 +1058,7 @@ export default function Stations() {
           </section>
         )}
 
-        {staticRuntime && !showSavedOnly && !broadAguasLindasQuery && (
-          {staticRuntime && !showSavedOnly && (
+        {staticRuntime && !showSavedOnly && (
           <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.57rem] leading-relaxed text-white/35">
             <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between text-[0.55rem] font-black text-white/55">
               <span>Fonte, qualidade e limites dos dados</span>
