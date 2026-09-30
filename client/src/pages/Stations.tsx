@@ -15,6 +15,14 @@ import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
 
+function isBroadAguasLindasQuery(value: string) {
+  const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return normalized === "postos" ||
+    normalized === "aguas lindas" ||
+    normalized.includes("postos em aguas lindas") ||
+    normalized.includes("postos de aguas lindas");
+}
+
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
   return new URLSearchParams(window.location.search).get("q") || corridorPresets[0]?.query || "postos";
@@ -27,7 +35,7 @@ export default function Stations() {
   const [query, setQuery] = useState(getInitialQuery);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [nearby, setNearby] = useState(false);
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(() => isBroadAguasLindasQuery(getInitialQuery()));
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -51,7 +59,7 @@ export default function Stations() {
   const showSavedOnly = params.get("salvos") === "1";
   const staticRuntime = isGitHubPagesRuntime();
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const broadAguasLindasQuery = normalizedQuery === "postos" || normalizedQuery === "aguas lindas" || normalizedQuery.includes("postos em aguas lindas") || normalizedQuery.includes("postos de aguas lindas");
+  const broadAguasLindasQuery = isBroadAguasLindasQuery(query);
   const anpLiveQuery = trpc.stationDirectory.anp.useQuery(
     { municipio: "AGUASLINDASDEGOIAS", uf: "GO" },
     { enabled: broadAguasLindasQuery && !showSavedOnly && !staticRuntime, retry: 1, staleTime: 10 * 60_000 },
@@ -140,8 +148,10 @@ export default function Stations() {
       ...offlineMap,
     ]) {
       const key = keyFor(station);
-      if (seen.has(key)) continue;
+      const coordinateKey = `coord:${station.lat.toFixed(4)},${station.lng.toFixed(4)}`;
+      if (seen.has(key) || seen.has(coordinateKey)) continue;
       seen.add(key);
+      seen.add(coordinateKey);
       merged.push(station);
     }
 
@@ -261,7 +271,7 @@ export default function Stations() {
     rememberSearch(trimmed);
     vibration();
     setQuery(trimmed);
-    setShowMap(false);
+    setShowMap(isBroadAguasLindasQuery(trimmed));
     setCompareIds([]);
     setOnlyOpen(false);
     setNeighborhoodFilter("all");
