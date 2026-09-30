@@ -15,6 +15,8 @@ import OfficialDataRadar from "@/components/OfficialDataRadar";
 import OfficialSourcesCard from "@/components/OfficialSourcesCard";
 import { getMobileDestinations, mobileDestinationEvent } from "@/lib/mobileDestinations";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
+import { getRecentTrips, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 
 type PanelId = "rotina" | "veiculo" | "custos" | "fontes";
 
@@ -29,18 +31,27 @@ export default function MobileUtilityHub() {
   const [open, setOpen] = useState<PanelId | null>(null);
   const [destinationCount, setDestinationCount] = useState(() => getMobileDestinations().length);
   const [hasVehicle, setHasVehicle] = useState(() => Boolean(getMobileVehicle()));
+  const [recentTripCount, setRecentTripCount] = useState(() => getRecentTrips().length);
+  const [offlineRouteCount, setOfflineRouteCount] = useState(0);
 
   useEffect(() => {
     const refresh = () => {
       setDestinationCount(getMobileDestinations().length);
       setHasVehicle(Boolean(getMobileVehicle()));
+      setRecentTripCount(getRecentTrips().length);
+      void listOfflineRoutes().then(routes => setOfflineRouteCount(routes.length)).catch(() => setOfflineRouteCount(0));
     };
+    refresh();
     window.addEventListener(mobileDestinationEvent, refresh);
     window.addEventListener(mobileVehicleEvent, refresh);
+    window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener(offlineRouteEvent, refresh);
     window.addEventListener("focus", refresh);
     return () => {
       window.removeEventListener(mobileDestinationEvent, refresh);
       window.removeEventListener(mobileVehicleEvent, refresh);
+      window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener(offlineRouteEvent, refresh);
       window.removeEventListener("focus", refresh);
     };
   }, []);
@@ -70,7 +81,7 @@ export default function MobileUtilityHub() {
                     <strong className="block text-sm font-extrabold text-white">{panel.title}</strong>
                     <span className="mt-0.5 block text-xs leading-relaxed text-[#7F919A]">{panel.detail}</span>
                   </span>
-                  <span className="inline-flex shrink-0 max-w-[6.5rem] truncate rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-[#71838C]">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"}` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : "fontes visíveis"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
+                  <span className="inline-flex shrink-0 max-w-[6.5rem] truncate rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-[#71838C]">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"} · ${recentTripCount} viagem${recentTripCount === 1 ? "" : "ns"} · ${offlineRouteCount} offline` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : "fontes visíveis"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
                 </button>
 
                 {isOpen && (
