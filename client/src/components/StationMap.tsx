@@ -167,13 +167,14 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
       };
     };
     const placeApi = (window.google.maps.places as unknown as PlacesNewApi).Place;
-    if (!placeApi?.searchByText) return;
+    const searchByText = placeApi?.searchByText;
+    if (!searchByText) return;
     let cursor = 0;
     const workers = Math.min(3, unresolved.length);
     const resolveOne = async (station: StationMapItem) => {
       const query = [station.name, station.address, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
       try {
-        const response = await placeApi.searchByText({
+        const response = await searchByText({
           textQuery: query,
           fields: ["id", "displayName", "formattedAddress", "location"],
           includedType: "gas_station",
@@ -192,7 +193,9 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
           ? typeof match.location.lng === "function" ? match.location.lng() : match.location.lng
           : null;
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-        setResolvedStations(current => current.map(item => ((item.cnpj && station.cnpj && item.cnpj === station.cnpj) || item.id === station.id) ? { ...item, lat, lng, source: "Google" as const } : item));
+        const resolvedLat = lat as number;
+        const resolvedLng = lng as number;
+        setResolvedStations(current => current.map(item => ((item.cnpj && station.cnpj && item.cnpj === station.cnpj) || item.id === station.id) ? { ...item, lat: resolvedLat, lng: resolvedLng, source: "Google" as const } : item));
       } catch {
         // Enrichment is optional; the ANP/local catalog remains the source of truth.
       }
