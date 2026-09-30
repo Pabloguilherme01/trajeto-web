@@ -216,6 +216,46 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   return geocodedCoordinate;
 }
 
+
+function corridorDistanceKm(point: PublicCoordinate, origin: PublicCoordinate, destination: PublicCoordinate) {
+  const dx = destination.lng - origin.lng;
+  const dy = destination.lat - origin.lat;
+  const length2 = dx * dx + dy * dy;
+  const t = length2 === 0
+    ? 0
+    : Math.max(0, Math.min(1, ((point.lng - origin.lng) * dx + (point.lat - origin.lat) * dy) / length2));
+  const closest = { lat: origin.lat + dy * t, lng: origin.lng + dx * t };
+  return {
+    distanceKm: haversineMeters(point, closest) / 1000,
+    progress: t,
+  };
+}
+
+function findLocalRouteStops(origin: PublicCoordinate, destination: PublicCoordinate) {
+  return searchAguasLindasStations("postos")
+    .map(station => {
+      const lat = Number(station.anp?.latitude);
+      const lng = Number(station.anp?.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      const corridor = corridorDistanceKm({ lat, lng }, origin, destination);
+      return {
+        placeId: "local:" + station.id,
+        name: station.displayName || station.legalName || "Posto",
+        address: station.address || station.neighborhood || "Águas Lindas de Goiás",
+        lat,
+        lng,
+        corridorKm: corridor.distanceKm,
+        progress: corridor.progress,
+        isOpen: station.mapData?.operationalStatus === "open" ? true : station.mapData?.operationalStatus === "closed" ? false : undefined,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .filter(item => item.corridorKm <= 4 && item.progress > 0.03 && item.progress < 0.97)
+    .sort((a, b) => a.corridorKm - b.corridorKm || a.progress - b.progress)
+    .slice(0, 6)
+    .map(({ corridorKm: _corridorKm, progress: _progress, ...stop }) => stop);
+}
+
 function buildLocalEstimate(origin: PublicCoordinate, destination: PublicCoordinate, mode: PublicTravelMode): PublicRoute {
   const directDistance = haversineMeters(origin, destination);
   const distanceMeters = Math.max(200, directDistance * 1.18);
@@ -318,7 +358,7 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       source: result.source,
       mode: result.mode,
     },
-    stops: [],
+    stops: findLocalRouteStops(result.origin, result.destination),
     priceCoverage: 0,
     anpReferences: [],
     traffic: {
