@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
-import { ArrowUpRight, Crosshair, LocateFixed, MapPin, Navigation, ShieldCheck, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowUpRight, Crosshair, LocateFixed, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import { buildGoogleMapsSearchUrl, buildRouteProviderUrl, type NavigationProvider } from "@/lib/mobileTools";
-import { CITY_PLACES, searchCityPlaces } from "@/lib/aguasLindasCity";
+import CityPlaceAutocomplete from "@/components/CityPlaceAutocomplete";
 
 const providers: { id: NavigationProvider; label: string }[] = [
   { id: "google", label: "Google Maps" },
@@ -10,7 +10,6 @@ const providers: { id: NavigationProvider; label: string }[] = [
   { id: "openstreetmap", label: "OpenStreetMap" },
 ];
 
-const routeDestinations = ["hospital-bom-jesus", "heal", "terminal-nelson-alves", "br-070"];
 const nearbySearches = [
   { label: "Saúde", query: "hospital unidade de saúde" },
   { label: "Farmácias", query: "farmácia" },
@@ -24,7 +23,6 @@ export default function SmartCityMode() {
   const [message, setMessage] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   const [destination, setDestination] = useState<{ label: string; address: string } | null>(null);
-  const suggestions = useMemo(() => searchCityPlaces(destinationQuery).slice(0, 5), [destinationQuery]);
 
   const syncLocation = () => {
     if (!navigator.geolocation) {
@@ -50,8 +48,6 @@ export default function SmartCityMode() {
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     );
   };
-
-  const locations = CITY_PLACES.filter(place => routeDestinations.includes(place.id));
 
   return (
     <section className="mt-5 overflow-hidden rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[radial-gradient(circle_at_100%_0%,rgba(199,255,60,.09),transparent_38%),#111A20] p-4 shadow-[0_18px_48px_rgba(0,0,0,.2)] sm:p-5" aria-labelledby="smart-city-title">
@@ -82,27 +78,11 @@ export default function SmartCityMode() {
         <form className="mt-4" onSubmit={event => { event.preventDefault(); const value = destinationQuery.trim(); if (value.length >= 3) setDestination({ label: value, address: value }); }}>
           <label htmlFor="smart-city-destination" className="text-[.54rem] font-black uppercase tracking-[.14em] text-white/45">Destino no guia ou outro endereço</label>
           <div className="mt-2 flex gap-2 rounded-2xl border border-white/10 bg-[#0B1014]/75 p-1.5 pl-3 focus-within:border-[#3DE3FF]/50">
-            <input id="smart-city-destination" value={destinationQuery} onChange={event => { setDestinationQuery(event.target.value); setDestination(null); }} placeholder="Hospital, bairro, endereço…" autoComplete="street-address" className="min-h-11 min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30" />
+            <CityPlaceAutocomplete id="smart-city-destination" value={destinationQuery} onValueChange={value => { setDestinationQuery(value); setDestination(null); }} onPlaceSelect={place => { setDestination({ label: place.name, address: place.address }); setDestinationQuery(place.name); }} placeholder="Hospital, bairro, endereço…" autoComplete="street-address" className="min-h-11 w-full min-w-0 bg-transparent text-sm text-white outline-none placeholder:text-white/30" />
             <button type="submit" disabled={destinationQuery.trim().length < 3} className="min-h-11 shrink-0 rounded-xl bg-[#3DE3FF] px-3 text-[.62rem] font-black text-[#0B1014] disabled:opacity-35">Usar destino</button>
           </div>
-          {destinationQuery.trim().length >= 2 && !destination && <div className="mt-1 overflow-hidden rounded-xl border border-white/10 bg-[#10191F]" role="listbox" aria-label="Sugestões de locais da cidade">
-            {suggestions.map(place => <button key={place.id} type="button" role="option" aria-selected="false" onClick={() => { setDestination({ label: place.name, address: place.address }); setDestinationQuery(place.name); }} className="flex min-h-11 w-full items-center justify-between gap-2 border-b border-white/5 px-3 text-left last:border-0"><span className="min-w-0"><span className="block truncate text-xs font-bold">{place.name}</span><span className="block truncate text-[.55rem] text-white/40">{place.address}</span></span><ArrowUpRight className="size-3.5 shrink-0 text-[#3DE3FF]" /></button>)}
-            {suggestions.length === 0 && <p className="px-3 py-3 text-xs text-white/50">Sem correspondência no guia. Toque em “Usar destino” para pesquisar mesmo assim.</p>}
-          </div>}
           {destination && <div className="mt-2 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] p-3"><p className="text-[.52rem] font-black uppercase tracking-[.12em] text-[#9FEFFF]">Rota pronta para</p><p className="mt-1 truncate text-xs font-bold">{destination.label}</p><div className="mt-2 grid grid-cols-2 gap-1">{providers.map(provider => <a key={provider.id} href={buildRouteProviderUrl(provider.id, position, destination.address)} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center justify-between rounded-lg bg-white/[.035] px-2 text-[.58rem] font-bold text-white/70"><span>{provider.label}{provider.id === "openstreetmap" ? " · buscar" : ""}</span><ArrowUpRight className="size-3 text-white/35" /></a>)}</div></div>}
         </form>
-
-        <div className="mt-4">
-          <p className="text-[.54rem] font-black uppercase tracking-[.14em] text-white/40">Rotas prontas</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {locations.map(place => <details key={place.id} className="group rounded-xl border border-white/8 bg-[#0B1014]/75">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 px-3 text-left text-xs font-bold"><span className="flex min-w-0 items-center gap-2"><Navigation className="size-3.5 shrink-0 text-[#C7FF3C]" /><span className="truncate">{place.name}</span></span><ArrowUpRight className="size-3.5 shrink-0 text-white/40" /></summary>
-              <div className="grid grid-cols-2 gap-1 border-t border-white/6 p-2">
-                {providers.map(provider => <a key={provider.id} href={buildRouteProviderUrl(provider.id, position, place.address)} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center justify-between rounded-lg bg-white/[.035] px-2 text-[.58rem] font-bold text-white/70"><span>{provider.label}{provider.id === "openstreetmap" ? " · buscar" : ""}</span><ArrowUpRight className="size-3 text-white/35" /></a>)}
-              </div>
-            </details>)}
-          </div>
-        </div>
 
         <div className="mt-4">
           <p className="text-[.54rem] font-black uppercase tracking-[.14em] text-white/40">Buscar perto da minha posição</p>
