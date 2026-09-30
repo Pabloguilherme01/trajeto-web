@@ -318,7 +318,7 @@ export default function Stations() {
             </div>
             {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length > 0 && (
               <div className="mt-3 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-3 text-[0.57rem] leading-relaxed text-white/45">
-                <strong className="text-[#FFD09A]">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} estabelecimento(s) apareceram em mapas, mas ainda não foram somados à base até haver identificação confiável por CNPJ/endereço.
+                <strong className="text-[#FFD09A]">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} referências de estabelecimentos apareceram em mapas. Elas são exibidas para auditoria, mas não são somadas automaticamente à base cadastral até haver identificação confiável por CNPJ/endereço.
                 {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => <div key={item.displayName} className="mt-1"><span className="font-bold text-white/60">{item.displayName}</span> · {item.address}</div>)}
               </div>
             )}
