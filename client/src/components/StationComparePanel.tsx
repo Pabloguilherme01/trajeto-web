@@ -29,20 +29,7 @@ function statusLabel(value: ComparableStation["isOpen"]) {
   return "Não confirmado";
 }
 
-function compareDistance(stations: ComparableStation[]) {
-  const withDistance = stations
-    .map((station, index) => ({ station, index, value: station.distanceMeters }))
-    .filter(item => item.value != null && Number.isFinite(item.value));
-  if (!withDistance.length) return new Set<number>();
-  const values = withDistance.map(item => item.value).filter((value): value is number => value != null && Number.isFinite(value));
-  if (!values.length) return new Set<number>();
-  const min = Math.min(...values);
-  return new Set(withDistance.filter(item => item.value === min).map(item => item.index));
-}
-
 export default function StationComparePanel({ stations, onClear }: Props) {
-  const nearest = compareDistance(stations);
-
   return (
     <section id="station-compare" className="mt-5 overflow-hidden rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#111A21]" aria-labelledby="station-compare-title">
       <div className="border-b border-white/8 p-4">
@@ -74,8 +61,8 @@ export default function StationComparePanel({ stations, onClear }: Props) {
             <tr className="border-b border-white/6">
               <th className="px-3 py-3 text-[0.5rem] font-bold text-white/35">Distância</th>
               {stations.map((station, index) => (
-                <td key={station.placeId + "-distance"} className={"px-3 py-3 text-xs font-black " + (nearest.has(index) ? "text-[#D9FF91]" : "text-white/75")}>
-                  {station.distanceLabel ?? "—"}{nearest.has(index) ? " · mais perto" : ""}
+                <td key={station.placeId + "-distance"} className="px-3 py-3 text-xs font-black text-white/75">
+                  {station.distanceLabel ?? "—"}
                 </td>
               ))}
             </tr>
