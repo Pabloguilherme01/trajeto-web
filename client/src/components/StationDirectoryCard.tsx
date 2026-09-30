@@ -5,7 +5,7 @@ import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
-import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
+import { stationDataConfidence, freshnessLabel, freshnessLevel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -92,6 +92,7 @@ export function StationDirectoryCard({
   const primaryPrice = prices.find(item => item.productKey === "gasolina-comum") ?? prices[0] ?? null;
   const confidence = stationDataConfidence({ anp, local, price: primaryPrice });
   const priceDate = primaryPrice?.collectionDate ? new Date(primaryPrice.collectionDate).toLocaleDateString("pt-BR") : null;
+  const priceFreshness = freshnessLevel(primaryPrice?.collectionDate);
   const products = useMemo(() => {
     const unique = new Map<string, AnpStation["products"][number]>();
     (anp?.products || []).forEach(item => {
@@ -213,6 +214,7 @@ export function StationDirectoryCard({
           <div className="text-right">
             <p className="text-[0.48rem] font-black text-white/35">{primaryPrice ? primaryPrice.produto : "gasolina comum"}</p>
             <p className="mt-1 text-[0.48rem] font-bold text-white/25">{priceDate ? "coleta " + priceDate : "sem coleta individual"}</p>
+            {primaryPrice && <span className={"mt-1 inline-flex rounded-full border px-2 py-0.5 text-[0.43rem] font-black " + (priceFreshness === "fresh" ? "border-[#C7FF3C]/20 text-[#D9FF91]" : priceFreshness === "recent" ? "border-[#FFB86B]/20 text-[#FFD39F]" : "border-[#FF7D6A]/20 text-[#FFB7A9]")}>{priceFreshness === "fresh" ? "até 7 dias" : priceFreshness === "recent" ? "8–21 dias" : "snapshot antigo"}</span>}
           </div>
         </div>
         {prices.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{prices.slice(0, 5).map(price => <span key={price.productKey + price.salePrice} className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.47rem] font-black text-white/55">{price.produto}: {price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/{price.unit}</span>)}</div>}
