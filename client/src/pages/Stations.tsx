@@ -681,7 +681,7 @@ export default function Stations() {
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><Map className="mr-1 inline size-3.5" />Abrir mapa</button>
               <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-[0.6rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
-              <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
+              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
               <div className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.53rem] font-black text-white/45"><ShieldCheck className="size-3.5 text-[#C7FF3C]" />ANP + cache local</div>
             </div>
           </section>
@@ -724,6 +724,7 @@ export default function Stations() {
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">
                       <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
                       <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
+                      <span>{anpWithoutCoordinates > 0 ? String(anpWithoutCoordinates) + " cadastro(s) ANP sem coordenada · ficha continua disponível" : "cobertura coordenada ANP completa nesta consulta"}</span>
                     </div>
                   </section>
                 )}
