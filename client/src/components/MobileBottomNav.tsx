@@ -55,7 +55,7 @@ export default function MobileBottomNav() {
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1 rounded-[1.35rem] border border-white/10 bg-[#090E12]/95 p-1.5 shadow-[0_-10px_40px_rgba(0,0,0,.42)] backdrop-blur-2xl">
         {baseItems.map(item => {
           const active = item.key === "saved"
-            ? current === "/planejar" && savedMode
+            ? (current === "/salvos" || (current === "/planejar" && savedMode))
             : current === item.href || (item.href !== "/" && current.startsWith(item.href + "/"));
           const primary = item.key === "plan";
           const Icon = item.icon;
