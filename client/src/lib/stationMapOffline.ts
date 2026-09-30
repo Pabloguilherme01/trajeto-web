@@ -106,7 +106,7 @@ export function getOfflineMapStations(): OfflineMapSnapshot {
   const raw = Array.isArray((value as { stations?: unknown }).stations) ? (value as { stations: unknown[] }).stations : [];
   return {
     savedAt: typeof (value as { savedAt?: unknown }).savedAt === "string" ? (value as { savedAt: string }).savedAt : "",
-    stations: raw.filter(isOfflineMapEntry).slice(0, MAX_MAP_STATIONS),
+    stations: raw.filter(isOfflineMapEntry).filter(station => station.source !== "Google").slice(0, MAX_MAP_STATIONS),
   };
 }
 
