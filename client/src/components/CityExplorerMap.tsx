@@ -6,7 +6,7 @@ import { getDistanceKm, type Coordinates } from "@/lib/stationDirectorySearch";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
 
 type Props = {
-  category: PlaceCategory;
+  category: PlaceCategory | "all";
   center: Coordinates;
   online: boolean;
   onResults: (places: PlaceEntity[]) => void;
@@ -14,7 +14,7 @@ type Props = {
   onSelect?: (place: PlaceEntity) => void;
 };
 
-const sourceColors:Record<PlaceCategory,string> = {
+const sourceColors:Record<PlaceCategory|"all",string> = {
   fuel:"#C7FF3C", health:"#FF7A90", education:"#62B8FF", transport:"#FFB86B",
   government:"#B59CFF", security:"#FF8D55", leisure:"#59DFA5", accessibility:"#3DE3FF",
 };
