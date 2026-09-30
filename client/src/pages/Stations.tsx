@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -316,6 +316,12 @@ export default function Stations() {
                 <p className="mt-2 text-[0.68rem] leading-relaxed text-white/45">Esta versão está hospedada como site estático. A busca ao vivo é entregue pelo Google Maps, enquanto favoritos e dados já salvos continuam no aparelho.</p>
               </div>
             </div>
+            {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length > 0 && (
+              <div className="mt-3 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-3 text-[0.57rem] leading-relaxed text-white/45">
+                <strong className="text-[#FFD09A]">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} estabelecimento(s) apareceram em mapas, mas ainda não foram somados à base até haver identificação confiável por CNPJ/endereço.
+                {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => <div key={item.displayName} className="mt-1"><span className="font-bold text-white/60">{item.displayName}</span> · {item.address}</div>)}
+              </div>
+            )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
               <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]">Postos perto de mim</button>
