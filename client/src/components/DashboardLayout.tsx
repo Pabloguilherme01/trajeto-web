@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { CircleUserRound, LayoutDashboard, LogOut, MapPinned, PanelLeft } from "lucide-react";
+import { CircleUserRound, Fuel, LayoutDashboard, LogOut, MapPinned, PanelLeft, House } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -32,6 +32,13 @@ const menuItems = [
   { icon: CircleUserRound, label: "Minha conta", path: "/minha-conta", adminOnly: false },
   { icon: MapPinned, label: "Planejador", path: "/planejar", adminOnly: false },
   { icon: LayoutDashboard, label: "Operações", path: "/operacoes", adminOnly: true },
+] as const;
+
+const mobileNavItems = [
+  { icon: House, label: "Início", path: "/" },
+  { icon: MapPinned, label: "Planejar", path: "/planejar" },
+  { icon: Fuel, label: "Postos", path: "/postos" },
+  { icon: CircleUserRound, label: "Conta", path: "/minha-conta" },
 ] as const;
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -284,7 +291,33 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-4 pb-24 md:pb-4">{children}</main>
+        {isMobile && (
+          <nav
+            aria-label="Navegação rápida"
+            className="safe-bottom fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0B1014]/95 px-2 pt-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur"
+          >
+            <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
+              {mobileNavItems.map(item => {
+                const active = location === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onClick={() => setLocation(item.path)}
+                    className={active
+                      ? "mobile-pressable flex-col gap-0.5 rounded-xl bg-[#C7FF3C]/10 px-2 py-2 text-[#C7FF3C]"
+                      : "mobile-pressable flex-col gap-0.5 rounded-xl px-2 py-2 text-[#73858E] hover:bg-white/[0.04] hover:text-white"}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    <item.icon className="size-4" aria-hidden="true" />
+                    <span className="text-[0.5rem] font-black uppercase tracking-[0.08em]">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        )}
       </SidebarInset>
     </>
   );
