@@ -190,7 +190,7 @@ export default function Stations() {
         cacheOfflineAnpSnapshot(rows, typeof payload.retrievedAt === "string" ? payload.retrievedAt : null);
       })
       .catch(() => {
-        if (!cancelled) setStaticAnpRows([]);
+        // Mantém o snapshot/cache local já carregado quando a rede falha.
       });
     return () => { cancelled = true; };
   }, [staticRuntime, broadAguasLindasQuery, showSavedOnly]);
@@ -223,22 +223,7 @@ export default function Stations() {
   }, [anpRows, staticAnpRetrievedAt, anpLiveQuery.data?.retrievedAt]);
 
   useEffect(() => {
-    if (!mapStations.length) return;
-    cacheOfflineMapStations(mapStations);
-    setOfflineMap(current => {
-      const merged = [...mapStations, ...current];
-      const seen = new Set<string>();
-      return merged.filter(station => {
-        const key = station.cnpj
-          ? "cnpj:" + station.cnpj
-          : station.placeId
-            ? "place:" + station.placeId
-            : `coord:${station.lat.toFixed(4)},${station.lng.toFixed(4)}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }).slice(0, 120);
-    });
+    if (mapStations.length) cacheOfflineMapStations(mapStations);
   }, [mapStations]);
 
 
