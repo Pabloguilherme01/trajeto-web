@@ -27,10 +27,10 @@ function minutes(seconds: number) {
 }
 
 function RouteResultSkeleton() {
-  return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white" role="status">
-    <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse rounded-xl bg-white/[.06]" /><div className="h-16 flex-1 animate-pulse rounded-xl bg-white/[.06]" /></div>
-    <div className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/[.035]" />
-    <div className="space-y-3"><div className="h-4 w-28 animate-pulse rounded bg-white/[.07]" /><div className="h-8 w-3/4 animate-pulse rounded bg-white/[.06]" /><p className="text-xs text-white/45">Calculando percurso e buscando postos próximos…</p></div>
+  return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between" role="status">
+    <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /></div>
+    <div className="h-44 animate-pulse border border-[#D8DED5] bg-[#EEF2ED]" />
+    <div className="space-y-3"><div className="h-4 w-28 animate-pulse bg-[#E7ECE7]" /><div className="h-8 w-3/4 animate-pulse bg-[#E7ECE7]" /><p className="text-xs text-[#6A7C78]">Calculando percurso e buscando postos próximos…</p></div>
   </div>;
 }
 
@@ -235,15 +235,12 @@ export default function Planner() {
     distanceKm: selectedRouteDistanceKm,
     durationSeconds: selectedRouteDuration,
     toll: selectedRoute.toll?.amount ?? null,
+    savedAt: new Date().toISOString(),
   } : null;
   const saveRouteSnapshot = () => {
     if (!selectedRouteSnapshot) return;
     try {
-      const snapshot = {
-        ...selectedRouteSnapshot,
-        savedAt: new Date().toISOString(),
-      };
-      localStorage.setItem("trajeto-route-simulator", JSON.stringify(snapshot));
+      localStorage.setItem("trajeto-route-simulator", JSON.stringify(selectedRouteSnapshot));
       setShareMessage("Simulação salva neste aparelho para consulta offline.");
     } catch {
       setShareMessage("Não foi possível salvar a simulação neste aparelho.");
@@ -414,18 +411,18 @@ export default function Planner() {
             {lastTrip && <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.06] p-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0"><p className="text-[0.56rem] font-bold uppercase tracking-[0.12em] text-[#FFC928]">Última rota</p><p className="mt-1 truncate text-xs font-bold text-white/85">{lastTrip.origin} → {lastTrip.destination}</p></div>
-                <button type="button" onClick={() => { setOrigin(lastTrip.origin); setDestination(lastTrip.destination); setPlanned(null); setLoadedFromOffline(false); setOfflineSavedAt(null); setFormError(null); setShareMessage(null); }} className="min-h-10 shrink-0 rounded-xl bg-[#FFC928] px-3 text-[0.62rem] font-extrabold text-[#163840] active:scale-[.98]">Retomar</button>
+                <button type="button" onClick={() => { setOrigin(lastTrip.origin); setDestination(lastTrip.destination); setPlanned(null); setFormError(null); setShareMessage(null); }} className="min-h-10 shrink-0 rounded-xl bg-[#FFC928] px-3 text-[0.62rem] font-extrabold text-[#163840] active:scale-[.98]">Retomar</button>
               </div>
             </div>}
             <div className="flex items-center justify-between gap-3"><label className="text-xs font-bold text-white/75" htmlFor="origin">Origem</label><button type="button" onClick={useCurrentLocation} disabled={locatingOrigin || offline} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/15 px-2.5 text-[0.62rem] font-extrabold text-[#D9FF91] transition hover:border-[#FFC928] disabled:opacity-60"><LocateFixed className="size-3.5" />{locatingOrigin ? "Localizando…" : "Usar minha localização"}</button></div>
-            <div className="relative mt-2"><MapPin className="absolute left-0 top-3.5 size-4 text-[#FFC928]" /><input id="origin" required minLength={3} value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); setLoadedFromOffline(false); setOfflineSavedAt(null); setFormError(null); setShareMessage(null); }} placeholder="Ex.: Brasília, DF ou use GPS" autoComplete="street-address" enterKeyHint="next" className="w-full border-b border-white/25 bg-transparent py-3 pl-7 text-base outline-none placeholder:text-white/35 focus:border-[#FFC928]" /></div>
+            <div className="relative mt-2"><MapPin className="absolute left-0 top-3.5 size-4 text-[#FFC928]" /><input id="origin" required minLength={3} value={origin} onChange={event => { setOrigin(event.target.value); setPlanned(null); setLoadedFromOffline(false); if (formError) setFormError(null); }} placeholder="Ex.: Brasília, DF ou use GPS" className="w-full border-b border-white/25 bg-transparent py-3 pl-7 text-base outline-none placeholder:text-white/35 focus:border-[#FFC928]" /></div>
             <div className="mt-3 flex justify-between gap-2">
-              <button type="button" onClick={() => { setOrigin(""); setDestination(""); setPlanned(null); setLoadedFromOffline(false); setOfflineSavedAt(null); setFormError(null); setShareMessage(null); }} disabled={!origin.trim() && !destination.trim()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-bold text-white/55 transition hover:border-white/30 hover:text-white disabled:opacity-40">Limpar</button>
-              <button type="button" onClick={() => { setOrigin(destination); setDestination(origin); setPlanned(null); setLoadedFromOffline(false); setOfflineSavedAt(null); setFormError(null); }} disabled={!origin.trim() && !destination.trim()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/15 px-3 text-xs font-bold text-white/80 transition hover:border-[#FFC928] hover:text-[#FFC928] active:scale-[.98]" aria-label="Inverter origem e destino"><ArrowDownUp className="size-3.5" /> Inverter rota</button>
+              <button type="button" onClick={() => { setOrigin(""); setDestination(""); setPlanned(null); setFormError(null); setShareMessage(null); }} disabled={!origin.trim() && !destination.trim()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-bold text-white/55 transition hover:border-white/30 hover:text-white disabled:opacity-40">Limpar</button>
+              <button type="button" onClick={() => { setOrigin(destination); setDestination(origin); setPlanned(null); setFormError(null); }} disabled={!origin.trim() && !destination.trim()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/15 px-3 text-xs font-bold text-white/80 transition hover:border-[#FFC928] hover:text-[#FFC928] active:scale-[.98]" aria-label="Inverter origem e destino"><ArrowDownUp className="size-3.5" /> Inverter rota</button>
             </div>
             <label className="mt-7 block text-xs font-bold text-white/75" htmlFor="destination">Destino</label>
-            <div className="relative mt-2"><MapPin className="absolute left-0 top-3.5 size-4 text-[#BA5B45]" /><input id="destination" required minLength={3} value={destination} onChange={event => { setDestination(event.target.value); setPlanned(null); setLoadedFromOffline(false); setOfflineSavedAt(null); setFormError(null); setShareMessage(null); }} placeholder="Ex.: Águas Lindas de Goiás, GO" autoComplete="street-address" enterKeyHint="done" className="w-full border-b border-white/25 bg-transparent py-3 pl-7 text-base outline-none placeholder:text-white/35 focus:border-[#FFC928]" /></div>\n            {savedDestinations.length > 0 && <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Destinos salvos neste aparelho">\n              {savedDestinations.map(place => <button key={place.id} type="button" onClick={() => { setDestination(place.value); setPlanned(null); setLoadedFromOffline(false); setFormError(null); rememberDestinationUsage(place); }} className="min-h-10 shrink-0 rounded-full border border-white/15 bg-white/[.05] px-3.5 text-[0.62rem] font-extrabold text-white/80 transition hover:border-[#C7FF3C] hover:bg-[#C7FF3C]/10 hover:text-[#EFFFCA] active:scale-[.98]">{place.label} · {place.value}</button>)}\n            </div>}
-            <fieldset className="mt-7 border-t border-white/15 pt-5"><legend className="text-xs font-bold text-[#FFC928]">O que pesa mais na decisão</legend><div className="mt-3 flex items-center justify-between gap-3 text-xs"><span className="font-bold text-white/70">Menor desvio</span><output htmlFor="recommendation-weight" className="rounded-full bg-white/10 px-2.5 py-1 font-bold text-[#FFC928]">{priceWeight}% preço</output><span className="font-bold text-white/70">Menor preço</span></div><input id="recommendation-weight" type="range" min="0" max="100" step="5" value={priceWeight} onChange={event => setPriceWeight(Number(event.target.value))} aria-describedby="recommendation-weight-description" aria-valuetext={`${priceWeight}% preço · ${100 - priceWeight}% desvio real`} className="mt-3 h-2 w-full cursor-pointer accent-[#FFC928]" /><p id="recommendation-weight-description" className="mt-3 text-xs leading-relaxed text-white/60">Preço: <strong className="text-white">{priceWeight}%</strong> · desvio real: <strong className="text-white">{100 - priceWeight}%</strong>. O Trajeto mede o desvio real nos candidatos com referência de preço disponíveis para esta rota.</p></fieldset>
+            <div className="relative mt-2"><MapPin className="absolute left-0 top-3.5 size-4 text-[#BA5B45]" /><input id="destination" required minLength={3} value={destination} onChange={event => { setDestination(event.target.value); setPlanned(null); setLoadedFromOffline(false); if (formError) setFormError(null); }} placeholder="Ex.: Águas Lindas de Goiás, GO" className="w-full border-b border-white/25 bg-transparent py-3 pl-7 text-base outline-none placeholder:text-white/35 focus:border-[#FFC928]" /></div>\n            {savedDestinations.length > 0 && <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Destinos salvos neste aparelho">\n              {savedDestinations.map(place => <button key={place.id} type="button" onClick={() => { setDestination(place.value); setPlanned(null); setLoadedFromOffline(false); setFormError(null); rememberDestinationUsage(place); }} className="min-h-10 shrink-0 rounded-full border border-white/15 bg-white/[.05] px-3.5 text-[0.62rem] font-extrabold text-white/80 transition hover:border-[#C7FF3C] hover:bg-[#C7FF3C]/10 hover:text-[#EFFFCA] active:scale-[.98]">{place.label} · {place.value}</button>)}\n            </div>}
+            <fieldset className="mt-7 border-t border-white/15 pt-5"><legend className="text-xs font-bold text-[#FFC928]">O que pesa mais na decisão</legend><div className="mt-3 flex items-center justify-between gap-3 text-xs"><span className="font-bold text-white/70">Menor desvio</span><output htmlFor="recommendation-weight" className="rounded-full bg-white/10 px-2.5 py-1 font-bold text-[#FFC928]">{priceWeight}% preço</output><span className="font-bold text-white/70">Menor preço</span></div><input id="recommendation-weight" type="range" min="0" max="100" step="5" value={priceWeight} onChange={event => setPriceWeight(Number(event.target.value))} aria-describedby="recommendation-weight-description" className="mt-3 h-2 w-full cursor-pointer accent-[#FFC928]" /><p id="recommendation-weight-description" className="mt-3 text-xs leading-relaxed text-white/60">Preço: <strong className="text-white">{priceWeight}%</strong> · desvio real: <strong className="text-white">{100 - priceWeight}%</strong>. O Trajeto mede o desvio real nos candidatos com referência de preço disponíveis para esta rota.</p></fieldset>
             {isAuthenticated && <fieldset className="mt-7 border-t border-white/15 pt-5"><legend className="text-xs font-bold text-[#FFC928]">Comparar combustíveis nesta rota</legend><p className="mt-2 text-xs leading-relaxed text-white/60">Opcional. Os valores escolhidos ficam vinculados ao histórico desta rota.</p><label className="mt-3 block text-xs font-bold text-white/75">Veículo<select value={selectedVehicleId ?? ""} onChange={event => setSelectedVehicleId(event.target.value ? Number(event.target.value) : null)} className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm"><option value="">Selecione</option>{vehicles.data?.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.nickname}</option>)}</select></label><div className="mt-3 grid grid-cols-2 gap-3"><label className="text-xs font-bold text-white/75">Gasolina R$/L<input value={gasolinePrice} onChange={event => setGasolinePrice(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label><label className="text-xs font-bold text-white/75">Etanol R$/L<input value={ethanolPrice} onChange={event => setEthanolPrice(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label><label className="text-xs font-bold text-white/75">Gasolina km/L<input value={gasolineKmPerLiter} onChange={event => setGasolineKmPerLiter(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label><label className="text-xs font-bold text-white/75">Etanol km/L<input value={ethanolKmPerLiter} onChange={event => setEthanolKmPerLiter(event.target.value)} inputMode="decimal" className="mt-1.5 w-full border border-white/25 bg-[#0F2B31] px-3 py-2.5 text-base text-white outline-none focus:border-[#FFC928] sm:text-sm" /></label></div></fieldset>}
             <div className="sticky bottom-0 z-10 -mx-6 mt-7 border-t border-white/15 bg-[#163840]/95 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0"><Button type="submit" disabled={planRoute.isPending} className="min-h-12 w-full rounded-none bg-[#FFC928] font-bold text-[#163840] hover:bg-white">{planRoute.isPending ? <><Loader2 className="mr-2 size-4 animate-spin" />Calculando rota…</> : <>Comparar rota e paradas <ArrowRight className="ml-2 size-4" /></>}</Button></div>
             {(formError || planRoute.isError) && (
@@ -545,40 +542,28 @@ export default function Planner() {
           </div>
         </section>
 
-        {planned && <section className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0" aria-label="Resumo da rota">
-          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
+        {planned && <section className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Resumo da rota">
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#3DE3FF]">Distância</p>
             <p className="mt-1 text-lg font-black text-white">{selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
             <p className="text-[0.58rem] text-white/45">rota selecionada</p>
           </div>
-          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]">Tempo</p>
             <p className="mt-1 text-lg font-black text-white">{minutes(selectedRouteDuration)}</p>
             <p className="text-[0.58rem] text-white/45">estimativa atual</p>
           </div>
-          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#BDA5FF]">Paradas</p>
             <p className="mt-1 text-lg font-black text-white">{planned.stops.length}</p>
             <p className="text-[0.58rem] text-white/45">encontradas na rota</p>
           </div>
-          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
-            <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFB86B]">Trânsito</p>
-            <p className="mt-1 text-lg font-black text-white">{selectedRoute?.staticDurationSeconds != null ? Math.max(0, Math.round((selectedRouteDuration - selectedRoute.staticDurationSeconds) / 60)) + " min" : "—"}</p>
-            <p className="text-[0.58rem] text-white/45">{selectedRoute?.staticDurationSeconds != null ? "acréscimo sobre o fluxo livre" : "dado não disponível"}</p>
-          </div>
-          <div className="min-w-[9.75rem] flex-1 rounded-2xl border border-white/10 bg-white/[.04] p-3 sm:min-w-0">
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-3">
             <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-[#FFC928]">ANP</p>
             <p className="mt-1 text-lg font-black text-white">{planned.priceCoverage}</p>
             <p className="text-[0.58rem] text-white/45">referências vinculadas</p>
           </div>
         </section>
-
-        {planned && routeConfirmed && (
-          <div className="mb-3 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.07] px-3 py-2.5 text-[0.62rem] font-black text-[#D9FF91]" role="status" aria-live="polite">
-            <CheckCircle2 className="size-4 shrink-0" />
-            <span>Rota confirmada · {selectedRouteLabel ?? "principal"} · pronta para navegação</span>
-          </div>
-        )}
 
         {planned && <MobileNavigationCenter
           origin={origin}
