@@ -48,7 +48,7 @@ function extractPeriod(html) {
 
 function latestSpreadsheetUrl(html) {
   const hrefs = [...String(html).matchAll(/href=["']([^"']+)["']/gi)].map(match => match[1].replace(/&amp;/g, "&"));
-  const candidates = hrefs.filter(href => /\.(xlsx?|xlsm)(?:[?#]|$)/i.test(href) && /posto|revendedor|preco/i.test(href));
+  const candidates = hrefs.filter(href => /\.(xlsx?|xlsm)(?:[/?#]|$)/i.test(href) && /posto|revendedor|preco/i.test(href));
   if (!candidates.length) throw new Error("Planilha semanal da ANP não localizada na página.");
   return new URL(candidates[0], PAGE_URL).href;
 }
