@@ -153,6 +153,43 @@ export function rememberTrip(origin: string, destination: string) {
   rememberIntent("route");
 }
 
+export function restoreLocalMobilityProfile(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const data = value as Record<string, unknown>;
+  if (data.version !== 1 || data.scope !== "aparelho") return false;
+
+  const trips = Array.isArray(data.trips) ? data.trips.filter(isRecentTrip).slice(0, MAX_RECENT_TRIPS) : [];
+  const routeUsage = Array.isArray(data.routeUsage) ? data.routeUsage.filter(isRouteUsage).slice(0, MAX_TRACKED_ROUTES) : [];
+  const searches = Array.isArray(data.recentSearches)
+    ? data.recentSearches.filter((item): item is string => typeof item === "string" && item.trim().length >= 3).map(item => item.trim()).slice(0, 5)
+    : [];
+
+  if (!trips.length && !routeUsage.length && !searches.length && !data.lastTrip) return false;
+
+  try {
+    localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(trips));
+    localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(routeUsage));
+    localStorage.setItem(SEARCHES_KEY, JSON.stringify(searches));
+    if (data.lastTrip && typeof data.lastTrip === "object" && !Array.isArray(data.lastTrip)) {
+      const lastTrip = data.lastTrip as Record<string, unknown>;
+      if (
+        typeof lastTrip.origin === "string" && lastTrip.origin.trim().length >= 3 &&
+        typeof lastTrip.destination === "string" && lastTrip.destination.trim().length >= 3
+      ) {
+        localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({
+          origin: lastTrip.origin.trim().slice(0, 500),
+          destination: lastTrip.destination.trim().slice(0, 500),
+        }));
+      }
+    }
+  } catch {
+    return false;
+  }
+
+  notifyPreferenceChange();
+  return true;
+}
+
 export type LastStation = { placeId: string; name: string; address: string; query: string };
 
 export function getLastStation(): LastStation | null {
