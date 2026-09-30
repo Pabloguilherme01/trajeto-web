@@ -32,6 +32,18 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
+      - name: Sync ANP snapshot for Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npm run sync:anp:aguas-lindas; then
+            echo "Snapshot ANP atualizado para o build."
+          elif [ -f client/public/data/aguas-lindas-anp.json ]; then
+            echo "ANP indisponível agora; usando snapshot existente."
+          else
+            echo "ANP indisponível e sem snapshot; o build segue com o diretório local e cache do aparelho."
+          fi
+
       - name: Build static client
         run: npm run build:client
 
