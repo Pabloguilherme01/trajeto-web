@@ -12,6 +12,7 @@ import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE,
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
+import StationComparePanel from "@/components/StationComparePanel";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
@@ -1355,17 +1356,7 @@ export default function Stations() {
               </button>
             )}
 
-            {compared.length > 0 && (
-              <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#121B22] p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div><p className="text-[0.55rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Comparação</p><h3 className="mt-1 text-xl font-black">{compared.length} parada(s)</h3></div>
-                  <button type="button" onClick={() => setCompareIds([])} className="grid size-9 place-items-center rounded-lg border border-white/8 text-white/40" aria-label="Limpar comparação"><X className="size-4" /></button>
-                </div>
-                <div className="mt-3 space-y-2">
-                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="flex min-h-12 w-full items-center justify-between rounded-xl bg-[#0B1014] px-3 text-left"><span className="min-w-0 truncate text-xs font-black">{item.name}<span className="ml-2 text-[0.55rem] font-normal text-white/35">{item.distanceLabel || "sem distância"}</span></span><ChevronRight className="size-4 shrink-0 text-[#3DE3FF]" /></button>)}
-                </div>
-              </section>
-            )}
+            {compared.length > 0 && <StationComparePanel stations={compared} onClear={() => setCompareIds([])} />}
 
             <section className="mt-4 rounded-3xl border border-white/8 bg-white/[.025] p-4">
               <details>
