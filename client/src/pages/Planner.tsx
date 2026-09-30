@@ -8,6 +8,7 @@ import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -103,6 +104,15 @@ export default function Planner() {
     }
     if (!online) {
       setError("Sem internet. Para calcular uma rota nova, conecte-se ou abra uma rota salva.");
+      return;
+    }
+
+    if (isGitHubPagesRuntime()) {
+      setError(null);
+      setSavedMessage("Modo público ativo: abra a navegação externa para obter distância, trânsito e chegada atualizados.");
+      setFallbackReady(true);
+      rememberTrip(from, to);
+      track("route_open", to);
       return;
     }
 
