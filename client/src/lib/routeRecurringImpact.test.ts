@@ -16,6 +16,10 @@ describe("calculateRecurringRouteImpact", () => {
     expect(calculateRecurringRouteImpact(1, 1, 0)).toBeNull();
   });
 
+  it("does not show an additional cost when the faster route is also cheaper", () => {
+    expect(calculateRecurringRouteImpact(-1, -3, 5)?.costPerMinuteSaved).toBeNull();
+  });
+
   it("does not invent an impact when route cost is incomplete", () => {
     expect(calculateRecurringRouteImpact(null, -3, 5)).toBeNull();
   });
