@@ -49,7 +49,8 @@ export default function DailyModeSelector() {
   const modes = useMemo(() => buildDailyModes(online, savedRoutes), [online, savedRoutes]);
   const activeId = selected === "automatico" ? autoMode : selected;
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
-  if (!active) return null;
+  const automatic = modes.find(mode => mode.id === autoMode) ?? modes[0];
+  if (!active || !automatic) return null;
 
   const openMode = (mode: { id: DailyModeId; href: string }) => {
     setSelected(mode.id);
@@ -62,7 +63,7 @@ export default function DailyModeSelector() {
     setSelected("automatico");
     setSavedDailyMode("automatico");
     setExpanded(false);
-    setLocation(appUrl(active.href));
+    setLocation(appUrl(automatic.href));
   };
 
   return (
