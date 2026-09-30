@@ -10,7 +10,7 @@ export type LocalStationRecord = {
   status: "cadastro_ativo";
   sourceNote: string;
   anp?: { authorization?: string | null; anpCode?: string | null; lastAnpUpdate?: string | null; products?: string[]; distributor?: string | null; tankCapacityLiters?: number | null; nozzleCount?: number | null; interdicted?: boolean | null; latitude?: number | null; longitude?: number | null };
-  mapData?: { phone?: string | null; rating?: number | null; reviewCount?: number | null; hours?: string | null; source?: "maps" };
+  mapData?: { phone?: string | null; rating?: number | null; reviewCount?: number | null; hours?: string | null; observedBrand?: string | null; source?: "maps" };
   priceData?: { referenceDate?: string | null; gasoline?: number | null; ethanol?: number | null; dieselS10?: number | null; dieselS500?: number | null; glpP13?: number | null; gnv?: number | null; source?: "ANP" };
   dataQuality?: "anp-confirmed" | "cross-checked" | "catalog-only";
   dataOrigin?: "ANP" | "cross-check" | "local-catalog";
@@ -22,7 +22,7 @@ export const AGUAS_LINDAS_STATIONS_UPDATED_AT = "2026-09-30";
 export const AGUAS_LINDAS_STATIONS_COUNT = 41;
 export const AGUAS_LINDAS_DATA_AUDIT = {
   checkedAt: "2026-09-30",
-  officialAnpBaseUpdatedAt: "2026-09-28",
+  officialAnpBaseUpdatedAt: "2026-09-29",
   officialSource: "ANP - Dados Cadastrais dos Revendedores Varejistas de Combustíveis Automotivos",
   officialApiAvailable: true,
   officialFields: ["CNPJ", "endereço", "produtos", "distribuidor", "tancagem", "bicos", "situação Sigaf", "coordenadas"],
@@ -59,7 +59,7 @@ export const AGUAS_LINDAS_PRICE_REFERENCE = {
   note: "Médias municipais da amostra semanal; não representam preço atual individual de cada posto.",
 } as const;
 
-export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-28";
+export const AGUAS_LINDAS_STATIONS_LAST_SYNC = "2026-09-29";
 export const AGUAS_LINDAS_ANP_API_SCOPE = "GO / Águas Lindas de Goiás";
 export const AGUAS_LINDAS_DATA_POLICY = "ANP é a fonte primária para status cadastral; fontes secundárias apenas complementam nomes/endereço quando necessário.";
 
@@ -164,6 +164,20 @@ const records: StationSeed[] = [
   ["mizuno","Mizuno Kay & CIA LTDA","Mizuno Kay & Cia","00.375.386/0002-05","AGUAS LINDAS","Gleba 2-B, Fazenda Cachoeira e Saltos",null,["Mizuno Kay","Mizuno Kay & Cia"],"Cadastro setorial ativo."],
 ];
 
+
+
+const MAP_ENRICHMENTS: Record<string, NonNullable<LocalStationRecord["mapData"]>> = {
+  "zm": { phone: "(61) 99620-0099", rating: 4.8, reviewCount: 163, hours: "04:00–00:00", source: "maps" },
+  "perola": { rating: 4.0, reviewCount: 191, hours: "05:00–23:00", source: "maps" },
+  "formula-01": { phone: "(61) 3060-0591", rating: 4.2, reviewCount: 111, hours: "05:00–22:00", source: "maps" },
+  "meu-posto": { rating: 4.4, reviewCount: 55, hours: "05:00–22:00", observedBrand: "Shell", source: "maps" },
+  "rainha-da-paz": { rating: 3.8, reviewCount: 217, hours: "05:00–23:00", source: "maps" },
+  "guaira": { phone: "(61) 3613-0600", rating: 4.0, reviewCount: 219, hours: "05:00–23:00", observedBrand: "Ipiranga", source: "maps" },
+  "rham": { phone: "0800 725 7333", rating: 4.3, reviewCount: 18, hours: "05:00–23:00", observedBrand: "Ipiranga", source: "maps" },
+  "sao-jose": { phone: "(61) 99292-5283", rating: 4.6, reviewCount: 30, hours: "05:00–00:00", source: "maps" },
+  "village": { rating: 4.3, reviewCount: 14, source: "maps" },
+};
+
 function tupleToRecord(row: StationSeed): LocalStationRecord {
   const [id, legalName, displayName, cnpj, neighborhood, address, brand, aliases, sourceNote] = row;
   return {
@@ -177,8 +191,9 @@ function tupleToRecord(row: StationSeed): LocalStationRecord {
     aliases,
     status: "cadastro_ativo",
     sourceNote,
-    dataQuality: "catalog-only",
-    dataOrigin: "local-catalog",
+    mapData: MAP_ENRICHMENTS[id],
+    dataQuality: MAP_ENRICHMENTS[id] ? "cross-checked" : "catalog-only",
+    dataOrigin: MAP_ENRICHMENTS[id] ? "cross-check" : "local-catalog",
     verifiedAt: null,
     verificationFlags: { address: false, coordinates: false, authorization: false, brand: false },
   };
@@ -186,6 +201,31 @@ function tupleToRecord(row: StationSeed): LocalStationRecord {
 
 export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
   records.map(tupleToRecord);
+
+
+
+export const AGUAS_LINDAS_STATION_STATS = (() => {
+  const total = AGUAS_LINDAS_STATIONS.length;
+  const withAddress = AGUAS_LINDAS_STATIONS.filter(station => Boolean(station.address)).length;
+  const withBrand = AGUAS_LINDAS_STATIONS.filter(station => Boolean(station.brand)).length;
+  const mapEnriched = AGUAS_LINDAS_STATIONS.filter(station => Boolean(station.mapData)).length;
+  const neighborhoods = new Set(
+    AGUAS_LINDAS_STATIONS.map(station => station.neighborhood).filter((value): value is string => Boolean(value)),
+  );
+  const brands = new Set(
+    AGUAS_LINDAS_STATIONS.map(station => station.brand).filter((value): value is string => Boolean(value)),
+  );
+  return {
+    total,
+    withAddress,
+    withoutAddress: total - withAddress,
+    withBrand,
+    withoutBrand: total - withBrand,
+    mapEnriched,
+    neighborhoods: neighborhoods.size,
+    brands: brands.size,
+  } as const;
+})();
 
 export function searchAguasLindasStations(query: string) {
   const normalized = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
