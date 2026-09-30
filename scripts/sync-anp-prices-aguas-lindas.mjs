@@ -6,7 +6,6 @@ const OUTPUT = new URL("../client/public/data/aguas-lindas-anp-precos.json", imp
 
 const norm = value => String(value ?? "").trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 
-
 function normalizeProduct(value) {
   const key = norm(value);
   if (key.includes("gasolina comum") || key === "gasolina") return "gasolina-comum";
@@ -18,6 +17,7 @@ function normalizeProduct(value) {
   if (key.includes("gnv") || key.includes("gas natural")) return "gnv";
   return "outro";
 }
+
 function unitFor(productKey) {
   if (productKey === "glp-p13") return "13kg";
   if (productKey === "gnv") return "m3";
@@ -82,7 +82,7 @@ for (const sheetName of workbook.SheetNames) {
     if (cnpj.length !== 14 || (uf && uf !== "GO") || (municipalityNorm && !municipalityNorm.includes("aguas lindas de goias"))) continue;
 
     const product = String(pick(row, ["produto", "combustivel", "combustível"]) ?? "").trim();
-    const price = parseNumber(pick(row, ["preco de revenda", "preco revenda", "preço de revenda", "valor de venda", "preco"]) );
+    const price = parseNumber(pick(row, ["preco de revenda", "preco revenda", "preço de revenda", "valor de venda", "preco"]));
     if (!product || price == null) continue;
 
     const productKey = normalizeProduct(product);
@@ -111,14 +111,8 @@ for (const record of output) {
   if (!deduped.has(key)) deduped.set(key, record);
 }
 const data = [...deduped.values()];
+
 if (!data.length) {
-  try {
-    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
-    if (previous?.data?.length) {
-      console.warn(JSON.stringify({ warning: "Nenhum preço ANP foi extraído; snapshot anterior preservado.", previousRows: previous.data.length }));
-      process.exit(0);
-    }
-  } catch {}
   await mkdir(new URL("../client/public/data/", import.meta.url), { recursive: true });
   const emptySnapshot = {
     source: "ANP",
@@ -130,8 +124,32 @@ if (!data.length) {
     data: [],
     warning: "A fonte semanal foi acessada, mas nenhum registro municipal foi reconhecido. Não exibir preço como atual."
   };
+
+  try {
+    const previous = JSON.parse(await readFile(OUTPUT, "utf8"));
+    const sameEmptySnapshot =
+      previous?.source === "ANP" &&
+      previous?.sourceUrl === sourceUrl &&
+      previous?.referencePeriod === referencePeriod &&
+      previous?.totalRows === 0 &&
+      previous?.totalStations === 0 &&
+      Array.isArray(previous?.data) &&
+      previous.data.length === 0;
+
+    if (sameEmptySnapshot) {
+      console.warn(JSON.stringify({
+        warning: "Nenhum preço individual ANP reconhecido; snapshot vazio já está atualizado.",
+        referencePeriod
+      }));
+      process.exit(0);
+    }
+  } catch {}
+
   await writeFile(OUTPUT, JSON.stringify(emptySnapshot, null, 2) + "\n", "utf8");
-  console.warn(JSON.stringify({ warning: "Nenhum preço individual ANP reconhecido; snapshot vazio materializado.", referencePeriod }));
+  console.warn(JSON.stringify({
+    warning: "Nenhum preço individual ANP reconhecido; snapshot vazio materializado para impedir preço antigo como atual.",
+    referencePeriod
+  }));
   process.exit(0);
 }
 

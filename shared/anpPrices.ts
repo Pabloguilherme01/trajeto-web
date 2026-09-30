@@ -22,6 +22,8 @@ export type AnpPriceSnapshot = {
   totalRows: number;
   totalStations: number;
   data: AnpPriceRecord[];
+  /** Present when the ANP source was reached but no individual station price was recognized. */
+  warning?: string;
 };
 
 export function normalizeAnpPriceProduct(value: string) {

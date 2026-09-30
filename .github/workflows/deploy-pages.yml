@@ -24,13 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Check runner toolchain
-        run: |
-          node --version
-          npm --version
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package.json
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - name: Resolve dependency lock
+        run: npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+
+      - name: Install from lock
+        run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
       - name: Sync ANP snapshot for Pages
         shell: bash
@@ -73,24 +78,27 @@ jobs:
           test -f dist/public/icon-1024.png
           test -f dist/public/.vite/manifest.json
           cp dist/public/index.html dist/public/404.html
-          printf '%s\n' "GitHub Pages artifact validated."
+          printf '%s
+' "GitHub Pages artifact validated."
 
       - name: Validate mobile offline assets
         shell: bash
         run: |
           set -euo pipefail
           test -f dist/public/sw.js
+          node --check dist/public/sw.js
           test -f dist/public/site.webmanifest
           test -f dist/public/favicon.svg
           test -f dist/public/icon-192.png
           test -f dist/public/icon-512.png
           test -f dist/public/icon-512-maskable.png
           test -f dist/public/.vite/manifest.json
-          grep -q '192x192' dist/public/site.webmanifest
-          grep -q '512x512' dist/public/site.webmanifest
-          grep -q 'maskable' dist/public/site.webmanifest
-          grep -q 'scope' dist/public/site.webmanifest
-          printf '%s\n' "Mobile/offline assets validated."
+          grep -q '"sizes": "192x192"' dist/public/site.webmanifest
+          grep -q '"sizes": "512x512"' dist/public/site.webmanifest
+          grep -q '"purpose": "maskable"' dist/public/site.webmanifest
+          grep -q '"scope": "./"' dist/public/site.webmanifest
+          printf '%s
+' "Mobile/offline assets validated."
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
