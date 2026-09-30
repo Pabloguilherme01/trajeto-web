@@ -445,6 +445,51 @@ export default function Stations() {
         )}
 
         {staticRuntime && !showSavedOnly && (
+          <section className="mt-4 rounded-[1.4rem] border border-[#3DE3FF]/15 bg-[#0F1A20] p-4" aria-labelledby="station-complementary-data">
+            <details>
+              <summary id="station-complementary-data" className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-sm font-black">
+                <span>Dados complementares de Águas Lindas</span>
+                <span className="text-[0.52rem] font-bold text-white/30">{AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT} descobertas</span>
+              </summary>
+              <div className="mt-4 grid gap-3">
+                <div className="rounded-2xl border border-white/8 bg-[#0B1014] p-3">
+                  <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Referência municipal de preços</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    <div><p className="text-[0.5rem] text-white/30">Gasolina comum</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</p></div>
+                    <div><p className="text-[0.5rem] text-white/30">Etanol</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.ethanol.average.toFixed(2).replace(".", ",")}/L</p></div>
+                    <div><p className="text-[0.5rem] text-white/30">Diesel S10</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS10.average.toFixed(2).replace(".", ",")}/L</p></div>
+                    <div><p className="text-[0.5rem] text-white/30">Diesel S500</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS500.average.toFixed(2).replace(".", ",")}/L</p></div>
+                    <div><p className="text-[0.5rem] text-white/30">GLP P13</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.glpP13.average.toFixed(2).replace(".", ",")}</p></div>
+                    <div><p className="text-[0.5rem] text-white/30">GNV</p><p className="text-sm font-black text-white">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gnv.average.toFixed(2).replace(".", ",")}/m³</p></div>
+                  </div>
+                  <p className="mt-3 text-[0.54rem] leading-relaxed text-white/30">Período {AGUAS_LINDAS_PRICE_REFERENCE.period}; médias municipais da ANP, não preço atual individual de cada posto.</p>
+                </div>
+                <div className="space-y-2">
+                  {searchAguasLindasMapDiscoveries(query).map(item => (
+                    <article key={item.displayName + item.address} className="rounded-2xl border border-white/8 bg-[#0B1014] p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-black text-white">{item.displayName}</p>
+                          <p className="mt-1 text-[0.6rem] leading-relaxed text-white/40">{item.address}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.46rem] font-black text-[#C9F7FF]">mapa</span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-[0.55rem] text-white/35 sm:grid-cols-4">
+                        <span>Telefone: {item.phone ?? "não informado"}</span>
+                        <span>Horário: {item.hours ?? "não informado"}</span>
+                        <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
+                        <span className="col-span-2 sm:col-span-1">{item.note}</span>
+                      </div>
+                      <a href={mapDiscoverySearchUrl(item)} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014]">Abrir no Google Maps</a>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </details>
+          </section>
+        )}
+
+        {staticRuntime && !showSavedOnly && (
           <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.57rem] leading-relaxed text-white/35">
             Fonte e natureza do dado: cadastro empresarial público e referências públicas locais. A ANP mantém o cadastro oficial de revendedores autorizados; preços e situação operacional podem mudar e devem ser verificados antes da viagem.
           </section>
