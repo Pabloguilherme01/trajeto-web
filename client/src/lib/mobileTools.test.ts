@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -59,6 +59,18 @@ describe("mobile tools", () => {
 
   it("keeps a useful generic message when there is no recommendation", () => {
     expect(buildRouteShareText("Casa", "Trabalho")).toBe("Planejei esta rota no Trajeto: Casa → Trabalho. Veja distância, duração e opções de abastecimento.");
+  });
+
+  it("builds an official Uber universal link with the station as destination", () => {
+    const url = buildUberRideUrl("Posto Exemplo, Águas Lindas de Goiás", { lat: -15.86, lng: -48.03 });
+    expect(url).toContain("https://m.uber.com/looking?");
+    expect(url).toContain("pickup=my_location");
+    expect(url).toContain("drop%5B0%5D=");
+    expect(decodeURIComponent(url)).toContain("Águas Lindas de Goiás");
+  });
+
+  it("keeps 99 on its verified public entrypoint without inventing private destination parameters", () => {
+    expect(build99MobilityUrl("Posto Exemplo, Águas Lindas de Goiás")).toBe("https://99app.com/");
   });
 
   it("uses the native share API when available", async () => {
