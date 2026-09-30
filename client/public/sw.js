@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v12";
+const VERSION = "trajeto-v13";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -72,7 +72,9 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
   const url = new URL(request.url);
 
-  if (url.pathname.includes("/api/") || url.pathname.includes("/data/")) {
+  if (url.pathname.includes("/data/")) {
+    event.respondWith(staleWhileRevalidate(request, DATA_CACHE));
+  } else if (url.pathname.includes("/api/")) {
     event.respondWith(networkFirst(request, DATA_CACHE));
   } else if (url.pathname.includes("/maps/") || url.pathname.includes("/tiles/")) {
     event.respondWith(staleWhileRevalidate(request, MAP_CACHE));
