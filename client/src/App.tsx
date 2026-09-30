@@ -5,6 +5,7 @@ import NotFound from "@/pages/NotFound";
 import { lazy, Suspense, type ReactNode } from "react";
 import { Route, Router as WouterRouter, Switch } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { normalizeRouterTarget } from "@/lib/appUrl";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -57,7 +58,7 @@ function AdminOnly({ children }: { children: ReactNode }) {
 
 function Router() {
   return (
-    <WouterRouter base={routerBase}>
+    <WouterRouter base={routerBase} hrefs={target => normalizeRouterTarget(target)} aroundNav={(navigate, target, options) => navigate(normalizeRouterTarget(target), options)}>
       <Suspense fallback={<RouteLoading />}>
         <Switch>
           <Route path="/" component={Home} />
