@@ -2087,3 +2087,841 @@ Após a infraestrutura de contratos, storage, missão, rotas, offline, eventos, 
 
 ## 81. Critério máximo adicional
 O Trajeto deve conectar dados públicos, dados pessoais, fontes externas, contexto territorial, missão, rota, recursos, custos, eventos, histórico e evidências sem confundir atual com histórico, estimado com registrado, projetado com existente, público com privado ou offline com tempo real.
+
+
+## 84. Reformulação completa — Mobile First 2.0
+
+A prioridade desta fase muda de “adicionar recursos” para **tornar o produto realmente utilizável**. A implementação deve reduzir a complexidade visual e estrutural antes de reintroduzir recursos avançados.
+
+A arquitetura atual concentra muitos módulos na Home e no Planner. A nova versão deve tratar a experiência mobile como produto principal, não como versão reduzida do desktop.
+
+### 84.1 Nova promessa do produto
+
+O Trajeto passa a responder a uma pergunta:
+
+**“O que preciso fazer agora para chegar onde quero?”**
+
+A experiência principal será:
+
+**Destino → Preparar → Escolher rota → Navegar → Concluir**
+
+Todo recurso secundário deve existir fora desse caminho ou aparecer somente quando contextual.
+
+### 84.2 Nova estrutura mobile
+
+Substituir a navegação pulverizada por quatro áreas principais:
+
+1. **Agora**
+2. **Viajar**
+3. **Mobilidade**
+4. **Dados**
+
+No modo condução, a interface passa temporariamente para uma superfície reduzida.
+
+Não haverá sete ou mais destinos competindo no bottom navigation.
+
+### 84.3 Agora
+
+A Home será reconstruída para conter somente:
+
+- saudação/contexto mínimo;
+- campo principal “Para onde?”;
+- ação principal;
+- destino mais relevante;
+- última viagem;
+- estado offline;
+- pequena indicação de preparação.
+
+Depois disso:
+
+**próxima viagem → informação útil → recursos secundários.**
+
+A Home não exibirá simultaneamente todos os cards de rotina, veículo, custos, fontes, manutenção, histórico e calculadoras.
+
+### 84.4 Viajar
+
+Fluxo único:
+
+**Destino → Origem → Rota → Comparar → Preparar → Navegar**
+
+A tela de rota será organizada em:
+
+1. resumo;
+2. alternativas;
+3. custos;
+4. combustível;
+5. offline;
+6. navegação.
+
+Essas informações devem aparecer como seções progressivas, não como dezenas de cards simultâneos.
+
+### 84.5 Mobilidade
+
+Concentrar:
+
+- minhas viagens;
+- destinos;
+- veículo;
+- combustível;
+- manutenção;
+- custos;
+- documentos.
+
+Usar listas e detalhes sob demanda.
+
+Não carregar todos os dados na primeira renderização.
+
+### 84.6 Dados
+
+Concentrar:
+
+- fontes;
+- indicadores;
+- procedência;
+- atualizações;
+- integridade;
+- privacidade;
+- diagnóstico técnico.
+
+Dados públicos avançados ficam aqui, não na Home.
+
+## 85. Novo Mobile Shell
+
+Criar um shell mobile único com:
+
+- header compacto;
+- conteúdo de largura controlada;
+- bottom navigation;
+- safe-area;
+- barra de ação contextual;
+- bottom sheets;
+- modais somente quando necessários;
+- scroll restoration;
+- foco previsível.
+
+O shell deve evitar múltiplas barras fixas simultâneas.
+
+### 85.1 Bottom Navigation
+
+Máximo de quatro destinos principais.
+
+O item ativo deve possuir:
+
+- nome;
+- ícone;
+- estado;
+- foco visível.
+
+O usuário nunca deve depender apenas do gesto de swipe para navegar.
+
+### 85.2 Contextual Action Bar
+
+A ação principal muda conforme o contexto:
+
+- Planejar;
+- Continuar;
+- Preparar;
+- Navegar;
+- Registrar.
+
+Nunca exibir várias ações primárias equivalentes.
+
+### 85.3 Bottom Sheet Contract
+
+Toda bottom sheet deve:
+
+- possuir título;
+- botão/gesto de fechamento;
+- foco recuperável;
+- altura controlada;
+- conteúdo rolável;
+- suporte a teclado;
+- funcionar sem gesto;
+- não esconder o elemento focado.
+
+### 85.4 Touch Contract
+
+Todos os controles principais devem possuir área de toque confortável. A referência de acessibilidade WCAG 2.2 define mínimo de 24×24 CSS px para alvos AA e a recomendação AAA de 44×44 para alvos aprimorados; para o Trajeto, controles principais devem mirar 44×44 px sempre que possível. citeturn0search2turn0search6
+
+### 85.5 Gesture Independence
+
+Nenhuma função essencial poderá depender exclusivamente de swipe, drag, pinch ou gesto complexo. Deve existir equivalente por toque simples. Isso segue a orientação WCAG para pointer gestures. citeturn0search10
+
+## 86. Nova Home
+
+A Home atual deve ser reduzida drasticamente.
+
+### Ordem:
+
+1. estado online/offline;
+2. busca/destino;
+3. ação principal;
+4. destino recorrente;
+5. última viagem;
+6. preparação;
+7. recursos secundários.
+
+### Remover da Home principal
+
+- grandes blocos repetidos;
+- quatro painéis extensos;
+- radar completo;
+- calculadora completa;
+- manutenção detalhada;
+- histórico completo;
+- múltiplas métricas repetidas;
+- explicações longas;
+- cards de fontes.
+
+Esses recursos continuam existindo em Mobilidade/Dados.
+
+## 87. Novo fluxo “Ir agora”
+
+Para destino conhecido:
+
+**Home → Ir agora → rota → Navegar**
+
+Meta de interação:
+
+- 1 toque para iniciar destino recorrente;
+- 1 toque para selecionar rota;
+- 1 toque para abrir navegador externo.
+
+Não transformar a meta em promessa de desempenho; validar por testes de interação.
+
+## 88. Novo fluxo “Preparar”
+
+Quando a missão precisar de preparação:
+
+**Preparar viagem**
+
+Checklist compacto:
+
+- destino;
+- rota;
+- veículo;
+- combustível;
+- offline;
+- navegação.
+
+Itens opcionais não bloqueiam a viagem.
+
+### 88.1 Preflight
+
+O Preflight mostra somente bloqueios reais:
+
+- destino ausente;
+- rota indisponível;
+- snapshot antigo;
+- veículo indisponível;
+- dados insuficientes;
+- conflito de agenda.
+
+Sem pontuação geral.
+
+## 89. Novo fluxo “Condução”
+
+Ao entrar em condução:
+
+**Tela limpa**
+
+- destino;
+- próxima ação;
+- navegador;
+- retorno ao Trajeto;
+- status mínimo.
+
+Esconder:
+
+- gráficos;
+- custos detalhados;
+- fontes;
+- histórico;
+- cards promocionais;
+- configurações secundárias.
+
+O Trajeto continua responsável por abrir Google Maps/Waze/Apple, sem tentar substituir a navegação.
+
+## 90. Novo fluxo “Concluí”
+
+Depois da navegação externa:
+
+**Concluir viagem**
+
+Ações opcionais:
+
+- registrar combustível;
+- registrar custo;
+- registrar incidente;
+- salvar observação;
+- finalizar.
+
+Se nenhum dado for informado, a missão pode ser encerrada sem exigir preenchimento.
+
+## 91. Novo sistema de estados visuais
+
+Cada tela importante precisa ter explicitamente:
+
+- loading;
+- ready;
+- empty;
+- error;
+- offline;
+- stale;
+- degraded;
+- recovery.
+
+Nenhuma tela pode ficar em branco ou em loading indefinido.
+
+### 91.1 Error Boundary por domínio
+
+Falha em:
+
+- fontes;
+- rota;
+- custos;
+- veículo;
+- offline
+
+não deve derrubar todo o aplicativo.
+
+### 91.2 Timeout UI
+
+Consultas externas devem ter estado de timeout e ação de recuperação.
+
+### 91.3 Retry Policy
+
+Retry deve ser limitado e explícito, evitando loops automáticos.
+
+## 92. Performance mobile
+
+### 92.1 Home Critical Path
+
+A Home deve carregar primeiro somente:
+
+- shell;
+- destino;
+- contexto;
+- ação principal.
+
+### 92.2 Deferred Modules
+
+Carregar sob demanda:
+
+- histórico;
+- custos;
+- manutenção;
+- fontes;
+- observatório;
+- documentos;
+- diagnóstico.
+
+### 92.3 Request Dedup
+
+Não executar múltiplas consultas equivalentes por componentes diferentes.
+
+### 92.4 Local Event Consolidation
+
+Evitar que dezenas de componentes registrem listeners independentes para os mesmos eventos de preferência.
+
+### 92.5 Render Budget
+
+Evitar renderizações provocadas por dados secundários enquanto o usuário ainda está no caminho crítico.
+
+## 93. Novo sistema visual
+
+A direção visual será:
+
+**premium utilitário**, não dashboard corporativo.
+
+### Características
+
+- tipografia grande;
+- poucos elementos;
+- alto contraste;
+- hierarquia forte;
+- superfícies discretas;
+- bordas suaves;
+- espaçamento generoso;
+- ícones consistentes;
+- animação mínima;
+- estados claros.
+
+### Evitar
+
+- excesso de cards;
+- sombras pesadas;
+- gradientes decorativos em excesso;
+- textos pequenos;
+- badges demais;
+- repetição de métricas;
+- grids densos.
+
+## 94. Sistema de design mobile
+
+Criar tokens centralizados:
+
+- cores;
+- radius;
+- spacing;
+- typography;
+- elevation;
+- motion;
+- focus;
+- touch target;
+- safe-area.
+
+Nenhum novo componente deve inventar valores arbitrários repetidamente.
+
+## 95. Acessibilidade mobile completa
+
+A reformulação seguirá WCAG 2.2 e a orientação específica de aplicação a mobile; o W3C trata acessibilidade mobile dentro das próprias WCAG e mantém orientação específica para mobile web/apps. citeturn0search0turn0search3
+
+Testar:
+
+- leitor de tela;
+- teclado;
+- foco;
+- touch;
+- contraste;
+- zoom;
+- orientação;
+- reduced motion;
+- targets;
+- bottom sheets;
+- dialogs;
+- navegação por headings;
+- labels;
+- live regions.
+
+O foco nunca deve ficar totalmente escondido por conteúdo fixo, em linha com WCAG 2.2. citeturn0search5
+
+## 96. Busca mobile
+
+Substituir buscas pulverizadas por um único componente.
+
+### Busca rápida
+
+Pesquisar:
+
+- destino;
+- rota;
+- veículo;
+- viagem;
+- posto;
+- ação.
+
+### Comandos
+
+Permitir ações simples:
+
+- “ir para trabalho”;
+- “abrir última viagem”;
+- “registrar combustível”;
+- “meu veículo”.
+
+A execução deve respeitar confirmação quando houver alteração ou ação externa.
+
+## 97. Offline mobile
+
+O offline deve aparecer como estado do produto, não como card.
+
+### Online
+
+**Tudo atualizado**
+
+### Offline
+
+**Você está offline**
+
+Ações disponíveis:
+
+- abrir rota salva;
+- continuar missão;
+- consultar dados locais.
+
+Ações indisponíveis:
+
+- trânsito atual;
+- consulta externa;
+- atualização de fonte.
+
+### Stale
+
+**Disponível, mas salvo há X dias**
+
+## 98. Segurança mobile
+
+Auditar:
+
+- URL params;
+- localStorage;
+- sessionStorage;
+- Service Worker;
+- cache;
+- links externos;
+- open redirects;
+- dados importados;
+- payloads externos;
+- logs;
+- erros;
+- dados sensíveis.
+
+Adicionar:
+
+- sanitização de entradas;
+- validação de schema;
+- limites de storage;
+- quarantine de dados inválidos;
+- redaction de logs;
+- política de links externos;
+- CSP quando o hosting permitir;
+- nenhuma chave secreta no frontend.
+
+## 99. Arquitetura React
+
+Reduzir acoplamento entre componentes.
+
+Separar:
+
+**UI → Application → Domain → Storage → Providers**
+
+### Domain
+
+Sem React.
+
+### Application
+
+Coordena casos de uso.
+
+### UI
+
+Renderiza estados.
+
+### Storage
+
+Persistência local segura.
+
+### Providers
+
+Google/ANP/ANTT/outros.
+
+Nenhum componente de apresentação deve conhecer diretamente detalhes de provider.
+
+## 100. Estado global
+
+Evitar um grande estado global.
+
+Preferir:
+
+- contexto derivado;
+- estado local;
+- eventos de domínio;
+- storage;
+- queries específicas.
+
+Um único estado de missão deve alimentar as superfícies relacionadas.
+
+## 101. Simplificação de componentes
+
+Fazer auditoria dos componentes atuais para identificar:
+
+- duplicados;
+- órfãos;
+- componentes que só exibem dados de outro componente;
+- cards com mesma métrica;
+- listeners repetidos;
+- hooks redundantes;
+- fluxos paralelos.
+
+A regra será:
+
+**uma fonte de verdade por conceito.**
+
+## 102. Nova arquitetura de informação
+
+### Agora
+
+Ação atual.
+
+### Viajar
+
+Planejamento e navegação.
+
+### Mobilidade
+
+Histórico, veículo, custos e rotina.
+
+### Dados
+
+Fontes, indicadores, privacidade e diagnóstico.
+
+### Condução
+
+Superfície temporária mínima.
+
+Isso substitui a lógica de “muitos módulos na Home”.
+
+## 103. Dados úteis na interface pública
+
+Mostrar apenas dados que ajudam uma decisão imediata:
+
+- destino;
+- distância;
+- duração;
+- rota;
+- combustível;
+- custo;
+- offline;
+- atualização;
+- fonte.
+
+Dados avançados ficam sob demanda.
+
+## 104. Mobile Decision Cards
+
+Substituir cards informativos por cartões de decisão:
+
+**Título**
+
+**Situação**
+
+**Dado principal**
+
+**Ação**
+
+Exemplo:
+
+> Rota salva  
+> disponível offline  
+> salva há 2 dias  
+> **Continuar**
+
+## 105. Recovery UX
+
+Se algo falhar:
+
+### Rota
+
+> Não foi possível atualizar a rota.  
+> Sua última rota salva está disponível.
+
+**Abrir rota salva**
+
+### Fonte
+
+> A fonte não respondeu.
+
+**Usar último snapshot**
+
+### Storage
+
+> Alguns dados locais estão inválidos.
+
+**Recuperar dados**
+
+Nunca mostrar apenas “Erro”.
+
+## 106. Mobile Test Matrix
+
+Testar no mínimo:
+
+- 320 px;
+- 360 px;
+- 375 px;
+- 390 px;
+- 412 px;
+- 430 px;
+- tablet;
+- desktop.
+
+Estados:
+
+- online;
+- offline;
+- loading;
+- erro;
+- dados vazios;
+- dados antigos;
+- storage corrompido;
+- provider indisponível;
+- teclado aberto;
+- orientação vertical/horizontal.
+
+## 107. Jornada de regressão obrigatória
+
+### Jornada A
+Abrir → destino → rota → navegação.
+
+### Jornada B
+Abrir → destino recorrente → ir agora.
+
+### Jornada C
+Offline → rota salva → continuar.
+
+### Jornada D
+Rota → combustível → custo.
+
+### Jornada E
+Missão → navegação → concluir.
+
+### Jornada F
+Storage corrompido → recuperação.
+
+### Jornada G
+Provider indisponível → fallback.
+
+### Jornada H
+Mobile → busca → resultado → ação.
+
+### Jornada I
+Importação → preview → validação → confirmação.
+
+### Jornada J
+Compartilhamento → preview → confirmação.
+
+## 108. Reformulação visual completa
+
+A implementação deve permitir remover progressivamente a aparência atual de “dashboard com muitos cards” e substituí-la por:
+
+**uma experiência de aplicativo móvel de mobilidade.**
+
+A prioridade visual será:
+
+1. contexto;
+2. destino;
+3. ação;
+4. estado;
+5. detalhe.
+
+Não:
+
+1. card;
+2. card;
+3. card;
+4. card;
+5. card.
+
+## 109. Estratégia de migração
+
+Não reescrever tudo em uma única mudança.
+
+### Fase A — Fundação
+
+- design tokens;
+- Mobile Shell;
+- navigation;
+- state contracts;
+- error/loading states.
+
+### Fase B — Home
+
+- remover duplicações;
+- novo Agora;
+- busca;
+- destino recorrente;
+- última viagem.
+
+### Fase C — Planner
+
+- novo fluxo linear;
+- rota;
+- alternativas;
+- preparação;
+- navegação.
+
+### Fase D — Mobilidade
+
+- histórico;
+- veículo;
+- custos;
+- manutenção;
+- documentos.
+
+### Fase E — Dados
+
+- fontes;
+- observatório;
+- evidências;
+- integridade.
+
+### Fase F — Offline/Security
+
+- recovery;
+- storage;
+- PWA;
+- security audit.
+
+### Fase G — Advanced
+
+Somente depois:
+
+- multimodal;
+- cenários;
+- automações;
+- datasets públicos;
+- packs;
+- governança.
+
+## 110. Critério de sucesso da reformulação
+
+A nova versão não será considerada pronta porque “tem mais funcionalidades”.
+
+Ela deverá demonstrar:
+
+- primeira ação claramente identificável;
+- navegação mobile simples;
+- nenhuma tela essencial sobrecarregada;
+- nenhum loading infinito;
+- nenhum erro sem recuperação;
+- nenhuma função essencial dependente de gesto;
+- nenhuma informação duplicada em várias áreas;
+- rota recorrente acessível rapidamente;
+- offline compreensível;
+- dados com procedência;
+- armazenamento resiliente;
+- provider failure tolerado;
+- acessibilidade testada;
+- performance mobile verificada;
+- fluxos críticos funcionando ponta a ponta.
+
+## 111. Regra de produto
+
+A partir desta reformulação:
+
+> **Se uma função não melhorar uma decisão, uma ação, uma recuperação ou a transparência do sistema, ela não entra na Home.**
+
+Recursos avançados continuam disponíveis, mas sob demanda.
+
+## 112. Nova ordem de implementação após a reformulação
+
+1. Auditoria de componentes e fluxos atuais.
+2. Design tokens e Mobile Shell.
+3. Navigation 4 áreas.
+4. Error/Loading/Empty/Offline State System.
+5. Nova Home/Agora.
+6. Novo fluxo de busca/destino.
+7. Novo Planner linear.
+8. Condução mínima.
+9. Concluir viagem.
+10. Mobilidade secundária.
+11. Dados/Observatório.
+12. Offline/Recovery.
+13. Security hardening.
+14. Accessibility hardening.
+15. Performance optimization.
+16. Integrações externas.
+17. Recursos avançados.
+18. Golden journeys.
+19. Testes mobile completos.
+20. Build/CI.
+21. Code review.
+22. Deploy somente após verificação.
+
+## 113. Critério máximo da nova versão
+
+O Trajeto deve parecer, no celular, um **aplicativo de mobilidade simples**, enquanto internamente pode possuir uma arquitetura extremamente sofisticada.
+
+A complexidade deve ficar no motor.
+
+**O usuário deve enxergar simplicidade.**
