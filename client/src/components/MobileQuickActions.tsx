@@ -76,6 +76,12 @@ export default function MobileQuickActions() {
   }, [statusMessage]);
 
   const locate = () => {
+    if (!online) {
+      setStatusMessage(savedRoutesCount > 0
+        ? "Sem internet. Continue uma rota salva ou tente novamente quando voltar."
+        : "Sem internet. A busca por perto precisa de conexão.");
+      return;
+    }
     if (!navigator.geolocation || locating) return;
     vibration();
     setLocating(true);
