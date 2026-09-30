@@ -1,4 +1,4 @@
-const VERSION = "trajeto-v14";
+const VERSION = "trajeto-v15";
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -96,9 +96,16 @@ function collectManifestAssets(manifest) {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+
+  if (url.hostname === "tile.openstreetmap.org") {
+    event.respondWith(tileNetworkFirst(request));
+    return;
+  }
+
+  if (url.origin !== self.location.origin) return;
 
   if (url.pathname.includes("/api/") || url.pathname.includes("/data/")) {
     event.respondWith(networkFirst(request, DATA_CACHE));
@@ -174,6 +181,23 @@ async function networkFirst(request, cacheName) {
         status: 503,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       })
+    );
+  }
+}
+
+
+async function tileNetworkFirst(request) {
+  const cache = await caches.open(MAP_CACHE);
+  try {
+    const response = await fetch(request);
+    if (response.ok || response.type === "opaque") {
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return (
+      await cache.match(request, { ignoreVary: true }) ||
+      new Response("", { status: 504 })
     );
   }
 }
