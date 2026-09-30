@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AlarmClock, CalendarClock, Clock3 } from "lucide-react";
 import type { RouteIntelligenceRoute } from "@/lib/routeIntelligence";
-import { calculateDepartureTime, type ArrivalDay } from "@/lib/arrivalPlanner";
+import { calculateDepartureTime, describeDepartureStatus, departureMinutesDelta, type ArrivalDay } from "@/lib/arrivalPlanner";
 
 const ARRIVAL_KEY = "trajeto-arrival-planner";
 
@@ -19,6 +19,7 @@ export default function ArrivalTimePlannerCard(props: { route: RouteIntelligence
   const [arrivalTime, setArrivalTime] = useState(defaultArrivalTime);
   const [day, setDay] = useState<ArrivalDay>("today");
   const [buffer, setBuffer] = useState(10);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     try {
@@ -80,7 +81,31 @@ export default function ArrivalTimePlannerCard(props: { route: RouteIntelligence
       </div>
 
       {result ? (
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <>
+          {(() => {
+            const status = describeDepartureStatus(result.departure, now);
+            const delta = departureMinutesDelta(result.departure, now);
+            const liveMessage =
+              status === "upcoming"
+                ? "Saída programada em " + Math.max(1, delta) + " min."
+                : status === "due"
+                  ? "Janela de saída agora."
+                  : "A saída planejada já passou.";
+            const tone = status === "upcoming"
+              ? "border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035]"
+              : status === "due"
+                ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05]"
+                : "border-[#FFB86B]/20 bg-[#FFB86B]/[.05]";
+            return (
+              <div className={"mt-3 rounded-2xl border p-3 " + tone} role="status" aria-live="polite">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-white/45">Agora</p>
+                  <span className="text-xs font-black">{liveMessage}</span>
+                </div>
+              </div>
+            );
+          })()}
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
           <div className="rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] p-3">
             <Clock3 className="size-3.5 text-[#C7FF3C]" />
             <p className="mt-2 text-[0.5rem] font-black uppercase tracking-[.1em] text-white/30">Saída sugerida</p>
@@ -99,7 +124,8 @@ export default function ArrivalTimePlannerCard(props: { route: RouteIntelligence
             <p className="mt-1 text-sm font-black">{result.totalPlanningMinutes} min</p>
             <p className="mt-1 text-[0.52rem] text-white/35">rota + margem escolhida</p>
           </div>
-        </div>
+          </div>
+        </>
       ) : (
         <p className="mt-3 rounded-xl border border-amber-300/20 bg-amber-300/[.04] p-3 text-[0.58rem] text-amber-100">Não foi possível calcular com este horário.</p>
       )}
