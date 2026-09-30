@@ -53,7 +53,10 @@ export default function Stations() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [economyMode, setEconomyMode] = useState(getEconomyMode);
   const [nearby, setNearby] = useState(false);
-  const [showMap, setShowMap] = useState(() => isBroadAguasLindasQuery(getInitialQuery()));
+  const [showMap, setShowMap] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return isBroadAguasLindasQuery(getInitialQuery()) && window.matchMedia("(min-width: 768px)").matches;
+  });
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -639,11 +642,11 @@ export default function Stations() {
     <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_15%_0%,rgba(61,227,255,.08),transparent_28%),radial-gradient(circle_at_90%_8%,rgba(199,255,60,.06),transparent_24%),#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#3DE3FF]">Postos</p>
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">{showSavedOnly ? "Seus salvos." : "Encontre uma parada."}</h1>
+          <div className="min-w-0">
+            <p className="text-[0.52rem] font-black uppercase tracking-[.18em] text-[#3DE3FF]">Encontrar</p>
+            <h1 className="mobile-title mt-1 font-display text-[2rem] font-semibold tracking-[-.065em] sm:text-3xl">{showSavedOnly ? "Seus salvos" : "Postos perto de você"}</h1>
           </div>
-          <span className={"inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-[0.54rem] font-black " + (online ? "border-[#C7FF3C]/20 text-[#C7FF3C]" : "border-[#FFB86B]/25 text-[#FFB86B]")}>
+          <span className={"inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[0.5rem] font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/[.04] text-[#FFB86B]")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
             {online ? "online" : "offline"}
           </span>
@@ -662,28 +665,33 @@ export default function Stations() {
               </div>
             </form>
 
-            <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1">
-              <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#C7FF3C] px-3.5 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">
-                <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.58rem] font-black text-[#0B1014] disabled:opacity-40">
+                <Navigation className="mr-1 inline size-3.5" /> {locating ? "GPS…" : "Perto"}
               </button>
+              <button type="button" onClick={() => { setShowMap(true); requestAnimationFrame(() => document.getElementById(broadAguasLindasQuery ? "aguas-lindas-map" : "station-results-map")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 text-[0.58rem] font-black text-[#C9F7FF]">
+                <MapIcon className="mr-1 inline size-3.5" /> Mapa
+              </button>
+              <button type="button" onClick={openSaved} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.58rem] font-black text-white/65">
+                <Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}
+              </button>
+            </div>
+            <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1">
               {!staticRuntime && (
-                <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-[#3DE3FF] px-3.5 text-[0.6rem] font-black text-[#0B1014]" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 py-2 text-[0.6rem] font-bold text-white/65"}>
-                  <CircleCheck className="mr-1 inline size-3.5" /> {onlyOpen ? "Apenas abertos" : "Abertos agora"}
+                <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-9 shrink-0 rounded-full bg-[#3DE3FF] px-3 text-[0.52rem] font-black text-[#0B1014]" : "min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.025] px-3 text-[0.52rem] font-bold text-white/55"}>
+                  <CircleCheck className="mr-1 inline size-3" /> {onlyOpen ? "Abertos" : "Abertos agora"}
                 </button>
               )}
               {broadAguasLindasQuery && (
-                <button type="button" onClick={() => { setDirectorySort("price"); setFuelFilter("gasolina-comum"); if (priceFilterAvailable) setPriceOnly(true); requestAnimationFrame(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3.5 text-[0.6rem] font-black text-[#D9FF91]">
-                  <Fuel className="mr-1 inline size-3.5" /> Mais baratos
+                <button type="button" onClick={() => { setDirectorySort("price"); setFuelFilter("gasolina-comum"); if (priceFilterAvailable) setPriceOnly(true); requestAnimationFrame(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-9 shrink-0 rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3 text-[0.52rem] font-black text-[#D9FF91]">
+                  <Fuel className="mr-1 inline size-3" /> Menor preço
                 </button>
               )}
-              <button type="button" onClick={() => { setShowMap(true); requestAnimationFrame(() => document.getElementById(broadAguasLindasQuery ? "aguas-lindas-map" : "station-results-map")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3.5 text-[0.6rem] font-black text-[#C9F7FF]">
-                <MapIcon className="mr-1 inline size-3.5" /> Mapa
+              <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.52rem] font-bold text-white/50 disabled:opacity-30">
+                <WifiOff className="mr-1 inline size-3" /> Guardar offline
               </button>
-              <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65 disabled:opacity-35">
-                <WifiOff className="mr-1 inline size-3.5" /> Offline
+              <button type="button" onClick={() => void shareCurrent()} className="min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.52rem] font-bold text-white/50"><Share2 className="mr-1 inline size-3" /> Enviar
               </button>
-              <button type="button" onClick={openSaved} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}</button>
-              <button type="button" onClick={() => void shareCurrent()} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Share2 className="mr-1 inline size-3.5" /> Enviar</button>
             </div>
 
             {recentSearches.length > 0 && (
