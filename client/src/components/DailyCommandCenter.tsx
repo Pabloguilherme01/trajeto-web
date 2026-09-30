@@ -254,7 +254,7 @@ export default function DailyCommandCenter() {
             <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
               <CheckCircle2 className="size-4 text-[#C7FF3C]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Pronto</p>
-              <p className="mt-1 text-xs font-extrabold text-white">{completed}/4 itens</p><p className="mt-0.5 truncate text-[0.52rem] text-white/35">{nextSetup ? `Próximo: ${nextSetup}` : "Tudo preparado"}</p>
+              <p className="mt-1 text-xs font-extrabold text-white">{completed}/5 itens</p><p className="mt-0.5 truncate text-[0.52rem] text-white/35">{nextSetup ? `Próximo: ${nextSetup}` : "Tudo preparado"}</p>
             </div>
           </div>
         </div>
