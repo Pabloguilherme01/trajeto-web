@@ -46,6 +46,8 @@
 - [ ] Secret scanning e push protection habilitados no GitHub
 - [ ] Backups e procedimento de restauração testados
 - [ ] Logs de produção sem cookies, Authorization headers ou secrets
+- [ ] Rate limiting distribuído quando houver mais de uma instância do backend
+- [ ] Teste de penetração externo antes de expor integrações autenticadas ao público
 
 ## Critério de release
 
