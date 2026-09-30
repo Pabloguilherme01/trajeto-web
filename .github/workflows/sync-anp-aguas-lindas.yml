@@ -1,6 +1,11 @@
 name: Sync ANP Águas Lindas
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "client/public/data/aguas-lindas-anp.json"
+      - "client/public/data/aguas-lindas-anp-precos.json"
   schedule:
     - cron: "0 */12 * * *"
   workflow_dispatch:
@@ -19,29 +24,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: package.json
+
+      - name: Instalar dependências
+        run: |
+          npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+          npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+
       - name: Sincronizar ANP cadastral
         run: node scripts/sync-anp-aguas-lindas.mjs
-      - name: Instalar dependência de leitura de planilha
-        run: npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund --prefer-offline
+
       - name: Sincronizar preços ANP por posto
-        shell: bash
-        run: |
-          set -euo pipefail
-          if npm run sync:anp:precos:aguas-lindas; then
-            echo "Snapshot de preços ANP atualizado."
-          elif [ -s client/public/data/aguas-lindas-anp-precos.json ]; then
-            echo "ANP preços indisponível; snapshot anterior preservado."
-          else
-            echo "ANP preços indisponível; nenhum preço individual novo foi materializado."
-          fi
+        run: node scripts/sync-anp-prices-aguas-lindas.mjs
+
       - name: Commit snapshot
         run: |
           if [ -z "$(git status --porcelain -- client/public/data/aguas-lindas-anp.json client/public/data/aguas-lindas-anp-precos.json)" ]; then
-            echo "ANP sem alterações."
+            echo "ANP sem alterações semânticas."
             exit 0
           fi
           git config user.name "trajeto-anp-sync"
