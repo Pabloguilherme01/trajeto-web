@@ -2,8 +2,8 @@ export type MobileStation = {
   placeId: string;
   name: string;
   address: string;
-  lat?: number | null;
-  lng?: number | null;
+  lat: number;
+  lng: number;
   phone?: string | null;
   website?: string | null;
   openingHours: string[];
@@ -97,7 +97,7 @@ function isMobileStation(value: unknown): value is MobileStation {
   return typeof station.placeId === "string" &&
     typeof station.name === "string" &&
     typeof station.address === "string" &&
-    (station.lat == null || typeof station.lat === "number") &&
-    (station.lng == null || typeof station.lng === "number") &&
+    typeof station.lat === "number" &&
+    typeof station.lng === "number" &&
     Array.isArray(station.openingHours);
 }
