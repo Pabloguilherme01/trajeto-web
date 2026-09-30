@@ -19,7 +19,7 @@ describe("OfflineRouteHub", () => {
 
   it("filtra por categoria e usa busca textual local", () => {
     render(<OfflineRouteHub compact onSelectDestination={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Saúde" })[0]);
     expect(screen.getByText("Hospital Bom Jesus")).toBeTruthy();
     expect(screen.queryByText("Rodoviária")).toBeNull();
 
