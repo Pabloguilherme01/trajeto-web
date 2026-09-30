@@ -5,6 +5,7 @@ import type { PlaceCategory, PlaceEntity } from "@/lib/placeEntity";
 import { categoryFromGoogleType, categoryToGoogleTypes, placeMatchesQuery } from "@/lib/placeSearch";
 import { getDistanceKm, type Coordinates } from "@/lib/stationDirectorySearch";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
+import { OFFLINE_DESTINATIONS } from "@/lib/offlineDestinations";
 
 type Props = {
   category: PlaceCategory | "all";
@@ -125,10 +126,43 @@ export default function CityExplorerMap({ category, query = "", center, online, 
       });
   };
 
-  const localResults = useMemo(() => {
-    if (category !== "fuel") return [];
+  const offlinePlaceResults = useMemo<PlaceEntity[]>(() => {
+    const categoryMap: Record<string, PlaceCategory> = {
+      cidade: "territory",
+      saude: "health",
+      transporte: "transport",
+      servicos: "government",
+      assistencia: "government",
+      justica: "government",
+    };
     const text = query.trim();
-    return text.length >= 2
+    return OFFLINE_DESTINATIONS
+      .filter(item => category === "all" || categoryMap[item.category] === category)
+      .filter(item => !text || placeMatchesQuery([item.name, item.shortName, item.address, item.description, ...item.keywords], text))
+      .map(item => ({
+        id: "offline:" + item.id,
+        name: item.name,
+        category: categoryMap[item.category],
+        subcategory: item.shortName,
+        coordinates: null,
+        address: item.address,
+        neighborhood: null,
+        source: "Local" as const,
+        sourceDate: null,
+        status: "unknown" as const,
+        mapsUrl: item.sourceUrl,
+        isEnrichment: false,
+        evidence: [{
+          label: "Catálogo local offline",
+          source: item.sourceLabel,
+          updatedAt: null,
+        }],
+      }));
+  }, [category, query]);
+
+  const localResults = useMemo<PlaceEntity[]>(() => {
+    const text = query.trim();
+    const fuels = text.length >= 2
       ? localFuel.filter(place =>
           placeMatchesQuery(
             [place.name, place.address, place.neighborhood],
@@ -136,7 +170,8 @@ export default function CityExplorerMap({ category, query = "", center, online, 
           ),
         )
       : localFuel;
-  }, [category, localFuel, query]);
+    return [...fuels, ...offlinePlaceResults];
+  }, [localFuel, offlinePlaceResults, query]);
 
   const mapGooglePlaces = (places: GooglePlace[]) => places
     .map((place): PlaceEntity | null => {
@@ -301,11 +336,11 @@ export default function CityExplorerMap({ category, query = "", center, online, 
   }
 
   if (!online) {
-    const offlineMessage = category === "fuel" && localResults.length
-      ? "Os postos do catálogo local continuam disponíveis. Para outras categorias, resultados externos precisam de conexão."
-      : "As camadas externas precisam de conexão; o Trajeto não inventa pontos que não estejam no pacote local.";
-    const offlineSource = category === "fuel"
-      ? "ANP / catálogo local"
+    const offlineMessage = localResults.length
+      ? "Mapa offline de Águas Lindas ativo. Pontos locais, favoritos, busca e catálogo disponível continuam utilizáveis; dados externos entram quando houver conexão."
+      : "Mapa offline de Águas Lindas ativo. Esta categoria ainda não possui pontos locais suficientes no pacote instalado.";
+    const offlineSource = localResults.length
+      ? "ANP + catálogo local"
       : "pacote local disponível no aparelho";
 
     return (
