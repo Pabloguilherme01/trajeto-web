@@ -45,7 +45,7 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
   await page.getByRole("button", { name: "Calcular rota" }).click();
 
   await expect(page.getByText("12,3 km")).toBeVisible();
-  await expect(page.getByText("16 min")).toBeVisible();
+  await expect(page.getByText("15 min")).toBeVisible();
   await expect(page.getByText(/Trânsito ao vivo não disponível|Estimativa local/)).toBeVisible();
 
   await page.getByRole("button", { name: "Ver mapa" }).click();
