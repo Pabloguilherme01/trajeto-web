@@ -83,10 +83,10 @@ export function MapView({
     map.current = new window.google.maps.Map(mapContainer.current, {
       zoom: initialZoom,
       center: initialCenter,
-      mapTypeControl: true,
-      fullscreenControl: true,
+      mapTypeControl: false,
+      fullscreenControl: false,
       zoomControl: true,
-      streetViewControl: true,
+      streetViewControl: false,
       mapTypeId,
       mapId: "DEMO_MAP_ID",
       renderingType: window.google.maps.RenderingType.VECTOR,
@@ -108,10 +108,10 @@ export function MapView({
         map.current = new window.google.maps.Map(mapContainer.current, {
           zoom: initialZoom,
           center: initialCenter,
-          mapTypeControl: true,
-          fullscreenControl: true,
+          mapTypeControl: false,
+          fullscreenControl: false,
           zoomControl: true,
-          streetViewControl: true,
+          streetViewControl: false,
           mapTypeId,
           renderingType: window.google.maps.RenderingType.RASTER,
         });
