@@ -103,7 +103,6 @@ export default function Stations() {
   }, []);
 
   useEffect(() => {
-    if (savedOnly) return;
     let cancelled = false;
     setPriceState("loading");
     void loadAguasLindasAnpPrices()
@@ -116,7 +115,7 @@ export default function Stations() {
         if (!cancelled) setPriceState("error");
       });
     return () => { cancelled = true; };
-  }, [savedOnly]);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -559,7 +558,7 @@ export default function Stations() {
           <div className="border-t border-white/8 p-3 text-[0.55rem] leading-relaxed text-white/35">
             <p>O catálogo local é a base para busca e uso offline. Dados ANP são conciliados por CNPJ quando disponíveis. Google é reservado para mapa, referências e navegação.</p>
             <p className="mt-2">Preço individual mostra produto + data + origem. Um cadastro ANP não significa automaticamente preço de bomba atual ou funcionamento confirmado.</p>
-            <p className="mt-2">Último snapshot ANP consultável: {anpQuery.data?.retrievedAt ? formatDate(anpQuery.data.retrievedAt) : "não informado"}.</p>
+            <p className="mt-2">Último snapshot ANP consultável: {formatDate(anpQuery.data?.retrievedAt ?? offlineAnpRetrievedAt)}.</p>
           </div>
         </details>
 
