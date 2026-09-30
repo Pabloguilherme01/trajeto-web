@@ -12,12 +12,14 @@ describe("MobileUtilityHub", () => {
     await user.click(screen.getByRole("button", { name: /Minha rotina/i }));
     expect(screen.getAllByText("Antes de sair").length).toBeGreaterThan(0);
 
-    await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
-    expect(screen.getAllByRole("button", { name: /Meu veículo/i })[0].getAttribute("aria-expanded")).toBe("true");
+    const vehicleToggle = () => screen.getAllByRole("button", { name: /Meu veículo/i })
+      .find(button => button.getAttribute("aria-controls") === "utility-panel-veiculo");
+    await user.click(vehicleToggle()!);
+    expect(vehicleToggle()!.getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText("Não deixe o veículo virar surpresa.")).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: /Meu veículo/i }));
-    expect(screen.getAllByRole("button", { name: /Meu veículo/i })[0].getAttribute("aria-expanded")).toBe("false");
+    await user.click(vehicleToggle()!);
+    expect(vehicleToggle()!.getAttribute("aria-expanded")).toBe("false");
     expect(screen.queryByText("Não deixe o veículo virar surpresa.")).toBeNull();
   });
 });
