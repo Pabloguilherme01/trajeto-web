@@ -38,6 +38,28 @@ function isBroadAguasLindasQuery(value: string) {
     normalized.includes("postos de aguas lindas");
 }
 
+type FuelFilter = "all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv";
+type DirectoryCardShape = { key: string; local: ReturnType<typeof searchAguasLindasStations>[number] | null; anp: ReturnType<typeof groupAnpFuelRows>[number] | null };
+
+function matchesFuelFilter(item: DirectoryCardShape, filter: FuelFilter, pricesByCnpj: Map<string, AnpPriceSnapshot["data"]>) {
+  if (filter === "all") return true;
+  if (pricesByCnpj.get(item.key)?.some(price => price.productKey === filter)) return true;
+  return item.anp?.products?.some(product => {
+    const text = (product.produto || "").toLocaleLowerCase("pt-BR");
+    return filter === "gasolina-comum"
+      ? text.includes("gasolina") && !text.includes("aditivada")
+      : filter === "etanol"
+        ? text.includes("etanol")
+        : filter === "diesel-s10"
+          ? text.includes("s10")
+          : filter === "diesel-s500"
+            ? text.includes("s500")
+            : filter === "glp-p13"
+              ? text.includes("glp") || text.includes("p13")
+              : text.includes("gnv");
+  }) ?? false;
+}
+
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
   return new URLSearchParams(window.location.search).get("q") || corridorPresets[0]?.query || "postos";
@@ -73,7 +95,7 @@ export default function Stations() {
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
-  const [fuelFilter, setFuelFilter] = useState<"all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv">("all");
+  const [fuelFilter, setFuelFilter] = useState<FuelFilter>("all");
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -181,26 +203,26 @@ export default function Stations() {
     });
   }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj]);
 
-  const directoryCardsForDisplay = useMemo(() => directoryCardsFiltered.filter(item => {
-    if (fuelFilter === "all") return true;
-    if (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter)) return true;
-    return item.anp?.products?.some(product => {
-      const text = (product.produto || "").toLocaleLowerCase("pt-BR");
-      return fuelFilter === "gasolina-comum"
-        ? text.includes("gasolina") && !text.includes("aditivada")
-        : fuelFilter === "etanol"
-          ? text.includes("etanol")
-          : fuelFilter === "diesel-s10"
-            ? text.includes("s10")
-            : fuelFilter === "diesel-s500"
-              ? text.includes("s500")
-              : fuelFilter === "glp-p13"
-                ? text.includes("glp") || text.includes("p13")
-                : fuelFilter === "gnv"
-                  ? text.includes("gnv")
-                  : false;
-    }) ?? false;
-  }), [directoryCardsFiltered, fuelFilter, pricesByCnpj]);
+  const directoryCardsForDisplay = useMemo(
+    () => directoryCardsFiltered.filter(item => matchesFuelFilter(item, fuelFilter, pricesByCnpj)),
+    [directoryCardsFiltered, fuelFilter, pricesByCnpj],
+  );
+
+  const fuelOptions = useMemo<Array<{ id: FuelFilter; label: string }>>(
+    () => [
+      { id: "all", label: "Todos" },
+      { id: "gasolina-comum", label: "Gasolina" },
+      { id: "etanol", label: "Etanol" },
+      { id: "diesel-s10", label: "Diesel S10" },
+      { id: "diesel-s500", label: "Diesel S500" },
+      { id: "glp-p13", label: "GLP P13" },
+      { id: "gnv", label: "GNV" },
+    ],
+    [],
+  );
+  const fuelOptionCounts = useMemo(() => Object.fromEntries(
+    fuelOptions.map(option => [option.id, option.id === "all" ? directoryCardsFiltered.length : directoryCardsFiltered.filter(item => matchesFuelFilter(item, option.id, pricesByCnpj)).length]),
+  ) as Record<FuelFilter, number>, [directoryCardsFiltered, fuelOptions, pricesByCnpj]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -1006,34 +1028,35 @@ export default function Stations() {
                 })}
               </div>
               <div className="mobile-scroll-x mt-2 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Filtrar por combustível">
-                {[
-                  { id: "all" as const, label: "Todos" },
-                  { id: "gasolina-comum" as const, label: "Gasolina" },
-                  { id: "etanol" as const, label: "Etanol" },
-                  { id: "diesel-s10" as const, label: "Diesel S10" },
-                  { id: "diesel-s500" as const, label: "Diesel S500" },
-                  { id: "glp-p13" as const, label: "GLP P13" },
-                  { id: "gnv" as const, label: "GNV" },
-                ].map(option => {
+                {fuelOptions.map(option => {
                   const active = fuelFilter === option.id;
+                  const count = fuelOptionCounts[option.id];
+                  const disabled = option.id !== "all" && count === 0;
                   return (
                     <button
                       key={option.id}
                       type="button"
                       aria-pressed={active}
+                      disabled={disabled}
                       onClick={() => setFuelFilter(option.id)}
-                      className={"min-h-9 shrink-0 rounded-full border px-3 text-[0.52rem] font-black " + (
+                      className={"min-h-9 shrink-0 rounded-full border px-3 text-[0.52rem] font-black disabled:cursor-not-allowed disabled:opacity-25 " + (
                         active
                           ? "border-[#3DE3FF]/25 bg-[#3DE3FF]/10 text-[#C9F7FF]"
                           : "border-white/8 bg-white/[.025] text-white/45"
                       )}
                     >
-                      {option.label}
+                      {option.label} · {count}
                     </button>
                   );
                 })}
               </div>
             </div>
+            {fuelFilter !== "all" && (
+              <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] px-3 py-2 text-[0.52rem] font-bold text-[#C9F7FF]" role="status" aria-live="polite">
+                <span>Filtro: {fuelOptions.find(option => option.id === fuelFilter)?.label} · {directoryCardsForDisplay.length} posto(s)</span>
+                <button type="button" onClick={() => setFuelFilter("all")} className="min-h-8 rounded-lg border border-white/10 px-2.5 text-[0.48rem] font-black text-white/70">Remover</button>
+              </div>
+            )}
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
               <span>{directoryCardsForDisplay.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
