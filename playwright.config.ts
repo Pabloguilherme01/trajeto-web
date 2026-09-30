@@ -17,6 +17,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run build:client && npx vite preview --host 127.0.0.1 --port 4173",
+    env: { ...process.env, VITE_STATIC_RUNTIME: "true" },
     url: "http://127.0.0.1:4173",
     reuseExistingServer: false,
     timeout: 120_000,
