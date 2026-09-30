@@ -1,6 +1,7 @@
 import { MapView } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Navigation, Minus, Plus, RotateCcw } from "lucide-react";
+import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
+import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 
 export type StationMapItem = {
   id?: string;
@@ -29,7 +30,7 @@ function sourceLabel(source?: StationMapItem["source"]) {
   return "local";
 }
 
-function OfflineStationMap({ stations }: { stations: StationMapItem[] }) {
+function OfflineStationMap({ stations, onSelectStation }: { stations: StationMapItem[]; onSelectStation?: (station: StationMapItem) => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(stations[0]?.id ?? null);
   const [zoom, setZoom] = useState(1);
 
@@ -76,7 +77,7 @@ function OfflineStationMap({ stations }: { stations: StationMapItem[] }) {
           const isSelected = point.station.id === selectedId;
           const official = point.station.source === "ANP";
           return (
-            <g key={point.station.id || `station-${point.index}`} onClick={() => setSelectedId(point.station.id ?? null)} className="cursor-pointer">
+            <g key={point.station.id || `station-${point.index}`} onClick={() => { setSelectedId(point.station.id ?? null); onSelectStation?.(point.station); }} className="cursor-pointer">
               {isSelected && <circle cx={point.x} cy={point.y} r="18" fill={official ? "#C7FF3C" : "#3DE3FF"} opacity=".22" />}
               <circle cx={point.x} cy={point.y} r={isSelected ? 10 : 8} fill={official ? "#C7FF3C" : "#3DE3FF"} stroke="#163840" strokeWidth="3" />
               <text x={point.x} y={point.y + 4} textAnchor="middle" fontSize="8" fontWeight="900" fill="#163840">{point.index + 1}</text>
@@ -102,14 +103,32 @@ function OfflineStationMap({ stations }: { stations: StationMapItem[] }) {
             {selected?.cnpj && <p className="mt-1 text-[.52rem] font-semibold text-[#7D8C84]">CNPJ {selected.cnpj}{selected.brand ? " · " + selected.brand : ""}</p>}
           </div>
           {selected && (
-            <button
-              type="button"
-              onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selected.lat},${selected.lng}`, "_blank", "noopener,noreferrer")}
-              className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white"
-              aria-label="Navegar até o posto selecionado"
-            >
-              <Navigation className="size-4" />
-            </button>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selected.lat},${selected.lng}&travelmode=driving&dir_action=navigate`, "_blank", "noopener,noreferrer")}
+                className="grid size-10 place-items-center rounded-xl bg-[#163840] text-white"
+                aria-label="Navegar pelo Google Maps"
+              >
+                <Navigation className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => window.open(buildWazeNavigationUrl(selected.address, { lat: selected.lat, lng: selected.lng }), "_blank", "noopener,noreferrer")}
+                className="grid size-10 place-items-center rounded-xl border border-[#163840]/10 bg-white text-[#163840]"
+                aria-label="Navegar pelo Waze"
+              >
+                <span className="text-[.55rem] font-black">WZ</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => window.open(buildAppleMapsDirectionsUrl(`${selected.lat},${selected.lng}`), "_blank", "noopener,noreferrer")}
+                className="grid size-10 place-items-center rounded-xl border border-[#163840]/10 bg-white text-[#163840]"
+                aria-label="Navegar pelo Apple Maps"
+              >
+                <Apple className="size-4" />
+              </button>
+            </div>
           )}
         </div>
         <div className="mt-2 flex items-center justify-between gap-3 text-[.5rem] font-bold text-[#7D8C84]">
@@ -125,10 +144,12 @@ export function StationMap({
   stations,
   heightClassName = "h-[min(68vh,620px)]",
   showTraffic = false,
+  onSelectStation,
 }: {
   stations: StationMapItem[];
   heightClassName?: string;
   showTraffic?: boolean;
+  onSelectStation?: (station: StationMapItem) => void;
 }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -187,10 +208,16 @@ export function StationMap({
             ${station.cnpj ? `<span style="display:block;margin-top:4px;font-size:11px;color:#7a8882">CNPJ ${escapeHtml(station.cnpj)}</span>` : ""}
             ${station.brand ? `<span style="display:block;margin-top:3px;font-size:11px;color:#7a8882">${escapeHtml(station.brand)}</span>` : ""}
             <span style="display:inline-block;margin-top:7px;padding:4px 7px;border-radius:999px;background:${official ? "#ECFFBA" : "#E0FBFF"};color:#34524A;font-size:10px;font-weight:800">${official ? "Fonte ANP" : "Referência de mapa"}</span>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:9px;padding:8px 11px;border-radius:8px;background:#163840;color:#fff;text-decoration:none;font-size:11px;font-weight:700">Navegar</a>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}&travelmode=driving&dir_action=navigate" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:8px 10px;border-radius:8px;background:#163840;color:#fff;text-decoration:none;font-size:11px;font-weight:700">Google</a>
+              <a href="${buildWazeNavigationUrl(station.address, { lat: station.lat, lng: station.lng })}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:8px 10px;border-radius:8px;background:#eefbff;color:#163840;text-decoration:none;font-size:11px;font-weight:700">Waze</a>
+              <a href="${buildAppleMapsDirectionsUrl(`${station.lat},${station.lng}`)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:8px 10px;border-radius:8px;background:#f4f4f4;color:#163840;text-decoration:none;font-size:11px;font-weight:700">Apple</a>
+              ${station.cnpj ? `<a href="#posto-${encodeURIComponent(station.cnpj)}" style="display:inline-block;padding:8px 10px;border-radius:8px;border:1px solid #d8e0dc;color:#34524A;text-decoration:none;font-size:11px;font-weight:700">Ficha</a>` : ""}
+            </div>
           </div>`,
         );
         popup.open({ map, anchor: marker });
+        onSelectStation?.(station);
       });
 
       markers.current.push(marker);
@@ -209,7 +236,7 @@ export function StationMap({
   }
 
   if (offline) {
-    return <div className={`relative ${heightClassName}`}><OfflineStationMap stations={stations} /></div>;
+    return <div className={`relative ${heightClassName}`}><OfflineStationMap stations={stations} onSelectStation={onSelectStation} /></div>;
   }
 
   return (
@@ -219,7 +246,7 @@ export function StationMap({
       initialCenter={{ lat: -15.7545, lng: -48.2816 }}
       initialZoom={12}
       showTraffic={showTraffic}
-      fallback={<OfflineStationMap stations={stations} />}
+      fallback={<OfflineStationMap stations={stations} onSelectStation={onSelectStation} />}
       onMapReady={map => {
         mapRef.current = map;
         setReady(true);
