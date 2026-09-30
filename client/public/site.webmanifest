@@ -5,41 +5,19 @@
   "lang": "pt-BR",
   "start_url": "./postos?q=postos",
   "scope": "./",
+  "id": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "background_color": "#0B1014",
   "theme_color": "#0B1014",
-  "categories": [
-    "navigation",
-    "travel",
-    "utilities"
-  ],
+  "categories": ["navigation", "travel", "utilities"],
   "prefer_related_applications": false,
   "icons": [
-    {
-      "src": "./favicon.svg",
-      "sizes": "64x64",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./favicon.svg",
-      "sizes": "64x64",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./favicon.svg",
-      "sizes": "64x64",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./favicon.svg",
-      "sizes": "64x64",
-      "type": "image/png",
-      "purpose": "any"
-    }
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "./icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "./icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any"}
   ],
   "shortcuts": [
     {
@@ -48,13 +26,7 @@
       "description": "Abrir rapidamente o planejador e continuar a última viagem salva",
       "url": "./planejar",
       "id": "retomar-rota",
-      "icons": [
-        {
-          "src": "./favicon.svg",
-          "sizes": "64x64",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "./icon-192.png", "sizes": "192x192", "type": "image/png"}]
     },
     {
       "name": "Encontrar postos",
@@ -62,13 +34,7 @@
       "description": "Abrir a busca de postos",
       "url": "./postos?q=postos",
       "id": "postos",
-      "icons": [
-        {
-          "src": "./favicon.svg",
-          "sizes": "64x64",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "./icon-192.png", "sizes": "192x192", "type": "image/png"}]
     },
     {
       "name": "Perto de mim",
@@ -76,13 +42,7 @@
       "description": "Abrir rapidamente a busca de postos próximos",
       "url": "./postos?q=postos%20pr%C3%B3ximos",
       "id": "perto",
-      "icons": [
-        {
-          "src": "./favicon.svg",
-          "sizes": "64x64",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "./icon-192.png", "sizes": "192x192", "type": "image/png"}]
     },
     {
       "name": "Salvos no aparelho",
@@ -90,18 +50,8 @@
       "description": "Abrir locais e recursos salvos neste dispositivo",
       "url": "./salvos",
       "id": "salvos",
-      "icons": [
-        {
-          "src": "./favicon.svg",
-          "sizes": "64x64",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "./icon-192.png", "sizes": "192x192", "type": "image/png"}]
     }
   ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "id": "./",
-  "display_override": ["window-controls-overlay", "standalone"]
+  "launch_handler": {"client_mode": "navigate-existing"}
 }
