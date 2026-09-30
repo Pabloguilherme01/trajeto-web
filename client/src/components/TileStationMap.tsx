@@ -116,12 +116,13 @@ export default function TileStationMap({
     setZoom(value => Math.max(11, Math.min(17, value + delta)));
   };
 
+  const tileFallback = Boolean(fallback && tileErrors >= 5);
+
   if (!drawable.length || tileFallback) {
     return <div className={"grid " + heightClassName + " place-items-center bg-[#E8F0EA] p-6 text-center text-[#163840]"}>{fallback ?? <div><p className="text-sm font-black">Mapa sem coordenadas suficientes.</p><p className="mt-2 text-xs text-[#607169]">Os locais continuam disponíveis em lista.</p></div>}</div>;
   }
 
   const selected = drawable.find(item => item.id === selectedId) ?? null;
-  const tileFallback = Boolean(fallback && tileErrors >= Math.min(5, tiles.length));
 
   return (
     <div className={"relative overflow-hidden rounded-[1.25rem] bg-[#dfe9e2] " + heightClassName}>
