@@ -718,11 +718,22 @@ export default function Stations() {
               </button>
               {!staticRuntime && (
                 <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-[#3DE3FF] px-3.5 text-[0.6rem] font-black text-[#0B1014]" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 py-2 text-[0.6rem] font-bold text-white/65"}>
-                  <CircleCheck className="mr-1 inline size-3.5" /> Abertos agora
+                  <CircleCheck className="mr-1 inline size-3.5" /> {onlyOpen ? "Apenas abertos" : "Abertos agora"}
                 </button>
               )}
-              <button type="button" onClick={() => void shareCurrent()} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Share2 className="mr-1 inline size-3.5" /> Enviar</button>
+              {broadAguasLindasQuery && (
+                <button type="button" onClick={() => { setDirectorySort("price"); setFuelFilter("gasolina-comum"); requestAnimationFrame(() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3.5 text-[0.6rem] font-black text-[#D9FF91]">
+                  <Fuel className="mr-1 inline size-3.5" /> Mais baratos
+                </button>
+              )}
+              <button type="button" onClick={() => { setShowMap(true); requestAnimationFrame(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className="min-h-11 shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3.5 text-[0.6rem] font-black text-[#C9F7FF]">
+                <MapIcon className="mr-1 inline size-3.5" /> Mapa
+              </button>
+              <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65 disabled:opacity-35">
+                <WifiOff className="mr-1 inline size-3.5" /> Offline
+              </button>
               <button type="button" onClick={openSaved} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}</button>
+              <button type="button" onClick={() => void shareCurrent()} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3.5 text-[0.6rem] font-bold text-white/65"><Share2 className="mr-1 inline size-3.5" /> Enviar</button>
             </div>
 
             {recentSearches.length > 0 && (
