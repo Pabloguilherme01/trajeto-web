@@ -156,7 +156,7 @@ export default function CityExplorerMap({ category, query = "", center, online, 
         isEnrichment: false,
         evidence: [{
           label: "Catálogo local offline",
-          source: item.sourceLabel,
+          source: "Local",
           updatedAt: null,
         }],
       }));
