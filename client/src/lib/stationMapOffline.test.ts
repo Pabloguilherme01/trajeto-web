@@ -1,4 +1,14 @@
 import { describe, expect, it, beforeEach } from "vitest";
+
+const storage = new Map<string, string>();
+const localStorageMock = {
+  clear: () => storage.clear(),
+  getItem: (key: string) => storage.get(key) ?? null,
+  setItem: (key: string, value: string) => { storage.set(key, value); },
+  removeItem: (key: string) => { storage.delete(key); },
+};
+
+Object.defineProperty(globalThis, "localStorage", { value: localStorageMock, configurable: true });
 import { cacheOfflineMapStations, getOfflineMapAgeLabel, getOfflineMapStations } from "./stationMapOffline";
 
 describe("stationMapOffline", () => {
