@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";\nimport { Link } from "wouter";\nimport { appUrl } from "@/lib/appUrl";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
@@ -239,7 +239,7 @@ export function StationDirectoryCard({
         <span className="text-[0.58rem] font-black text-[#C9F7FF]">{confidence}% · fonte/data explícitas</span>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="mt-3 grid grid-cols-3 gap-2">\n        {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="col-span-3 min-h-11 flex items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-[0.58rem] font-black text-[#C9F7FF]">Abrir ficha completa</Link>}
         <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-3 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
