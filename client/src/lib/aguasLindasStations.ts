@@ -99,23 +99,24 @@ export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
 export function searchAguasLindasStations(query: string) {
   const normalized = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
   const normalizedCompact = normalized.replace(/[^a-z0-9]+/g, " ").trim();
+  const isAguasLindasQuery =
+    normalizedCompact === "aguas lindas" ||
+    normalizedCompact.startsWith("aguas lindas de goias") ||
+    normalizedCompact.startsWith("postos em aguas lindas") ||
+    normalizedCompact.startsWith("postos de aguas lindas") ||
+    (normalizedCompact.includes("postos") && normalizedCompact.includes("aguas lindas"));
+
   if (
     !normalizedCompact ||
     normalizedCompact === "postos" ||
     normalizedCompact === "combustiveis" ||
     normalizedCompact === "postos de combustiveis" ||
-    normalizedCompact === "aguas lindas" ||
-    normalizedCompact === "aguas lindas de goias" ||
-    normalizedCompact === "postos em aguas lindas" ||
-    normalizedCompact === "postos de aguas lindas"
+    isAguasLindasQuery
   ) {
     return AGUAS_LINDAS_STATIONS;
   }
   return AGUAS_LINDAS_STATIONS.filter(station =>
-    [station.displayName, station.legalName, station.cnpj, station.neighborhood ?? "", station.address ?? "", station.brand ?? "", ...station.aliases]
-      .join(" ")
-      .toLocaleLowerCase("pt-BR")
-      .includes(normalized),
+    getStationSearchText(station).includes(normalized),
   );
 }
 
