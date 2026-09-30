@@ -33,7 +33,7 @@ function iconFor(category:PlaceCategory){
 }
 
 export default function Explore(){
-  const [,setLocation]=useLocation();
+  const [location,setLocation]=useLocation();
   const initialQuery = typeof window !== "undefined"
     ? new URLSearchParams(window.location.search).get("q") || ""
     : "";
