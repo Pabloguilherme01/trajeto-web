@@ -1,21 +1,8 @@
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { corridorPresets, type CorridorPreset } from "@/lib/corridorPresets";
-
-
-
-
-
-
-
-
 import DailyCommandCenter from "@/components/DailyCommandCenter";
 import MobileUtilityHub from "@/components/MobileUtilityHub";
-
-
-
-
-
 import { ArrowRight, BadgeCheck, Bookmark, Download, Fuel, History, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { getLastTrip, getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
@@ -156,8 +143,8 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="premium-surface border-b border-white/8">
-          <div className="container grid gap-7 py-8 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
+        <section className="premium-surface route-grid border-b border-white/8">
+          <div className="container grid gap-6 py-6 sm:gap-12 sm:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center lg:py-24">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#C7FF3C]/25 bg-[#C7FF3C]/8 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#D9FF91]">
                 <Navigation className="size-3.5" /> Águas Lindas de Goiás · Entorno
@@ -193,7 +180,7 @@ export default function Home() {
               </div>
             </div>
 
-            <section className="mobile-glass rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
+            <section className="mobile-glass mobile-card rounded-[1.4rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_60px_rgba(0,0,0,.28)] sm:rounded-[1.75rem] sm:p-7" aria-labelledby="search-title">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#3DE3FF]">Comece aqui</p>
