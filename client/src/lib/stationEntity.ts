@@ -44,3 +44,24 @@ export function freshnessLabel(value?: string | null) {
   if (days === 1) return "há 1 dia";
   return "há " + days + " dias";
 }
+
+
+export type StationEvidenceItem = {
+  key: "cadastro" | "preco" | "mapa";
+  label: string;
+  source: "ANP" | "Mapa" | "local";
+  at: string | null;
+  freshness: string;
+};
+
+export function stationEvidence(params: {
+  anp?: AnpStation | null;
+  local?: LocalStationRecord | null;
+  price?: AnpPriceRecord | null;
+}): StationEvidenceItem[] {
+  return [
+    { key: "cadastro", label: "Cadastro", source: params.anp ? "ANP" : "local", at: params.anp?.dataObtencao || params.local?.verifiedAt || null, freshness: freshnessLabel(params.anp?.dataObtencao || params.local?.verifiedAt) },
+    { key: "preco", label: "Preço", source: "ANP", at: params.price?.collectionDate || null, freshness: freshnessLabel(params.price?.collectionDate) },
+    { key: "mapa", label: "Mapa", source: "Mapa", at: params.local?.mapData?.observedAt || null, freshness: freshnessLabel(params.local?.mapData?.observedAt) },
+  ];
+}
