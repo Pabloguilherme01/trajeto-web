@@ -8,7 +8,7 @@ import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileSta
 import { getEconomyMode, getRecentSearches, mobilePreferenceEvent, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
@@ -238,9 +238,6 @@ export default function Stations() {
     toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");
   };
 
-
-  const visibleLocalDirectory = localDirectory.slice(0, localVisibleCount);
-  const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     hasCoordinates ? { query, lat, lng, limit: economyMode ? 8 : 20 } : { query, limit: economyMode ? 8 : 20 },
@@ -606,69 +603,6 @@ export default function Stations() {
     } catch {
       toast.error("Não foi possível atualizar agora. O último cache continua disponível.");
     }
-  };
-
-  const copyCnpj = async (cnpj: string) => {
-    try {
-      await navigator.clipboard.writeText(cnpj);
-      vibration();
-      toast.message("CNPJ copiado.");
-    } catch {
-      toast.error("Não foi possível copiar o CNPJ.");
-    }
-  };
-
-  const copyAddress = async (station: typeof localDirectory[number]) => {
-    if (!station.address) {
-      toast.message("Este cadastro não possui endereço consolidado.");
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(`${station.address}, ${station.neighborhood ?? ""}, Águas Lindas de Goiás - GO`);
-      toast.message("Endereço copiado.");
-    } catch {
-      toast.error("Não foi possível copiar o endereço.");
-    }
-  };
-
-
-  const exportLocalCsv = () => {
-    const headers = [
-      "id","nome_comercial","razao_social","cnpj","bairro","endereco","bandeira","situacao","aliases",
-      "qualidade_dado","origem_dado","observacao_cadastro","telefone_mapa","avaliacao_mapa","avaliacoes_mapa",
-      "horario_mapa","bandeira_observada_mapa"
-    ];
-    const csvValue = (value: unknown) => {
-      const text = value == null ? "" : String(value);
-      return '"' + text.replace(/"/g, '""') + '"';
-    };
-    const rows = localDirectory.map(station => [
-      station.id,
-      station.displayName,
-      station.legalName,
-      station.cnpj,
-      station.neighborhood ?? "",
-      station.address ?? "",
-      station.brand ?? "",
-      station.status,
-      station.aliases.join(" | "),
-      getStationDataQualityLabel(station),
-      station.dataOrigin ?? "",
-      station.sourceNote,
-      station.mapData?.phone ?? "",
-      station.mapData?.rating ?? "",
-      station.mapData?.reviewCount ?? "",
-      station.mapData?.hours ?? "",
-      station.mapData?.observedBrand ?? "",
-    ]);
-    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "trajeto-postos-aguas-lindas-2026-09-30.csv";
-    anchor.click();
-    URL.revokeObjectURL(url);
-    toast.message(localDirectory.length + " cadastro(s) exportado(s).");
   };
 
   const exportAnpCsv = () => {
