@@ -2,14 +2,14 @@ import { ArrowRight, Compass, Fuel, HeartPulse, Landmark, MapPin, Navigation, Ro
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { AGUAS_LINDAS_STATIONS, searchAguasLindasStations } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_STATIONS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { getRecentSearches, rememberSearch } from "@/lib/mobilePreferences";
 import { getLocalRoutePresets } from "@/lib/localRoutePresets";
 
 const googleSearch = (query: string) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
 
 const quickActions = [
-  { label: "Postos", hint: "41 cadastros locais", icon: Fuel, kind: "internal", query: "postos" },
+  { label: "Postos", hint: `${AGUAS_LINDAS_STATIONS_COUNT} cadastros locais`, icon: Fuel, kind: "internal", query: "postos" },
   { label: "Rotas rápidas", hint: "UPA, hospital, centro e mais", icon: Route, kind: "routes", query: "" },
   { label: "Serviços públicos", hint: "Saúde, segurança e cidadania", icon: Landmark, kind: "services", query: "" },
   { label: "Perto de mim", hint: "Usar localização do aparelho", icon: Compass, kind: "nearby", query: "" },
@@ -128,7 +128,7 @@ export default function SearchPage() {
         </section>
 
         <section className="mt-6">
-          <div className="flex items-end justify-between gap-3"><div><p className="text-[0.54rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Postos de Águas Lindas</p><h2 className="mt-1 text-xl font-black">{query ? stationResults.length + " resultado(s)" : "Catálogo local"}</h2></div><span className="text-[0.55rem] text-white/25">41 cadastros</span></div>
+          <div className="flex items-end justify-between gap-3"><div><p className="text-[0.54rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Postos de Águas Lindas</p><h2 className="mt-1 text-xl font-black">{query ? stationResults.length + " resultado(s)" : "Catálogo local"}</h2></div><span className="text-[0.55rem] text-white/25">{AGUAS_LINDAS_STATIONS_COUNT} cadastros · {AGUAS_LINDAS_STATIONS_UPDATED_AT}</span></div>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {stationResults.map(item => <button key={item.id} type="button" onClick={() => setLocation(appUrl("/local/" + encodeURIComponent(item.id)))} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/20 active:scale-[.99]">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-4" /></span>
