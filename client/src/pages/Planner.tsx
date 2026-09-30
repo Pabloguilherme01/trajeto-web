@@ -36,6 +36,11 @@ function formatArrival(seconds: number | null | undefined) {
   return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
 }
 
+function estimateDetourFuelCost(detourKm: number | null | undefined, price: number | null | undefined, kmPerLiter: number) {
+  if (!Number.isFinite(detourKm) || !Number.isFinite(price) || detourKm == null || price == null || kmPerLiter <= 0) return null;
+  return (detourKm / kmPerLiter) * price;
+}
+
 export default function Planner() {
   const [location, setLocation] = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(window.location.search), [location]);
@@ -52,6 +57,7 @@ export default function Planner() {
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
+  const [consumptionKmPerLiter, setConsumptionKmPerLiter] = useState(10);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
   const staticRuntime = isGitHubPagesRuntime();
@@ -441,12 +447,60 @@ export default function Planner() {
 
             {planned.recommendation && (
               <section className="mt-3 rounded-[1.5rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4">
-                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Parada sugerida</p>
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Posto no corredor</p>
                 <h3 className="mt-1 text-lg font-black">{planned.recommendation.name}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-white/45">{planned.recommendation.detourSource === "real" ? "Desvio calculado pela rota real" : "Desvio estimado"} · {planned.recommendation.detourKm.toLocaleString("pt-BR")} km</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/45">
+                  {planned.recommendation.detourSource === "real" ? "Desvio calculado pela rota real" : "Desvio geométrico estimado"} · {planned.recommendation.detourKm.toLocaleString("pt-BR")} km
+                </p>
+
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => openStation(planned.stops.find(stop => stop.name === planned.recommendation?.name) ?? planned.stops[0])} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota até o posto</button>
-                  <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Ver postos</button>
+                  <div className="rounded-xl border border-white/8 bg-white/[.025] p-3">
+                    <p className="text-[0.48rem] font-black uppercase tracking-[.1em] text-white/30">Preço de referência</p>
+                    <p className="mt-1 text-sm font-black text-[#D9FF91]">
+                      {Number.isFinite(Number(planned.recommendation.price))
+                        ? Number(planned.recommendation.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/L"
+                        : "não disponível"}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/8 bg-white/[.025] p-3">
+                    <p className="text-[0.48rem] font-black uppercase tracking-[.1em] text-white/30">Custo do desvio</p>
+                    <p className="mt-1 text-sm font-black text-white">
+                      {(() => {
+                        const cost = estimateDetourFuelCost(
+                          planned.recommendation?.detourKm,
+                          Number(planned.recommendation?.price),
+                          consumptionKmPerLiter,
+                        );
+                        return cost == null ? "não calculado" : cost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+                      })()}
+                    </p>
+                  </div>
+                </div>
+
+                <label className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[.02] px-3 py-2.5">
+                  <span className="text-[0.55rem] font-bold text-white/50">Seu consumo estimado</span>
+                  <span className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="3"
+                      max="40"
+                      step="0.1"
+                      value={consumptionKmPerLiter}
+                      onChange={event => setConsumptionKmPerLiter(Math.min(40, Math.max(3, Number(event.target.value) || 10)))}
+                      className="w-16 rounded-lg border border-white/10 bg-[#0B1014] px-2 py-1.5 text-right text-xs font-black text-white outline-none"
+                      aria-label="Consumo estimado do veículo em quilômetros por litro"
+                    />
+                    <span className="text-[0.52rem] text-white/35">km/L</span>
+                  </span>
+                </label>
+                <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">
+                  O custo do desvio é uma estimativa somente quando há preço de referência e desvio calculado; usa o consumo informado por você. Não é economia garantida.
+                </p>
+
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => openStation(planned.stops.find(stop => stop.name === planned.recommendation?.name) ?? planned.stops[0])} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir até o posto</button>
+                  <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Ver ficha</button>
                 </div>
               </section>
             )}
