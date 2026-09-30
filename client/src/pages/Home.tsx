@@ -257,15 +257,6 @@ export default function Home() {
           </section>
         )}
 
-        {!online && (
-          <section className="mt-7 rounded-3xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-4">
-            <div className="flex items-start gap-3">
-              <WifiOff className="mt-0.5 size-4 shrink-0 text-[#FFB86B]" />
-              <div><p className="text-xs font-black text-white">Modo offline</p><p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Rotas que já foram salvas neste aparelho continuam disponíveis. Novas consultas precisam de internet.</p></div>
-            </div>
-          </section>
-        )}
-
         <footer className="mt-10 pb-4 text-center text-[0.55rem] leading-relaxed text-white/25">
           Dados de rota e locais são apresentados com a fonte correspondente quando disponível. O Trajeto não substitui o aplicativo de navegação.
         </footer>
