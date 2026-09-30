@@ -2,21 +2,23 @@ import { Bookmark, Fuel, Home, Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
+import MobileMoreSheet from "@/components/MobileMoreSheet";
 import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
-  { key: "stations", href: "/postos", label: "Postos", short: "Postos", icon: Fuel },
-  { key: "plan", href: "/planejar", label: "Planejar", short: "Planejar", icon: Navigation },
+  { key: "map", href: "/postos", label: "Mapa", short: "Mapa", icon: Fuel },
   { key: "saved", href: "/salvos", label: "Salvos", short: "Salvos", icon: Bookmark },
+  { key: "more", href: "#", label: "Mais", short: "Mais", icon: MoreHorizontal },
 ] as const;
 
 export default function MobileBottomNav() {
   const [location, setLocation] = useLocation();
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [savedTotal, setSavedTotal] = useState(0);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const refresh = () => {
@@ -37,16 +39,17 @@ export default function MobileBottomNav() {
   }, []);
 
   const current = location.split("?")[0].replace(/\/$/, "") || "/";
-  const savedMode = new URLSearchParams(location.split("?")[1] ?? "").get("salvos") === "1";
-  const resumeLabel = lastTrip ? "Continuar" : "Planejar";
+  const searchParams = new URLSearchParams(location.split("?")[1] ?? "");
+  const savedMode = searchParams.get("salvos") === "1";
+  const mapMode = current === "/postos" && searchParams.get("view") === "map";
 
   const go = (item: typeof baseItems[number]) => {
-    if (item.key === "plan" && lastTrip) {
-      setLocation(
-        appUrl("/planejar") +
-        "?origem=" + encodeURIComponent(lastTrip.origin) +
-        "&destino=" + encodeURIComponent(lastTrip.destination),
-      );
+    if (item.key === "more") {
+      setMoreOpen(true);
+      return;
+    }
+    if (item.key === "map") {
+      setLocation(appUrl("/postos") + "?q=postos&view=map");
       return;
     }
     setLocation(appUrl(item.href));
@@ -58,8 +61,10 @@ export default function MobileBottomNav() {
         {baseItems.map(item => {
           const active = item.key === "saved"
             ? (current === "/salvos" || (current === "/planejar" && savedMode))
-            : current === item.href || (item.href !== "/" && current.startsWith(item.href + "/"));
-          const primary = item.key === "plan";
+            : item.key === "map"
+              ? mapMode
+              : current === item.href || (item.href !== "/" && current.startsWith(item.href + "/"));
+          const primary = item.key === "map";
           const Icon = item.icon;
           return (
             <button
@@ -75,13 +80,14 @@ export default function MobileBottomNav() {
                   : "relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 text-[#8798A1] active:scale-[.97]"}
             >
               <Icon className="size-[1.05rem]" strokeWidth={primary || active ? 2.7 : 2} />
-              <span className="text-[0.55rem] font-extrabold">{primary && lastTrip ? resumeLabel : item.short}</span>
+              <span className="text-[0.55rem] font-extrabold">{item.short}</span>
               {item.key === "saved" && savedTotal > 0 && <span className="absolute right-2 top-1.5 grid min-w-4 place-items-center rounded-full bg-[#3DE3FF] px-1 text-[0.45rem] font-black text-[#0B1014]">{savedTotal > 9 ? "9+" : savedTotal}</span>}
               {active && !primary && <span className="absolute bottom-1 h-0.5 w-5 rounded-full bg-[#C7FF3C]" aria-hidden="true" />}
             </button>
           );
         })}
       </div>
+      <MobileMoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} />
     </nav>
   );
 }
