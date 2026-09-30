@@ -986,9 +986,9 @@ export default function Stations() {
 
             <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
           </section>
-        )}
           </div>
         </details>
+        )}
 
         {broadAguasLindasQuery && !showSavedOnly && (
           <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
