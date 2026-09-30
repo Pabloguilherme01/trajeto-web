@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { buildNavigationProviderUrl, type NavigationProvider } from "@/lib/mobileTools";
 import { CITY_PLACES, CITY_SERVICES, searchCityPlaces, type CityCategory } from "@/lib/aguasLindasCity";
+import SmartCityMode from "@/components/SmartCityMode";
 
 const filters: { id: "todos" | CityCategory; label: string; icon: typeof MapPinned }[] = [
   { id: "todos", label: "Tudo", icon: MapPinned },
@@ -45,6 +46,8 @@ export default function City() {
             <div className="rounded-xl border border-white/8 bg-white/[.03] p-3"><p className="text-[.52rem] font-bold uppercase tracking-[.12em] text-white/35">Acesso</p><p className="mt-1 text-lg font-black">Livre</p><p className="text-[.55rem] text-white/40">sem cadastro</p></div>
           </div>
         </header>
+
+        <SmartCityMode />
 
         <section className="mt-5" aria-label="Pesquisar locais e rotas da cidade">
           <label htmlFor="city-search" className="text-[.56rem] font-black uppercase tracking-[.13em] text-white/40">O que você procura?</label>
