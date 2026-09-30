@@ -18,6 +18,7 @@ import Home from "./pages/Home";
 const Planner = lazy(() => import("./pages/Planner"));
 const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
+const City = lazy(() => import("./pages/City"));
 const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
 
@@ -68,6 +69,7 @@ function Router() {
           <Route path="/salvos"><Planner /></Route>
           <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
           <Route path="/postos" component={Stations} />
+          <Route path="/cidade" component={City} />
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
           <Route path="/minha-conta" component={Personal} />
