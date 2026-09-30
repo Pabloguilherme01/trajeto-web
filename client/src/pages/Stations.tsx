@@ -72,6 +72,7 @@ export default function Stations() {
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [fuelFilter, setFuelFilter] = useState<"all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv">("all");
+  const [withIndividualPriceOnly, setWithIndividualPriceOnly] = useState(false);
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -140,6 +141,7 @@ export default function Stations() {
   const directoryCardsFiltered = useMemo(() => {
     const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const matches = directoryCards.filter(item => {
+      if (withIndividualPriceOnly && !(pricesByCnpj.get(item.key)?.length)) return false;
       const text = [
         item.local?.displayName,
         item.local?.legalName,
@@ -174,7 +176,7 @@ export default function Stations() {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords, directoryDistanceByKey, pricesByCnpj]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, directoryDistanceByKey, pricesByCnpj, withIndividualPriceOnly]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -820,11 +822,13 @@ export default function Stations() {
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <button type="button" onClick={() => setWithIndividualPriceOnly(value => !value)} className={withIndividualPriceOnly ? "min-h-11 rounded-2xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014]" : "min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-bold text-white/55"}>{withIndividualPriceOnly ? "Com preço ANP" : "Preço individual"}</button>
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[0.5rem] text-white/30" aria-live="polite">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância local · GPS não enviado" : "sem localização"}</span>
               {fuelFilter !== "all" && <span className="rounded-full border border-[#C7FF3C]/10 px-2 py-1 text-[#D9FF91]">combustível filtrado</span>}
+              {withIndividualPriceOnly && <span className="rounded-full border border-[#3DE3FF]/10 px-2 py-1 text-[#9FEFFF]">preço individual ANP</span>}
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
