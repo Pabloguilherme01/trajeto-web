@@ -126,7 +126,7 @@ export function StationDirectoryCard({
               <h3 className="mt-1 text-base font-black leading-tight text-white">{stationName}</h3>
               <p className="mt-1 text-[0.56rem] leading-relaxed text-white/35">{legalName}</p>
             </div>
-            <button type="button" onClick={onToggleSaved} className={"grid size-10 shrink-0 place-items-center rounded-xl border " + (saved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/10 text-[#FFB7A9]" : "border-white/8 text-white/45")} aria-label={saved ? "Remover posto dos salvos" : "Salvar posto neste aparelho"}>
+            <button type="button" onClick={onToggleSaved} disabled={!onToggleSaved} className={"grid size-10 shrink-0 place-items-center rounded-xl border disabled:opacity-25 " + (saved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/10 text-[#FFB7A9]" : "border-white/8 text-white/45")} aria-label={saved ? "Remover posto dos salvos" : onToggleSaved ? "Salvar posto neste aparelho" : "Salvar indisponível sem coordenada"}>
               <Heart className="size-4" fill={saved ? "currentColor" : "none"} />
             </button>
           </div>
