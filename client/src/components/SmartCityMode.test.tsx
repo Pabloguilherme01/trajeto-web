@@ -18,7 +18,11 @@ describe("modo inteligente da cidade", () => {
     fireEvent.click(screen.getByRole("button", { name: /Sincronizar minha localização/ }));
 
     expect(screen.getByText("Ponto de partida definido")).toBeTruthy();
-    fireEvent.click(screen.getByText("Hospital Municipal Bom Jesus"));
+    const destination = screen.getByRole("textbox", { name: "Destino no guia ou outro endereço" });
+    fireEvent.focus(destination);
+    fireEvent.change(destination, { target: { value: "Hospital Municipal" } });
+    fireEvent.click(screen.getByRole("option", { name: /Hospital Municipal Bom Jesus/ }));
+    expect(screen.getByText("Hospital Municipal Bom Jesus")).toBeTruthy();
     expect(screen.getAllByRole("link", { name: /Google Maps/ })[0]?.getAttribute("href")).toContain("origin=-15.86%2C-48.03");
     expect(screen.getAllByRole("link", { name: /Waze/ })[0]?.getAttribute("href")).toContain("waze.com");
     expect(screen.getAllByRole("link", { name: /Apple Maps/ })[0]?.getAttribute("href")).toContain("maps.apple.com");
@@ -38,7 +42,9 @@ describe("modo inteligente da cidade", () => {
     Object.defineProperty(navigator, "geolocation", { configurable: true, value: { getCurrentPosition } });
     render(<SmartCityMode />);
     fireEvent.click(screen.getByRole("button", { name: /Sincronizar minha localização/ }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Destino no guia ou outro endereço" }), { target: { value: "ESF América" } });
+    const destination = screen.getByRole("textbox", { name: "Destino no guia ou outro endereço" });
+    fireEvent.focus(destination);
+    fireEvent.change(destination, { target: { value: "ESF América" } });
     fireEvent.click(screen.getByRole("option", { name: /ESF América/ }));
     expect(screen.getByText("Rota pronta para")).toBeTruthy();
     expect(screen.getAllByRole("link", { name: /OpenStreetMap · buscar/ })[0]?.getAttribute("href")).toContain("openstreetmap.org/search?query=");
