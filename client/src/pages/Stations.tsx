@@ -386,6 +386,10 @@ export default function Stations() {
                         <button type="button" onClick={() => void copyCnpj(station.cnpj)} className="min-h-11 rounded-xl border border-white/8 px-3 text-[0.6rem] font-black text-white/65">Copiar CNPJ</button>
                         <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web", "_blank", "noopener,noreferrer")} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF]">Verificar situação na ANP</button>
                       </div>
+                      <div className="mt-3 rounded-xl border border-white/8 bg-white/[.02] p-3">
+                        <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Como interpretar</p>
+                        <p className="mt-1 text-[0.55rem] leading-relaxed text-white/35">Cadastro identifica o estabelecimento. Preço, horário, bandeira e situação operacional podem mudar e precisam de uma fonte e uma data de coleta próprias.</p>
+                      </div>
                       <div className="mt-2 flex items-center justify-between gap-2 text-[0.5rem] text-white/25">
                         <span>{station.neighborhood ?? "Bairro não consolidado"}</span>
                         <span>{station.brand ?? "Bandeira não consolidada"}</span>
