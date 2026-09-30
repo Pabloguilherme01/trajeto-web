@@ -19,6 +19,7 @@ const Operations = lazy(() => import("./pages/Operations"));
 const Stations = lazy(() => import("./pages/Stations"));
 const Help = lazy(() => import("./pages/Help"));
 const Tools = lazy(() => import("./pages/Tools"));
+const Explore = lazy(() => import("./pages/Explore"));
 
 
 const routerBase = import.meta.env.BASE_URL === "/"
@@ -54,6 +55,7 @@ function Router() {
           <Route path="/rota" component={Planner} />
           <Route path="/salvos"><Stations /></Route>
           <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
+          <Route path="/mapa" component={Explore} />
           <Route path="/postos" component={Stations} />
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
