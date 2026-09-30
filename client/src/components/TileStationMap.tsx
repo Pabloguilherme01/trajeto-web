@@ -209,6 +209,7 @@ export default function TileStationMap({
             </div>
           </div>
         ) : <p className="text-xs font-bold text-[#607169]">Toque em um marcador para abrir a ficha.</p>}
+        <p className="mt-2 text-[0.48rem] text-[#78867f]">© OpenStreetMap contributors. O mapa pode ficar disponível offline depois de ser aberto neste aparelho.</p>
       </div>
     </div>
   );
