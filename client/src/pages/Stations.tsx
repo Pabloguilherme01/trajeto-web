@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, openNavigation, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -599,9 +599,11 @@ export default function Stations() {
   };
 
   const navigateTo = (station: typeof stations[number]) => {
+    const provider = getPreferredNavigationProvider();
     if (typeof station.lat === "number" && typeof station.lng === "number") {
       const urls = openNavigation(station.lat, station.lng, station.name);
-      window.open(urls.google, "_blank", "noopener,noreferrer");
+      const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
+      window.open(url, "_blank", "noopener,noreferrer");
       return;
     }
     window.open(buildGoogleMapsSearchUrl([station.name, station.address].filter(Boolean).join(", ")), "_blank", "noopener,noreferrer");
