@@ -11,7 +11,7 @@ describe("public services catalog", () => {
 
   it("filters by category and text without case sensitivity", () => {
     expect(searchPublicServices("cora coralina", "educacao").map(item => item.id)).toContain("coralina");
-    expect(searchPublicServices("upu", "saude").some(item => item.id === "upa-mansoes-odisseia")).toBe(true);
+    expect(searchPublicServices("upa", "saude").some(item => item.id === "upa-mansoes-odisseia")).toBe(true);
     expect(searchPublicServices("nao existe", "todos")).toEqual([]);
   });
 });
