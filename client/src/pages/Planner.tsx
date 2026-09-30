@@ -44,6 +44,8 @@ export default function Planner() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const pathname = location.split("?")[0].replace(/\/$/, "") || "/";
   const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
+  const economyMode = queryParams.get("economia") === "1";
+  const drivingMode = queryParams.get("conducao") === "1";
   const [origin, setOrigin] = useState(() => queryParams.get("origem") || getLastTrip()?.origin || "");
   const [destination, setDestination] = useState(() => queryParams.get("destino") || getLastTrip()?.destination || "");
   const [mode, setMode] = useState<PublicTravelMode>(() => {
@@ -101,7 +103,7 @@ export default function Planner() {
 
   useEffect(() => {
     const value = queryParams.get("modo");
-    setMode(value === "walking" || value === "cycling" || value === "transit" ? value : "driving");
+    setMode(drivingMode ? "driving" : (value === "walking" || value === "cycling" || value === "transit" ? value : "driving"));
     resetResult();
     const routeId = queryParams.get("rota");
     let active = true;
@@ -121,7 +123,7 @@ export default function Planner() {
       setDestination(queryParams.get("destino") ?? "");
     }
     return () => { active = false; };
-  }, [queryParams]);
+  }, [queryParams, drivingMode]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -406,6 +408,24 @@ export default function Planner() {
                 {!online && destination.trim() && <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination), "_blank", "noopener,noreferrer")} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-[0.62rem] font-black text-[#FFD59B]">Abrir no Google Maps</button>}
               </div>
             )}
+          </section>
+        )}
+
+        {economyMode && !savedMode && !planned && (
+          <section className="mt-4 rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4" aria-labelledby="economy-mode-title">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-5" /></div>
+              <div><p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Modo economia</p><h2 id="economy-mode-title" className="mt-1 text-lg font-black">Calculadora pronta.</h2><p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Informe distância, preço e consumo para calcular custo por viagem, mês e autonomia. Os valores ficam salvos neste aparelho.</p></div>
+            </div>
+          </section>
+        )}
+
+        {economyMode && !savedMode && !planned && <LocalRouteCalculator compact />}
+
+        {drivingMode && !savedMode && (
+          <section className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-4 py-3" role="status" aria-live="polite">
+            <p className="text-xs font-black text-[#C9F7FF]">Modo condução ativo</p>
+            <p className="mt-1 text-[0.62rem] leading-relaxed text-white/45">O Trajeto deixa a tela focada na viagem e mantém Google Maps, Waze e Apple Maps como opções de navegação atualizada.</p>
           </section>
         )}
 
