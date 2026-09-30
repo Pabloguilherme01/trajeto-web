@@ -19,6 +19,7 @@ import { getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage
 import { projectTripCosts } from "@/lib/tripProjection";
 import MobileNavigationCenter from "@/components/MobileNavigationCenter";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
+import MobileRouteHeader from "@/components/MobileRouteHeader";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -380,6 +381,25 @@ export default function Planner() {
       </header>
 
       <main className="container py-10 lg:py-14">
+        <MobileRouteHeader
+          origin={origin}
+          destination={destination}
+          online={!offline}
+          planned={Boolean(planned)}
+          distance={planned ? selectedRouteDistanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km" : null}
+          duration={planned ? minutes(selectedRouteDuration) : null}
+          onInvert={() => {
+            setOrigin(destination);
+            setDestination(origin);
+            setPlanned(null);
+            setFormError(null);
+            setShareMessage(null);
+          }}
+          onNavigate={openDestinationNavigation}
+          onShare={shareRoute}
+          onSave={saveCurrentRouteOffline}
+          onOpenSaved={() => setLocation(appUrl("/planejar?salvos=1"))}
+        />
         {offline && <section role="status" aria-live="polite" className="mb-6 rounded-2xl border border-[#FFB86B]/35 bg-[#FFF4D6] p-4 text-sm leading-relaxed text-[#6D4A00]">
           <div className="flex items-start gap-3">
             <WifiOff className="mt-0.5 size-4 shrink-0" />
