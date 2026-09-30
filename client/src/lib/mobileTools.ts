@@ -106,7 +106,8 @@ export function buildGoogleMapsDestinationUrl(destination: string, navigate = fa
 }
 
 export function buildGoogleMapsSearchUrl(query: string) {
-  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query.trim());
+  const params = new URLSearchParams({ api: "1", query: query.trim() });
+  return "https://www.google.com/maps/search/?" + params.toString();
 }
 
 export function buildWazeNavigationUrl(destination: string, coordinates?: { lat: number; lng: number }) {
