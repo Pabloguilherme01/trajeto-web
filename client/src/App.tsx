@@ -27,6 +27,14 @@ const routerBase = import.meta.env.BASE_URL === "/"
   ? undefined
   : import.meta.env.BASE_URL.replace(/\/$/, "");
 
+function PrivacyRoute() {
+  return <Legal defaultSection="privacy" />;
+}
+
+function TermsRoute() {
+  return <Legal defaultSection="terms" />;
+}
+
 function RouteLoading() {
   return (
     <div role="status" aria-live="polite" className="grid min-h-[70dvh] place-items-center bg-[#0B1014] px-5 text-white">
@@ -62,8 +70,8 @@ function Router() {
           <Route path="/ajuda" component={Help} />
           <Route path="/ferramentas" component={Tools} />
           <Route path="/transparencia" component={Legal} />
-          <Route path="/privacidade"><Legal defaultSection="privacy" /></Route>
-          <Route path="/termos"><Legal defaultSection="terms" /></Route>
+          <Route path="/privacidade" component={PrivacyRoute} />
+          <Route path="/termos" component={TermsRoute} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
