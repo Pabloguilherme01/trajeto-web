@@ -103,7 +103,7 @@ export default function MobileCopilot() {
 
   const findNearby = () => {
     if (locatingNearby) return;
-    if (!navigator.geolocation) {
+    if (!online || !navigator.geolocation) {
       setLocation(buildNearbyStationsUrl(appUrl("/postos")));
       return;
     }
@@ -184,11 +184,13 @@ export default function MobileCopilot() {
 
     if (intent === "nearby") {
       return {
-        title: "Encontrar postos por perto",
-        detail: locatingNearby ? "Obtendo sua localização para ordenar os postos mais próximos." : "Use sua localização para encontrar a próxima parada.",
-        label: locatingNearby ? "Localizando…" : "Perto de mim",
+        title: online ? "Encontrar postos por perto" : "Abrir postos sem internet",
+        detail: online
+          ? locatingNearby ? "Obtendo sua localização para ordenar os postos mais próximos." : "Use sua localização para encontrar a próxima parada."
+          : "Abra o diretório local ou resultados já armazenados neste aparelho.",
+        label: online ? (locatingNearby ? "Localizando…" : "Perto de mim") : "Abrir postos",
         onClick: findNearby,
-        intent: "nearby",
+        intent: online ? "nearby" : "stations",
         icon: MapPin,
       };
     }
