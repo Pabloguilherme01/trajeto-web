@@ -978,10 +978,10 @@ export default function Stations() {
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
-                .filter(item => fuelFilter === "all" || (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter) ?? false) || (fuelFilter !== "all" && item.anp?.products?.some(product => {
+                .filter(item => fuelFilter === "all" || (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter) ?? false) || item.anp?.products?.some(product => {
                   const text = (product.produto || "").toLocaleLowerCase("pt-BR");
-                  return fuelFilter === "gasolina-comum" ? text.includes("gasolina") && !text.includes("aditivada") : fuelFilter === "etanol" ? text.includes("etanol") : fuelFilter === "diesel-s10" ? text.includes("s10") : fuelFilter === "diesel-s500" ? text.includes("s500") : fuelFilter === "glp-p13" ? text.includes("glp") || text.includes("p13") : fuelFilter === "gnv" ? text.includes("gnv") : true;
-                })))
+                  return fuelFilter === "gasolina-comum" ? text.includes("gasolina") && !text.includes("aditivada") : fuelFilter === "etanol" ? text.includes("etanol") : fuelFilter === "diesel-s10" ? text.includes("s10") : fuelFilter === "diesel-s500" ? text.includes("s500") : fuelFilter === "glp-p13" ? text.includes("glp") || text.includes("p13") : fuelFilter === "gnv" ? text.includes("gnv") : false;
+                }))
                 .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
