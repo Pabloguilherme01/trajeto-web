@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildWazeNavigationUrl, buildWhatsAppShareUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -19,6 +19,14 @@ describe("mobile tools", () => {
     );
     expect(buildGoogleMapsNearbyStationsUrl(-15.86, -48.03)).toBe(
       "https://www.google.com/maps/search/?api=1&query=postos%20de%20combust%C3%ADvel%20%40-15.86%2C-48.03",
+    );
+  });
+
+  it("supports multimodal Google Maps links and WhatsApp sharing", () => {
+    expect(buildGoogleMapsDirectionsUrl("", "Hospital Bom Jesus", "walking", true)).toContain("travelmode=walking");
+    expect(buildGoogleMapsDirectionsUrl("", "Rodoviária", "transit", true)).toContain("travelmode=transit");
+    expect(buildWhatsAppShareUrl("Veja no Trajeto", "https://example.com/local/hospital")).toBe(
+      "https://wa.me/?text=Veja%20no%20Trajeto%0Ahttps%3A%2F%2Fexample.com%2Flocal%2Fhospital",
     );
   });
 
