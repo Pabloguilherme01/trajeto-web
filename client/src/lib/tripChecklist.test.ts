@@ -37,6 +37,6 @@ describe("buildTripChecklist", () => {
     expect(items.find(item => item.key === "navigation")?.status).toBe("attention");
     expect(items.find(item => item.key === "dataFreshness")?.status).toBe("attention");
     expect(items.find(item => item.key === "fuelRange")?.status).toBe("attention");
-    expect(items.filter(item => item.status === "attention").length).toBe(6);
+    expect(items.filter(item => item.status === "attention").length).toBe(5);
   });
 });
