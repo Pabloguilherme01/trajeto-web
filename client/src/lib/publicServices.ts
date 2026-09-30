@@ -15,7 +15,7 @@ export type PublicService = {
   phone?: string;
   extraPhone?: string;
   hours?: string;
-  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás";
+  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás" | "SES-GO";
   sourceUrl: string;
   mapQuery: string;
 };
@@ -43,6 +43,7 @@ const TRANSITO = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-t
 const CT = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
 const PCGO = "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-atendimento/";
 const SEDUC = "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
+const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
   {
@@ -56,6 +57,18 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UPA,
     mapQuery: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "heal",
+    name: "HEAL · Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho",
+    category: "saude",
+    description: "Hospital estadual de média e alta complexidade com pronto atendimento e linhas especializadas.",
+    address: "Rua 19, nº 792-902, Parque da Barragem 9, Águas Lindas de Goiás - GO",
+    phone: "(61) 3774-2660",
+    hours: "Sempre aberto",
+    sourceLabel: "SES-GO",
+    sourceUrl: HEAL,
+    mapQuery: "HEAL Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho, GO",
   },
   {
     id: "hospital-bom-jesus",
