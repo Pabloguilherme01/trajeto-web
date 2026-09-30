@@ -31,4 +31,18 @@ describe("busca compartilhada de pontos da cidade", () => {
     expect(screen.getByRole("option", { name: /BR-070/ })).toBeTruthy();
     expect(screen.queryByRole("option", { name: /Hospital Municipal/ })).toBeNull();
   });
+
+  it("permite navegar pelas sugestões com as setas e selecionar com Enter", () => {
+    const onPlaceSelect = vi.fn();
+    render(<CityPlaceAutocomplete id="keyboard-place" value="" onValueChange={() => {}} onPlaceSelect={onPlaceSelect} placeholder="Ponto" />);
+    const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    const activeId = input.getAttribute("aria-activedescendant");
+    expect(activeId).toBeTruthy();
+    expect(document.getElementById(activeId!)?.getAttribute("aria-selected")).toBe("true");
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onPlaceSelect.mock.calls[0]?.[0].id).toBe("hospital-bom-jesus");
+    expect(screen.queryByRole("listbox")).toBeNull();
+  });
 });
