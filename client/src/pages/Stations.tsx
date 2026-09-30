@@ -535,6 +535,10 @@ export default function Stations() {
         typeof station.lng === "number" && Number.isFinite(station.lng)
       )
       .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
+    if (!normalized.length) {
+      toast.message("Não há coordenadas oficiais ou locais suficientes para um mapa offline confiável.");
+      return;
+    }
     const saved = cacheOfflineMapStations(normalized);
     if (saved) setOfflineMap(getOfflineMapStations().stations);
     toast.message(saved ? `Mapa oficial/local salvo neste aparelho · ${normalized.length} referências` : "Não foi possível gravar o mapa local.");
