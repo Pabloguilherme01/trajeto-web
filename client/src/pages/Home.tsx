@@ -102,12 +102,8 @@ export default function Home() {
 
   const findNearby = () => {
     rememberIntent("nearby");
-    if (!online) {
-      setLocation(appUrl("/postos") + "?q=postos");
-      return;
-    }
     if (!navigator.geolocation) {
-      setLocation(appUrl("/postos"));
+      setLocation(appUrl("/postos") + "?q=postos");
       return;
     }
     setLocating(true);
@@ -119,7 +115,7 @@ export default function Home() {
       },
       () => {
         setLocating(false);
-        setLocation(appUrl("/postos"));
+        setLocation(appUrl("/postos") + "?q=postos");
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
