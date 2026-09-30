@@ -88,8 +88,18 @@ export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] =
   records.map(tupleToRecord);
 
 export function searchAguasLindasStations(query: string) {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  if (!normalized || normalized === "postos" || normalized === "combustíveis" || normalized === "combustiveis" || normalized === "postos de combustíveis" || normalized === "postos de combustivel") {
+  const normalized = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+  const normalizedCompact = normalized.replace(/[^a-z0-9]+/g, " ").trim();
+  if (
+    !normalizedCompact ||
+    normalizedCompact === "postos" ||
+    normalizedCompact === "combustiveis" ||
+    normalizedCompact === "postos de combustiveis" ||
+    normalizedCompact === "aguas lindas" ||
+    normalizedCompact === "aguas lindas de goias" ||
+    normalizedCompact === "postos em aguas lindas" ||
+    normalizedCompact === "postos de aguas lindas"
+  ) {
     return AGUAS_LINDAS_STATIONS;
   }
   return AGUAS_LINDAS_STATIONS.filter(station =>
