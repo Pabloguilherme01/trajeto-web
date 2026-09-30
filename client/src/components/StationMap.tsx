@@ -1,6 +1,6 @@
 import { MapView, loadGoogleMapsScript } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
+import { Apple, Navigation, Minus, Plus, RotateCcw, X } from "lucide-react";
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { dedupeStationReferences, type StationReference } from "@/lib/stationReconciliation";
@@ -17,9 +17,6 @@ export type StationMapItem = {
   source?: "ANP" | "Google" | "local";
 };
 
-function escapeHtml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\x27/g, "&#039;");
-}
 
 function hasCoordinates(station: StationMapItem): station is StationMapItem & { lat: number; lng: number } {
   return typeof station.lat === "number" && Number.isFinite(station.lat) && typeof station.lng === "number" && Number.isFinite(station.lng);
@@ -140,12 +137,12 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const userMarker = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
-  const infoWindow = useRef<google.maps.InfoWindow | null>(null);
   const [ready, setReady] = useState(false);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
   const [resolvingCount, setResolvingCount] = useState(0);
   const [nearbyStations, setNearbyStations] = useState<StationMapItem[]>([]);
+  const [selectedStation, setSelectedStation] = useState<StationMapItem | null>(null);
 
   useEffect(() => {
     setResolvedStations(stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
@@ -327,8 +324,6 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
     if (!drawableStations.length) return;
     const map = mapRef.current;
     const bounds = new window.google.maps.LatLngBounds();
-    const popup = infoWindow.current ?? new window.google.maps.InfoWindow();
-    infoWindow.current = popup;
 
     userMarker.current?.map && (userMarker.current.map = null);
     userMarker.current = null;
@@ -356,21 +351,9 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
       const pin = new window.google.maps.marker.PinElement({ background: official ? "#C7FF3C" : "#3DE3FF", borderColor: "#163840", glyphColor: "#163840", glyph: String(index + 1) });
       const marker = new window.google.maps.marker.AdvancedMarkerElement({ map, position, title: String(index + 1) + ". " + station.name, content: pin.element });
       marker.addListener("click", () => {
-        const html = "<div style=\"min-width:220px;max-width:290px;padding:4px 2px;font-family:Arial,sans-serif\">" +
-          "<strong style=\"display:block;font-size:14px;line-height:1.25\">" + String(index + 1) + ". " + escapeHtml(station.name) + "</strong>" +
-          "<span style=\"display:block;margin-top:5px;font-size:12px;line-height:1.45;color:#53635d\">" + escapeHtml(station.address || "Endereço não informado") + "</span>" +
-          (station.cnpj ? "<span style=\"display:block;margin-top:4px;font-size:11px;color:#7a8882\">CNPJ " + escapeHtml(station.cnpj) + "</span>" : "") +
-          (station.brand ? "<span style=\"display:block;margin-top:3px;font-size:11px;color:#7a8882\">" + escapeHtml(station.brand) + "</span>" : "") +
-          "<span style=\"display:inline-block;margin-top:7px;padding:4px 7px;border-radius:999px;background:" + (official ? "#ECFFBA" : "#E0FBFF") + ";color:#34524A;font-size:10px;font-weight:800\">" + (official ? "Fonte ANP" : station.source === "Google" ? "Referência de mapa" : "Catálogo local") + "</span>" +
-          "<div style=\"display:flex;gap:6px;flex-wrap:wrap;margin-top:9px\">" +
-          "<a href=\"https://www.google.com/maps/dir/?api=1&destination=" + station.lat + "," + station.lng + "&travelmode=driving&dir_action=navigate\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;padding:8px 10px;border-radius:8px;background:#163840;color:#fff;text-decoration:none;font-size:11px;font-weight:700\">Google</a>" +
-          "<a href=\"" + buildWazeNavigationUrl(station.address, { lat: station.lat, lng: station.lng }) + "\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;padding:8px 10px;border-radius:8px;background:#eefbff;color:#163840;text-decoration:none;font-size:11px;font-weight:700\">Waze</a>" +
-          "<a href=\"" + buildAppleMapsDirectionsUrl(station.lat + "," + station.lng) + "\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;padding:8px 10px;border-radius:8px;background:#f4f4f4;color:#163840;text-decoration:none;font-size:11px;font-weight:700\">Apple</a>" +
-          (station.cnpj ? "<a href=\"#posto-" + encodeURIComponent(station.cnpj) + "\" style=\"display:inline-block;padding:8px 10px;border-radius:8px;border:1px solid #d8e0dc;color:#34524A;text-decoration:none;font-size:11px;font-weight:700\">Ficha</a>" : "") +
-          "</div></div>";
-        popup.setContent(html);
-        popup.open({ map, anchor: marker });
+        setSelectedStation(station);
         onSelectStation?.(station);
+      });
       });
       markers.current.push(marker);
     });
@@ -396,6 +379,31 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
       <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
       {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP/local continuam sendo a base cadastral.</div>}
       {nearbyStations.length > 0 && nearbyCenter && <div className="pointer-events-none absolute left-3 right-3 top-14 z-10 rounded-2xl border border-[#3DE3FF]/20 bg-[#0B1014]/85 px-3 py-2 text-[0.52rem] font-black text-[#C9F7FF] shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Perto de mim · {nearbyStations.length} referências Google · ordenadas por distância. Duplicatas são conciliadas com a base principal.</div>}
+      {selectedStation && (
+        <section className="absolute inset-x-2 bottom-2 z-20 rounded-[1.35rem] border border-white/10 bg-[#10191F]/96 p-3.5 text-white shadow-[0_20px_60px_rgba(0,0,0,.5)] backdrop-blur-xl" aria-label={"Posto selecionado: " + selectedStation.name}>
+          <div className="flex items-start gap-3">
+            <div className={"grid size-10 shrink-0 place-items-center rounded-xl " + (selectedStation.source === "ANP" ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-[#3DE3FF]/10 text-[#C9F7FF]")}>
+              <span className="text-[0.52rem] font-black">{selectedStation.source === "ANP" ? "ANP" : "MAPA"}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-black">{selectedStation.name}</p>
+              <p className="mt-1 line-clamp-2 text-[0.6rem] leading-relaxed text-white/45">{selectedStation.address || "Endereço não informado"}</p>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[0.48rem] font-bold text-white/35">
+                {selectedStation.brand && <span className="rounded-full border border-white/8 px-2 py-1">{selectedStation.brand}</span>}
+                <span className="rounded-full border border-white/8 px-2 py-1">{selectedStation.lat.toFixed(4)}, {selectedStation.lng.toFixed(4)}</span>
+              </div>
+            </div>
+            <button type="button" onClick={() => setSelectedStation(null)} className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/8 text-white/45" aria-label="Fechar posto selecionado"><X className="size-4" /></button>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + selectedStation.lat + "," + selectedStation.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014]"><Navigation className="mr-1 inline size-3.5" /> Ir agora</button>
+            <button type="button" onClick={() => {
+              if (selectedStation.cnpj) window.location.hash = "posto-" + encodeURIComponent(selectedStation.cnpj);
+              onSelectStation?.(selectedStation);
+            }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-3 text-[0.56rem] font-black text-white/70">Ver ficha</button>
+          </div>
+        </section>
+      )}
       {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-[0.58rem] font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
     </div>
   );
