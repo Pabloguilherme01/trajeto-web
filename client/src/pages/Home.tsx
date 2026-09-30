@@ -269,7 +269,33 @@ export default function Home() {
           </div>
         </section>
 
-        <DailyCommandCenter />
+        {(lastTrip || latestSavedRoute || lastStation) && (
+          <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-6" aria-labelledby="next-trip-title">
+            <div className="container">
+              <div className="mobile-card overflow-hidden rounded-3xl border border-[#C7FF3C]/15 bg-[#10181F]">
+                <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                  <div className="min-w-0">
+                    <p className="text-[0.58rem] font-black uppercase tracking-[0.15em] text-[#C7FF3C]">Próxima viagem</p>
+                    <h2 id="next-trip-title" className="mt-1 truncate font-display text-xl font-semibold tracking-[-0.045em] text-white">
+                      {lastTrip ? `${lastTrip.origin} → ${lastTrip.destination}` : latestSavedRoute ? `${latestSavedRoute.origin} → ${latestSavedRoute.destination}` : lastStation?.name}
+                    </h2>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">última viagem</span>}
+                      {latestSavedRoute && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">offline pronta</span>}
+                      {lastStation && !lastTrip && <span className="rounded-full bg-white/[.06] px-2 py-1 text-[0.5rem] font-black text-white/55">último posto</span>}
+                    </div>
+                  </div>
+                  <a
+                    href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : latestSavedRoute ? appUrl("/planejar") + "?rota=" + encodeURIComponent(latestSavedRoute.id) + "&origem=" + encodeURIComponent(latestSavedRoute.origin) + "&destino=" + encodeURIComponent(latestSavedRoute.destination) : appUrl("/postos") + "?station=" + encodeURIComponent(lastStation?.placeId ?? "") + "&q=" + encodeURIComponent(lastStation?.query || lastStation?.name || "")}
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]"
+                  >
+                    {lastTrip ? "Preparar viagem" : latestSavedRoute ? "Continuar offline" : "Reabrir posto"}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="border-b border-white/8 bg-[#0D141A] py-4 sm:py-7" aria-labelledby="mobile-snapshot-title">
           <div className="container">
