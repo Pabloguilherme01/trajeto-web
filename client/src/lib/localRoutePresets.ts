@@ -50,6 +50,12 @@ export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "secretaria-educacao", label: "Secretaria de Educação", detail: "Atendimento da educação municipal", destination: "Secretaria Municipal de Educação, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "camara-municipal", label: "Câmara Municipal", detail: "Atendimento legislativo", destination: "Câmara Municipal de Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "forum", label: "Fórum", detail: "Serviços da Justiça", destination: "Fórum de Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "rodoviaria", label: "Rodoviária", detail: "Terminal rodoviário · Jardim da Barragem IV", destination: "Rodoviária de Águas Lindas de Goiás, Rua 36, 5335, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "transporte" },
+  { id: "aguas-lindas-shopping", label: "Águas Lindas Shopping", detail: "Compras e serviços · Mansões Centro-Oeste", destination: "Águas Lindas Shopping, Alameda Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "supermercado-universo", label: "Supermercado Universo", detail: "Mercado · Parque das Águas Bonitas", destination: "Supermercado Universo, Avenida Brasil, Parque das Águas Bonitas, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "atacadao-farmacias", label: "Atacadão das Farmácias", detail: "Farmácia · Jardim Barragem I", destination: "Atacadão das Farmácias, Quadra 10, Lote 01, Jardim Barragem I, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "farmacias-preco-baixo", label: "Farmácias Preço Baixo", detail: "Farmácia · Jardim Brasília", destination: "Farmácias Preço Baixo, Avenida JK, Jardim Brasília, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "banco-brasil-4590", label: "Banco do Brasil · Agência 4590", detail: "Atendimento bancário · Jardim Brasília", destination: "Banco do Brasil Agência 4590, Avenida JK, Jardim Brasília, Águas Lindas de Goiás, GO", category: "servicos" },
 ];
 
 export function getLocalRoutePresets(query = "") {
