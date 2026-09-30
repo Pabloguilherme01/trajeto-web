@@ -7,6 +7,7 @@ import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { normalizeRouterTarget } from "@/lib/appUrl";
 import { consumeStationReturn } from "@/lib/authReturn";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import ErrorBoundary from "./components/ErrorBoundary";
 import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -45,7 +46,7 @@ function AdminOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function AuthReturnHandler() {
+function AuthenticatedReturnHandler() {
   const { isAuthenticated, loading } = useAuth();
   const [location, setLocation] = useLocation();
 
@@ -58,7 +59,14 @@ function AuthReturnHandler() {
   return null;
 }
 
+function AuthReturnHandler() {
+  if (isGitHubPagesRuntime()) return null;
+  return <AuthenticatedReturnHandler />;
+}
+
 function Router() {
+  const staticRuntime = isGitHubPagesRuntime();
+
   return (
       <Suspense fallback={<RouteLoading />}>
         <Switch>
@@ -66,11 +74,11 @@ function Router() {
           <Route path="/planejar" component={Planner} />
           <Route path="/rota" component={Planner} />
           <Route path="/salvos"><Planner /></Route>
-          <Route path="/operacoes"><AdminOnly><Operations /></AdminOnly></Route>
+          <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
           <Route path="/postos" component={Stations} />
           <Route path="/buscar" component={Stations} />
           <Route path="/ajuda" component={Help} />
-          <Route path="/minha-conta" component={Personal} />
+          <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>

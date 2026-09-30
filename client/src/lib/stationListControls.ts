@@ -25,6 +25,33 @@ export function filterAndSortStations<T extends StationListItem>(stations: T[], 
 }
 
 
+export type StationFuelFilter = "all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv";
+
+export function stationProductMatchesFuel(productName: string, filter: StationFuelFilter) {
+  if (filter === "all") return true;
+  const text = productName.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (filter === "gasolina-comum") return text.includes("gasolina") && !text.includes("aditivada");
+  if (filter === "etanol") return text.includes("etanol");
+  if (filter === "diesel-s10") return text.includes("s10");
+  if (filter === "diesel-s500") return text.includes("s500");
+  if (filter === "glp-p13") return text.includes("glp") || text.includes("p13") || text.includes("13 kg");
+  return text.includes("gnv") || text.includes("gas natural");
+}
+
+export function stationSupportsFuel(
+  priceProductKeys: string[],
+  anpProductNames: string[],
+  filter: StationFuelFilter,
+) {
+  if (filter === "all") return true;
+  return priceProductKeys.includes(filter) || anpProductNames.some(product => stationProductMatchesFuel(product, filter));
+}
+
+export function fuelFilterPriceKey(filter: StationFuelFilter): Exclude<StationFuelFilter, "all"> {
+  return filter === "all" ? "gasolina-comum" : filter;
+}
+
+
 export type StationSearchPreferenceValues = {
   mappedBrand: string;
   hoursStatus: StationHoursFilter;

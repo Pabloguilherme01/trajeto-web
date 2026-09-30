@@ -1,6 +1,8 @@
 const configuredRoutingBase = import.meta.env.VITE_ROUTING_API_BASE_URL?.trim() || "";
+const configuredStaticRuntime = import.meta.env.VITE_STATIC_RUNTIME?.trim().toLowerCase() === "true";
 
 export function isGitHubPagesRuntime() {
+  if (configuredStaticRuntime) return true;
   if (typeof window === "undefined") return false;
   return window.location.hostname.endsWith(".github.io");
 }

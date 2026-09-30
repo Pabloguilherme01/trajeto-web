@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 20
     env:
       VITE_BASE_PATH: /trajeto-web/
+      VITE_STATIC_RUNTIME: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
