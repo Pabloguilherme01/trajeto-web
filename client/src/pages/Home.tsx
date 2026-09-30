@@ -206,7 +206,7 @@ export default function Home() {
                 <label htmlFor="home-search" className="text-xs font-bold text-[#A9BAC2]">Cidade, bairro, posto ou destino</label>
                 <div className="mt-2 flex rounded-2xl border border-white/12 bg-[#0B1014] p-1.5 focus-within:border-[#3DE3FF]">
                   <Search className="ml-3 mt-3 size-5 shrink-0 text-[#3DE3FF]" />
-                  <input id="home-search" minLength={3} aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "home-search-error" : undefined} value={search} onChange={event => { setSearch(event.target.value); if (searchError) setSearchError(null); }} placeholder={activePreset?.query ?? "Ex.: Águas Lindas de Goiás"} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780]" />
+                  <input id="home-search" minLength={3} autoComplete="street-address" enterKeyHint="search" aria-invalid={Boolean(searchError)} aria-describedby={searchError ? "home-search-error" : undefined} value={search} onChange={event => { setSearch(event.target.value); if (searchError) setSearchError(null); }} placeholder={activePreset?.query ?? "Ex.: Águas Lindas de Goiás"} className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-[#657780]" />
                   <button type="submit" aria-label={online ? "Pesquisar postos" : "Buscar quando houver internet"} disabled={!online} className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014] transition hover:bg-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-40">
                     <ArrowRight className="size-5" />
                   </button>
@@ -244,7 +244,7 @@ export default function Home() {
                   <span className="text-[0.58rem] font-semibold text-[#5F727B]">só neste aparelho</span>
                 </div>
                 <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {recentSearches.map(query => <button key={query} type="button" onClick={() => openSearch(query)} className="min-h-10 shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-3.5 text-xs font-bold text-[#D7E0E4] transition hover:border-[#3DE3FF] hover:bg-[#3DE3FF]/8 active:scale-[.98]">{query}</button>)}
+                  {recentSearches.map(query => <button key={query} type="button" onClick={() => openSearch(query)} className="min-h-11 shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-3.5 text-xs font-bold text-[#D7E0E4] transition hover:border-[#3DE3FF] hover:bg-[#3DE3FF]/8 active:scale-[.98]">{query}</button>)}
                 </div>
               </div>}
 
@@ -252,7 +252,7 @@ export default function Home() {
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#7F919A]">Buscas rápidas</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {corridorPresets.slice(0, 4).map(preset => (
-                    <button key={preset.id} onClick={() => { setActivePresetId(preset.id); openSearch(preset.query, preset.id); }} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C] hover:bg-[#C7FF3C]/8">
+                    <button key={preset.id} onClick={() => { setActivePresetId(preset.id); openSearch(preset.query, preset.id); }} className="min-h-16 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C] hover:bg-[#C7FF3C]/8">
                       <span className="block text-xs font-extrabold text-white">{preset.label}</span>
                       <span className="mt-1 block text-[0.65rem] text-[#7F919A]">{preset.detail}</span>
                     </button>
