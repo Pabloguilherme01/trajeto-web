@@ -48,6 +48,7 @@ export default function Planner() {
   const queryParams = useMemo(() => new URLSearchParams(window.location.search), [location]);
   const pathname = location.split("?")[0].replace(/\/$/, "") || "/";
   const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
+  const offlineFocus = queryParams.get("offline") === "1";
   const [origin, setOrigin] = useState(() => queryParams.get("origem") || getLastTrip()?.origin || "");
   const [destination, setDestination] = useState(() => queryParams.get("destino") || getLastTrip()?.destination || "");
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
@@ -86,6 +87,13 @@ export default function Planner() {
     if (!savedMode) return;
     refreshSavedRoutes();
   }, [savedMode]);
+
+  useEffect(() => {
+    if (!offlineFocus || savedMode) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById("offline-route-hub")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [offlineFocus, savedMode]);
 
   useEffect(() => {
     const routeId = queryParams.get("rota");
@@ -286,7 +294,7 @@ export default function Planner() {
 
         {!savedMode && (
           <OfflineRouteHub
-            compact
+            compact={!offlineFocus}
             onSelectDestination={chooseOfflineDestination}
             highlightedDestinationId={null}
           />
