@@ -236,6 +236,7 @@ export default function DailyCommandCenter() {
               <MapPin className="size-4 text-[#3DE3FF]" />
               <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[.1em] text-white/40">Destino</p>
               <p className="mt-1 truncate text-xs font-extrabold text-white">{favorite?.label ?? "Configurar"}</p>
+              {favorite && <p className="mt-0.5 truncate text-[0.52rem] font-bold text-white/35">{usage[favorite.id] ?? 0} {usage[favorite.id] === 1 ? "uso" : "usos"} neste aparelho</p>}
             </div>
             <div className="rounded-xl border border-white/8 bg-white/[.035] p-3">
               <Route className="size-4 text-[#BDA5FF]" />
