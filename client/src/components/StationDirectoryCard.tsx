@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
@@ -58,6 +59,7 @@ export function StationDirectoryCard({
   onToggleSaved?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
   const cnpj = anp?.cnpj || local?.cnpj || "";
@@ -116,7 +118,17 @@ export function StationDirectoryCard({
   };
 
   return (
-    <article id={"posto-" + (cnpj || "mapa-" + index)} className="scroll-mt-24 rounded-[1.45rem] border border-white/8 bg-[#0B1014] p-4 shadow-[0_18px_50px_rgba(0,0,0,.16)]">
+    <motion.article
+      id={"posto-" + (cnpj || "mapa-" + index)}
+      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
+      whileHover={reduceMotion ? undefined : { y: -3 }}
+      whileTap={reduceMotion ? undefined : { scale: 0.997 }}
+      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)]"
+    >
+      <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
         <BrandMark local={local} anp={anp} />
         <div className="min-w-0 flex-1">
@@ -156,9 +168,10 @@ export function StationDirectoryCard({
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.56rem] font-black text-[#0B1014]"><Navigation className="mr-1 inline size-3.5" />Google Maps</button>
-        <button type="button" onClick={() => window.open(wazeUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF]">Waze</button>
-        <button type="button" onClick={() => window.open(appleUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75">Apple Maps</button>
+        <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="col-span-3 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora</button>
+        <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
+        <button type="button" onClick={() => window.open(wazeUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
+        <button type="button" onClick={() => window.open(appleUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -198,6 +211,10 @@ export function StationDirectoryCard({
           {coords && <p className="text-white/25">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
         </div>
       </details>
-    </article>
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-[0.48rem] text-white/25">
+        <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
+        <span>Sem conta · uso direto</span>
+      </div>
+    </motion.article>
   );
 }
