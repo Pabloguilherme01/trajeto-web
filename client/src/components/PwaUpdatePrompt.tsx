@@ -19,7 +19,7 @@ export default function PwaUpdatePrompt() {
   };
 
   return (
-    <aside className="fixed inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-[70] md:bottom-4 md:left-auto md:max-w-sm" aria-label="Atualização disponível">
+    <aside className="fixed inset-x-3 bottom-[calc(11.75rem+env(safe-area-inset-bottom))] z-[70] md:bottom-4 md:left-auto md:max-w-sm" aria-label="Atualização disponível">
       <div className="flex items-center gap-3 rounded-2xl border border-[#C7FF3C]/25 bg-[#121B22]/95 p-3 text-white shadow-[0_18px_50px_rgba(0,0,0,.32)] backdrop-blur-xl">
         <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]">
           <RefreshCw className="size-4" aria-hidden="true" />
