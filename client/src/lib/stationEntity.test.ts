@@ -59,9 +59,17 @@ describe("stationDataConfidence", () => {
     const score = stationDataConfidence({ anp: anp(fresh), price: price(fresh) });
 
     expect(typeof score).toBe("number");
-    expect(score).toBeGreaterThanOrEqual(90);
+    expect(score).toBeGreaterThanOrEqual(70);
     expect(score).toBeLessThanOrEqual(100);
-    expect(stationDataConfidenceBand(score)).toBe("Alta");
+    expect(stationDataConfidenceBand(score)).toBe("Boa");
+  });
+
+  it("penalizes missing evidence instead of treating partial data as complete", () => {
+    const identityOnly = stationDataConfidence({ anp: anp(fresh) });
+    const withPrice = stationDataConfidence({ anp: anp(fresh), price: price(fresh) });
+
+    expect(identityOnly).toBeLessThan(withPrice);
+    expect(identityOnly).toBeLessThan(90);
   });
 
   it("reduces confidence when the evidence is stale", () => {
