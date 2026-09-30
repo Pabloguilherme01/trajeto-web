@@ -3676,3 +3676,310 @@ O usuário deve conseguir usar o celular sem conhecer arquitetura, providers, da
 ## 156. Regra de encerramento da expansão
 
 Qualquer novo recurso deve demonstrar pelo menos uma melhoria em: reduzir toques, reduzir tempo, reduzir erro, melhorar recuperação, transparência, segurança, acessibilidade, integração de dados ou preparação/conclusão. Caso contrário, fica fora da superfície principal.
+
+
+## 157. Mobile UX Hardening — nível de produto
+
+Esta etapa não adiciona outra camada de módulos à Home. Ela define requisitos para que a reconstrução pareça e funcione como um aplicativo mobile.
+
+### 157.1 First Useful Paint
+A primeira superfície útil deve aparecer sem depender de fontes externas. O usuário deve conseguir começar uma ação local antes de qualquer dado secundário terminar de carregar.
+
+### 157.2 First Useful Interaction
+O primeiro controle acionável deve ser o destino ou a continuação da missão. Nenhum modal, banner ou carregamento secundário pode bloquear esse controle sem motivo funcional.
+
+### 157.3 No Accidental Complexity
+Toda informação secundária deve ser recolhida por disclosure. A abertura de detalhes nunca pode substituir a ação principal.
+
+### 157.4 Mobile Reading Width
+Textos operacionais devem usar largura confortável, evitar linhas excessivamente longas e impedir overflow horizontal.
+
+### 157.5 Dynamic Viewport
+A interface deve considerar as variações reais de viewport mobile e teclado virtual, evitando depender exclusivamente de 100vh.
+
+### 157.6 Safe Area
+Elementos fixos devem considerar safe-area superior e inferior, incluindo dispositivos com recorte e navegação por gestos.
+
+### 157.7 Scroll Ownership
+Cada tela deve possuir um único scroll principal sempre que possível. Bottom sheets e modais devem ter scroll interno somente quando necessário.
+
+### 157.8 Scroll Restoration
+Ao voltar de detalhe, busca, modal ou navegador externo, restaurar posição/contexto quando isso reduzir perda de contexto.
+
+## 158. Mobile Interaction States
+
+Cada controle interativo relevante deve possuir:
+
+- default;
+- pressed;
+- focus-visible;
+- disabled;
+- loading;
+- success;
+- error.
+
+Focus indicators devem ser claramente perceptíveis; o WCAG 2.2 inclui orientação específica para aparência do foco e contraste do indicador. citeturn0search3
+
+### 158.1 Reduced Motion
+Animações não essenciais devem respeitar prefers-reduced-motion.
+
+### 158.2 Motion Budget
+Nenhuma animação pode atrasar uma ação, esconder estado ou impedir navegação.
+
+## 159. Mobile Network Resilience
+
+Criar estados de rede:
+
+- online;
+- offline;
+- unstable;
+- slow;
+- unknown.
+
+Somente classificar como slow/unstable quando houver evidência mensurável.
+
+### 159.1 Network-Aware UX
+Em conexão limitada:
+
+- reduzir refresh;
+- priorizar missão;
+- usar cache;
+- adiar módulos secundários;
+- evitar retries agressivos.
+
+### 159.2 Request Cancellation
+Ao abandonar uma tela, cancelar requisições que não tenham mais utilidade.
+
+### 159.3 Request Deduplication
+Uma mesma consulta não deve ser executada simultaneamente por componentes diferentes.
+
+## 160. Mobile Data Budget
+
+Cada tela deve declarar aproximadamente:
+
+- requests críticos;
+- requests secundários;
+- dados locais;
+- dados externos;
+- cache permitido.
+
+A Home deve ter o menor orçamento do produto.
+
+## 161. Mission Preflight 2.0
+
+Antes de abrir navegação, mostrar somente problemas acionáveis:
+
+- destino ausente;
+- rota ausente;
+- rota salva antiga;
+- veículo indisponível;
+- conflito;
+- dados essenciais ausentes.
+
+Informações não bloqueantes ficam recolhidas.
+
+### 161.1 One-Tap Fix
+Quando possível, cada bloqueio possui uma correção direta:
+
+**Sem rota → Calcular**
+
+**Sem veículo → Selecionar**
+
+**Sem offline → Salvar**
+
+**Conflito → Revisar**
+
+## 162. Mission Handoff Return
+
+Após abrir Google Maps/Waze/Apple, o Trajeto mantém um checkpoint local e, no retorno:
+
+- identifica a missão;
+- mostra a etapa;
+- evita reiniciar a preparação;
+- permite concluir.
+
+Não inferir que a viagem foi concluída apenas porque o usuário abriu o navegador.
+
+## 163. Trip Completion Evidence
+
+A conclusão pode registrar:
+
+- concluída manualmente;
+- concluída com observação;
+- combustível registrado;
+- custo registrado;
+- incidente registrado.
+
+“Concluída” nunca significa que o Trajeto comprovou fisicamente a chegada.
+
+## 164. Mobile History
+
+Histórico deve priorizar:
+
+**última viagem → viagens frequentes → demais**
+
+Cada item mostra apenas:
+
+- destino;
+- data;
+- estado;
+- ação principal.
+
+Detalhes abrem sob demanda.
+
+## 165. Mobile Destination Memory
+
+Destinos devem possuir identidade estável baseada em dados registrados, evitando duplicatas por pequenas diferenças de nome.
+
+Possíveis correspondências exigem confirmação quando houver ambiguidade.
+
+## 166. Mobile Cost Surface
+
+Custos não devem aparecer como dashboard na Home.
+
+Na área Mobilidade:
+
+- gasto registrado;
+- estimativa;
+- projeção;
+- período;
+- missão;
+- veículo.
+
+Cada categoria deve ser claramente distinguida.
+
+## 167. Mobile Data Center
+
+O Data Center terá duas camadas:
+
+### Público
+- fontes;
+- atualização;
+- indicadores principais;
+- explicações.
+
+### Técnico
+- datasets;
+- schemas;
+- adapters;
+- cache;
+- migrations;
+- logs sanitizados;
+- capabilities.
+
+A camada técnica nunca deve aparecer automaticamente durante uma tarefa de navegação.
+
+## 168. Accessibility Journey Gate
+
+Acessibilidade será testada como jornada:
+
+**abrir → pesquisar → selecionar → calcular → preparar → navegar → retornar → concluir**
+
+e não apenas como auditoria de componentes.
+
+O W3C mantém orientação específica para aplicar WCAG 2.2 a aplicações mobile, incluindo mobile web apps. citeturn0search0turn0search4
+
+## 169. Touch Target Policy
+
+O requisito normativo WCAG 2.2 AA de 24×24 CSS px continua sendo o mínimo; o Trajeto adotará uma política interna mais confortável para ações principais, com 44×44 como alvo de design quando não houver conflito de espaço. citeturn0search1turn0search2
+
+## 170. Mobile QA Matrix 2.0
+
+Cada release deve validar:
+
+- viewport 320;
+- 360;
+- 375;
+- 390;
+- 412;
+- 430;
+- teclado aberto;
+- teclado fechado;
+- orientação vertical;
+- orientação horizontal;
+- reduced motion;
+- zoom;
+- leitor de tela;
+- conexão rápida;
+- conexão lenta;
+- offline.
+
+## 171. Visual Failure Catalog
+
+Criar testes específicos para:
+
+- overflow horizontal;
+- texto cortado;
+- botão coberto;
+- bottom navigation sobre conteúdo;
+- action rail sobre teclado;
+- modal sem fechamento;
+- sheet sem scroll;
+- foco perdido;
+- foco escondido;
+- skeleton infinito;
+- layout quebrado sem dados;
+- erro sem ação.
+
+## 172. Product Simplification Audit
+
+Antes de cada release, contar:
+
+- ações primárias por tela;
+- elementos fixos;
+- CTAs;
+- cards;
+- requests críticos;
+- listeners;
+- fontes de estado;
+- modais simultâneos.
+
+A tendência desejada é redução, não crescimento.
+
+## 173. Feature Removal Rule
+
+Uma função existente pode ser removida da superfície principal se:
+
+- for pouco utilizada;
+- duplicar outra;
+- aumentar complexidade;
+- não tiver fallback;
+- não funcionar offline quando deveria;
+- não possuir estado de erro;
+- não tiver utilidade clara.
+
+Ela pode permanecer disponível em área secundária ou ser removida do produto.
+
+## 174. Core Product Freeze
+
+Durante a reconstrução mobile, congelar novas features de baixo impacto até que:
+
+- Home funcione;
+- Planner funcione;
+- navegação externa funcione;
+- offline funcione;
+- recuperação funcione;
+- testes mobile passem.
+
+## 175. Definition of Done Mobile
+
+Uma função só estará pronta quando:
+
+1. funcionar;
+2. tiver loading;
+3. tiver erro;
+4. tiver empty state quando aplicável;
+5. funcionar em mobile;
+6. não quebrar offline quando houver suporte esperado;
+7. possuir acessibilidade;
+8. não gerar listener/requisição redundante;
+9. possuir fallback;
+10. estiver coberta por teste relevante.
+
+## 176. Último nível de produto
+
+O objetivo final não é fazer o Trajeto “ter tudo”.
+
+É fazer o Trajeto **resolver a próxima necessidade com o mínimo de esforço**, enquanto toda a complexidade técnica permanece invisível até ser necessária.
+
+A partir daqui, novas ideias devem ser avaliadas contra esse princípio.
