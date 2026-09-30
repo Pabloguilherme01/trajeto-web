@@ -1,7 +1,7 @@
 import { MapView, loadGoogleMapsScript } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Apple, Navigation, Minus, Plus, RotateCcw, X } from "lucide-react";
-import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, openNavigation } from "@/lib/mobileTools";
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { dedupeStationReferences, type StationReference } from "@/lib/stationReconciliation";
 
@@ -398,7 +398,13 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
             <button type="button" onClick={() => setSelectedStation(null)} className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/8 text-white/45" aria-label="Fechar posto selecionado"><X className="size-4" /></button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" disabled={!selectedCoords} onClick={() => selectedCoords && window.open("https://www.google.com/maps/dir/?api=1&destination=" + selectedCoords.lat + "," + selectedCoords.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014] disabled:opacity-40"><Navigation className="mr-1 inline size-3.5" /> Ir agora</button>
+            <button type="button" disabled={!selectedCoords} onClick={() => {
+              if (!selectedCoords) return;
+              const urls = openNavigation(selectedCoords.lat, selectedCoords.lng, selectedStation.name);
+              const provider = getPreferredNavigationProvider();
+              const target = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
+              window.open(target, "_blank", "noopener,noreferrer");
+            }} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.56rem] font-black text-[#0B1014] disabled:opacity-40"><Navigation className="mr-1 inline size-3.5" /> Ir agora</button>
             <button type="button" onClick={() => {
               if (selectedStation.cnpj) window.location.hash = "posto-" + encodeURIComponent(selectedStation.cnpj);
               onSelectStation?.(selectedStation);
