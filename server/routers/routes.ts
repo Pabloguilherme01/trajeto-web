@@ -46,7 +46,7 @@ export const routesRouter = router({
     const originPoint = originGeo.results[0]?.geometry.location ?? route.origin;
     const destinationPoint = destinationGeo.results[0]?.geometry.location ?? route.destination;
 
-    const corridorPoints = routeCorridorPoints(directions, 4);
+    const corridorPoints = routeCorridorPoints(directions, 3);
     const searchPoints = [
       { point: originPoint, radius: 7000 },
       ...corridorPoints.map(point => ({ point, radius: 6000 })),
