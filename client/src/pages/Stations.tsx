@@ -55,7 +55,7 @@ export default function Stations() {
   const verifiedFilterAvailable = false;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
-  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(16);
+  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(60);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
@@ -347,7 +347,7 @@ export default function Stations() {
 
   useEffect(() => {
     setLocalVisibleCount(12);
-    setDirectoryVisibleCount(16);
+    setDirectoryVisibleCount(60);
   }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
   useEffect(() => {
@@ -929,10 +929,10 @@ export default function Stations() {
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setDirectoryVisibleCount(current => Math.min(current + 16, directoryCardsFiltered.length))}
+                  onClick={() => setDirectoryVisibleCount(current => Math.min(current + 24, directoryCardsFiltered.length))}
                   className="min-h-12 rounded-2xl border border-white/8 bg-white/[.025] text-xs font-black text-white/65 transition-transform duration-200 active:scale-[.99]"
                 >
-                  Mostrar mais {Math.min(16, directoryCardsFiltered.length - directoryVisibleCount)} postos
+                  Mostrar mais {Math.min(24, directoryCardsFiltered.length - directoryVisibleCount)} postos
                 </button>
                 <button
                   type="button"
@@ -950,7 +950,7 @@ export default function Stations() {
                 onClick={() => setDirectoryVisibleCount(16)}
                 className="mt-2 min-h-10 w-full text-[0.6rem] font-bold text-white/30"
               >
-                Mostrar apenas os primeiros 16
+                Mostrar apenas os primeiros 60
               </button>
             )}
 
