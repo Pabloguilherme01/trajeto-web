@@ -142,7 +142,7 @@ export function StationDirectoryCard({
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               <h3 className="text-[1rem] font-black leading-tight text-white">{stationName}</h3>
-              <p className="mt-1 text-[0.5rem] font-bold uppercase tracking-[.12em] text-white/25">{anp ? "Cadastro ANP" : "Catálogo local"}</p>
+              <p className="mt-1 text-[0.5rem] font-bold uppercase tracking-[.12em] text-white/60">{anp ? "Cadastro ANP" : "Catálogo local"}</p>
             </div>
             <button
               type="button"
@@ -162,7 +162,7 @@ export function StationDirectoryCard({
         <p className="mt-1 text-[1.8rem] font-black tracking-[-.055em] text-white">
           {price ? price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "Indisponível"}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.5rem] text-white/40">
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.5rem] text-white/60">
           <span>{price ? "coleta " + formatDate(price.collectionDate) : "nesta coleta não há preço individual"}</span>
           {price && <span>· {freshnessLabel(price.collectionDate)}</span>}
           {price && <span>· ANP</span>}
@@ -171,19 +171,19 @@ export function StationDirectoryCard({
 
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.56rem]">
         <span className="font-black text-white/75">{distanceKm == null ? "distância indisponível" : distanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"}</span>
-        {coords && <span className="text-white/30">coordenada disponível</span>}
-        {status === "open" && <span className="text-white/45">horário: referência externa</span>}
+        {coords && <span className="text-white/60">coordenada disponível</span>}
+        {status === "open" && <span className="text-white/60">horário: referência externa</span>}
       </div>
 
       <div className="mt-2 flex items-start gap-2 rounded-xl border border-white/8 bg-white/[.02] p-3">
         <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#3DE3FF]" />
         <p className="min-w-0 flex-1 text-[0.58rem] leading-relaxed text-white/55">{address || "Endereço não consolidado"}</p>
-        <button type="button" onClick={() => void copyAddress()} className="shrink-0 text-[0.48rem] font-black text-white/35">{copied ? "Copiado" : "Copiar"}</button>
+        <button type="button" onClick={() => void copyAddress()} className="shrink-0 text-[0.48rem] font-black text-white/60">{copied ? "Copiado" : "Copiar"}</button>
       </div>
 
       {fuelLabels.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {fuelLabels.map(label => <span key={label} className="rounded-full border border-white/8 px-2 py-1 text-[0.43rem] font-bold text-white/45">{label}</span>)}
+          {fuelLabels.map(label => <span key={label} className="rounded-full border border-white/8 px-2 py-1 text-[0.43rem] font-bold text-white/60">{label}</span>)}
         </div>
       )}
 
@@ -206,15 +206,15 @@ export function StationDirectoryCard({
       <details className="mt-2 rounded-xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.54rem] font-black text-white/60">
           <span>Dados completos e fontes</span>
-          <span className="text-[0.45rem] text-white/25">técnico</span>
+          <span className="text-[0.45rem] text-white/60">técnico</span>
         </summary>
         <div className="space-y-2 border-t border-white/8 p-3">
           <StationIntegrityPanel anp={anp} local={local} price={price} />
-          {cnpj && <p className="text-[0.52rem] text-white/35">CNPJ: <span className="font-black text-white/55">{cnpj}</span></p>}
-          {anp?.dataObtencao && <p className="text-[0.52rem] text-white/35">Cadastro ANP: <span className="text-white/55">{formatDate(anp.dataObtencao)}</span></p>}
-          {price?.collectionDate && <p className="text-[0.52rem] text-white/35">Preço individual: <span className="text-white/55">{formatDate(price.collectionDate)} · ANP</span></p>}
-          {status && <p className="text-[0.52rem] text-white/35">Status externo: <span className="text-white/55">{status === "open" ? "aberto" : status === "closed" ? "fechado" : "não confirmado"} · {formatDate(local?.mapData?.observedAt)}</span></p>}
-          {coords && <p className="text-[0.52rem] text-white/35">Coordenadas: <span className="text-white/55">{coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}</span></p>}
+          {cnpj && <p className="text-[0.52rem] text-white/60">CNPJ: <span className="font-black text-white/55">{cnpj}</span></p>}
+          {anp?.dataObtencao && <p className="text-[0.52rem] text-white/60">Cadastro ANP: <span className="text-white/55">{formatDate(anp.dataObtencao)}</span></p>}
+          {price?.collectionDate && <p className="text-[0.52rem] text-white/60">Preço individual: <span className="text-white/55">{formatDate(price.collectionDate)} · ANP</span></p>}
+          {status && <p className="text-[0.52rem] text-white/60">Status externo: <span className="text-white/55">{status === "open" ? "aberto" : status === "closed" ? "fechado" : "não confirmado"} · {formatDate(local?.mapData?.observedAt)}</span></p>}
+          {coords && <p className="text-[0.52rem] text-white/60">Coordenadas: <span className="text-white/55">{coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}</span></p>}
           <div className="flex flex-wrap gap-2">
             <a href={"https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web"} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-white/8 px-2.5 text-[0.48rem] font-black text-white/55">ANP <ExternalLink className="size-3" /></a>
             {onToggleCompare && (
@@ -222,7 +222,7 @@ export function StationDirectoryCard({
             )}
           </div>
           <details className="rounded-xl border border-white/8">
-            <summary className="cursor-pointer px-3 py-2 text-[0.5rem] font-black text-white/45">Escolher provedor de navegação</summary>
+            <summary className="cursor-pointer px-3 py-2 text-[0.5rem] font-black text-white/60">Escolher provedor de navegação</summary>
             <div className="grid grid-cols-3 gap-2 border-t border-white/8 p-2">
               <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-10 rounded-lg border border-white/8 text-[0.5rem] font-black text-white/60">Google</button>
               <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-10 rounded-lg border border-white/8 text-[0.5rem] font-black text-white/60">Waze</button>
