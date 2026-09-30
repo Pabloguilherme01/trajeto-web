@@ -821,9 +821,10 @@ export default function Stations() {
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
-            <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
-              <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
-              <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[0.5rem] text-white/30" aria-live="polite">
+              <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas · {anpStations.length} ANP</span>
+              <span>{userCoords ? "distância local · GPS não enviado" : "sem localização"}</span>
+              {fuelFilter !== "all" && <span className="rounded-full border border-[#C7FF3C]/10 px-2 py-1 text-[#D9FF91]">combustível filtrado</span>}
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
