@@ -573,6 +573,13 @@ export default function Planner() {
           </div>
         </section>
 
+        {planned && routeConfirmed && (
+          <div className="mb-3 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.07] px-3 py-2.5 text-[0.62rem] font-black text-[#D9FF91]" role="status" aria-live="polite">
+            <CheckCircle2 className="size-4 shrink-0" />
+            <span>Rota confirmada · {selectedRouteLabel ?? "principal"} · pronta para navegação</span>
+          </div>
+        )}
+
         {planned && <MobileNavigationCenter
           origin={origin}
           destination={destination}
