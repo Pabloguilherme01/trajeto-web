@@ -20,7 +20,7 @@ export default defineConfig({
   root: path.resolve(root, "client"),
   publicDir: path.resolve(root, "client", "public"),
   build: {
-    manifest: true,
+    manifest: "manifest.json",
     outDir: path.resolve(root, "dist/public"),
     emptyOutDir: true,
     rollupOptions: {
