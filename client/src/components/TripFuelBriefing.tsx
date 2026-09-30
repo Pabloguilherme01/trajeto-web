@@ -9,13 +9,15 @@ const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL
 
 export default function TripFuelBriefing({ distanceKm, durationSeconds, roundTrip = false }: Props) {
   const [vehicle, setVehicle] = useState<MobileVehicle | null>(() => getMobileVehicle());
-  const [price, setPrice] = useState(0);\n  const [priceDate, setPriceDate] = useState<string | null>(null);
+  const [price, setPrice] = useState(0);
+  const [priceDate, setPriceDate] = useState<string | null>(null);
 
   useEffect(() => {
     const refresh = () => {
       setVehicle(getMobileVehicle());
       const latest = listFuelLog()[0];
-      setPrice(latest && latest.liters > 0 ? latest.totalCost / latest.liters : 0);\n      setPriceDate(latest?.date ?? null);
+      setPrice(latest && latest.liters > 0 ? latest.totalCost / latest.liters : 0);
+      setPriceDate(latest?.date ?? null);
     };
     refresh();
     window.addEventListener(mobileVehicleEvent, refresh);
