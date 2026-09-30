@@ -2,7 +2,7 @@ import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, rememberIntent, rememberSearch, type RecentTrip } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
@@ -17,6 +17,7 @@ export default function Home() {
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches);
+  const [recentTrips, setRecentTrips] = useState<RecentTrip[]>(getRecentTrips);
   const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
   const [locating, setLocating] = useState(false);
   const [shareDone, setShareDone] = useState(false);
@@ -26,6 +27,7 @@ export default function Home() {
     const refresh = () => {
       setLastTrip(getLastTrip());
       setRecentSearches(getRecentSearches());
+      setRecentTrips(getRecentTrips());
       const nextDestinations = getMobileDestinations();
       setDestinations(nextDestinations);
     };
@@ -33,10 +35,12 @@ export default function Home() {
     const onOffline = () => setOnline(false);
     refresh();
     window.addEventListener("focus", refresh);
+    window.addEventListener(mobilePreferenceEvent, refresh);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
       window.removeEventListener("focus", refresh);
+      window.removeEventListener(mobilePreferenceEvent, refresh);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
@@ -309,6 +313,57 @@ export default function Home() {
                 </button>
               ))}
             </div>
+          </section>
+        )}
+
+        {recentTrips.length > 0 && (
+          <section className="mt-7 rounded-3xl border border-white/8 bg-white/[.025] p-4" aria-labelledby="recent-trips-title">
+            <div className="flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-white/30">Rotas reutilizáveis</p>
+                <h2 id="recent-trips-title" className="mt-1 text-lg font-black tracking-[-.035em]">Continue de onde parou.</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLocation(appUrl("/salvos"))}
+                className="min-h-10 shrink-0 rounded-xl border border-white/8 px-3 text-[0.58rem] font-black text-white/55"
+              >
+                Ver salvos
+              </button>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {recentTrips.slice(0, 8).map((trip, index) => (
+                <button
+                  key={trip.origin + "::" + trip.destination}
+                  type="button"
+                  onClick={() => {
+                    rememberIntent("route");
+                    setLocation(
+                      appUrl("/planejar") +
+                        "?origem=" + encodeURIComponent(trip.origin) +
+                        "&destino=" + encodeURIComponent(trip.destination),
+                    );
+                  }}
+                  className="flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left active:scale-[.99]"
+                  aria-label={"Repetir rota " + trip.origin + " para " + trip.destination}
+                >
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+                    <Route className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-black text-white">{trip.destination}</span>
+                    <span className="mt-0.5 block truncate text-[0.58rem] text-white/38">{trip.origin} → destino</span>
+                    <span className="mt-1 block text-[0.5rem] font-bold uppercase tracking-[.1em] text-white/22">
+                      {index === 0 ? "Mais recente" : "Reutilizar"}
+                    </span>
+                  </span>
+                  <ArrowRight className="size-3.5 shrink-0 text-white/25" />
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 text-[0.55rem] leading-relaxed text-white/28">
+              Estas rotas ficam guardadas localmente como histórico. Use “Salvar offline” no planejador quando quiser uma cópia do trajeto para contingência sem internet.
+            </p>
           </section>
         )}
 
