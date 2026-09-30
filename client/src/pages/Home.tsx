@@ -176,6 +176,18 @@ export default function Home() {
 
         <QuickResolver onMessage={setMessage} />
 
+        <section className="mt-3 grid grid-cols-3 gap-2" aria-label="Atalhos locais">
+          <button type="button" onClick={() => setLocation(appUrl("/mapa") + "?q=Centro")} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl px-3 text-[0.56rem]">
+            ★ Centro
+          </button>
+          <button type="button" onClick={() => setLocation(appUrl("/mapa") + "?q=emergencia")} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl border-[#FF7D6A]/20 bg-[#FF7D6A]/[.04] px-3 text-[0.56rem] text-[#FFB7A9]">
+            ⚠ Emergência
+          </button>
+          <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl px-3 text-[0.56rem]">
+            🗺 Explorar
+          </button>
+        </section>
+
         <section className="mt-5">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-[0.5rem] font-black uppercase tracking-[.16em] text-white/25">Explorar a cidade</p><h2 className="mt-1 text-base font-black">O que você precisa?</h2></div>
