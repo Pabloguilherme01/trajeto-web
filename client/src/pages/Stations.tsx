@@ -12,6 +12,7 @@ import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE,
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
+import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
@@ -36,7 +37,16 @@ export default function Stations() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
   const [localVisibleCount, setLocalVisibleCount] = useState(12);
+  const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>([]);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
+  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const broadAguasLindasQuery = normalizedQuery === "postos" || normalizedQuery === "aguas lindas" || normalizedQuery.includes("postos em aguas lindas") || normalizedQuery.includes("postos de aguas lindas");
+  const anpLiveQuery = trpc.stationDirectory.anp.useQuery(
+    { municipio: "AGUASLINDASDEGOIAS", uf: "GO" },
+    { enabled: broadAguasLindasQuery && !showSavedOnly && !staticRuntime, retry: 1, staleTime: 10 * 60_000 },
+  );
+  const anpRows = staticRuntime ? staticAnpRows : anpLiveQuery.data?.rows ?? [];
+  const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -96,6 +106,22 @@ export default function Stations() {
     ? new Date(cachedSnapshot.savedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
     : null;
   const usingCache = !online && liveStations.length === 0 && stations.length > 0;
+
+  useEffect(() => {
+    if (!staticRuntime || !broadAguasLindasQuery || showSavedOnly) return;
+    let cancelled = false;
+    fetch(appUrl("/data/aguas-lindas-anp.json"), { cache: "no-store" })
+      .then(response => response.ok ? response.json() as Promise<{ data?: unknown[] }> : Promise.reject(new Error("snapshot unavailable")))
+      .then(payload => {
+        if (cancelled) return;
+        const rows = (payload.data ?? []).map(item => item && typeof item === "object" ? normalizeAnpFuelRow(item as Record<string, unknown>) : null).filter((row): row is AnpFuelRow => Boolean(row));
+        setStaticAnpRows(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setStaticAnpRows([]);
+      });
+    return () => { cancelled = true; };
+  }, [staticRuntime, broadAguasLindasQuery, showSavedOnly]);
 
   useEffect(() => {
     const onOnline = () => setOnline(true);
@@ -253,6 +279,26 @@ export default function Stations() {
     toast.message(localDirectory.length + " cadastro(s) exportado(s).");
   };
 
+  const exportAnpCsv = () => {
+    if (!anpRows.length) {
+      toast.message("Nenhum dado oficial da ANP disponível nesta consulta.");
+      return;
+    }
+    const headers = ["codigoSIMP","autorizacao","dataPublicacao","razaoSocial","cnpj","endereco","complemento","bairro","cep","uf","municipio","distribuidora","dataVinculacao","classe","produto","tancagem","unidadeMedidaTancagem","quantidadeBicos","latitude","longitude","latitudeANP4C","longitudeANP4C","validacao","estimativaAcuraciaM","srid","sistemaReferenciaCoordenadas","dataObtencao","origemInformacao","situacaoConstatada","observacao","statusSIGAF"];
+    const rows = anpRows.map(row => [
+      row.codigoSimp,row.autorizacao,row.dataPublicacao,row.razaoSocial,row.cnpj,row.endereco,row.complemento,row.bairro,row.cep,row.uf,row.municipio,row.distribuidora,row.dataVinculacao,row.classe,row.produto,row.tancagem,row.unidadeMedidaTancagem,row.quantidadeBicos,row.latitude,row.longitude,row.latitudeAnp4c,row.longitudeAnp4c,row.validacao,row.estimativaAcuraciaM,row.srid,row.sistemaReferenciaCoordenadas,row.dataObtencao,row.origemInformacao,row.situacaoConstatada,row.observacao,row.statusSigaf
+    ]);
+    const csvValue = (value: unknown) => '"' + (value == null ? "" : String(value)).replace(/"/g, '""') + '"';
+    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "trajeto-aguas-lindas-anp-2026.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.message(anpRows.length + " registro(s) ANP exportado(s).");
+  };
+
   const toggleSaved = (station: typeof stations[number]) => {
     const result = toggleMobileStationFavorite(station as unknown as MobileStation);
     setSaved(result.stations);
@@ -391,6 +437,68 @@ export default function Stations() {
               <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
               <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]">Postos perto de mim</button>
             </div>
+          </section>
+        )}
+
+        {!showSavedOnly && broadAguasLindasQuery && (
+          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Fonte oficial ANP</p>
+                <h2 id="anp-directory-title" className="mt-1 text-xl font-black">Cadastro técnico dos postos</h2>
+                <p className="mt-1 text-[0.63rem] leading-relaxed text-white/45">A API da ANP fornece autorização, CNPJ, endereço, distribuidora, produtos, tancagem, bicos, coordenadas, validação geográfica, situação constatada e status SIGAF.</p>
+              </div>
+              <span className="shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
+            </div>
+
+            {anpLiveQuery.isLoading && !staticRuntime && <div className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/45">Consultando a base oficial da ANP…</div>}
+            {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/50">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/20 px-3 font-black text-[#FFD09A]">Tentar novamente</button></div>}
+            {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/50">O snapshot oficial ainda não chegou ao GitHub Pages. A sincronização automática da ANP foi configurada e a base local continua disponível enquanto isso.</div>}
+
+            {anpRows.length > 0 && (
+              <>
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
+                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
+                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-white/30">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
+                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {anpStations.slice(0, 12).map(station => (
+                    <details key={station.cnpj} className="rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
+                      <summary className="cursor-pointer list-none px-3.5 py-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-black text-white">{station.razaoSocial ?? "Razão social não informada"}</p>
+                            <p className="mt-1 text-[0.56rem] text-white/35">CNPJ {station.cnpj} · Autorização {station.autorizacao ?? "não informada"}</p>
+                            <p className="mt-1 text-[0.58rem] leading-relaxed text-white/45">{station.endereco ?? "Endereço não informado"}{station.bairro ? " · " + station.bairro : ""}</p>
+                          </div>
+                          <span className="shrink-0 rounded-full border border-white/8 px-2 py-1 text-[0.46rem] font-black text-white/40">{station.products.length} produto(s)</span>
+                        </div>
+                      </summary>
+                      <div className="space-y-2 border-t border-white/8 px-3.5 py-3 text-[0.55rem] leading-relaxed text-white/45">
+                        <p><strong className="text-white/65">Código SIMP:</strong> {station.codigoSimp ?? "não informado"} · <strong className="text-white/65">CEP:</strong> {station.cep ?? "não informado"} · <strong className="text-white/65">Município/UF:</strong> {station.municipio ?? "—"}/{station.uf ?? "—"}</p>
+                        <p><strong className="text-white/65">Distribuidora/bandeira:</strong> {station.distribuidora ?? "bandeira branca/não informada"} · <strong className="text-white/65">Vinculação:</strong> {station.dataVinculacao ?? "não informada"}</p>
+                        <p><strong className="text-white/65">Publicação:</strong> {station.dataPublicacao ?? "não informada"} · <strong className="text-white/65">Classe:</strong> {station.products.map(item => item.classe).filter(Boolean).filter((item, index, arr) => arr.indexOf(item) === index).join(" · ") || "não informada"}</p>
+                        <p><strong className="text-white/65">Situação:</strong> {station.situacaoConstatada ?? "não informada"} · <strong className="text-white/65">SIGAF:</strong> {station.statusSigaf || "sem ocorrência informada"} </p>
+                        <p><strong className="text-white/65">Origem:</strong> {station.origemInformacao ?? "não informada"} · <strong className="text-white/65">Obtido em:</strong> {station.dataObtencao ?? "não informado"}</p>
+                        <div className="rounded-xl border border-white/8 bg-white/[.02] p-3">
+                          <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">Produtos, tancagem e bicos</p>
+                          {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
+                        </div>
+                        <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
+                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "_blank", "noopener,noreferrer")} className="min-h-10 rounded-xl border border-[#C7FF3C]/20 px-3 text-[0.58rem] font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
+                        {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
+                      </div>
+                    </details>
+                  ))}
+                </div>
+                {anpStations.length > 12 && <p className="mt-3 text-center text-[0.55rem] text-white/25">Mostrando os primeiros 12 nesta visualização. O CSV contém todas as linhas retornadas pela ANP.</p>}
+              </>
+            )}
+
+            <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. A base técnica é separada dos dados secundários de mapas e da lista local. Última consulta: {((anpLiveQuery.data?.retrievedAt && new Date(anpLiveQuery.data.retrievedAt).toLocaleString("pt-BR")) || "snapshot no GitHub Pages / aguardando sincronização")}.</p>
           </section>
         )}
 
