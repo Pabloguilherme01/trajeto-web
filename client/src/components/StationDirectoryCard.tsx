@@ -5,7 +5,7 @@ import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
-import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
+import { stationDataConfidence, stationDataConfidenceBand, freshnessLabel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -183,7 +183,7 @@ export function StationDirectoryCard({
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-white/45">Confiança dos dados</p>
-            <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
+            <p className="mt-1 text-xs font-black text-white">{stationDataConfidenceBand(confidence)}</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
