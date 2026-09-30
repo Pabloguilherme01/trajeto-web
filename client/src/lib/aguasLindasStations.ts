@@ -361,7 +361,7 @@ export const AGUAS_LINDAS_STATIONS: LocalStationRecord[] = [
 
 export function searchAguasLindasStations(query: string) {
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  if (!normalized || normalized === "postos" || normalized === "postos de combustíveis" || normalized === "postos de combustivel") {
+  if (!normalized || normalized === "postos" || normalized === "combustíveis" || normalized === "combustiveis" || normalized === "postos de combustíveis" || normalized === "postos de combustivel") {
     return AGUAS_LINDAS_STATIONS;
   }
   return AGUAS_LINDAS_STATIONS.filter(station =>
