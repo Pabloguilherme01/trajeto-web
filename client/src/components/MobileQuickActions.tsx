@@ -127,7 +127,7 @@ export default function MobileQuickActions() {
     ? `Minha próxima viagem no Trajeto: ${lastTrip.origin} → ${lastTrip.destination}.`
     : "Use o Trajeto para planejar viagens, encontrar postos e guardar rotas offline.";
 
-  const automaticMode = getAutomaticDailyMode(online, savedRoutesCount);
+  const shareUrl = lastTrip\n    ? window.location.origin + appUrl("/planejar?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination))\n    : window.location.origin + appUrl("/");\n\n  const automaticMode = getAutomaticDailyMode(online, savedRoutesCount);
   const primary = chooseMobilePrimaryAction({
     online,
     mode: dailyMode,
