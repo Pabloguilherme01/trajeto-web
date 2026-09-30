@@ -6,10 +6,12 @@ import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "
 import { getFavoriteDestination, getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { getMobileVehicle } from "@/lib/mobileVehicle";
 import { getMobilityContext } from "@/lib/mobilityContext";
-import { routingCapabilityLabel } from "@/lib/runtimeCapabilities";
 import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
+import MobileCopilot from "@/components/MobileCopilot";
+import MobileDataMode from "@/components/MobileDataMode";
+import TripReadinessCard from "@/components/TripReadinessCard";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -221,23 +223,22 @@ export default function Home() {
           )}
         </section>
 
-        <section className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4" aria-labelledby="mobility-status-title">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Próximo passo</p>
-              <h2 id="mobility-status-title" className="mt-1 text-base font-black">{mobilityContext.summary}</h2>
+        <MobileCopilot />
+
+        <section className="mt-4">
+          <details className="rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-black">
+              <span>Antes de sair</span>
+              <span className="text-[0.55rem] font-bold uppercase tracking-[.12em] text-white/25">checagem local</span>
+            </summary>
+            <div className="mt-3">
+              <TripReadinessCard />
             </div>
-            <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-white/40">{routingCapabilityLabel()}</span>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {mobilityContext.checks.slice(0, 4).map(check => (
-              <div key={check.id} className="rounded-xl bg-white/[.035] p-3">
-                <CheckCircle2 className={"size-3.5 " + (check.ready ? "text-[#C7FF3C]" : "text-white/20")} />
-                <p className="mt-2 text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">{check.id === "connection" ? "Conexão" : check.id === "destination" ? "Destino" : check.id === "vehicle" ? "Veículo" : "Offline"}</p>
-                <p className="mt-1 text-[0.62rem] font-bold text-white/65">{check.label}</p>
-              </div>
-            ))}
-          </div>
+          </details>
+        </section>
+
+        <section className="mt-4">
+          <MobileDataMode />
         </section>
 
         <section className="mt-4 grid gap-3 sm:grid-cols-3">
