@@ -111,6 +111,9 @@ export default function MobileBottomNav() {
           <button type="button" onClick={() => openExternalSearch("emergência Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Siren className="size-5" /> Emergência
           </button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/servicos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <Landmark className="size-5" /> Serviços públicos
+          </button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Fuel className="size-5" /> Encontrar postos
           </button>
