@@ -336,6 +336,21 @@ export default function Stations() {
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório local</p>
                 <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
                 <p className="mt-2 text-[0.66rem] leading-relaxed text-white/45">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. Sincronização ANP de referência: {new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
+            <div className="mt-3 rounded-xl border border-white/8 bg-[#0B1014] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Referência de preços ANP</p>
+                  <p className="mt-1 text-[0.58rem] text-white/45">20/09 a 26/09/2026 · médias municipais</p>
+                </div>
+                <span className="text-[0.5rem] font-black text-white/30">não é preço em tempo real</span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-[0.55rem] text-white/50">
+                <span>Gasolina: <strong className="text-white/75">R$ 6,78/L</strong></span>
+                <span>Etanol: <strong className="text-white/75">R$ 4,59/L</strong></span>
+                <span>Diesel S10: <strong className="text-white/75">R$ 7,27/L</strong></span>
+                <span>GLP P13: <strong className="text-white/75">R$ 107,53</strong></span>
+              </div>
+            </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
                 <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Cadastro local</p>
