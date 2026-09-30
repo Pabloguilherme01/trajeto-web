@@ -7,6 +7,7 @@ import { getMobileDestinations, rememberDestinationUsage, type MobileDestination
 import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import TripReadinessCard from "@/components/TripReadinessCard";
+import DailyModeSelector from "@/components/DailyModeSelector";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -197,6 +198,8 @@ export default function Home() {
             </button>
           </div>
         </section>
+
+        <div className="mt-5"><DailyModeSelector /></div>
 
         <section className="mt-4" aria-label="Atalhos por necessidade">
           <div className="flex items-end justify-between gap-3">
