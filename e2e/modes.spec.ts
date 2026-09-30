@@ -21,4 +21,7 @@ test("home mostra modos rápidos e ação automática", async ({ page }) => {
   await page.getByRole("button", { name: "Trocar modo" }).click();
   await expect(page.getByRole("button", { name: "Economia", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Condução", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Economia", exact: true }).click();
+  await expect(page).toHaveURL(/\/planejar\?economia=1/);
+  await expect(page.getByRole("heading", { name: "Calculadora pronta." })).toBeVisible();
 });
