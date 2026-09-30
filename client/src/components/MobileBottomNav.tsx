@@ -83,7 +83,7 @@ export default function MobileBottomNav() {
       <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="border-white/10 bg-[#121B22] text-white">
         <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-white/70"><X className="size-5" /></DialogClose>
         <DialogTitle>Mais opções</DialogTitle>
-        <DialogDescription>Postos, salvos, ajuda e conta ficam aqui.</DialogDescription>
+        <DialogDescription>Serviços, postos, salvos, ajuda e recursos locais ficam aqui.</DialogDescription>
         <div className="grid gap-2">
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Search className="size-5" /> Buscar no Trajeto
