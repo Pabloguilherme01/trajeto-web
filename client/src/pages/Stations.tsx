@@ -8,7 +8,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
 import { StationMap } from "@/components/StationMap";
 import { toast } from "sonner";
@@ -365,6 +365,7 @@ export default function Stations() {
             </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className="text-[0.46rem] font-bold text-white/25">{AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE.count} CNPJs ativos no CNAE 4731-8/00</span>
                 <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
                 <span className="text-[0.46rem] font-bold text-white/25">sincronização: {new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}</span>
               </div>
