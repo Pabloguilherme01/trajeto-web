@@ -57,7 +57,7 @@ export default function Stations() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
-  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
+  const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -156,6 +156,11 @@ export default function Stations() {
         const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
         const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
+      }
+      if (directorySort === "price") {
+        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
+        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
+        return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "brand") {
         return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
@@ -960,6 +965,7 @@ export default function Stations() {
               </label>
               <select value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
+                <option value="price">Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
