@@ -75,7 +75,6 @@ export default function CityExplorerMap({ category, query = "", center, online, 
         Number.isFinite(Number(station.anp?.latitude)) &&
         Number.isFinite(Number(station.anp?.longitude)),
       )
-      .slice(0, 80)
       .map(station => ({
         id: "local:" + station.cnpj,
         name: station.displayName,
