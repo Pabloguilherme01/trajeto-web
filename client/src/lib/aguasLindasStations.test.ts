@@ -11,9 +11,11 @@ describe("diretório de postos de Águas Lindas", () => {
     expect(new Set(AGUAS_LINDAS_STATIONS.map(item => item.cnpj)).size).toBe(41);
   });
 
-  it("retorna a base completa para a busca genérica de postos", () => {
+  it("retorna a base completa para buscas genéricas e variações da cidade", () => {
     expect(searchAguasLindasStations("postos")).toHaveLength(41);
     expect(searchAguasLindasStations("combustíveis")).toHaveLength(41);
+    expect(searchAguasLindasStations("Águas Lindas de Goiás, GO")).toHaveLength(41);
+    expect(searchAguasLindasStations("postos em Águas Lindas de Goiás")).toHaveLength(41);
   });
 
   it("permite localizar por nome, alias ou CNPJ", () => {
