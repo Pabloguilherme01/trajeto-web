@@ -52,6 +52,18 @@ export const AGUAS_LINDAS_MAP_ONLY_DISCOVERIES = [
 export const AGUAS_LINDAS_STATIONS_SOURCE =
   "41 empresas ativas no CNAE 4731-8/00 em Águas Lindas de Goiás, cruzadas com a relação pública de postos e referências de mapas. Cadastro setorial não equivale, por si só, a comprovação de que cada unidade está aberta neste momento.";
 
+export const AGUAS_LINDAS_PRICE_REFERENCE = {
+  period: "20/09/2026 a 26/09/2026",
+  gasolineCommon: { average: 6.78, sampledStations: 8 },
+  ethanol: { average: 4.59, sampledStations: 8 },
+  dieselS10: { average: 7.27, sampledStations: 7 },
+  dieselS500: { average: 6.94, sampledStations: 6 },
+  glpP13: { average: 107.53, sampledStations: 13 },
+  gnv: { average: 3.89, sampledStations: 1 },
+  source: "ANP",
+  note: "Médias municipais; não representam preço atual individual de cada posto.",
+} as const;
+
 export const AGUAS_LINDAS_STATIONS_SOURCES = {
   anp: "Dados cadastrais dos revendedores varejistas de combustíveis automotivos, ANP, atualização de 29/09/2026.",
   cirtrox: "Consulta de empresas por CNAE e município, atualização indicada em setembro de 2026.",
