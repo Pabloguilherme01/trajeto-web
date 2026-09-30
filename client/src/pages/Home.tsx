@@ -4,9 +4,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
-import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileDataMode from "@/components/MobileDataMode";
@@ -19,7 +17,6 @@ export default function Home() {
   const [destination, setDestination] = useState("");
   const [lastTrip, setLastTrip] = useState(getLastTrip);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
-  const [offlineRoutes, setOfflineRoutes] = useState(0);
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches);
   const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
   const [locating, setLocating] = useState(false);
@@ -32,7 +29,6 @@ export default function Home() {
       setRecentSearches(getRecentSearches());
       const nextDestinations = getMobileDestinations();
       setDestinations(nextDestinations);
-      void listOfflineRoutes().then(routes => { setOfflineRoutes(routes.length); }).catch(() => { setOfflineRoutes(0); });
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
@@ -40,12 +36,10 @@ export default function Home() {
     window.addEventListener("focus", refresh);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    window.addEventListener(offlineRouteEvent, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
-      window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
 
