@@ -383,7 +383,7 @@ export default function Stations() {
             {savedItems.length === 0 ? (
               <div className="rounded-[1.4rem] border border-white/8 bg-[#121B22] p-5">
                 <p className="text-base font-black">Nenhum posto salvo</p>
-                <p className="mt-1 text-sm leading-relaxed text-white/40">Salve postos no aparelho para acessá-los rapidamente, inclusive sem conexão.</p>
+                <p className="mt-1 text-sm leading-relaxed text-white/60">Salve postos no aparelho para acessá-los rapidamente, inclusive sem conexão.</p>
                 <button type="button" onClick={() => setLocation(appUrl("/postos?q=postos"))} className="mt-4 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">Encontrar postos</button>
               </div>
             ) : savedItems.map(({ station, item }, index) => item ? (
@@ -405,8 +405,8 @@ export default function Stations() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate text-sm font-black">{station.name}</h2>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{station.address || "Endereço não informado"}</p>
-                    <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">Este cadastro foi salvo neste aparelho e não está mais presente no catálogo atual.</p>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/60">{station.address || "Endereço não informado"}</p>
+                    <p className="mt-2 text-[0.52rem] leading-relaxed text-white/60">Este cadastro foi salvo neste aparelho e não está mais presente no catálogo atual.</p>
                   </div>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -460,8 +460,8 @@ export default function Stations() {
             <label htmlFor="stations-search" className="sr-only">Buscar posto, bairro ou endereço</label>
             <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
               <Search className="size-4 shrink-0 text-[#3DE3FF]" />
-              <input id="stations-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/22" placeholder="Buscar posto, bairro ou endereço" />
-              {input && <button type="button" onClick={() => { setInput(""); setSearch(""); setLocation(appUrl("/postos?q=postos")); }} className="grid size-8 place-items-center rounded-lg text-white/30" aria-label="Limpar busca"><X className="size-4" /></button>}
+              <input id="stations-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/60" placeholder="Buscar posto, bairro ou endereço" />
+              {input && <button type="button" onClick={() => { setInput(""); setSearch(""); setLocation(appUrl("/postos?q=postos")); }} className="grid size-8 place-items-center rounded-lg text-white/60" aria-label="Limpar busca"><X className="size-4" /></button>}
               <button type="submit" className="grid size-10 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar"><Search className="size-4" /></button>
             </div>
           </form>
@@ -483,15 +483,15 @@ export default function Stations() {
               <SlidersHorizontal className="mr-1 inline size-3.5" /> Filtros{filterCount ? " " + filterCount : ""}
             </button>
             <button type="button" disabled={!directory.priceCount} onClick={() => setFilters(current => ({ ...current, priceOnly: true, sort: "price", fuelFilter: "gasolina-comum" }))} className="min-h-9 shrink-0 rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.52rem] font-black text-[#D9FF91] disabled:cursor-not-allowed disabled:opacity-30"><Fuel className="mr-1 inline size-3" /> {directory.priceCount ? "Menor preço" : "Preço indisponível"}</button>
-            <button type="button" onClick={saveMapOffline} className="min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.025] px-3 text-[0.52rem] font-bold text-white/45"><WifiOff className="mr-1 inline size-3" /> Offline</button>
-            <button type="button" onClick={() => void shareDirectory()} className="min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.025] px-3 text-[0.52rem] font-bold text-white/45"><Share2 className="mr-1 inline size-3" /> Enviar</button>
+            <button type="button" onClick={saveMapOffline} className="min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.025] px-3 text-[0.52rem] font-bold text-white/60"><WifiOff className="mr-1 inline size-3" /> Offline</button>
+            <button type="button" onClick={() => void shareDirectory()} className="min-h-9 shrink-0 rounded-full border border-white/8 bg-white/[.025] px-3 text-[0.52rem] font-bold text-white/60"><Share2 className="mr-1 inline size-3" /> Enviar</button>
           </div>
         </section>
 
         {recentSearches.length > 0 && !search && (
           <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Buscas recentes">
             {recentSearches.slice(0, 6).map(item => (
-              <button key={item} type="button" onClick={() => { setInput(item); setSearch(item); rememberSearch(item); setLocation(appUrl("/postos") + "?q=postos&busca=" + encodeURIComponent(item)); }} className="min-h-9 max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 bg-white/[.02] px-3 text-[0.52rem] font-bold text-white/45">
+              <button key={item} type="button" onClick={() => { setInput(item); setSearch(item); rememberSearch(item); setLocation(appUrl("/postos") + "?q=postos&busca=" + encodeURIComponent(item)); }} className="min-h-9 max-w-[12rem] shrink-0 truncate rounded-full border border-white/8 bg-white/[.02] px-3 text-[0.52rem] font-bold text-white/60">
                 {item}
               </button>
             ))}
@@ -500,9 +500,9 @@ export default function Stations() {
 
         <div className="mt-4 flex items-end justify-between gap-3">
           <div>
-            <p className="text-[0.48rem] font-black uppercase tracking-[.15em] text-white/25">Catálogo local</p>
+            <p className="text-[0.48rem] font-black uppercase tracking-[.15em] text-white/60">Catálogo local</p>
             <h2 className="mt-1 text-lg font-black tracking-[-.03em]">{resultCount} posto(s)</h2>
-            <p className="mt-1 text-[0.52rem] text-white/30">
+            <p className="mt-1 text-[0.52rem] text-white/60">
               {directory.verifiedCount} com cadastro ANP · {directory.priceCount} com preço individual · {directory.mappedCount} com coordenada
             </p>
           </div>
@@ -514,7 +514,7 @@ export default function Stations() {
         </div>
 
         {priceState === "loading" && (
-          <p className="mt-2 text-[0.5rem] font-bold text-white/25" role="status" aria-live="polite">Atualizando preços ANP em segundo plano…</p>
+          <p className="mt-2 text-[0.5rem] font-bold text-white/60" role="status" aria-live="polite">Atualizando preços ANP em segundo plano…</p>
         )}
         {priceState === "error" && (
           <p className="mt-2 rounded-xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.03] px-3 py-2 text-[0.52rem] text-[#FFD59B]">Preço individual ANP não está disponível nesta atualização. O catálogo continua utilizável.</p>
@@ -568,7 +568,7 @@ export default function Stations() {
         {resultCount === 0 ? (
           <section className="mt-5 rounded-[1.4rem] border border-white/8 bg-[#121B22] p-5" role="status" aria-live="polite">
             <p className="text-base font-black">{search ? "Nenhum posto encontrado" : "Nenhum posto disponível"}</p>
-            <p className="mt-1 text-sm leading-relaxed text-white/40">Ajuste a busca ou limpe os filtros. Dados ausentes continuam ausentes; o Trajeto não inventa preço ou localização.</p>
+            <p className="mt-1 text-sm leading-relaxed text-white/60">Ajuste a busca ou limpe os filtros. Dados ausentes continuam ausentes; o Trajeto não inventa preço ou localização.</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => { setInput(""); setSearch(""); resetFilters(); setLocation(appUrl("/postos?q=postos")); }} className="min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-[0.58rem] font-black text-[#0B1014]">Limpar</button>
               <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(search || "postos em Águas Lindas de Goiás"), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 px-4 text-[0.58rem] font-black text-white/60">Abrir mapa externo</button>
@@ -609,9 +609,9 @@ export default function Stations() {
         <details className="mt-4 rounded-2xl border border-white/8 bg-white/[.02]">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.54rem] font-black text-white/55">
             <span>Dados e procedência</span>
-            <span className="text-[0.46rem] text-white/25">ANP + catálogo local</span>
+            <span className="text-[0.46rem] text-white/60">ANP + catálogo local</span>
           </summary>
-          <div className="border-t border-white/8 p-3 text-[0.55rem] leading-relaxed text-white/35">
+          <div className="border-t border-white/8 p-3 text-[0.55rem] leading-relaxed text-white/60">
             <p>O catálogo local é a base para busca e uso offline. Dados ANP são conciliados por CNPJ quando disponíveis. Google é reservado para mapa, referências e navegação.</p>
             <p className="mt-2">Preço individual mostra produto + data + origem. Um cadastro ANP não significa automaticamente preço de bomba atual ou funcionamento confirmado.</p>
             <p className="mt-2">Último snapshot ANP consultável: {formatDate(anpQuery.data?.retrievedAt ?? offlineAnpRetrievedAt)}.</p>
@@ -619,7 +619,7 @@ export default function Stations() {
         </details>
 
         {!online && (
-          <div className="mt-4 rounded-2xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.03] p-3 text-[0.55rem] text-white/40">
+          <div className="mt-4 rounded-2xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.03] p-3 text-[0.55rem] text-white/60">
             Offline: catálogo, filtros, favoritos, comparação e dados já armazenados continuam utilizáveis. Mapa Google, Waze e Apple Maps dependem de conexão.
           </div>
         )}
@@ -636,9 +636,9 @@ export default function Stations() {
       {compareKeys.length > 0 && !compareOpen && (
         <div className="fixed inset-x-0 bottom-[calc(5.8rem+env(safe-area-inset-bottom))] z-50 px-3 md:bottom-4">
           <div className="mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-white/10 bg-[#10191F]/95 p-2.5 shadow-[0_18px_60px_rgba(0,0,0,.45)] backdrop-blur-xl">
-            <div className="min-w-0 flex-1"><p className="text-[0.5rem] font-black uppercase tracking-[.14em] text-white/30">Comparar</p><p className="truncate text-[0.62rem] font-black">{compareKeys.length} posto(s) selecionado(s)</p></div>
+            <div className="min-w-0 flex-1"><p className="text-[0.5rem] font-black uppercase tracking-[.14em] text-white/60">Comparar</p><p className="truncate text-[0.62rem] font-black">{compareKeys.length} posto(s) selecionado(s)</p></div>
             <button type="button" onClick={() => setCompareOpen(true)} className="min-h-10 rounded-xl bg-[#C7FF3C] px-3 text-[0.55rem] font-black text-[#0B1014]">Ver</button>
-            <button type="button" onClick={() => setCompareKeys([])} className="grid size-10 place-items-center rounded-xl border border-white/8 text-white/40" aria-label="Limpar comparação"><X className="size-4" /></button>
+            <button type="button" onClick={() => setCompareKeys([])} className="grid size-10 place-items-center rounded-xl border border-white/8 text-white/60" aria-label="Limpar comparação"><X className="size-4" /></button>
           </div>
         </div>
       )}
