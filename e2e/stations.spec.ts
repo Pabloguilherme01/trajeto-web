@@ -5,6 +5,8 @@ test("postos: abre, filtra e mantém a ficha navegável", async ({ page }) => {
   await page.goto("/postos?q=postos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await expect(page.getByText(/Diretório completo/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Conta", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Conta", exact: true })).toHaveCount(0);
 
   const search = page.getByRole("textbox", { name: /filtrar diretório de postos/i });
   await search.fill("posto");
