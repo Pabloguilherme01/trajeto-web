@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
-import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
+import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
@@ -302,8 +302,7 @@ export default function Stations() {
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
   const mapSecondaryCount = mapStations.filter(station => station.source !== "ANP").length;
   const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt);
-  const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
-  const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
+  const stations = showSavedOnly ? saved : liveStations;
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
@@ -312,10 +311,6 @@ export default function Stations() {
   const searchedAt = stationPages.data?.pages[0]?.queriedAt
     ? new Date(stationPages.data.pages[0].queriedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
     : null;
-  const cachedAt = cachedSnapshot?.savedAt
-    ? new Date(cachedSnapshot.savedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
-    : null;
-  const usingCache = !online && liveStations.length === 0 && stations.length > 0;
 
   useEffect(() => {
     if (!broadAguasLindasQuery || showSavedOnly) return;
@@ -370,12 +365,6 @@ export default function Stations() {
       window.removeEventListener("focus", refreshSaved);
     };
   }, []);
-
-  useEffect(() => {
-    if (liveStations.length > 0) {
-      cacheStations(query, liveStations as unknown as MobileStation[], hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
-    }
-  }, [liveStations, query, hasCoordinates, lat, lng]);
 
   useEffect(() => {
     if (anpRows.length > 0) {
@@ -1276,9 +1265,9 @@ export default function Stations() {
           <>
             <section className="mt-5 flex items-end justify-between gap-3">
               <div>
-                <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-white/25">{usingCache ? "Cache local" : searchedAt ? "Consulta atual" : "Neste aparelho"}</p>
+                <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-white/25">{searchedAt ? "Consulta atual" : "Neste aparelho"}</p>
                 <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">{visibleStations.length} resultado(s)</h2>
-                <p className="mt-1 text-[0.56rem] text-white/30">{usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
+                <p className="mt-1 text-[0.56rem] text-white/30">{searchedAt ? "Consultado em " + searchedAt : "Favoritos locais"}</p>
               </div>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><MapIcon className="size-4" /></button>
@@ -1343,7 +1332,7 @@ export default function Stations() {
               <details>
                 <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Como ler estes dados</span><BadgeInfo className="size-4 text-white/25" /></summary>
                 <div className="mt-2 space-y-2 text-[0.6rem] leading-relaxed text-white/35">
-                  <p>Endereço, horário, telefone e distância dependem da consulta atual do provedor de mapas.</p>
+                  <p>Endereço, horário, telefone e distância podem depender do provedor de mapas consultado naquele momento.</p>
                   <p>Referências de preço aparecem separadas e nunca são tratadas como preço em tempo real.</p>
                   <p>Um item salvo neste aparelho funciona como atalho local e não precisa de conta.</p>
                 </div>
