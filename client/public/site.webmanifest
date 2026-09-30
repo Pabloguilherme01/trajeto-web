@@ -85,6 +85,20 @@
       ]
     },
     {
+      "name": "Serviços públicos",
+      "short_name": "Serviços",
+      "description": "Abrir a central offline de saúde, segurança, trânsito, educação e cidadania",
+      "url": "./servicos",
+      "id": "servicos-publicos",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
       "name": "Salvos no aparelho",
       "short_name": "Salvos",
       "description": "Abrir locais e recursos salvos neste dispositivo",
