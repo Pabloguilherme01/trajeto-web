@@ -10,9 +10,10 @@ import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand } from "@/lib/stationListControls";
-import { StationMap } from "@/components/StationMap";
+import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
+import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations } from "@/lib/stationMapOffline";
 
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
@@ -37,7 +38,11 @@ export default function Stations() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
   const [localVisibleCount, setLocalVisibleCount] = useState(12);
-  const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>([]);
+  const initialOfflineAnp = getOfflineAnpSnapshot();
+  const initialOfflineMap = getOfflineMapStations();
+  const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
+  const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
+  const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
 
   const lat = Number(params.get("lat"));
@@ -51,7 +56,8 @@ export default function Stations() {
     { municipio: "AGUASLINDASDEGOIAS", uf: "GO" },
     { enabled: broadAguasLindasQuery && !showSavedOnly && !staticRuntime, retry: 1, staleTime: 10 * 60_000 },
   );
-  const anpRows = staticRuntime ? staticAnpRows : anpLiveQuery.data?.rows ?? [];
+  const liveAnpRows = anpLiveQuery.data?.rows ?? [];
+  const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
@@ -93,6 +99,7 @@ export default function Stations() {
   }, [stationPages.data]);
 
   const mapStations = useMemo<StationMapItem[]>(() => {
+    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
     const official = anpStations
       .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
       .map(station => ({
@@ -106,22 +113,45 @@ export default function Stations() {
         source: "ANP" as const,
       }));
 
-    if (official.length > 0) return official;
+    const seen = new Set<string>();
+    const keyFor = (station: StationMapItem) =>
+      station.cnpj
+        ? "cnpj:" + station.cnpj
+        : station.placeId
+          ? "place:" + station.placeId
+          : station.address
+            ? "address:" + normalize(station.address)
+            : `coord:${station.lat.toFixed(4)},${station.lng.toFixed(4)}`;
 
-    return liveStations
-      .filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lng))
-      .map(station => ({
-        id: station.placeId,
-        placeId: station.placeId,
-        name: station.name,
-        address: station.address,
-        lat: station.lat,
-        lng: station.lng,
-        source: "Google" as const,
-      }));
-  }, [anpStations, liveStations]);
+    const merged: StationMapItem[] = [];
+    for (const station of [
+      ...official,
+      ...liveStations
+        .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+        .map(item => ({
+          id: item.placeId,
+          placeId: item.placeId,
+          name: item.name,
+          address: item.address,
+          lat: item.lat,
+          lng: item.lng,
+          source: "Google" as const,
+        })),
+      ...offlineMap,
+    ]) {
+      const key = keyFor(station);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(station);
+    }
+
+    return merged;
+  }, [anpStations, liveStations, offlineMap]);
   const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
+  const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
+  const mapSecondaryCount = mapStations.filter(station => station.source !== "ANP").length;
+  const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt);
   const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
   const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
@@ -140,12 +170,14 @@ export default function Stations() {
   useEffect(() => {
     if (!staticRuntime || !broadAguasLindasQuery || showSavedOnly) return;
     let cancelled = false;
-    fetch(appUrl("/data/aguas-lindas-anp.json"), { cache: "no-store" })
+    fetch(appUrl("/data/aguas-lindas-anp.json"), { cache: "default" })
       .then(response => response.ok ? response.json() as Promise<{ data?: unknown[] }> : Promise.reject(new Error("snapshot unavailable")))
       .then(payload => {
         if (cancelled) return;
         const rows = (payload.data ?? []).map(item => item && typeof item === "object" ? normalizeAnpFuelRow(item as Record<string, unknown>) : null).filter((row): row is AnpFuelRow => Boolean(row));
         setStaticAnpRows(rows);
+        setStaticAnpRetrievedAt(typeof payload.retrievedAt === "string" ? payload.retrievedAt : null);
+        cacheOfflineAnpSnapshot(rows, typeof payload.retrievedAt === "string" ? payload.retrievedAt : null);
       })
       .catch(() => {
         if (!cancelled) setStaticAnpRows([]);
@@ -172,6 +204,34 @@ export default function Stations() {
       cacheStations(query, liveStations as unknown as MobileStation[], hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
     }
   }, [liveStations, query, hasCoordinates, lat, lng]);
+
+  useEffect(() => {
+    if (anpRows.length > 0) {
+      const retrievedAt = staticAnpRetrievedAt ?? anpLiveQuery.data?.retrievedAt ?? null;
+      cacheOfflineAnpSnapshot(anpRows, retrievedAt);
+    }
+  }, [anpRows, staticAnpRetrievedAt, anpLiveQuery.data?.retrievedAt]);
+
+  useEffect(() => {
+    if (!mapStations.length) return;
+    cacheOfflineMapStations(mapStations);
+    setOfflineMap(current => {
+      const merged = [...mapStations, ...current];
+      const seen = new Set<string>();
+      return merged.filter(station => {
+        const key = station.cnpj
+          ? "cnpj:" + station.cnpj
+          : station.placeId
+            ? "place:" + station.placeId
+            : `coord:${station.lat.toFixed(4)},${station.lng.toFixed(4)}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).slice(0, 120);
+    });
+  }, [mapStations]);
+
+
 
   useEffect(() => {
     setLocalVisibleCount(12);
@@ -490,7 +550,7 @@ export default function Stations() {
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3">
                   <div className="min-w-0">
                     <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
-                    <p className="mt-1 text-[0.62rem] leading-relaxed text-white/50">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas e serão marcados no mapa{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}.</p>
+                    <p className="mt-1 text-[0.62rem] leading-relaxed text-white/50">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}. {mapSecondaryCount > 0 ? mapSecondaryCount + " referências secundárias também foram agregadas ao mapa." : ""}</p>
                   </div>
                   <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>
                 </div>
@@ -501,8 +561,8 @@ export default function Stations() {
                       <StationMap stations={mapStations} showTraffic />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">
-                      <span>{mapStations.length} marcadores · fonte principal: coordenadas ANP</span>
-                      <span>Toque em um marcador para ver endereço, CNPJ e navegar.</span>
+                      <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
+                      <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
                     </div>
                   </section>
                 )}
@@ -548,7 +608,20 @@ export default function Stations() {
               </>
             )}
 
-            <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. A base técnica é separada dos dados secundários de mapas e da lista local. Última consulta: {((anpLiveQuery.data?.retrievedAt && new Date(anpLiveQuery.data.retrievedAt).toLocaleString("pt-BR")) || "snapshot no GitHub Pages / aguardando sincronização")}.</p>
+            {!anpRows.length && mapStations.length > 0 && (
+              <section className="mt-4 overflow-hidden rounded-[1.35rem] border border-[#FFB86B]/20 bg-[#0B1014]" aria-label="Mapa offline de referências dos postos">
+                <div className="border-b border-white/8 px-3.5 py-3">
+                  <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#FFCF96]">Mapa salvo no aparelho</p>
+                  <p className="mt-1 text-[0.6rem] leading-relaxed text-white/45">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis e navegáveis sem conexão.</p>
+                </div>
+                <div className="h-[min(68vh,620px)]">
+                  <StationMap stations={mapStations} showTraffic={false} />
+                </div>
+                <div className="border-t border-white/8 px-3 py-2.5 text-[0.52rem] text-white/35">{mapStations.length} referências armazenadas · {offlineMapAge}.</div>
+              </section>
+            )}
+
+            <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
           </section>
         )}
 
