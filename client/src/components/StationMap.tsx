@@ -354,7 +354,6 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
         setSelectedStation(station);
         onSelectStation?.(station);
       });
-      });
       markers.current.push(marker);
     });
     map.fitBounds(bounds, 44);
