@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, CarFront, Clock3, Fuel, Scale } from "lucide-react";
 import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/mobileVehicle";
 import { calculateRouteTotalCost } from "@/lib/routeTotalCost";
+import { calculateRouteDecisionValue } from "@/lib/routeDecisionValue";
 import type { RouteIntelligenceRoute } from "@/lib/routeIntelligence";
 
 const PRICE_KEY = "trajeto-route-fuel-price";
+const TIME_VALUE_KEY = "trajeto-route-time-value";
 
 function money(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -13,6 +15,7 @@ function money(value: number) {
 export default function RouteCostComparisonCard(props: { routes: RouteIntelligenceRoute[]; selectedRouteId: string }) {
   const [vehicle, setVehicle] = useState<MobileVehicle | null>(() => getMobileVehicle());
   const [fuelPrice, setFuelPrice] = useState<number | null>(null);
+  const [timeValue, setTimeValue] = useState(0);
 
   useEffect(() => {
     const refresh = () => {
@@ -20,6 +23,8 @@ export default function RouteCostComparisonCard(props: { routes: RouteIntelligen
       try {
         const value = Number(localStorage.getItem(PRICE_KEY) || "");
         setFuelPrice(Number.isFinite(value) && value > 0 ? value : null);
+        const storedTimeValue = Number(localStorage.getItem(TIME_VALUE_KEY) || "");
+        setTimeValue(Number.isFinite(storedTimeValue) && storedTimeValue > 0 ? storedTimeValue : 0);
       } catch {
         setFuelPrice(null);
       }
@@ -62,9 +67,9 @@ export default function RouteCostComparisonCard(props: { routes: RouteIntelligen
           ? Math.round((route.durationSeconds - baseline.durationSeconds) / 60)
           : null;
         const deltaCost = cost.totalCost != null && base.totalCost != null ? cost.totalCost - base.totalCost : null;
-        return { route, cost, deltaMinutes, deltaCost };
+        return { route, cost, deltaMinutes, deltaCost, decision: calculateRouteDecisionValue(deltaCost, deltaMinutes, timeValue) };
       });
-  }, [baseline, props.routes, vehicle, fuelPrice]);
+  }, [baseline, props.routes, vehicle, fuelPrice, timeValue]);
 
   if (!baseline || rows.length === 0) return null;
 
@@ -80,7 +85,24 @@ export default function RouteCostComparisonCard(props: { routes: RouteIntelligen
       </div>
 
       <div className="mt-4 grid gap-2">
-        {rows.map(({ route, cost, deltaMinutes, deltaCost }) => (
+        <label className="rounded-2xl border border-white/8 bg-white/[.025] p-3 text-[0.58rem] font-bold text-white/50">
+          Valor do tempo (R$/hora)
+          <input
+            value={timeValue ? String(timeValue).replace(".", ",") : ""}
+            onChange={event => {
+              const value = Number(event.target.value.replace(",", "."));
+              const next = Number.isFinite(value) && value > 0 ? Math.min(1000, value) : 0;
+              setTimeValue(next);
+              try { if (next > 0) localStorage.setItem(TIME_VALUE_KEY, String(next)); else localStorage.removeItem(TIME_VALUE_KEY); } catch {}
+            }}
+            inputMode="decimal"
+            placeholder="Ex.: 30"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-white/10 bg-[#0B1014] px-3 text-sm font-bold text-white outline-none placeholder:text-white/25 focus:border-[#BDA5FF]"
+            aria-describedby="route-time-value-help"
+          />
+          <span id="route-time-value-help" className="mt-1.5 block text-[0.52rem] font-medium leading-relaxed text-white/30">Opcional. Não altera a rota; apenas converte minutos em um valor comparável.</span>
+        </label>
+        {rows.map(({ route, cost, deltaMinutes, deltaCost, decision }) => (
           <article key={route.id} className="rounded-2xl border border-white/8 bg-white/[.02] p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -108,6 +130,17 @@ export default function RouteCostComparisonCard(props: { routes: RouteIntelligen
                 </p>
               </div>
             </div>
+              <div className="mt-3 rounded-xl border border-[#BDA5FF]/15 bg-[#BDA5FF]/[.035] p-2.5">
+                <p className="text-[0.5rem] font-black uppercase tracking-[.1em] text-[#BDA5FF]">Custo combinado</p>
+                <p className="mt-1 text-xs font-black">
+                  {decision.combinedDelta == null ? "—" : (decision.combinedDelta > 0 ? "+" : "") + money(decision.combinedDelta)}
+                </p>
+                <p className="mt-1 text-[0.52rem] leading-relaxed text-white/35">
+                  {timeValue > 0
+                    ? "Financeiro + valor do tempo. Resultado positivo indica maior custo combinado que a rota selecionada."
+                    : "Defina um valor/hora para incluir o tempo na comparação."}
+                </p>
+              </div>
           </article>
         ))}
       </div>
