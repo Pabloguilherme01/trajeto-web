@@ -1,3 +1,5 @@
+import { normalizePlaceSearchText } from "@/lib/placeSearch";
+
 export type OfflineDestinationCategory =
   | "cidade"
   | "saude"
@@ -159,7 +161,7 @@ export const OFFLINE_DESTINATIONS: OfflineDestination[] = [
 ];
 
 export function searchOfflineDestinations(query: string, category: OfflineDestinationCategory | "todos" = "todos") {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR");
+  const normalized = normalizePlaceSearchText(query);
   return OFFLINE_DESTINATIONS.filter(destination => {
     if (category !== "todos" && destination.category !== category) return false;
     if (!normalized) return true;
@@ -169,6 +171,6 @@ export function searchOfflineDestinations(query: string, category: OfflineDestin
       destination.address,
       destination.description,
       ...destination.keywords,
-    ].some(value => value.toLocaleLowerCase("pt-BR").includes(normalized));
+    ].some(value => normalizePlaceSearchText(value).includes(normalized));
   });
 }
