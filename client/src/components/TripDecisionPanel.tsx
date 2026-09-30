@@ -7,12 +7,12 @@ type Props = { route: RouteIntelligenceRoute | null; alternatives: RouteIntellig
 function formatDuration(seconds: number | null) {
   if (!seconds || seconds <= 0) return "—";
   const minutes = Math.max(1, Math.round(seconds / 60));
-  return minutes >= 60 ? \`\${Math.floor(minutes / 60)}h \${minutes % 60}min\` : \`\${minutes} min\`;
+  return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}min` : `${minutes} min`;
 }
 
 function formatDistance(meters: number | null) {
   if (!Number.isFinite(meters) || meters == null) return "—";
-  return meters >= 1000 ? \`\${(meters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km\` : \`\${Math.round(meters)} m\`;
+  return meters >= 1000 ? `${(meters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km` : `${Math.round(meters)} m`;
 }
 
 export default function TripDecisionPanel({ route, alternatives, online }: Props) {
@@ -29,12 +29,12 @@ export default function TripDecisionPanel({ route, alternatives, online }: Props
   const liters = route.fuelConsumptionLiters;
   const fuelConfigured = Boolean(vehicle?.consumption && vehicle.consumption > 0);
   const routeEfficiency = liters != null
-    ? \`\${liters.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L\`
+    ? `${liters.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L`
     : fuelConfigured && route.distanceMeters
-      ? \`\${(route.distanceMeters / 1000 / vehicle!.consumption).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L teóricos\`
+      ? `${(route.distanceMeters / 1000 / vehicle!.consumption).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L teóricos`
       : "consumo não informado";
-  const alternativesText = alternatives.length > 1 ? \`\${alternatives.length} opções consultadas\` : "sem alternativa confirmada";
-  const trafficState = trafficMinutes == null ? "trânsito não detalhado" : trafficMinutes > 0 ? \`+\${trafficMinutes} min de impacto\` : "fluxo próximo do padrão";
+  const alternativesText = alternatives.length > 1 ? `${alternatives.length} opções consultadas` : "sem alternativa confirmada";
+  const trafficState = trafficMinutes == null ? "trânsito não detalhado" : trafficMinutes > 0 ? `+${trafficMinutes} min de impacto` : "fluxo próximo do padrão";
 
   return (
     <section className="mt-3 rounded-[1.35rem] border border-[#3DE3FF]/15 bg-[#0E171D] p-4 text-white" aria-labelledby="trip-decision-title">
