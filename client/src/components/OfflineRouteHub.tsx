@@ -42,7 +42,7 @@ export default function OfflineRouteHub({ onSelectDestination, compact = false, 
   };
 
   return (
-    <section className="mt-5 rounded-[1.55rem] border border-[#3DE3FF]/15 bg-[#0E171D] p-3.5 shadow-[0_20px_50px_rgba(0,0,0,.24)] sm:p-5" aria-labelledby="offline-route-hub-title">
+    <section id="offline-route-hub" className="mt-5 rounded-[1.55rem] border border-[#3DE3FF]/15 bg-[#0E171D] p-3.5 shadow-[0_20px_50px_rgba(0,0,0,.24)] sm:p-5" aria-labelledby="offline-route-hub-title">
       <div className="flex items-start gap-3">
         <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.06] text-[#C7FF3C]">
           <MapPinned className="size-5" />
