@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { resolveIntentQuery } from "@/lib/intentResolver";
+import { normalizePlaceSearchText } from "@/lib/placeSearch";
 import { rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { searchOfflineDestinations } from "@/lib/offlineDestinations";
 import { vibration } from "@/lib/mobileTools";
@@ -31,7 +32,15 @@ export default function QuickResolver({ onMessage }: Props) {
     }
 
     const offline = searchOfflineDestinations(value)[0];
-    if (offline && value.length >= 4) {
+    const normalizedValue = normalizePlaceSearchText(value);
+    const normalizedName = offline ? normalizePlaceSearchText(offline.name) : "";
+    const normalizedShortName = offline ? normalizePlaceSearchText(offline.shortName) : "";
+    const isSpecificOfflineMatch = Boolean(
+      offline &&
+      value.length >= 4 &&
+      (normalizedValue === normalizedName || normalizedValue === normalizedShortName || normalizedName.includes(normalizedValue)),
+    );
+    if (offline && isSpecificOfflineMatch) {
       rememberIntent("route");
       vibration(8);
       setLocation(appUrl("/local/" + encodeURIComponent(offline.id)));
