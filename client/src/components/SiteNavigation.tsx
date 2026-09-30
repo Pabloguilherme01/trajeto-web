@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, HelpCircle, Home, Navigation, UserRound } from "lucide-react";
+import { Bookmark, Building2, Fuel, Home, Navigation, UserRound } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
@@ -6,6 +6,7 @@ const items = [
   { href: "/", label: "Início", icon: Home, primary: false },
   { href: "/planejar", label: "Planejar", icon: Navigation, primary: true },
   { href: "/postos", label: "Postos", icon: Fuel, primary: false },
+  { href: "/cidade", label: "Cidade", icon: Building2, primary: false },
   { href: "/salvos", label: "Salvos", icon: Bookmark, primary: false },
   { href: "/minha-conta", label: "Conta", icon: UserRound, primary: false },
 ] satisfies Array<{ href: string; label: string; icon: typeof Home; primary: boolean }>;
