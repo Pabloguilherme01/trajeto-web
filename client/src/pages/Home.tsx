@@ -1,4 +1,4 @@
-import { ArrowRight, Heart, LocateFixed, MapPin, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Heart, LocateFixed, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -230,6 +230,3 @@ export default function Home() {
   );
 }
 
-function ChevronRightIcon() {
-  return <span aria-hidden="true">›</span>;
-}
