@@ -4,8 +4,9 @@ export function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
   window.addEventListener("load", () => {
-    void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
+    void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL, updateViaCache: "none" })
       .then(registration => {
+        void registration.update().catch(() => undefined);
         const announceUpdate = () => window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: registration }));
 
         if (registration.waiting && navigator.serviceWorker.controller) {
