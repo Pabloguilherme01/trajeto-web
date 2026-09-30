@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CarFront, ChevronDown, CircleDollarSign, MapPinned, ShieldCheck } from "lucide-react";
+import { CarFront, ChevronDown, CircleDollarSign, MapPinned, ShieldCheck, Sparkles } from "lucide-react";
 import DailyDepartureChecklist from "@/components/DailyDepartureChecklist";
 import MobileTripShortcuts from "@/components/MobileTripShortcuts";
 import RecentTripsCard from "@/components/RecentTripsCard";
@@ -13,16 +13,18 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import VehicleServiceHub from "@/components/VehicleServiceHub";
 import OfficialDataRadar from "@/components/OfficialDataRadar";
 import OfficialSourcesCard from "@/components/OfficialSourcesCard";
+import MobilityInsightsCard from "@/components/MobilityInsightsCard";
 import { getMobileDestinations, mobileDestinationEvent } from "@/lib/mobileDestinations";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 
-type PanelId = "rotina" | "veiculo" | "custos" | "fontes";
+type PanelId = "rotina" | "veiculo" | "custos" | "fontes" | "inteligencia";
 
 const panels: Array<{id: PanelId; title: string; detail: string; icon: typeof MapPinned}> = [
   { id: "rotina", title: "Minha rotina", detail: "Destinos, viagens e preparação para sair.", icon: MapPinned },
   { id: "veiculo", title: "Meu veículo", detail: "Veículo, manutenção e serviços oficiais.", icon: CarFront },
   { id: "custos", title: "Custos e consumo", detail: "Combustível, despesas e impacto da viagem.", icon: CircleDollarSign },
   { id: "fontes", title: "Dados e fontes", detail: "ANP e serviços oficiais, sem misturar estimativas.", icon: ShieldCheck },
+  { id: "inteligencia", title: "Inteligência pessoal", detail: "Uso recorrente, atalhos e portabilidade dos seus dados locais.", icon: Sparkles },
 ];
 
 export default function MobileUtilityHub() {
@@ -70,7 +72,7 @@ export default function MobileUtilityHub() {
                     <strong className="block text-sm font-extrabold text-white">{panel.title}</strong>
                     <span className="mt-0.5 block text-xs leading-relaxed text-[#7F919A]">{panel.detail}</span>
                   </span>
-                  <span className="inline-flex shrink-0 max-w-[6.5rem] truncate rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-[#71838C]">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"}` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : "fontes visíveis"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
+                  <span className="inline-flex shrink-0 max-w-[6.5rem] truncate rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.48rem] font-black uppercase tracking-[.08em] text-[#71838C]">{panel.id === "rotina" ? `${destinationCount} destino${destinationCount === 1 ? "" : "s"}` : panel.id === "veiculo" ? (hasVehicle ? "cadastrado" : "não cadastrado") : panel.id === "custos" ? "cálculo local" : panel.id === "fontes" ? "fontes visíveis" : "dados locais"}</span><ChevronDown className={isOpen ? "size-5 rotate-180 text-[#C7FF3C] transition-transform" : "size-5 text-[#71838C] transition-transform"} />
                 </button>
 
                 {isOpen && (
