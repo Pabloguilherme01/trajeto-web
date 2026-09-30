@@ -101,7 +101,7 @@ export default function Explore(){
       </form>
 
       <div className="mt-3 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {categoryOptions.map(item=>{const Icon=item.icon;const active=category===item.key;return <button key={item.key} type="button" onClick={()=>{setCategory(item.key);setQuery("");setSelected(null);}} className={active?"shrink-0 rounded-2xl bg-[#C7FF3C] px-3 py-2.5 text-[#0B1014]":"shrink-0 rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2.5 text-white/65"}><span className="flex items-center gap-2 text-[.6rem] font-black"><Icon className="size-3.5"/>{item.label}</span></button>;})}
+        {categoryOptions.map(item=>{const Icon=item.icon;const active=category===item.key;return <button key={item.key} type="button" aria-pressed={active} onClick={()=>{setCategory(item.key);setQuery("");setSelected(null);}} className={active?"shrink-0 rounded-2xl bg-[#C7FF3C] px-3 py-2.5 text-[#0B1014]":"shrink-0 rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2.5 text-white/65"}><span className="flex items-center gap-2 text-[.6rem] font-black"><Icon className="size-3.5"/>{item.label}</span></button>;})}
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">
