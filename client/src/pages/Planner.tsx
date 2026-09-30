@@ -160,7 +160,7 @@ export default function Planner() {
         if (!resolvedOrigin) throw new Error("Informe a origem ou permita a localização para calcular a rota no próprio Trajeto.");
         const publicRoute = await calculatePublicRoute(resolvedOrigin, to);
         if (version !== requestVersion.current) return;
-        setPlanned(buildPublicRoutePayload(publicRoute) as PlannedRoute);
+        setPlanned(buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute);
         setSavedMessage("Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.");
         if (resolvedOrigin) rememberTrip(resolvedOrigin, to);
         track("route_open", to);
