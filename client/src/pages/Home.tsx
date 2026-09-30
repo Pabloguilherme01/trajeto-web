@@ -11,6 +11,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import MobileCopilot from "@/components/MobileCopilot";
 import MobileDataMode from "@/components/MobileDataMode";
 import TripReadinessCard from "@/components/TripReadinessCard";
+import VoiceInputButton from "@/components/VoiceInputButton";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -181,6 +182,7 @@ export default function Home() {
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
                 <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
+                <VoiceInputButton label="a origem" onTranscript={setOrigin} />
                 <button type="button" onClick={useLocationAsOrigin} disabled={!online || locating} className="grid size-10 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
                   <LocateFixed className="size-4" />
                 </button>
@@ -192,6 +194,7 @@ export default function Home() {
               <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#C7FF3C]" />
                 <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/25" />
+                <VoiceInputButton label="o destino" onTranscript={setDestination} />
               </div>
             </label>
 
