@@ -15,6 +15,9 @@ const quickActions = [
   { label: "Perto de mim", hint: "Usar localização do aparelho", icon: Compass, kind: "nearby", query: "" },
   { label: "Saúde", hint: "UPA, HEAL, hospital e UBS", icon: HeartPulse, kind: "services", query: "saude" },
   { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "services", query: "seguranca" },
+  { label: "Segurança", hint: "Delegacia e canais policiais", icon: ShieldAlert, kind: "services", query: "seguranca" },
+  { label: "Educação", hint: "Escolas e rede pública", icon: BookOpen, kind: "services", query: "educacao" },
+  { label: "Trânsito", hint: "Mobilidade e atendimento", icon: BusFront, kind: "services", query: "transito" },
   { label: "Farmácias", hint: "Encontrar farmácias", icon: Store, kind: "external", query: "farmácias, Águas Lindas de Goiás, GO" },
   { label: "Compras", hint: "Mercados e atacarejos", icon: ShoppingCart, kind: "external", query: "supermercados atacadistas, Águas Lindas de Goiás, GO" },
 ] as const;
