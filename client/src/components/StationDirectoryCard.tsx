@@ -57,6 +57,7 @@ export function StationDirectoryCard({
   local?: LocalStationRecord | null;
   anp?: AnpStation | null;
   saved?: boolean;
+  distanceKm?: number | null;
   onToggleSaved?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
