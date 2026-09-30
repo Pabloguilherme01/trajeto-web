@@ -31,6 +31,7 @@ export default function Stations() {
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
@@ -40,15 +41,16 @@ export default function Stations() {
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
-    const filtered = neighborhoodFilter === "all"
-      ? matches
-      : matches.filter(station => station.neighborhood === neighborhoodFilter);
+    const filtered = matches.filter(station =>
+      (neighborhoodFilter === "all" || station.neighborhood === neighborhoodFilter) &&
+      (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter)
+    );
     return [...filtered].sort((a, b) =>
       (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
       a.displayName.localeCompare(b.displayName, "pt-BR")
     );
-  }, [query, showSavedOnly, staticRuntime, neighborhoodFilter]);
-  const localNeighborhoods = useMemo(
+  }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter]);
+  const localBrands = useMemo(() => [...new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))].sort((a,b) => a.localeCompare(b, "pt-BR")), []);\n  const localNeighborhoods = useMemo(
     () => [...new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "pt-BR")),
     []
   );
@@ -275,7 +277,7 @@ export default function Stations() {
               <span className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/40">{AGUAS_LINDAS_STATIONS_COUNT} base</span>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <label className="min-w-0 flex-1">
                 <span className="sr-only">Filtrar diretório por bairro</span>
                 <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none">
@@ -283,7 +285,7 @@ export default function Stations() {
                   {localNeighborhoods.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
                 </select>
               </label>
-              <button type="button" onClick={() => { setNeighborhoodFilter("all"); setQuery("postos"); setInput("postos"); }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/65">Mostrar todos</button>
+              <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
             </div>
 
             {localDirectory.length ? (
