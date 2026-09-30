@@ -1,3 +1,23 @@
+test("Pages: cliques principais funcionam dentro da base hospedada", async ({ page }) => {
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /Chegue melhor/i })).toBeVisible();
+
+  await page.getByRole("button", { name: /Planejar uma rota/i }).click();
+  await expect(page).toHaveURL(/\/trajeto-web\/planejar$/);
+  await expect(page.getByRole("heading", { name: /Sua próxima saída/i })).toBeVisible();
+
+  await page.getByRole("link", { name: "Postos" }).click();
+  await expect(page).toHaveURL(/\/trajeto-web\/postos/);
+  await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
+
+  await page.getByRole("link", { name: "Salvos" }).click();
+  await expect(page).toHaveURL(/\/trajeto-web\/salvos$/);
+  await expect(page.getByRole("heading", { name: /Rotas salvas/i })).toBeVisible();
+
+  await page.getByRole("link", { name: "Início" }).click();
+  await expect(page).toHaveURL(/\/trajeto-web\/$/);
+});
+
 import { expect, test } from "@playwright/test";
 
 test("Pages: abre a home e navega entre os fluxos públicos", async ({ page }) => {
