@@ -6,9 +6,12 @@ import {
 } from "./aguasLindasStations";
 
 describe("diretório de postos de Águas Lindas", () => {
-  it("mantém os 41 cadastros da coleta", () => {
+  it("mantém os 41 cadastros da coleta e não confunde presença com verificação ANP", () => {
     expect(AGUAS_LINDAS_STATIONS).toHaveLength(41);
     expect(new Set(AGUAS_LINDAS_STATIONS.map(item => item.cnpj)).size).toBe(41);
+    expect(AGUAS_LINDAS_STATIONS.every(item => item.dataQuality === "catalog-only")).toBe(true);
+    expect(AGUAS_LINDAS_STATIONS.every(item => item.dataOrigin === "local-catalog")).toBe(true);
+    expect(AGUAS_LINDAS_STATIONS.every(item => !item.verificationFlags?.address && !item.verificationFlags?.brand)).toBe(true);
   });
 
   it("retorna a base completa para buscas genéricas e variações da cidade", () => {
