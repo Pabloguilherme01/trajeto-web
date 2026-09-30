@@ -118,7 +118,10 @@ export function removeRecentTrip(origin: string, destination: string) {
 }
 
 export function clearRecentTrips() {
-  try { localStorage.removeItem(RECENT_TRIPS_KEY); } catch {}
+  try {
+    localStorage.removeItem(RECENT_TRIPS_KEY);
+    localStorage.removeItem(ROUTE_USAGE_KEY);
+  } catch {}
   notifyPreferenceChange();
 }
 
