@@ -18,7 +18,7 @@ import MobileUtilityHub from "@/components/MobileUtilityHub";
 
 import { ArrowRight, BadgeCheck, Bookmark, Download, Fuel, History, MapPinned, Navigation, Search, ShieldCheck, TimerReset, LocateFixed, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import { getLastTrip, getRecentSearches, mobilePreferenceEvent, rememberSearch } from "@/lib/mobilePreferences";
+import { getLastStation, getLastTrip, getRecentSearches, mobilePreferenceEvent, rememberSearch, type LastStation } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { useLocation } from "wouter";
 
@@ -37,12 +37,14 @@ export default function Home() {
   const [offlineStorageError, setOfflineStorageError] = useState(false);
   const [latestSavedRoute, setLatestSavedRoute] = useState<OfflineRoute | null>(null);
   const [lastTrip, setLastTrip] = useState(() => getLastTrip());
+  const [lastStation, setLastStation] = useState<LastStation | null>(() => getLastStation());
   const track = useProductEvents();
   const activePreset = corridorPresets.find(item => item.id === activePresetId) ?? corridorPresets[0];
 
   useEffect(() => {
     const refresh = () => {
       setRecentSearches(getRecentSearches());
+      setLastStation(getLastStation());
       void listOfflineRoutes().then(routes => {
         setOfflineStorageError(false);
         setSavedRoutes(routes.length);
@@ -278,7 +280,7 @@ export default function Home() {
               </div>
               <span className="hidden text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#60737D] sm:block">dados deste aparelho</span>
             </div>
-            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-4 md:overflow-visible" aria-label="Resumo operacional do aparelho">
+            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-5 md:overflow-visible" aria-label="Resumo operacional do aparelho">
               <article className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 md:min-w-0">
                 <div className="flex items-center justify-between gap-2"><WifiOff className={online ? "size-4 text-[#C7FF3C]" : "size-4 text-[#FFC928]"} /><span className={online ? "text-[0.55rem] font-black uppercase tracking-[.1em] text-[#C7FF3C]" : "text-[0.55rem] font-black uppercase tracking-[.1em] text-[#FFC928]"}>{online ? "Conectado" : "Offline"}</span></div>
                 <p className="mt-2 text-xs font-extrabold text-white">{online ? "Consultas ao vivo disponíveis" : "Modo local ativo"}</p>
@@ -299,6 +301,15 @@ export default function Home() {
                 <p className="mt-2 text-xs font-extrabold text-white">{recentSearches.length} {recentSearches.length === 1 ? "consulta recente" : "consultas recentes"}</p>
                 <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{recentSearches[0] ?? "Suas próximas buscas aparecerão aqui"}</p>
               </div>
+              <a
+                href={lastStation ? appUrl("/postos") + "?station=" + encodeURIComponent(lastStation.placeId) + "&q=" + encodeURIComponent(lastStation.query || lastStation.name) : appUrl("/postos")}
+                className="mobile-card min-w-[10rem] snap-start rounded-2xl border border-white/8 bg-white/[.035] p-3.5 transition hover:border-[#FFB86B]/35 active:scale-[.99] md:min-w-0"
+                aria-label={lastStation ? "Reabrir último posto consultado" : "Abrir busca de postos"}
+              >
+                <div className="flex items-center justify-between gap-2"><MapPinned className="size-4 text-[#FFB86B]" /><span className="text-[0.55rem] font-black uppercase tracking-[.1em] text-[#7F919A]">Último posto</span></div>
+                <p className="mt-2 truncate text-xs font-extrabold text-white">{lastStation?.name ?? "Encontrar postos"}</p>
+                <p className="mt-1 truncate text-[0.62rem] text-[#73858E]">{lastStation?.address ?? "Abra a busca para descobrir paradas."}</p>
+              </a>
             </div>
           </div>
         </section>
