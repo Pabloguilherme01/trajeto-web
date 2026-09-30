@@ -27,10 +27,10 @@ function minutes(seconds: number) {
 }
 
 function RouteResultSkeleton() {
-  return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between" role="status">
-    <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /></div>
-    <div className="h-44 animate-pulse border border-[#D8DED5] bg-[#EEF2ED]" />
-    <div className="space-y-3"><div className="h-4 w-28 animate-pulse bg-[#E7ECE7]" /><div className="h-8 w-3/4 animate-pulse bg-[#E7ECE7]" /><p className="text-xs text-[#6A7C78]">Calculando percurso e buscando postos próximos…</p></div>
+  return <div aria-label="Carregando resultado da rota" className="flex min-h-[340px] flex-col justify-between rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white" role="status">
+    <div className="flex gap-3"><div className="h-16 flex-1 animate-pulse rounded-xl bg-white/[.06]" /><div className="h-16 flex-1 animate-pulse bg-[#E7ECE7]" /></div>
+    <div className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/[.035]" />
+    <div className="space-y-3"><div className="h-4 w-28 animate-pulse rounded bg-white/[.07]" /><div className="h-8 w-3/4 animate-pulse rounded bg-white/[.06]" /><p className="text-xs text-white/45">Calculando percurso e buscando postos próximos…</p></div>
   </div>;
 }
 
