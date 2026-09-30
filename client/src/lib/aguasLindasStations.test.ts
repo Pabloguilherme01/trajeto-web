@@ -3,6 +3,10 @@ import {
   AGUAS_LINDAS_STATIONS,
   searchAguasLindasStations,
   stationMapsSearchUrl,
+  AGUAS_LINDAS_MAP_ONLY_DISCOVERIES,
+  AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT,
+  searchAguasLindasMapDiscoveries,
+  mapDiscoverySearchUrl,
 } from "./aguasLindasStations";
 
 describe("diretório de postos de Águas Lindas", () => {
@@ -32,5 +36,21 @@ describe("diretório de postos de Águas Lindas", () => {
     const station = AGUAS_LINDAS_STATIONS[0];
     expect(stationMapsSearchUrl(station)).toContain("https://www.google.com/maps/search/?api=1&query=");
     expect(stationMapsSearchUrl(station)).toContain(encodeURIComponent(station.displayName));
+  });
+});
+
+describe("descobertas públicas complementares de mapas", () => {
+  it("mantém as descobertas separadas do catálogo cadastral", () => {
+    expect(AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT).toBe(AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length);
+    expect(AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT).toBeGreaterThan(0);
+  });
+
+  it("permite localizar descobertas por consulta", () => {
+    expect(searchAguasLindasMapDiscoveries("postos")).toHaveLength(AGUAS_LINDAS_MAP_ONLY_DISCOVERIES_COUNT);
+    expect(searchAguasLindasMapDiscoveries("ZM Combustíveis")[0]?.displayName).toBe("ZM Combustíveis");
+  });
+
+  it("gera URL do mapa para uma descoberta", () => {
+    expect(mapDiscoverySearchUrl(AGUAS_LINDAS_MAP_ONLY_DISCOVERIES[0])).toContain("https://www.google.com/maps/search/?api=1&query=");
   });
 });
