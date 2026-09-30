@@ -550,7 +550,7 @@ export default function Planner() {
                         <Fuel className="size-4 shrink-0 text-[#3DE3FF]" />
                       </div>
                       {stop.priceReference && <p className="mt-2 text-[0.58rem] font-bold text-[#D9FF91]">Referência ANP: {Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>}
-                      <button type="button" onClick={() => openStation(stop)} className="mt-3 min-h-11 w-full rounded-xl border border-white/8 bg-white/[.03] text-xs font-black text-white/70">Navegar até esta parada</button>
+                      <button type="button" onClick={() => openStation(stop)} className="mobile-action mobile-action-secondary mt-3 min-h-11 w-full rounded-xl text-xs text-white/70">Navegar até esta parada</button>
                     </article>
                   ))}
                 </div>
