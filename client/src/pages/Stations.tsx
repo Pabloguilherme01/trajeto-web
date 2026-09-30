@@ -174,7 +174,28 @@ export default function Stations() {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj]);
+  }, [directoryCards, directorySearch, directorySort, userCoords, pricesByCnpj]);
+
+  const directoryCardsForDisplay = useMemo(() => directoryCardsFiltered.filter(item => {
+    if (fuelFilter === "all") return true;
+    if (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter)) return true;
+    return item.anp?.products?.some(product => {
+      const text = (product.produto || "").toLocaleLowerCase("pt-BR");
+      return fuelFilter === "gasolina-comum"
+        ? text.includes("gasolina") && !text.includes("aditivada")
+        : fuelFilter === "etanol"
+          ? text.includes("etanol")
+          : fuelFilter === "diesel-s10"
+            ? text.includes("s10")
+            : fuelFilter === "diesel-s500"
+              ? text.includes("s500")
+              : fuelFilter === "glp-p13"
+                ? text.includes("glp") || text.includes("p13")
+                : fuelFilter === "gnv"
+                  ? text.includes("gnv")
+                  : false;
+    }) ?? false;
+  }), [directoryCardsFiltered, fuelFilter, pricesByCnpj]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const lat = anp?.latitude ?? local?.anp?.latitude;
@@ -1005,16 +1026,12 @@ export default function Stations() {
               </div>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/30">
-              <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
+              <span>{directoryCardsForDisplay.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
-                .filter(item => fuelFilter === "all" || (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter) ?? false) || item.anp?.products?.some(product => {
-                  const text = (product.produto || "").toLocaleLowerCase("pt-BR");
-                  return fuelFilter === "gasolina-comum" ? text.includes("gasolina") && !text.includes("aditivada") : fuelFilter === "etanol" ? text.includes("etanol") : fuelFilter === "diesel-s10" ? text.includes("s10") : fuelFilter === "diesel-s500" ? text.includes("s500") : fuelFilter === "glp-p13" ? text.includes("glp") || text.includes("p13") : fuelFilter === "gnv" ? text.includes("gnv") : false;
-                }))
                 .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
@@ -1035,14 +1052,14 @@ export default function Stations() {
               ))}
             </div>
 
-            {directoryVisibleCount < directoryCardsFiltered.length && (
+            {directoryVisibleCount < directoryCardsForDisplay.length && (
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setDirectoryVisibleCount(current => Math.min(current + 24, directoryCardsFiltered.length))}
+                  onClick={() => setDirectoryVisibleCount(current => Math.min(current + 24, directoryCardsForDisplay.length))}
                   className="min-h-12 rounded-2xl border border-white/8 bg-white/[.025] text-xs font-black text-white/65 transition-transform duration-200 active:scale-[.99]"
                 >
-                  Mostrar mais {Math.min(24, directoryCardsFiltered.length - directoryVisibleCount)} postos
+                  Mostrar mais {Math.min(24, directoryCardsForDisplay.length - directoryVisibleCount)} postos
                 </button>
                 <button
                   type="button"
@@ -1054,7 +1071,7 @@ export default function Stations() {
               </div>
             )}
 
-            {directoryVisibleCount >= directoryCardsFiltered.length && directoryCardsFiltered.length > 16 && (
+            {directoryVisibleCount >= directoryCardsForDisplay.length && directoryCardsForDisplay.length > 16 && (
               <button
                 type="button"
                 onClick={() => setDirectoryVisibleCount(48)}
