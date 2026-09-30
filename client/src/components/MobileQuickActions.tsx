@@ -186,7 +186,7 @@ export default function MobileQuickActions() {
   if (keyboardOpen || current.endsWith("/postos")) return null;
 
   return (
-    <nav aria-label="Ações rápidas" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
+    <nav aria-label="Ações rápidas do Trajeto" className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 md:hidden">
       <div className={`mobile-glass mx-auto max-w-md rounded-[1.45rem] border p-1.5 shadow-[0_20px_55px_rgba(0,0,0,.48)] transition-colors ${online ? "border-white/12 bg-[#080D11]/95" : "border-[#FFB86B]/35 bg-[#17110B]/95"}`}>
         <div className="mb-1 flex items-center justify-between px-2 pt-0.5">
           <span className="flex items-center gap-1 text-[0.5rem] font-extrabold uppercase tracking-[0.14em] text-[#71828B]"><Sparkles className="size-2.5 text-[#C7FF3C]" /> {dailyMode === "automatico" ? "Ação automática" : "Modo " + primary.kind}</span>
