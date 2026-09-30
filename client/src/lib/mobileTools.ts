@@ -167,31 +167,3 @@ export function vibration(pattern: number | number[] = 12) {
 }
 
 
-export type MobilityProvider = "uber" | "99";
-
-export function buildUberRideUrl(destination: string, coordinates?: { lat: number; lng: number }) {
-  const params = new URLSearchParams();
-  params.set("pickup", "my_location");
-  const drop = {
-    ...(coordinates && Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng)
-      ? { latitude: coordinates.lat, longitude: coordinates.lng }
-      : {}),
-    nickname: destination.trim().slice(0, 80),
-    formatted_address: destination.trim(),
-  };
-  params.set("drop[0]", JSON.stringify(drop));
-  return "https://m.uber.com/looking?" + params.toString();
-}
-
-export function build99MobilityUrl(destination: string) {
-  const query = destination.trim();
-  void query;
-  return "https://99app.com/";
-}
-
-export function buildMobilityLinks(destination: string, coordinates?: { lat: number; lng: number }) {
-  return {
-    uber: buildUberRideUrl(destination, coordinates),
-    nineNine: build99MobilityUrl(destination),
-  };
-}
