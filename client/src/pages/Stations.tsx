@@ -802,6 +802,7 @@ export default function Stations() {
               <Navigation className="mr-1.5 inline size-3.5" /> Emergência
             </button>
           </div>
+          </section>
         )}
 
         {staticRuntime && !showSavedOnly && (
@@ -850,9 +851,9 @@ export default function Stations() {
               <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]">Postos perto de mim</button>
             </div>
           </section>
-        )}
           </div>
         </details>
+        )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
           <section className="mt-4 overflow-hidden rounded-[1.7rem] border border-white/8 bg-white/[.025] p-4 shadow-[0_18px_65px_rgba(0,0,0,.20)] backdrop-blur sm:p-5" aria-label="Painel rápido dos postos">
@@ -884,7 +885,7 @@ export default function Stations() {
 <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#0F171D] px-4 py-3">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-xs font-black text-white/75">
             <span>Dados oficiais da ANP</span>
-            <span className="rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#9FEFFF]">${anpStations.length} postos</span>
+            <span className="rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#9FEFFF]">{anpStations.length} postos</span>
           </summary>
           <div className="pt-2">
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
