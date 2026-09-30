@@ -1,4 +1,4 @@
-import { ArrowRight, Heart, LocateFixed, MapPinned, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Heart, LocateFixed, Navigation, Search, Share2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
