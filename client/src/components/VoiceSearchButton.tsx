@@ -29,6 +29,10 @@ export default function VoiceSearchButton({ onResult, label = "Pesquisar por voz
         setListening(false);
         recognitionRef.current = null;
       },
+      () => {
+        setListening(false);
+        recognitionRef.current = null;
+      },
     );
 
     if (!recognition) return;
@@ -37,7 +41,7 @@ export default function VoiceSearchButton({ onResult, label = "Pesquisar por voz
   };
 
   useEffect(() => () => {
-    recognitionRef.current?.stop();
+    try { recognitionRef.current?.stop(); } catch {}
   }, []);
 
   const supported = typeof window !== "undefined" && Boolean(
