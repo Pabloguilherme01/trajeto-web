@@ -391,7 +391,7 @@ export default function Planner() {
                     <button type="button" onClick={() => { toggleMobileStationFavorite(station); setSavedStations(listMobileStationFavorites()); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir agora</button>
+                    <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="mobile-action mobile-action-primary min-h-11 rounded-xl px-3">Ir agora</button>
                     <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(station.address || station.name))} className="mobile-action mobile-action-secondary min-h-11 rounded-xl px-3 text-white/70">Planejar</button>
                   </div>
                 </article>
@@ -411,9 +411,9 @@ export default function Planner() {
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir Google Maps</button>
-              <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
-              <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+              <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true), "_blank", "noopener,noreferrer")} className="mobile-action mobile-action-primary min-h-12 rounded-xl px-3">Abrir Google Maps</button>
+              <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="mobile-action mobile-action-secondary min-h-12 rounded-xl border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-[#FFD9AF]">Abrir Waze</button>
+              <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="mobile-action mobile-action-secondary min-h-12 rounded-xl border-white/10 bg-white/[.04] px-3">Abrir Apple Maps</button>
             </div>
           </section>
         )}
@@ -442,15 +442,15 @@ export default function Planner() {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Google Maps</button>
-                <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-xs font-black text-[#C9F7FF]">Waze</button>
-                <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-[0.65rem] font-black text-white/70">Apple Maps</button>
-                <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-[0.65rem] font-black text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
+                <button type="button" onClick={() => openExternal("google")} className="mobile-action mobile-action-primary min-h-12 rounded-2xl px-3">Google Maps</button>
+                <button type="button" onClick={() => openExternal("waze")} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-[#C9F7FF]">Waze</button>
+                <button type="button" onClick={() => openExternal("apple")} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/70">Apple Maps</button>
+                <button type="button" onClick={() => void shareRoute()} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => void saveCurrentRoute()} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/65"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
-                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
+                <button type="button" onClick={() => setShowMap(value => !value)} className="mobile-action mobile-action-secondary min-h-11 rounded-2xl px-3 text-[0.65rem] text-white/65"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-[#C7FF3C]/[.05] px-3 py-2 text-[0.58rem] font-bold text-[#D9FF91]">{savedMessage}</p>}
@@ -460,7 +460,7 @@ export default function Planner() {
               <section className="mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22]">
                 <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
                   <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-white/35">Mapa da rota</p>
-                  <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
+                  <button type="button" onClick={() => setShowMap(false)} className="mobile-action mobile-action-secondary min-h-10 border-0 bg-transparent px-3 text-xs font-bold text-white/55">Fechar</button>
                 </div>
                 <div className="h-[min(68vh,520px)]">
                   <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} />
@@ -533,8 +533,8 @@ export default function Planner() {
                 </p>
 
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => openStation(planned.stops.find(stop => stop.name === planned.recommendation?.name) ?? planned.stops[0])} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir até o posto</button>
-                  <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Ver ficha</button>
+                  <button type="button" onClick={() => openStation(planned.stops.find(stop => stop.name === planned.recommendation?.name) ?? planned.stops[0])} className="mobile-action mobile-action-primary min-h-11 rounded-xl px-3">Ir até o posto</button>
+                  <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="mobile-action mobile-action-secondary min-h-11 rounded-xl px-3 text-white/70">Ver ficha</button>
                 </div>
               </section>
             )}
