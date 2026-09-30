@@ -468,6 +468,17 @@ export default function Planner() {
                     </p>
                   </div>
                 </div>
+                {planned.recommendation.netSavings && (
+                  <div className="mt-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3">
+                    <p className="text-[0.48rem] font-black uppercase tracking-[.1em] text-[#D9FF91]">Economia estimada</p>
+                    <p className="mt-1 text-base font-black text-white">
+                      {planned.recommendation.netSavings.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    </p>
+                    <p className="mt-1 text-[0.48rem] leading-relaxed text-white/30">
+                      Cálculo do Trajeto com desvio real e referências comparadas. Não é garantia de economia.
+                    </p>
+                  </div>
+                )}
 
                 <label className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[.02] px-3 py-2.5">
                   <span className="text-[0.55rem] font-bold text-white/50">Seu consumo estimado</span>
