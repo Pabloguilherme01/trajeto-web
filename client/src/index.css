@@ -209,3 +209,49 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
        [class~="text-white/45"]) {
   color: #9AAAB2 !important;
 }
+
+
+/* Diretório de postos: hierarquia visual curta, leitura rápida e menos ruído. */
+.station-directory-card {
+  container-type: inline-size;
+}
+.station-directory-card .station-price {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+.station-directory-card details > summary {
+  transition: background .18s ease, color .18s ease;
+}
+.station-directory-card details > summary:hover {
+  background: rgba(255,255,255,.025);
+}
+@media (min-width: 900px) {
+  .station-directory-card {
+    padding: 1.1rem;
+  }
+  .station-directory-card .station-secondary {
+    background: rgba(255,255,255,.018);
+  }
+}
+@media (max-width: 639px) {
+  .station-directory-card {
+    border-radius: 1.2rem;
+    padding: .85rem;
+  }
+  .station-directory-card .station-price {
+    margin-top: .65rem;
+    padding: .8rem;
+  }
+  .station-directory-card .station-secondary {
+    margin-top: .65rem;
+    padding: .75rem;
+  }
+  .station-directory-card h3 {
+    font-size: .95rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .station-directory-card,
+  .station-directory-card * {
+    scroll-behavior: auto !important;
+  }
+}
