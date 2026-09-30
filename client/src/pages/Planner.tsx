@@ -322,7 +322,6 @@ export default function Planner() {
           <OfflineRouteHub
             compact={false}
             onSelectDestination={chooseOfflineDestination}
-            highlightedDestinationId={null}
           />
         )}
 
