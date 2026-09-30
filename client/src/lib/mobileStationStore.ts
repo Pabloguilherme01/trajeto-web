@@ -9,6 +9,7 @@ export type MobileStation = {
   openingHours: string[];
   isOpen?: boolean | null;
   distanceLabel?: string | null;
+  distanceMeters?: number | null;
   anpMatch?: {
     status: "probable" | "unresolved";
     confidence: number;
