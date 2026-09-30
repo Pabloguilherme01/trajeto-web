@@ -801,18 +801,15 @@ export default function Stations() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#C7FF3C]">Águas Lindas · posto em 1 toque</p>
-                  <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">sem cadastro</span>
-                  <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/45">{online ? "online + cache" : "offline"}</span>
+                  <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/45">{online ? "online + cache local" : "offline"}</span>
                 </div>
                 <h2 className="mt-1 text-xl font-black tracking-[-.03em]">Mapa, ficha e rota no mesmo lugar.</h2>
                 <p className="mt-1 text-[0.63rem] leading-relaxed text-white/40">Abra o mapa, escolha um posto e saia direto para o navegador que você usa. Os dados locais ficam disponíveis no aparelho sem cadastro.</p>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><MapIcon className="mr-1 inline size-3.5" />Abrir mapa</button>
-              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-[0.6rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
-              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-[0.6rem] font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.6rem] font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
               <div className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.53rem] font-black text-white/45"><ShieldCheck className="size-3.5 text-[#C7FF3C]" />ANP + cache local</div>
             </div>
           </section>
