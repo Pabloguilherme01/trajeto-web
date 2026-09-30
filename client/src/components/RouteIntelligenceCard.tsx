@@ -287,6 +287,26 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </div>
       )}
 
+      {data && data.routes.length > 1 && selectedRouteId && (
+        <div className="mt-3 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.025] p-3.5">
+          <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">O que muda ao escolher esta rota</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {(() => {
+              const selected = data.routes.find(route => route.id === selectedRouteId) ?? data.routes[0];
+              const base = data.routes[0];
+              const timeDelta = selected.durationSeconds != null && base.durationSeconds != null ? selected.durationSeconds - base.durationSeconds : null;
+              const distanceDelta = selected.distanceMeters != null && base.distanceMeters != null ? selected.distanceMeters - base.distanceMeters : null;
+              const costDelta = routeSavings(selected);
+              return <>
+                <div className="rounded-xl bg-white/[.04] p-3"><p className="text-[0.52rem] uppercase tracking-[.1em] text-white/35">Tempo</p><p className="mt-1 text-sm font-black">{timeDelta == null ? "—" : timeDelta === 0 ? "igual" : (timeDelta > 0 ? "+" : "") + formatDuration(Math.abs(timeDelta))}</p><p className="mt-1 text-[0.52rem] text-white/35">vs. principal</p></div>
+                <div className="rounded-xl bg-white/[.04] p-3"><p className="text-[0.52rem] uppercase tracking-[.1em] text-white/35">Distância</p><p className="mt-1 text-sm font-black">{distanceDelta == null ? "—" : distanceDelta === 0 ? "igual" : (distanceDelta > 0 ? "+" : "") + (Math.abs(distanceDelta) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"}</p><p className="mt-1 text-[0.52rem] text-white/35">vs. principal</p></div>
+                <div className="col-span-2 rounded-xl bg-white/[.04] p-3"><p className="text-[0.52rem] uppercase tracking-[.1em] text-white/35">Custo</p><p className="mt-1 text-sm font-black">{costDelta == null ? "não comparável" : costDelta === 0 ? "igual" : (costDelta > 0 ? "+" : "−") + Math.abs(costDelta).toLocaleString("pt-BR", { style: "currency", currency: selected.toll?.currency || "BRL" })}</p><p className="mt-1 text-[0.52rem] text-white/35">{costDelta == null ? "faltam dados de combustível ou pedágio" : costDelta < 0 ? "economia estimada vs. principal" : "acréscimo estimado vs. principal"}</p></div>
+              </>;
+            })()}
+          </div>
+        </div>
+      )}
+
       {data && data.routes.length > 1 && (
         <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] p-3">
           <p className="text-xs font-black">Escolha a rota no mapa</p>
