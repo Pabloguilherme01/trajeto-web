@@ -36,9 +36,19 @@ export default function Explore(){
   const [,setLocation]=useLocation();
   const [input,setInput]=useState("");
   const [query,setQuery]=useState("");
-  const [category,setCategory]=useState<PlaceCategory>(()=>inferPlaceCategory(typeof window!=="undefined"?new URLSearchParams(window.location.search).get("q")||"": "")==="all" ? "fuel" : inferPlaceCategory(typeof window!=="undefined"?new URLSearchParams(window.location.search).get("q")||"": "") as PlaceCategory);
+  const [urlCenter] = useState<Coordinates | null>(() => {
+    if(typeof window==="undefined") return null;
+    const params=new URLSearchParams(window.location.search);
+    const lat=Number(params.get("lat")); const lng=Number(params.get("lng"));
+    return Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180 ? {lat,lng} : null;
+  });
+  const [category,setCategory]=useState<PlaceCategory>(()=> {
+    const q=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("q")||"":"";
+    const inferred=inferPlaceCategory(q);
+    return inferred==="all" ? "fuel" : inferred;
+  });
   const [online,setOnline]=useState(()=>typeof navigator==="undefined"||navigator.onLine);
-  const [center,setCenter]=useState<Coordinates>(fallbackCenter);
+  const [center,setCenter]=useState<Coordinates>(urlCenter??fallbackCenter);
   const [results,setResults]=useState<PlaceEntity[]>([]);
   const [selected,setSelected]=useState<PlaceEntity|null>(null);
 
