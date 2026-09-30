@@ -21,6 +21,17 @@ describe("public routing fallback", () => {
     expect(route.origin).toEqual({ lat: -15.7545, lng: -48.2816 });
   });
 
+  it("falls back to a local estimate when the shared router is unavailable", async () => {
+    vi.unstubAllGlobals();
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
+
+    const route = await calculatePublicRoute("-15.7545,-48.2816", "-15.7942,-47.8822");
+    expect(route.source).toBe("local-estimate");
+    expect(route.distanceMeters).toBeGreaterThan(0);
+    expect(route.durationSeconds).toBeGreaterThan(0);
+    expect(route.polyline.length).toBeGreaterThan(0);
+  });
+
   it("turns the public route into the planner contract", () => {
     const payload = buildPublicRoutePayload({
       origin: { lat: -15.7, lng: -48.2 },
@@ -28,6 +39,7 @@ describe("public routing fallback", () => {
       distanceMeters: 5000,
       durationSeconds: 600,
       polyline: "encoded",
+      source: "osrm",
     });
     expect(payload.route.distanceMeters).toBe(5000);
     expect(payload.route.durationSeconds).toBe(600);
