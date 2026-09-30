@@ -28,6 +28,7 @@ import {
   saveMobileDestination,
 } from "@/lib/mobileDestinations";
 import { getLastStation, getLastTrip, mobilePreferenceEvent, type LastStation } from "@/lib/mobilePreferences";
+import { getMobilityContext } from "@/lib/mobilityContext";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
@@ -94,10 +95,14 @@ export default function DailyCommandCenter() {
   const nextSetup = !favorite ? "destino" : !vehicle ? "veículo" : !lastTrip ? "primeira viagem" : routes.length === 0 ? "rota offline" : null;
   const primaryOffline = routes[0] ?? null;
   const offlineFresh = primaryOffline ? !isOfflineRouteStale(primaryOffline.savedAt) : false;
-  const contextSummary = !online
-    ? primaryOffline ? "Sem internet · uma rota salva está disponível." : "Sem internet · prepare uma rota antes de sair."
-    : favorite ? `${usage[favorite.id] ?? 0} uso${(usage[favorite.id] ?? 0) === 1 ? "" : "s"} do seu destino principal neste aparelho.`
-    : "Configure um destino para personalizar a próxima ação.";
+  const mobilityContext = useMemo(() => getMobilityContext({
+    online,
+    hasDestination: Boolean(favorite),
+    hasVehicle: Boolean(vehicle),
+    hasLastTrip: Boolean(lastTrip),
+    offlineRoutes: routes.map(route => ({ savedAt: route.savedAt })),
+  }), [online, favorite, vehicle, lastTrip, routes]);
+  const contextSummary = mobilityContext.summary;
   const readiness = [
     { label: "Destino", value: Boolean(favorite), detail: favorite ? favorite.label : "Cadastre um atalho", icon: MapPin },
     { label: "Veículo", value: Boolean(vehicle), detail: vehicle ? vehicle.name : "Ainda não cadastrado", icon: CarFront },
@@ -248,8 +253,9 @@ export default function DailyCommandCenter() {
               <div className="min-w-0">
                 <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-white/40">Contexto agora</p>
                 <p className="mt-1 text-xs font-extrabold text-white">{contextSummary}</p>
+                <p className="mt-1 text-[0.55rem] font-bold uppercase tracking-[.1em] text-[#C7FF3C]/75">Ação sugerida: {mobilityContext.primaryAction.replaceAll("_", " ")}</p>
                 <div className="mt-1 flex flex-wrap gap-1.5 text-[0.5rem] font-bold text-white/35">
-                  <span>{routes.length} rota{routes.length === 1 ? "" : "s"} salva{routes.length === 1 ? "" : "s"}</span>
+                  <span>{mobilityContext.state.replace("_", " ")}</span><span>{routes.length} rota{routes.length === 1 ? "" : "s"} salva{routes.length === 1 ? "" : "s"}</span>
                   {primaryOffline && <span>{offlineFresh ? "cópia offline recente" : "cópia offline antiga"}</span>}
                 </div>
               </div>
