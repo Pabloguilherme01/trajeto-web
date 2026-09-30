@@ -599,3 +599,477 @@ A evolução será considerada pronta quando:
 11. refinamento visual mobile.
 12. testes de regressão, segurança e acessibilidade.
 13. verificação final do diff e CI/build disponível.
+
+
+## 22. Evolução de nível máximo — inteligência operacional
+
+Esta extensão consolida as novas funções em uma arquitetura única. O objetivo é aumentar a capacidade do produto sem multiplicar cards, estados paralelos ou fontes de verdade.
+
+### 22.1 Contratos centrais
+
+A evolução deverá convergir para contratos pequenos, versionáveis e independentes de React:
+
+- `Mission`: objetivo de deslocamento, destino(s), estado, rota, veículo, combustível, custos, offline e conclusão.
+- `Routine`: viagem recorrente ou padrão explicitamente derivado de eventos suficientes.
+- `MobilityEvent`: evento temporal normalizado de viagem, combustível, rota, veículo, posto ou preferência.
+- `Destination`: destino normalizado, aliases, frequência, último uso e associações.
+- `MobilityGraph`: relações entre missão, rotina, destino, rota, veículo, custos e eventos.
+- `NextAction`: próxima ação determinística, motivo, dependências e ação alternativa.
+- `Provenance`: origem, data, atualização, tipo e limitações do dado.
+- `Scenario`: simulação isolada do histórico real.
+- `OfflineSnapshot`: cópia local, idade, estado e conteúdo permitido offline.
+- `RecoveryState`: resultado de validação/migração/recuperação do armazenamento.
+
+Esses contratos devem substituir gradualmente estruturas paralelas, sem exigir uma migração total em uma única alteração.
+
+### 22.2 Mission Engine
+
+Uma missão representa o objetivo do deslocamento, e não somente uma rota.
+
+Exemplos:
+
+- trabalho;
+- faculdade;
+- compras;
+- resolver múltiplas tarefas;
+- viagem longa;
+- abastecer e voltar;
+- voltar para casa.
+
+A missão poderá possuir múltiplas paradas e dependências. O Trajeto organiza a missão e prepara a navegação, mas não substitui Google Maps, Waze ou Apple Maps como navegador.
+
+### 22.3 Grafo de dependências da viagem
+
+O fluxo lógico será:
+
+**Objetivo → Destino → Rota → Veículo → Combustível → Offline → Navegação → Registro**
+
+Cada dependência deve possuir estado:
+
+- pronta;
+- faltando;
+- opcional;
+- indisponível;
+- desatualizada.
+
+A interface deve mostrar somente a próxima dependência relevante.
+
+### 22.4 Smart Destinations 2.0
+
+Destinos locais poderão exibir:
+
+- uso em 7/30/90 dias;
+- último uso;
+- rota mais associada;
+- ir agora;
+- repetir;
+- inverter;
+- favoritar;
+- aliases normalizados.
+
+Padrões temporais exigem amostra suficiente. O produto não deve transformar poucos registros em afirmações sobre hábitos.
+
+### 22.5 Trip Templates
+
+Permitir modelos reutilizáveis:
+
+- Trabalho;
+- Faculdade;
+- Casa;
+- Compras;
+- Viagem longa;
+- modelos personalizados.
+
+Um modelo pode guardar preferências de planejamento, mas dados dinâmicos como trânsito, pedágio e preços devem ser recalculados ou buscados quando realmente disponíveis.
+
+### 22.6 Multi-stop Mission
+
+Uma missão pode conter múltiplos destinos registrados pelo usuário.
+
+A representação deve permitir:
+
+- adicionar/remover parada;
+- reordenar manualmente;
+- marcar parada concluída;
+- voltar ao destino principal;
+- abrir navegação externa por etapa.
+
+Não criar um algoritmo próprio de otimização de trânsito sem fonte/provedor real.
+
+### 22.7 Parada no caminho
+
+Durante a preparação, o usuário poderá adicionar uma necessidade intermediária, como posto, mercado, farmácia, estacionamento ou endereço salvo.
+
+A disponibilidade, distância, preço ou horário só deve aparecer quando houver dado real. Ausência de dado deve ser explícita.
+
+### 22.8 Plan B
+
+Missões e rotas importantes poderão ter alternativa local:
+
+- rota principal;
+- rota alternativa;
+- cópia offline;
+- última configuração conhecida.
+
+Planos alternativos devem informar sua idade e nunca sugerir trânsito atual quando o dado é offline.
+
+### 22.9 Offline Vault 2.0
+
+O cofre offline deverá tratar separadamente:
+
+- rotas;
+- destinos;
+- missões;
+- preferências;
+- registros;
+- configurações mínimas necessárias para recuperação.
+
+Cada item terá idade, versão, origem e estado. O sistema deverá diferenciar disponibilidade offline de validade dos dados externos.
+
+### 22.10 Recovery Mode
+
+Falhas de armazenamento não podem produzir tela branca.
+
+O fluxo deverá suportar:
+
+1. leitura segura;
+2. validação;
+3. migração quando aplicável;
+4. descarte seletivo do item inválido;
+5. fallback para estado vazio;
+6. registro local mínimo da recuperação.
+
+Quando possível, uma cópia anterior válida deverá ser preservada antes de uma migração destrutiva.
+
+### 22.11 Storage Safety
+
+A camada de armazenamento deverá fornecer:
+
+- parse seguro;
+- versionamento;
+- limites;
+- migração;
+- fallback;
+- expiração;
+- limpeza seletiva;
+- validação estrutural;
+- prevenção de loops de migração.
+
+A implementação deve permanecer leve e sem biblioteca pesada de schema.
+
+### 22.12 Planned × Recorded
+
+Quando houver registros suficientes, comparar planejamento e resultado:
+
+- distância;
+- duração;
+- combustível;
+- custo;
+- rota escolhida.
+
+A comparação deve mostrar explicitamente quais valores são planejados, registrados ou estimados. Ausência de registro não pode ser preenchida por suposição.
+
+### 22.13 Trip Delta
+
+Ao repetir uma viagem, mostrar somente mudanças relevantes desde a última utilização:
+
+- configuração do veículo;
+- disponibilidade offline;
+- atualização de dados externos;
+- combustível registrado;
+- custos;
+- alterações da missão.
+
+Se nada relevante mudou, não criar uma tela adicional.
+
+### 22.14 Data Sufficiency Engine
+
+Criar uma regra comum para determinar se uma métrica pode ser derivada.
+
+Exemplos:
+
+- 0 registros: indisponível;
+- amostra insuficiente: mostrar limitação;
+- amostra suficiente: calcular;
+- histórico amplo: permitir projeção.
+
+Os limiares devem ser específicos à métrica e documentados, não transformados em uma nota universal de confiança.
+
+### 22.15 Contradiction Detector
+
+Detectar inconsistências nos registros locais, incluindo:
+
+- odômetro regressivo;
+- datas impossíveis;
+- valores negativos inválidos;
+- duplicações prováveis;
+- litros incompatíveis com o tanque configurado;
+- sequência temporal inconsistente.
+
+O sistema deve alertar e preservar o dado original, sem corrigi-lo silenciosamente.
+
+### 22.16 Data Aging Center
+
+Criar uma leitura única da idade dos dados locais e externos:
+
+- atualizado;
+- recente;
+- antigo;
+- desatualizado;
+- indisponível.
+
+A idade deve ser calculada a partir do timestamp real da fonte ou do registro local.
+
+### 22.17 Data Lineage
+
+Para valores calculados relevantes, permitir explicar:
+
+**resultado → fórmula → entradas → procedência → timestamp**
+
+Exemplo de custo estimado:
+
+distância × consumo configurado × preço registrado.
+
+Se uma entrada for estimada, a cadeia deve preservar essa classificação.
+
+### 22.18 “Por que estou vendo isso?”
+
+Ações contextuais deverão possuir uma explicação curta derivada dos dados reais disponíveis.
+
+Exemplo:
+
+- destino recorrente registrado;
+- rota utilizada anteriormente;
+- cópia offline disponível.
+
+A explicação não deve revelar dados privados além do necessário para a decisão.
+
+### 22.19 Mobility Inbox
+
+Consolidar pendências relevantes em uma única entrada contextual:
+
+- rota offline antiga;
+- registro incompleto;
+- manutenção cadastrada próxima;
+- missão pendente;
+- inconsistência de dados;
+- atualização necessária.
+
+Itens resolvidos devem desaparecer da superfície principal.
+
+### 22.20 Long Trip Mode
+
+Para viagens longas, condensar preparação em:
+
+- destino;
+- rota;
+- veículo;
+- autonomia;
+- reserva configurada;
+- combustível;
+- custos conhecidos;
+- offline;
+- navegação;
+- paradas.
+
+Não criar uma experiência separada com lógica duplicada.
+
+### 22.21 Data/Battery Saver
+
+Permitir reduzir consultas e atualizações:
+
+- evitar refresh redundante;
+- priorizar cache;
+- permitir atualização manual;
+- respeitar offline;
+- reduzir chamadas externas quando o dado ainda estiver dentro da validade definida.
+
+### 22.22 Accessibility Mode
+
+Adicionar uma camada opcional para:
+
+- tipografia maior;
+- contraste reforçado;
+- alvos de toque maiores;
+- menos animação;
+- foco visual forte;
+- linguagem reduzida;
+- menor densidade de informação.
+
+O modo deve reutilizar os mesmos componentes e contratos.
+
+### 22.23 Cognitive Load Mode
+
+Um modo de baixa complexidade visual:
+
+- destino atual;
+- ação principal;
+- próxima etapa;
+- estado essencial.
+
+Detalhes ficam sob demanda. Não duplicar lógica de negócio.
+
+### 22.24 Scenario Lab
+
+Simulações ficam separadas dos registros reais.
+
+Permitir cenários como:
+
+- preço de combustível alternativo;
+- frequência semanal;
+- frequência mensal;
+- consumo hipotético;
+- custo por viagem;
+- comparação entre configurações.
+
+Todo resultado simulado deve ser identificado como cenário/projeção.
+
+### 22.25 Mobility Inbox e ações recentes
+
+Registrar localmente ações relevantes recentes para facilitar recuperação:
+
+- última missão aberta;
+- último destino;
+- última rota;
+- último registro;
+- última configuração alterada.
+
+O histórico deve possuir limites e limpeza automática segura.
+
+### 22.26 Busca universal
+
+A busca única deve indexar localmente:
+
+- destinos;
+- rotas;
+- missões;
+- modelos;
+- veículos;
+- registros;
+- ações.
+
+Não criar outra command palette ou mecanismo paralelo.
+
+## 23. Modelo de estado operacional
+
+O estado global derivado deverá continuar determinístico:
+
+`idle → planning → route_ready → preparing → navigating → completed`
+
+Com `offline` como estado de disponibilidade quando uma cópia local puder sustentar a próxima ação.
+
+O estado não deve depender de chamadas externas para existir. APIs externas enriquecem o contexto, mas não podem ser a única fonte para a interface básica.
+
+## 24. Regras de não-invenção
+
+Toda função nova deverá respeitar:
+
+1. Sem trânsito real sem fonte real.
+2. Sem pedágio sem provedor que forneça pedágio.
+3. Sem preço atual sem fonte atual.
+4. Sem frequência temporal sem timestamps suficientes.
+5. Sem consumo histórico sem registros suficientes.
+6. Sem previsão apresentada como fato.
+7. Sem dado externo apresentado como dado do usuário.
+8. Sem cenário apresentado como histórico.
+9. Sem localização contínua.
+10. Sem promessa de funcionamento offline além do que foi realmente salvo.
+
+## 25. Segurança de dados locais
+
+Adicionar ao desenho:
+
+- namespace/versionamento de storage;
+- migrações idempotentes;
+- limites por coleção;
+- validação antes de renderização;
+- fallback por coleção;
+- exportação/importação opcional;
+- detecção de conflito durante importação;
+- limpeza seletiva;
+- proteção contra dados de demonstração contaminarem dados reais.
+
+Dados importados devem ser marcados como importados quando a procedência for relevante.
+
+## 26. Diagnóstico de produção
+
+Criar uma superfície técnica que permita verificar, sem expor dados pessoais:
+
+- versão do app;
+- versão do schema local;
+- estado do PWA;
+- disponibilidade offline;
+- rota base/BASE_URL;
+- conectividade;
+- integridade das estruturas locais;
+- APIs configuradas;
+- estado de carregamento;
+- erros recuperáveis.
+
+O diagnóstico deve ser separado da experiência pública e não deve depender de segredos no cliente.
+
+## 27. Performance
+
+A evolução deve respeitar um orçamento de performance:
+
+- evitar novas dependências pesadas;
+- lazy loading por rota quando já suportado;
+- não carregar módulos de administração no fluxo público;
+- não executar cálculos caros em cada render;
+- memoizar somente onde houver benefício medido;
+- evitar listeners globais redundantes;
+- limitar histórico pesquisado;
+- limitar atualizações externas;
+- preservar carregamento inicial rápido em mobile.
+
+## 28. Observabilidade e verificabilidade
+
+Para cada etapa de implementação:
+
+- teste unitário da lógica pura;
+- teste de integração dos fluxos críticos;
+- teste de estados vazios/loading/error;
+- teste de recuperação de storage;
+- teste de navegação mobile;
+- verificação de acessibilidade;
+- verificação de regressão dos links externos;
+- build real quando disponível;
+- CI real quando disponível.
+
+Status ausente nunca será interpretado como sucesso.
+
+## 29. Ordem consolidada de implementação
+
+1. Contratos `Mission`, `Routine`, `MobilityEvent`, `Destination`, `NextAction` e `Provenance`.
+2. `storageSafety`, versionamento e migrações.
+3. Motor de contexto e dependências.
+4. Destinos inteligentes e modelos de viagem.
+5. Centro “Agora”.
+6. Missões multi-stop e Plan B.
+7. Cofre offline e Recovery Mode.
+8. Diário, Planned × Recorded e Trip Delta.
+9. Data Sufficiency, Contradiction e Aging.
+10. Data Lineage e explicabilidade.
+11. Custos, combustível e Scenario Lab.
+12. Veículo, manutenção e viagens longas.
+13. Busca universal e Mobility Inbox.
+14. Modos Rápido/Economia/Preparação/Condução/Offline/Acessibilidade.
+15. Diagnóstico, performance, segurança e privacidade.
+16. Refinamento visual mobile.
+17. Testes completos, auditoria e verificação de build/CI.
+18. Revisão final do diff antes de qualquer merge/deploy.
+
+## 30. Critério adicional de qualidade
+
+Uma nova função só entra no produto se satisfizer pelo menos uma destas condições:
+
+- reduz o número de toques;
+- reduz uma decisão repetitiva;
+- evita perda de contexto;
+- melhora transparência do dado;
+- melhora recuperação offline;
+- melhora segurança/privacidade;
+- melhora acessibilidade;
+- melhora preparação ou conclusão da viagem.
+
+Se apenas adicionar informação visual sem resolver uma tarefa, deve permanecer fora da superfície principal.
