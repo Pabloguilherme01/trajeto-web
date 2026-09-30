@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
-import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import TripReadinessCard from "@/components/TripReadinessCard";
 
@@ -113,6 +113,15 @@ export default function Home() {
     );
   };
 
+  const openServiceSearch = (query: string) => {
+    rememberSearch(query);
+    rememberIntent("search");
+    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
+    if (!opened) {
+      setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(query));
+    }
+  };
+
   const shareHome = async () => {
     try {
       const url = window.location.origin + appUrl("/");
@@ -199,15 +208,15 @@ export default function Home() {
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { label: "Centro", hint: "Explorar a região", icon: MapPin, query: "Centro Águas Lindas" },
-              { label: "Saúde", hint: "Hospitais e UBS", icon: HeartPulse, query: "saúde Águas Lindas" },
-              { label: "Serviços", hint: "Atendimento público", icon: Landmark, query: "serviço público Águas Lindas" },
-              { label: "Emergência", hint: "Atendimento urgente", icon: Siren, query: "emergência Águas Lindas" },
+              { label: "Centro", hint: "Explorar a região", icon: MapPin, query: "Centro Águas Lindas de Goiás, GO" },
+              { label: "Saúde", hint: "Hospitais e UBS", icon: HeartPulse, query: "hospitais e UBS Águas Lindas de Goiás, GO" },
+              { label: "Serviços", hint: "Atendimento público", icon: Landmark, query: "serviços públicos Águas Lindas de Goiás, GO" },
+              { label: "Emergência", hint: "Atendimento urgente", icon: Siren, query: "emergência Águas Lindas de Goiás, GO" },
             ].map(item => (
               <button
                 key={item.label}
                 type="button"
-                onClick={() => { rememberSearch(item.query); rememberIntent("search"); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(item.query)); }}
+                onClick={() => openServiceSearch(item.query)}
                 className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition active:scale-[.985]"
               >
                 <item.icon className="size-4 text-[#C7FF3C]" aria-hidden="true" />

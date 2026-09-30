@@ -4,7 +4,8 @@ import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { appUrl } from "@/lib/appUrl";
-import { getLastTrip, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { getLastTrip, mobilePreferenceEvent, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { buildGoogleMapsSearchUrl } from "@/lib/mobileTools";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
@@ -33,6 +34,16 @@ export default function MobileBottomNav() {
   }, []);
 
   const current = location.split("?")[0].replace(/\/$/, "") || "/";
+
+  const openExternalSearch = (query: string) => {
+    rememberSearch(query);
+    rememberIntent("search");
+    setMoreOpen(false);
+    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
+    if (!opened) {
+      setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(query));
+    }
+  };
 
   const go = (item: typeof baseItems[number]) => {
     if (item.key === "more") { setMoreOpen(true); return; }
@@ -88,16 +99,16 @@ export default function MobileBottomNav() {
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Search className="size-5" /> Buscar no Trajeto
           </button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("Centro Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+          <button type="button" onClick={() => openExternalSearch("Centro Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <MapPinned className="size-5" /> Explorar o Centro
           </button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("saúde Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+          <button type="button" onClick={() => openExternalSearch("hospitais e UBS Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <HeartPulse className="size-5" /> Saúde
           </button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("serviço público Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+          <button type="button" onClick={() => openExternalSearch("serviços públicos Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Landmark className="size-5" /> Serviços públicos
           </button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent("emergência Águas Lindas")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+          <button type="button" onClick={() => openExternalSearch("emergência Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Siren className="size-5" /> Emergência
           </button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
