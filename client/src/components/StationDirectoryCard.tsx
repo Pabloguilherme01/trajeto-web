@@ -66,7 +66,6 @@ type Props = {
   distanceKm?: number | null;
   onToggleSaved?: () => void;
   prices?: AnpPriceRecord[];
-  catalogStatus?: string;
 };
 
 export function StationDirectoryCard({
@@ -77,11 +76,9 @@ export function StationDirectoryCard({
   distanceKm = null,
   onToggleSaved,
   prices = [],
-  catalogStatus = "unreconciled",
 }: Props) {
   const [copied, setCopied] = useState(false);
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
-  const legalName = anp?.razaoSocial || local?.legalName || "Razão social não informada";
   const cnpj = anp?.cnpj || local?.cnpj || "";
   const address =
     [
@@ -191,7 +188,6 @@ export function StationDirectoryCard({
                 Posto {String(index).padStart(2, "0")}
               </p>
               <h3 className="mt-1 text-[0.98rem] font-black leading-tight text-white">{stationName}</h3>
-              <p className="mt-1 line-clamp-1 text-[0.54rem] leading-relaxed text-white/35">{legalName}</p>
             </div>
             <button
               type="button"
@@ -210,7 +206,7 @@ export function StationDirectoryCard({
 
           <div className="mt-2 flex flex-wrap gap-1.5">
             <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.43rem] font-black text-[#9FEFFF]">
-              {catalogStatus}
+              {anp ? "ANP" : local?.mapData ? "Mapa" : "Local"}
             </span>
             {Number.isFinite(distanceKm) && (
               <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.43rem] font-black text-white/65">
