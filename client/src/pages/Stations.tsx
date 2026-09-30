@@ -7,6 +7,7 @@ import { buildGoogleMapsSearchUrl, buildWazeNavigationUrl, buildAppleMapsDirecti
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
+import { groupAnpFuelRows } from "@shared/anpRevendedores";
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj, type AnpPriceSnapshot } from "@/lib/anpPrices";
 import { buildDirectoryCards, getDirectoryCoordinates, type FuelFilter } from "@/lib/stationDirectoryModel";
 import { getDistanceKm, type Coordinates } from "@/lib/stationDirectorySearch";
@@ -114,7 +115,7 @@ export default function Stations() {
 
   const anpStations = useMemo<AnpStation[]>(() => {
     const live = anpQuery.data?.rows ?? [];
-    return live.length > 0 ? live as AnpStation[] : [];
+    return live.length > 0 ? groupAnpFuelRows(live) : [];
   }, [anpQuery.data?.rows]);
 
   const directoryCards = useMemo(
