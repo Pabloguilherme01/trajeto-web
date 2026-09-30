@@ -2,6 +2,7 @@ import { MapView } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Apple, Navigation, Minus, Plus, RotateCcw } from "lucide-react";
 import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
+import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 
 export type StationMapItem = {
   id?: string;
@@ -252,5 +253,11 @@ export function StationMap({
         setReady(true);
       }}
     />
+    {resolvingCount > 0 && (
+      <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">
+        Posicionando {resolvingCount} posto(s) automaticamente… as coordenadas serão salvas para uso offline.
+      </div>
+    )}
+    </div>
   );
 }
