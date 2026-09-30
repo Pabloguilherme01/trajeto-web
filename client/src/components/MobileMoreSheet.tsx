@@ -1,4 +1,4 @@
-import { Accessibility, ChevronRight, CircleHelp, Download, ExternalLink, Navigation, Settings, X } from "lucide-react";
+import { Accessibility, Calculator, ChevronRight, CircleHelp, Download, ExternalLink, Navigation, Settings, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 
@@ -51,6 +51,12 @@ export default function MobileMoreSheet({ open, onClose }: Props) {
           <button type="button" onClick={() => go("/ajuda")} className="flex min-h-12 items-center gap-3 rounded-2xl border border-white/8 bg-white/[.025] px-3 text-left">
             <CircleHelp className="size-4 text-[#3DE3FF]" />
             <span className="min-w-0 flex-1"><span className="block text-[0.65rem] font-black text-white">Fontes e ajuda</span><span className="mt-0.5 block text-[0.52rem] text-white/35">ANP, Google, limites e funcionamento do Trajeto</span></span>
+            <ChevronRight className="size-4 text-white/20" />
+          </button>
+
+          <button type="button" onClick={() => go("/ferramentas")} className="flex min-h-12 items-center gap-3 rounded-2xl border border-white/8 bg-white/[.025] px-3 text-left">
+            <Calculator className="size-4 text-[#C7FF3C]" />
+            <span className="min-w-0 flex-1"><span className="block text-[0.65rem] font-black text-white">Calculadora</span><span className="mt-0.5 block text-[0.52rem] text-white/35">Custo da viagem e relação gasolina × etanol</span></span>
             <ChevronRight className="size-4 text-white/20" />
           </button>
 
