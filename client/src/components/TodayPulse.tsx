@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Bookmark, Clock3, MapPin, Navigation, Search, Wifi, WifiOff } from "lucide-react";
 import { appUrl } from "@/lib/appUrl";
-import { getFavoriteDestination, getMobileDestinations, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
+import { getFavoriteDestination, mobileDestinationEvent, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { getLastTrip, getRecentSearches, mobilePreferenceEvent } from "@/lib/mobilePreferences";
 import { listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
