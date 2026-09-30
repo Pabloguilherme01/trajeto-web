@@ -248,7 +248,7 @@ export const AGUAS_LINDAS_STATION_STATS = (() => {
 })();
 
 export function searchAguasLindasStations(query: string) {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+  const normalized = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const normalizedCompact = normalized.replace(/[^a-z0-9]+/g, " ").trim();
   const isAguasLindasQuery =
     normalizedCompact === "aguas lindas" ||
@@ -288,7 +288,7 @@ export function getStationSearchText(station: LocalStationRecord) {
     .join(" ")
     .toLocaleLowerCase("pt-BR")
     .normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 
