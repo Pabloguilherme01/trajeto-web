@@ -30,6 +30,8 @@ export type AnpFuelRow = {
   situacaoConstatada: string | null;
   observacao: string | null;
   statusSigaf: string | null;
+  src: string | null;
+  inadimplenciaPMQC: unknown[] | null;
 };
 
 export type AnpStationProduct = {
@@ -67,6 +69,8 @@ export type AnpStation = {
   situacaoConstatada: string | null;
   observacao: string | null;
   statusSigaf: string | null;
+  src: string | null;
+  inadimplenciaPMQC: unknown[] | null;
   products: AnpStationProduct[];
 };
 
@@ -102,6 +106,8 @@ const aliases: Record<keyof AnpFuelRow, string[]> = {
   situacaoConstatada: ["situacaoConstatada","SituacaoConstatada","SITUACAOCONSTATADA"],
   observacao: ["observacao","Observacao","OBSERVACAO"],
   statusSigaf: ["statusSIGAF","statusSigaf","StatusSIGAF","STATUSSIGAF"],
+  src: ["src","SRC"],
+  inadimplenciaPMQC: ["inadimplenciaPMQC","InadimplenciaPMQC","INADIMPLENCIAPMQC"],
 };
 
 function valueFor(row: Record<string, unknown>, keys: string[]) {
@@ -114,6 +120,11 @@ function valueFor(row: Record<string, unknown>, keys: string[]) {
 function textFor(row: Record<string, unknown>, key: keyof AnpFuelRow) {
   const value = valueFor(row, aliases[key]);
   return value == null ? null : String(value).trim() || null;
+}
+
+function arrayFor(row: Record<string, unknown>, key: keyof AnpFuelRow) {
+  const value = valueFor(row, aliases[key]);
+  return Array.isArray(value) ? value : null;
 }
 
 function numberFor(row: Record<string, unknown>, key: keyof AnpFuelRow) {
@@ -160,6 +171,8 @@ export function normalizeAnpFuelRow(input: Record<string, unknown>): AnpFuelRow 
     situacaoConstatada: textFor(input, "situacaoConstatada"),
     observacao: textFor(input, "observacao"),
     statusSigaf: textFor(input, "statusSigaf"),
+    src: textFor(input, "src"),
+    inadimplenciaPMQC: arrayFor(input, "inadimplenciaPMQC"),
   };
 }
 
@@ -202,6 +215,8 @@ export function groupAnpFuelRows(rows: AnpFuelRow[]): AnpStation[] {
         situacaoConstatada: row.situacaoConstatada,
         observacao: row.observacao,
         statusSigaf: row.statusSigaf,
+        src: row.src,
+        inadimplenciaPMQC: row.inadimplenciaPMQC,
         products: [product],
       });
       continue;
