@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, Fuel, LocateFixed, Route, Search as SearchIcon, Share2, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -189,6 +189,35 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="mt-4" aria-label="Atalhos por necessidade">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-white/30">Resolver agora</p>
+              <h2 className="mt-1 text-lg font-black tracking-[-.035em]">Acesso rápido.</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-10 rounded-xl border border-white/8 px-3 text-[0.58rem] font-black text-white/55">Ver tudo</button>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: "Centro", hint: "Explorar a região", icon: MapPin, query: "Centro Águas Lindas" },
+              { label: "Saúde", hint: "Hospitais e UBS", icon: HeartPulse, query: "saúde Águas Lindas" },
+              { label: "Serviços", hint: "Atendimento público", icon: Landmark, query: "serviço público Águas Lindas" },
+              { label: "Emergência", hint: "Atendimento urgente", icon: Siren, query: "emergência Águas Lindas" },
+            ].map(item => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => { rememberSearch(item.query); rememberIntent("search"); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(item.query)); }}
+                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition active:scale-[.985]"
+              >
+                <item.icon className="size-4 text-[#C7FF3C]" aria-hidden="true" />
+                <span className="mt-2 block text-xs font-black">{item.label}</span>
+                <span className="mt-0.5 block text-[0.55rem] text-white/35">{item.hint}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -275,7 +304,7 @@ export default function Home() {
           <section className="mt-7 rounded-3xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-4">
             <div className="flex items-start gap-3">
               <WifiOff className="mt-0.5 size-4 shrink-0 text-[#FFB86B]" />
-              <div><p className="text-xs font-black text-white">Modo offline</p><p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Rotas que já foram salvas neste aparelho continuam disponíveis. Novas consultas precisam de internet.</p></div>
+              <div><p className="text-xs font-black text-white">Modo offline</p><p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Rotas e dados já guardados neste aparelho continuam disponíveis. Quando houver conexão, o Trajeto pode atualizar e enriquecer os dados.</p></div>
             </div>
           </section>
         )}
