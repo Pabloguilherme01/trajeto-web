@@ -6,6 +6,7 @@ type ComparableStation = {
   name: string;
   address: string;
   distanceLabel: string | null;
+  distanceMeters: number | null;
   isOpen: boolean | null;
   lat: number;
   lng: number;
@@ -30,8 +31,8 @@ function statusLabel(value: ComparableStation["isOpen"]) {
 
 function compareDistance(stations: ComparableStation[]) {
   const withDistance = stations
-    .map((station, index) => ({ station, index, value: Number.parseFloat((station.distanceLabel ?? "").replace(",", ".")) }))
-    .filter(item => Number.isFinite(item.value));
+    .map((station, index) => ({ station, index, value: station.distanceMeters }))
+    .filter(item => item.value != null && Number.isFinite(item.value));
   if (!withDistance.length) return new Set<number>();
   const min = Math.min(...withDistance.map(item => item.value));
   return new Set(withDistance.filter(item => item.value === min).map(item => item.index));
