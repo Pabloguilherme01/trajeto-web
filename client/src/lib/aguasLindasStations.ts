@@ -273,6 +273,16 @@ export function searchAguasLindasStations(query: string) {
   );
 }
 
+export function getTopAguasLindasNeighborhoods(limit = 6) {
+  const counts = new globalThis.Map<string, number>();
+  for (const station of AGUAS_LINDAS_STATIONS) {
+    if (station.neighborhood) counts.set(station.neighborhood, (counts.get(station.neighborhood) ?? 0) + 1);
+  }
+  return Array.from(counts, ([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "pt-BR"))
+    .slice(0, Math.max(0, Math.floor(limit)));
+}
+
 export function stationMapsSearchUrl(station: LocalStationRecord) {
   const query = [station.displayName, station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
