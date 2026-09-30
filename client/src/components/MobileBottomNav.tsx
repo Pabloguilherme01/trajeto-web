@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, X, MapPinned } from "lucide-react";
+import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -26,7 +26,6 @@ export default function MobileBottomNav() {
     refresh();
     window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
-    window.addEventListener(offlineRouteEvent, refresh);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
@@ -86,6 +85,9 @@ export default function MobileBottomNav() {
         <DialogTitle>Mais opções</DialogTitle>
         <DialogDescription>Postos, salvos, ajuda e conta ficam aqui.</DialogDescription>
         <div className="grid gap-2">
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
+            <Search className="size-5" /> Buscar no Trajeto
+          </button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold">
             <Fuel className="size-5" /> Encontrar postos
           </button>
