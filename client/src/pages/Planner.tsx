@@ -6,7 +6,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration, type GoogleMapsTravelMode } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import OfflineRouteHub from "@/components/OfflineRouteHub";
@@ -60,6 +60,7 @@ export default function Planner() {
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
+  const [travelMode, setTravelMode] = useState<GoogleMapsTravelMode>("driving");
   const [consumptionKmPerLiter, setConsumptionKmPerLiter] = useState(10);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
@@ -244,7 +245,7 @@ export default function Planner() {
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
     const target = provider === "google"
-      ? buildGoogleMapsDirectionsUrl(origin, destination, "driving", true)
+      ? buildGoogleMapsDirectionsUrl(origin, destination, travelMode, true)
       : provider === "waze"
         ? buildWazeNavigationUrl(destination)
         : buildAppleMapsDirectionsUrl(destination, origin);
@@ -439,6 +440,34 @@ export default function Planner() {
                 <p className="text-[0.52rem] font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
                 <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
                 <p className="mt-1 text-[0.58rem] leading-relaxed text-white/35">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
+              </div>
+
+              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Modo de deslocamento</p>
+                  <span className="text-[0.48rem] text-white/25">Google Maps</span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-5">
+                  {([
+                    ["driving", "Carro"],
+                    ["two-wheeler", "Moto"],
+                    ["bicycling", "Bicicleta"],
+                    ["walking", "A pé"],
+                    ["transit", "Transporte"],
+                  ] as const).map(([mode, label]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => { setTravelMode(mode); vibration(6); }}
+                      aria-pressed={travelMode === mode}
+                      className={travelMode === mode
+                        ? "min-h-10 rounded-xl bg-[#C7FF3C] px-2 text-[0.5rem] font-black text-[#0B1014]"
+                        : "min-h-10 rounded-xl border border-white/8 bg-white/[.025] px-2 text-[0.5rem] font-bold text-white/50"}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
