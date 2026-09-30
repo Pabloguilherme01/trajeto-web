@@ -181,10 +181,15 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
 /* Mobile interaction primitives */
 @layer components {
   .mobile-pressable {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-height: 48px;
     min-width: 48px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
   .mobile-pressable:active { transform: scale(.985); }
   .mobile-focus-ring:focus-visible { outline: 3px solid #3DE3FF; outline-offset: 3px; }
