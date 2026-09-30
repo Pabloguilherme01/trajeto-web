@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildNavigationProviderUrl, shareText, vibration, type NavigationProvider } from "@/lib/mobileTools";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -50,14 +50,12 @@ export function StationDirectoryCard({
   local,
   anp,
   saved,
-  distanceKm = null,
   onToggleSaved,
 }: {
   index: number;
   local?: LocalStationRecord | null;
   anp?: AnpStation | null;
   saved?: boolean;
-  distanceKm?: number | null;
   onToggleSaved?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -92,13 +90,15 @@ export function StationDirectoryCard({
     return Array.from(unique.values());
   }, [anp]);
 
-  const destination = coords ? coords.lat + "," + coords.lng : address;
-  const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
-  const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
-  const appleUrl = buildAppleMapsDirectionsUrl(destination);
+  const navigationLinks: { provider: NavigationProvider; label: string; className: string }[] = [
+    { provider: "google", label: "Google Maps", className: "border-white/10 bg-white/[.04] text-white/80" },
+    { provider: "waze", label: "Waze", className: "border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] text-[#C9F7FF]" },
+    { provider: "apple", label: "Apple Maps", className: "border-white/10 bg-white/[.04] text-white/80" },
+    { provider: "openstreetmap", label: "OpenStreetMap", className: "border-white/10 bg-white/[.04] text-white/80" },
+  ];
   const anpUrl = "https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web";
   const shareUrl = typeof window !== "undefined"
-    ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName) + (cnpj ? "#posto-" + encodeURIComponent(cnpj) : "")
+    ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName)
     : address;
   const phone = local?.mapData?.phone;
   const status = local?.mapData?.operationalStatus;
@@ -121,7 +121,7 @@ export function StationDirectoryCard({
 
   return (
     <motion.article
-      id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
+      id={"posto-" + (cnpj || "mapa-" + index)}
       initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.12 }}
@@ -149,7 +149,6 @@ export function StationDirectoryCard({
             {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/35">sem cruzamento ANP</span>}
             <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/45">{distributor}</span>
             {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">coordenada</span>}
-            {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
             {status && <span className={"rounded-full border px-2 py-1 text-[0.45rem] font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
           </div>
         </div>
@@ -170,11 +169,24 @@ export function StationDirectoryCard({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="col-span-3 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora</button>
-        <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
-        <button type="button" onClick={() => window.open(wazeUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
-        <button type="button" onClick={() => window.open(appleUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
+      <div className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3">
+        <p className="text-xs font-black text-white/85">Escolha como navegar</p>
+        <p className="mt-1 text-xs leading-relaxed text-white/45">O link abre o app instalado ou a versão web. Sem coordenada, usamos o endereço para localizar o posto.</p>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {navigationLinks.map(({ provider, label, className }) => (
+            <button
+              key={provider}
+              type="button"
+              onClick={() => window.open(buildNavigationProviderUrl(provider, address, coords), "_blank", "noopener,noreferrer")}
+              className={"min-h-11 rounded-xl border px-2 text-xs font-black transition-transform duration-200 active:scale-[.98] " + className}
+            >{label}</button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => window.open(buildNavigationProviderUrl("google", address, coords), "_blank", "noopener,noreferrer")}
+          className="mt-2 min-h-12 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98]"
+        ><Navigation className="mr-1.5 inline size-4" />Ir agora · Google Maps</button>
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
