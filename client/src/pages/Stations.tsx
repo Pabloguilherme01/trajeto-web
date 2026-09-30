@@ -55,6 +55,7 @@ export default function Stations() {
   const verifiedFilterAvailable = false;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand">("name");
+  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(16);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
@@ -346,7 +347,12 @@ export default function Stations() {
 
   useEffect(() => {
     setLocalVisibleCount(12);
+    setDirectoryVisibleCount(16);
   }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
+
+  useEffect(() => {
+    setDirectoryVisibleCount(16);
+  }, [directorySearch, directorySort]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -641,7 +647,7 @@ export default function Stations() {
             </form>
 
             <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1">
-              <button type="button" onClick={useNearby} disabled={locating || !online} className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#C7FF3C] px-3.5 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">
+              <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#C7FF3C] px-3.5 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>
               {!staticRuntime && (
@@ -901,7 +907,7 @@ export default function Stations() {
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsFiltered.map((item, index) => (
+              {directoryCardsFiltered.slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
                   index={index + 1}
@@ -918,6 +924,35 @@ export default function Stations() {
                 />
               ))}
             </div>
+
+            {directoryVisibleCount < directoryCardsFiltered.length && (
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setDirectoryVisibleCount(current => Math.min(current + 16, directoryCardsFiltered.length))}
+                  className="min-h-12 rounded-2xl border border-white/8 bg-white/[.025] text-xs font-black text-white/65 transition-transform duration-200 active:scale-[.99]"
+                >
+                  Mostrar mais {Math.min(16, directoryCardsFiltered.length - directoryVisibleCount)} postos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDirectoryVisibleCount(directoryCardsFiltered.length)}
+                  className="min-h-12 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] text-xs font-black text-[#D9FF91] transition-transform duration-200 active:scale-[.99]"
+                >
+                  Mostrar todos os {directoryCardsFiltered.length}
+                </button>
+              </div>
+            )}
+
+            {directoryVisibleCount >= directoryCardsFiltered.length && directoryCardsFiltered.length > 16 && (
+              <button
+                type="button"
+                onClick={() => setDirectoryVisibleCount(16)}
+                className="mt-2 min-h-10 w-full text-[0.6rem] font-bold text-white/30"
+              >
+                Mostrar apenas os primeiros 16
+              </button>
+            )}
 
             <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-[0.55rem] leading-relaxed text-white/35">
               <strong className="text-white/55">Rota:</strong> o Trajeto envia o destino ao provedor escolhido. Google Maps, Waze e Apple Maps calculam a rota, trânsito e instruções de navegação. O site não inventa distância ou tempo quando não possui um motor de roteamento próprio.
