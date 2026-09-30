@@ -93,7 +93,6 @@ export default function MobilityInsightsCard() {
       const time = Date.parse(item.usedAt);
       return Number.isFinite(time) && Date.now() - time <= 7 * 24 * 60 * 60 * 1000;
     }).length;
-    const activeRouteKeys = new Set(recentTrips.map(item => routeKey(item.origin, item.destination)));
     const matchingOffline = mostUsed ? offlineRoutes.find(item => routeKey(item.origin, item.destination) === routeKey(mostUsed.origin, mostUsed.destination)) ?? null : null;
 
     return {
