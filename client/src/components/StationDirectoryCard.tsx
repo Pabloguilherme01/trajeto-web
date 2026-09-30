@@ -89,7 +89,7 @@ export function StationDirectoryCard({
       const key = [item.produto, item.classe, item.tancagem, item.quantidadeBicos].join("|");
       if (!unique.has(key)) unique.set(key, item);
     });
-    return [...unique.values()];
+    return Array.from(unique.values());
   }, [anp]);
 
   const destination = coords ? coords.lat + "," + coords.lng : address;
