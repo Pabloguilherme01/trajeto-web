@@ -439,8 +439,8 @@ export default function Stations() {
               </div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
                 <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">ANP</p>
-                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count}</p>
-                <p className="text-[0.52rem] text-white/30">{AGUAS_LINDAS_ANP_VERIFIED_COUNT} enriquecidos via API</p>
+                <p className="mt-1 text-lg font-black text-[#3DE3FF]">{AGUAS_LINDAS_ANP_CATALOG_REFERENCE.count ?? "—"}</p>
+                <p className="text-[0.52rem] text-white/30">{AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0 ? AGUAS_LINDAS_ANP_VERIFIED_COUNT + " enriquecidos via API" : "sincronização individual pendente"}</p>
               </div>
             </div>
               </div>
