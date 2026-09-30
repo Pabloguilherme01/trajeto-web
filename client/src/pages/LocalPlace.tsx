@@ -10,6 +10,7 @@ import {
   buildOfflineDestinationShareText,
   buildOfflineDestinationShareUrl,
   buildWazeNavigationUrl,
+  buildWhatsAppShareUrl,
   getPreferredNavigationProvider,
   shareText,
   vibration,
@@ -68,6 +69,14 @@ export default function LocalPlace() {
             <button type="button" onClick={navigate} className="mobile-action mobile-action-primary min-h-12 rounded-2xl px-4"><Navigation className="size-4" /> Como chegar</button>
             <button type="button" onClick={() => void share()} className="mobile-action mobile-action-secondary min-h-12 rounded-2xl px-4"><Share2 className="size-4" /> Compartilhar</button>
           </div>
+          <a
+            href={buildWhatsAppShareUrl(buildOfflineDestinationShareText(destination), buildOfflineDestinationShareUrl(destination.id))}
+            target="_blank"
+            rel="noreferrer"
+            className="mobile-action mobile-action-secondary mt-2 min-h-11 w-full rounded-2xl border-[#25D366]/20 bg-[#25D366]/[.05] text-[#B8F6C8]"
+          >
+            Compartilhar no WhatsApp
+          </a>
           <a
             href={appUrl("/planejar") + "?offline=1&destino=" + encodeURIComponent(destination.address)}
             className="mobile-action mobile-action-secondary mt-2 min-h-11 w-full rounded-2xl"
