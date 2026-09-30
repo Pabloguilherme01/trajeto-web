@@ -176,7 +176,7 @@ export default function Stations() {
     const offline = getOfflineMapStations().stations;
     const seen = new Set<string>();
     return [...source, ...offline].filter(item => {
-      const key = item.cnpj ? "cnpj:" + item.cnpj : item.id || item.placeId || item.name + "|" + item.address;
+      const key = item.cnpj ? "cnpj:" + item.cnpj : item.id || item.name + "|" + item.address;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
