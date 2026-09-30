@@ -273,7 +273,7 @@ export default function Planner() {
               </label>
 
               <div className="my-2 flex justify-end">
-                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-9 place-items-center rounded-full border border-white/8 text-white/45 disabled:opacity-25" aria-label="Inverter origem e destino">
+                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-white/8 text-white/45 disabled:opacity-25" aria-label="Inverter origem e destino">
                   <ArrowLeftRight className="size-4" />
                 </button>
               </div>
@@ -287,8 +287,8 @@ export default function Planner() {
               </label>
 
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setOrigin(trip.origin); setDestination(trip.destination); setPlanned(null); }} className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 py-2 text-[0.58rem] font-bold text-white/60">Última rota</button>}
-                <button type="button" onClick={clear} disabled={!origin && !destination} className="shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 py-2 text-[0.58rem] font-bold text-white/50 disabled:opacity-30">Limpar</button>
+                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setOrigin(trip.origin); setDestination(trip.destination); setPlanned(null); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/60">Última rota</button>}
+                <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/50 disabled:opacity-30">Limpar</button>
               </div>
 
               <button type="submit" disabled={planRoute.isPending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
