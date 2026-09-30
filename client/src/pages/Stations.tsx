@@ -357,9 +357,17 @@ export default function Stations() {
   const recentSearches = getRecentSearches();
 
   if (savedOnly) {
-    const savedItems = saved
-      .map(station => directoryCards.find(item => item.key === station.placeId.replace("aguas-lindas:", "")))
-      .filter((item): item is (typeof directoryCards)[number] => Boolean(item));
+    const savedItems = saved.map(station => ({
+      station,
+      item: directoryCards.find(card => card.key === station.placeId.replace("aguas-lindas:", "")) ?? null,
+    }));
+
+    const removeSaved = (station: MobileStation) => {
+      const result = toggleMobileStationFavorite(station);
+      setSaved(result.stations);
+      vibration();
+      toast.message("Posto removido dos salvos.");
+    };
 
     return (
       <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-10">
@@ -378,9 +386,9 @@ export default function Stations() {
                 <p className="mt-1 text-sm leading-relaxed text-white/40">Salve postos no aparelho para acessá-los rapidamente, inclusive sem conexão.</p>
                 <button type="button" onClick={() => setLocation(appUrl("/postos?q=postos"))} className="mt-4 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">Encontrar postos</button>
               </div>
-            ) : savedItems.map((item, index) => (
+            ) : savedItems.map(({ station, item }, index) => item ? (
               <StationDirectoryCard
-                key={item.key}
+                key={station.placeId}
                 index={index + 1}
                 local={item.local}
                 anp={item.anp}
@@ -389,6 +397,39 @@ export default function Stations() {
                 distanceKm={getDistanceKm(userCoords, getDirectoryCoordinates(item))}
                 onToggleSaved={() => toggleSaved(item)}
               />
+            ) : (
+              <article key={station.placeId} className="rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]">
+                    <Fuel className="size-4" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-sm font-black">{station.name}</h2>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{station.address || "Endereço não informado"}</p>
+                    <p className="mt-2 text-[0.52rem] leading-relaxed text-white/25">Este cadastro foi salvo neste aparelho e não está mais presente no catálogo atual.</p>
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.open(
+                      openNavigation(station.lat, station.lng, station.name)[getPreferredNavigationProvider()],
+                      "_blank",
+                      "noopener,noreferrer",
+                    )}
+                    className="min-h-11 rounded-xl bg-[#C7FF3C] text-[0.6rem] font-black text-[#0B1014]"
+                  >
+                    <Navigation className="mr-1 inline size-3.5" aria-hidden="true" /> Navegar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeSaved(station)}
+                    className="min-h-11 rounded-xl border border-[#FF7D6A]/25 bg-[#FF7D6A]/[.05] text-[0.6rem] font-black text-[#FFB7A9]"
+                  >
+                    <Heart className="mr-1 inline size-3.5" aria-hidden="true" /> Remover
+                  </button>
+                </div>
+              </article>
             ))}
           </section>
         </div>
