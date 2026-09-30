@@ -24,6 +24,7 @@ it("prioritizes a balanced option using price, proximity, opening status and dat
   const nearExpensive = { distanceKm: 1, price: 6.2, isOpen: true, hasAnp: true };
   const farCheap = { distanceKm: 8, price: 5.4, isOpen: true, hasAnp: true };
   const balanced = { distanceKm: 2, price: 5.7, isOpen: true, hasAnp: true };
-  expect(compareBestValue(balanced, nearExpensive)).toBeLessThan(0);
-  expect(compareBestValue(balanced, farCheap)).toBeLessThan(0);
+  const baseline = { minDistanceKm: 1, minPrice: 5.4 };
+  expect(compareBestValue(balanced, nearExpensive, baseline)).toBeLessThan(0);
+  expect(compareBestValue(balanced, farCheap, baseline)).toBeLessThan(0);
 });
