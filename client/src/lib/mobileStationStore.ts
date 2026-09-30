@@ -50,7 +50,7 @@ export function toggleMobileStationFavorite(station: MobileStation) {
     : [station, ...current].slice(0, MAX_FAVORITES);
   try {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
-    window.dispatchEvent(new Event(mobileStationStoreEvent));
+    if (typeof window !== "undefined") window.dispatchEvent(new Event(mobileStationStoreEvent));
   } catch {}
   return { saved: !exists, stations: next };
 }
