@@ -1,6 +1,6 @@
 import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
@@ -9,7 +9,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { inferredBrand } from "@/lib/stationListControls";
+import { fuelFilterPriceKey, inferredBrand, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
@@ -44,7 +44,8 @@ function getInitialQuery() {
 
 export default function Stations() {
   const [location, setLocation] = useLocation();
-  const params = useMemo(() => new URLSearchParams(window.location.search), [location]);
+  const search = useSearch();
+  const params = useMemo(() => new URLSearchParams(search), [search]);
   const [input, setInput] = useState(getInitialQuery);
   const [query, setQuery] = useState(getInitialQuery);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
@@ -71,12 +72,13 @@ export default function Stations() {
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
-  const [fuelFilter, setFuelFilter] = useState<"all" | "gasolina-comum" | "etanol" | "diesel-s10" | "diesel-s500" | "glp-p13" | "gnv">("all");
+  const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
 
   const lat = Number(params.get("lat"));
   const lng = Number(params.get("lng"));
   const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
+  const urlQuery = params.get("q")?.trim() || "";
   const staticRuntime = isGitHubPagesRuntime();
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const broadAguasLindasQuery = isBroadAguasLindasQuery(query);
@@ -140,7 +142,12 @@ export default function Stations() {
         item.anp?.endereco,
         item.anp?.distribuidora,
       ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return !normalized || text.includes(normalized);
+      const matchesFuel = stationSupportsFuel(
+        pricesByCnpj.get(item.key)?.map(price => price.productKey) ?? [],
+        item.anp?.products?.map(product => product.produto || "") ?? [],
+        fuelFilter,
+      );
+      return (!normalized || text.includes(normalized)) && matchesFuel;
     });
 
     return [...matches].sort((a, b) => {
@@ -158,8 +165,9 @@ export default function Stations() {
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "price") {
-        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
-        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === "gasolina-comum")?.salePrice ?? Number.POSITIVE_INFINITY;
+        const productKey = fuelFilterPriceKey(fuelFilter);
+        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === productKey)?.salePrice ?? Number.POSITIVE_INFINITY;
+        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === productKey)?.salePrice ?? Number.POSITIVE_INFINITY;
         return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "brand") {
@@ -393,6 +401,30 @@ export default function Stations() {
 
 
   useEffect(() => {
+    if (showSavedOnly || !urlQuery || urlQuery === query) return;
+    setQuery(urlQuery);
+    setInput(urlQuery);
+    setShowMap(isBroadAguasLindasQuery(urlQuery));
+    setCompareIds([]);
+    setOnlyOpen(false);
+    setNeighborhoodFilter("all");
+    setBrandFilter("all");
+    setAddressOnly(false);
+    setVerifiedOnly(false);
+    setMappedOnly(false);
+  }, [urlQuery, showSavedOnly, query]);
+
+  useEffect(() => {
+    if (hasCoordinates) {
+      setUserCoords({ lat, lng });
+      setNearby(true);
+      return;
+    }
+    setUserCoords(null);
+    setNearby(false);
+  }, [hasCoordinates, lat, lng]);
+
+  useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     if (!hash.startsWith("#posto-")) return;
     const target = decodeURIComponent(hash.slice("#posto-".length));
@@ -410,7 +442,7 @@ export default function Stations() {
 
   useEffect(() => {
     setDirectoryVisibleCount(48);
-  }, [directorySearch, directorySort]);
+  }, [directorySearch, directorySort, fuelFilter]);
 
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
@@ -752,7 +784,7 @@ export default function Stations() {
               <div className="min-w-0">
                 <p className="text-[0.56rem] font-black uppercase tracking-[.15em] text-[#3DE3FF]">Modo público</p>
                 <h2 id="public-stations-title" className="mt-1 text-lg font-black">Pesquisar postos sem esperar por servidor.</h2>
-                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/65">Esta versão está hospedada como site estático. A busca ao vivo é entregue pelo Google Maps, enquanto favoritos e dados já salvos continuam no aparelho.</p>
+                <p className="mt-2 text-[0.68rem] leading-relaxed text-white/65">Esta versão usa o catálogo local e snapshots ANP versionados. Conferência e navegação ao vivo abrem no provedor externo escolhido; favoritos e dados salvos continuam neste aparelho.</p>
               </div>
             </div>
             {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length > 0 && (
@@ -957,19 +989,28 @@ export default function Stations() {
               <button type="button" onClick={() => document.getElementById("complete-stations-title")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-[0.46rem] font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></button>
             </div>
 
-            <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto]">
+            <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
               <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 text-white/65" />
                 <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-[0.62rem] text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-7 place-items-center rounded-lg text-white/65" aria-label="Limpar busca"><X className="size-3.5" /></button>}
               </label>
+              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
+                <option value="all">Combustível: todos</option>
+                <option value="gasolina-comum">Gasolina comum</option>
+                <option value="etanol">Etanol</option>
+                <option value="diesel-s10">Diesel S10</option>
+                <option value="diesel-s500">Diesel S500</option>
+                <option value="glp-p13">GLP P13</option>
+                <option value="gnv">GNV</option>
+              </select>
               <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-[0.56rem] font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
                 <option value="price">Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-[0.56rem] font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[0.5rem] text-white/65">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
@@ -978,10 +1019,6 @@ export default function Stations() {
 
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
-                .filter(item => fuelFilter === "all" || (pricesByCnpj.get(item.key)?.some(price => price.productKey === fuelFilter) ?? false) || item.anp?.products?.some(product => {
-                  const text = (product.produto || "").toLocaleLowerCase("pt-BR");
-                  return fuelFilter === "gasolina-comum" ? text.includes("gasolina") && !text.includes("aditivada") : fuelFilter === "etanol" ? text.includes("etanol") : fuelFilter === "diesel-s10" ? text.includes("s10") : fuelFilter === "diesel-s500" ? text.includes("s500") : fuelFilter === "glp-p13" ? text.includes("glp") || text.includes("p13") : fuelFilter === "gnv" ? text.includes("gnv") : false;
-                }))
                 .slice(0, directoryVisibleCount).map((item, index) => (
                 <StationDirectoryCard
                   key={item.key}
