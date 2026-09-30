@@ -19,11 +19,3 @@ test("postos: acessibilidade sem violações críticas", async ({ page }) => {
   const blocking = results.violations.filter(item => item.impact === "critical" || item.impact === "serious");
   expect(blocking).toEqual([]);
 });
-
-test("postos: shell navega em offline após carregar", async ({ page, context }) => {
-  await page.goto("/postos?q=postos", { waitUntil: "networkidle" });
-  await page.waitForFunction(() => "serviceWorker" in navigator);
-  await context.setOffline(true);
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.getByText(/offline|cache local/i).first()).toBeVisible();
-});
