@@ -89,7 +89,7 @@ export default function MobileNavigationCenter({
           </div>
           <div className="rounded-xl border border-white/8 bg-white/[.04] p-3">
             <p className="text-[0.52rem] font-bold uppercase tracking-[.12em] text-white/40">Combustível</p>
-            <p className="mt-1 text-base font-black">{fuelCost != null ? fuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—"}</p>
+            <p className="mt-1 text-base font-black">{fuelCost != null ? fuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }).replace(/\u00A0/g, " ") : "—"}</p>
             <p className="text-[0.65rem] text-white/45">{litersNeeded != null ? `${litersNeeded.toLocaleString("pt-BR")} L` : "configure o veículo"}</p>
           </div>
           <div className="rounded-xl border border-white/8 bg-white/[.04] p-3">
