@@ -764,10 +764,53 @@ export default function Stations() {
                 ))}
               </div>
             )}
-          </section>
+          <div className="mt-4 grid grid-cols-2 gap-2" aria-label="Atalhos rápidos">
+            <button
+              type="button"
+              onClick={() => {
+                setFuelFilter("gasolina-comum");
+                setDirectorySort(priceSnapshot ? "price" : "name");
+                document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] active:scale-[.98]"
+            >
+              <Fuel className="mr-1.5 inline size-3.5" /> Abastecer agora
+            </button>
+            <button
+              type="button"
+              onClick={useNearby}
+              disabled={locating || typeof navigator === "undefined" || !navigator.geolocation}
+              className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.62rem] font-black text-[#C9F7FF] active:scale-[.98] disabled:opacity-35"
+            >
+              <MapPin className="mr-1.5 inline size-3.5" /> Perto de mim
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDirectorySort(userCoords || priceSnapshot ? "best-value" : "name");
+                document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-[0.62rem] font-black text-white/75 active:scale-[.98]"
+            >
+              <Sparkles className="mr-1.5 inline size-3.5 text-[#C7FF3C]" /> Comparar
+            </button>
+            <button
+              type="button"
+              onClick={() => window.open(buildGoogleMapsSearchUrl("postos abertos Águas Lindas de Goiás"), "_blank", "noopener,noreferrer")}
+              className="min-h-12 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-[0.62rem] font-black text-[#FFD09A] active:scale-[.98]"
+            >
+              <Navigation className="mr-1.5 inline size-3.5" /> Emergência
+            </button>
+          </div>
         )}
 
         {staticRuntime && !showSavedOnly && (
+<details className="mt-4 rounded-[1.35rem] border border-[#3DE3FF]/15 bg-[#0F171D] px-4 py-3">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-xs font-black text-white/75">
+            <span>Como o catálogo funciona</span>
+            <span className="text-[0.52rem] font-bold uppercase tracking-[.1em] text-[#9FEFFF]">fontes e referências</span>
+          </summary>
+          <div className="pt-2">
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
@@ -808,6 +851,8 @@ export default function Stations() {
             </div>
           </section>
         )}
+          </div>
+        </details>
 
         {!showSavedOnly && broadAguasLindasQuery && (
           <section className="mt-4 overflow-hidden rounded-[1.7rem] border border-white/8 bg-white/[.025] p-4 shadow-[0_18px_65px_rgba(0,0,0,.20)] backdrop-blur sm:p-5" aria-label="Painel rápido dos postos">
@@ -836,6 +881,12 @@ export default function Stations() {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
+<details className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#0F171D] px-4 py-3">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-xs font-black text-white/75">
+            <span>Dados oficiais da ANP</span>
+            <span className="rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.5rem] font-black text-[#9FEFFF]">${anpStations.length} postos</span>
+          </summary>
+          <div className="pt-2">
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -934,6 +985,8 @@ export default function Stations() {
             <p className="mt-3 text-[0.5rem] leading-relaxed text-white/25">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
           </section>
         )}
+          </div>
+        </details>
 
         {broadAguasLindasQuery && !showSavedOnly && (
           <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
