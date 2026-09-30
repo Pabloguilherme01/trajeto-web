@@ -28,28 +28,24 @@ export function createMemoryRateLimiter(options: {
       }
       current = { count: 1, resetAt: now + options.windowMs };
       buckets.set(key, current);
-      res.setHeader("RateLimit-Limit", String(options.max));
-      res.setHeader("RateLimit-Remaining", String(Math.max(0, options.max - current.count)));
-      res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
-      return next();
+    } else {
+      current.count += 1;
     }
 
-    current.count += 1;
+    const remaining = Math.max(0, options.max - current.count);
+    res.setHeader("RateLimit-Limit", String(options.max));
+    res.setHeader("RateLimit-Remaining", String(remaining));
+    res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
+
     if (current.count > options.max) {
       const retryAfter = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
       res.setHeader("Retry-After", String(retryAfter));
-      res.setHeader("RateLimit-Limit", String(options.max));
-      res.setHeader("RateLimit-Remaining", "0");
-      res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
       return res.status(429).json({
         error: "too_many_requests",
         message: `Limite de requisições excedido para ${name}. Tente novamente em alguns segundos.`,
       });
     }
 
-    res.setHeader("RateLimit-Limit", String(options.max));
-    res.setHeader("RateLimit-Remaining", String(Math.max(0, options.max - current.count)));
-    res.setHeader("RateLimit-Reset", String(Math.ceil(current.resetAt / 1000)));
     return next();
   };
 }
