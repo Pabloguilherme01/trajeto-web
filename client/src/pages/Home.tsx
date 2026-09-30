@@ -215,6 +215,20 @@ export default function Home() {
 
               {locationMessage && <p role="status" aria-live="polite" className="mt-2 rounded-xl border border-white/8 bg-white/[0.025] px-3 py-2 text-[0.62rem] font-bold text-[#8FA3AC]">{locationMessage}</p>}
 
+              {online && lastTrip && (
+                <a
+                  href={appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)}
+                  className="mt-2 flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[0.06] px-3.5 text-left transition hover:border-[#C7FF3C]/45 hover:bg-[#C7FF3C]/[0.1] active:scale-[.99]"
+                  aria-label={"Continuar viagem de " + lastTrip.origin + " para " + lastTrip.destination}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-[0.55rem] font-black uppercase tracking-[0.12em] text-[#C7FF3C]">Próxima ação</span>
+                    <span className="mt-1 block truncate text-xs font-extrabold text-white">{lastTrip.origin} → {lastTrip.destination}</span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]" aria-hidden="true" />
+                </a>
+              )}
+
               <div className={online ? "mt-2 grid grid-cols-2 gap-2" : "hidden"}>
                 <button type="button" onClick={useMyLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-[#C6D1D6] transition hover:border-[#3DE3FF] active:scale-[.98]" disabled={locating}>
                   <LocateFixed className="size-4 text-[#3DE3FF]" /> {locating ? "Localizando…" : "Usar minha localização"}
