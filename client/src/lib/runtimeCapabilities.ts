@@ -21,3 +21,7 @@ export function routingCapabilityLabel() {
   if (isGitHubPagesRuntime()) return "rota pública disponível";
   return "rota avançada disponível";
 }
+
+export function supportsBackendAuth(staticRuntime = isGitHubPagesRuntime()) {
+  return !staticRuntime;
+}
