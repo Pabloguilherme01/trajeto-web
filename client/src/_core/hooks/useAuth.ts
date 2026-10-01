@@ -69,6 +69,7 @@ export function useAuth(options?: UseAuthOptions) {
   ]);
 
   useEffect(() => {
+    if (!canUseBackendAuth) return;
     if (!redirectOnUnauthenticated) return;
     if (meQuery.isLoading || logoutMutation.isPending) return;
     if (state.user) return;
@@ -82,6 +83,7 @@ export function useAuth(options?: UseAuthOptions) {
       startLogin();
     }
   }, [
+    canUseBackendAuth,
     redirectOnUnauthenticated,
     redirectPath,
     logoutMutation.isPending,
