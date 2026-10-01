@@ -6,6 +6,7 @@ export function useProductEvents() {
   const track = trpc.analytics.track.useMutation();
   return (event: ProductEventName, region?: string | null) => {
     if (isGitHubPagesRuntime()) return;
-    track.mutate({ event, region: region ?? null });
+    const coarseRegion = event === "google_page_token_invalid" ? region ?? null : null;
+    track.mutate({ event, region: coarseRegion });
   };
 }
