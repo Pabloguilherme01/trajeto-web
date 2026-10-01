@@ -176,9 +176,9 @@ function ResultCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3.5 text-left shadow-[0_10px_28px_rgba(0,0,0,.12)] transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
+      className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#141E23] p-3.5 text-left shadow-[0_10px_28px_rgba(0,0,0,.12)] transition hover:border-[#B7D86B]/30 active:scale-[.99]"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#B7D86B]/10 text-[#B7D86B]">
         <Icon className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
@@ -342,9 +342,9 @@ export default function SearchPage() {
         type="button"
         aria-label={action.label}
         onClick={() => openQuick(action)}
-        className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left shadow-[0_10px_28px_rgba(0,0,0,.1)] transition hover:border-[#C7FF3C]/30 disabled:opacity-60"
+        className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#141E23] p-3 text-left shadow-[0_10px_28px_rgba(0,0,0,.1)] transition hover:border-[#B7D86B]/30 disabled:opacity-60"
       >
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#B7D86B]/10 text-[#B7D86B]">
           <Icon className="size-5" />
         </span>
         <span className="min-w-0">
@@ -360,25 +360,25 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] w-full min-w-0 bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="premium-surface min-h-[100dvh] w-full min-w-0 bg-[#0D1418] pb-28 text-white md:pb-12">
       <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pt-5 sm:px-8 sm:pt-8">
         <header>
-          <p className="text-xs font-bold uppercase tracking-[.12em] text-[#C7FF3C]">
-            Águas Lindas de Goiás
+          <p className="soft-kicker text-xs text-[#B7D86B]">
+            Busca local · Águas Lindas
             <span className="hidden sm:inline"> · Ctrl/⌘ K</span>
           </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-.06em] sm:text-4xl">
-            Encontre e vá.
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-.035em] sm:text-4xl">
+            Encontre o que precisa.
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-white/75">
-            Busque pelo nome, bairro ou pelo que precisa resolver.
+            Digite um lugar, serviço ou problema do dia a dia. O Trajeto organiza as opções para você.
           </p>
         </header>
         <form
           onSubmit={submit}
-          className="mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#121B22] px-3"
+          className="mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-[#B7D86B]/25 bg-[#141E23] px-3"
         >
-          <SearchIcon className="size-5 shrink-0 text-[#C7FF3C]" />
+          <SearchIcon className="size-5 shrink-0 text-[#B7D86B]" />
           <input
             ref={inputRef}
             value={input}
@@ -386,7 +386,7 @@ export default function SearchPage() {
               setInput(event.target.value);
               setResultLimit(6);
             }}
-            placeholder="Ex.: CRAS, falta de luz, bairro"
+            placeholder="Ex.: UBS, CRAS, falta de luz, buraco ou bairro"
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/70"
             autoComplete="off"
             autoCapitalize="none"
@@ -411,7 +411,7 @@ export default function SearchPage() {
           )}
           <button
             type="submit"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]"
+            className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#B7D86B] text-[#0B1014]"
             aria-label="Pesquisar"
           >
             <ArrowRight className="size-5" />
@@ -420,7 +420,7 @@ export default function SearchPage() {
         {!online && (
           <p
             role="status"
-            className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[#DFFF9D]"
+            className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[#DCEAB9]"
           >
             <WifiOff className="mt-0.5 size-4 shrink-0" />
             Você está offline. A busca usa os dados salvos neste aparelho.
@@ -431,16 +431,16 @@ export default function SearchPage() {
           <div className="mt-5 space-y-5" aria-label="Resultados da busca">
             {primaryService && (
               <section
-                className="rounded-[1.4rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.055] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
+                className="rounded-[1.4rem] border border-[#B7D86B]/20 bg-[#B7D86B]/[.055] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
                 aria-labelledby="search-auto-answer-title"
               >
                 <div className="flex items-start gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#B7D86B]/10 text-[#B7D86B]">
                     <Sparkles className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#C7FF3C]">
-                      Resposta rápida · Águas Lindas
+                    <p className="soft-kicker text-xs text-[#B7D86B]">
+                      Encontramos isto para você
                     </p>
                     <h2 id="search-auto-answer-title" className="mt-1 text-base font-black leading-snug">
                       {primaryService.name}
@@ -459,7 +459,7 @@ export default function SearchPage() {
                   <button
                     type="button"
                     onClick={() => setLocation(appUrl("/servicos") + "?servico=" + encodeURIComponent(primaryService.id))}
-                    className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"
+                    className="min-h-11 rounded-xl bg-[#B7D86B] px-3 text-sm font-black text-[#0B1014]"
                   >
                     Ver detalhes
                   </button>
@@ -467,7 +467,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => openRoute(primaryService.mapQuery!)}
-                      className="min-h-11 rounded-xl border border-[#3DE3FF]/25 px-3 text-sm font-bold text-[#C9F7FF]"
+                      className="min-h-11 rounded-xl border border-[#79C6D0]/25 px-3 text-sm font-bold text-[#C7E9ED]"
                     >
                       Planejar rota
                     </button>
@@ -486,16 +486,16 @@ export default function SearchPage() {
             )}
             {!primaryService && primaryDestination && (
               <section
-                className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
+                className="rounded-[1.4rem] border border-[#79C6D0]/20 bg-[#79C6D0]/[.05] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
                 aria-labelledby="search-auto-route-title"
               >
                 <div className="flex items-start gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#79C6D0]/10 text-[#79C6D0]">
                     <Route className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">
-                      Rota rápida · Águas Lindas
+                    <p className="soft-kicker text-xs text-[#79C6D0]">
+                      Caminho sugerido
                     </p>
                     <h2 id="search-auto-route-title" className="mt-1 text-base font-black leading-snug">
                       {primaryDestination.title}
@@ -508,7 +508,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => openRoute(primaryDestination.destination)}
-                  className="mt-3 min-h-11 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"
+                  className="mt-3 min-h-11 w-full rounded-xl bg-[#B7D86B] px-3 text-sm font-black text-[#0B1014]"
                 >
                   Planejar rota
                 </button>
@@ -525,7 +525,7 @@ export default function SearchPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-black uppercase tracking-[.12em] text-[#FFB86B]">
-                      Posto encontrado · Águas Lindas
+                      Posto que combina com a busca
                     </p>
                     <h2 id="search-auto-station-title" className="mt-1 text-base font-black leading-snug">
                       {primaryStation.displayName}
@@ -538,7 +538,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => setLocation(appUrl("/local/" + encodeURIComponent(primaryStation.id)))}
-                  className="mt-3 min-h-11 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"
+                  className="mt-3 min-h-11 w-full rounded-xl bg-[#B7D86B] px-3 text-sm font-black text-[#0B1014]"
                 >
                   Ver posto
                 </button>
@@ -569,7 +569,7 @@ export default function SearchPage() {
                         appUrl("/servicos") + "?q=" + encodeURIComponent(liveQuery)
                       )
                     }
-                    className="mt-3 min-h-11 w-full rounded-xl border border-[#C7FF3C]/30 px-3 py-2 text-sm font-bold"
+                    className="mt-3 min-h-11 w-full rounded-xl border border-[#B7D86B]/30 px-3 py-2 text-sm font-bold"
                   >
                     Ver todos os {results.services.length} serviços encontrados
                   </button>
@@ -693,7 +693,7 @@ export default function SearchPage() {
               </button>
             )}
             <section
-              className="rounded-2xl border border-white/10 bg-[#121B22] p-4"
+              className="rounded-2xl border border-white/10 bg-[#141E23] p-4"
               aria-label="Ajuda para encontrar"
             >
               <p className="text-sm leading-relaxed text-white/80">
@@ -711,7 +711,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    openExternal(liveQuery + ", Águas Lindas de Goiás, GO")
+                    openExternal(liveQuery + ", Busca local · Águas Lindas, GO")
                   }
                   disabled={!online}
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-bold disabled:opacity-60"
@@ -766,10 +766,10 @@ export default function SearchPage() {
               <div className="flex items-end justify-between gap-3">
                 <div>
                   <h2 id="search-needs-title" className="text-sm font-bold text-white/80">
-                    Resolver uma necessidade
+                    O que você quer resolver?
                   </h2>
                   <p className="mt-1 text-xs leading-relaxed text-white/60">
-                    Atalhos ligados ao catálogo público verificado.
+                    Atalhos simples para situações comuns em Águas Lindas.
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full border border-white/10 px-2 py-1 text-xs font-bold text-white/60">
@@ -782,7 +782,7 @@ export default function SearchPage() {
                     key={item.label}
                     type="button"
                     onClick={() => search(item.query)}
-                    className="min-h-20 w-[13.5rem] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left"
+                    className="min-h-20 w-[13.5rem] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#141E23] p-3 text-left"
                   >
                     <span className="block text-sm font-bold text-white">{item.label}</span>
                     <span className="mt-1 block text-xs leading-relaxed text-white/65">{item.hint}</span>
@@ -804,7 +804,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => search(item)}
-                      className="min-h-11 max-w-full break-words rounded-2xl border border-white/15 bg-[#121B22] px-3 py-2 text-left text-sm text-white/85"
+                      className="min-h-11 max-w-full break-words rounded-2xl border border-white/15 bg-[#141E23] px-3 py-2 text-left text-sm text-white/85"
                     >
                       {item}
                     </button>
@@ -836,7 +836,7 @@ export default function SearchPage() {
               <button
                 type="button"
                 onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")}
-                className="mt-3 min-h-12 w-full rounded-xl border border-[#3DE3FF]/25 px-3 py-2 text-sm font-bold text-[#C9F7FF]"
+                className="mt-3 min-h-12 w-full rounded-xl border border-[#79C6D0]/25 px-3 py-2 text-sm font-bold text-[#C7E9ED]"
               >
                 Todos os destinos disponíveis ·{" "}
                 {ALL_LOCAL_ROUTE_DESTINATIONS.length} locais
@@ -847,14 +847,14 @@ export default function SearchPage() {
                 href={appUrl("/servicos") + "?salvos=1"}
                 className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
               >
-                <Bookmark className="size-4 text-[#C7FF3C]" />
+                <Bookmark className="size-4 text-[#B7D86B]" />
                 Meus serviços salvos
               </Link>
               <Link
                 href={appUrl("/ajuda") + "#offline-readiness-title"}
                 className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
               >
-                <WifiOff className="size-4 text-[#3DE3FF]" />
+                <WifiOff className="size-4 text-[#79C6D0]" />
                 Preparar acesso offline
               </Link>
             </div>
