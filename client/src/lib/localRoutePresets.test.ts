@@ -44,5 +44,11 @@ describe("local route presets", () => {
     expect(
       getLocalRoutePresets("UBS").some(item => item.id === "ubs-barragem-ii")
     ).toBe(true);
+    expect(
+      getLocalRoutePresets("Santa Lucia").some(item => item.id === "ubs-santa-lucia")
+    ).toBe(true);
+    expect(
+      getLocalRoutePresets("Setor 10").some(item => item.id === "ubs-setor-10")
+    ).toBe(true);
   });
 });
