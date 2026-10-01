@@ -592,7 +592,7 @@ export default function Planner() {
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Atualizar cópia</button>
+                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-[0.65rem] font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 
