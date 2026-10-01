@@ -23,9 +23,17 @@ export function getUniversalSearchResults(query: string) {
   const stations = searchAguasLindasStations(value);
   const places = searchLocalPlaces(value);
   const serviceCategories = new Set<string>(services.map(item => item.category));
-  const dataResources = searchPublicDataResources(value).filter(
-    item => !serviceCategories.has(item.category)
-  );
+  const normalizedQuery = normalizeCatalogText(value);
+  const dataResources = searchPublicDataResources(value).filter(item => {
+    if (!serviceCategories.has(item.category)) return true;
+    return [item.id, item.title, item.sourceLabel].some(field => {
+      const normalizedField = normalizeCatalogText(field);
+      return (
+        normalizedField.includes(normalizedQuery) ||
+        normalizedQuery.includes(normalizedField)
+      );
+    });
+  });
   const transitFares = searchSemiurbanFares(value);
   const serviceIds = new Set(services.map(item => item.id));
   const placeIds = new Set(places.map(item => "place-" + item.id));
