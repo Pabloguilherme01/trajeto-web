@@ -43,6 +43,12 @@ for (const marker of [
   }
 }
 
+const authHook = fs.readFileSync("client/src/_core/hooks/useAuth.ts", "utf8");
+if (!authHook.includes("supportsBackendAuth()") || !authHook.includes("enabled: canUseBackendAuth")) {
+  console.error("Zero-cost core: autenticação de backend deve permanecer desabilitada no runtime estático.");
+  process.exitCode = 1;
+}
+
 const publicIndex = fs.readFileSync("client/index.html", "utf8");
 const forbiddenStaticSdks = [
   "maps.googleapis.com/maps/api/js",
