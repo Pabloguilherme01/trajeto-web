@@ -2,6 +2,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import InstallAppPrompt from "./InstallAppPrompt";
+import { pwaUpdateEvent } from "@/lib/pwa";
 
 beforeEach(() => {
   vi.stubGlobal("React", React);
@@ -33,6 +34,13 @@ describe("instalação do app", () => {
     offer(undefined, "dismissed");
     fireEvent.click(screen.getByRole("button", { name: "Instalar app" }));
     await waitFor(() => expect(screen.queryByLabelText("Instalar Trajeto")).toBeNull());
+  });
+  it("hides the install prompt when an app update needs attention", () => {
+    render(<InstallAppPrompt />);
+    offer();
+    expect(screen.getByLabelText("Instalar Trajeto")).toBeTruthy();
+    act(() => { window.dispatchEvent(new Event(pwaUpdateEvent)); });
+    expect(screen.queryByLabelText("Instalar Trajeto")).toBeNull();
   });
   it("closes when the app is installed through another browser entrypoint", () => {
     render(<InstallAppPrompt />);
