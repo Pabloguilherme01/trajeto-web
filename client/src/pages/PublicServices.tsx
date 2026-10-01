@@ -175,9 +175,10 @@ export default function PublicServices() {
                   </div>
                 </div>
                 {service.address && <p className="mt-3 line-clamp-3 text-[0.62rem] leading-relaxed text-white/35"><span className="font-black text-white/45">Endereço:</span> {service.address}</p>}
-                {(service.phone || service.hours) && (
+                {(service.phone || service.extraPhone || service.hours) && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {service.phone && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-[0.53rem] font-bold text-white/50">{service.phone}</span>}
+                    {service.extraPhone && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-[0.53rem] font-bold text-white/38">Alternativo · {service.extraPhone}</span>}
                     {service.hours && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-[0.53rem] font-bold text-white/50">{service.hours}</span>}
                   </div>
                 )}
