@@ -43,6 +43,13 @@ describe("universal citizen search", () => {
       )
     ).toBe(true);
   });
+  it("keeps local assistance results concise when a national data source also matches", () => {
+    const results = getUniversalSearchResults("cras");
+    expect(results.services).toHaveLength(3);
+    expect(results.dataResources.some(item => item.id === "mds-assistencia")).toBe(false);
+    expect(results.total).toBe(3);
+  });
+
   it("finds transport and official data sources in the same search", () => {
     const bus = getUniversalSearchResults("onibus entorno");
     expect(bus.transitFares.length).toBeGreaterThan(0);
