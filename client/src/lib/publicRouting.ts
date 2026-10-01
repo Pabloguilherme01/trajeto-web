@@ -61,31 +61,24 @@ function normalizeSearch(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function fallbackCacheHash(value: string) {
-  let hash = 2166136261;
+function opaqueCacheToken(value: string) {
+  let first = 2166136261;
+  let second = 0x9e3779b9;
   for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
+    const code = value.charCodeAt(index);
+    first = Math.imul(first ^ code, 16777619);
+    second = Math.imul(second ^ code, 2246822519);
   }
-  return (hash >>> 0).toString(16).padStart(8, "0");
+  return (
+    (first >>> 0).toString(16).padStart(8, "0") +
+    (second >>> 0).toString(16).padStart(8, "0")
+  );
 }
 
-async function geocodeCacheKey(value: string) {
-  const normalized = normalizeSearch(value);
-  try {
-    const subtle = globalThis.crypto?.subtle;
-    if (subtle && typeof TextEncoder !== "undefined") {
-      const digest = await subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(normalized)
-      );
-      const hex = Array.from(new Uint8Array(digest), byte =>
-        byte.toString(16).padStart(2, "0")
-      ).join("");
-      return "geocode:" + hex;
-    }
-  } catch {}
-  return "geocode:" + fallbackCacheHash(normalized);
+function geocodeCacheKey(value: string) {
+  // This token is not a secret or an authentication hash. Its purpose is to
+  // keep the user's typed address out of browser-storage key names.
+  return "geocode:" + opaqueCacheToken(normalizeSearch(value));
 }
 
 function getGeocoderSessionStorage() {
@@ -122,6 +115,15 @@ function setGeocoderUnavailableUntil(value: number) {
     if (value > 0) storage.setItem(GEOCODER_COOLDOWN_KEY, String(value));
     else storage.removeItem(GEOCODER_COOLDOWN_KEY);
   } catch {}
+}
+
+export function resetPublicRoutingTestState() {
+  if (import.meta.env.MODE !== "test") return;
+  geocoderUnavailableUntilFallback = 0;
+  geocoderMissUntil.clear();
+  geocoderInFlight.clear();
+  geocoderQueue = Promise.resolve();
+  geocoderLastStartedAt = 0;
 }
 
 function expandLocalQuery(value: string) {
@@ -445,7 +447,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   const query = normalizeText(value);
   if (!query) throw new Error("Origem ou destino vazio.");
 
-  const cacheKey = await geocodeCacheKey(query);
+  const cacheKey = geocodeCacheKey(query);
   const cached = cacheGet<PublicCoordinate>(cacheKey);
   if (isCoordinate(cached)) return cached;
 
@@ -489,7 +491,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const geocodedCoordinate = { lat, lng };
   cacheSet(cacheKey, geocodedCoordinate);
-  const expandedKey = await geocodeCacheKey(expanded);
+  const expandedKey = geocodeCacheKey(expanded);
   if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
   return geocodedCoordinate;
 }
