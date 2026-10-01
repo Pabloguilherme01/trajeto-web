@@ -102,6 +102,44 @@ export async function getOfflineReadiness(): Promise<boolean> {
   return (await requestOfflineStatus("OFFLINE_STATUS", 5000)).ready;
 }
 
+export type OfflineStorageStatus = {
+  supported: boolean;
+  persisted: boolean;
+  usageBytes: number | null;
+  quotaBytes: number | null;
+};
+
+export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
+  const storage = typeof navigator !== "undefined" ? navigator.storage : undefined;
+  if (!storage) {
+    return { supported: false, persisted: false, usageBytes: null, quotaBytes: null };
+  }
+  try {
+    const [persisted, estimate] = await Promise.all([
+      storage.persisted?.().catch(() => false) ?? Promise.resolve(false),
+      storage.estimate?.().catch(() => ({})) ?? Promise.resolve({}),
+    ]);
+    return {
+      supported: typeof storage.persist === "function",
+      persisted: persisted === true,
+      usageBytes: typeof estimate.usage === "number" && Number.isFinite(estimate.usage) ? estimate.usage : null,
+      quotaBytes: typeof estimate.quota === "number" && Number.isFinite(estimate.quota) ? estimate.quota : null,
+    };
+  } catch {
+    return { supported: typeof storage.persist === "function", persisted: false, usageBytes: null, quotaBytes: null };
+  }
+}
+
+export async function requestOfflineStoragePersistence(): Promise<OfflineStorageStatus> {
+  const storage = typeof navigator !== "undefined" ? navigator.storage : undefined;
+  if (!storage?.persist) return getOfflineStorageStatus();
+  try {
+    await storage.persist();
+  } catch {}
+  return getOfflineStorageStatus();
+}
+
+
 export async function prepareOfflineAccess(): Promise<OfflinePreparation> {
   if (!("serviceWorker" in navigator)) return { ready: false, reason: "unsupported" };
   if (await getOfflineReadiness()) return { ready: true };
