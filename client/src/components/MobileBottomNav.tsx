@@ -40,7 +40,7 @@ export default function MobileBottomNav() {
   const go = (item: typeof baseItems[number]) => {
     if (item.key === "more") { setMoreOpen(true); return; }
     if (item.key === "plan" && lastTrip) {
-      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination)); return;
+      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&auto=1"); return;
     }
     setLocation(appUrl(item.href));
   };
