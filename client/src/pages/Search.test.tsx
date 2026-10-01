@@ -53,7 +53,7 @@ describe("mobile search organization", () => {
   it("shows an automatic local answer with direct actions for a citizen need", () => {
     window.history.replaceState(null, "", "/buscar?q=dengue");
     render(<SearchPage />);
-    expect(screen.getByText(/Resposta rápida · Águas Lindas/i)).toBeTruthy();
+    expect(screen.getByText(/Encontramos isto para você/i)).toBeTruthy();
     expect(screen.getAllByText("Vigilância em Saúde").length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Ver detalhes" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Planejar rota" })).toBeTruthy();
@@ -70,13 +70,13 @@ describe("mobile search organization", () => {
   it("turns local place and station matches into automatic next actions", () => {
     window.history.replaceState(null, "", "/buscar?q=giraffas");
     render(<SearchPage />);
-    expect(screen.getByText(/Rota rápida · Águas Lindas/i)).toBeTruthy();
+    expect(screen.getByText(/Caminho sugerido/i)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Planejar rota" })).toBeTruthy();
 
     cleanup();
     window.history.replaceState(null, "", "/buscar?q=rham");
     render(<SearchPage />);
-    expect(screen.getByText(/Posto encontrado · Águas Lindas/i)).toBeTruthy();
+    expect(screen.getByText(/Posto que combina com a busca/i)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Ver posto" })).toBeTruthy();
   });
 
@@ -102,7 +102,7 @@ describe("mobile search organization", () => {
     fireEvent.click(screen.getByRole("button", { name: "Limpar busca" }));
     expect(window.location.search).toBe("");
     expect(
-      screen.getByRole("heading", { name: "O que você precisa?" })
+      screen.getByRole("heading", { name: "O que você quer resolver?" })
     ).toBeTruthy();
     expect(document.activeElement).toBe(
       screen.getByRole("textbox", { name: "Buscar locais e serviços" })
