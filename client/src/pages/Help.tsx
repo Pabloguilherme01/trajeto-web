@@ -61,6 +61,30 @@ export default function Help() {
           </Link>
         </section>
 
+        <section className="mt-4 rounded-[1.4rem] border border-[#79C6D0]/20 bg-[#79C6D0]/[.045] p-5" aria-labelledby="location-privacy-title">
+          <div className="flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#79C6D0]/10 text-[#79C6D0]">
+              <ShieldCheck className="size-5" />
+            </span>
+            <div>
+              <p className="soft-kicker text-xs text-[#79C6D0]">Privacidade por padrão</p>
+              <h2 id="location-privacy-title" className="mt-1 text-lg font-bold">Sua localização não vira perfil.</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/75">
+                O GPS exato é usado em memória apenas quando você pede uma função de proximidade ou rota. Ele não é enviado para analytics, não entra em URL compartilhável e não é gravado no histórico de trajetos como coordenada exata.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Sem conta, uma rota calculada pelo backend não é salva no banco do Trajeto.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Histórico local usa “Minha localização” em vez da coordenada GPS exata.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Para cálculo online a origem GPS é reduzida antes de sair do aparelho.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Ao abrir Google Maps, Waze ou Apple Maps, o Trajeto não coloca sua coordenada de origem no link.</p>
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-white/60">
+            Uma rota online ainda precisa conversar com um serviço de roteamento. Esses serviços recebem apenas os dados necessários ao cálculo conforme o fluxo escolhido; a localização exata não é usada como telemetria do Trajeto.
+          </p>
+        </section>
+
         <section className="mt-4 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-5">
           <h2 className="text-base font-black">O que continua funcionando sem conta</h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
