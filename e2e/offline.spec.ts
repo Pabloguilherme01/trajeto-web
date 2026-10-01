@@ -47,3 +47,21 @@ test("ajuda offline mostra o que está salvo e continua acessível sem rede", as
   ).toBeVisible();
   await expect(page.getByRole("link", { name: /Usar busca offline|Escolher o que salvar/i })).toBeVisible();
 });
+
+
+test("home mostra atalhos de contingência ao ficar offline", async ({ page, context }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.evaluate(async () => {
+    if ("serviceWorker" in navigator) await navigator.serviceWorker.ready;
+  });
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+
+  await context.setOffline(true);
+  await page.reload({ waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("heading", { name: "Sem internet — continue por aqui" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Busca local" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Serviços" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Rotas salvas" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Postos salvos" })).toBeVisible();
+});
