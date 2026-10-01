@@ -58,7 +58,7 @@ O produto deve reduzir o número de decisões durante uma viagem e manter a pró
 - **Decisão compartilhável:** compartilhamento com posto, contexto, preço de referência, desvio e justificativa.
 - **Atalhos adaptativos:** o acesso rápido prioriza o comportamento recorrente do aparelho.
 - **PWA e offline:** continuidade do fluxo mesmo quando serviços externos não estão disponíveis.
-- **Navegação externa:** Google Maps e Waze como destinos de execução, sem tentar substituir mapas.
+- **Navegação externa:** Google Maps, Waze e Apple Maps como opções de execução quando o usuário escolher, sem torná-los dependências do núcleo.
 
 ### Loop de crescimento por utilidade
 
@@ -149,15 +149,18 @@ Preço de referência da ANP não é apresentado como preço de bomba nem como o
 
 ## Arquitetura
 
-- **Frontend:** React 19 + Vite + TypeScript + Tailwind CSS.
-- **API:** tRPC 11 sobre Express.
-- **Dados:** MySQL + Drizzle ORM.
-- **Autenticação:** OAuth + sessão JWT em cookie HTTP-only.
-- **Mapas e rotas:** integrações externas encapsuladas no servidor.
-- **Validação:** Zod na fronteira das procedures.
-- **Testes:** Vitest + Testing Library.
-- **CI:** typecheck, testes e build.
-- **Segurança:** headers, limites de payload, validação de ambiente, rate limiting de endpoints de maior custo, timeouts de provedores e auditoria de dependências.
+O Trajeto mantém um **núcleo público de custo obrigatório R$ 0** que precisa funcionar no GitHub Pages sem banco, login ou API comercial.
+
+- **Frontend público:** React 19 + Vite + TypeScript + Tailwind CSS.
+- **Runtime estático:** GitHub Pages com PWA, service worker, dados locais e processamento no aparelho.
+- **Dados essenciais:** catálogos locais/oficiais versionados, snapshots preparados e armazenamento local para continuidade offline.
+- **Rotas públicas:** resolução local primeiro; geocodificação pública apenas como fallback moderado; OSRM para rotas públicas quando disponível; estimativa local quando a rede falha.
+- **Localização atual:** GPS permanece no aparelho; o fluxo privado não envia a posição exata para o provedor de rota e não a grava em URL ou histórico.
+- **Navegação externa:** Google Maps, Waze e Apple Maps são saídas opcionais escolhidas pelo usuário.
+- **Backend opcional:** Express + tRPC + MySQL/Drizzle + OAuth podem habilitar recursos avançados, mas não são necessários para as funções essenciais públicas.
+- **APIs comerciais:** Google Maps/Forge, TomTom, Mapbox ou equivalentes são complementos opcionais e não podem virar requisito silencioso do núcleo.
+- **Validação e segurança:** Zod, limites de payload, rate limiting, timeouts, circuit breakers e auditoria de dependências.
+- **Testes e CI:** typecheck, testes unitários/componentes/páginas, build, E2E/acessibilidade, smoke do GitHub Pages, Security e CodeQL.
 
 ## Estrutura
 
@@ -172,11 +175,13 @@ Preço de referência da ANP não é apresentado como preço de bomba nem como o
 
 ## Arquitetura de produção
 
-O frontend pode ser publicado no GitHub Pages como site estático. Quando o backend Express estiver hospedado separadamente, defina `VITE_API_BASE_URL` no build do frontend e `FRONTEND_ORIGIN` no backend para permitir apenas a origem pública do site.
+O **deploy público padrão** pode ser somente o GitHub Pages. Nesse modo, busca local, serviços públicos, postos preparados, calculadora, PWA/offline e o planejamento público continuam úteis sem Express, banco, OAuth ou chave comercial.
 
-Sem backend disponível, o produto não finge que a API está funcionando: planejamento e busca de postos oferecem fallback direto para o Google Maps, enquanto rotas e consultas já salvas continuam disponíveis localmente. Isso mantém uma ação útil mesmo diante de falha de infraestrutura.
+A ordem de preferência do planejamento público é: **dados e coordenadas locais → cache do aparelho → geocodificador público de contingência → roteamento público → estimativa local**. Provedores públicos compartilhados são tratados como fallback, com cache, deduplicação, limitação de chamadas e circuit breaker; eles não devem ser usados como backend ilimitado.
 
-O GitHub Pages é adequado para o frontend estático; o backend deve ser hospedado em uma plataforma que execute Node/Express. O Express é suportado diretamente como aplicação backend pela Vercel.
+Se um backend Express for implantado para recursos avançados, configure `VITE_API_BASE_URL` no frontend e `FRONTEND_ORIGIN` no servidor. Banco, OAuth e integrações comerciais pertencem a esse modo opcional e seus secrets não devem ser necessários para publicar o núcleo estático.
+
+O CI contém uma verificação específica para impedir que o núcleo do GitHub Pages passe a depender silenciosamente de API comercial paga.
 
 ## Desenvolvimento
 
