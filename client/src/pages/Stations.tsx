@@ -804,7 +804,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
               <button type="button" onClick={useNearby} disabled={locating} className="min-h-12 rounded-xl bg-[#B7D86B] text-xs font-black text-[#0D1418]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
-              <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-12 rounded-xl border border-[#79C6D0]/20 bg-[#79C6D0]/[.05] text-xs font-black text-[#C7E9ED] disabled:opacity-40"><Bookmark className="mr-1 inline size-3.5" />Salvar mapa</button>
+              <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-12 rounded-xl border border-[#79C6D0]/20 bg-[#79C6D0]/[.05] text-xs font-black text-[#C7E9ED] disabled:opacity-40"><Bookmark className="mr-1 inline size-3.5" />Salvar pontos</button>
               <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="col-span-2 min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/70">Ver fichas e dados oficiais</button>
             </div>
           </section>
