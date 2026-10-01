@@ -235,7 +235,7 @@ export default function Home() {
         <section className="mt-8">
           <p className="soft-kicker text-xs text-[#B7D86B]">Feito para Águas Lindas</p>
           <h1 className="mobile-title mt-3 w-full min-w-0 max-w-3xl break-words font-display text-[clamp(2.45rem,9vw,5.1rem)] font-semibold leading-[.98] tracking-[-.045em]">
-            O que você precisa na cidade,<br />
+            O que você precisa na cidade,{" "}
             <span className="text-[#B7D86B]">mais fácil de encontrar.</span>
           </h1>
           <p className="mt-5 max-w-2xl soft-copy text-sm sm:text-base">
