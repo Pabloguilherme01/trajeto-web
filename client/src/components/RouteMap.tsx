@@ -304,6 +304,9 @@ export function TileRouteMap({
   const [zoom, setZoom] = useState(13);
   const [size, setSize] = useState({ width: 320, height: 460 });
   const [tileErrors, setTileErrors] = useState(0);
+  const [online, setOnline] = useState(
+    () => typeof navigator === "undefined" || navigator.onLine
+  );
   const [dragging, setDragging] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
@@ -339,6 +342,16 @@ export function TileRouteMap({
   }, [allPoints, size.width, size.height]);
 
   useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+
+  useEffect(() => {
     const target = viewport.current;
     if (!target) return;
     const measure = () =>
@@ -362,7 +375,7 @@ export function TileRouteMap({
   }, [fitRoute, selected?.polyline]);
 
   if (!allPoints.length) return <>{fallback}</>;
-  if (tileErrors >= 5) return <>{fallback}</>;
+  if (!online || tileErrors >= 5) return <>{fallback}</>;
 
   const centerPx = projectTilePoint(center.lat, center.lng, zoom);
   const baseTileX = Math.floor(centerPx.x / TILE_SIZE);
@@ -557,6 +570,9 @@ export function TileRouteMap({
           </div>
         </div>
 
+        <div className="absolute right-3 top-3 z-20 rounded-full border border-black/10 bg-white/95 px-2.5 py-1.5 text-xs font-black text-[#163840] shadow-lg">
+          ruas online
+        </div>
         <div className="absolute left-3 top-3 z-20 flex gap-1.5">
           <button
             type="button"
