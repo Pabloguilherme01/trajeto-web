@@ -95,6 +95,14 @@ describe("public services catalog", () => {
     expect(PUBLIC_SERVICES.some(item => item.id === "policia-civil-1")).toBe(
       true
     );
+    const regional = PUBLIC_SERVICES.find(item => item.id === "pcgo-17-drp")!;
+    expect(regional.address).toContain("Quadra 27, Rua 22");
+    expect(regional.address).toContain("Parque Águas Bonitas I");
+    expect(regional.phone).toBe("(61) 3613-4160");
+    expect(regional.verifiedAt).toBe("01/10/2026");
+    expect(regional.sourceUrl).toContain("delegacias-regionais");
+    const firstDp = PUBLIC_SERVICES.find(item => item.id === "policia-civil-1")!;
+    expect(firstDp.address).toContain("Rua Adélia");
   });
   it("includes verified national protection and utility channels without fictitious routes", () => {
     for (const [id, number] of [
