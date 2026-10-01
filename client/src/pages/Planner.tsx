@@ -6,7 +6,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
@@ -334,6 +334,9 @@ export default function Planner() {
         : buildAppleMapsDirectionsUrl(destination, origin);
     window.open(target, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
+  };
+  const openPreferredNavigation = () => {
+    openExternal(getPreferredNavigationProvider());
   };
 
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
@@ -678,27 +681,37 @@ export default function Planner() {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Google Maps</button>
-                <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-xs font-black text-[#C9F7FF]">Waze</button>
-                <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70">Apple Maps</button>
-                <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
+                <button type="button" onClick={openPreferredNavigation} className="col-span-2 flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] shadow-[0_12px_30px_rgba(199,255,60,.12)]">
+                  <Navigation className="size-5" /> Navegar agora
+                </button>
+                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]"><Bookmark className="mr-1.5 inline size-4" />Salvar offline</button>
+                <button type="button" onClick={() => void shareRoute()} className="min-h-12 rounded-2xl border border-white/10 bg-white/[.03] px-3 text-xs font-black text-white/75"><Share2 className="mr-1.5 inline size-4" />Compartilhar</button>
+                <button type="button" onClick={() => setShowMap(value => !value)} className="col-span-2 min-h-12 rounded-2xl border border-white/10 bg-white/[.03] px-3 text-xs font-black text-white/75"><Map className="mr-1.5 inline size-4" />{showMap ? "Ocultar mapa" : "Mostrar mapa"}</button>
               </div>
-
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
-                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
-              </div>
+              <details className="mt-2 rounded-2xl border border-white/8 bg-white/[.02]">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-xs font-black text-white/55">
+                  <span>Escolher navegador</span><ChevronDown className="size-4" />
+                </summary>
+                <div className="grid grid-cols-3 gap-2 px-3 pb-3">
+                  <button type="button" onClick={() => openExternal("google")} className="min-h-11 rounded-xl border border-white/8 px-2 text-xs font-black text-white/75">Google</button>
+                  <button type="button" onClick={() => openExternal("waze")} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 px-2 text-xs font-black text-[#C9F7FF]">Waze</button>
+                  <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-xl border border-white/8 px-2 text-xs font-black text-white/75">Apple</button>
+                </div>
+              </details>
 
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-[#C7FF3C]/[.05] px-3 py-2 text-xs font-bold text-[#D9FF91]">{savedMessage}</p>}
             </div>
 
             {showMap && (
               <section className="mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22]">
-                <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
-                  <p className="text-xs font-black uppercase tracking-[.15em] text-white/35">Mapa da rota</p>
-                  <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
+                <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[.15em] text-white/45">{online ? "Mapa da rota" : "Prévia offline"}</p>
+                    <p className="mt-0.5 text-xs text-white/35">{online ? "ruas + geometria no próprio Trajeto" : "rota salva sem depender do mapa de ruas"}</p>
+                  </div>
+                  <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-bold text-white/60">Fechar</button>
                 </div>
-                <div className="h-[min(68vh,520px)]">
+                <div className="h-[min(62dvh,520px)] min-h-[360px]">
                   <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} />
                 </div>
               </section>
