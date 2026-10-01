@@ -1,4 +1,4 @@
-import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
+import { BadgeInfo, Bookmark, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
