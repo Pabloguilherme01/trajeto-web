@@ -26,7 +26,7 @@ import {
   listPublicServiceFavorites,
   publicServiceFavoritesEvent,
 } from "@/lib/publicServiceFavorites";
-import { listMobileStationFavorites } from "@/lib/mobileStationStore";
+import { listMobileStationFavorites, mobileStationFavoritesEvent } from "@/lib/mobileStationStore";
 import {
   getOfflineMapAgeLabel,
   getOfflineMapStations,
@@ -168,6 +168,7 @@ export default function OfflineReadiness() {
     window.addEventListener("focus", refreshLocalSummary);
     window.addEventListener(offlineRouteEvent, refreshLocalSummary);
     window.addEventListener(publicServiceFavoritesEvent, refreshLocalSummary);
+    window.addEventListener(mobileStationFavoritesEvent, refreshLocalSummary);
     return () => {
       navigator.serviceWorker?.removeEventListener("controllerchange", refresh);
       window.removeEventListener("online", onlineHandler);
@@ -176,6 +177,10 @@ export default function OfflineReadiness() {
       window.removeEventListener(offlineRouteEvent, refreshLocalSummary);
       window.removeEventListener(
         publicServiceFavoritesEvent,
+        refreshLocalSummary
+      );
+      window.removeEventListener(
+        mobileStationFavoritesEvent,
         refreshLocalSummary
       );
     };
