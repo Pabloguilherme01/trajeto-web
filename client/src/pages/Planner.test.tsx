@@ -5,14 +5,30 @@ import Planner from "./Planner";
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
-  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
+  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.staticRuntime, supportsLiveRouting: () => !state.staticRuntime }));
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
-vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: vi.fn(async () => ({ origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" })), buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
+vi.mock("@/lib/publicRouting", () => ({
+  calculatePublicRoute: state.publicRoute,
+  buildPublicRoutePayload: vi.fn(result => ({
+    route: {
+      origin: result.origin,
+      destination: result.destination,
+      distanceMeters: result.distanceMeters,
+      durationSeconds: result.durationSeconds,
+      polyline: result.polyline,
+      source: result.source ?? "osrm",
+      mode: result.mode ?? "driving",
+    },
+    stops: [],
+    recommendation: null,
+    traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" },
+  })),
+}));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
 vi.mock("@/lib/offlineStore", () => ({
   listOfflineRoutes: async () => state.routes,
@@ -41,6 +57,15 @@ beforeEach(() => {
   state.search = "origem=Casa&destino=Trabalho";
   state.staticRuntime = false;
   state.mutate.mockReset().mockResolvedValue(payload);
+  state.publicRoute.mockReset().mockResolvedValue({
+    origin: { lat: -15.76, lng: -48.28 },
+    destination: { lat: -15.79, lng: -47.88 },
+    distanceMeters: 12000,
+    durationSeconds: 900,
+    polyline: "encoded",
+    source: "osrm",
+    mode: "driving",
+  });
   state.lookup.mockReset();
   state.navigate.mockReset();
   state.routes = [];
@@ -78,6 +103,41 @@ describe("Planner travel state", () => {
     expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
   });
 
+  it("automatically uses device location when calculating without an origin", async () => {
+    state.staticRuntime = true;
+    state.search = "destino=Hospital";
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: (success: PositionCallback) =>
+          success({
+            coords: {
+              latitude: -15.76123,
+              longitude: -48.28123,
+              accuracy: 10,
+              altitude: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+              toJSON: () => ({}),
+            },
+            timestamp: Date.now(),
+            toJSON: () => ({}),
+          } as GeolocationPosition),
+      },
+    });
+    render(<Planner />);
+    submit();
+    await waitFor(() =>
+      expect(state.publicRoute).toHaveBeenCalledWith(
+        "-15.76123, -48.28123",
+        "Hospital",
+        "driving"
+      )
+    );
+    expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("-15.76123, -48.28123");
+  });
+
   it("offers external navigation with the current position as an optional origin", async () => {
     state.staticRuntime = true;
     state.search = "destino=Hospital";
@@ -107,13 +167,23 @@ describe("Planner travel state", () => {
     expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
   });
 
-  it("discards the previous result before recalculating, including on failure", async () => {
+  it("falls back to public routing when the primary router fails", async () => {
+    render(<Planner />);
+    state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+    submit();
+    await screen.findByText(/rota pública de contingência/i);
+    expect(state.publicRoute).toHaveBeenCalledWith("Casa", "Trabalho", "driving");
+    expect(screen.getByTestId("route-map")).toBeTruthy();
+  });
+
+  it("clears stale route results when both routers fail", async () => {
     render(<Planner />);
     submit();
     await screen.findByRole("button", { name: "Salvar offline" });
     state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+    state.publicRoute.mockRejectedValueOnce(new Error("Também indisponível"));
     submit();
-    await screen.findByRole("button", { name: "Abrir Google Maps" });
+    await screen.findByRole("alert");
     expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
   });
 
