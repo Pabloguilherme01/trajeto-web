@@ -52,8 +52,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : (draft?.consumption ?? ""));
   const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : (draft?.tank ?? ""));
   const [currentFuel, setCurrentFuel] = useState(draft?.currentFuel ?? "");
-  const [roundTrip, setRoundTrip] = useState(draft?.roundTrip ?? true);
-  const [tripsPerWeek, setTripsPerWeek] = useState(draft?.tripsPerWeek ?? 5);
+  const [roundTrip, setRoundTrip] = useState(draft?.roundTrip ?? (initialDistanceKm > 0 ? false : true));
+  const [tripsPerWeek, setTripsPerWeek] = useState(draft?.tripsPerWeek ?? (initialDistanceKm > 0 ? 1 : 5));
   const [toll, setToll] = useState(draft?.toll ?? "");
   const [parking, setParking] = useState(draft?.parking ?? "");
   const [other, setOther] = useState(draft?.other ?? "");
@@ -100,7 +100,11 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     setRestoredDraft(false);
 
     if (modeId === "automatico") {
-      if (initialDistanceKm > 0) setDistance(String(initialDistanceKm));
+      if (initialDistanceKm > 0) {
+        setDistance(String(initialDistanceKm));
+        setRoundTrip(false);
+        setTripsPerWeek(1);
+      }
       const rememberedPrice = getRememberedPrice();
       if (rememberedPrice) setPrice(current => current || rememberedPrice);
       const vehicle = getMobileVehicle();
@@ -124,8 +128,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     setConsumption(savedVehicle ? String(savedVehicle.consumption) : "");
     setTank(savedVehicle ? String(savedVehicle.tank) : "");
     setCurrentFuel("");
-    setRoundTrip(true);
-    setTripsPerWeek(5);
+    setRoundTrip(initialDistanceKm > 0 ? false : true);
+    setTripsPerWeek(initialDistanceKm > 0 ? 1 : 5);
     setToll("");
     setParking("");
     setOther("");
