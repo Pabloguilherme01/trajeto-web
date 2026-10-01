@@ -1,4 +1,4 @@
-import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
+import { ArrowRight, Fuel, Landmark, LocateFixed, Phone, Route, Search as SearchIcon, Share2, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -6,7 +6,7 @@ import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, 
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
-import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
@@ -131,15 +131,6 @@ export default function Home() {
     );
   };
 
-  const openServiceSearch = (query: string) => {
-    rememberSearch(query);
-    rememberIntent("search");
-    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
-    if (!opened) {
-      setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(query));
-    }
-  };
-
   const shareHome = async () => {
     try {
       const url = window.location.origin + appUrl("/");
@@ -160,10 +151,15 @@ export default function Home() {
             <p className="mt-1 brand-wordmark text-[1.2rem] text-white">trajeto</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/5 text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/5 text-[#FFB86B]")}>
+            <button
+              type="button"
+              onClick={() => setLocation(appUrl("/ajuda") + "#offline-readiness-title")}
+              aria-label={`Status de conexão: ${online ? "online" : "offline"}. Abrir ajuda e acesso offline`}
+              className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black active:scale-[.98] " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/5 text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/5 text-[#FFB86B]")}
+            >
               {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
               {online ? "online" : "offline"}
-            </span>
+            </button>
             <button type="button" onClick={() => void shareHome()} aria-label="Compartilhar Trajeto" className="grid size-11 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-white/70 active:scale-[.97]">
               <Share2 className="size-4" />
             </button>
@@ -179,7 +175,7 @@ export default function Home() {
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><SearchIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-black text-white">O que você procura?</span>
-              <span className="mt-0.5 block truncate text-xs text-white/55">Serviço, posto, endereço, bairro ou lugar · Ctrl K</span>
+              <span className="mt-0.5 block truncate text-xs text-white/55">Serviço, posto, endereço, bairro ou lugar<span className="hidden sm:inline"> · Ctrl K</span></span>
             </span>
             <ArrowRight className="size-4 shrink-0 text-white/60" />
           </button>
@@ -251,7 +247,7 @@ export default function Home() {
             <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
+            {LOCAL_ROUTE_PRESETS.slice(0, 6).map(route => (
               <button
                 key={route.id}
                 type="button"
@@ -293,36 +289,6 @@ export default function Home() {
                 </button>
               );
             })}
-          </div>
-        </section>
-
-        <section className="mt-4" aria-label="Atalhos por necessidade">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-white/60">Resolver agora</p>
-              <h2 className="mt-1 text-lg font-black tracking-[-.035em]">Acesso rápido.</h2>
-            </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver tudo</button>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => openServiceSearch("Centro Águas Lindas de Goiás, GO") },
-              { label: "Saúde", hint: "UPA, hospital e UBS", icon: HeartPulse, action: () => setLocation(appUrl("/servicos") + "?categoria=saude") },
-              { label: "Serviços", hint: "Prefeitura e cidadania", icon: Landmark, action: () => setLocation(appUrl("/servicos") + "?categoria=cidadania") },
-              { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title") },
-            ].map(item => (
-              <button
-                key={item.label}
-                type="button"
-                aria-label={item.label}
-                onClick={item.action}
-                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/15 active:scale-[.985]"
-              >
-                <item.icon className="size-4 text-[#C7FF3C]" aria-hidden="true" />
-                <span className="mt-2 block text-xs font-black">{item.label}</span>
-                <span className="mt-0.5 block text-xs text-white/65">{item.hint}</span>
-              </button>
-            ))}
           </div>
         </section>
 
