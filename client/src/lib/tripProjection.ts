@@ -4,11 +4,13 @@ export type TripProjectionInput = {
   roundTrip: boolean;
   tripsPerWeek: number;
   extraCostPerTrip?: number;
+  recurring?: boolean;
 };
 
 export function projectTripCosts(input: TripProjectionInput) {
   const distanceMultiplier = input.roundTrip ? 2 : 1;
-  const weeklyTrips = Math.max(0, Math.min(21, Math.floor(input.tripsPerWeek)));
+  const recurring = input.recurring !== false;
+  const weeklyTrips = recurring ? Math.max(0, Math.min(21, Math.floor(input.tripsPerWeek))) : 0;
   const distanceKm = Math.max(0, input.oneWayDistanceKm) * distanceMultiplier;
   const fuelCostPerTrip = Math.max(0, input.oneWayCost) * distanceMultiplier;
   const extraCostPerTrip = Math.max(0, input.extraCostPerTrip ?? 0);
@@ -19,6 +21,7 @@ export function projectTripCosts(input: TripProjectionInput) {
   const annualCost = monthlyCost * 12;
 
   return {
+    recurring,
     distanceKm,
     fuelCostPerTrip,
     extraCostPerTrip,
@@ -103,6 +106,12 @@ export function calculateFuelStatus(input: {
   };
 }
 
+export function fuelLitersFromTankFraction(tankLiters: number, fraction: number) {
+  const normalizedTank = Math.max(0, tankLiters);
+  const normalizedFraction = Math.max(0, Math.min(1, fraction));
+  return normalizedTank * normalizedFraction;
+}
+
 export type TripScenarioComparison = {
   baseline: ReturnType<typeof projectTripCosts>;
   alternative: ReturnType<typeof projectTripCosts>;
@@ -120,6 +129,7 @@ export function compareTripScenarios(input: {
   roundTrip: boolean;
   tripsPerWeek: number;
   extraCostPerTrip?: number;
+  recurring?: boolean;
 }): TripScenarioComparison | null {
   const distanceKm = Math.max(0, input.oneWayDistanceKm);
   const baselinePrice = Math.max(0, input.baselinePricePerLiter);
@@ -137,6 +147,7 @@ export function compareTripScenarios(input: {
     roundTrip: input.roundTrip,
     tripsPerWeek: input.tripsPerWeek,
     extraCostPerTrip: input.extraCostPerTrip,
+    recurring: input.recurring,
   });
   const alternative = projectTripCosts({
     oneWayDistanceKm: distanceKm,
@@ -144,6 +155,7 @@ export function compareTripScenarios(input: {
     roundTrip: input.roundTrip,
     tripsPerWeek: input.tripsPerWeek,
     extraCostPerTrip: input.extraCostPerTrip,
+    recurring: input.recurring,
   });
 
   return {
