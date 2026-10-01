@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import {
+  clearPrivateLocationHandoff,
   clearPrivateLocationHistory,
+  consumePrivateLocationHandoff,
   coarsenCoordinatePoint,
   coarsenCoordinateText,
   isPreciseLocationText,
@@ -9,9 +11,22 @@ import {
   privateOriginForHistory,
   privateOriginForRouting,
   privateOriginForUrl,
+  setPrivateLocationHandoff,
 } from "./locationPrivacy";
 
 describe("location privacy", () => {
+  it("hands precise GPS between SPA screens in memory exactly once", () => {
+    clearPrivateLocationHandoff();
+    expect(
+      setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 })
+    ).toBe(true);
+    expect(consumePrivateLocationHandoff()).toEqual({
+      lat: -15.76123,
+      lng: -48.28123,
+    });
+    expect(consumePrivateLocationHandoff()).toBeNull();
+  });
+
   it("recognizes precise coordinate text", () => {
     expect(isPreciseLocationText("-15.76123, -48.28123")).toBe(true);
     expect(isPreciseLocationText("Minha localização")).toBe(true);
