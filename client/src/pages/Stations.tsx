@@ -1027,7 +1027,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 place-items-center rounded-lg text-white/65" aria-label="Limpar busca"><X className="size-3.5" /></button>}
               </label>
-              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
+              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="all">Combustível: todos</option>
                 <option value="gasolina-comum">Gasolina comum</option>
                 <option value="etanol">Etanol</option>
@@ -1036,7 +1036,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="glp-p13">GLP P13</option>
                 <option value="gnv">GNV</option>
               </select>
-              <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
+              <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
                 <option value="price">Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>

@@ -37,7 +37,13 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
     const texts = [...el.querySelectorAll("p, span, button, a")].filter(item => item.textContent?.trim());
     return Math.min(...texts.map(item => parseFloat(getComputedStyle(item).fontSize)));
   })).toBeGreaterThanOrEqual(12);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  const layout = await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth,
+    overflowing: [...document.querySelectorAll("main input, main select, main section, main button")]
+      .filter(el => el.getBoundingClientRect().right > innerWidth)
+      .map(el => ({ tag: el.tagName, text: el.textContent?.slice(0, 80), right: el.getBoundingClientRect().right, classes: el.className })),
+  }));
+  expect(layout.width, JSON.stringify(layout.overflowing)).toBeLessThanOrEqual(320);
 });
 
 test("Pages: saved station map does not clip its navigation card", async ({ page }) => {
