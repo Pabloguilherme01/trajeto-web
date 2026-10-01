@@ -45,6 +45,9 @@ describe("public services catalog", () => {
       searchPublicServices("bolsa familia", "assistencia").map(item => item.id)
     ).toContain("cadunico");
     expect(searchPublicServices("bolsa familia", "saude")).toEqual([]);
+    expect(searchPublicServices("saude mental").map(item => item.id)).toEqual([
+      "caps",
+    ]);
     expect(searchPublicServices("cras").map(item => item.id)).toEqual([
       "cras-1",
       "cras-2",
@@ -76,6 +79,10 @@ describe("public services catalog", () => {
     expect(PUBLIC_SERVICES.some(item => item.id === "hospital-bom-jesus")).toBe(
       true
     );
+    const caps = PUBLIC_SERVICES.find(item => item.id === "caps");
+    expect(caps?.phone).toBe("(61) 3618-1559");
+    expect(caps?.verifiedAt).toBe("01/10/2026");
+    expect(caps?.sourceUrl).toContain("caps-centro-de-atencao-psicossocial");
     expect(PUBLIC_SERVICES.some(item => item.id === "prefeitura")).toBe(true);
     expect(PUBLIC_SERVICES.some(item => item.id === "policia-civil-1")).toBe(
       true
