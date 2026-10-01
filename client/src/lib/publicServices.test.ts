@@ -109,6 +109,22 @@ describe("public services catalog", () => {
     );
   });
 
+  it("covers common city maintenance and health surveillance needs with official municipal data", () => {
+    const lighting = searchPublicServices("lampada apagada")[0];
+    expect(lighting.id).toBe("iluminacao-publica");
+    expect(lighting.verifiedAt).toBe("01/10/2026");
+    expect(lighting.sourceUrl).toContain("departamento-de-iluminacao-publica");
+
+    const cleaning = searchPublicServices("coleta de lixo")[0];
+    expect(cleaning.id).toBe("limpeza-urbana");
+    expect(cleaning.phone).toBe("(61) 99303-4608");
+
+    const surveillance = searchPublicServices("vigilancia sanitaria", "saude")[0];
+    expect(surveillance.id).toBe("vigilancia-saude");
+    expect(surveillance.phone).toBe("(61) 3618-1409");
+    expect(surveillance.mapQuery).toContain("Avenida Brasília");
+  });
+
   it("filters by category and text without case sensitivity", () => {
     expect(
       searchPublicServices("cora coralina", "educacao").map(item => item.id)
