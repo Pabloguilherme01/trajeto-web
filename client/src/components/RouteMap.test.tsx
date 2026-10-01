@@ -1,7 +1,7 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { OfflineRoutePreview, RouteMap } from "./RouteMap";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { OfflineRoutePreview, RouteMap, TileRouteMap } from "./RouteMap";
 
 Object.defineProperty(window, "google", {
   value: {
@@ -26,6 +26,8 @@ vi.mock("@/components/Map", () => ({
     return <div data-testid="map-view" />;
   },
 }));
+
+afterEach(() => cleanup());
 
 describe("RouteMap", () => {
   it("does not invent endpoints or navigation before a trip is defined", () => {
@@ -75,6 +77,44 @@ describe("RouteMap", () => {
         .hasAttribute("disabled")
     ).toBe(true);
   });
+  it("renders a street-tile route map with in-app geometry and controls", () => {
+    render(
+      <div style={{ width: 360, height: 520 }}>
+        <TileRouteMap
+          origin={{ lat: -15.7545, lng: -48.2816 }}
+          destination={{ lat: -15.781, lng: -48.31 }}
+          stops={[
+            {
+              placeId: "stop-1",
+              name: "Parada local",
+              address: "Águas Lindas de Goiás",
+              lat: -15.765,
+              lng: -48.295,
+            },
+          ]}
+          routes={[
+            {
+              id: "principal",
+              selected: true,
+              polyline: "j~}~B~_lhHfEfE",
+              distanceMeters: 4200,
+              durationSeconds: 720,
+            },
+          ]}
+          fallback={<div>fallback local</div>}
+        />
+      </div>
+    );
+    expect(
+      screen.getByRole("region", { name: "Mapa de ruas da rota" })
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Aumentar zoom" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Diminuir zoom" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Rota" })).toBeTruthy();
+    expect(screen.getByText(/Rota no próprio Trajeto/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: /OpenStreetMap/i })).toBeTruthy();
+  });
+
   it("oferece mapa grande, enquadramento, trânsito, satélite e zoom", () => {
     render(
       <RouteMap
