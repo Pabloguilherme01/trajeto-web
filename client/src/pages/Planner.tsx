@@ -13,6 +13,7 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
+import { isCurrentLocationLabel, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForRouting, privateOriginForUrl } from "@/lib/locationPrivacy";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -222,7 +223,7 @@ export default function Planner() {
       }
     }
 
-    if (!from) {
+    if (!from || isCurrentLocationLabel(from)) {
       setError(null);
       setSavedMessage("Identificando sua origem para calcular a rota…");
       const currentOrigin = await resolveCurrentOrigin();
@@ -243,14 +244,14 @@ export default function Planner() {
     resetResult();
     const version = requestVersion.current;
 
-    if (staticRuntime || mode !== "driving" || !online) {
+    if (staticRuntime || mode !== "driving" || !online || isPreciseLocationText(from)) {
       setError(null);
       setFallbackReady(false);
       setPublicRoutePending(true);
       const publicOrigin = from;
       try {
         const resolvedOrigin = publicOrigin;
-        const publicRoute = await calculatePublicRoute(resolvedOrigin, to, mode);
+        const publicRoute = await calculatePublicRoute(privateOriginForRouting(resolvedOrigin), to, mode);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
@@ -260,7 +261,7 @@ export default function Planner() {
           : "Caminho pronto no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.";
         const autoSaved = await persistRouteLocally(publicPayload, resolvedOrigin, to);
         setSavedMessage(baseMessage + (autoSaved ? " Cópia offline criada automaticamente." : ""));
-        if (resolvedOrigin) rememberTrip(resolvedOrigin, to);
+        if (resolvedOrigin) rememberTrip(privateOriginForHistory(resolvedOrigin), to);
         track("route_open", to);
         vibration(14);
         return;
@@ -269,7 +270,7 @@ export default function Planner() {
         setSavedMessage(null);
         setFallbackReady(true);
         setError(routeError instanceof Error ? routeError.message : "Não foi possível calcular a rota pública.");
-        if (publicOrigin) rememberTrip(publicOrigin, to);
+        if (publicOrigin) rememberTrip(privateOriginForHistory(publicOrigin), to);
         vibration(8);
         return;
       } finally {
@@ -281,7 +282,7 @@ export default function Planner() {
     setSavedMessage(null);
     setFallbackReady(false);
     setShowMap(false);
-    rememberTrip(from, to);
+    rememberTrip(privateOriginForHistory(from), to);
     track("route_open", to);
     try {
       const result = await planRoute.mutateAsync({ origin: from, destination: to });
@@ -297,7 +298,7 @@ export default function Planner() {
       if (version !== requestVersion.current) return;
       setPublicRoutePending(true);
       try {
-        const publicRoute = await calculatePublicRoute(from, to, "driving");
+        const publicRoute = await calculatePublicRoute(privateOriginForRouting(from), to, "driving");
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
@@ -353,7 +354,7 @@ export default function Planner() {
   };
 
   const persistRouteLocally = async (route: PlannedRoute, routeOrigin: string, routeDestination: string) => {
-    const normalizedOrigin = routeOrigin.trim();
+    const normalizedOrigin = privateOriginForHistory(routeOrigin);
     const normalizedDestination = routeDestination.trim();
     if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
     try {
@@ -403,7 +404,13 @@ export default function Planner() {
         detourKm: planned.recommendation.detourKm,
         detourSource: planned.recommendation.detourSource,
       } : null);
-      const url = window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(origin.trim()) + "&destino=" + encodeURIComponent(destination.trim()) + "&modo=" + encodeURIComponent(mode);
+      const params = new URLSearchParams({
+        destino: destination.trim(),
+        modo: mode,
+      });
+      const safeOrigin = privateOriginForUrl(origin);
+      if (safeOrigin) params.set("origem", safeOrigin);
+      const url = window.location.origin + appUrl("/planejar") + "?" + params.toString();
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
     } catch {}
@@ -411,11 +418,12 @@ export default function Planner() {
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
     const googleMode = mode === "walking" ? "walking" : mode === "cycling" ? "bicycling" : mode === "transit" ? "transit" : "driving";
+    const externalOrigin = privateOriginForExternalNavigation(origin);
     const target = provider === "google"
-      ? buildGoogleMapsDirectionsUrl(origin, destination, googleMode, true)
+      ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
       : provider === "waze"
         ? buildWazeNavigationUrl(destination)
-        : buildAppleMapsDirectionsUrl(destination, origin);
+        : buildAppleMapsDirectionsUrl(destination, externalOrigin);
     window.open(target, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
@@ -425,7 +433,7 @@ export default function Planner() {
 
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
     if (!stop) { setSavedMessage("Não há endereço disponível para esta parada."); return; }
-    window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
+    window.open(buildGoogleMapsDirectionsUrl(privateOriginForExternalNavigation(origin), stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
   const availableDestinations = useMemo(() => {
