@@ -23,4 +23,23 @@ describe("AccessibilityPanel", () => {
     expect(localStorage.getItem("other-app-setting")).toBe("keep");
     expect(screen.getByText(/nenhum dado local do trajeto está salvo/i)).toBeTruthy();
   });
+  it("keeps mobile accessibility copy readable and the dialog focus contained", async () => {
+    const user = userEvent.setup();
+    render(<AccessibilityPanel />);
+    await user.click(screen.getAllByRole("button", { name: /abrir acessibilidade/i })[0]);
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.className).toContain("items-end");
+    expect(
+      [...dialog.querySelectorAll("[class]")].some(element =>
+        /text-\[0\.(?:[0-6]\d*|7[0-4])rem\]/.test(element.getAttribute("class") || "")
+      )
+    ).toBe(false);
+
+    const close = screen.getByRole("button", { name: /fechar acessibilidade/i });
+    close.focus();
+    await user.tab({ shift: true });
+    expect(dialog.contains(document.activeElement)).toBe(true);
+  });
+
 });
