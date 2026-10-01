@@ -4,7 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { AGUAS_LINDAS_STATIONS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { getRecentSearches, rememberSearch } from "@/lib/mobilePreferences";
-import { getLocalRoutePresets } from "@/lib/localRoutePresets";
+import { ALL_LOCAL_ROUTE_DESTINATIONS, getLocalRoutePresets } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES, LOCAL_PLACES_UPDATED_AT, searchLocalPlaces } from "@/lib/localPlaces";
 import { searchPublicServices } from "@/lib/publicServices";
 
@@ -150,6 +150,10 @@ export default function SearchPage() {
               <ArrowRight className="size-4 shrink-0 text-white/25" />
             </button>)}
           </div>
+          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
+            <span><span className="block text-[0.56rem] font-black uppercase tracking-[.13em] text-[#3DE3FF]">Todos os destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/65">{ALL_LOCAL_ROUTE_DESTINATIONS.length} locais, serviços, lojas e referências para escolher</span></span>
+            <ArrowRight className="size-4 text-[#3DE3FF]" />
+          </button>
         </section>
 
         <section className="mt-6">
