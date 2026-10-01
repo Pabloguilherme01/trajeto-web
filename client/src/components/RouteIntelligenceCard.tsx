@@ -159,7 +159,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <div>
           <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Inteligência da rota</p>
           <h3 id="route-intelligence-title" className="mt-1 text-base font-black">Trânsito, pedágio e alternativas</h3>
-          <p className="mt-1 text-xs leading-relaxed text-white/45">Dados externos são apresentados como estimativas e não substituem a navegação.</p>
+          <p className="mt-1 text-xs leading-relaxed text-white/65">Dados externos são apresentados como estimativas e não substituem a navegação.</p>
         </div>
         <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-white/[.07] px-3 text-xs font-black disabled:opacity-50">
           <RefreshCw className={"size-3.5 " + (loading ? "animate-spin" : "")} /> {loading ? "Consultando" : "Atualizar"}
@@ -195,8 +195,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <button type="button" aria-pressed={trafficDetailed} onClick={() => setTrafficDetailed(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-black " + (trafficDetailed ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/10 bg-white/[.03] text-white/60")}>
           Trânsito detalhado {trafficDetailed ? "ativado" : "desativado"}
         </button>
-        <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-xs text-white/45">{trafficDetailed ? "NORMAL · SLOW · TRAFFIC_JAM" : "Consulta básica"}</span>
-        <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-xs text-white/45">Cálculo sob demanda</span>
+        <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-xs text-white/65">{trafficDetailed ? "NORMAL · SLOW · TRAFFIC_JAM" : "Consulta básica"}</span>
+        <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-xs text-white/65">Cálculo sob demanda</span>
       </div>
 
       {message && <div role="alert" aria-live="polite" className="mt-3 flex gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[.05] p-3 text-xs text-amber-100"><AlertTriangle className="mt-0.5 size-4 shrink-0" />{message}</div>}
@@ -241,7 +241,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Decisão da viagem</p>
               <p className="mt-1 text-sm font-black">{trafficDelay != null && trafficDelay > 120 ? "Reserve margem: o trânsito está adicionando tempo à rota." : totalCost(main) != null ? "Custo estimado do percurso: " + totalCost(main)!.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) + "." : toll != null ? "Pedágio informado; complete o combustível para estimar o custo total." : "Confira tempo, distância e dados de custo antes de sair."}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-bold text-white/45">
+              <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-bold text-white/65">
                 <span className="rounded-full bg-white/[.05] px-2 py-1">{formatDuration(main.durationSeconds)} de percurso</span>
                 {trafficDelay != null && trafficDelay > 0 && <span className="rounded-full bg-white/[.05] px-2 py-1">+{formatDuration(trafficDelay)} trânsito</span>}
                 {toll != null && <span className="rounded-full bg-white/[.05] px-2 py-1">pedágio {toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" })}</span>}
@@ -268,7 +268,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
               <p className="text-xs font-black">Simulador de decisão</p>
               <p className="mt-1 text-xs text-white/40">Escolha um critério. O Trajeto aplica somente aos dados reais retornados.</p>
             </div>
-            <span className="rounded-full bg-white/[.06] px-2 py-1 text-xs font-black text-white/45">sem rota inventada</span>
+            <span className="rounded-full bg-white/[.06] px-2 py-1 text-xs font-black text-white/65">sem rota inventada</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {(
@@ -296,7 +296,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
               </button>;
             })}
           </div>
-          <div className="mt-3 rounded-xl border border-white/6 bg-black/10 p-3 text-xs leading-relaxed text-white/45">
+          <div className="mt-3 rounded-xl border border-white/6 bg-black/10 p-3 text-xs leading-relaxed text-white/65">
             <p><strong className="text-white/70">Combustível:</strong> distância ÷ km/L × preço/L.</p>
             <p className="mt-1"><strong className="text-white/70">Custo da viagem:</strong> combustível + pedágio informado.</p>
             <p className="mt-1"><strong className="text-white/70">Comparação:</strong> tempo, distância, pedágio e custo são avaliados separadamente.</p>
@@ -308,8 +308,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] px-3.5 py-3" role="status" aria-label="Qualidade e atualização dos dados da rota">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.14em] text-white/45">Dados da rota</p>
-              <p className="mt-1 text-xs text-white/45">
+              <p className="text-xs font-black uppercase tracking-[.14em] text-white/65">Dados da rota</p>
+              <p className="mt-1 text-xs text-white/65">
                 {data.trafficAware ? "Trânsito considerado" : "Trânsito básico"} · atualizado às {formatGeneratedAt(data.generatedAt)}
               </p>
             </div>
@@ -358,7 +358,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-black">{index === 0 ? "Principal" : `Alternativa ${index}`}</p>
-                        <p className="mt-1 text-xs text-white/45">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
+                        <p className="mt-1 text-xs text-white/65">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p>
                       </div>
                       <strong className="text-sm">{totalCost(route) == null ? "Custo incompleto" : totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" })}</strong>
                     </div>
@@ -366,7 +366,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {analysis.badges.map(badge => <span key={badge} className="rounded-full bg-white/[.07] px-2 py-1 text-xs font-black text-white/65">{badge}</span>)}{trafficDetailed && route.trafficImpact && route.trafficImpact.totalPoints > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-xs font-black text-white/55">impacto {(route.trafficImpact.affectedPoints / route.trafficImpact.totalPoints * 100).toFixed(0)}% da polyline</span>}
                     {analysis.deltaSeconds != null && index > 0 && <span className="rounded-full bg-white/[.07] px-2 py-1 text-xs font-black text-white/55">{analysis.deltaSeconds > 0 ? "+" : ""}{formatDuration(analysis.deltaSeconds)} vs principal</span>}
-                    {analysis.tradeoff && <span className="w-full text-xs leading-relaxed text-white/45">{analysis.tradeoff}</span>}
+                    {analysis.tradeoff && <span className="w-full text-xs leading-relaxed text-white/65">{analysis.tradeoff}</span>}
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <p className="text-xs font-bold text-white/40">{selected ? "Prévia destacada no mapa" : "Toque para visualizar no mapa"}</p>
@@ -432,7 +432,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       {data && (
         <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02] p-3">
           <summary className="cursor-pointer text-xs font-black">Como o cálculo funciona</summary>
-          <div className="mt-2 space-y-1 text-xs leading-relaxed text-white/45">
+          <div className="mt-2 space-y-1 text-xs leading-relaxed text-white/65">
             <p><strong className="text-white/65">Combustível:</strong> distância ÷ consumo × preço por litro.</p>
             <p><strong className="text-white/65">Custo total:</strong> combustível + pedágio informado pela fonte.</p>
             <p><strong className="text-white/65">Impacto do trânsito:</strong> duração com trânsito − duração estática, quando ambas existem.</p>
