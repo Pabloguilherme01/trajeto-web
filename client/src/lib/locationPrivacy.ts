@@ -53,7 +53,7 @@ export function coarsenCoordinatePoint(point: ParsedCoordinate, decimals = 3): P
 
 export function privateOriginForRouting(value: string) {
   if (isCurrentLocationLabel(value)) return "";
-  return coarsenCoordinateText(value, 4);
+  return coarsenCoordinateText(value, 3);
 }
 
 export function privateRouteShareOrigin(value: string) {
