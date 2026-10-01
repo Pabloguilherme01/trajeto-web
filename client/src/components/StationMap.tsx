@@ -133,27 +133,27 @@ function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations
         })}
       </svg>
       <div className="absolute left-3 top-3 flex gap-1.5">
-        <button type="button" onClick={() => setZoom(value => Math.min(2.5, value + 0.25))} className="grid size-10 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Aumentar zoom"><Plus className="size-4" /></button>
-        <button type="button" onClick={() => setZoom(value => Math.max(1, value - 0.25))} className="grid size-10 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
-        <button type="button" onClick={() => setZoom(1)} className="grid size-10 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
+        <button type="button" onClick={() => setZoom(value => Math.min(2.5, value + 0.25))} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Aumentar zoom"><Plus className="size-4" /></button>
+        <button type="button" onClick={() => setZoom(value => Math.max(1, value - 0.25))} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
+        <button type="button" onClick={() => setZoom(1)} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       </div>
       <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-black/10 bg-white/92 p-3 shadow-lg backdrop-blur">
-        <div className="flex items-start gap-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/20 text-[#155163]"><span className="text-[.58rem] font-black">{selected ? sourceLabel(selected.source) : "—"}</span></div>
-          <div className="min-w-0 flex-1"><p className="truncate text-xs font-black text-[#163840]">{selected?.name ?? "Selecione um posto"}</p><p className="mt-1 line-clamp-2 text-[.61rem] leading-relaxed text-[#607169]">{selected?.address ?? "Sem coordenada salva."}</p></div>
+        <div className="flex flex-wrap items-start gap-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/20 text-[#155163]"><span className="text-xs font-black">{selected ? sourceLabel(selected.source) : "—"}</span></div>
+          <div className="min-w-0 flex-1 basis-[12rem]"><p className="break-words text-base font-black text-[#163840]">{selected?.name ?? "Selecione um posto"}</p><p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">{selected?.address ?? "Sem coordenada salva."}</p></div>
           {selected && <div className="flex shrink-0 items-center gap-1.5">
-            <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + selected.lat + "," + selected.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")} className="grid size-10 place-items-center rounded-xl bg-[#163840] text-white" aria-label="Navegar pelo Google Maps"><Navigation className="size-4" /></button>
-            <button type="button" onClick={() => window.open(buildWazeNavigationUrl(selected.address, { lat: selected.lat, lng: selected.lng }), "_blank", "noopener,noreferrer")} className="grid size-10 place-items-center rounded-xl border border-black/10 bg-white text-[#163840]" aria-label="Navegar pelo Waze"><span className="text-[.55rem] font-black">WZ</span></button>
-            <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(selected.lat + "," + selected.lng), "_blank", "noopener,noreferrer")} className="grid size-10 place-items-center rounded-xl border border-black/10 bg-white text-[#163840]" aria-label="Navegar pelo Apple Maps"><Apple className="size-4" /></button>
+            <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + selected.lat + "," + selected.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")} className="grid size-11 place-items-center rounded-xl bg-[#163840] text-white" aria-label="Navegar pelo Google Maps"><Navigation className="size-4" /></button>
+            <button type="button" onClick={() => window.open(buildWazeNavigationUrl(selected.address, { lat: selected.lat, lng: selected.lng }), "_blank", "noopener,noreferrer")} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white text-[#163840]" aria-label="Navegar pelo Waze"><span className="text-xs font-black">WZ</span></button>
+            <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(selected.lat + "," + selected.lng), "_blank", "noopener,noreferrer")} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white text-[#163840]" aria-label="Navegar pelo Apple Maps"><Apple className="size-4" /></button>
           </div>}
         </div>
-        <div className="mt-2 flex items-center justify-between gap-3 text-[.5rem] font-bold text-[#7D8C84]"><span>{stations.length} posições offline</span><span>Verde = ANP · azul = mapa</span></div>
+        <div className="mt-2 flex items-center justify-between gap-3 text-xs font-bold text-[#7D8C84]"><span>{stations.length} posições offline</span><span>Verde = ANP · azul = mapa</span></div>
       </div>
     </div>
   );
 }
 
-export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", showTraffic = false, onSelectStation, userCoords = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
+export function StationMap({ stations, heightClassName = "min-h-[480px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation, userCoords = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
@@ -341,20 +341,20 @@ export function StationMap({ stations, heightClassName = "h-[min(68vh,620px)]", 
   return (
     <div className="relative">
       <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
-        <button type="button" onClick={locateUser} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-white shadow-lg backdrop-blur" aria-label="Centralizar na minha localização">
+        <button type="button" onClick={locateUser} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-white shadow-lg backdrop-blur" aria-label="Centralizar na minha localização">
           <LocateFixed className="size-4" />
         </button>
-        <button type="button" onClick={toggleTilt} className={"min-h-10 rounded-xl border px-3 text-[0.58rem] font-black shadow-lg backdrop-blur " + (tiltEnabled ? "border-[#C7FF3C]/30 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>
+        <button type="button" onClick={toggleTilt} className={"min-h-11 rounded-xl border px-3 text-xs font-black shadow-lg backdrop-blur " + (tiltEnabled ? "border-[#C7FF3C]/30 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>
           {tiltEnabled ? "2.5D ativo" : "2.5D"}
         </button>
-        <button type="button" onClick={() => { setMapMessage(null); mapRef.current?.setZoom(12); mapRef.current?.setCenter({ lat: -15.7545, lng: -48.2816 }); }} className="min-h-10 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-[0.58rem] font-black text-white shadow-lg backdrop-blur">
+        <button type="button" onClick={() => { setMapMessage(null); mapRef.current?.setZoom(12); mapRef.current?.setCenter({ lat: -15.7545, lng: -48.2816 }); }} className="min-h-11 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur">
           Centro
         </button>
       </div>
-      {mapMessage && <div role="status" className="absolute left-3 right-3 top-[4.65rem] z-20 rounded-xl border border-white/10 bg-[#0B1014]/95 px-3 py-2 text-[0.58rem] font-bold text-white shadow-lg">{mapMessage}</div>}
+      {mapMessage && <div role="status" className="absolute left-3 right-3 top-[4.65rem] z-20 rounded-xl border border-white/10 bg-[#0B1014]/95 px-3 py-2 text-xs font-bold text-white shadow-lg">{mapMessage}</div>}
       <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
-      {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-[0.58rem] font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
-      {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-[0.58rem] font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
+      {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-xs font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
+      {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-xs font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
     </div>
   );
 }
