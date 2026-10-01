@@ -31,7 +31,31 @@ test("core public flows do not overflow and forms remain zoom-safe", async ({ pa
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
     }));
-    expect(metrics.scrollWidth, path || "home").toBeLessThanOrEqual(metrics.clientWidth + 1);
+    const overflowers = metrics.scrollWidth > metrics.clientWidth + 1
+      ? await page.locator("body *").evaluateAll((elements, viewportWidth) =>
+          elements.flatMap(element => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            if (
+              style.display === "none" ||
+              style.visibility === "hidden" ||
+              (rect.right <= viewportWidth + 1 && rect.left >= -1)
+            ) return [];
+            return [{
+              tag: element.tagName.toLowerCase(),
+              className: element.getAttribute("class") || "",
+              text: (element.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 80),
+              left: Math.round(rect.left * 10) / 10,
+              right: Math.round(rect.right * 10) / 10,
+              width: Math.round(rect.width * 10) / 10,
+            }];
+          }).slice(0, 8),
+        metrics.clientWidth)
+      : [];
+    expect(
+      metrics.scrollWidth,
+      `${path || "home"} overflowers: ${JSON.stringify(overflowers)}`,
+    ).toBeLessThanOrEqual(metrics.clientWidth + 1);
 
     const fields = page.locator("input:visible, select:visible, textarea:visible");
     const fieldCount = await fields.count();
