@@ -125,7 +125,7 @@ async function fetchJson<T>(url: string): Promise<T> {
       headers: { Accept: "application/json" },
       signal: controller.signal,
       credentials: "omit",
-      referrerPolicy: "no-referrer",
+      referrerPolicy: "origin",
       cache: "no-store",
     });
     if (!response.ok) throw new Error("Serviço de rota indisponível.");
