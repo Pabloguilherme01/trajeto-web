@@ -1,30 +1,174 @@
-import { ArrowRight, BookOpen, Compass, Fuel, HeartPulse, Landmark, MapPin, Navigation, Route, Search as SearchIcon, ShieldAlert, Siren, Store, X, Hospital, BusFront, ShoppingCart, Utensils, ShoppingBag } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  ChevronDown,
+  Compass,
+  Fuel,
+  HeartPulse,
+  Landmark,
+  MapPin,
+  Route,
+  Search as SearchIcon,
+  ShieldAlert,
+  Siren,
+  Store,
+  X,
+  BusFront,
+  ShoppingCart,
+  Utensils,
+  ShoppingBag,
+  WifiOff,
+  Bookmark,
+  ExternalLink,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { useLocation, useSearch } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { AGUAS_LINDAS_STATIONS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations } from "@/lib/aguasLindasStations";
-import { getRecentSearches, rememberSearch } from "@/lib/mobilePreferences";
-import { ALL_LOCAL_ROUTE_DESTINATIONS, getLocalRoutePresets } from "@/lib/localRoutePresets";
-import { LOCAL_PLACES, LOCAL_PLACES_UPDATED_AT, searchLocalPlaces } from "@/lib/localPlaces";
-import { searchPublicServices } from "@/lib/publicServices";
-
-const googleSearch = (query: string) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
+import { AGUAS_LINDAS_STATIONS_COUNT } from "@/lib/aguasLindasStations";
+import {
+  getRecentSearches,
+  rememberSearch,
+  mobilePreferenceEvent,
+} from "@/lib/mobilePreferences";
+import {
+  ALL_LOCAL_ROUTE_DESTINATIONS,
+  getLocalRoutePresets,
+} from "@/lib/localRoutePresets";
+import { localDataEvent } from "@/lib/localData";
+import { getUniversalSearchResults } from "@/lib/universalSearch";
 
 const quickActions = [
-  { label: "Postos", hint: `${AGUAS_LINDAS_STATIONS_COUNT} cadastros locais`, icon: Fuel, kind: "internal", query: "postos" },
-  { label: "Rotas rápidas", hint: "UPA, hospital, centro e mais", icon: Route, kind: "routes", query: "" },
-  { label: "Serviços públicos", hint: "Saúde, segurança e cidadania", icon: Landmark, kind: "services", query: "" },
-  { label: "Perto de mim", hint: "Usar localização do aparelho", icon: Compass, kind: "nearby", query: "" },
-  { label: "Saúde", hint: "UPA, HEAL, hospital e UBS", icon: HeartPulse, kind: "services", query: "saude" },
-  { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "services", query: "emergencia" },
-  { label: "Comer", hint: "Restaurantes, lanches e café", icon: Utensils, kind: "places", query: "alimentacao" },
-  { label: "Compras", hint: "Lojas, mercados e eletrônicos", icon: ShoppingBag, kind: "places", query: "compras" },
-  { label: "Segurança", hint: "Delegacia e canais policiais", icon: ShieldAlert, kind: "services", query: "seguranca" },
-  { label: "Educação", hint: "Escolas e rede pública", icon: BookOpen, kind: "services", query: "educacao" },
-  { label: "Trânsito", hint: "Mobilidade e atendimento", icon: BusFront, kind: "services", query: "transito" },
-  { label: "Farmácias", hint: "Encontrar farmácias", icon: Store, kind: "external", query: "farmácias, Águas Lindas de Goiás, GO" },
-  { label: "Mercados", hint: "Mercados e atacarejos", icon: ShoppingCart, kind: "external", query: "supermercados atacadistas, Águas Lindas de Goiás, GO" },
+  {
+    label: "Serviços públicos",
+    hint: "Contatos e atendimento",
+    icon: Landmark,
+    kind: "services",
+    query: "",
+  },
+  {
+    label: "Saúde",
+    hint: "UPA, hospital e UBS",
+    icon: HeartPulse,
+    kind: "services",
+    query: "saude",
+  },
+  {
+    label: "Emergência",
+    hint: "190, 192 e 193",
+    icon: Siren,
+    kind: "services",
+    query: "emergencia",
+  },
+  {
+    label: "Rotas rápidas",
+    hint: "Escolha o destino",
+    icon: Route,
+    kind: "routes",
+    query: "",
+  },
+  {
+    label: "Postos",
+    hint: AGUAS_LINDAS_STATIONS_COUNT + " cadastros locais",
+    icon: Fuel,
+    kind: "internal",
+    query: "postos",
+  },
+  {
+    label: "Perto de mim",
+    hint: "Postos pela localização",
+    icon: Compass,
+    kind: "nearby",
+    query: "",
+  },
+  {
+    label: "Comer",
+    hint: "Restaurantes e lanches",
+    icon: Utensils,
+    kind: "places",
+    query: "alimentacao",
+  },
+  {
+    label: "Compras",
+    hint: "Lojas e mercados",
+    icon: ShoppingBag,
+    kind: "places",
+    query: "compras",
+  },
+  {
+    label: "Segurança",
+    hint: "Delegacias e apoio",
+    icon: ShieldAlert,
+    kind: "services",
+    query: "seguranca",
+  },
+  {
+    label: "Educação",
+    hint: "Escolas e rede pública",
+    icon: BookOpen,
+    kind: "services",
+    query: "educacao",
+  },
+  {
+    label: "Trânsito",
+    hint: "Mobilidade e atendimento",
+    icon: BusFront,
+    kind: "services",
+    query: "transito",
+  },
+  {
+    label: "Farmácias",
+    hint: "Google Maps · online",
+    icon: Store,
+    kind: "external",
+    query: "farmácias, Águas Lindas de Goiás, GO",
+  },
+  {
+    label: "Mercados",
+    hint: "Google Maps · online",
+    icon: ShoppingCart,
+    kind: "external",
+    query: "supermercados atacadistas, Águas Lindas de Goiás, GO",
+  },
 ] as const;
+
+function ResultCard({
+  icon: Icon,
+  title,
+  detail,
+  source,
+  onClick,
+}: {
+  icon: LucideIcon;
+  title: string;
+  detail: string;
+  source?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex min-h-20 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+        <Icon className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block break-words text-sm font-bold">{title}</span>
+        <span className="mt-1 block break-words text-sm leading-relaxed text-white/75">
+          {detail}
+        </span>
+        {source && (
+          <span className="mt-1 block break-words text-xs text-white/70">
+            {source}
+          </span>
+        )}
+      </span>
+      <ArrowRight className="size-4 shrink-0 text-white/70" />
+    </button>
+  );
+}
 
 export default function SearchPage() {
   const [, setLocation] = useLocation();
@@ -32,197 +176,499 @@ export default function SearchPage() {
   const params = useMemo(() => new URLSearchParams(rawSearch), [rawSearch]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState(() => params.get("q") || "");
-  const [query, setQuery] = useState(() => params.get("q") || "");
+  const [query, setQuery] = useState(() => (params.get("q") || "").trim());
   const [recents, setRecents] = useState(getRecentSearches);
+  const [expanded, setExpanded] = useState(false);
+  const [resultLimit, setResultLimit] = useState(6);
+  const [online, setOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); inputRef.current?.focus(); }
-      if (event.key === "Escape" && document.activeElement === inputRef.current) { inputRef.current?.blur(); }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (event.key === "Escape" && document.activeElement === inputRef.current)
+        inputRef.current?.blur();
     };
+    const refreshRecents = () => setRecents(getRecentSearches());
+    const refreshNetwork = () => setOnline(navigator.onLine);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener(mobilePreferenceEvent, refreshRecents);
+    window.addEventListener(localDataEvent, refreshRecents);
+    window.addEventListener("online", refreshNetwork);
+    window.addEventListener("offline", refreshNetwork);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(mobilePreferenceEvent, refreshRecents);
+      window.removeEventListener(localDataEvent, refreshRecents);
+      window.removeEventListener("online", refreshNetwork);
+      window.removeEventListener("offline", refreshNetwork);
+    };
   }, []);
 
   useEffect(() => {
     const next = params.get("q") || "";
-    setInput(next); setQuery(next);
+    setInput(next);
+    setQuery(next.trim());
+    setResultLimit(6);
   }, [params]);
 
-  const stationResults = useMemo(() => {
-    const value = query.trim();
-    return value ? searchAguasLindasStations(value).slice(0, 16) : AGUAS_LINDAS_STATIONS.slice(0, 8);
-  }, [query]);
-
-  const routeResults = useMemo(() => getLocalRoutePresets(query).slice(0, 10), [query]);
-  const serviceMatches = useMemo(() => searchPublicServices(query), [query]);
-  const serviceResults = serviceMatches.slice(0, 12);
-  const placeResults = useMemo(() => searchLocalPlaces(query).slice(0, 12), [query]);
-
+  const results = useMemo(() => getUniversalSearchResults(query), [query]);
+  const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
+  const search = (value: string) => {
+    const next = value.trim();
+    setInput(next);
+    setQuery(next);
+    setResultLimit(6);
+    if (next) rememberSearch(next);
+    setLocation(
+      appUrl("/buscar") + (next ? "?q=" + encodeURIComponent(next) : "")
+    );
+  };
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const value = input.trim();
-    if (!value) { setQuery(""); setLocation(appUrl("/buscar")); return; }
-    rememberSearch(value); setRecents(getRecentSearches()); setQuery(value);
-    setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(value));
+    search(input);
   };
-
-  const openQuick = (action: typeof quickActions[number]) => {
-    if (action.kind === "internal") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=postos"); return; }
-    if (action.kind === "routes") { setLocation(appUrl("/planejar")); return; }
-    if (action.kind === "services" && action.query === "emergencia") { setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title"); return; }
-    if (action.kind === "services") { setLocation(appUrl("/servicos") + (action.query ? "?categoria=" + encodeURIComponent(action.query) : "")); return; }
-    if (action.kind === "places") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(action.query)); return; }
-    if (action.kind === "nearby") {
-      if (!navigator.geolocation) { setLocation(appUrl("/postos")); return; }
-      navigator.geolocation.getCurrentPosition(
-        position => setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude),
-        () => setLocation(appUrl("/postos") + "?q=postos"),
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+  const openExternal = (value: string) => {
+    if (online)
+      window.open(
+        "https://www.google.com/maps/search/?api=1&query=" +
+          encodeURIComponent(value),
+        "_blank",
+        "noopener,noreferrer"
+      );
+  };
+  const openQuick = (action: (typeof quickActions)[number]) => {
+    if (action.kind === "internal") {
+      setLocation(appUrl("/postos") + "?q=postos");
+      return;
+    }
+    if (action.kind === "routes") {
+      setLocation(appUrl("/planejar"));
+      return;
+    }
+    if (action.kind === "services" && action.query === "emergencia") {
+      setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title");
+      return;
+    }
+    if (action.kind === "services") {
+      setLocation(
+        appUrl("/servicos") +
+          (action.query ? "?categoria=" + encodeURIComponent(action.query) : "")
       );
       return;
     }
-    window.open(googleSearch(action.query), "_blank", "noopener,noreferrer");
+    if (action.kind === "places") {
+      search(action.query);
+      return;
+    }
+    if (action.kind === "nearby") {
+      if (!navigator.geolocation) {
+        setLocation(appUrl("/postos"));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        position =>
+          setLocation(
+            appUrl("/postos") +
+              "?q=postos&lat=" +
+              position.coords.latitude +
+              "&lng=" +
+              position.coords.longitude
+          ),
+        () => setLocation(appUrl("/postos") + "?q=postos"),
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+      );
+      return;
+    }
+    openExternal(action.query);
   };
-
   const openRoute = (destination: string) => {
     rememberSearch(destination);
-    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1");
+    setLocation(
+      appUrl("/planejar") +
+        "?destino=" +
+        encodeURIComponent(destination) +
+        "&auto=1"
+    );
+  };
+  const renderQuick = (action: (typeof quickActions)[number]) => {
+    const Icon = action.icon;
+    return (
+      <button
+        key={action.label}
+        type="button"
+        aria-label={action.label}
+        onClick={() => openQuick(action)}
+        disabled={!online && action.kind === "external"}
+        className="flex min-h-20 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 disabled:opacity-60"
+      >
+        <Icon className="size-5 shrink-0 text-[#C7FF3C]" />
+        <span className="min-w-0">
+          <span className="block break-words text-sm font-bold">
+            {action.label}
+          </span>
+          <span className="mt-1 block text-xs leading-relaxed text-white/75">
+            {action.hint}
+          </span>
+        </span>
+      </button>
+    );
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
-      <div className="container max-w-5xl pt-5 sm:pt-8">
+    <main className="premium-surface min-h-[100dvh] w-full min-w-0 bg-[#0B1014] pb-28 text-white md:pb-12">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pt-5 sm:px-8 sm:pt-8">
         <header>
-          <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">Busca universal · Ctrl/⌘ K</p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-.06em] sm:text-4xl">Encontre e vá.</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/70">As opções locais aparecem prontas em cards. Quando o Trajeto não possui um cadastro próprio, ele identifica a busca como externa em vez de inventar dados.</p>
+          <p className="text-xs font-bold uppercase tracking-[.12em] text-[#C7FF3C]">
+            Águas Lindas de Goiás
+            <span className="hidden sm:inline"> · Ctrl/⌘ K</span>
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-.06em] sm:text-4xl">
+            Encontre e vá.
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-white/75">
+            Busque pelo nome, bairro ou pelo que precisa resolver.
+          </p>
         </header>
-
-        <form onSubmit={submit} className="mt-5 flex min-h-14 items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#121B22] px-3 shadow-[0_12px_35px_rgba(0,0,0,.18)]">
+        <form
+          onSubmit={submit}
+          className="mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#121B22] px-3"
+        >
           <SearchIcon className="size-5 shrink-0 text-[#C7FF3C]" />
-          <input ref={inputRef} value={input} onChange={event => setInput(event.target.value)} placeholder="Posto, endereço, bairro ou serviço" className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/70" autoComplete="off" enterKeyHint="search" aria-label="Buscar locais e serviços" aria-keyshortcuts="Control+K Meta+K" />
-          <kbd className="hidden rounded-lg border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/70 sm:inline">Ctrl K</kbd>
-          {input && <button type="button" onClick={() => { setInput(""); setQuery(""); setLocation(appUrl("/buscar")); }} className="grid size-10 place-items-center rounded-xl text-white/70" aria-label="Limpar busca"><X className="size-4" /></button>}
-          <button type="submit" className="grid size-10 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar"><ArrowRight className="size-4" /></button>
-        </form>
-
-        <section className="mt-4" aria-labelledby="search-primary-title">
-          <div className="flex items-center justify-between gap-3"><h2 id="search-primary-title" className="text-xs font-black uppercase tracking-[.15em] text-white/70">Comece por aqui</h2><span className="text-xs text-white/70">1 toque</span></div>
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Ações essenciais">
-            {quickActions.slice(0, 6).map(action => {
-              const Icon = action.icon;
-              return <button key={action.label} type="button" aria-label={action.label} onClick={() => openQuick(action)} className="group min-h-[6.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C]/20 active:scale-[.985]">
-                <span className="grid size-9 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C] group-hover:bg-[#C7FF3C]/15"><Icon className="size-4" /></span>
-                <span className="mt-2 block text-xs font-black">{action.label}</span>
-                <span className="mt-0.5 block text-xs leading-snug text-white/70">{action.hint}</span>
-              </button>;
-            })}
-          </div>
-        </section>
-
-        <section className="mt-4" aria-labelledby="search-explore-title">
-          <div className="flex items-center justify-between gap-3"><h2 id="search-explore-title" className="text-xs font-black uppercase tracking-[.15em] text-white/70">Explorar</h2><span className="text-xs text-white/70">mais opções</span></div>
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Ações para explorar">
-            {quickActions.slice(6).map(action => {
-              const Icon = action.icon;
-              return <button key={action.label} type="button" aria-label={action.label} onClick={() => openQuick(action)} className="group min-h-[5.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#3DE3FF]/20 active:scale-[.985]">
-                <span className="grid size-8 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF] group-hover:bg-[#3DE3FF]/15"><Icon className="size-4" /></span>
-                <span className="mt-2 block text-xs font-black">{action.label}</span>
-                <span className="mt-0.5 block text-xs leading-snug text-white/70">{action.hint}</span>
-              </button>;
-            })}
-          </div>
-        </section>
-
-        {recents.length > 0 && !query && <section className="mt-5">
-          <p className="text-xs font-black uppercase tracking-[.14em] text-white/70">Pesquisas recentes</p>
-          <div className="mt-2 flex flex-wrap gap-2">{recents.map(item => <button key={item} type="button" onClick={() => { setInput(item); setQuery(item); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(item)); }} className="min-h-10 rounded-full border border-white/8 bg-white/[.03] px-3 text-sm font-bold text-white/60">{item}</button>)}</div>
-        </section>}
-
-        <section className="mt-6">
-          <div className="flex items-end justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Rotas prontas</p><h2 className="mt-1 text-xl font-black">{query ? "Atalhos relacionados" : "Use sem preencher o destino"}</h2></div>
-            <span className="text-xs text-white/70">offline · catálogo local</span>
-          </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {routeResults.map(item => <button key={item.id} type="button" onClick={() => openRoute(item.destination)} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.99]">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Route className="size-4" /></span>
-              <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.label}</span><span className="mt-0.5 block truncate text-sm text-white/70">{item.detail}</span><span className="mt-1 block truncate text-xs text-white/70">{item.destination}</span></span>
-              <ArrowRight className="size-4 shrink-0 text-white/70" />
-            </button>)}
-          </div>
-          <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
-            <span><span className="block text-xs font-black uppercase tracking-[.13em] text-[#3DE3FF]">Todos os destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/65">{ALL_LOCAL_ROUTE_DESTINATIONS.length} locais, serviços, lojas e referências para escolher</span></span>
-            <ArrowRight className="size-4 text-[#3DE3FF]" />
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={event => setInput(event.target.value)}
+            placeholder="Ex.: CRAS, falta de luz, bairro"
+            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/70"
+            autoComplete="off"
+            enterKeyHint="search"
+            aria-label="Buscar locais e serviços"
+            aria-keyshortcuts="Control+K Meta+K"
+          />
+          {input && (
+            <button
+              type="button"
+              onClick={() => {
+                search("");
+                inputRef.current?.focus();
+              }}
+              className="grid size-11 shrink-0 place-items-center rounded-xl text-white/75"
+              aria-label="Limpar busca"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+          <button
+            type="submit"
+            className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]"
+            aria-label="Pesquisar"
+          >
+            <ArrowRight className="size-5" />
           </button>
-        </section>
-
-        <section className="mt-6">
-          <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Postos de Águas Lindas</p><h2 className="mt-1 text-xl font-black">{query ? stationResults.length + " resultado(s)" : "Catálogo local"}</h2></div><span className="text-xs text-white/70">{AGUAS_LINDAS_STATIONS_COUNT} cadastros · {AGUAS_LINDAS_STATIONS_UPDATED_AT}</span></div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {stationResults.map(item => <button key={item.id} type="button" onClick={() => setLocation(appUrl("/local/" + encodeURIComponent(item.id)))} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/20 active:scale-[.99]">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-4" /></span>
-              <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.displayName}</span><span className="mt-0.5 block line-clamp-2 text-sm leading-snug text-white/70">{item.address || item.neighborhood || "Endereço não consolidado"}</span><span className="mt-1 block text-xs font-bold text-white/70">{item.dataOrigin === "ANP" ? "ANP" : item.dataOrigin === "cross-check" ? "Dados cruzados" : "Catálogo local"}</span></span><ArrowRight className="size-4 shrink-0 text-white/70" /></button>)}
-          </div>
-        </section>
-
-        <section className="mt-6" aria-labelledby="local-guide-title">
-          <div className="flex items-end justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Guia local</p><h2 id="local-guide-title" className="mt-1 text-xl font-black">{query ? "Comer, comprar e resolver" : "Lugares úteis em Águas Lindas"}</h2></div>
-            <span className="text-xs text-white/70">{LOCAL_PLACES.length} referências · {LOCAL_PLACES_UPDATED_AT}</span>
-          </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {(query ? placeResults : LOCAL_PLACES.slice(0, 8)).map(place => {
-              const icon = place.category === "alimentacao" ? Utensils : place.category === "compras" ? ShoppingBag : place.category === "servicos" ? Landmark : MapPin;
-              const PlaceIcon = icon;
-              return (
-                <button key={place.id} type="button" onClick={() => {
-                  rememberSearch(place.name);
-                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery));
-                }} className="flex min-h-[5.1rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/20 active:scale-[.99]">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><PlaceIcon className="size-4" /></span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-black">{place.name}</span>
-                    <span className="mt-0.5 block truncate text-sm text-white/70">{place.detail}</span>
-                    <span className="mt-1 block truncate text-xs text-white/70">{place.address}</span>
-                  </span>
-                  <span className="text-xs font-black uppercase tracking-[.08em] text-[#3DE3FF]">Ir</span>
-                </button>
-              );
-            })}
-          </div>
-          {!query && <button type="button" onClick={() => { setInput("compras"); setQuery("compras"); setLocation(appUrl("/buscar") + "?q=compras"); }} className="mt-3 min-h-11 w-full rounded-xl border border-white/8 bg-white/[.025] px-3 text-sm font-black text-white/55">Ver mais locais de compras e serviços</button>}
-        </section>
-
-        {query && serviceResults.length > 0 && (
-          <section className="mt-6">
-            <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#FFB86B]">Serviços encontrados</p><h2 className="mt-1 text-xl font-black">Resultados públicos</h2></div>
-              <span className="text-xs text-white/70">{serviceMatches.length} encontrados</span>
-            </div>
-        {serviceMatches.length > serviceResults.length && <button type="button" onClick={() => setLocation(appUrl("/servicos") + "?q=" + encodeURIComponent(query))} className="mt-3 block min-h-11 w-full rounded-xl border border-[#FFB86B]/30 px-3 text-sm font-bold text-white">
-          Ver todos os {serviceMatches.length} serviços encontrados
-        </button>}
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {serviceResults.map(service => (
-                <button key={service.id} type="button" onClick={() => setLocation(appUrl("/servicos") + "?servico=" + encodeURIComponent(service.id))} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.99]">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#FFB86B]/10 text-[#FFB86B]"><Landmark className="size-4" /></span>
-                  <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{service.name}</span><span className="mt-0.5 block line-clamp-2 text-sm leading-snug text-white/70">{service.description}</span><span className="mt-1 block truncate text-xs font-bold uppercase tracking-[.1em] text-white/70">{service.sourceLabel}</span></span>
-                  <ArrowRight className="size-4 shrink-0 text-white/70" />
-                </button>
-              ))}
-            </div>
-          </section>
+        </form>
+        {!online && (
+          <p
+            role="status"
+            className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[#DFFF9D]"
+          >
+            <WifiOff className="mt-0.5 size-4 shrink-0" />
+            Você está offline. A busca usa os dados salvos neste aparelho.
+          </p>
         )}
 
-
-
-        <section className="mt-6 rounded-3xl border border-white/8 bg-white/[.025] p-4">
-          <div className="flex items-start gap-3"><Hospital className="mt-0.5 size-4 text-[#3DE3FF]" /><div><p className="text-xs font-black">Serviços públicos</p><p className="mt-1 text-sm leading-relaxed text-white/70">Saúde, segurança, assistência, trânsito, educação e cidadania ficam disponíveis no catálogo incorporado.</p><button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"><Landmark className="size-3.5" />Abrir central</button></div></div>
-        </section>
-
-        <footer className="mt-8 pb-4 text-center text-xs text-white/70">O catálogo local permanece identificável por fonte. Consultas externas são abertas fora do catálogo do Trajeto.</footer>
+        {query ? (
+          <div className="mt-5 space-y-5" aria-label="Resultados da busca">
+            <p
+              role="status"
+              aria-live="polite"
+              className="break-words text-sm text-white/80"
+            >
+              {results.total
+                ? results.total + " resultado(s) para “" + query + "”"
+                : "Nenhum resultado local para “" + query + "”."}
+            </p>
+            {results.services.length > 0 && (
+              <section aria-labelledby="search-services-title">
+                <h2 id="search-services-title" className="text-lg font-bold">
+                  Serviços públicos{" "}
+                  <span className="text-sm font-normal text-white/75">
+                    ({results.services.length})
+                  </span>
+                </h2>
+                {results.services.length > resultLimit && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLocation(
+                        appUrl("/servicos") + "?q=" + encodeURIComponent(query)
+                      )
+                    }
+                    className="mt-3 min-h-11 w-full rounded-xl border border-[#C7FF3C]/30 px-3 py-2 text-sm font-bold"
+                  >
+                    Ver todos os {results.services.length} serviços encontrados
+                  </button>
+                )}
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.services.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={Landmark}
+                      title={item.name}
+                      detail={item.description}
+                      source={item.sourceLabel}
+                      onClick={() =>
+                        setLocation(
+                          appUrl("/servicos") +
+                            "?servico=" +
+                            encodeURIComponent(item.id)
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {results.stations.length > 0 && (
+              <section aria-labelledby="search-stations-title">
+                <h2 id="search-stations-title" className="text-lg font-bold">
+                  Postos{" "}
+                  <span className="text-sm font-normal text-white/75">
+                    ({results.stations.length})
+                  </span>
+                </h2>
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.stations.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={Fuel}
+                      title={item.displayName}
+                      detail={
+                        item.address ||
+                        item.neighborhood ||
+                        "Endereço não consolidado"
+                      }
+                      source={
+                        item.dataOrigin === "ANP"
+                          ? "Fonte: ANP"
+                          : "Catálogo local"
+                      }
+                      onClick={() =>
+                        setLocation(
+                          appUrl("/local/" + encodeURIComponent(item.id))
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {results.places.length > 0 && (
+              <section aria-labelledby="search-places-title">
+                <h2 id="search-places-title" className="text-lg font-bold">
+                  Lugares e comércio{" "}
+                  <span className="text-sm font-normal text-white/75">
+                    ({results.places.length})
+                  </span>
+                </h2>
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.places.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={
+                        item.category === "alimentacao"
+                          ? Utensils
+                          : item.category === "compras"
+                            ? ShoppingBag
+                            : MapPin
+                      }
+                      title={item.name}
+                      detail={item.address}
+                      source={item.detail}
+                      onClick={() => openRoute(item.mapQuery)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {results.routes.length > 0 && (
+              <section aria-labelledby="search-routes-title">
+                <h2 id="search-routes-title" className="text-lg font-bold">
+                  Outros destinos{" "}
+                  <span className="text-sm font-normal text-white/75">
+                    ({results.routes.length})
+                  </span>
+                </h2>
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.routes.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={Route}
+                      title={item.label}
+                      detail={item.detail}
+                      onClick={() => openRoute(item.destination)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {[results.stations, results.places, results.routes].some(
+              items => items.length > resultLimit
+            ) && (
+              <button
+                type="button"
+                onClick={() => setResultLimit(limit => limit + 12)}
+                className="min-h-12 w-full rounded-xl border border-white/20 px-3 text-sm font-bold"
+              >
+                Mostrar mais resultados
+              </button>
+            )}
+            <section
+              className="rounded-2xl border border-white/10 bg-[#121B22] p-4"
+              aria-label="Ajuda para encontrar"
+            >
+              <p className="text-sm leading-relaxed text-white/80">
+                {results.total
+                  ? "Ainda não encontrou o que precisa?"
+                  : "Tente o nome do serviço ou do bairro, ou consulte a central."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  href={appUrl("/servicos")}
+                  className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-3 text-sm font-bold"
+                >
+                  Abrir central de serviços
+                </Link>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openExternal(query + ", Águas Lindas de Goiás, GO")
+                  }
+                  disabled={!online}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-bold disabled:opacity-60"
+                >
+                  <ExternalLink className="size-4" />
+                  Buscar no Google Maps · online
+                </button>
+              </div>
+            </section>
+          </div>
+        ) : (
+          <>
+            <section className="mt-5" aria-labelledby="search-primary-title">
+              <h2
+                id="search-primary-title"
+                className="text-sm font-bold text-white/80"
+              >
+                O que você precisa?
+              </h2>
+              <div
+                className="mt-2 grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4"
+                aria-label="Ações essenciais"
+              >
+                {quickActions.slice(0, 4).map(renderQuick)}
+              </div>
+              <button
+                type="button"
+                aria-expanded={expanded}
+                aria-controls="search-more-actions"
+                onClick={() => setExpanded(value => !value)}
+                className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl border border-white/15 px-3 text-sm font-bold"
+              >
+                {expanded
+                  ? "Menos opções"
+                  : "Mais opções: postos, comércio e outras categorias"}
+                <ChevronDown
+                  className={
+                    "size-4 shrink-0 " + (expanded ? "rotate-180" : "")
+                  }
+                />
+              </button>
+              <div id="search-more-actions" hidden={!expanded}>
+                <div
+                  className="mt-2 grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3"
+                  aria-label="Ações para explorar"
+                >
+                  {quickActions.slice(4).map(renderQuick)}
+                </div>
+              </div>
+            </section>
+            {recents.length > 0 && (
+              <section className="mt-5" aria-labelledby="search-recent-title">
+                <h2
+                  id="search-recent-title"
+                  className="text-sm font-bold text-white/80"
+                >
+                  Pesquisas recentes
+                </h2>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {recents.map(item => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => search(item)}
+                      className="min-h-11 max-w-full break-words rounded-2xl border border-white/15 bg-[#121B22] px-3 py-2 text-left text-sm text-white/85"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+            <section
+              className="mt-5"
+              aria-labelledby="search-default-routes-title"
+            >
+              <h2
+                id="search-default-routes-title"
+                className="text-lg font-bold"
+              >
+                Rotas prontas
+              </h2>
+              <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                {defaultRoutes.map(item => (
+                  <ResultCard
+                    key={item.id}
+                    icon={Route}
+                    title={item.label}
+                    detail={item.detail}
+                    onClick={() => openRoute(item.destination)}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")}
+                className="mt-3 min-h-12 w-full rounded-xl border border-[#3DE3FF]/25 px-3 py-2 text-sm font-bold text-[#C9F7FF]"
+              >
+                Todos os destinos disponíveis ·{" "}
+                {ALL_LOCAL_ROUTE_DESTINATIONS.length} locais
+              </button>
+            </section>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              <Link
+                href={appUrl("/servicos") + "?salvos=1"}
+                className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
+              >
+                <Bookmark className="size-4 text-[#C7FF3C]" />
+                Meus serviços salvos
+              </Link>
+              <Link
+                href={appUrl("/ajuda") + "#offline-readiness-title"}
+                className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
+              >
+                <WifiOff className="size-4 text-[#3DE3FF]" />
+                Preparar acesso offline
+              </Link>
+            </div>
+          </>
+        )}
+        <footer className="mt-6 pb-4 text-sm leading-relaxed text-white/70">
+          Contatos e referências podem mudar. Confira a fonte do serviço antes
+          de sair.
+        </footer>
       </div>
     </main>
   );

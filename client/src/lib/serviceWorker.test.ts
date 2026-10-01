@@ -14,6 +14,23 @@ function loadWorker(cached?: Response) {
   return { ...context, cache };
 }
 
+function recoverableWorker(missing: string[]) {
+  const worker = loadWorker();
+  const absent = new Set(missing);
+  const saved = new Map<string, Response>();
+  const path = (request: string | Request) => "./" + new URL(typeof request === "string" ? request : request.url, worker.self.registration.scope).pathname.replace("/trajeto-web/", "");
+  worker.cache.match.mockImplementation(async (request: string | Request) => {
+    const key = path(request);
+    if (absent.has(key)) return undefined;
+    if (saved.has(key)) return saved.get(key)!.clone();
+    if (key === "./offline-assets.json") return new Response(JSON.stringify({ main: { file: "assets/installed.js" } }));
+    if (key.endsWith(".json")) return new Response("{}", { headers: { "Content-Type": "application/json" } });
+    return new Response(key.endsWith(".js") ? "installed code" : '<script src="./assets/installed.js"></script>', { headers: { "Content-Type": key.endsWith(".js") ? "text/javascript" : "text/html" } });
+  });
+  worker.cache.put.mockImplementation(async (request: string | Request, response: Response) => { const key = path(request); saved.set(key, response.clone()); absent.delete(key); });
+  return { worker, saved };
+}
+
 describe("service worker", () => {
   it("registers lifecycle handlers", () => {
     const worker = loadWorker();
@@ -58,7 +75,7 @@ describe("service worker", () => {
   });
   it("cleans only previous cache versions inside this app's scope", async () => {
     const worker = loadWorker();
-    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v21-static"]);
+    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v22-static"]);
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "activate")[1];
     let completion: Promise<unknown>;
     handler({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
@@ -83,6 +100,37 @@ describe("service worker", () => {
     worker.fetch.mockResolvedValue(new Response("new live document"));
     expect(await (await worker.appNavigation(new Request("https://example.com/trajeto-web/"))).text()).toBe("new live document");
     expect(worker.cache.put).not.toHaveBeenCalled();
+  });
+  it("restores a missing route chunk and confirms the complete package", async () => {
+    const { worker } = recoverableWorker(["./assets/installed.js"]);
+    expect((await worker.offlineStatus()).ready).toBe(false);
+    worker.fetch.mockResolvedValue(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    expect((await worker.restoreOfflinePackage()).ready).toBe(true);
+    expect(worker.fetch).toHaveBeenCalledTimes(1);
+    expect(worker.fetch.mock.calls[0][0].url).toBe("https://example.com/trajeto-web/assets/installed.js");
+  });
+  it("rejects an HTML fallback when an old chunk was removed by deployment", async () => {
+    const { worker, saved } = recoverableWorker(["./assets/installed.js"]);
+    worker.fetch.mockResolvedValue(new Response("new HTML", { headers: { "Content-Type": "text/html" } }));
+    expect(await worker.restoreOfflinePackage()).toEqual({ ready: false, reason: "update" });
+    expect(saved.has("./assets/installed.js")).toBe(false);
+  });
+  it("never fetches a newer manifest into the installed package", async () => {
+    const { worker } = recoverableWorker(["./offline-assets.json"]);
+    expect(await worker.restoreOfflinePackage()).toEqual({ ready: false, reason: "update" });
+    expect(worker.fetch).not.toHaveBeenCalled();
+  });
+  it("recovers the installed document from its saved fallback without mixing versions", async () => {
+    const { worker, saved } = recoverableWorker(["./index.html"]);
+    expect((await worker.restoreOfflinePackage()).ready).toBe(true);
+    expect(await saved.get("./index.html")!.text()).toContain("installed.js");
+    expect(worker.fetch).not.toHaveBeenCalled();
+  });
+  it("reports a full cache without claiming the download was saved", async () => {
+    const { worker } = recoverableWorker(["./assets/installed.js"]);
+    worker.fetch.mockResolvedValue(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    worker.cache.put.mockRejectedValue(Object.assign(new Error("Full"), { name: "QuotaExceededError" }));
+    expect(await worker.restoreOfflinePackage()).toEqual({ ready: false, reason: "storage" });
   });
   it("keeps the refreshed document with its new assets when the HTTP cache has an older shell", async () => {
     const worker = loadWorker();
