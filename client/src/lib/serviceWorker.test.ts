@@ -6,7 +6,7 @@ function loadWorker(cached?: Response) {
   const cache = { match: vi.fn(async (_request: unknown, options?: CacheQueryOptions) => options?.ignoreVary ? cached : undefined), put: vi.fn(), keys: vi.fn(async () => []), delete: vi.fn() };
   const context: Record<string, any> = {
     self: { addEventListener: vi.fn(), registration: { scope: "https://example.com/trajeto-web/" }, location: new URL("https://example.com/trajeto-web/sw.js"), clients: { claim: vi.fn() }, skipWaiting: vi.fn() },
-    Response, URL, AbortController, setTimeout, clearTimeout,
+    Response, Request, URL, AbortController, setTimeout, clearTimeout,
     caches: { open: vi.fn(async () => cache), keys: vi.fn(async () => []), delete: vi.fn() },
     fetch: vi.fn(async () => { throw new Error("offline"); }),
   };
@@ -58,14 +58,40 @@ describe("service worker", () => {
   });
   it("cleans only previous cache versions inside this app's scope", async () => {
     const worker = loadWorker();
-    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static"]);
+    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v20-static"]);
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "activate")[1];
     let completion: Promise<unknown>;
     handler({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
     await completion!;
-    expect(worker.caches.delete.mock.calls).toEqual([["trajeto-%2Ftrajeto-web%2F-v18-static"]]);
+    expect(worker.caches.delete.mock.calls).toEqual([["trajeto-%2Ftrajeto-web%2F-v19-static"]]);
   });
   it("does not announce readiness with a partial offline package", async () => {
     expect(await loadWorker().offlineStatus()).toEqual({ ready: false });
+  });
+  it("keeps the refreshed document with its new assets when the HTTP cache has an older shell", async () => {
+    const worker = loadWorker();
+    const stored = new Map<string, Response>();
+    const key = (request: string | Request) => new URL(typeof request === "string" ? request : request.url, worker.self.registration.scope).href;
+    const fresh = '<html><script src="./assets/new-build.js"></script></html>';
+    const addAll = vi.fn(async (requests: Array<string | Request>) => {
+      for (const request of requests) stored.set(key(request), new Response("old cached document"));
+    });
+    worker.caches.open.mockResolvedValue({
+      addAll,
+      put: async (request: string | Request, response: Response) => { stored.set(key(request), response); },
+      match: async (request: string | Request) => stored.get(key(request))?.clone(),
+    });
+    worker.fetch.mockImplementation(async (url: string) => url.includes("offline-assets.json")
+      ? new Response(JSON.stringify({ main: { file: "assets/new-build.js" } }))
+      : new Response(fresh, { headers: { "Content-Type": "text/html" } }));
+    const install = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "install")[1];
+    let completion: Promise<unknown>;
+    install({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
+    await completion!;
+    worker.fetch.mockRejectedValue(new Error("offline"));
+    for (const path of ["", "index.html", "servicos?salvos=1"]) {
+      const response = await worker.networkFirstNavigation(new Request(worker.self.registration.scope + path));
+      expect(await response.text()).toBe(fresh);
+    }
   });
 });
