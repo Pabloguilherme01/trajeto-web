@@ -5,6 +5,7 @@ const required = [
   "client/public/data/aguas-lindas-anp.json",
   "client/public/data/aguas-lindas-anp-precos.json",
   "client/src/lib/publicRouting.ts",
+  "client/src/components/TileStationMap.tsx",
 ];
 
 for (const file of required) {
@@ -30,6 +31,18 @@ for (const marker of requiredFallbacks) {
   }
 }
 
+const tileMap = fs.readFileSync("client/src/components/TileStationMap.tsx", "utf8");
+for (const marker of [
+  "tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "VITE_PUBLIC_TILE_URL",
+  'referrerPolicy="origin"',
+]) {
+  if (!tileMap.includes(marker)) {
+    console.error("Zero-cost core: integração sustentável de tiles ausente:", marker);
+    process.exitCode = 1;
+  }
+}
+
 const publicIndex = fs.readFileSync("client/index.html", "utf8");
 const forbiddenStaticSdks = [
   "maps.googleapis.com/maps/api/js",
@@ -44,6 +57,11 @@ for (const sdk of forbiddenStaticSdks) {
 }
 
 const serviceWorker = fs.readFileSync("client/public/sw.js", "utf8");
+if (serviceWorker.includes("tile.openstreetmap.org")) {
+  console.error("Zero-cost core: service worker não deve criar cache offline de tiles públicos do OSM.");
+  process.exitCode = 1;
+}
+
 for (const snapshot of [
   "./data/aguas-lindas-anp.json",
   "./data/aguas-lindas-anp-precos.json",

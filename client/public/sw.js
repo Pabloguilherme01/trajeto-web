@@ -1,7 +1,6 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v22";
+const VERSION = CACHE_PREFIX + "v23";
 const NETWORK_TIMEOUT_MS = 4000;
-const MAX_MAP_ENTRIES = 24;
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -124,11 +123,6 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  if (url.hostname === "tile.openstreetmap.org") {
-    event.respondWith(tileNetworkFirst(request));
-    return;
-  }
-
   if (url.origin !== self.location.origin) return;
 
   // Private API responses must never enter a shared browser cache.
@@ -204,25 +198,6 @@ async function networkFirst(request, cacheName) {
 }
 
 
-async function tileNetworkFirst(request) {
-  const cache = await caches.open(MAP_CACHE);
-  try {
-    const response = await fetchWithTimeout(request);
-    if (response.ok || response.type === "opaque") {
-      await safeCachePut(cache, request, response);
-      try {
-        const keys = await cache.keys();
-        await Promise.all(keys.slice(0, Math.max(0, keys.length - MAX_MAP_ENTRIES)).map(key => cache.delete(key)));
-      } catch {}
-    }
-    return response;
-  } catch {
-    return (
-      await cache.match(request, { ignoreVary: true }) ||
-      new Response("", { status: 504 })
-    );
-  }
-}
 
 async function fetchWithTimeout(request) {
   const controller = new AbortController();

@@ -587,9 +587,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     });
   };
 
-  const saveMapOffline = () => {
+  const savePointsOffline = () => {
     if (!mapStations.length) {
-      toast.message("Ainda não há coordenadas suficientes para salvar o mapa.");
+      toast.message("Ainda não há coordenadas suficientes para salvar os pontos.");
       return;
     }
     const normalized = mapStations
@@ -601,7 +601,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
     const saved = cacheOfflineMapStations(normalized);
     if (saved) setOfflineMap(getOfflineMapStations().stations);
-    toast.message(saved ? `Mapa salvo neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar o mapa local.");
+    toast.message(saved ? `Pontos salvos neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar os pontos locais.");
   };
 
   const refreshStationData = async () => {
@@ -1022,7 +1022,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <p className="mt-1 text-xs text-white/65">{AGUAS_LINDAS_PRICE_REFERENCE.period} · ANP · não é preço individual em tempo real</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={saveMapOffline} className="min-h-11 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-xs font-black text-white/65">Salvar mapa offline</button>
+                  <button type="button" onClick={savePointsOffline} className="min-h-11 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-xs font-black text-white/65">Salvar pontos offline</button>
                   <button type="button" onClick={() => void refreshStationData()} className="min-h-11 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-xs font-black text-[#9FEFFF]">Atualizar</button>
                 </div>
               </div>
