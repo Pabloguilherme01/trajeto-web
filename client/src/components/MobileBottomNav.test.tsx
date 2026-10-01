@@ -3,16 +3,57 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import MobileBottomNav from "./MobileBottomNav";
 
-const state = vi.hoisted(() => ({ search: "", staticRuntime: true, navigate: vi.fn() }));
-vi.mock("wouter", () => ({ useLocation: () => ["/planejar", state.navigate], useSearch: () => state.search }));
-vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, mobilePreferenceEvent: "preference-change" }));
-vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], offlineRouteEvent: "route-change" }));
+const state = vi.hoisted(() => ({
+  search: "",
+  location: "/planejar",
+  staticRuntime: true,
+  navigate: vi.fn(),
+}));
+vi.mock("wouter", () => ({
+  useLocation: () => [state.location, state.navigate],
+  useSearch: () => state.search,
+}));
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.staticRuntime }));
 
-beforeEach(() => { vi.stubGlobal("React", React); state.navigate.mockReset(); state.search = ""; state.staticRuntime = true; });
+beforeEach(() => {
+  vi.stubGlobal("React", React);
+  state.navigate.mockReset();
+  state.search = "";
+  state.location = "/planejar";
+  state.staticRuntime = true;
+});
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("mobile navigation", () => {
+  it("keeps public services in the primary dock", () => {
+    state.location = "/";
+    render(<MobileBottomNav />);
+    fireEvent.click(screen.getByRole("button", { name: "Serviços públicos" }));
+    expect(state.navigate).toHaveBeenCalledWith("/servicos");
+  });
+
+  it("opens a fresh planner from Rotas instead of silently restoring a previous trip", () => {
+    render(<MobileBottomNav />);
+    fireEvent.click(screen.getByRole("button", { name: "Rotas" }));
+    expect(state.navigate).toHaveBeenCalledWith("/planejar");
+  });
+
+  it("keeps route aliases and secondary sections visually grouped", () => {
+    state.location = "/salvos";
+    render(<MobileBottomNav />);
+    expect(
+      screen.getByRole("button", { name: "Rotas" }).getAttribute("aria-current")
+    ).toBe("page");
+    cleanup();
+    state.location = "/mapa";
+    render(<MobileBottomNav />);
+    expect(
+      screen
+        .getByRole("button", { name: "Mais opções" })
+        .getAttribute("aria-current")
+    ).toBe("page");
+  });
+
   it("opens More, hides unavailable accounts, navigates to help and closes the dialog", async () => {
     render(<MobileBottomNav />);
     fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
