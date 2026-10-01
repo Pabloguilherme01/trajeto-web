@@ -1,9 +1,11 @@
+import { LOCAL_PLACES } from "@/lib/localPlaces";
+
 export type LocalRoutePreset = {
   id: string;
   label: string;
   detail: string;
   destination: string;
-  category: "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro";
+  category: "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
 };
 
 export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
@@ -69,8 +71,8 @@ export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
 
 export function getLocalRoutePresets(query = "") {
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  if (!normalized) return LOCAL_ROUTE_PRESETS;
-  return LOCAL_ROUTE_PRESETS.filter(item =>
+  if (!normalized) return ALL_LOCAL_ROUTE_DESTINATIONS;
+  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item =>
     [item.label, item.detail, item.destination, item.category].join(" ").toLocaleLowerCase("pt-BR").includes(normalized),
   );
 }
