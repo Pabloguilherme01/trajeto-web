@@ -32,7 +32,7 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
 function isBroadAguasLindasQuery(value: string) {
   const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return normalized === "postos" ||
-    normalized === "aguas lindas" ||
+    /^aguas lindas(?: de goias)?(?:,? go)?$/.test(normalized) ||
     normalized.includes("postos em aguas lindas") ||
     normalized.includes("postos de aguas lindas");
 }
@@ -83,7 +83,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const hasCoordinates = latParam !== null && lngParam !== null &&
     Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const showSavedOnly = params.get("salvos") === "1";
-  const urlQuery = params.get("q")?.trim() || "";
+  const urlQuery = params.get("q")?.trim() || corridorPresets[0]?.query || "postos";
   const staticRuntime = isGitHubPagesRuntime();
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const broadAguasLindasQuery = isBroadAguasLindasQuery(query);
@@ -406,10 +406,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
 
   useEffect(() => {
-    if (showSavedOnly || !urlQuery || urlQuery === query) return;
+    if (showSavedOnly || urlQuery === query) return;
     setQuery(urlQuery);
     setInput(urlQuery);
-    setShowMap(false);
+    setShowMap(mapFirst);
     setCompareIds([]);
     setOnlyOpen(false);
     setNeighborhoodFilter("all");
@@ -417,7 +417,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     setAddressOnly(false);
     setVerifiedOnly(false);
     setMappedOnly(false);
-  }, [urlQuery, showSavedOnly, query]);
+  }, [urlQuery, showSavedOnly, query, mapFirst]);
 
   useEffect(() => {
     if (hasCoordinates) {
@@ -787,8 +787,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           </section>
         )}
 
-        {mapFirst && !showSavedOnly && broadAguasLindasQuery && mapStations.length > 0 && (
-          <section className="mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121B22] shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
+        {mapFirst && showMap && !showSavedOnly && broadAguasLindasQuery && mapStations.length > 0 && (
+          <section id="aguas-lindas-map" className="scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121B22] shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
             <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
               <div>
                 <p className="text-[0.52rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Mapa principal</p>
@@ -899,7 +899,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-[0.6rem] font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>
                 </div>
 
-                {showMap && mapStations.length > 0 && (
+                {!mapFirst && showMap && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="h-[min(68vh,620px)]">
                       <StationMap

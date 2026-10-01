@@ -49,7 +49,7 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
   await page.getByRole("button", { name: "Calcular rota" }).click();
   await expect(page.getByText("12,3 km")).toBeVisible();
   await expect(page.getByText("15 min")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Google Maps" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
   const currentUrl = new URL(page.url());
   expect(currentUrl.pathname).toBe("/trajeto-web/planejar");
   expect(currentUrl.search).toContain("origem=");
@@ -59,6 +59,13 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
 test("Pages: mapa e ficha local funcionam como recursos independentes", async ({ page }) => {
   await page.goto("mapa", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
+  await expect(page.locator("#aguas-lindas-map")).toBeVisible();
+  await expect(page.locator("#aguas-lindas-map")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Aumentar zoom" })).toHaveCount(1);
+  await page.getByRole("button", { name: "Aumentar zoom" }).click();
+  await page.getByRole("button", { name: "Ocultar mapa", exact: true }).click();
+  await expect(page.locator("#aguas-lindas-map")).toHaveCount(0);
+  await page.getByRole("button", { name: "Abrir mapa", exact: true }).click();
   await expect(page.locator("#aguas-lindas-map")).toBeVisible();
 
   await page.goto("local/rham", { waitUntil: "domcontentloaded" });

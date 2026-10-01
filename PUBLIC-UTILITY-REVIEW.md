@@ -8,6 +8,7 @@
 - A ligação utiliza apenas um número; contatos com alternativas nunca viram um telefone concatenado.
 - O menu Mais cabe em telas pequenas, permite rolagem e devolve o foco ao botão. Saúde e Emergência usam o catálogo local. Removidos atalhos redundantes do menu; as telas existentes continuam acessíveis.
 - Rota de serviço abre o planejador com destino preenchido, preservando as opções de navegação do Trajeto.
+- O mapa reconhece a cidade selecionada pelo atalho padrão, restaura a busca da URL e exibe um único mapa; abrir e ocultar usam a mesma seção.
 - Cadastro da Ouvidoria adicionado. SIC e Vapt Vupt receberam endereço, horários e orientação para o canal oficial. Agendamentos e solicitações são feitos no portal do órgão.
 
 ## Fontes conferidas
