@@ -6,6 +6,12 @@ import {
 } from "./localRoutePresets";
 
 describe("local route presets", () => {
+  it("does not offer an unverified local Saneago destination in the planner", () => {
+    expect(getLocalRoutePresets("Saneago")).toEqual([]);
+    expect(
+      ALL_LOCAL_ROUTE_DESTINATIONS.some(item => item.id === "saneago")
+    ).toBe(false);
+  });
   it("provides a broad set of reusable city destinations", () => {
     expect(LOCAL_ROUTE_PRESETS.length).toBeGreaterThanOrEqual(20);
     expect(ALL_LOCAL_ROUTE_DESTINATIONS.length).toBeGreaterThanOrEqual(80);

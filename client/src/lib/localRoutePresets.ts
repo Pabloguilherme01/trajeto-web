@@ -10,7 +10,7 @@ export type LocalRoutePreset = {
   category: "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
 };
 
-export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
+const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "upa", label: "UPA", detail: "Urgência e emergência · 24h", destination: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "heal", label: "HEAL", detail: "Hospital estadual · atendimento", destination: "HEAL Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho, Rua 19, 792, Parque da Barragem 9, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "hospital-bom-jesus", label: "Hospital Bom Jesus", detail: "Hospital municipal · 24h", destination: "Hospital Municipal Bom Jesus, Q 109, Setor 10, Águas Lindas de Goiás, GO", category: "saude" },
@@ -70,6 +70,12 @@ export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "posto-perimetral", label: "Posto Perimetral", detail: "Combustível · Parque da Barragem", destination: "Posto Perimetral, Avenida Águas Lindas, Parque da Barragem, Águas Lindas de Goiás, GO", category: "combustivel" },
   { id: "mercado-paraiso", label: "Mini Mercado Paraíso", detail: "Mercado · Residencial Jardim Paraíso", destination: "Mini Mercado Paraíso, Rua das Azaléias, 195, Residencial Jardim Paraíso, Águas Lindas de Goiás, GO", category: "compras" },
 ];
+
+// A legacy shortcut must not recreate a route deliberately absent in the official catalog.
+export const LOCAL_ROUTE_PRESETS = CITY_ROUTE_PRESETS.filter(preset => {
+  const service = PUBLIC_SERVICES.find(item => item.id === preset.id);
+  return !service || Boolean(service.mapQuery);
+});
 
 const LOCAL_PLACE_DESTINATIONS: LocalRoutePreset[] = LOCAL_PLACES.map(place => ({
   id: "place-" + place.id,

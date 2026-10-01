@@ -28,7 +28,7 @@ export default function Help() {
               <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0B1014] p-4">
                 <div className="flex items-center justify-between">
                   <step.icon className="size-4 text-[#C7FF3C]" />
-                  <span className="text-[0.5rem] font-black tracking-[.16em] text-white/25">{step.n}</span>
+                  <span className="text-xs font-black tracking-[.16em] text-white/60">{step.n}</span>
                 </div>
                 <h2 className="mt-5 text-sm font-black">{step.title}</h2>
                 <p className="mt-1.5 text-sm leading-relaxed text-white/75">{step.text}</p>

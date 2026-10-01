@@ -37,6 +37,16 @@ export function publicServiceContacts(service: {
       whatsapp.has(contact.href) && [10, 11].includes(digits.length);
     return {
       ...contact,
+      label:
+        contact.label ||
+        (
+          {
+            "193": "Bombeiros · resgate e salvamento",
+            "190": "Polícia · emergência policial",
+            "192": "SAMU · emergência médica",
+          } as Record<string, string>
+        )[digits] ||
+        "",
       channel: isWhatsApp ? ("whatsapp" as const) : ("phone" as const),
       href: isWhatsApp ? "https://wa.me/55" + digits : contact.href,
     };

@@ -53,6 +53,13 @@ async function checkCard(page: Page, id: string, name: string) {
     await expect(cards.locator('a[href="tel:193"]')).toHaveCount(1);
     await expect(cards.locator('a[href="tel:190"]')).toHaveCount(1);
     await expect(
+      cards.getByRole("link", { name: /Polícia · emergência policial/ })
+    ).toHaveAttribute("href", "tel:190");
+    await expect(
+      cards.getByRole("link", { name: /Bombeiros · resgate e salvamento/ })
+    ).toHaveAttribute("href", "tel:193");
+    await expect(cards.getByText(/Alternativo/)).toHaveCount(0);
+    await expect(
       cards.getByText(
         "Use 193 para incêndio, resgate e salvamento e 190 para emergência policial.",
         { exact: true }
@@ -63,6 +70,36 @@ async function checkCard(page: Page, id: string, name: string) {
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(320);
 }
+
+test("Pages: planner excludes unverified utility routes but keeps the official contact", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("planejar", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: /Destinos disponíveis/ }).click();
+  await page
+    .getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" })
+    .fill("Saneago");
+  await expect(
+    page.getByText("Nenhum destino corresponde ao filtro.")
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth)
+  ).toBeLessThanOrEqual(320);
+  await page.goto("servicos?servico=saneago", {
+    waitUntil: "domcontentloaded",
+  });
+  const card = page
+    .getByRole("region", { name: "Serviços públicos" })
+    .getByRole("article");
+  await expect(
+    card.getByRole("heading", { name: "Saneago · água e esgoto" })
+  ).toBeVisible();
+  await expect(card.locator('a[href="tel:08006450115"]')).toHaveCount(1);
+  await expect(
+    card.getByRole("button", { name: "Rota", exact: true })
+  ).toHaveCount(0);
+});
 
 for (const service of cases) {
   test(`Pages: ${service.id} searches and contact safeguards survive offline reload at 320px`, async ({
