@@ -20,6 +20,8 @@ import {
   WifiOff,
   Bookmark,
   ExternalLink,
+  Phone,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -38,6 +40,7 @@ import {
 import { localDataEvent } from "@/lib/localData";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
 import { PUBLIC_SERVICE_SHORTCUTS } from "@/lib/publicServices";
+import { phoneHref } from "@/lib/contactActions";
 
 const quickActions = [
   {
@@ -222,6 +225,8 @@ export default function SearchPage() {
 
   const liveQuery = input.trim();
   const results = useMemo(() => getUniversalSearchResults(liveQuery), [liveQuery]);
+  const primaryService = results.services[0];
+  const primaryPhone = primaryService?.phone ? phoneHref(primaryService.phone) : null;
   const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
   const search = (value: string) => {
     const next = value.trim();
@@ -397,6 +402,61 @@ export default function SearchPage() {
 
         {liveQuery ? (
           <div className="mt-5 space-y-5" aria-label="Resultados da busca">
+            {primaryService && (
+              <section
+                className="rounded-[1.4rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.055] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
+                aria-labelledby="search-auto-answer-title"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+                    <Sparkles className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#C7FF3C]">
+                      Resposta rápida · Águas Lindas
+                    </p>
+                    <h2 id="search-auto-answer-title" className="mt-1 text-base font-black leading-snug">
+                      {primaryService.name}
+                    </h2>
+                    <p className="mt-1 text-sm leading-relaxed text-white/75">
+                      {primaryService.description}
+                    </p>
+                    {results.services.length > 1 && (
+                      <p className="mt-1 text-xs leading-relaxed text-white/60">
+                        Há mais {results.services.length - 1} opção(ões) relacionada(s) logo abaixo.
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => setLocation(appUrl("/servicos") + "?servico=" + encodeURIComponent(primaryService.id))}
+                    className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"
+                  >
+                    Ver detalhes
+                  </button>
+                  {primaryService.mapQuery && (
+                    <button
+                      type="button"
+                      onClick={() => openRoute(primaryService.mapQuery!)}
+                      className="min-h-11 rounded-xl border border-[#3DE3FF]/25 px-3 text-sm font-bold text-[#C9F7FF]"
+                    >
+                      Planejar rota
+                    </button>
+                  )}
+                  {primaryPhone && (
+                    <a
+                      href={primaryPhone}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/85"
+                    >
+                      <Phone className="size-4" />
+                      Ligar
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
             <p
               role="status"
               aria-live="polite"
