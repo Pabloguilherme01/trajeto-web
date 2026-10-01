@@ -212,19 +212,18 @@ export default function PublicServices() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="premium-surface min-h-[100dvh] bg-[#0D1418] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.17em] text-[#C7FF3C]">
-              Central de serviços
+            <p className="soft-kicker text-xs text-[#B7D86B]">
+              Serviços para o dia a dia
             </p>
-            <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">
+            <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.04em] sm:text-5xl">
               Águas Lindas em um só lugar.
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/70">
-              Serviços e locais públicos essenciais já ficam incorporados ao
-              app. O catálogo básico funciona sem depender de consulta online.
+              Encontre atendimento, contatos e caminhos úteis sem precisar saber antes qual órgão procurar. O catálogo básico continua disponível offline.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/70">
@@ -234,10 +233,10 @@ export default function PublicServices() {
                 6 categorias
               </span>
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/70">
-                offline por padrão
+                essencial disponível offline
               </span>
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/65">
-                Confira contatos e horários na fonte oficial
+                dados com fonte identificada
               </span>
             </div>
           </div>
@@ -251,13 +250,13 @@ export default function PublicServices() {
         </header>
 
         <section
-          className="mt-5 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3"
+          className="mt-5 rounded-[1.5rem] border border-[#D8B47A]/20 bg-[#D8B47A]/[.045] p-3"
           aria-labelledby="emergency-strip-title"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.14em] text-[#FFB86B]">
-                Utilidade imediata
+              <p className="soft-kicker text-xs text-[#D8B47A]">
+                Se for urgente
               </p>
               <h2
                 id="emergency-strip-title"
@@ -280,10 +279,10 @@ export default function PublicServices() {
               <a
                 key={item.label}
                 href={phoneHref(item.number) ?? "#"}
-                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-[#0B1014] px-2 py-2 text-center text-sm font-bold text-white/80 transition hover:border-[#FFB86B]/30 hover:text-white"
+                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-[#0D1418] px-2 py-2 text-center text-sm font-bold text-white/80 transition hover:border-[#D8B47A]/30 hover:text-white"
               >
                 <span className="inline-flex items-center gap-1.5">
-                  <Phone className="size-3.5 shrink-0 text-[#FFB86B]" />
+                  <Phone className="size-3.5 shrink-0 text-[#D8B47A]" />
                   {item.label}
                 </span>
                 <span className="text-xs text-white/70">{item.number}</span>
@@ -292,21 +291,21 @@ export default function PublicServices() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
+        <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#141E23] p-3 sm:p-4">
           <form
             onSubmit={event => {
               event.preventDefault();
               applyFilters(query, category);
               inputRef.current?.blur();
             }}
-            className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3"
+            className="flex items-center gap-2 rounded-2xl border border-[#B7D86B]/18 bg-[#0D1418] px-3"
           >
-            <MapPinned className="size-4 shrink-0 text-[#C7FF3C]" />
+            <MapPinned className="size-4 shrink-0 text-[#B7D86B]" />
             <input
               ref={inputRef}
               value={query}
               onChange={event => setQuery(event.target.value)}
-              placeholder="Buscar saúde, escola, polícia, prefeitura..."
+              placeholder="Ex.: UBS, Bolsa Família, iluminação, documentos..."
               className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65"
               autoComplete="off"
               autoCapitalize="none"
@@ -332,7 +331,7 @@ export default function PublicServices() {
             <button
               type="submit"
               aria-label="Pesquisar serviços"
-              className="grid size-11 shrink-0 place-items-center rounded-xl text-[#C7FF3C]"
+              className="grid size-11 shrink-0 place-items-center rounded-xl text-[#B7D86B]"
             >
               <ArrowRight className="size-5" />
             </button>
@@ -354,7 +353,7 @@ export default function PublicServices() {
                 className={
                   "min-h-11 rounded-xl border px-2 text-sm font-black transition " +
                   (category === item.id
-                    ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A] shadow-[0_8px_24px_rgba(199,255,60,.08)]"
+                    ? "border-[#B7D86B]/35 bg-[#B7D86B]/10 text-[#DFFF9A] shadow-[0_8px_24px_rgba(199,255,60,.08)]"
                     : "border-white/8 bg-white/[.025] text-white/75 hover:border-white/15 hover:text-white")
                 }
               >
@@ -398,7 +397,7 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="min-h-24 min-w-0 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/5 p-3 text-left shadow-[0_10px_26px_rgba(0,0,0,.1)]"
+                    className="min-h-24 min-w-0 rounded-2xl border border-[#79C6D0]/20 bg-[#79C6D0]/5 p-3 text-left shadow-[0_10px_26px_rgba(0,0,0,.1)]"
                   >
                     <span className="block text-sm font-bold text-white">
                       {shortcut.label}
@@ -449,21 +448,21 @@ export default function PublicServices() {
             return (
               <article
                 key={service.id}
-                className="route-card mobile-card rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4 shadow-[0_12px_34px_rgba(0,0,0,.14)]"
+                className="route-card mobile-card rounded-[1.4rem] border border-white/8 bg-[#141E23] p-4 shadow-[0_12px_34px_rgba(0,0,0,.14)]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#3DE3FF]">
+                  <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#79C6D0]">
                     <Icon className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">
+                    <p className="soft-kicker text-xs text-[#79C6D0]">
                       {
                         PUBLIC_SERVICE_CATEGORIES.find(
                           item => item.id === service.category
                         )?.shortLabel
                       }
                     </p>
-                    <h2 className="mt-1 text-sm font-black leading-snug">
+                    <h2 className="mt-1 text-sm font-bold leading-snug">
                       {service.name}
                     </h2>
                     <p className="mt-1.5 text-sm leading-relaxed text-white/70">
@@ -499,8 +498,8 @@ export default function PublicServices() {
                   </div>
                 )}
                 {service.guidance && (
-                  <div className="mt-3 rounded-xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.04] p-3">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#D9FF91]">Antes de sair</p>
+                  <div className="mt-3 rounded-xl border border-[#B7D86B]/12 bg-[#B7D86B]/[.04] p-3">
+                    <p className="soft-kicker text-xs text-[#DCEAB9]">Antes de sair</p>
                     <p className="mt-1 text-sm leading-relaxed text-white/78">{service.guidance}</p>
                   </div>
                 )}
@@ -509,7 +508,7 @@ export default function PublicServices() {
                     href={service.actionUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#3DE3FF]/30 px-3 text-sm font-bold text-[#C9F7FF]"
+                    className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#79C6D0]/30 px-3 text-sm font-bold text-[#C7E9ED]"
                   >
                     <ExternalLink className="size-4" />
                     {service.actionLabel} · online
@@ -547,7 +546,7 @@ export default function PublicServices() {
                           ": " +
                           contact.number
                         }
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-sm font-bold text-[#C9F7FF]"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#79C6D0]/20 bg-[#79C6D0]/[.05] px-3 text-sm font-bold text-[#C7E9ED]"
                       >
                         {contact.channel === "whatsapp" ? (
                           <MessageCircle className="size-3.5 shrink-0" />
@@ -569,10 +568,10 @@ export default function PublicServices() {
                     <button
                       type="button"
                       onClick={() => openMaps(service)}
-                      className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-bold text-[#0B1014]"
+                      className="min-h-11 rounded-xl bg-[#B7D86B] px-3 text-sm font-bold text-[#0B1014]"
                     >
                       <MapPinned className="mr-1.5 inline size-3.5" />
-                      Rota
+                      Ir até lá
                     </button>
                   )}
                   <button
@@ -602,7 +601,7 @@ export default function PublicServices() {
         </section>
 
         {!results.length && (
-          <section className="mt-5 rounded-3xl border border-white/8 bg-[#121B22] p-6 text-center">
+          <section className="mt-5 rounded-3xl border border-white/8 bg-[#141E23] p-6 text-center">
             <p className="text-sm font-black">
               {savedOnly && !favoriteCount
                 ? "Nenhum serviço salvo ainda."
@@ -620,7 +619,7 @@ export default function PublicServices() {
                 setCategory("todos");
                 applyFilters("", "todos", false, false);
               }}
-              className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-sm font-bold text-[#0B1014]"
+              className="mt-3 min-h-11 rounded-xl bg-[#B7D86B] px-4 text-sm font-bold text-[#0B1014]"
             >
               Limpar filtros
             </button>
@@ -630,9 +629,9 @@ export default function PublicServices() {
         <section className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-4">
           <div className="flex items-start gap-3">
             {online ? (
-              <Building2 className="mt-0.5 size-4 text-[#C7FF3C]" />
+              <Building2 className="mt-0.5 size-4 text-[#B7D86B]" />
             ) : (
-              <WifiOff className="mt-0.5 size-4 text-[#FFB86B]" />
+              <WifiOff className="mt-0.5 size-4 text-[#D8B47A]" />
             )}
             <div>
               <p className="text-xs font-black">
@@ -641,7 +640,7 @@ export default function PublicServices() {
               <p className="mt-1 text-sm leading-relaxed text-white/70">
                 {online
                   ? "Endereços, contatos e fontes são apresentados como cadastro local; a navegação abre o mapa escolhido."
-                  : "Este catálogo continua visível sem internet. Rotas, mapa externo e atualizações em tempo real podem exigir conexão."}
+                  : "Este catálogo continua visível sem internet. Ir até lás, mapa externo e atualizações em tempo real podem exigir conexão."}
               </p>
             </div>
           </div>
