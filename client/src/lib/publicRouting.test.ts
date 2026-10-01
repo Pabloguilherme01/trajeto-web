@@ -149,6 +149,19 @@ describe("public routing fallback", () => {
   });
 
   it("does not persist typed addresses in plaintext geocode cache keys", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: (index: number) => Array.from(saved.keys())[index] ?? null,
+      get length() {
+        return saved.size;
+      },
+    };
+    vi.stubGlobal("localStorage", storage);
+
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -170,12 +183,7 @@ describe("public routing fallback", () => {
     const typedAddress = "Rua Particular 123, Águas Lindas de Goiás, GO";
     await calculatePublicRoute("-15.7545,-48.2816", typedAddress);
 
-    const keys: string[] = [];
-    for (let index = 0; index < localStorage.length; index += 1) {
-      const key = localStorage.key(index);
-      if (key) keys.push(key);
-    }
-
+    const keys = Array.from(saved.keys());
     expect(keys.some(key => key.startsWith("trajeto:public-routing:geocode:"))).toBe(true);
     expect(keys.join(" ").toLocaleLowerCase("pt-BR")).not.toContain(
       "rua particular 123"
