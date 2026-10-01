@@ -31,6 +31,7 @@ type RouteMapProps = {
   destination?: { lat: number; lng: number };
   stops: Stop[];
   routes?: RoutePreview[];
+  privateOrigin?: boolean;
 };
 
 export function OfflineRoutePreview({
@@ -38,6 +39,7 @@ export function OfflineRoutePreview({
   destination,
   stops = [],
   routes = [],
+  privateOrigin = false,
 }: RouteMapProps) {
   const [zoom, setZoom] = useState(1);
   const validOrigin = isMapPoint(origin) ? origin : undefined;
@@ -91,11 +93,11 @@ export function OfflineRoutePreview({
       : []),
   ];
   const navigation =
-    validOrigin && validDestination
-      ? "https://www.google.com/maps/dir/?api=1&origin=" +
-        validOrigin.lat +
-        "," +
-        validOrigin.lng +
+    validDestination
+      ? "https://www.google.com/maps/dir/?api=1" +
+        (privateOrigin || !validOrigin
+          ? ""
+          : "&origin=" + validOrigin.lat + "," + validOrigin.lng) +
         "&destination=" +
         validDestination.lat +
         "," +
@@ -234,6 +236,7 @@ export function RouteMap({
   destination,
   stops,
   routes = [],
+  privateOrigin = false,
 }: RouteMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -440,6 +443,23 @@ export function RouteMap({
     trafficImpactSeconds == null
       ? null
       : Math.max(0, Math.round(trafficImpactSeconds / 60));
+
+  if (privateOrigin) {
+    return (
+      <section
+        className="relative h-[min(68vh,620px)] min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
+        aria-label="Prévia privada da viagem"
+      >
+        <OfflineRoutePreview
+          origin={origin}
+          destination={destination}
+          routes={routes}
+          stops={stops}
+          privateOrigin
+        />
+      </section>
+    );
+  }
 
   const toggleTraffic = () => {
     if (!mapRef.current) return;

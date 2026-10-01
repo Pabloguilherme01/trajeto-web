@@ -12,7 +12,8 @@ import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
-import { buildPublicRoutePayload, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
+import { PRIVATE_LOCATION_LABEL, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -57,6 +58,8 @@ export default function Planner() {
   const [error, setError] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [locating, setLocating] = useState(false);
+  const [originPrivate, setOriginPrivate] = useState(false);
+  const privateOriginRef = useRef<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
@@ -118,6 +121,8 @@ export default function Planner() {
       void getOfflineRoute(routeId).then(route => {
         if (!active) return;
         if (!route) { setError("Esta rota não está salva neste aparelho."); return; }
+        privateOriginRef.current = null;
+        setOriginPrivate(false);
         setOrigin(route.origin);
         setDestination(route.destination);
         setPlanned(route.payload as PlannedRoute);
@@ -126,6 +131,8 @@ export default function Planner() {
         setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
       }).catch(() => { if (active) setError("Não foi possível abrir a rota salva."); });
     } else if (queryParams.has("origem") || queryParams.has("destino")) {
+      privateOriginRef.current = null;
+      setOriginPrivate(false);
       setOrigin(queryParams.get("origem") ?? "");
       setDestination(queryParams.get("destino") ?? "");
     }
@@ -153,6 +160,10 @@ export default function Planner() {
       setError("Preencha o destino com pelo menos 3 caracteres.");
       return;
     }
+    if (isCurrentLocationLabel(from) && !originPrivate) {
+      setError("Para recalcular a partir da sua posição, toque em usar localização atual.");
+      return;
+    }
     if (!staticRuntime && from.length < 3) {
       setError("Preencha a origem com pelo menos 3 caracteres.");
       return;
@@ -169,7 +180,7 @@ export default function Planner() {
     resetResult();
     const version = requestVersion.current;
 
-    if (staticRuntime || mode !== "driving") {
+    if (staticRuntime || mode !== "driving" || originPrivate) {
       setError(null);
       setFallbackReady(false);
       setPublicRoutePending(true);
@@ -185,7 +196,9 @@ export default function Planner() {
           vibration(12);
           return;
         }
-        const publicRoute = await calculatePublicRoute(resolvedOrigin, to, mode);
+        const publicRoute = originPrivate && privateOriginRef.current
+          ? await calculatePrivateLocationRoute(privateOriginRef.current, to, mode)
+          : await calculatePublicRoute(resolvedOrigin, to, mode);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
@@ -194,7 +207,7 @@ export default function Planner() {
           : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.";
         const autoSaved = await persistRouteLocally(publicPayload, resolvedOrigin, to);
         setSavedMessage(baseMessage + (autoSaved ? " Cópia offline criada automaticamente." : ""));
-        if (resolvedOrigin) rememberTrip(resolvedOrigin, to);
+        if (resolvedOrigin) rememberTrip(originPrivate ? privateOriginForHistory(resolvedOrigin) : resolvedOrigin, to);
         track("route_open", to);
         vibration(14);
         return;
@@ -203,7 +216,7 @@ export default function Planner() {
         setSavedMessage(null);
         setFallbackReady(true);
         setError(routeError instanceof Error ? routeError.message : "Não foi possível calcular a rota pública.");
-        if (publicOrigin) rememberTrip(publicOrigin, to);
+        if (publicOrigin) rememberTrip(originPrivate ? privateOriginForHistory(publicOrigin) : publicOrigin, to);
         vibration(8);
         return;
       } finally {
@@ -215,7 +228,7 @@ export default function Planner() {
     setSavedMessage(null);
     setFallbackReady(false);
     setShowMap(false);
-    rememberTrip(from, to);
+    rememberTrip(originPrivate ? privateOriginForHistory(from) : from, to);
     track("route_open", to);
     try {
       const result = await planRoute.mutateAsync({ origin: from, destination: to });
@@ -241,7 +254,9 @@ export default function Planner() {
       position => {
         setLocating(false);
         resetResult();
-        setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
+        privateOriginRef.current = position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5);
+        setOriginPrivate(true);
+        setOrigin(PRIVATE_LOCATION_LABEL);
         vibration(14);
       },
       () => {
@@ -254,6 +269,14 @@ export default function Planner() {
 
   const swap = () => {
     resetResult();
+    if (originPrivate) {
+      privateOriginRef.current = null;
+      setOriginPrivate(false);
+      setOrigin(destination);
+      setDestination("");
+      vibration();
+      return;
+    }
     setOrigin(destination);
     setDestination(origin);
     vibration();
@@ -261,12 +284,14 @@ export default function Planner() {
 
   const clear = () => {
     resetResult();
+    privateOriginRef.current = null;
+    setOriginPrivate(false);
     setOrigin("");
     setDestination("");
   };
 
   const persistRouteLocally = async (route: PlannedRoute, routeOrigin: string, routeDestination: string) => {
-    const normalizedOrigin = routeOrigin.trim();
+    const normalizedOrigin = originPrivate ? privateOriginForHistory(routeOrigin) : routeOrigin.trim();
     const normalizedDestination = routeDestination.trim();
     if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
     try {
@@ -316,7 +341,9 @@ export default function Planner() {
         detourKm: planned.recommendation.detourKm,
         detourSource: planned.recommendation.detourSource,
       } : null);
-      const url = window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(origin.trim()) + "&destino=" + encodeURIComponent(destination.trim()) + "&modo=" + encodeURIComponent(mode);
+      const params = new URLSearchParams({ destino: destination.trim(), modo: mode });
+      if (!originPrivate) params.set("origem", origin.trim());
+      const url = window.location.origin + appUrl("/planejar") + "?" + params.toString();
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
     } catch {}
@@ -324,18 +351,19 @@ export default function Planner() {
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
     const googleMode = mode === "walking" ? "walking" : mode === "cycling" ? "bicycling" : mode === "transit" ? "transit" : "driving";
+    const externalOrigin = originPrivate ? privateOriginForExternalNavigation(PRIVATE_LOCATION_LABEL) : origin;
     const target = provider === "google"
-      ? buildGoogleMapsDirectionsUrl(origin, destination, googleMode, true)
+      ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
       : provider === "waze"
         ? buildWazeNavigationUrl(destination)
-        : buildAppleMapsDirectionsUrl(destination, origin);
+        : buildAppleMapsDirectionsUrl(destination, externalOrigin);
     window.open(target, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
 
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
     if (!stop) { setSavedMessage("Não há endereço disponível para esta parada."); return; }
-    window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
+    window.open(buildGoogleMapsDirectionsUrl(originPrivate ? "" : origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
   const availableDestinations = useMemo(() => {
@@ -389,7 +417,7 @@ export default function Planner() {
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                  <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
+                  <input value={origin} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
@@ -691,7 +719,7 @@ export default function Planner() {
                   <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
                 </div>
                 <div className="h-[min(68vh,520px)]">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} />
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={originPrivate} />
                 </div>
               </section>
             )}

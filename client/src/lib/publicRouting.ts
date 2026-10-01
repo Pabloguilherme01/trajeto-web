@@ -1,4 +1,7 @@
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
+import { LOCAL_PLACES } from "@/lib/localPlaces";
+import { PUBLIC_SERVICES } from "@/lib/publicServices";
+import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -48,6 +51,51 @@ function normalizeSearch(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function expandLocalQuery(value: string) {
+  const normalized = normalizeSearch(value);
+  if (!normalized || normalized.length < 3) return value;
+
+  const serviceMatches = PUBLIC_SERVICES.filter(service => {
+    const name = normalizeSearch(service.name);
+    const haystack = normalizeSearch(
+      [service.name, service.address, service.mapQuery, ...(service.keywords ?? [])]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      name === normalized ||
+      name.includes(normalized) ||
+      normalized.includes(name) ||
+      haystack === normalized
+    );
+  });
+  if (serviceMatches.length === 1) {
+    const service = serviceMatches[0];
+    return service.mapQuery || service.address || service.name;
+  }
+
+  const placeMatches = LOCAL_PLACES.filter(place => {
+    const name = normalizeSearch(place.name);
+    const haystack = normalizeSearch(
+      [place.name, place.address, place.mapQuery, ...(place.tags ?? [])]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      name === normalized ||
+      name.includes(normalized) ||
+      normalized.includes(name) ||
+      haystack === normalized
+    );
+  });
+  if (placeMatches.length === 1) {
+    const place = placeMatches[0];
+    return place.mapQuery || place.address || place.name;
+  }
+
+  return value;
+}
+
 function parseCoordinateInput(value: string): PublicCoordinate | null {
   const match = normalizeText(value).match(
     /^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/
@@ -76,6 +124,9 @@ async function fetchJson<T>(url: string): Promise<T> {
       method: "GET",
       headers: { Accept: "application/json" },
       signal: controller.signal,
+      credentials: "omit",
+      referrerPolicy: "origin",
+      cache: "no-store",
     });
     if (!response.ok) throw new Error("Serviço de rota indisponível.");
     return (await response.json()) as T;
@@ -187,6 +238,33 @@ function localGeocode(value: string): PublicCoordinate | null {
     return { lat: -15.7545, lng: -48.2816 };
   }
 
+  const snapshotMatches = getOfflineAnpSnapshot().rows.filter(row => {
+    if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
+      return false;
+    const rowText = normalizeSearch(
+      [
+        row.cnpj,
+        row.razaoSocial,
+        row.endereco,
+        row.bairro,
+        row.municipio,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      rowText === normalized ||
+      rowText.includes(normalized) ||
+      normalized.includes(normalizeSearch(row.razaoSocial || ""))
+    );
+  });
+  if (snapshotMatches.length === 1) {
+    return {
+      lat: Number(snapshotMatches[0].latitude),
+      lng: Number(snapshotMatches[0].longitude),
+    };
+  }
+
   const matches = searchAguasLindasStations(value);
   const withCoordinates = matches.filter(
     station =>
@@ -248,19 +326,24 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     return fetchJson<NominatimResult[]>(url.toString());
   };
 
-  let results: NominatimResult[] = [];
-  try {
-    results = await request(query);
-  } catch {
-    results = [];
-  }
+  const expanded = expandLocalQuery(query);
+  const attempts = Array.from(
+    new Set([
+      expanded,
+      query,
+      query + ", Águas Lindas de Goiás, Goiás, Brasil",
+    ])
+  );
 
-  let result = results[0];
-  if (!result?.lat || !result.lon) {
+  let result: NominatimResult | undefined;
+  for (const attempt of attempts) {
     try {
-      results = await request(query + ", Águas Lindas de Goiás, Goiás, Brasil");
+      const results = await request(attempt);
       result = results[0];
-    } catch {}
+      if (result?.lat && result.lon) break;
+    } catch {
+      // Try the next query form before giving up.
+    }
   }
 
   const lat = Number(result?.lat);
@@ -280,6 +363,8 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const geocodedCoordinate = { lat, lng };
   cacheSet(cacheKey, geocodedCoordinate);
+  const expandedKey = "geocode:" + expanded.toLocaleLowerCase("pt-BR");
+  if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
   return geocodedCoordinate;
 }
 
@@ -382,6 +467,33 @@ function buildLocalEstimate(
   };
 }
 
+export async function calculatePrivateLocationRoute(
+  originText: string,
+  destinationText: string,
+  mode: PublicTravelMode = "driving"
+): Promise<PublicRoute> {
+  const parsedOrigin = parseCoordinateInput(originText);
+  if (!parsedOrigin) {
+    throw new Error("A origem privada precisa vir da localização deste aparelho.");
+  }
+
+  // Keep the exact GPS fix in memory only. The value used by the local estimate
+  // is rounded to roughly a city block before it can reach route state/storage.
+  const origin = {
+    lat: Math.round(parsedOrigin.lat * 1000) / 1000,
+    lng: Math.round(parsedOrigin.lng * 1000) / 1000,
+  };
+  const destination = await geocode(destinationText);
+
+  if (haversineMeters(origin, destination) < 20) {
+    throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
+  }
+
+  // Deliberately do not call OSRM here. Only the destination may need
+  // geocoding; the user's current location never leaves the device.
+  return buildLocalEstimate(origin, destination, mode);
+}
+
 export async function calculatePublicRoute(
   originText: string,
   destinationText: string,
@@ -389,6 +501,9 @@ export async function calculatePublicRoute(
 ): Promise<PublicRoute> {
   const origin = await geocode(originText);
   const destination = await geocode(destinationText);
+  if (haversineMeters(origin, destination) < 20) {
+    throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
+  }
   const coordinateKey =
     [
       origin.lat.toFixed(5),

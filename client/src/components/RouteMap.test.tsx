@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { OfflineRoutePreview, RouteMap } from "./RouteMap";
 
@@ -75,6 +75,24 @@ describe("RouteMap", () => {
         .hasAttribute("disabled")
     ).toBe(true);
   });
+  it("omits a private device origin from external map navigation", () => {
+    render(
+      <RouteMap
+        origin={{ lat: -15.761, lng: -48.281 }}
+        destination={{ lat: -15.8, lng: -48.2 }}
+        stops={[]}
+        privateOrigin
+      />
+    );
+    const region = screen.getByRole("region", { name: "Prévia privada da viagem" });
+    expect(region).toBeTruthy();
+    const href = within(region)
+      .getByRole("link", { name: "Abrir no Google Maps" })
+      .getAttribute("href") || "";
+    expect(href).not.toContain("origin=");
+    expect(href).toContain("destination=");
+  });
+
   it("oferece mapa grande, enquadramento, trânsito, satélite e zoom", () => {
     render(
       <RouteMap
