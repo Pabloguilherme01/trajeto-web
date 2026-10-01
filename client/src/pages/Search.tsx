@@ -37,6 +37,7 @@ import {
 } from "@/lib/localRoutePresets";
 import { localDataEvent } from "@/lib/localData";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
+import { PUBLIC_SERVICE_SHORTCUTS } from "@/lib/publicServices";
 
 const quickActions = [
   {
@@ -137,21 +138,23 @@ function ResultCard({
   title,
   detail,
   source,
+  actionLabel = "Abrir",
   onClick,
 }: {
   icon: LucideIcon;
   title: string;
   detail: string;
   source?: string;
+  actionLabel?: string;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-20 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
+      className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3.5 text-left shadow-[0_10px_28px_rgba(0,0,0,.12)] transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
     >
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
         <Icon className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
@@ -164,6 +167,9 @@ function ResultCard({
             {source}
           </span>
         )}
+        <span className="mt-2 inline-flex min-h-7 items-center rounded-lg bg-white/[.05] px-2 text-xs font-bold text-white/80">
+          {actionLabel}
+        </span>
       </span>
       <ArrowRight className="size-4 shrink-0 text-white/70" />
     </button>
@@ -214,7 +220,8 @@ export default function SearchPage() {
     setResultLimit(6);
   }, [params]);
 
-  const results = useMemo(() => getUniversalSearchResults(query), [query]);
+  const liveQuery = input.trim();
+  const results = useMemo(() => getUniversalSearchResults(liveQuery), [liveQuery]);
   const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
   const search = (value: string) => {
     const next = value.trim();
@@ -229,6 +236,7 @@ export default function SearchPage() {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     search(input);
+    inputRef.current?.blur();
   };
   const openExternal = (value: string) => {
     if (online)
@@ -302,9 +310,11 @@ export default function SearchPage() {
         aria-label={action.label}
         onClick={() => openQuick(action)}
         disabled={!online && action.kind === "external"}
-        className="flex min-h-20 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 disabled:opacity-60"
+        className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left shadow-[0_10px_28px_rgba(0,0,0,.1)] transition hover:border-[#C7FF3C]/30 disabled:opacity-60"
       >
-        <Icon className="size-5 shrink-0 text-[#C7FF3C]" />
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+          <Icon className="size-5" />
+        </span>
         <span className="min-w-0">
           <span className="block break-words text-sm font-bold">
             {action.label}
@@ -340,10 +350,16 @@ export default function SearchPage() {
           <input
             ref={inputRef}
             value={input}
-            onChange={event => setInput(event.target.value)}
+            onChange={event => {
+              setInput(event.target.value);
+              setResultLimit(6);
+            }}
             placeholder="Ex.: CRAS, falta de luz, bairro"
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/70"
             autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            inputMode="search"
             enterKeyHint="search"
             aria-label="Buscar locais e serviços"
             aria-keyshortcuts="Control+K Meta+K"
@@ -379,7 +395,7 @@ export default function SearchPage() {
           </p>
         )}
 
-        {query ? (
+        {liveQuery ? (
           <div className="mt-5 space-y-5" aria-label="Resultados da busca">
             <p
               role="status"
@@ -387,8 +403,8 @@ export default function SearchPage() {
               className="break-words text-sm text-white/80"
             >
               {results.total
-                ? results.total + " resultado(s) para “" + query + "”"
-                : "Nenhum resultado local para “" + query + "”."}
+                ? results.total + " resultado(s) para “" + liveQuery + "”"
+                : "Nenhum resultado local para “" + liveQuery + "”."}
             </p>
             {results.services.length > 0 && (
               <section aria-labelledby="search-services-title">
@@ -403,7 +419,7 @@ export default function SearchPage() {
                     type="button"
                     onClick={() =>
                       setLocation(
-                        appUrl("/servicos") + "?q=" + encodeURIComponent(query)
+                        appUrl("/servicos") + "?q=" + encodeURIComponent(liveQuery)
                       )
                     }
                     className="mt-3 min-h-11 w-full rounded-xl border border-[#C7FF3C]/30 px-3 py-2 text-sm font-bold"
@@ -419,6 +435,7 @@ export default function SearchPage() {
                       title={item.name}
                       detail={item.description}
                       source={item.sourceLabel}
+                      actionLabel="Abrir serviço"
                       onClick={() =>
                         setLocation(
                           appUrl("/servicos") +
@@ -455,6 +472,7 @@ export default function SearchPage() {
                           ? "Fonte: ANP"
                           : "Catálogo local"
                       }
+                      actionLabel="Ver posto"
                       onClick={() =>
                         setLocation(
                           appUrl("/local/" + encodeURIComponent(item.id))
@@ -487,6 +505,7 @@ export default function SearchPage() {
                       title={item.name}
                       detail={item.detail + " · " + item.address}
                       source={item.sourceLabel}
+                      actionLabel="Planejar rota"
                       onClick={() => openRoute(item.mapQuery)}
                     />
                   ))}
@@ -508,6 +527,7 @@ export default function SearchPage() {
                       icon={Route}
                       title={item.label}
                       detail={item.detail}
+                      actionLabel="Planejar rota"
                       onClick={() => openRoute(item.destination)}
                     />
                   ))}
@@ -544,7 +564,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    openExternal(query + ", Águas Lindas de Goiás, GO")
+                    openExternal(liveQuery + ", Águas Lindas de Goiás, GO")
                   }
                   disabled={!online}
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-bold disabled:opacity-60"
@@ -593,6 +613,34 @@ export default function SearchPage() {
                 >
                   {quickActions.slice(4).map(renderQuick)}
                 </div>
+              </div>
+            </section>
+            <section className="mt-5" aria-labelledby="search-needs-title">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h2 id="search-needs-title" className="text-sm font-bold text-white/80">
+                    Resolver uma necessidade
+                  </h2>
+                  <p className="mt-1 text-xs leading-relaxed text-white/60">
+                    Atalhos ligados ao catálogo público verificado.
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full border border-white/10 px-2 py-1 text-xs font-bold text-white/60">
+                  local
+                </span>
+              </div>
+              <div className="mobile-scroll-x mt-2 flex snap-x gap-2 overflow-x-auto pb-1">
+                {PUBLIC_SERVICE_SHORTCUTS.slice(0, 8).map(item => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => search(item.query)}
+                    className="min-h-20 w-[13.5rem] shrink-0 snap-start rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left"
+                  >
+                    <span className="block text-sm font-bold text-white">{item.label}</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-white/65">{item.hint}</span>
+                  </button>
+                ))}
               </div>
             </section>
             {recents.length > 0 && (
