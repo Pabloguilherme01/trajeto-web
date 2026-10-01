@@ -1,4 +1,8 @@
+import type { TripCalculatorModeSelection } from "@/lib/tripCalculatorModes";
+
 export type TripCalculatorDraft = {
+  mode?: TripCalculatorModeSelection;
+  recurring?: boolean;
   distance: string;
   price: string;
   consumption: string;

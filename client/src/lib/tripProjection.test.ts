@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectTripCosts } from "./tripProjection";
+import { fuelLitersFromTankFraction, projectTripCosts } from "./tripProjection";
 
 describe("projectTripCosts", () => {
   it("calcula ida e volta e projeção semanal e mensal", () => {
@@ -52,5 +52,29 @@ describe("projectTripCosts", () => {
     expect(result.costPerKm).toBe(0);
     expect(result.weeklyCost).toBe(0);
     expect(result.monthlyCost).toBe(0);
+  });
+
+  it("não cria projeção semanal ou mensal para viagem pontual", () => {
+    const result = projectTripCosts({
+      oneWayDistanceKm: 30,
+      oneWayCost: 18,
+      roundTrip: false,
+      tripsPerWeek: 7,
+      recurring: false,
+    });
+
+    expect(result.costPerTrip).toBe(18);
+    expect(result.recurring).toBe(false);
+    expect(result.weeklyCost).toBe(0);
+    expect(result.monthlyCost).toBe(0);
+    expect(result.annualCost).toBe(0);
+  });
+
+  it("converte atalhos do marcador de tanque sem ultrapassar a capacidade", () => {
+    expect(fuelLitersFromTankFraction(40, 0.25)).toBe(10);
+    expect(fuelLitersFromTankFraction(40, 0.5)).toBe(20);
+    expect(fuelLitersFromTankFraction(40, 1)).toBe(40);
+    expect(fuelLitersFromTankFraction(40, 1.5)).toBe(40);
+    expect(fuelLitersFromTankFraction(40, -1)).toBe(0);
   });
 });
