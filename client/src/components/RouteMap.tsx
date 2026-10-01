@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
@@ -224,6 +224,388 @@ export function OfflineRoutePreview({
           O aplicativo externo pode exigir internet. A prévia local não oferece
           navegação curva a curva.
         </p>
+      </div>
+    </div>
+  );
+}
+
+
+const TILE_SIZE = 256;
+
+function clampMapLatitude(lat: number) {
+  return Math.max(-85.05112878, Math.min(85.05112878, lat));
+}
+
+function projectTilePoint(lat: number, lng: number, zoom: number) {
+  const scale = TILE_SIZE * 2 ** zoom;
+  const sin = Math.sin((clampMapLatitude(lat) * Math.PI) / 180);
+  return {
+    x: ((lng + 180) / 360) * scale,
+    y:
+      (0.5 -
+        Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) *
+      scale,
+  };
+}
+
+function unprojectTilePoint(x: number, y: number, zoom: number) {
+  const scale = TILE_SIZE * 2 ** zoom;
+  const lng = (x / scale) * 360 - 180;
+  const n = Math.PI - (2 * Math.PI * y) / scale;
+  const lat = (180 / Math.PI) * Math.atan(Math.sinh(n));
+  return { lat, lng };
+}
+
+function wrapTileX(x: number, zoom: number) {
+  const max = 2 ** zoom;
+  return ((x % max) + max) % max;
+}
+
+function TileRouteMap({
+  origin,
+  destination,
+  stops = [],
+  routes = [],
+  fallback,
+}: RouteMapProps & { fallback: React.ReactNode }) {
+  const selected = routes.find(route => route.selected) ?? routes[0];
+  const routePoints = useMemo(
+    () => decodeMapPolyline(selected?.polyline ?? ""),
+    [selected?.polyline]
+  );
+  const validOrigin = isMapPoint(origin) ? origin : undefined;
+  const validDestination = isMapPoint(destination) ? destination : undefined;
+  const validStops = stops.filter(isMapPoint);
+  const allPoints = useMemo(
+    () =>
+      [validOrigin, validDestination, ...validStops, ...routePoints].filter(
+        isMapPoint
+      ),
+    [
+      validOrigin?.lat,
+      validOrigin?.lng,
+      validDestination?.lat,
+      validDestination?.lng,
+      validStops.map(point => point.placeId).join("|"),
+      selected?.polyline,
+    ]
+  );
+  const initialCenter = allPoints.length
+    ? {
+        lat:
+          allPoints.reduce((sum, point) => sum + point.lat, 0) /
+          allPoints.length,
+        lng:
+          allPoints.reduce((sum, point) => sum + point.lng, 0) /
+          allPoints.length,
+      }
+    : { lat: -15.7545, lng: -48.2816 };
+  const [center, setCenter] = useState(initialCenter);
+  const [zoom, setZoom] = useState(13);
+  const [size, setSize] = useState({ width: 320, height: 460 });
+  const [tileErrors, setTileErrors] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const viewport = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    cx: number;
+    cy: number;
+  } | null>(null);
+
+  const fitRoute = React.useCallback(() => {
+    if (!allPoints.length) return;
+    const minLat = Math.min(...allPoints.map(point => point.lat));
+    const maxLat = Math.max(...allPoints.map(point => point.lat));
+    const minLng = Math.min(...allPoints.map(point => point.lng));
+    const maxLng = Math.max(...allPoints.map(point => point.lng));
+    setCenter({
+      lat: (minLat + maxLat) / 2,
+      lng: (minLng + maxLng) / 2,
+    });
+    let nextZoom = 17;
+    while (nextZoom > 8) {
+      const a = projectTilePoint(minLat, minLng, nextZoom);
+      const b = projectTilePoint(maxLat, maxLng, nextZoom);
+      if (
+        Math.abs(b.x - a.x) <= Math.max(80, size.width - 72) &&
+        Math.abs(b.y - a.y) <= Math.max(100, size.height - 150)
+      )
+        break;
+      nextZoom -= 1;
+    }
+    setZoom(nextZoom);
+  }, [allPoints, size.width, size.height]);
+
+  useEffect(() => {
+    const target = viewport.current;
+    if (!target) return;
+    const measure = () =>
+      setSize({
+        width: target.clientWidth || 320,
+        height: target.clientHeight || 460,
+      });
+    measure();
+    const observer =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(target);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  useEffect(() => {
+    fitRoute();
+  }, [fitRoute, selected?.polyline]);
+
+  if (!allPoints.length) return <>{fallback}</>;
+  if (tileErrors >= 5) return <>{fallback}</>;
+
+  const centerPx = projectTilePoint(center.lat, center.lng, zoom);
+  const baseTileX = Math.floor(centerPx.x / TILE_SIZE);
+  const baseTileY = Math.floor(centerPx.y / TILE_SIZE);
+  const radius = 2;
+  const tiles: Array<{
+    key: string;
+    x: number;
+    y: number;
+    left: number;
+    top: number;
+  }> = [];
+  for (let dy = -radius; dy <= radius; dy++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      const rawX = baseTileX + dx;
+      const y = baseTileY + dy;
+      tiles.push({
+        key: `${zoom}:${rawX}:${y}`,
+        x: wrapTileX(rawX, zoom),
+        y,
+        left: (dx + radius) * TILE_SIZE,
+        top: (dy + radius) * TILE_SIZE,
+      });
+    }
+  }
+
+  const screenPoint = (point: { lat: number; lng: number }) => {
+    const projected = projectTilePoint(point.lat, point.lng, zoom);
+    return {
+      x: size.width / 2 + projected.x - centerPx.x,
+      y: size.height / 2 + projected.y - centerPx.y,
+    };
+  };
+  const routePath = routePoints
+    .map((point, index) => {
+      const screen = screenPoint(point);
+      return `${index ? "L" : "M"}${screen.x} ${screen.y}`;
+    })
+    .join(" ");
+
+  const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      cx: centerPx.x,
+      cy: centerPx.y,
+    };
+    setDragging(true);
+  };
+  const drag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const state = dragRef.current;
+    if (!state || state.id !== event.pointerId) return;
+    setCenter(
+      unprojectTilePoint(
+        state.cx - (event.clientX - state.x),
+        state.cy - (event.clientY - state.y),
+        zoom
+      )
+    );
+  };
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.id !== event.pointerId) return;
+    dragRef.current = null;
+    setDragging(false);
+  };
+  const changeZoom = (delta: number) =>
+    setZoom(value => Math.max(8, Math.min(18, value + delta)));
+
+  const markerItems = [
+    ...(validOrigin
+      ? [{ point: validOrigin, label: "A", name: "Origem", tone: "bg-[#3DE3FF]" }]
+      : []),
+    ...validStops.map((point, index) => ({
+      point,
+      label: String(index + 1),
+      name: point.name,
+      tone: "bg-white",
+    })),
+    ...(validDestination
+      ? [{ point: validDestination, label: "B", name: "Destino", tone: "bg-[#C7FF3C]" }]
+      : []),
+  ];
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden bg-[#dfe9e2] text-[#163840]">
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={viewport}
+          role="region"
+          aria-label="Mapa de ruas da rota"
+          tabIndex={0}
+          onKeyDown={event => {
+            if (event.target !== event.currentTarget) return;
+            const offsets: Record<string, [number, number]> = {
+              ArrowRight: [80, 0],
+              ArrowLeft: [-80, 0],
+              ArrowDown: [0, 80],
+              ArrowUp: [0, -80],
+            };
+            const offset = offsets[event.key];
+            if (offset)
+              setCenter(
+                unprojectTilePoint(
+                  centerPx.x + offset[0],
+                  centerPx.y + offset[1],
+                  zoom
+                )
+              );
+            else if (event.key === "+" || event.key === "=") changeZoom(1);
+            else if (event.key === "-") changeZoom(-1);
+            else if (event.key === "Home") fitRoute();
+            else return;
+            event.preventDefault();
+          }}
+          onPointerDown={beginDrag}
+          onPointerMove={drag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          className={
+            "absolute inset-0 select-none touch-none overflow-hidden " +
+            (dragging ? "cursor-grabbing" : "cursor-grab")
+          }
+        >
+          <div
+            className="absolute"
+            style={{
+              width: TILE_SIZE * (radius * 2 + 1),
+              height: TILE_SIZE * (radius * 2 + 1),
+              left:
+                size.width / 2 -
+                radius * TILE_SIZE -
+                (centerPx.x - baseTileX * TILE_SIZE),
+              top:
+                size.height / 2 -
+                radius * TILE_SIZE -
+                (centerPx.y - baseTileY * TILE_SIZE),
+            }}
+          >
+            {tiles.map(tile => (
+              <img
+                key={tile.key}
+                src={`https://tile.openstreetmap.org/${zoom}/${tile.x}/${tile.y}.png`}
+                alt=""
+                draggable={false}
+                onError={() => setTileErrors(value => value + 1)}
+                className="absolute size-64 max-w-none"
+                style={{ left: tile.left, top: tile.top }}
+              />
+            ))}
+          </div>
+          <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+            {routePath && (
+              <>
+                <path
+                  d={routePath}
+                  fill="none"
+                  stroke="rgba(255,255,255,.92)"
+                  strokeWidth="9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d={routePath}
+                  fill="none"
+                  stroke="#163840"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </>
+            )}
+          </svg>
+          <div className="pointer-events-none absolute inset-0">
+            {markerItems.map((marker, index) => {
+              const position = screenPoint(marker.point);
+              return (
+                <span
+                  key={marker.name + index}
+                  className={
+                    "absolute grid size-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-[#163840] text-xs font-black shadow-lg " +
+                    marker.tone
+                  }
+                  style={{ left: position.x, top: position.y }}
+                  title={marker.name}
+                >
+                  {marker.label}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="absolute left-3 top-3 z-20 flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => changeZoom(1)}
+            className="grid size-11 place-items-center rounded-xl bg-white/95 shadow-lg"
+            aria-label="Aumentar zoom"
+          >
+            <Plus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => changeZoom(-1)}
+            className="grid size-11 place-items-center rounded-xl bg-white/95 shadow-lg"
+            aria-label="Diminuir zoom"
+          >
+            <Minus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={fitRoute}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white/95 px-3 text-xs font-black shadow-lg"
+          >
+            <LocateFixed className="size-4" />
+            Rota
+          </button>
+        </div>
+
+        {selected?.distanceMeters != null && (
+          <div className="absolute bottom-3 left-3 z-20 rounded-xl bg-[#0B1014]/90 px-3 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
+            {(selected.distanceMeters / 1000).toLocaleString("pt-BR", {
+              maximumFractionDigits: 1,
+            })}{" "}
+            km
+            {selected.durationSeconds != null
+              ? " · " + Math.max(1, Math.round(selected.durationSeconds / 60)) + " min"
+              : ""}
+          </div>
+        )}
+      </div>
+      <div className="flex items-center justify-between gap-3 border-t border-black/10 bg-white/95 px-3 py-2 text-xs font-bold text-[#607169]">
+        <span>Rota no próprio Trajeto</span>
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="min-h-11 inline-flex items-center"
+        >
+          © OpenStreetMap
+        </a>
       </div>
     </div>
   );
@@ -457,16 +839,25 @@ export function RouteMap({
   };
 
   if (isGitHubPagesRuntime()) {
+    const fallback = (
+      <OfflineRoutePreview
+        origin={origin}
+        destination={destination}
+        routes={routes}
+        stops={stops}
+      />
+    );
     return (
       <section
         className="relative h-[min(68vh,620px)] min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
         aria-label="Mapa independente da viagem"
       >
-        <OfflineRoutePreview
+        <TileRouteMap
           origin={origin}
           destination={destination}
           routes={routes}
           stops={stops}
+          fallback={fallback}
         />
       </section>
     );
