@@ -108,6 +108,15 @@ describe("public routing fallback", () => {
   });
 
   it("resolves a prepared ANP station from local storage when the network is unavailable", async () => {
+    const saved = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: () => null,
+      length: 0,
+    });
     localStorage.setItem(
       "trajeto-aguas-lindas-anp-offline-v1",
       JSON.stringify({
