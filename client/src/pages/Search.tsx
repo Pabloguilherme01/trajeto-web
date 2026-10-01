@@ -283,22 +283,9 @@ export default function SearchPage() {
       return;
     }
     if (action.kind === "nearby") {
-      if (!navigator.geolocation) {
-        setLocation(appUrl("/postos"));
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        position =>
-          setLocation(
-            appUrl("/postos") +
-              "?q=postos&lat=" +
-              position.coords.latitude +
-              "&lng=" +
-              position.coords.longitude
-          ),
-        () => setLocation(appUrl("/postos") + "?q=postos"),
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
-      );
+      // Pass only the user's intent in the URL. Stations asks for location
+      // locally and keeps the GPS fix out of browser history/shareable links.
+      setLocation(appUrl("/postos") + "?q=postos&perto=1");
       return;
     }
     openExternal(action.query);
