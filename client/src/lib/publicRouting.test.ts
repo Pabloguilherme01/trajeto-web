@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute } from "./publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, resetPublicRoutingRequestBudgetForTests } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
+    resetPublicRoutingRequestBudgetForTests();
     vi.stubGlobal(
       "fetch",
       vi
@@ -243,6 +244,86 @@ describe("public routing fallback", () => {
         Object.defineProperty(globalThis, "localStorage", descriptor);
       else Reflect.deleteProperty(globalThis, "localStorage");
     }
+  });
+
+  it("deduplicates concurrent geocoding for the same destination", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("nominatim")) {
+        return new Response(
+          JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]),
+          { status: 200 }
+        );
+      }
+      if (url.includes("router.project-osrm.org")) {
+        return new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 10123, duration: 845, geometry: "abc123" }],
+          }),
+          { status: 200 }
+        );
+      }
+      throw new Error("unexpected provider");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await Promise.all([
+      calculatePublicRoute("Águas Lindas de Goiás, GO", "Brasília, DF"),
+      calculatePublicRoute("Águas Lindas de Goiás, GO", "Brasília, DF"),
+    ]);
+
+    const geocoderCalls = fetchMock.mock.calls.filter(call =>
+      String(call[0]).includes("nominatim")
+    );
+    expect(geocoderCalls).toHaveLength(1);
+  });
+
+  it("keeps automatic routing cache session-only and removes legacy persistent entries", async () => {
+    const persistent = new Map<string, string>([
+      ["trajeto:public-routing:geocode:casa", JSON.stringify({ lat: -15.7, lng: -48.2 })],
+      ["unrelated", "keep"],
+    ]);
+    const session = new Map<string, string>();
+    const storage = (map: Map<string, string>) => ({
+      getItem: (key: string) => map.get(key) ?? null,
+      setItem: (key: string, value: string) => map.set(key, value),
+      removeItem: (key: string) => map.delete(key),
+      clear: () => map.clear(),
+      key: (index: number) => Array.from(map.keys())[index] ?? null,
+      get length() {
+        return map.size;
+      },
+    });
+    vi.stubGlobal("localStorage", storage(persistent));
+    vi.stubGlobal("sessionStorage", storage(session));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 10000, duration: 800, geometry: "road" }],
+          }),
+          { status: 200 }
+        )
+      )
+    );
+
+    await calculatePublicRoute("-15.7,-48.2", "-15.8,-48.3");
+
+    expect(persistent.has("trajeto:public-routing:geocode:casa")).toBe(false);
+    expect(persistent.get("unrelated")).toBe("keep");
+    expect(
+      Array.from(session.keys()).some(key =>
+        key.startsWith("trajeto:public-routing:route:")
+      )
+    ).toBe(true);
+    expect(
+      Array.from(persistent.keys()).some(key =>
+        key.startsWith("trajeto:public-routing:")
+      )
+    ).toBe(false);
   });
 
   it("turns the public route into the planner contract", () => {
