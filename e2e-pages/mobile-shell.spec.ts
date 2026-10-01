@@ -55,6 +55,29 @@ test("Pages: core citizen flows stay inside a 320px viewport and keep the dock t
   }
 });
 
+test("Pages: search stays useful while the keyboard is open and restores the dock after submit", async ({
+  page,
+}) => {
+  await page.goto("buscar", { waitUntil: "domcontentloaded" });
+  const nav = page.getByRole("navigation", { name: "Navegação móvel" });
+  const input = page.getByRole("textbox", { name: "Buscar locais e serviços" });
+
+  await input.focus();
+  await expect(nav).toBeHidden();
+  await input.fill("dengue");
+  await expect(page.getByText("Vigilância em Saúde", { exact: true })).toBeVisible();
+  await expect(page.getByText(/resultado\(s\) para “dengue”/i)).toBeVisible();
+
+  await input.press("Enter");
+  await expect(nav).toBeVisible();
+  await expect(page).toHaveURL(/buscar\?q=dengue/);
+
+  await page.getByRole("button", { name: "Limpar busca" }).click();
+  await expect(page.getByRole("heading", { name: "Resolver uma necessidade" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Dengue e Vigilância/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Conselho Tutelar/i })).toBeVisible();
+});
+
 test("Pages: More and accessibility behave as bottom sheets on a small phone", async ({
   page,
 }) => {
