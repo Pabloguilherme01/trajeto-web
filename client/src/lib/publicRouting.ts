@@ -193,9 +193,10 @@ async function requestPublicGeocoder(query: string) {
 
   geocoderInFlight.set(key, task);
   geocoderQueue = task.then(() => undefined, () => undefined);
-  void task.finally(() => {
+  const cleanup = () => {
     if (geocoderInFlight.get(key) === task) geocoderInFlight.delete(key);
-  });
+  };
+  void task.then(cleanup, cleanup);
   return task;
 }
 
