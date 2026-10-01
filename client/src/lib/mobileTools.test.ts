@@ -18,7 +18,7 @@ describe("mobile tools", () => {
       "https://www.google.com/maps/search/?api=1&query=postos%20perto%20de%20%C3%81guas%20Lindas",
     );
     expect(buildGoogleMapsNearbyStationsUrl(-15.86, -48.03)).toBe(
-      "https://www.google.com/maps/search/?api=1&query=postos%20de%20combust%C3%ADvel%20%40-15.86%2C-48.03",
+      "https://www.google.com/maps/search/?api=1&query=postos%20de%20combust%C3%ADvel%20perto%20de%20mim",
     );
   });
 
