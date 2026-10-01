@@ -32,6 +32,17 @@ describe("mobile navigation", () => {
     expect(state.navigate).toHaveBeenCalledWith("/servicos");
   });
 
+  it("gets out of the way while the mobile keyboard field is active", async () => {
+    render(<><input aria-label="Campo móvel" /><MobileBottomNav /></>);
+    const nav = screen.getByRole("navigation", { name: "Navegação móvel" });
+    const input = screen.getByRole("textbox", { name: "Campo móvel" });
+    fireEvent.focus(input);
+    await waitFor(() => expect(nav.className).toContain("hidden"));
+    expect(nav.getAttribute("data-editing-field")).toBe("true");
+    fireEvent.blur(input);
+    await waitFor(() => expect(nav.className).not.toContain("hidden"));
+  });
+
   it("opens a fresh planner from Rotas instead of silently restoring a previous trip", () => {
     render(<MobileBottomNav />);
     fireEvent.click(screen.getByRole("button", { name: "Rotas" }));
