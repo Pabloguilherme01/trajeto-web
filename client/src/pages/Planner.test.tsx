@@ -53,11 +53,11 @@ describe("Planner travel state", () => {
     state.staticRuntime = true;
     render(<Planner />);
     submit();
-    await screen.findByRole("button", { name: "Google Maps" });
+    await screen.findByRole("button", { name: "Navegar agora" });
     changeDestination("Hospital");
-    expect(screen.queryByRole("button", { name: "Google Maps" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Navegar agora" })).toBeNull();
     submit();
-    await screen.findByRole("button", { name: "Google Maps" });
+    await screen.findByRole("button", { name: "Navegar agora" });
     fireEvent.click(screen.getByRole("button", { name: "Limpar" }));
     expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
   });
@@ -69,6 +69,15 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(state.mutate).not.toHaveBeenCalled();
+  });
+
+  it("keeps offline saving prominent and secondary providers tucked away", async () => {
+    render(<Planner />);
+    submit();
+    await screen.findByRole("button", { name: "Navegar agora" });
+    expect(screen.getByRole("button", { name: "Salvar offline" })).toBeTruthy();
+    expect(screen.getByText("Escolher navegador")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Mostrar mapa" })).toBeTruthy();
   });
 
   it("ignores a calculation that returns after the destination changed", async () => {
