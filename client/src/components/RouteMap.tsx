@@ -620,7 +620,7 @@ export function TileRouteMap({
           rel="noopener noreferrer"
           className="min-h-11 inline-flex items-center"
         >
-          © OpenStreetMap
+          © OpenStreetMap contributors
         </a>
       </div>
     </div>
