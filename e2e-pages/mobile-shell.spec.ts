@@ -63,11 +63,14 @@ test("Pages: More and accessibility behave as bottom sheets on a small phone", a
   await page.getByRole("button", { name: "Mais opções" }).click();
   const more = page.getByRole("dialog");
   await expect(more).toBeVisible();
+  await expect.poll(async () => {
+    const box = await more.boundingBox();
+    return box ? Math.abs(box.y + box.height - 568) : Number.POSITIVE_INFINITY;
+  }).toBeLessThanOrEqual(1);
   const moreBox = await more.boundingBox();
   expect(moreBox).not.toBeNull();
   expect(moreBox!.x).toBeGreaterThanOrEqual(-0.5);
   expect(moreBox!.x + moreBox!.width).toBeLessThanOrEqual(320.5);
-  expect(Math.abs(moreBox!.y + moreBox!.height - 568)).toBeLessThanOrEqual(2);
   await page.getByRole("button", { name: "Fechar menu" }).click();
 
   await page.getByRole("button", { name: "Abrir acessibilidade" }).click();
