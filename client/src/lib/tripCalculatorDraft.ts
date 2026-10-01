@@ -1,4 +1,4 @@
-export type TripCalculatorDraft = {
+import type { TripCalculatorModeSelection } from "@/lib/tripCalculatorModes";\n\nexport type TripCalculatorDraft = {
   distance: string;
   price: string;
   consumption: string;
