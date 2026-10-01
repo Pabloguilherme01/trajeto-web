@@ -89,6 +89,24 @@ describe("public routing fallback", () => {
     ).toHaveLength(1);
   });
 
+  it("uses at most one public geocoder request for an unknown destination", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify([]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculatePublicRoute(
+        "-15.7545,-48.2816",
+        "Destino desconhecido sem cadastro local"
+      )
+    ).rejects.toThrow(/não foi possível localizar/i);
+
+    expect(
+      fetchMock.mock.calls.filter(call => String(call[0]).includes("nominatim"))
+    ).toHaveLength(1);
+  });
+
   it("geocodes endpoints and calculates a route without the application backend", async () => {
     const route = await calculatePublicRoute(
       "Águas Lindas de Goiás, GO",
