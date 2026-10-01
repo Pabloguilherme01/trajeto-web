@@ -1,8 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute } from "./publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {}
+
     vi.stubGlobal(
       "fetch",
       vi
@@ -28,6 +33,60 @@ describe("public routing fallback", () => {
     try {
       localStorage.removeItem("trajeto-aguas-lindas-anp-offline-v1");
     } catch {}
+  });
+
+  it("calculates the provider wait budget without exceeding one request per second", () => {
+    expect(publicGeocoderWaitMs(1_000, 1_500)).toBe(600);
+    expect(publicGeocoderWaitMs(1_000, 2_100)).toBe(0);
+    expect(publicGeocoderWaitMs(0, 1_500)).toBe(0);
+  });
+
+  it("deduplicates identical geocoder work while a request is in flight", async () => {
+    let resolveGeocoder: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn((url: string | URL | Request) => {
+      const value = String(url);
+      if (value.includes("nominatim")) {
+        return new Promise<Response>(resolve => {
+          resolveGeocoder = resolve;
+        });
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 2100, duration: 240, geometry: "shared" }],
+          }),
+          { status: 200 }
+        )
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const first = calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "Destino concorrente de teste"
+    );
+    const second = calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "Destino concorrente de teste"
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(
+      fetchMock.mock.calls.filter(call => String(call[0]).includes("nominatim"))
+    ).toHaveLength(1);
+
+    resolveGeocoder?.(
+      new Response(JSON.stringify([{ lat: "-15.79", lon: "-48.24" }]), {
+        status: 200,
+      })
+    );
+
+    await Promise.all([first, second]);
+    expect(
+      fetchMock.mock.calls.filter(call => String(call[0]).includes("nominatim"))
+    ).toHaveLength(1);
   });
 
   it("geocodes endpoints and calculates a route without the application backend", async () => {
@@ -71,6 +130,21 @@ describe("public routing fallback", () => {
     expect(onlyUrl).not.toContain("-15.76123");
     expect(onlyUrl).not.toContain("-48.28123");
     expect(onlyUrl).not.toContain("router.project-osrm.org");
+  });
+
+  it("does not call the public geocoder while the device is offline", async () => {
+    vi.stubGlobal("navigator", { onLine: false });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculatePublicRoute(
+        "-15.7545,-48.2816",
+        "Destino ainda não preparado offline"
+      )
+    ).rejects.toThrow(/não está disponível offline/i);
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("falls back to a local estimate when the shared router is unavailable", async () => {
