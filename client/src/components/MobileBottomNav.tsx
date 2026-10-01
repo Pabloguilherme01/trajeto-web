@@ -1,5 +1,5 @@
 import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, ShoppingBag, Utensils } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
@@ -16,6 +16,39 @@ export default function MobileBottomNav() {
   const [location, setLocation] = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreButton = useRef<HTMLButtonElement>(null);
+  const [editingField, setEditingField] = useState(false);
+
+  useEffect(() => {
+    const isEditable = (target: Element | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return true;
+      if (target instanceof HTMLInputElement) {
+        return !["button", "checkbox", "radio", "range", "color", "file", "submit", "reset"].includes(target.type);
+      }
+      return false;
+    };
+    let blurTimer = 0;
+    const sync = () => setEditingField(isEditable(document.activeElement));
+    const onFocusIn = () => {
+      window.clearTimeout(blurTimer);
+      sync();
+    };
+    const onFocusOut = () => {
+      window.clearTimeout(blurTimer);
+      blurTimer = window.setTimeout(sync, 0);
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    window.visualViewport?.addEventListener("resize", sync);
+    sync();
+    return () => {
+      window.clearTimeout(blurTimer);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+      window.visualViewport?.removeEventListener("resize", sync);
+    };
+  }, []);
 
   const current = location.split("?")[0].replace(/\/$/, "") || "/";
   const matchesPath = (path: string) =>
@@ -41,7 +74,7 @@ export default function MobileBottomNav() {
   };
 
   return <>
-    <nav aria-label="Navegação móvel" className="fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(.45rem,env(safe-area-inset-bottom))] md:hidden">
+    <nav aria-label="Navegação móvel" data-editing-field={editingField ? "true" : "false"} className={editingField ? "hidden" : "fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(.45rem,env(safe-area-inset-bottom))] md:hidden"}>
       <div className="mx-auto grid max-w-md grid-cols-4 gap-1 rounded-[1.35rem] border border-white/10 bg-[#090E12]/95 p-1.5 shadow-[0_-10px_40px_rgba(0,0,0,.42)] backdrop-blur-2xl">
         {baseItems.map(item => {
           const active = isActive(item);
