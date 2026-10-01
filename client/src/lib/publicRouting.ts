@@ -11,6 +11,12 @@ const OSRM_URL =
   "https://router.project-osrm.org/route/v1/driving";
 const CACHE_PREFIX = "trajeto:public-routing:";
 const REQUEST_TIMEOUT_MS = 9_000;
+const GEOCODER_MIN_INTERVAL_MS = import.meta.env.MODE === "test" ? 0 : 1_100;
+const GEOCODER_MISS_TTL_MS = 60_000;
+const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>();
+const geocoderMissUntil = new Map<string, number>();
+let geocoderQueue: Promise<void> = Promise.resolve();
+let geocoderLastStartedAt = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -133,6 +139,64 @@ async function fetchJson<T>(url: string): Promise<T> {
   } finally {
     globalThis.clearTimeout(timeout);
   }
+}
+
+export function publicGeocoderWaitMs(
+  lastStartedAt: number,
+  now: number,
+  minIntervalMs = 1_100
+) {
+  if (!Number.isFinite(lastStartedAt) || lastStartedAt <= 0) return 0;
+  return Math.max(0, minIntervalMs - Math.max(0, now - lastStartedAt));
+}
+
+async function requestPublicGeocoder(query: string) {
+  const key = normalizeSearch(query);
+  const now = Date.now();
+  if ((geocoderMissUntil.get(key) ?? 0) > now) return undefined;
+
+  const existing = geocoderInFlight.get(key);
+  if (existing) return existing;
+
+  const task = geocoderQueue.then(async () => {
+    const waitMs = publicGeocoderWaitMs(
+      geocoderLastStartedAt,
+      Date.now(),
+      GEOCODER_MIN_INTERVAL_MS
+    );
+    if (waitMs > 0) {
+      await new Promise<void>(resolve => globalThis.setTimeout(resolve, waitMs));
+    }
+    geocoderLastStartedAt = Date.now();
+
+    const url = new URL(NOMINATIM_URL);
+    url.searchParams.set("q", query);
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("limit", "1");
+    url.searchParams.set("countrycodes", "br");
+    url.searchParams.set("accept-language", "pt-BR");
+
+    try {
+      const results = await fetchJson<NominatimResult[]>(url.toString());
+      const result = results[0];
+      if (!result?.lat || !result.lon) {
+        geocoderMissUntil.set(key, Date.now() + GEOCODER_MISS_TTL_MS);
+        return undefined;
+      }
+      geocoderMissUntil.delete(key);
+      return result;
+    } catch (error) {
+      geocoderMissUntil.set(key, Date.now() + GEOCODER_MISS_TTL_MS);
+      throw error;
+    }
+  });
+
+  geocoderInFlight.set(key, task);
+  geocoderQueue = task.then(() => undefined, () => undefined);
+  void task.finally(() => {
+    if (geocoderInFlight.get(key) === task) geocoderInFlight.delete(key);
+  });
+  return task;
 }
 
 function isCoordinate(value: unknown): value is PublicCoordinate {
@@ -316,16 +380,6 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     return local;
   }
 
-  const request = async (q: string) => {
-    const url = new URL(NOMINATIM_URL);
-    url.searchParams.set("q", q);
-    url.searchParams.set("format", "jsonv2");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("countrycodes", "br");
-    url.searchParams.set("accept-language", "pt-BR");
-    return fetchJson<NominatimResult[]>(url.toString());
-  };
-
   const expanded = expandLocalQuery(query);
   const attempts = Array.from(
     new Set([
@@ -338,11 +392,10 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   let result: NominatimResult | undefined;
   for (const attempt of attempts) {
     try {
-      const results = await request(attempt);
-      result = results[0];
+      result = await requestPublicGeocoder(attempt);
       if (result?.lat && result.lon) break;
     } catch {
-      // Try the next query form before giving up.
+      // The next attempt is queued behind the same per-device request budget.
     }
   }
 
