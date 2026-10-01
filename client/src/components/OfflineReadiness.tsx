@@ -234,24 +234,28 @@ export default function OfflineReadiness() {
           {
             label: "Rotas",
             value: summary.routes,
+            suffix: summary.routes === 1 ? "salva" : "salvas",
             icon: Route,
             href: appUrl("/salvos"),
           },
           {
             label: "Serviços",
             value: summary.services,
+            suffix: summary.services === 1 ? "salvo" : "salvos",
             icon: Landmark,
             href: appUrl("/servicos") + "?salvos=1",
           },
           {
             label: "Postos",
             value: summary.stations,
+            suffix: summary.stations === 1 ? "salvo" : "salvos",
             icon: Fuel,
             href: appUrl("/postos") + "?salvos=1",
           },
           {
-            label: "Mapa local",
+            label: "Pontos do mapa",
             value: summary.mapStations,
+            suffix: summary.mapStations === 1 ? "salvo" : "salvos",
             icon: Database,
             href: appUrl("/mapa"),
           },
@@ -264,7 +268,7 @@ export default function OfflineReadiness() {
             <item.icon className="size-4 text-[#79C6D0]" />
             <p className="mt-2 text-xl font-semibold">{item.value}</p>
             <p className="mt-0.5 text-xs font-bold text-white/65">
-              {item.label} {item.value === 1 ? "salvo" : "salvos"}
+              {item.label} {item.suffix}
             </p>
           </Link>
         ))}
@@ -341,11 +345,11 @@ export default function OfflineReadiness() {
                 : "Conecte-se para preparar"}
         </button>
         <Link
-          href={totalSaved ? appUrl("/salvos") : appUrl("/buscar")}
+          href={appUrl("/buscar")}
           className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-bold text-white/80"
         >
           <Bookmark className="size-4" />
-          {totalSaved ? "Abrir conteúdo salvo" : "Escolher o que salvar"}
+          {totalSaved ? "Usar busca offline" : "Escolher o que salvar"}
         </Link>
       </div>
 
