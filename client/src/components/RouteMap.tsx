@@ -870,7 +870,7 @@ export function RouteMap({
     >
       <MapView
         className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden"
-        initialCenter={{ lat: -15.7942, lng: -47.8822 }}
+        initialCenter={{ lat: -15.7545, lng: -48.2816 }}
         initialZoom={11}
         fallback={
           <OfflineRoutePreview
@@ -935,7 +935,7 @@ export function RouteMap({
               Satélite
             </button>
           </div>
-          <div className="absolute right-3 top-[7rem] z-10 flex flex-wrap justify-end gap-2">
+          <div className="absolute right-3 top-[7rem] z-10 hidden flex-wrap justify-end gap-2 sm:flex">
             <span className="inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur">
               {isVector
                 ? "3D · VETORIAL"
