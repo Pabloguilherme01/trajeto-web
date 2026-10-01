@@ -68,6 +68,8 @@ export default function Planner() {
   const planRoute = trpc.routes.plan.useMutation();
   const staticRuntime = !supportsLiveRouting();
   const requestVersion = useRef(0);
+  const plannerFormRef = useRef<HTMLFormElement>(null);
+  const autoSubmittedKey = useRef<string | null>(null);
 
   const resetResult = () => {
     requestVersion.current += 1;
@@ -126,6 +128,18 @@ export default function Planner() {
     }
     return () => { active = false; };
   }, [queryParams, drivingMode]);
+
+  useEffect(() => {
+    const auto = queryParams.get("auto") === "1";
+    const to = queryParams.get("destino")?.trim() ?? "";
+    const from = queryParams.get("origem")?.trim() ?? "";
+    if (!auto || to.length < 3 || savedMode || economyMode || (!staticRuntime && from.length < 3)) return;
+    const key = from + "::" + to + "::" + mode;
+    if (autoSubmittedKey.current === key) return;
+    autoSubmittedKey.current = key;
+    const timer = window.setTimeout(() => plannerFormRef.current?.requestSubmit(), 0);
+    return () => window.clearTimeout(timer);
+  }, [queryParams, savedMode, economyMode, staticRuntime, mode]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -358,7 +372,7 @@ export default function Planner() {
 
         {!savedMode && (
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
-            <form onSubmit={submit}>
+            <form ref={plannerFormRef} onSubmit={submit}>
               <label className="block">
                 <span className="text-[0.56rem] font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
