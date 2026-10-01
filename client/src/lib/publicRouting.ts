@@ -15,11 +15,11 @@ const REQUEST_TIMEOUT_MS = 9_000;
 const GEOCODER_MIN_INTERVAL_MS = import.meta.env.MODE === "test" ? 0 : 1_100;
 const GEOCODER_MISS_TTL_MS = 60_000;
 const GEOCODER_FAILURE_COOLDOWN_MS = 120_000;
+const GEOCODER_COOLDOWN_KEY = CACHE_PREFIX + "geocoder-unavailable-until";
 const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>();
 const geocoderMissUntil = new Map<string, number>();
 let geocoderQueue: Promise<void> = Promise.resolve();
 let geocoderLastStartedAt = 0;
-let geocoderUnavailableUntil = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -58,6 +58,23 @@ function normalizeSearch(value: string) {
     .toLocaleLowerCase("pt-BR")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+}
+
+function getGeocoderUnavailableUntil() {
+  try {
+    const raw = globalThis.sessionStorage?.getItem(GEOCODER_COOLDOWN_KEY);
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function setGeocoderUnavailableUntil(value: number) {
+  try {
+    if (value > 0) globalThis.sessionStorage?.setItem(GEOCODER_COOLDOWN_KEY, String(value));
+    else globalThis.sessionStorage?.removeItem(GEOCODER_COOLDOWN_KEY);
+  } catch {}
 }
 
 function expandLocalQuery(value: string) {
@@ -156,7 +173,7 @@ export function publicGeocoderWaitMs(
 async function requestPublicGeocoder(query: string) {
   const key = normalizeSearch(query);
   const now = Date.now();
-  if (geocoderUnavailableUntil > now) return undefined;
+  if (getGeocoderUnavailableUntil() > now) return undefined;
   if ((geocoderMissUntil.get(key) ?? 0) > now) return undefined;
 
   const existing = geocoderInFlight.get(key);
@@ -188,12 +205,12 @@ async function requestPublicGeocoder(query: string) {
         return undefined;
       }
       geocoderMissUntil.delete(key);
-      geocoderUnavailableUntil = 0;
+      setGeocoderUnavailableUntil(0);
       return result;
     } catch (error) {
       const failedAt = Date.now();
       geocoderMissUntil.set(key, failedAt + GEOCODER_MISS_TTL_MS);
-      geocoderUnavailableUntil = failedAt + GEOCODER_FAILURE_COOLDOWN_MS;
+      setGeocoderUnavailableUntil(failedAt + GEOCODER_FAILURE_COOLDOWN_MS);
       throw error;
     }
   });
