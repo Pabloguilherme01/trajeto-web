@@ -2,6 +2,7 @@
 
 import { ENV } from "./env";
 import { recordProviderMetric } from "../db";
+import { createCircuitBreaker } from "./circuitBreaker";
 
 type MapsConfig = {
   baseUrl: string;
@@ -11,6 +12,7 @@ type MapsConfig = {
 const MAPS_REQUEST_TIMEOUT_MS = 10_000;
 const inFlightRequests = new Map<string, Promise<unknown>>();
 const MAX_IN_FLIGHT_KEYS = 500;
+const mapsCircuit = createCircuitBreaker({ failureThreshold: 5, cooldownMs: 15_000 });
 
 function getMapsConfig(): MapsConfig {
   const baseUrl = ENV.forgeApiUrl;
@@ -134,6 +136,11 @@ export async function makeRequest<T = unknown>(
 
   const execute = async (): Promise<T> => {
   const startedAt = Date.now();
+  if (!mapsCircuit.canRequest(startedAt)) {
+    const error = new Error("Google Maps temporarily unavailable");
+    Object.assign(error, { code: "PROVIDER_CIRCUIT_OPEN", retryAfterMs: mapsCircuit.retryAfterMs(startedAt) });
+    throw error;
+  }
   const operation = endpoint.replace(/^\/maps\/api\//, "").replace(/\/json$/, "").slice(0, 80);
   let metricRecorded = false;
   const { baseUrl, apiKey } = getMapsConfig();
@@ -161,10 +168,12 @@ export async function makeRequest<T = unknown>(
     }
 
     const payload = await response.json() as T;
+    mapsCircuit.success();
     metricRecorded = true;
     void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
     return payload;
   } catch (error) {
+    mapsCircuit.failure();
     if (!metricRecorded) void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false });
     throw error;
   }
