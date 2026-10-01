@@ -2,6 +2,36 @@ export type ParsedCoordinate = { lat: number; lng: number };
 
 export const PRIVATE_LOCATION_LABEL = "Minha localização";
 
+let privateLocationHandoff: ParsedCoordinate | null = null;
+
+function isValidCoordinatePoint(point: ParsedCoordinate) {
+  return (
+    Number.isFinite(point.lat) &&
+    Number.isFinite(point.lng) &&
+    Math.abs(point.lat) <= 90 &&
+    Math.abs(point.lng) <= 180
+  );
+}
+
+export function setPrivateLocationHandoff(point: ParsedCoordinate) {
+  privateLocationHandoff = isValidCoordinatePoint(point)
+    ? { lat: point.lat, lng: point.lng }
+    : null;
+  return Boolean(privateLocationHandoff);
+}
+
+export function consumePrivateLocationHandoff() {
+  const point = privateLocationHandoff;
+  privateLocationHandoff = null;
+  return point;
+}
+
+export function clearPrivateLocationHandoff() {
+  const hadValue = Boolean(privateLocationHandoff);
+  privateLocationHandoff = null;
+  return hadValue;
+}
+
 export function parseCoordinateText(value: string): ParsedCoordinate | null {
   const match = value.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/);
   if (!match) return null;
@@ -69,7 +99,7 @@ const PRIVATE_HISTORY_KEYS = [
 ] as const;
 
 export function clearPrivateLocationHistory() {
-  let cleared = false;
+  let cleared = clearPrivateLocationHandoff();
   for (const storageName of ["localStorage", "sessionStorage"] as const) {
     let storage: Storage | null = null;
     try {

@@ -13,7 +13,7 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
-import { PRIVATE_LOCATION_LABEL, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -116,6 +116,10 @@ export default function Planner() {
     setMode(drivingMode ? "driving" : (value === "walking" || value === "cycling" || value === "transit" ? value : "driving"));
     resetResult();
     const routeId = queryParams.get("rota");
+    const privateHandoff =
+      queryParams.get("local") === "1"
+        ? consumePrivateLocationHandoff()
+        : null;
     let active = true;
     if (routeId) {
       void getOfflineRoute(routeId).then(route => {
@@ -130,6 +134,12 @@ export default function Planner() {
         if (savedMode.mode === "walking" || savedMode.mode === "cycling" || savedMode.mode === "transit" || savedMode.mode === "driving") setMode(savedMode.mode);
         setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
       }).catch(() => { if (active) setError("Não foi possível abrir a rota salva."); });
+    } else if (privateHandoff) {
+      privateOriginRef.current =
+        privateHandoff.lat.toFixed(5) + ", " + privateHandoff.lng.toFixed(5);
+      setOriginPrivate(true);
+      setOrigin(PRIVATE_LOCATION_LABEL);
+      setDestination(queryParams.get("destino") ?? "");
     } else if (queryParams.has("origem") || queryParams.has("destino")) {
       privateOriginRef.current = null;
       setOriginPrivate(false);
