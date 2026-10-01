@@ -5,7 +5,7 @@ import Planner from "./Planner";
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
-  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(),
+  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
@@ -14,7 +14,21 @@ vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
 vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: vi.fn(async () => ({ origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" })), buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
-vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: vi.fn(), removeOfflineRoute: vi.fn() }));
+vi.mock("@/lib/offlineStore", () => ({
+  listOfflineRoutes: async () => state.routes,
+  getOfflineRoute: state.lookup,
+  findOfflineRouteByDestination: (routes: typeof state.routes, destination: string) =>
+    routes.find(route => route.destination.toLocaleLowerCase("pt-BR") === destination.trim().toLocaleLowerCase("pt-BR")) ?? null,
+  findOfflineRouteByTrip: (routes: typeof state.routes, origin: string, destination: string) =>
+    routes.find(route =>
+      route.origin.toLocaleLowerCase("pt-BR") === origin.trim().toLocaleLowerCase("pt-BR") &&
+      route.destination.toLocaleLowerCase("pt-BR") === destination.trim().toLocaleLowerCase("pt-BR")
+    ) ?? null,
+  offlineRouteId: vi.fn(),
+  saveOfflineRoute: vi.fn(),
+  removeOfflineRoute: vi.fn(),
+  isOfflineRouteStale: () => false,
+}));
 vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map">mapa</div> }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
@@ -29,6 +43,8 @@ beforeEach(() => {
   state.mutate.mockReset().mockResolvedValue(payload);
   state.lookup.mockReset();
   state.navigate.mockReset();
+  state.routes = [];
+  vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -99,6 +115,24 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
+  });
+
+  it("opens a matching saved route automatically when offline", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    state.staticRuntime = true;
+    state.routes = [{
+      id: "casa::trabalho",
+      origin: "Casa",
+      destination: "Trabalho",
+      savedAt: new Date().toISOString(),
+      payload,
+    }];
+    render(<Planner />);
+    await screen.findByText(/1 rota pronta sem internet/i);
+    submit();
+    await screen.findByText(/abrimos a cópia salva desta rota/i);
+    expect(screen.getByTestId("route-map")).toBeTruthy();
+    expect(state.mutate).not.toHaveBeenCalled();
   });
 
   it("opens a saved route by id and reports a missing route", async () => {
