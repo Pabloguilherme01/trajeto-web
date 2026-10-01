@@ -195,6 +195,43 @@ export default function Home() {
           </button>
         </section>
 
+        {!online && (
+          <section
+            className="mt-4 rounded-[1.35rem] border border-[#D8B47A]/20 bg-[#D8B47A]/[.05] p-3"
+            aria-labelledby="home-offline-title"
+          >
+            <div className="flex items-start gap-2.5">
+              <WifiOff className="mt-0.5 size-4 shrink-0 text-[#D8B47A]" />
+              <div className="min-w-0">
+                <h2 id="home-offline-title" className="text-sm font-bold">
+                  Sem internet — continue por aqui
+                </h2>
+                <p className="mt-1 text-xs leading-relaxed text-white/65">
+                  Busca local, serviços e conteúdos salvos continuam acessíveis neste aparelho.
+                </p>
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {[
+                { label: "Busca local", icon: SearchIcon, href: appUrl("/buscar") },
+                { label: "Serviços", icon: Landmark, href: appUrl("/servicos") },
+                { label: "Rotas salvas", icon: Route, href: appUrl("/salvos") },
+                { label: "Postos salvos", icon: Fuel, href: appUrl("/postos") + "?salvos=1" },
+              ].map(item => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => setLocation(item.href)}
+                  className="flex min-h-12 items-center gap-2 rounded-xl border border-white/10 bg-[#0D1418] px-3 text-left text-xs font-bold text-white/80 active:scale-[.985]"
+                >
+                  <item.icon className="size-4 shrink-0 text-[#79C6D0]" />
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mt-8">
           <p className="soft-kicker text-xs text-[#B7D86B]">Feito para Águas Lindas</p>
           <h1 className="mobile-title mt-3 w-full min-w-0 max-w-3xl break-words font-display text-[clamp(2.45rem,9vw,5.1rem)] font-semibold leading-[.98] tracking-[-.045em]">
