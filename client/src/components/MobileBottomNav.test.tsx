@@ -57,7 +57,10 @@ describe("mobile navigation", () => {
   it("opens More, hides unavailable accounts, navigates to help and closes the dialog", async () => {
     render(<MobileBottomNav />);
     fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
-    expect(screen.getByRole("dialog")).toBeTruthy();
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeTruthy();
+    expect(dialog.className).toContain("bottom-0");
+    expect(dialog.className).toContain("pb-[calc(1rem+env(safe-area-inset-bottom))]");
     expect(screen.queryByRole("button", { name: "Minha conta" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Ajuda e offline" }));
     expect(state.navigate).toHaveBeenCalledWith("/ajuda");
