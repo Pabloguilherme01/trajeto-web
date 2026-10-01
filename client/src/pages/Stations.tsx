@@ -1357,7 +1357,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                       <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#B7D86B] text-[#0D1418]"><Fuel className="size-4" /></div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0"><p className="break-words text-base font-black">{station.name}</p><p className="mt-1 truncate text-sm text-white/65">{inferredBrand(station.name)} · {station.distanceLabel || "distância indisponível"}</p></div>
+                          <div className="min-w-0"><p className="break-words text-base font-black">{station.name}</p><p className="mt-1 line-clamp-2 break-words text-sm leading-snug text-white/65">{inferredBrand(station.name)} · {station.distanceLabel || "distância indisponível"}</p></div>
                           {station.isOpen === true && <span className="shrink-0 rounded-full bg-[#B7D86B]/10 px-2 py-1 text-xs font-black text-[#D9FF91]">aberto</span>}
                         </div>
                         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/65">{station.address}</p>
@@ -1389,7 +1389,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <button type="button" onClick={() => setCompareIds([])} className="grid size-11 place-items-center rounded-xl border border-white/8 text-white/65" aria-label="Limpar comparação"><X className="size-4" /></button>
                 </div>
                 <div className="mt-3 space-y-2">
-                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="flex min-h-12 w-full items-center justify-between rounded-xl bg-[#0D1418] px-3 text-left"><span className="min-w-0 truncate text-xs font-black">{item.name}<span className="ml-2 text-xs font-normal text-white/65">{item.distanceLabel || "sem distância"}</span></span><ChevronRight className="size-4 shrink-0 text-[#79C6D0]" /></button>)}
+                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="flex min-h-12 w-full items-center justify-between gap-2 rounded-xl bg-[#0D1418] px-3 py-2 text-left"><span className="min-w-0"><span className="block line-clamp-2 break-words text-sm font-bold leading-snug">{item.name}</span><span className="mt-0.5 block text-xs leading-snug text-white/65">{item.distanceLabel || "sem distância"}</span></span><ChevronRight className="size-4 shrink-0 text-[#79C6D0]" /></button>)}
                 </div>
               </section>
             )}
