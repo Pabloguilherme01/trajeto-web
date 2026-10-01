@@ -61,6 +61,33 @@ function normalizeSearch(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function fallbackCacheHash(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+async function geocodeCacheKey(value: string) {
+  const normalized = normalizeSearch(value);
+  try {
+    const subtle = globalThis.crypto?.subtle;
+    if (subtle && typeof TextEncoder !== "undefined") {
+      const digest = await subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(normalized)
+      );
+      const hex = Array.from(new Uint8Array(digest), byte =>
+        byte.toString(16).padStart(2, "0")
+      ).join("");
+      return "geocode:" + hex;
+    }
+  } catch {}
+  return "geocode:" + fallbackCacheHash(normalized);
+}
+
 function getGeocoderSessionStorage() {
   try {
     if (typeof window !== "undefined") return window.sessionStorage;
@@ -418,7 +445,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   const query = normalizeText(value);
   if (!query) throw new Error("Origem ou destino vazio.");
 
-  const cacheKey = "geocode:" + query.toLocaleLowerCase("pt-BR");
+  const cacheKey = await geocodeCacheKey(query);
   const cached = cacheGet<PublicCoordinate>(cacheKey);
   if (isCoordinate(cached)) return cached;
 
@@ -462,7 +489,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const geocodedCoordinate = { lat, lng };
   cacheSet(cacheKey, geocodedCoordinate);
-  const expandedKey = "geocode:" + expanded.toLocaleLowerCase("pt-BR");
+  const expandedKey = await geocodeCacheKey(expanded);
   if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
   return geocodedCoordinate;
 }
