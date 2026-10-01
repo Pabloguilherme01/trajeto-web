@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+// These tests control the tile provider. A service worker can bypass Playwright
+// request interception; offline package behavior is covered in the other specs.
+test.use({ serviceWorkers: "block" });
+
 test("Pages: station map and directory are usable at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   // Keep this layout test independent of the tile provider's availability.
