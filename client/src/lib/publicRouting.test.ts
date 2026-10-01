@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs } from "./publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs, resetPublicRoutingTestState } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
+    resetPublicRoutingTestState();
     try {
       localStorage.clear();
       sessionStorage.clear();
