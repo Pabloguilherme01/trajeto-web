@@ -1,6 +1,7 @@
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
+import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -234,6 +235,34 @@ function localGeocode(value: string): PublicCoordinate | null {
     return { lat: -15.7545, lng: -48.2816 };
   }
 
+  const snapshotMatches = getOfflineAnpSnapshot().rows.filter(row => {
+    if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
+      return false;
+    const rowText = normalizeSearch(
+      [
+        row.cnpj,
+        row.razaoSocial,
+        row.nomeFantasia,
+        row.endereco,
+        row.bairro,
+        row.municipio,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      rowText === normalized ||
+      rowText.includes(normalized) ||
+      normalized.includes(normalizeSearch(row.razaoSocial || ""))
+    );
+  });
+  if (snapshotMatches.length === 1) {
+    return {
+      lat: Number(snapshotMatches[0].latitude),
+      lng: Number(snapshotMatches[0].longitude),
+    };
+  }
+
   const matches = searchAguasLindasStations(value);
   const withCoordinates = matches.filter(
     station =>
@@ -332,6 +361,8 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const geocodedCoordinate = { lat, lng };
   cacheSet(cacheKey, geocodedCoordinate);
+  const expandedKey = "geocode:" + expanded.toLocaleLowerCase("pt-BR");
+  if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
   return geocodedCoordinate;
 }
 
