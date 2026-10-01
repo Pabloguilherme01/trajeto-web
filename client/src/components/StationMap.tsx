@@ -5,7 +5,6 @@ import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobil
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
-import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
 
 export type StationMapItem = {
   id?: string;
@@ -172,7 +171,6 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
-  const userMarker = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
   const [tiltEnabled, setTiltEnabled] = useState(false);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -294,38 +292,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }, [ready, resolvedStations, offline]);
 
   const locateUser = () => {
-    if (offline || !mapRef.current || !navigator.geolocation) {
-      setMapMessage("Localização do aparelho não está disponível neste modo.");
-      return;
-    }
-    setMapMessage(null);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const coords = coarsenCoordinatePoint({ lat: position.coords.latitude, lng: position.coords.longitude }, 3);
-        const map = mapRef.current;
-        if (!map) return;
-        map.setCenter(coords);
-        map.setZoom(15);
-        try {
-          userMarker.current?.map && (userMarker.current.map = null);
-          const pin = new window.google.maps.marker.PinElement({
-            background: "#3DE3FF",
-            borderColor: "#163840",
-            glyphColor: "#163840",
-            glyph: "•",
-            scale: 1.1,
-          });
-          userMarker.current = new window.google.maps.marker.AdvancedMarkerElement({
-            map,
-            position: coords,
-            title: "Sua localização",
-            content: pin.element,
-          });
-        } catch {}
-      },
-      () => setMapMessage("Não foi possível obter sua localização."),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
-    );
+    setMapMessage("Privacidade ativa: o mapa online não recebe sua posição. Use “Mais perto” para ordenar localmente ou abra o navegador externo para navegação.");
   };
 
   const toggleTilt = () => {
