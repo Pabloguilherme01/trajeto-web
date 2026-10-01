@@ -26,6 +26,7 @@ const Explorer = lazy(() => import("./pages/Explorer"));
 const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
 const PublicServices = lazy(() => import("./pages/PublicServices"));
+const PublicData = lazy(() => import("./pages/PublicData"));
 
 const routerBase = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -75,6 +76,7 @@ function Router() {
         <Route path="/rota" component={Planner} />
         <Route path="/salvos"><Planner /></Route>
         <Route path="/servicos" component={PublicServices} />
+        <Route path="/dados" component={PublicData} />
         <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
         <Route path="/mapa"><Stations mapFirst /></Route>
         <Route path="/postos"><Stations /></Route>

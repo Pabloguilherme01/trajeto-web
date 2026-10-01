@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, ShoppingBag, Utensils } from "lucide-react";
+import { Bookmark, Database, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, ShoppingBag, Utensils } from "lucide-react";
 import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -26,7 +26,7 @@ export default function MobileBottomNav() {
     if (item.key === "more")
       return (
         moreOpen ||
-        ["/mapa", "/buscar", "/postos", "/local", "/explorar", "/ajuda"].some(
+        ["/mapa", "/buscar", "/postos", "/local", "/explorar", "/dados", "/ajuda"].some(
           matchesPath
         )
       );
@@ -71,6 +71,7 @@ export default function MobileBottomNav() {
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=alimentacao"); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><Utensils className="size-5 text-[#FFB86B]" /> Comer</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=compras"); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><ShoppingBag className="size-5 text-[#3DE3FF]" /> Compras e lojas</button>
 
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/dados")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><Database className="size-5 shrink-0" /> Dados da cidade</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><Bookmark className="size-5 shrink-0" /> Salvos</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><HelpCircle className="size-5 shrink-0" /> Ajuda e offline</button>
         </div>

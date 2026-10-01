@@ -20,6 +20,7 @@ import {
   WifiOff,
   Bookmark,
   ExternalLink,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -115,6 +116,20 @@ const quickActions = [
     icon: BusFront,
     kind: "services",
     query: "transito",
+  },
+  {
+    label: "Ônibus Entorno",
+    hint: "Tarifas ANTT e corredores",
+    icon: BusFront,
+    kind: "data",
+    query: "transporte",
+  },
+  {
+    label: "Dados oficiais",
+    hint: "ANTT, CNES, Inep, PRF e IBGE",
+    icon: Database,
+    kind: "data",
+    query: "",
   },
   {
     label: "Farmácias",
@@ -261,6 +276,10 @@ export default function SearchPage() {
     }
     if (action.kind === "places") {
       search(action.query);
+      return;
+    }
+    if (action.kind === "data") {
+      setLocation(appUrl("/dados") + (action.query === "transporte" ? "#transporte" : ""));
       return;
     }
     if (action.kind === "nearby") {
@@ -431,6 +450,67 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
+            {results.transitFares.length > 0 && (
+              <section aria-labelledby="search-transit-title">
+                <h2 id="search-transit-title" className="text-lg font-bold">
+                  Transporte do Entorno{" "}
+                  <span className="text-sm font-normal text-white/75">
+                    ({results.transitFares.length})
+                  </span>
+                </h2>
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.transitFares.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={BusFront}
+                      title={item.origin + " → " + item.destination}
+                      detail={
+                        item.operator +
+                        " · tarifa " +
+                        item.fare.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }) +
+                        " · desde " +
+                        item.effectiveFrom
+                      }
+                      source={item.sourceLabel}
+                      onClick={() =>
+                        setLocation(appUrl("/dados") + "#transporte")
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {results.dataResources.length > 0 && (
+              <section aria-labelledby="search-data-title">
+                <h2 id="search-data-title" className="text-lg font-bold">
+                  Dados e fontes{" "}
+                  <span className="text-sm font-normal text-white/75">
+                    ({results.dataResources.length})
+                  </span>
+                </h2>
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.dataResources.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={Database}
+                      title={item.title}
+                      detail={item.description}
+                      source={item.sourceLabel}
+                      onClick={() =>
+                        setLocation(
+                          appUrl("/dados") +
+                            "?recurso=" +
+                            encodeURIComponent(item.id)
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
             {results.stations.length > 0 && (
               <section aria-labelledby="search-stations-title">
                 <h2 id="search-stations-title" className="text-lg font-bold">
@@ -514,7 +594,7 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
-            {[results.stations, results.places, results.routes].some(
+            {[results.stations, results.places, results.routes, results.dataResources, results.transitFares].some(
               items => items.length > resultLimit
             ) && (
               <button

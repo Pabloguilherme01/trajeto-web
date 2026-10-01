@@ -3,6 +3,7 @@ import { normalizeCatalogText } from "./catalogSearch";
 import { getLocalRoutePresets } from "./localRoutePresets";
 import { searchLocalPlaces } from "./localPlaces";
 import { searchPublicServices } from "./publicServices";
+import { searchPublicDataResources, searchSemiurbanFares } from "./publicDataHub";
 
 const serviceAliases: Record<string, string> = {
   upa: "upa-mansoes-odisseia",
@@ -17,10 +18,12 @@ const serviceAliases: Record<string, string> = {
 export function getUniversalSearchResults(query: string) {
   const value = query.trim();
   if (!value)
-    return { services: [], stations: [], places: [], routes: [], total: 0 };
+    return { services: [], stations: [], places: [], routes: [], dataResources: [], transitFares: [], total: 0 };
   const services = searchPublicServices(value);
   const stations = searchAguasLindasStations(value);
   const places = searchLocalPlaces(value);
+  const dataResources = searchPublicDataResources(value);
+  const transitFares = searchSemiurbanFares(value);
   const serviceIds = new Set(services.map(item => item.id));
   const placeIds = new Set(places.map(item => "place-" + item.id));
   const destinations = new Set(
@@ -43,6 +46,14 @@ export function getUniversalSearchResults(query: string) {
     stations,
     places,
     routes,
-    total: services.length + stations.length + places.length + routes.length,
+    dataResources,
+    transitFares,
+    total:
+      services.length +
+      stations.length +
+      places.length +
+      routes.length +
+      dataResources.length +
+      transitFares.length,
   };
 }
