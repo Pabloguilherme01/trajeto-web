@@ -51,11 +51,13 @@ export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "camara-municipal", label: "Câmara Municipal", detail: "Atendimento legislativo", destination: "Câmara Municipal de Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "forum", label: "Fórum", detail: "Serviços da Justiça", destination: "Fórum de Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "rodoviaria", label: "Rodoviária", detail: "Terminal rodoviário · Jardim da Barragem IV", destination: "Rodoviária de Águas Lindas de Goiás, Rua 36, 5335, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "transporte" },
-  { id: "aguas-lindas-shopping", label: "Águas Lindas Shopping", detail: "Compras e serviços · Mansões Centro-Oeste", destination: "Águas Lindas Shopping, Alameda Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
-  { id: "supermercado-universo", label: "Supermercado Universo", detail: "Mercado · Parque das Águas Bonitas", destination: "Supermercado Universo, Avenida Brasil, Parque das Águas Bonitas, Águas Lindas de Goiás, GO", category: "compras" },
-  { id: "atacadao-farmacias", label: "Atacadão das Farmácias", detail: "Farmácia · Jardim Barragem I", destination: "Atacadão das Farmácias, Quadra 10, Lote 01, Jardim Barragem I, Águas Lindas de Goiás, GO", category: "compras" },
-  { id: "farmacias-preco-baixo", label: "Farmácias Preço Baixo", detail: "Farmácia · Jardim Brasília", destination: "Farmácias Preço Baixo, Avenida JK, Jardim Brasília, Águas Lindas de Goiás, GO", category: "compras" },
-  { id: "banco-brasil-4590", label: "Banco do Brasil · Agência 4590", detail: "Atendimento bancário · Jardim Brasília", destination: "Banco do Brasil Agência 4590, Avenida JK, Jardim Brasília, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "aguas-lindas-shopping", label: "Águas Lindas Shopping", detail: "Compras e serviços · Mansões Centro-Oeste", destination: "Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "supermercado-jardim-guaira", label: "Supermercado · Jardim Guaíra", detail: "Mercado · Jardim Guaíra", destination: "Supermercado, Rua Tocantins, 38, Jardim Guaíra, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "droga-shop-camping-club", label: "DrogaShop Camping Club", detail: "Farmácia · Camping Club", destination: "DrogaShop Camping Club, Quadra 07 Lote 60, Camping Clube Nacional, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "farmacia-aguas-lindas", label: "Farmácia Águas Lindas", detail: "Farmácia · Parque da Barragem", destination: "Farmácia Águas Lindas, Rua 19, Parque da Barragem, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "banco-brasil-4590", label: "Banco do Brasil · Agência 4590", detail: "Atendimento bancário · Jardim Brasília", destination: "Banco do Brasil Agência 4590, Avenida JK, S/N, Jardim Brasília, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "supermercado-alves", label: "Supermercado Alves", detail: "Mercado · Jardim Águas Lindas II", destination: "Supermercado Alves, Q 18 S/N LT 10, Avenida Águas Lindas 2, Jardim Águas Lindas II, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "supermercado-rodrigues", label: "Supermercado Rodrigues", detail: "Mercado · Parque Águas Bonitas", destination: "Supermercado Rodrigues, Parque Águas Bonitas, Águas Lindas de Goiás, GO", category: "compras" },
 ];
 
 export function getLocalRoutePresets(query = "") {
