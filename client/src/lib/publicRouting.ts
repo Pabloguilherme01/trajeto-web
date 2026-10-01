@@ -1,4 +1,6 @@
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
+import { LOCAL_PLACES } from "@/lib/localPlaces";
+import { PUBLIC_SERVICES } from "@/lib/publicServices";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -46,6 +48,51 @@ function normalizeSearch(value: string) {
     .toLocaleLowerCase("pt-BR")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+}
+
+function expandLocalQuery(value: string) {
+  const normalized = normalizeSearch(value);
+  if (!normalized || normalized.length < 3) return value;
+
+  const serviceMatches = PUBLIC_SERVICES.filter(service => {
+    const name = normalizeSearch(service.name);
+    const haystack = normalizeSearch(
+      [service.name, service.address, service.mapQuery, ...(service.keywords ?? [])]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      name === normalized ||
+      name.includes(normalized) ||
+      normalized.includes(name) ||
+      haystack === normalized
+    );
+  });
+  if (serviceMatches.length === 1) {
+    const service = serviceMatches[0];
+    return service.mapQuery || service.address || service.name;
+  }
+
+  const placeMatches = LOCAL_PLACES.filter(place => {
+    const name = normalizeSearch(place.name);
+    const haystack = normalizeSearch(
+      [place.name, place.address, place.mapQuery, ...(place.tags ?? [])]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      name === normalized ||
+      name.includes(normalized) ||
+      normalized.includes(name) ||
+      haystack === normalized
+    );
+  });
+  if (placeMatches.length === 1) {
+    const place = placeMatches[0];
+    return place.mapQuery || place.address || place.name;
+  }
+
+  return value;
 }
 
 function parseCoordinateInput(value: string): PublicCoordinate | null {
@@ -248,19 +295,24 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     return fetchJson<NominatimResult[]>(url.toString());
   };
 
-  let results: NominatimResult[] = [];
-  try {
-    results = await request(query);
-  } catch {
-    results = [];
-  }
+  const expanded = expandLocalQuery(query);
+  const attempts = Array.from(
+    new Set([
+      expanded,
+      query,
+      query + ", Águas Lindas de Goiás, Goiás, Brasil",
+    ])
+  );
 
-  let result = results[0];
-  if (!result?.lat || !result.lon) {
+  let result: NominatimResult | undefined;
+  for (const attempt of attempts) {
     try {
-      results = await request(query + ", Águas Lindas de Goiás, Goiás, Brasil");
+      const results = await request(attempt);
       result = results[0];
-    } catch {}
+      if (result?.lat && result.lon) break;
+    } catch {
+      // Try the next query form before giving up.
+    }
   }
 
   const lat = Number(result?.lat);
@@ -389,6 +441,9 @@ export async function calculatePublicRoute(
 ): Promise<PublicRoute> {
   const origin = await geocode(originText);
   const destination = await geocode(destinationText);
+  if (haversineMeters(origin, destination) < 20) {
+    throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
+  }
   const coordinateKey =
     [
       origin.lat.toFixed(5),
