@@ -401,7 +401,7 @@ export default function Planner() {
               </label>
 
               <div className="my-2 flex justify-end">
-                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-white/8 text-white/45 disabled:opacity-25" aria-label="Inverter origem e destino">
+                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-white/8 text-white/65 disabled:opacity-25" aria-label="Inverter origem e destino">
                   <ArrowLeftRight className="size-4" />
                 </button>
               </div>
@@ -467,7 +467,7 @@ export default function Planner() {
                     ["cycling", "Bicicleta", Bike],
                     ["transit", "Transporte", Bus],
                   ] as const).map(([value, label, Icon]) => (
-                    <button key={value} type="button" onClick={() => { resetResult(); setMode(value); }} className={"flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/45")}>
+                    <button key={value} type="button" onClick={() => { resetResult(); setMode(value); }} className={"flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/65")}>
                       <Icon className="size-3.5" />
                       {label}
                     </button>
@@ -507,7 +507,7 @@ export default function Planner() {
           <section className="mt-4 rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4" aria-labelledby="economy-mode-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-5" /></div>
-              <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Modo economia</p><h2 id="economy-mode-title" className="mt-1 text-lg font-black">Calculadora pronta.</h2><p className="mt-1 text-xs leading-relaxed text-white/45">Informe distância, preço e consumo para calcular custo por viagem, mês e autonomia. Os valores ficam salvos neste aparelho.</p></div>
+              <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Modo economia</p><h2 id="economy-mode-title" className="mt-1 text-lg font-black">Calculadora pronta.</h2><p className="mt-1 text-xs leading-relaxed text-white/65">Informe distância, preço e consumo para calcular custo por viagem, mês e autonomia. Os valores ficam salvos neste aparelho.</p></div>
             </div>
           </section>
         )}
@@ -517,7 +517,7 @@ export default function Planner() {
         {drivingMode && !savedMode && (
           <section className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-4 py-3" role="status" aria-live="polite">
             <p className="text-xs font-black text-[#C9F7FF]">Modo condução ativo</p>
-            <p className="mt-1 text-xs leading-relaxed text-white/45">O Trajeto deixa a tela focada na viagem e mantém Google Maps, Waze e Apple Maps como opções de navegação atualizada.</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/65">O Trajeto deixa a tela focada na viagem e mantém Google Maps, Waze e Apple Maps como opções de navegação atualizada.</p>
           </section>
         )}
 
@@ -571,7 +571,7 @@ export default function Planner() {
                 </section>
               </>
             ) : savedRoutes.length > 0 && filteredSavedRoutes.length === 0 ? (
-              <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
+              <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/65">
                 Nenhuma rota corresponde ao filtro.
               </div>
             ) : (
@@ -638,7 +638,7 @@ export default function Planner() {
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Navegação pronta</p>
                 <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">{staticRuntime ? "Navegação pronta para este site estático." : "O serviço de cálculo não respondeu, mas sua viagem não ficou travada."}</h2>
-                <p className="mt-2 text-xs leading-relaxed text-white/45">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
+                <p className="mt-2 text-xs leading-relaxed text-white/65">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -662,9 +662,9 @@ export default function Planner() {
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/8 bg-white/[.045] p-3"><RouteIcon className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/45">Distância</p><p className="mt-1 text-base font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
-                <div className="rounded-2xl border border-white/8 bg-white/[.045] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/45">Tempo</p><p className="mt-1 text-base font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
-                <div className="col-span-2 rounded-2xl border border-white/8 bg-white/[.045] p-3 sm:col-span-1"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/45">Chegada estimada</p><p className="mt-1 text-base font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
+                <div className="rounded-2xl border border-white/8 bg-white/[.045] p-3"><RouteIcon className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/65">Distância</p><p className="mt-1 text-base font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
+                <div className="rounded-2xl border border-white/8 bg-white/[.045] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/65">Tempo</p><p className="mt-1 text-base font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
+                <div className="col-span-2 rounded-2xl border border-white/8 bg-white/[.045] p-3 sm:col-span-1"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/65">Chegada estimada</p><p className="mt-1 text-base font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -724,7 +724,7 @@ export default function Planner() {
               <section className="mt-3 rounded-[1.5rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Parada sugerida</p>
                 <h3 className="mt-1 text-lg font-black">{planned.recommendation.name}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-white/45">{planned.recommendation.detourSource === "real" ? "Desvio calculado pela rota real" : "Desvio estimado"} · {planned.recommendation.detourKm.toLocaleString("pt-BR")} km</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/65">{planned.recommendation.detourSource === "real" ? "Desvio calculado pela rota real" : "Desvio estimado"} · {planned.recommendation.detourKm.toLocaleString("pt-BR")} km</p>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => openStation(planned.stops.find(stop => stop.name === planned.recommendation?.name) ?? planned.stops[0])} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota até o posto</button>
                   <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Ver postos</button>
@@ -753,7 +753,7 @@ export default function Planner() {
             <section className="mt-3 rounded-3xl border border-white/8 bg-white/[.025] p-4">
               <details>
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-white/35" /></summary>
-                <div className="mt-3 grid gap-2 text-xs leading-relaxed text-white/45">
+                <div className="mt-3 grid gap-2 text-xs leading-relaxed text-white/65">
                   <p>Fonte da rota: {publicRouteSource === "local-estimate"
                     ? "estimativa local baseada nas coordenadas"
                     : staticRuntime
