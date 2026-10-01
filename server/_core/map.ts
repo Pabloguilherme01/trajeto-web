@@ -2,13 +2,17 @@
 
 import { ENV } from "./env";
 import { recordProviderMetric } from "../db";
+import { createCircuitBreaker } from "./circuitBreaker";
 
 type MapsConfig = {
   baseUrl: string;
   apiKey: string;
 };
 
-const MAPS_REQUEST_TIMEOUT_MS = 15_000;
+const MAPS_REQUEST_TIMEOUT_MS = 10_000;
+const inFlightRequests = new Map<string, Promise<unknown>>();
+const MAX_IN_FLIGHT_KEYS = 500;
+const mapsCircuit = createCircuitBreaker({ failureThreshold: 5, cooldownMs: 15_000 });
 
 function getMapsConfig(): MapsConfig {
   const baseUrl = ENV.forgeApiUrl;
@@ -114,7 +118,29 @@ export async function makeRequest<T = unknown>(
   params: Record<string, unknown> = {},
   options: RequestOptions = {}
 ): Promise<T> {
+  // Collapse only identical requests that are already in flight. Nothing is
+  // retained after completion, so coordinate-bearing requests are not cached.
+  const dedupeKey = options.method === "POST" || options.body
+    ? null
+    : endpoint + "?" + new URLSearchParams(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined && value !== null)
+          .map(([key, value]) => [key, String(value)])
+          .sort(([a], [b]) => a.localeCompare(b)),
+      ).toString();
+
+  if (dedupeKey) {
+    const existing = inFlightRequests.get(dedupeKey);
+    if (existing) return existing as Promise<T>;
+  }
+
+  const execute = async (): Promise<T> => {
   const startedAt = Date.now();
+  if (!mapsCircuit.canRequest(startedAt)) {
+    const error = new Error("Google Maps temporarily unavailable");
+    Object.assign(error, { code: "PROVIDER_CIRCUIT_OPEN", retryAfterMs: mapsCircuit.retryAfterMs(startedAt) });
+    throw error;
+  }
   const operation = endpoint.replace(/^\/maps\/api\//, "").replace(/\/json$/, "").slice(0, 80);
   let metricRecorded = false;
   const { baseUrl, apiKey } = getMapsConfig();
@@ -142,11 +168,24 @@ export async function makeRequest<T = unknown>(
     }
 
     const payload = await response.json() as T;
+    mapsCircuit.success();
     metricRecorded = true;
     void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: true, statusCode: response.status });
     return payload;
   } catch (error) {
+    mapsCircuit.failure();
     if (!metricRecorded) void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false });
     throw error;
+  }
+  };
+
+  const request = execute();
+  if (!dedupeKey || inFlightRequests.size >= MAX_IN_FLIGHT_KEYS) return request;
+
+  inFlightRequests.set(dedupeKey, request);
+  try {
+    return await request;
+  } finally {
+    if (inFlightRequests.get(dedupeKey) === request) inFlightRequests.delete(dedupeKey);
   }
 }
