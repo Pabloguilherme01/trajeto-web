@@ -183,7 +183,7 @@ export default function Home() {
 
         <section className="mt-8">
           <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">Utilidade local</p>
-          <h1 className="mobile-title mt-3 max-w-3xl font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
+          <h1 className="mobile-title mt-3 w-full min-w-0 max-w-3xl break-words font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
             Resolva na cidade.<br />
             <span className="text-[#C7FF3C]">Chegue com menos esforço.</span>
           </h1>
