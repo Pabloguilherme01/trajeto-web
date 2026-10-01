@@ -1,6 +1,7 @@
 import { normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { idbGet, idbPut } from "@/lib/offlineDb";
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
+import { appUrl } from "@/lib/appUrl";
 
 export type OfflineStationMapEntry = {
   id: string;
@@ -176,6 +177,49 @@ export function prepareOfflineStationMapFromCatalog() {
       };
     });
   return cacheOfflineMapStations(stations);
+}
+
+export async function prepareOfflineStationData() {
+  let snapshot = getOfflineAnpSnapshot();
+
+  if (!snapshot.rows.length && typeof fetch === "function") {
+    try {
+      const response = await fetch(appUrl("/data/aguas-lindas-anp.json"), {
+        cache: "default",
+      });
+      if (response.ok) {
+        const payload = (await response.json()) as {
+          data?: unknown[];
+          retrievedAt?: string;
+        };
+        const rows = (payload.data ?? [])
+          .map(item =>
+            item && typeof item === "object"
+              ? normalizeAnpFuelRow(item as Record<string, unknown>)
+              : null
+          )
+          .filter((row): row is AnpFuelRow => Boolean(row));
+        if (rows.length) {
+          cacheOfflineAnpSnapshot(
+            rows,
+            typeof payload.retrievedAt === "string"
+              ? payload.retrievedAt
+              : undefined
+          );
+          snapshot = getOfflineAnpSnapshot();
+        }
+      }
+    } catch {
+      // The existing local snapshot remains the fallback.
+    }
+  }
+
+  const mapPrepared = prepareOfflineStationMapFromCatalog();
+  return {
+    anpRows: snapshot.rows.length,
+    mapStations: getOfflineMapStations().stations.length,
+    mapPrepared,
+  };
 }
 
 export function getOfflineMapAgeLabel(savedAt: string) {
