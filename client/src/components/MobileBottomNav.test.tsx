@@ -78,8 +78,8 @@ describe("mobile navigation", () => {
     expect(dialog.className).toContain("bottom-0");
     expect(dialog.className).toContain("pb-[calc(1rem+env(safe-area-inset-bottom))]");
     expect(screen.queryByRole("button", { name: "Minha conta" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Ajuda e offline" }));
-    expect(state.navigate).toHaveBeenCalledWith("/ajuda");
+    fireEvent.click(screen.getByRole("button", { name: "Preparar offline" }));
+    expect(state.navigate).toHaveBeenCalledWith("/ajuda#offline-readiness-title");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
   it("opens Saved routes from the More menu", async () => {
