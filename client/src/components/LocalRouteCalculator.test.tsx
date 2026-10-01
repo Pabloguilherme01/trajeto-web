@@ -73,7 +73,6 @@ describe("local route calculator contract", () => {
     expect(result.annualCost).toBe(0);
   });
 
-
   it("calcula abastecimento, autonomia atual e combustível após a viagem", () => {
     const result = calculateFuelStatus({
       tankLiters: 50,
@@ -88,12 +87,14 @@ describe("local route calculator contract", () => {
     expect(result?.fillCost).toBeCloseTo(176.7, 2);
     expect(result?.currentRangeKm).toBe(200);
     expect(result?.tripFuelNeeded).toBe(12);
+    expect(result?.fuelShortfallLiters).toBe(0);
+    expect(result?.minimumFuelCost).toBe(0);
     expect(result?.fuelRemainingAfterTrip).toBe(8);
     expect(result?.rangeRemainingAfterTripKm).toBe(80);
     expect(result?.canCompleteTrip).toBe(true);
   });
 
-  it("sinaliza quando o combustível atual não cobre a viagem", () => {
+  it("informa quanto falta abastecer para concluir a viagem", () => {
     const result = calculateFuelStatus({
       tankLiters: 50,
       currentFuelLiters: 5,
@@ -104,7 +105,23 @@ describe("local route calculator contract", () => {
 
     expect(result?.canCompleteTrip).toBe(false);
     expect(result?.fuelRemainingAfterTrip).toBe(-3);
+    expect(result?.fuelShortfallLiters).toBe(3);
+    expect(result?.minimumFuelCost).toBeCloseTo(17.67, 2);
     expect(result?.rangeRemainingAfterTripKm).toBe(0);
+  });
+
+  it("aceita tanque vazio como valor válido de combustível atual", () => {
+    const result = calculateFuelStatus({
+      tankLiters: 40,
+      currentFuelLiters: 0,
+      pricePerLiter: 5.5,
+      kmPerLiter: 10,
+      tripDistanceKm: 20,
+    });
+
+    expect(result?.fuelShortfallLiters).toBe(2);
+    expect(result?.minimumFuelCost).toBe(11);
+    expect(result?.canCompleteTrip).toBe(false);
   });
 
   it("limita o combustível atual ao tanque e rejeita dados incompletos", () => {
@@ -156,5 +173,4 @@ describe("local route calculator contract", () => {
       tripsPerWeek: 5,
     })).toBeNull();
   });
-
 });
