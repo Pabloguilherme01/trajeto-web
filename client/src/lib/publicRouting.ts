@@ -2,6 +2,7 @@ import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
+import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -295,6 +296,9 @@ function encodePolyline(points: PublicCoordinate[]) {
 function localGeocode(value: string): PublicCoordinate | null {
   const normalized = normalizeSearch(value);
   if (!normalized) return null;
+
+  const preparedPoint = resolveLocalGeocodePoint(value);
+  if (preparedPoint) return preparedPoint;
 
   // A city-qualified street, hospital or station is never the city centre.
   const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
