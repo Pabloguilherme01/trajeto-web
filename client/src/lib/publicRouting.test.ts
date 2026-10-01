@@ -132,6 +132,21 @@ describe("public routing fallback", () => {
     expect(onlyUrl).not.toContain("router.project-osrm.org");
   });
 
+  it("does not call the public geocoder while the device is offline", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculatePublicRoute(
+        "-15.7545,-48.2816",
+        "Destino ainda não preparado offline"
+      )
+    ).rejects.toThrow(/não está disponível offline/i);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("falls back to a local estimate when the shared router is unavailable", async () => {
     vi.unstubAllGlobals();
     vi.stubGlobal(
