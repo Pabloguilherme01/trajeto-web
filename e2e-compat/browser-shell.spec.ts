@@ -73,6 +73,39 @@ test("core public flows do not overflow and forms remain zoom-safe", async ({ pa
       expect(box).not.toBeNull();
       expect(box!.x).toBeGreaterThanOrEqual(-0.5);
       expect(box!.x + box!.width).toBeLessThanOrEqual((await page.viewportSize())!.width + 0.5);
+
+      const typography = await page.locator("main").evaluate(root => {
+        const visible = [...root.querySelectorAll("p, span, a, button, label, summary, h1, h2, h3")]
+          .filter(element => {
+            const text = (element.textContent || "").trim();
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return Boolean(text) && rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+          });
+        const tiny = visible
+          .flatMap(element => {
+            const size = parseFloat(getComputedStyle(element).fontSize);
+            return size < 11.9 ? [{ text: (element.textContent || "").trim().slice(0, 60), size }] : [];
+          })
+          .slice(0, 8);
+        const h1 = root.querySelector("h1");
+        const h1Size = h1 ? parseFloat(getComputedStyle(h1).fontSize) : null;
+        const clippedButtons = visible
+          .filter(element => element.tagName === "BUTTON")
+          .flatMap(element =>
+            element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1
+              ? [(element.textContent || "").trim().slice(0, 60)]
+              : []
+          )
+          .slice(0, 8);
+        return { tiny, h1Size, clippedButtons };
+      });
+      expect(typography.tiny, `${path || "home"} tiny text`).toEqual([]);
+      if (typography.h1Size != null) {
+        expect(typography.h1Size, `${path || "home"} h1 too small`).toBeGreaterThanOrEqual(30);
+        expect(typography.h1Size, `${path || "home"} h1 too large`).toBeLessThanOrEqual(48);
+      }
+      expect(typography.clippedButtons, `${path || "home"} clipped buttons`).toEqual([]);
     } else {
       await expect(page.getByRole("navigation", { name: "Navegação principal" })).toBeVisible();
     }
