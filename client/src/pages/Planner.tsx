@@ -137,7 +137,7 @@ export default function Planner() {
     const auto = queryParams.get("auto") === "1";
     const to = queryParams.get("destino")?.trim() ?? "";
     const from = queryParams.get("origem")?.trim() ?? "";
-    if (!auto || to.length < 3 || savedMode || economyMode || (!staticRuntime && from.length < 3)) return;
+    if (!auto || to.length < 3 || savedMode || economyMode) return;
     const key = from + "::" + to + "::" + mode;
     if (autoSubmittedKey.current === key) return;
     autoSubmittedKey.current = key;
@@ -145,23 +145,43 @@ export default function Planner() {
     return () => window.clearTimeout(timer);
   }, [queryParams, savedMode, economyMode, staticRuntime, mode]);
 
+  const resolveCurrentOrigin = async () => {
+    if (!navigator.geolocation) return null;
+    setLocating(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 300000,
+        });
+      });
+      return (
+        position.coords.latitude.toFixed(5) +
+        ", " +
+        position.coords.longitude.toFixed(5)
+      );
+    } catch {
+      return null;
+    } finally {
+      setLocating(false);
+    }
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const from = origin.trim();
+    let from = origin.trim();
     const to = destination.trim();
 
     if (to.length < 3) {
       setError("Preencha o destino com pelo menos 3 caracteres.");
       return;
     }
-    if (!staticRuntime && from.length < 3) {
-      setError("Preencha a origem com pelo menos 3 caracteres.");
-      return;
-    }
     if (from && from.toLocaleLowerCase("pt-BR") === to.toLocaleLowerCase("pt-BR")) {
       setError("Origem e destino precisam ser diferentes.");
       return;
     }
+
     if (!online) {
       const offlineRoutes = savedRoutes.length
         ? savedRoutes
@@ -188,30 +208,35 @@ export default function Planner() {
         return;
       }
     }
-    if (!online && !staticRuntime) {
-      setError("Sem internet. Esta rota ainda não está salva neste aparelho.");
-      return;
+
+    if (!from) {
+      setError(null);
+      setSavedMessage("Identificando sua origem para calcular a rota…");
+      const currentOrigin = await resolveCurrentOrigin();
+      if (currentOrigin) {
+        from = currentOrigin;
+        setOrigin(currentOrigin);
+      } else {
+        setSavedMessage(null);
+        setFallbackReady(true);
+        setError(
+          "Não conseguimos identificar sua origem. Toque em “Usar localização” ou digite um ponto de partida."
+        );
+        vibration(8);
+        return;
+      }
     }
 
     resetResult();
     const version = requestVersion.current;
 
-    if (staticRuntime || mode !== "driving") {
+    if (staticRuntime || mode !== "driving" || !online) {
       setError(null);
       setFallbackReady(false);
       setPublicRoutePending(true);
       const publicOrigin = from;
       try {
-        let resolvedOrigin = publicOrigin;
-        if (!resolvedOrigin) {
-          if (version !== requestVersion.current) return;
-          setFallbackReady(true);
-          setSavedMessage("Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho.");
-          rememberTrip("", to);
-          track("route_open", to);
-          vibration(12);
-          return;
-        }
+        const resolvedOrigin = publicOrigin;
         const publicRoute = await calculatePublicRoute(resolvedOrigin, to, mode);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
@@ -257,28 +282,48 @@ export default function Planner() {
       vibration(14);
     } catch {
       if (version !== requestVersion.current) return;
-      setError(null);
-      setFallbackReady(true);
-      vibration(8);
+      setPublicRoutePending(true);
+      try {
+        const publicRoute = await calculatePublicRoute(from, to, "driving");
+        if (version !== requestVersion.current) return;
+        const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
+        setPlanned(publicPayload);
+        setShowMap(true);
+        setError(null);
+        setFallbackReady(false);
+        const autoSaved = await persistRouteLocally(publicPayload, from, to);
+        setSavedMessage(
+          (publicRoute.source === "local-estimate"
+            ? "O roteador principal não respondeu; usamos uma estimativa local."
+            : "O roteador principal não respondeu; usamos a rota pública de contingência.") +
+            (autoSaved ? " Cópia offline criada automaticamente." : "")
+        );
+        vibration(14);
+      } catch (routeError) {
+        if (version !== requestVersion.current) return;
+        setError(
+          routeError instanceof Error
+            ? routeError.message
+            : "Não foi possível calcular a rota automaticamente."
+        );
+        setFallbackReady(true);
+        vibration(8);
+      } finally {
+        if (version === requestVersion.current) setPublicRoutePending(false);
+      }
     }
   };
 
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation || locating) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setLocating(false);
-        resetResult();
-        setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
-        vibration(14);
-      },
-      () => {
-        setLocating(false);
-        setError("Não foi possível obter sua localização.");
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
-    );
+  const useCurrentLocation = async () => {
+    if (locating) return;
+    const currentOrigin = await resolveCurrentOrigin();
+    if (!currentOrigin) {
+      setError("Não foi possível obter sua localização. Digite a origem ou tente novamente.");
+      return;
+    }
+    resetResult();
+    setOrigin(currentOrigin);
+    vibration(14);
   };
 
   const swap = () => {
