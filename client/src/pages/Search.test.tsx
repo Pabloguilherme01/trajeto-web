@@ -50,6 +50,16 @@ describe("mobile search organization", () => {
     ).toBeNull();
     expect(screen.getByRole("status").textContent).toContain("3 resultado(s)");
   });
+  it("shows an automatic local answer with direct actions for a citizen need", () => {
+    window.history.replaceState(null, "", "/buscar?q=dengue");
+    render(<SearchPage />);
+    expect(screen.getByText(/Resposta rápida · Águas Lindas/i)).toBeTruthy();
+    expect(screen.getAllByText("Vigilância em Saúde").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Ver detalhes" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Planejar rota" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Ligar" }).getAttribute("href")).toBe("tel:6136181409");
+  });
+
   it("shows the source label for local places instead of presenting a category as a source", () => {
     window.history.replaceState(null, "", "/buscar?q=giraffas");
     render(<SearchPage />);
