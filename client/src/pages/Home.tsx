@@ -1,10 +1,11 @@
-import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, rememberIntent, rememberSearch, type RecentTrip } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
+import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import TripReadinessCard from "@/components/TripReadinessCard";
@@ -265,6 +266,33 @@ export default function Home() {
                 <span className="mt-0.5 block line-clamp-2 text-[0.53rem] leading-snug text-white/35">{route.detail}</span>
               </button>
             ))}
+          </div>
+        </section>
+
+        <section className="mt-5" aria-labelledby="local-guide-home-title">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-[#FFB86B]">Guia local</p>
+              <h2 id="local-guide-home-title" className="mt-1 text-xl font-black tracking-[-.035em]">Comer, comprar, resolver.</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-10 rounded-xl border border-white/8 px-3 text-[0.58rem] font-black text-white/55">Abrir guia</button>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {LOCAL_PLACES.filter(place => place.category === "alimentacao" || place.category === "compras").slice(0, 6).map(place => {
+              const PlaceIcon = place.category === "alimentacao" ? Utensils : ShoppingBag;
+              return (
+                <button key={place.id} type="button" onClick={() => {
+                  rememberSearch(place.name);
+                  rememberIntent("route");
+                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery));
+                }} className="mobile-card min-h-[7rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985]">
+                  <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
+                  <span className="mt-2 block truncate text-xs font-black">{place.name}</span>
+                  <span className="mt-0.5 block line-clamp-2 text-[0.53rem] leading-snug text-white/35">{place.detail}</span>
+                  <span className="mt-1 block truncate text-[0.5rem] text-white/20">{place.address}</span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
