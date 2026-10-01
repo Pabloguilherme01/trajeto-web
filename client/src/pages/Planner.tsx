@@ -13,7 +13,7 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
-import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -121,6 +121,8 @@ export default function Planner() {
       void getOfflineRoute(routeId).then(route => {
         if (!active) return;
         if (!route) { setError("Esta rota não está salva neste aparelho."); return; }
+        privateOriginRef.current = null;
+        setOriginPrivate(false);
         setOrigin(route.origin);
         setDestination(route.destination);
         setPlanned(route.payload as PlannedRoute);
@@ -156,6 +158,10 @@ export default function Planner() {
 
     if (to.length < 3) {
       setError("Preencha o destino com pelo menos 3 caracteres.");
+      return;
+    }
+    if (isCurrentLocationLabel(from) && !originPrivate) {
+      setError("Para recalcular a partir da sua posição, toque em usar localização atual.");
       return;
     }
     if (!staticRuntime && from.length < 3) {
