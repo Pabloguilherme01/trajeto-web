@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2, Fuel, Landmark, MapPinned, Route as RouteIcon, ShieldCheck, WifiOff } from "lucide-react";
 import { Link } from "wouter";
+import OfflineReadiness from "@/components/OfflineReadiness";
 import { appUrl } from "@/lib/appUrl";
 
 const steps = [
@@ -69,6 +70,8 @@ export default function Help() {
             <p className="flex gap-2 text-xs leading-relaxed text-white/50"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#3DE3FF]" />Dados oficiais e referências secundárias são identificados separadamente.</p>
           </div>
         </section>
+
+        <OfflineReadiness />
 
         <section className="mt-4 pb-4 text-center text-[0.56rem] leading-relaxed text-white/25">
           Para trânsito, incidentes e chegada em tempo real, use o navegador externo escolhido.

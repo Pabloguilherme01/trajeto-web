@@ -28,7 +28,7 @@ test("Pages: abre a home e navega entre os fluxos públicos", async ({ page }) =
   await page.goto("salvos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Rotas salvas/i })).toBeVisible();
   await page.goto("ajuda", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Ajuda/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Use o Trajeto em poucos passos/i })).toBeVisible();
 });
 
 test("Pages: planejador público funciona com a base /trajeto-web/", async ({ page }) => {
@@ -62,7 +62,7 @@ test("Pages: mapa e ficha local funcionam como recursos independentes", async ({
 
 test("Pages: busca universal encontra um local e abre a ficha", async ({ page }) => {
   await page.goto("buscar", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Encontre o que precisa/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre e vá/i })).toBeVisible();
   const input = page.getByRole("textbox", { name: /Buscar locais/i });
   await input.fill("Rham");
   await page.getByRole("button", { name: "Pesquisar" }).click();
@@ -85,4 +85,55 @@ test("Pages: modos de rota ficam disponíveis sem backend", async ({ page }) => 
   await page.getByRole("button", { name: /A pé/i }).click();
   await page.getByRole("button", { name: "Calcular rota" }).click();
   await expect(page.getByText("2,5 km")).toBeVisible();
+});
+
+test("Pages: public filters survive category changes, reload and back navigation", async ({ page }) => {
+  await page.goto("servicos", { waitUntil: "domcontentloaded" });
+  const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
+  await search.fill("informacao cidadao");
+  await page.getByRole("button", { name: "Cidadania", exact: true }).click();
+  await expect(search).toHaveValue("informacao cidadao");
+  await expect(page.getByRole("heading", { name: "Serviço de Informação ao Cidadão · SIC" })).toBeVisible();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(search).toHaveValue("informacao cidadao");
+  await page.getByRole("button", { name: "Saúde", exact: true }).click();
+  await expect(page.getByText("Nenhum serviço corresponde ao filtro.")).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole("button", { name: "Cidadania", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(search).toHaveValue("informacao cidadao");
+});
+
+test("Pages: first visit prepares unvisited public screens for offline use", async ({ page, context }) => {
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await context.setOffline(true);
+  for (const [path, title] of [
+    ["servicos", "Águas Lindas em um só lugar."],
+    ["buscar", "Encontre e vá."],
+    ["salvos", "Rotas salvas"],
+    ["ajuda", "Use o Trajeto em poucos passos."],
+    ["mapa", "Encontre uma parada"],
+  ]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: new RegExp(title) }).first()).toBeVisible();
+    if (path === "ajuda") await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+});
+
+test("Pages: More stays usable on a small mobile viewport", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "pages-mobile", "Mobile drawer ergonomics");
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Mais opções" }).click();
+  const dialog = page.getByRole("dialog");
+  const box = await dialog.boundingBox();
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(568);
+  await dialog.getByRole("button", { name: "Ajuda e offline" }).click();
+  await expect(page).toHaveURL(/\/trajeto-web\/ajuda$/);
+  await expect(dialog).not.toBeVisible();
 });

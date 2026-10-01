@@ -68,7 +68,7 @@ export default function SearchPage() {
 
   const openQuick = (action: typeof quickActions[number]) => {
     if (action.kind === "internal") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=postos"); return; }
-    if (action.kind === "routes") { setLocation(appUrl("/buscar") + "?q="); return; }
+    if (action.kind === "routes") { setLocation(appUrl("/planejar")); return; }
     if (action.kind === "services") { setLocation(appUrl("/servicos") + (action.query ? "?categoria=" + encodeURIComponent(action.query) : "")); return; }
     if (action.kind === "places") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(action.query)); return; }
     if (action.kind === "nearby") {

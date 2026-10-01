@@ -17,7 +17,7 @@ test("busca local oferece categorias prontas", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Segurança", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Educação", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Saúde", exact: true }).click();
-  await expect(page).toHaveURL(/\/buscar/);
+  await expect(page).toHaveURL(/\/servicos\?categoria=saude/);
 });
 
 test("atalho público leva da home para serviços municipais", async ({ page }) => {

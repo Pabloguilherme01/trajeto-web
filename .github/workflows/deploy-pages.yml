@@ -45,6 +45,9 @@ jobs:
           test -f client/public/data/aguas-lindas-anp-precos.json
           node -e 'JSON.parse(require("node:fs").readFileSync("client/public/data/aguas-lindas-anp.json","utf8")); JSON.parse(require("node:fs").readFileSync("client/public/data/aguas-lindas-anp-precos.json","utf8"));'
 
+      - name: Typecheck before publishing
+        run: npm run check
+
       - name: Build static client
         run: npm run build:client
 
@@ -60,7 +63,7 @@ jobs:
           test -f dist/public/icon-512.png
           test -f dist/public/icon-512-maskable.png
           test -f dist/public/icon-1024.png
-          test -f dist/public/.vite/manifest.json
+          test -f dist/public/offline-assets.json
           cp dist/public/index.html dist/public/404.html
           echo "GitHub Pages artifact validated."
 
@@ -75,7 +78,7 @@ jobs:
           test -f dist/public/icon-192.png
           test -f dist/public/icon-512.png
           test -f dist/public/icon-512-maskable.png
-          test -f dist/public/.vite/manifest.json
+          test -f dist/public/offline-assets.json
           grep -q '"sizes": "192x192"' dist/public/site.webmanifest
           grep -q '"sizes": "512x512"' dist/public/site.webmanifest
           grep -q '"purpose": "maskable"' dist/public/site.webmanifest

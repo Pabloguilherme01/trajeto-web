@@ -1,3 +1,5 @@
+import { matchesCatalogText } from "./catalogSearch";
+
 export type LocalPlaceCategory = "alimentacao" | "compras" | "servicos" | "referencia";
 
 export type LocalPlace = {
@@ -304,8 +306,8 @@ export const LOCAL_PLACES: LocalPlace[] = [
     mapQuery: "Banco do Brasil Agência 4590, Águas Lindas de Goiás, GO",
     phone: "4003-3001",
     tags: ["banco", "atm"],
-  },,
-{
+  },
+  {
     id: "cabana-chopperia",
     name: "Cabana Chopperia",
     detail: "Restaurante · BR-070",
@@ -366,16 +368,8 @@ export function getLocalPlaces(category: LocalPlaceCategory) {
 }
 
 export function searchLocalPlaces(query = "", category?: LocalPlaceCategory) {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR");
   return LOCAL_PLACES.filter(place => {
     if (category && place.category !== category) return false;
-    if (!normalized) return true;
-    return [
-      place.name,
-      place.detail,
-      place.address,
-      place.category,
-      ...(place.tags ?? []),
-    ].join(" ").toLocaleLowerCase("pt-BR").includes(normalized);
+    return matchesCatalogText(query, [place.name, place.detail, place.address, place.category, ...(place.tags ?? [])]);
   });
 }
