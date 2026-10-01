@@ -142,26 +142,39 @@ export async function hydrateOfflineMapStations() {
 }
 
 export function prepareOfflineStationMapFromCatalog() {
-  const stations = searchAguasLindasStations("postos")
-    .filter(
-      station =>
-        Number.isFinite(station.anp?.latitude) &&
-        Number.isFinite(station.anp?.longitude)
-    )
-    .map(station => ({
-      id: "catalog-" + station.cnpj,
-      name: station.displayName || station.legalName || "Posto",
-      address:
-        station.address ||
-        station.neighborhood ||
-        "Águas Lindas de Goiás, GO",
-      lat: Number(station.anp?.latitude),
-      lng: Number(station.anp?.longitude),
-      cnpj: station.cnpj,
-      brand: station.brand,
-      source:
-        station.dataOrigin === "ANP" ? ("ANP" as const) : ("local" as const),
-    }));
+  const localByCnpj = new Map(
+    searchAguasLindasStations("postos").map(station => [station.cnpj, station])
+  );
+  const seen = new Set<string>();
+  const stations = getOfflineAnpSnapshot().rows
+    .filter(row => {
+      if (
+        !Number.isFinite(row.latitude) ||
+        !Number.isFinite(row.longitude) ||
+        seen.has(row.cnpj)
+      )
+        return false;
+      seen.add(row.cnpj);
+      return true;
+    })
+    .map(row => {
+      const local = localByCnpj.get(row.cnpj);
+      return {
+        id: "anp-offline-" + row.cnpj,
+        name: local?.displayName || row.razaoSocial || "Posto",
+        address:
+          local?.address ||
+          [row.endereco, row.bairro, row.municipio, row.uf]
+            .filter(Boolean)
+            .join(", ") ||
+          "Águas Lindas de Goiás, GO",
+        lat: Number(row.latitude),
+        lng: Number(row.longitude),
+        cnpj: row.cnpj,
+        brand: local?.brand || row.distribuidora,
+        source: "ANP" as const,
+      };
+    });
   return cacheOfflineMapStations(stations);
 }
 
