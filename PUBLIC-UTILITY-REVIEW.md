@@ -84,3 +84,10 @@ Validação inclui larguras de 320 a 1024 px, fonte ampliada, acessibilidade, co
 - Rótulos críticos do dock, busca inicial e aviso de atualização receberam texto maior e contraste mais legível no celular.
 
 Esta revisão não remove módulos funcionais nem amplia promessas de dados offline. Informações de comércio com rótulo "Consulta local" continuam sendo referência local e devem ser confirmadas antes do deslocamento; diretórios oficiais mantêm sua fonte própria.
+
+## Sexta revisão: cobertura de serviços oficiais
+
+- Incluído o ponto de atendimento conveniado da Receita Federal em Águas Lindas, usando exclusivamente a página oficial federal como fonte.
+- O cadastro não inventa endereço, telefone ou horário: esses campos ficam ausentes enquanto a fonte oficial consultada não os publica de forma verificável.
+- A busca por Defesa Civil, alagamento, enchente, desabamento e risco estrutural passa a recuperar o bloco de proteção e emergência já existente, mantendo 193/190 com a descrição correta e sem criar um número municipal não confirmado.
+- Adicionado atalho para CPF e Receita Federal entre as necessidades cidadãs frequentes.

@@ -50,6 +50,18 @@ describe("public services catalog", () => {
     expect(searchPublicServices("upa", "saude").some(item => item.id === "upa-mansoes-odisseia")).toBe(true);
     expect(searchPublicServices("nao existe", "todos")).toEqual([]);
   });
+  it("covers verified federal tax help and emergency intent without inventing local details", () => {
+    const receita = searchPublicServices("receita federal")[0];
+    expect(receita.id).toBe("receita-federal-pav");
+    expect(receita.sourceLabel).toBe("Receita Federal");
+    expect(receita.sourceUrl).toContain("gov.br/receitafederal");
+    expect(receita.verifiedAt).toBe("01/10/2026");
+    expect(receita.address).toBeUndefined();
+    expect(receita.phone).toBeUndefined();
+    expect(receita.mapQuery).toBeUndefined();
+    expect(searchPublicServices("defesa civil").map(item => item.id)).toContain("defesa-civil");
+  });
+
   it("offers official work and pension channels without a fictitious local route", () => {
     const work = searchPublicServices("ctps")[0];
     expect(work.phone).toBe("158");
