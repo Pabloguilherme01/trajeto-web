@@ -24,7 +24,8 @@
     "test:e2e": "playwright test",
     "prebuild:client": "node scripts/generate-pwa-icons.mjs",
     "sync:anp:precos:aguas-lindas": "node scripts/sync-anp-prices-aguas-lindas.mjs",
-    "test:e2e:pages": "playwright test --config=playwright.pages.config.ts"
+    "test:e2e:pages": "playwright test --config=playwright.pages.config.ts",
+    "test:e2e:compat": "playwright test --config=playwright.compat.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
