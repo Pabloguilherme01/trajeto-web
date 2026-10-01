@@ -2,18 +2,19 @@ import React from "react";
 import { Fuel, Gauge, Route as RouteIcon, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
-import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
+import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, fuelLitersFromTankFraction, projectTripCosts } from "@/lib/tripProjection";
 import { clearTripCalculatorDraft, loadTripCalculatorDraft, saveTripCalculatorDraft } from "@/lib/tripCalculatorDraft";
-import { getTripCalculatorMode, TRIP_CALCULATOR_MODES, type TripCalculatorModeId } from "@/lib/tripCalculatorModes";
+import { getTripCalculatorMode, isRecurringTripMode, isTripCalculatorModeSelection, TRIP_CALCULATOR_MODES, type TripCalculatorModeId, type TripCalculatorModeSelection } from "@/lib/tripCalculatorModes";
 
 function numberValue(value: string) {
   const parsed = Number(value.replace(",", "."));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-function nonNegativeValue(value: string) {
+function optionalNonNegativeValue(value: string) {
+  if (!value.trim()) return null;
   const parsed = Number(value.replace(",", "."));
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
 
 export type LocalRouteCalculatorProps = {
@@ -45,15 +46,17 @@ function rememberPrice(value: string) {
 export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = false }: LocalRouteCalculatorProps) {
   const savedVehicle = getMobileVehicle();
   const [draft] = useState(() => loadTripCalculatorDraft());
+  const restoredMode: TripCalculatorModeSelection = isTripCalculatorModeSelection(draft?.mode) ? draft.mode : "automatico";
   const [restoredDraft, setRestoredDraft] = useState(() => Boolean(draft));
-  const [activeMode, setActiveMode] = useState<TripCalculatorModeId | "personalizado">("automatico");
+  const [activeMode, setActiveMode] = useState<TripCalculatorModeSelection>(restoredMode);
   const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : (draft?.distance ?? ""));
   const [price, setPrice] = useState(() => draft?.price || getRememberedPrice());
   const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : (draft?.consumption ?? ""));
   const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : (draft?.tank ?? ""));
   const [currentFuel, setCurrentFuel] = useState(draft?.currentFuel ?? "");
-  const [roundTrip, setRoundTrip] = useState(draft?.roundTrip ?? (initialDistanceKm > 0 ? false : true));
-  const [tripsPerWeek, setTripsPerWeek] = useState(draft?.tripsPerWeek ?? (initialDistanceKm > 0 ? 1 : 5));
+  const [roundTrip, setRoundTrip] = useState(draft?.roundTrip ?? false);
+  const [tripsPerWeek, setTripsPerWeek] = useState(draft?.tripsPerWeek ?? 1);
+  const [recurring, setRecurring] = useState(() => typeof draft?.recurring === "boolean" ? draft.recurring : isRecurringTripMode(restoredMode));
   const [toll, setToll] = useState(draft?.toll ?? "");
   const [parking, setParking] = useState(draft?.parking ?? "");
   const [other, setOther] = useState(draft?.other ?? "");
@@ -67,6 +70,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
 
   useEffect(() => {
     saveTripCalculatorDraft({
+      mode: activeMode,
+      recurring,
       distance,
       price,
       consumption,
@@ -81,7 +86,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
       alternativeConsumption,
       monthlyBudget,
     });
-  }, [distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
+  }, [activeMode, recurring, distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
 
   useEffect(() => {
     const refreshVehicle = () => {
@@ -98,13 +103,12 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     const mode = getTripCalculatorMode(modeId);
     setActiveMode(modeId);
     setRestoredDraft(false);
+    setRecurring(Boolean(mode.recurring));
 
     if (modeId === "automatico") {
-      if (initialDistanceKm > 0) {
-        setDistance(String(initialDistanceKm));
-        setRoundTrip(false);
-        setTripsPerWeek(1);
-      }
+      setRoundTrip(false);
+      setTripsPerWeek(1);
+      if (initialDistanceKm > 0) setDistance(String(initialDistanceKm));
       const rememberedPrice = getRememberedPrice();
       if (rememberedPrice) setPrice(current => current || rememberedPrice);
       const vehicle = getMobileVehicle();
@@ -128,8 +132,9 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     setConsumption(savedVehicle ? String(savedVehicle.consumption) : "");
     setTank(savedVehicle ? String(savedVehicle.tank) : "");
     setCurrentFuel("");
-    setRoundTrip(initialDistanceKm > 0 ? false : true);
-    setTripsPerWeek(initialDistanceKm > 0 ? 1 : 5);
+    setRoundTrip(false);
+    setTripsPerWeek(1);
+    setRecurring(false);
     setToll("");
     setParking("");
     setOther("");
@@ -151,18 +156,20 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     const pricePerLiter = numberValue(price);
     const kmPerLiter = numberValue(consumption);
     const tankLiters = numberValue(tank);
-    const currentFuelLiters = nonNegativeValue(currentFuel);
+    const currentFuelLiters = optionalNonNegativeValue(currentFuel);
     const currentFuelProvided = currentFuel.trim().length > 0;
+    const currentFuelInvalid = currentFuelProvided && currentFuelLiters === null;
+    const currentFuelAboveTank = currentFuelLiters !== null && tankLiters > 0 && currentFuelLiters > tankLiters;
     const extraCostPerTrip = numberValue(toll) + numberValue(parking) + numberValue(other);
     if (!oneWayDistanceKm || !pricePerLiter || !kmPerLiter) return null;
 
     const litersOneWay = oneWayDistanceKm / kmPerLiter;
     const oneWayCost = litersOneWay * pricePerLiter;
-    const projection = projectTripCosts({ oneWayDistanceKm, oneWayCost, roundTrip, tripsPerWeek, extraCostPerTrip });
+    const projection = projectTripCosts({ oneWayDistanceKm, oneWayCost, roundTrip, tripsPerWeek, extraCostPerTrip, recurring });
     const autonomyKm = tankLiters ? tankLiters * kmPerLiter : 0;
     const fuelNeeded = projection.distanceKm / kmPerLiter;
     const estimatedRefuels = autonomyKm > 0 ? Math.max(0, Math.ceil(fuelNeeded / tankLiters) - 1) : null;
-    const fuelStatus = currentFuelProvided && tankLiters > 0
+    const fuelStatus = currentFuelProvided && currentFuelLiters !== null && tankLiters > 0
       ? calculateFuelStatus({ tankLiters, currentFuelLiters, pricePerLiter, kmPerLiter, tripDistanceKm: projection.distanceKm })
       : null;
     const comparison = compareTripScenarios({
@@ -174,11 +181,22 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
       roundTrip,
       tripsPerWeek,
       extraCostPerTrip,
+      recurring,
     });
-    const budgetStatus = compareMonthlyBudget(projection.monthlyCost, numberValue(monthlyBudget));
+    const budgetStatus = recurring ? compareMonthlyBudget(projection.monthlyCost, numberValue(monthlyBudget)) : null;
 
-    return { projection, fuelNeeded, autonomyKm, estimatedRefuels, fuelStatus, comparison, budgetStatus };
-  }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget, roundTrip, tripsPerWeek]);
+    return {
+      projection,
+      fuelNeeded,
+      autonomyKm,
+      estimatedRefuels,
+      fuelStatus,
+      comparison,
+      budgetStatus,
+      currentFuelInvalid,
+      currentFuelAboveTank,
+    };
+  }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget, roundTrip, tripsPerWeek, recurring]);
 
   return (
     <section
@@ -283,9 +301,10 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-5">
             <div className="col-span-2 rounded-xl bg-[#163840] p-4 text-white lg:col-span-1">
               <RouteIcon className="size-4 text-[#FFC928]" />
-              <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/60">Esta viagem</p>
+              <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/60">{roundTrip ? "Ida e volta" : "Só ida"}</p>
               <p className="mt-1 text-xl font-black">{values.projection.costPerTrip.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
               <p className="mt-1 text-[0.58rem] text-white/55">{values.projection.distanceKm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km no modo escolhido</p>
+              {values.projection.extraCostPerTrip > 0 && <p className="mt-1 text-[0.58rem] text-white/55">Inclui {values.projection.extraCostPerTrip.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} em extras</p>}
             </div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4">
               <Fuel className="size-4 text-[#356451]" />
@@ -295,9 +314,9 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
             </div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4">
               <WalletCards className="size-4 text-[#356451]" />
-              <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">Por mês</p>
-              <p className="mt-1 text-lg font-black text-[#163840]">{values.projection.monthlyCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
-              <p className="mt-1 text-[0.58rem] text-[#71877E]">{tripsPerWeek} viagem(ns)/semana</p>
+              <p className="mt-2 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#6C7F78]">{recurring ? "Por mês" : "Frequência"}</p>
+              <p className="mt-1 text-lg font-black text-[#163840]">{recurring ? values.projection.monthlyCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "Pontual"}</p>
+              <p className="mt-1 text-[0.58rem] text-[#71877E]">{recurring ? tripsPerWeek + " viagem(ns)/semana" : "sem projeção semanal"}</p>
             </div>
             <div className="rounded-xl border border-[#D7DFD8] bg-white p-4">
               <RouteIcon className="size-4 text-[#356451]" />
@@ -371,10 +390,33 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
             Tanque (L)
             <input value={tank} onChange={e => setTank(e.target.value)} inputMode="decimal" placeholder="Ex.: 45" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
           </label>
-          <label className="text-xs font-bold text-[#365E51]">
-            Combustível atual (L)
-            <input value={currentFuel} onChange={e => setCurrentFuel(e.target.value)} inputMode="decimal" placeholder="Ex.: 18 ou 0" aria-describedby="fuel-status-note" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
-          </label>
+          <div>
+            <label className="text-xs font-bold text-[#365E51]">
+              Combustível atual (L)
+              <input value={currentFuel} onChange={e => setCurrentFuel(e.target.value)} inputMode="decimal" placeholder="Ex.: 18 ou 0" aria-describedby="fuel-status-note current-fuel-validation" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+            </label>
+            {numberValue(tank) > 0 && (
+              <div className="mt-2 grid grid-cols-4 gap-1.5" aria-label="Atalhos de nível do tanque">
+                {[
+                  { label: "¼", fraction: 0.25 },
+                  { label: "½", fraction: 0.5 },
+                  { label: "¾", fraction: 0.75 },
+                  { label: "Cheio", fraction: 1 },
+                ].map(option => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setCurrentFuel(fuelLitersFromTankFraction(numberValue(tank), option.fraction).toLocaleString("pt-BR", { maximumFractionDigits: 1 }))}
+                    className="min-h-10 rounded-lg border border-[#D7DFD8] bg-[#F8FAF7] px-2 text-[0.62rem] font-extrabold text-[#365E51] hover:border-[#A7CDBA]"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {values?.currentFuelInvalid && <p id="current-fuel-validation" role="alert" className="mt-1.5 text-[0.62rem] font-bold text-[#8A4434]">Informe um valor válido igual ou maior que zero.</p>}
+            {values?.currentFuelAboveTank && <p id="current-fuel-validation" role="status" className="mt-1.5 text-[0.62rem] font-bold text-[#8A4434]">O valor informado supera o tanque; o cálculo usa a capacidade máxima.</p>}
+          </div>
         </div>
 
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -392,7 +434,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           </label>
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3">
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#56766A]">Tipo de viagem</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -400,13 +442,21 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
               <button type="button" onClick={() => { setRoundTrip(true); setActiveMode("personalizado"); }} aria-pressed={roundTrip} className={`min-h-11 rounded-lg px-3 text-xs font-extrabold ${roundTrip ? "bg-[#163840] text-white" : "bg-white text-[#365E51]"}`}>Ida e volta</button>
             </div>
           </div>
+          <div className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3">
+            <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#56766A]">Recorrência</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => { setRecurring(false); setActiveMode("personalizado"); }} aria-pressed={!recurring} className={`min-h-11 rounded-lg px-2 text-xs font-extrabold ${!recurring ? "bg-[#163840] text-white" : "bg-white text-[#365E51]"}`}>Pontual</button>
+              <button type="button" onClick={() => { setRecurring(true); setActiveMode("personalizado"); }} aria-pressed={recurring} className={`min-h-11 rounded-lg px-2 text-xs font-extrabold ${recurring ? "bg-[#163840] text-white" : "bg-white text-[#365E51]"}`}>Semanal</button>
+            </div>
+          </div>
           <label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51]">
             Viagens por semana
-            <input type="number" min="0" max="21" step="1" value={tripsPerWeek} onChange={e => { setTripsPerWeek(Math.max(0, Math.min(21, Number(e.target.value) || 0))); setActiveMode("personalizado"); }} className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+            <input type="number" min="1" max="21" step="1" value={tripsPerWeek} disabled={!recurring} onChange={e => { setTripsPerWeek(Math.max(1, Math.min(21, Number(e.target.value) || 1))); setRecurring(true); setActiveMode("personalizado"); }} className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840] disabled:cursor-not-allowed disabled:opacity-45" />
           </label>
-          <label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51] sm:col-span-2">
+          <label className="rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3 text-xs font-bold text-[#365E51] sm:col-span-3">
             Orçamento mensal de deslocamento
-            <input value={monthlyBudget} onChange={e => setMonthlyBudget(e.target.value)} inputMode="decimal" placeholder="Ex.: 800" className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
+            <input value={monthlyBudget} onChange={e => setMonthlyBudget(e.target.value)} inputMode="decimal" disabled={!recurring} placeholder={recurring ? "Ex.: 800" : "Ative uma rotina semanal para comparar"} className="mt-2 min-h-11 w-full rounded-lg border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840] disabled:cursor-not-allowed disabled:opacity-45" />
+            {!recurring && <span className="mt-1.5 block text-[0.6rem] font-semibold text-[#71877E]">Viagens pontuais não geram uma projeção mensal automática.</span>}
           </label>
         </div>
 
@@ -438,15 +488,15 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
               </div>
               <p className="mt-3 rounded-lg bg-[#EAF4EC] px-3 py-2 text-xs font-extrabold text-[#356451]">
                 {values.comparison.differencePerTrip >= 0
-                  ? `O segundo cenário economiza ${values.comparison.differencePerTrip.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} por viagem e ${values.comparison.differencePerMonth.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/mês.`
-                  : `O segundo cenário custa ${Math.abs(values.comparison.differencePerTrip).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} a mais por viagem e ${Math.abs(values.comparison.differencePerMonth).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/mês.`}
+                  ? `O segundo cenário economiza ${values.comparison.differencePerTrip.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} por viagem${recurring ? " e " + values.comparison.differencePerMonth.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês" : ""}.`
+                  : `O segundo cenário custa ${Math.abs(values.comparison.differencePerTrip).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} a mais por viagem${recurring ? " e " + Math.abs(values.comparison.differencePerMonth).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês" : ""}.`}
               </p>
             </div>
           )}
         </div>
       </details>
 
-      {values && (
+      {values && recurring && (
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <div className="rounded-xl border border-[#D7DFD8] bg-white px-4 py-3 text-xs font-bold text-[#56766A]">
             Por semana: {values.projection.weeklyCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
@@ -458,7 +508,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
       )}
 
       <p id="local-calculator-note" className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">
-        Cálculo local baseado somente nos valores informados. O Trajeto pode reaproveitar neste aparelho a distância da rota, o veículo salvo e o último preço digitado. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.
+        Cálculo local baseado somente nos valores informados. O Trajeto pode reaproveitar neste aparelho a distância da rota, o veículo salvo e o último preço digitado. Projeções mensais só aparecem quando você ativa uma rotina e usam 4,33 semanas por mês; nenhum valor representa preço atual de posto.
       </p>
     </section>
   );
