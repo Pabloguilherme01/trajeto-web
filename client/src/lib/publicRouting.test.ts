@@ -38,7 +38,7 @@ describe("public routing fallback", () => {
     const requestOptions = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]?.[1];
     expect(requestOptions).toMatchObject({
       credentials: "omit",
-      referrerPolicy: "no-referrer",
+      referrerPolicy: "origin",
       cache: "no-store",
     });
     expect(route.distanceMeters).toBe(10123);
