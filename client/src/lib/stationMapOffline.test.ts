@@ -10,7 +10,7 @@ const localStorageMock = {
 
 Object.defineProperty(globalThis, "localStorage", { value: localStorageMock, configurable: true });
 Object.defineProperty(globalThis, "window", { value: globalThis, configurable: true });
-import { cacheOfflineMapStations, getOfflineMapAgeLabel, getOfflineMapStations } from "./stationMapOffline";
+import { cacheOfflineMapStations, getOfflineMapAgeLabel, getOfflineMapStations, prepareOfflineStationMapFromCatalog } from "./stationMapOffline";
 
 describe("stationMapOffline", () => {
   beforeEach(() => {
@@ -45,6 +45,13 @@ describe("stationMapOffline", () => {
     expect(snapshot.stations).toHaveLength(1);
     expect(snapshot.stations[0]?.source).toBe("ANP");
     expect(snapshot.savedAt).toBeTruthy();
+  });
+
+  it("can materialize the local station catalog for offline map use", () => {
+    expect(prepareOfflineStationMapFromCatalog()).toBe(true);
+    const snapshot = getOfflineMapStations();
+    expect(snapshot.stations.length).toBeGreaterThan(0);
+    expect(snapshot.stations.every(station => Number.isFinite(station.lat) && Number.isFinite(station.lng))).toBe(true);
   });
 
   it("describes cached age without expiring it", () => {
