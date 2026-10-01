@@ -64,6 +64,9 @@ describe("public services catalog", () => {
     }
     expect(phoneHref("190 / 193")).toBe("tel:190");
     expect(phoneHref("00000-0000")).toBeNull();
+    const health = PUBLIC_SERVICES.find(service => service.id === "secretaria-saude")!;
+    expect(health.phone).toBe("(61) 3618-4096 / (61) 99227-7937");
+    expect(health.verifiedAt).toBe("01/10/2026");
     const vapt = PUBLIC_SERVICES.find(service => service.id === "vapt-vupt")!;
     expect(vapt.address).toContain("Rua Um, 2210");
     expect(vapt.actionLabel).toBe("Agendar atendimento");
