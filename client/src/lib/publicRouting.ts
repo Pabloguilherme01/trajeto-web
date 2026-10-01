@@ -467,6 +467,33 @@ function buildLocalEstimate(
   };
 }
 
+export async function calculatePrivateLocationRoute(
+  originText: string,
+  destinationText: string,
+  mode: PublicTravelMode = "driving"
+): Promise<PublicRoute> {
+  const parsedOrigin = parseCoordinateInput(originText);
+  if (!parsedOrigin) {
+    throw new Error("A origem privada precisa vir da localização deste aparelho.");
+  }
+
+  // Keep the exact GPS fix in memory only. The value used by the local estimate
+  // is rounded to roughly a city block before it can reach route state/storage.
+  const origin = {
+    lat: Math.round(parsedOrigin.lat * 1000) / 1000,
+    lng: Math.round(parsedOrigin.lng * 1000) / 1000,
+  };
+  const destination = await geocode(destinationText);
+
+  if (haversineMeters(origin, destination) < 20) {
+    throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
+  }
+
+  // Deliberately do not call OSRM here. Only the destination may need
+  // geocoding; the user's current location never leaves the device.
+  return buildLocalEstimate(origin, destination, mode);
+}
+
 export async function calculatePublicRoute(
   originText: string,
   destinationText: string,
