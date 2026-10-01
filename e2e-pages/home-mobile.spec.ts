@@ -41,7 +41,8 @@ test("Pages: home remains readable and touch-friendly at 320px", async ({ page }
     expect(box?.height).toBeGreaterThanOrEqual(44);
   }
 
-  for (const input of page.locator("main input").all()) {
+  const inputs = await page.locator("main input").all();
+  for (const input of inputs) {
     expect(parseFloat(await input.evaluate(element => getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16);
   }
 
