@@ -73,6 +73,24 @@ describe("mobile search organization", () => {
       screen.getByRole("link", { name: "Abrir central de serviços" })
     ).toBeTruthy();
   });
+  it("passes only nearby intent instead of GPS coordinates in the URL", () => {
+    const getCurrentPosition = vi.fn();
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+    render(<SearchPage />);
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mais opções: postos, comércio e outras categorias",
+    }));
+    fireEvent.click(screen.getByRole("button", { name: "Perto de mim" }));
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    const params = new URLSearchParams(window.location.search);
+    expect(params.get("q")).toBe("postos");
+    expect(params.get("perto")).toBe("1");
+    expect(params.has("lat")).toBe(false);
+    expect(params.has("lng")).toBe(false);
+  });
   it("clears the query, returns to shortcuts and focuses the input", () => {
     window.history.replaceState(null, "", "/buscar?q=cras");
     render(<SearchPage />);
