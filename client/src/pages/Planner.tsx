@@ -838,7 +838,7 @@ export default function Planner() {
                   </div>
                 </div>
                 <div className="h-[min(62dvh,520px)] min-h-[360px]">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} />
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={isPreciseLocationText(origin)} />
                 </div>
               </section>
             )}
