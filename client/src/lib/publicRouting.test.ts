@@ -263,11 +263,11 @@ describe("public routing fallback", () => {
 
     await calculatePublicRoute(
       "-15.7545,-48.2816",
-      "Hospital Municipal Bom Jesus"
+      "CAPS"
     );
 
     const firstUrl = new URL(String(fetchMock.mock.calls[0][0]));
-    expect(firstUrl.searchParams.get("q")).toContain("Hospital Municipal Bom Jesus");
+    expect(firstUrl.searchParams.get("q")).toContain("CAPS");
     expect(firstUrl.searchParams.get("q")).toContain("Águas Lindas de Goiás");
   });
 
