@@ -5,7 +5,7 @@ import Planner from "./Planner";
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
-  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(), routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
+  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(), routeMapProps: [] as Array<Record<string, unknown>>, routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
@@ -46,7 +46,7 @@ vi.mock("@/lib/offlineStore", () => ({
   removeOfflineRoute: vi.fn(),
   isOfflineRouteStale: () => false,
 }));
-vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map">mapa</div> }));
+vi.mock("@/components/RouteMap", () => ({ RouteMap: (props: Record<string, unknown>) => { state.routeMapProps.push(props); return <div data-testid="route-map">mapa</div>; } }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
 const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Digite o destino"), { target: { value } });
@@ -79,6 +79,7 @@ beforeEach(() => {
   state.lookup.mockReset();
   state.navigate.mockReset();
   state.routes = [];
+  state.routeMapProps = [];
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -150,6 +151,7 @@ describe("Planner travel state", () => {
       expect(state.publicRoute).not.toHaveBeenCalled();
       expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("-15.76123, -48.28123");
       expect(state.mutate).not.toHaveBeenCalled();
+      expect(state.routeMapProps.at(-1)?.privateOrigin).toBe(true);
     } finally {
       if (descriptor) Object.defineProperty(navigator, "geolocation", descriptor);
       else Reflect.deleteProperty(navigator, "geolocation");
