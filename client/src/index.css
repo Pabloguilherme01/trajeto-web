@@ -246,6 +246,11 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     letter-spacing: 0.055em;
     line-height: 1.35;
   }
+  .premium-surface [class*="uppercase"][class*="tracking-"],
+  [role="dialog"] [class*="uppercase"][class*="tracking-"] {
+    letter-spacing: 0.07em;
+    font-weight: 700;
+  }
   .mobile-title {
     font-size: clamp(2rem, 9vw, 2.75rem);
     letter-spacing: -0.025em;
