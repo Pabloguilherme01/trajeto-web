@@ -96,7 +96,7 @@ export default function TripReadinessCard() {
         <div className="min-w-0">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-[#3DE3FF]">Prontidão da viagem</p>
           <h2 id="trip-readiness-title" className="mt-1 font-display text-xl font-semibold tracking-[-0.045em]">{status}</h2>
-          <p className="mt-1 text-xs leading-relaxed text-white/45">{readyCount}/{items.length} pontos verificados localmente · sem enviar seus dados para um servidor.</p>
+          <p className="mt-1 text-xs leading-relaxed text-white/65">{readyCount}/{items.length} pontos verificados localmente · sem enviar seus dados para um servidor.</p>
         </div>
         <div className={hasWarning ? "grid size-10 shrink-0 place-items-center rounded-xl bg-[#FFC928]/10 text-[#FFD66B]" : "grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"}>
           {hasWarning ? <CircleAlert className="size-5" /> : <ShieldCheck className="size-5" />}
@@ -106,7 +106,7 @@ export default function TripReadinessCard() {
         <div className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-3">
           <p className="text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Rotina detectada localmente</p>
           <p className="mt-1 truncate text-xs font-extrabold text-white">{routineLabel}</p>
-          <p className="mt-1 text-xs text-white/45">{mostUsedTrip ? "Esta é a rota mais usada na memória deste aparelho." : "Última rota registrada neste aparelho."}</p>
+          <p className="mt-1 text-xs text-white/65">{mostUsedTrip ? "Esta é a rota mais usada na memória deste aparelho." : "Última rota registrada neste aparelho."}</p>
           {routineOffline && <p className={"mt-1 text-xs font-bold " + (isOfflineRouteStale(routineOffline.savedAt) ? "text-amber-200" : "text-[#C7FF3C]")}>{isOfflineRouteStale(routineOffline.savedAt) ? "Cópia offline antiga · revisar antes de depender dela." : "Cópia offline disponível para contingência."}</p>}
         </div>
       )}
