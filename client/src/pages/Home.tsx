@@ -248,7 +248,7 @@ export default function Home() {
               <p className="text-[0.56rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rotas locais</p>
               <h2 id="local-routes-title" className="mt-1 text-xl font-black tracking-[-.035em]">Já deixe o destino pronto.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-10 rounded-xl border border-white/8 px-3 text-[0.58rem] font-black text-white/55">Mais opções</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-10 rounded-xl border border-white/8 px-3 text-[0.58rem] font-black text-white/55">Ver catálogo</button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
