@@ -108,9 +108,14 @@ async function withStore<T>(
     return await new Promise<T>((resolve, reject) => {
       const tx = db.transaction(STORE, mode);
       const request = operation(tx.objectStore(STORE));
-      request.onsuccess = () => resolve(request.result);
+      let result: T;
+      // Success of one request does not mean its transaction was committed.
+      // Preserve callbacks supplied by a batch operation (such as pruning).
+      request.addEventListener("success", () => { result = request.result; });
+      tx.oncomplete = () => resolve(result);
       request.onerror = () => reject(request.error ?? new Error("Operação offline falhou."));
       tx.onerror = () => reject(tx.error ?? new Error("Transação offline falhou."));
+      tx.onabort = () => reject(tx.error ?? new Error("Transação offline foi interrompida."));
     });
   } finally {
     db.close();
@@ -152,9 +157,9 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
       const tx = db.transaction(STORE, "readwrite");
       const store = tx.objectStore(STORE);
       const request = store.getAll();
+      const valid: OfflineRoute[] = [];
 
       request.onsuccess = () => {
-        const valid: OfflineRoute[] = [];
         for (const candidate of request.result as unknown[]) {
           if (isValidRoute(candidate)) {
             valid.push(candidate);
@@ -163,12 +168,12 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
           }
         }
 
-        valid.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
-        resolve(valid);
       };
 
+      tx.oncomplete = () => resolve(valid.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt)));
       request.onerror = () => reject(request.error ?? new Error("Não foi possível ler as rotas salvas."));
       tx.onerror = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
+      tx.onabort = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
     });
   } finally {
     db.close();

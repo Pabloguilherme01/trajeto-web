@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v21";
+const VERSION = CACHE_PREFIX + "v22";
 const NETWORK_TIMEOUT_MS = 4000;
 const MAX_MAP_ENTRIES = 24;
 const STATIC_CACHE = VERSION + "-static";
@@ -73,6 +73,9 @@ self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
   if (event.data?.type === "OFFLINE_STATUS" && event.ports?.[0]) {
     event.waitUntil(offlineStatus().then(status => event.ports[0].postMessage(status)));
+  }
+  if (event.data?.type === "RESTORE_OFFLINE" && event.ports?.[0]) {
+    event.waitUntil(restoreOfflinePackage().then(status => event.ports[0].postMessage(status)));
   }
 });
 
@@ -243,6 +246,50 @@ async function offlineStatus() {
     return { ready: saved.every(Boolean) && snapshots.every(Boolean), version: VERSION };
   } catch {
     return { ready: false };
+  }
+}
+
+async function restoreOfflinePackage() {
+  try {
+    const cache = await caches.open(STATIC_CACHE);
+    const manifest = await cache.match("./offline-assets.json", { ignoreVary: true });
+    if (!manifest) return { ready: false, reason: "update" };
+    // Recover the document from this installed build only. Downloading today's
+    // HTML into an older package would mix incompatible versions.
+    const shell = await cache.match("./index.html", { ignoreVary: true }) ||
+      await cache.match("./", { ignoreVary: true }) || await cache.match("./404.html", { ignoreVary: true });
+    if (!shell) return { ready: false, reason: "update" };
+    for (const path of ["./", "./index.html", "./404.html"]) {
+      if (!await cache.match(path, { ignoreVary: true })) await cache.put(path, shell.clone());
+    }
+    const assets = [...new Set([...STATIC_SHELL, ...collectManifestAssets(await manifest.json())])];
+    const missing = [];
+    for (const asset of assets) {
+      if (!await cache.match(asset, { ignoreVary: true })) missing.push({ cache, asset });
+    }
+    const data = await caches.open(DATA_CACHE);
+    for (const asset of ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"]) {
+      if (!await data.match(asset, { ignoreVary: true })) missing.push({ cache: data, asset });
+    }
+    // Keep downloads bounded on phones. A missing old chunk may have been
+    // removed by a deployment: never cache an HTML fallback as JavaScript.
+    for (let index = 0; index < missing.length; index += 6) {
+      await Promise.all(missing.slice(index, index + 6).map(async ({ cache: target, asset }) => {
+        const url = new URL(asset, self.registration.scope);
+        if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope) || url.pathname.includes("/api/")) throw new Error("update");
+        const response = await fetchWithTimeout(new Request(url, { cache: "reload" }));
+        const type = response.headers.get("Content-Type") || "";
+        if (!response.ok ||
+          (/\.js$/.test(url.pathname) && !/(?:javascript|ecmascript)/i.test(type)) ||
+          (/\.css$/.test(url.pathname) && !/text\/css/i.test(type)) ||
+          (/\.json$/.test(url.pathname) && !/json/i.test(type))) throw new Error("update");
+        if (/\.json$/.test(url.pathname)) await response.clone().json();
+        await target.put(asset, response);
+      }));
+    }
+    return await offlineStatus();
+  } catch (error) {
+    return { ready: false, reason: error?.name === "QuotaExceededError" ? "storage" : error?.message === "update" ? "update" : "connection" };
   }
 }
 

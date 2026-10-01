@@ -12,8 +12,10 @@ test("central de serviços abre offline e filtra saúde", async ({ page }) => {
 test("busca local oferece categorias prontas", async ({ page }) => {
   await page.goto("/buscar", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre e vá\./i })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Postos", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Saúde", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Segurança", exact: true })).not.toBeVisible();
+  await page.getByRole("button", { name: "Mais opções: postos, comércio e outras categorias" }).click();
+  await expect(page.getByRole("button", { name: "Postos", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Segurança", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Educação", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Saúde", exact: true }).click();

@@ -50,4 +50,13 @@ describe("public services catalog", () => {
     expect(searchPublicServices("upa", "saude").some(item => item.id === "upa-mansoes-odisseia")).toBe(true);
     expect(searchPublicServices("nao existe", "todos")).toEqual([]);
   });
+  it("offers official work and pension channels without a fictitious local route", () => {
+    const work = searchPublicServices("ctps")[0];
+    expect(work.phone).toBe("158");
+    expect(work.sourceUrl).toContain("gov.br/pt-br/servicos/obter-a-carteira-de-trabalho");
+    const inss = searchPublicServices("cnis")[0];
+    expect(inss.phone).toBe("135");
+    expect(inss.actionUrl).toBe("https://meu.inss.gov.br/");
+    for (const item of [work, inss, PUBLIC_SERVICES.find(item => item.id === "defesa-civil")!]) expect(item.mapQuery).toBeUndefined();
+  });
 });

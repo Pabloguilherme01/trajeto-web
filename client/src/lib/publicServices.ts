@@ -28,7 +28,9 @@ export type PublicService = {
     | "Ministério das Mulheres"
     | "Direitos Humanos e Cidadania"
     | "Saneago"
-    | "Equatorial Goiás";
+    | "Equatorial Goiás"
+    | "Ministério do Trabalho e Emprego"
+    | "INSS";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -735,7 +737,35 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "190",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
-    mapQuery: "Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "carteira-trabalho-digital",
+    name: "Carteira de Trabalho Digital",
+    category: "cidadania",
+    description: "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
+    phone: "158",
+    sourceLabel: "Ministério do Trabalho e Emprego",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/obter-a-carteira-de-trabalho",
+    actionUrl: "https://www.gov.br/pt-br/servicos/obter-a-carteira-de-trabalho",
+    actionLabel: "Acessar Carteira de Trabalho",
+    guidance: "Use sua conta gov.br no portal oficial. O acesso digital exige internet. Para dúvidas, consulte a Central 158.",
+    keywords: ["ctps", "carteira de trabalho", "contrato de trabalho", "documento trabalhador"],
+    verifiedAt: "01/10/2026",
+  },
+  {
+    id: "meu-inss",
+    name: "Meu INSS · benefícios e extratos",
+    category: "assistencia",
+    description: "Canal oficial para pedidos, acompanhamento de benefícios e extratos previdenciários, como o CNIS.",
+    phone: "135",
+    hours: "Central 135: segunda a sábado, 7h–22h (Brasília)",
+    sourceLabel: "INSS",
+    sourceUrl: "https://www.gov.br/inss/pt-br/canais_atendimento/meu-inss/meu-inss",
+    actionUrl: "https://meu.inss.gov.br/",
+    actionLabel: "Acessar Meu INSS",
+    guidance: "Entre com sua conta gov.br somente no portal oficial. Consultas e solicitações online exigem internet; a Central 135 precisa de rede telefônica. A análise do pedido cabe ao INSS.",
+    keywords: ["aposentadoria", "pensão", "previdencia", "cnis", "extrato contribuição", "beneficio inss"],
+    verifiedAt: "01/10/2026",
   },
   {
     id: "prefeitura",
