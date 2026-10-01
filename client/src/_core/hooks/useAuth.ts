@@ -1,12 +1,8 @@
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import { supportsBackendAuth } from "@/lib/runtimeCapabilities";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
-
-export function backendAuthEnabled(staticRuntime: boolean) {
-  return !staticRuntime;
-}
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -19,8 +15,7 @@ export function useAuth(options?: UseAuthOptions) {
   // the state cookie, so calling it per render would overwrite the cookie and
   // desync it from an in-flight login's `state`.
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
-  const staticRuntime = isGitHubPagesRuntime();
-  const canUseBackendAuth = backendAuthEnabled(staticRuntime);
+  const canUseBackendAuth = supportsBackendAuth();
   const utils = trpc.useUtils();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
