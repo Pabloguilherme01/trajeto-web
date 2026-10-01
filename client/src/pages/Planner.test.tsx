@@ -89,7 +89,7 @@ describe("Planner travel state", () => {
 
     render(<Planner />);
     fireEvent.click(screen.getByRole("button", { name: "Usar localização atual" }));
-    expect(screen.getByPlaceholderText("De onde você sai")).toHaveValue("Minha localização");
+    expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Minha localização");
 
     submit();
     await waitFor(() =>
