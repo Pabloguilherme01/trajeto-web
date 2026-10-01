@@ -6,3 +6,9 @@ export function normalizeRegion(value: string | null | undefined) {
   const normalized = value?.trim().replace(/\s+/g, " ").slice(0, 120) ?? "";
   return normalized || null;
 }
+
+
+export function productEventRegion(event: ProductEventName, value: string | null | undefined) {
+  if (event !== "google_page_token_invalid") return null;
+  return normalizeRegion(value);
+}
