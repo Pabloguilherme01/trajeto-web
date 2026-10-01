@@ -61,7 +61,7 @@ export default function InstallAppPrompt() {
   };
 
   return (
-    <aside className="fixed inset-x-3 bottom-[max(5.6rem,calc(5rem + env(safe-area-inset-bottom)))] z-50 mx-auto max-w-md rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#0D151A]/96 p-4 text-white shadow-[0_20px_60px_rgba(0,0,0,.5)] backdrop-blur-2xl md:bottom-4" aria-label="Instalar Trajeto">
+    <aside className="fixed inset-x-3 bottom-[calc(5.6rem_+_env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#0D151A]/96 p-4 text-white shadow-[0_20px_60px_rgba(0,0,0,.5)] backdrop-blur-2xl md:bottom-4" aria-label="Instalar Trajeto">
       <div className="flex items-start gap-3">
         <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C] text-[#0B1014]">
           <Download className="size-5" />
