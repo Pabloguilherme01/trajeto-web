@@ -518,6 +518,7 @@ export default function Planner() {
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 place-items-center text-[#79C6D0] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
                 <p className="mt-1.5 text-xs leading-snug text-white/50">Se deixar vazio, tentamos usar a localização deste aparelho.</p>
+                <p className="mt-1 text-xs leading-snug text-[#79C6D0]">Privacidade: o GPS exato fica em memória; não entra em analytics, histórico ou link compartilhado.</p>
               </label>
 
               <div className="my-2 flex justify-end">
