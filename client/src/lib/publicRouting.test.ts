@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePublicRoute } from "./publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
@@ -45,6 +45,32 @@ describe("public routing fallback", () => {
     expect(route.durationSeconds).toBe(845);
     expect(route.polyline).toBe("abc123");
     expect(route.origin).toEqual({ lat: -15.7545, lng: -48.2816 });
+  });
+
+  it("never sends the GPS origin to an online route provider", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]), {
+          status: 200,
+        })
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePrivateLocationRoute(
+      "-15.76123, -48.28123",
+      "Brasília, DF",
+      "driving"
+    );
+
+    expect(route.source).toBe("local-estimate");
+    expect(route.origin).toEqual({ lat: -15.761, lng: -48.281 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const onlyUrl = String(fetchMock.mock.calls[0][0]);
+    expect(onlyUrl).toContain("nominatim");
+    expect(onlyUrl).not.toContain("-15.76123");
+    expect(onlyUrl).not.toContain("-48.28123");
+    expect(onlyUrl).not.toContain("router.project-osrm.org");
   });
 
   it("falls back to a local estimate when the shared router is unavailable", async () => {
