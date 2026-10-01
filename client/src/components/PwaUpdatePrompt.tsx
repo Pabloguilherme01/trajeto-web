@@ -26,9 +26,9 @@ export default function PwaUpdatePrompt() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-black">Nova versão disponível</p>
-          <p className="mt-0.5 text-[0.62rem] leading-4 text-white/60">Atualize para receber correções e melhorias do Trajeto.</p>
+          <p className="mt-0.5 text-xs leading-5 text-white/70">Atualize para receber correções e melhorias do Trajeto.</p>
         </div>
-        <button type="button" onClick={update} className="min-h-10 shrink-0 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
+        <button type="button" onClick={update} className="min-h-10 shrink-0 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">
           Atualizar
         </button>
         <button type="button" onClick={() => setAvailable(false)} aria-label="Fechar aviso de atualização" className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-white/70">
