@@ -85,7 +85,7 @@ export default function SearchPage() {
 
   const openRoute = (destination: string) => {
     rememberSearch(destination);
-    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination));
+    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1");
   };
 
   return (
