@@ -1,5 +1,6 @@
 import { normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { idbGet, idbPut } from "@/lib/offlineDb";
+import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 
 export type OfflineStationMapEntry = {
   id: string;
@@ -138,6 +139,30 @@ export async function hydrateOfflineMapStations() {
     return snapshot;
   }
   return getOfflineMapStations();
+}
+
+export function prepareOfflineStationMapFromCatalog() {
+  const stations = searchAguasLindasStations("postos")
+    .filter(
+      station =>
+        Number.isFinite(station.anp?.latitude) &&
+        Number.isFinite(station.anp?.longitude)
+    )
+    .map(station => ({
+      id: "catalog-" + station.cnpj,
+      name: station.displayName || station.legalName || "Posto",
+      address:
+        station.address ||
+        station.neighborhood ||
+        "Águas Lindas de Goiás, GO",
+      lat: Number(station.anp?.latitude),
+      lng: Number(station.anp?.longitude),
+      cnpj: station.cnpj,
+      brand: station.brand,
+      source:
+        station.dataOrigin === "ANP" ? ("ANP" as const) : ("local" as const),
+    }));
+  return cacheOfflineMapStations(stations);
 }
 
 export function getOfflineMapAgeLabel(savedAt: string) {
