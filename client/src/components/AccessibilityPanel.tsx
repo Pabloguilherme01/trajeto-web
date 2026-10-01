@@ -20,6 +20,7 @@ export default function AccessibilityPanel() {
   const [clearStep,setClearStep]=useState<"idle"|"confirm"|"done">("idle");
   const [backupStatus,setBackupStatus]=useState<"idle"|"done"|"error">("idle");
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const openPanel = () => { returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setOpen(true); };
   const closePanel = () => setOpen(false);
 
@@ -37,7 +38,30 @@ export default function AccessibilityPanel() {
       document.getElementById("accessibility-close")?.focus();
     }, 0);
     const onKeyDown=(event: KeyboardEvent)=>{
-      if (event.key === "Escape") closePanel();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closePanel();
+        return;
+      }
+      if (event.key !== "Tab" || !panelRef.current) return;
+      const focusable = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(element => !element.hasAttribute("hidden") && element.getClientRects().length > 0);
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return()=>{
@@ -81,19 +105,19 @@ export default function AccessibilityPanel() {
         <Accessibility className="size-5"/>
       </button>
       {open && (
-        <div className="fixed inset-0 z-[70] bg-black/70 p-3 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" onMouseDown={e=>{if(e.target===e.currentTarget)closePanel()}}>
-          <section className="mx-auto mt-auto max-h-[90vh] max-w-lg overflow-auto rounded-3xl border border-white/15 bg-[#0F171D] p-4 shadow-2xl sm:mt-10 sm:p-6">
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:block sm:p-3" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" onMouseDown={e=>{if(e.target===e.currentTarget)closePanel()}}>
+          <section ref={panelRef} className="w-full max-h-[calc(100dvh-.5rem)] max-w-lg overflow-auto overscroll-contain rounded-b-none rounded-t-[1.75rem] border border-white/15 bg-[#0F171D] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl sm:mx-auto sm:mt-10 sm:max-h-[90vh] sm:rounded-3xl sm:p-6">
             <header className="flex items-start justify-between gap-4">
-              <div><p className="text-[0.62rem] font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]">Acesso rápido</p><h2 id="accessibility-title" className="mt-1 text-xl font-extrabold text-white">Acessibilidade e modo de uso</h2><p className="mt-1 text-xs text-[#8FA3AC]">Preferências ficam neste aparelho e podem ser alteradas a qualquer momento.</p></div>
+              <div><p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]">Acesso rápido</p><h2 id="accessibility-title" className="mt-1 text-xl font-extrabold text-white">Acessibilidade e modo de uso</h2><p className="mt-1 text-xs text-[#8FA3AC]">Preferências ficam neste aparelho e podem ser alteradas a qualquer momento.</p></div>
               <button type="button" id="accessibility-close" onClick={closePanel} aria-label="Fechar acessibilidade" className="grid size-11 place-items-center rounded-xl border border-white/10 text-white"><X className="size-5"/></button>
             </header>
 
             <div className="mt-5">
-              <p className="text-[0.62rem] font-extrabold uppercase tracking-[0.14em] text-[#7F919A]">Modos prontos</p>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#7F919A]">Modos prontos</p>
               <div className="mt-2 grid grid-cols-3 gap-2">
-                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:true});setEconomyMode(true);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Economia<span className="mt-0.5 block text-[0.58rem] font-normal text-[#8FA3AC]">menos dados e blocos</span></button>
-                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:true,highContrast:true,reduceMotion:false,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Leitura<span className="mt-0.5 block text-[0.58rem] font-normal text-[#8FA3AC]">texto e contraste</span></button>
-                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Condução<span className="mt-0.5 block text-[0.58rem] font-normal text-[#8FA3AC]">menos movimento</span></button>
+                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:true});setEconomyMode(true);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Economia<span className="mt-0.5 block text-xs font-normal text-[#8FA3AC]">menos dados e blocos</span></button>
+                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:true,highContrast:true,reduceMotion:false,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Leitura<span className="mt-0.5 block text-xs font-normal text-[#8FA3AC]">texto e contraste</span></button>
+                <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Condução<span className="mt-0.5 block text-xs font-normal text-[#8FA3AC]">menos movimento</span></button>
               </div>
             </div>
 
@@ -112,8 +136,8 @@ export default function AccessibilityPanel() {
             <button type="button" onClick={()=>{resetAccessibilityPreferences();setPrefs(getAccessibilityPreferences());}} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 px-4 text-xs font-bold text-[#B8C7CE]"><RotateCcw className="size-4"/>Restaurar padrão</button>
               <div className="mt-3">
                 <button type="button" onClick={()=>setBackupStatus(exportLocalAppData() ? "done" : "error")} className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 text-xs font-extrabold text-white">Exportar backup local</button>
-                {backupStatus === "done" && <p role="status" className="mt-2 text-[0.68rem] font-bold text-[#DFFF9A]">Backup criado no aparelho. Ele contém apenas os dados locais do Trajeto.</p>}
-                {backupStatus === "error" && <p role="alert" className="mt-2 text-[0.68rem] font-bold text-[#FFD0C3]">Não foi possível criar o backup neste navegador.</p>}
+                {backupStatus === "done" && <p role="status" className="mt-2 text-xs font-bold text-[#DFFF9A]">Backup criado no aparelho. Ele contém apenas os dados locais do Trajeto.</p>}
+                {backupStatus === "error" && <p role="alert" className="mt-2 text-xs font-bold text-[#FFD0C3]">Não foi possível criar o backup neste navegador.</p>}
               </div>
 
             <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
