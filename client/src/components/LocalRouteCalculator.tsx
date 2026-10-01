@@ -458,7 +458,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
       )}
 
       <p id="local-calculator-note" className="mt-3 text-[0.62rem] leading-relaxed text-[#71877E]">
-        Estimativa local baseada somente nos valores informados. O Trajeto pode reaproveitar neste aparelho a distância da rota, o veículo salvo e o último preço digitado. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.
+        Cálculo local baseado somente nos valores informados. O Trajeto pode reaproveitar neste aparelho a distância da rota, o veículo salvo e o último preço digitado. O custo mensal usa 4,33 semanas por mês e não representa preço atual de posto.
       </p>
     </section>
   );
