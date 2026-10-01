@@ -153,6 +153,34 @@ export const PUBLIC_SERVICES: PublicService[] = [
     mapQuery: "Secretaria Municipal de Saúde, Águas Lindas de Goiás, GO",
   },
   {
+    id: "vigilancia-saude",
+    keywords: [
+      "vigilancia sanitaria",
+      "vigilancia epidemiologica",
+      "denuncia sanitaria",
+      "surto",
+      "dengue",
+      "zoonoses",
+    ],
+    name: "Vigilância em Saúde",
+    category: "saude",
+    description:
+      "Orientação e atendimento municipal de vigilância em saúde, incluindo demandas sanitárias e epidemiológicas.",
+    address:
+      "Avenida Brasília, Quadra 109, Lote 30/32, Conjunto B, Setor 10, Águas Lindas de Goiás - GO",
+    phone: "(61) 3618-1409",
+    email: "saude@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, das 08h às 12h e das 13h às 17h",
+    guidance:
+      "Entre em contato antes de sair para confirmar o setor responsável pela sua demanda.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/vigilancia-em-saude/",
+    mapQuery:
+      "Vigilância em Saúde, Avenida Brasília, Quadra 109, Lote 30/32, Setor 10, Águas Lindas de Goiás, GO",
+  },
+  {
     id: "unidades-saude",
     name: "Unidades de Saúde do município",
     category: "saude",
@@ -642,6 +670,60 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "Secretaria Municipal de Infraestrutura e Obras, Águas Lindas de Goiás, GO",
   },
   {
+    id: "iluminacao-publica",
+    keywords: [
+      "lampada apagada",
+      "poste sem luz",
+      "iluminacao de rua",
+      "luz da rua",
+      "manutencao de poste",
+    ],
+    name: "Iluminação Pública",
+    category: "cidadania",
+    description:
+      "Departamento municipal responsável por demandas de iluminação pública.",
+    address: "Área Especial, Quadra 31, Setor 02, Águas Lindas de Goiás - GO",
+    phone: "(61) 9311-8672",
+    email: "infraeobras@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, das 08h às 12h e das 13h às 17h",
+    guidance:
+      "Informe o endereço e um ponto de referência do poste ou trecho com problema.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/departamento-de-iluminacao-publica/",
+    mapQuery:
+      "Departamento de Iluminação Pública, Área Especial, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "limpeza-urbana",
+    keywords: [
+      "coleta de lixo",
+      "lixo",
+      "varricao",
+      "rocagem",
+      "podagem",
+      "limpeza de rua",
+      "entulho",
+    ],
+    name: "Limpeza e Varrição Urbana",
+    category: "cidadania",
+    description:
+      "Canal municipal para limpeza pública, coleta, varrição, roçagem e podagem.",
+    address: "Área Especial, Quadra 31, Setor 02, Águas Lindas de Goiás - GO",
+    phone: "(61) 99303-4608",
+    email: "infraeobras@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, das 08h às 12h e das 13h às 17h",
+    guidance:
+      "Informe rua, bairro e ponto de referência. Para ocorrências específicas, confirme o encaminhamento com a Secretaria de Infraestrutura e Obras.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/",
+    mapQuery:
+      "Secretaria Municipal de Infraestrutura e Obras, Área Especial, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
+  },
+  {
     id: "secretaria-meio-ambiente",
     name: "Secretaria Municipal de Meio Ambiente",
     category: "cidadania",
@@ -1000,6 +1082,16 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
   { label: "Saúde mental / CAPS", query: "saude mental", hint: "Atendimento psicossocial municipal" },
   { label: "Água e segunda via", query: "conta agua", hint: "Saneago" },
   { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
+  {
+    label: "Iluminação pública",
+    query: "lampada apagada",
+    hint: "Poste ou trecho sem luz",
+  },
+  {
+    label: "Limpeza e coleta",
+    query: "coleta lixo",
+    hint: "Limpeza, varrição e coleta",
+  },
   {
     label: "CadÚnico e benefícios",
     query: "cadunico",
