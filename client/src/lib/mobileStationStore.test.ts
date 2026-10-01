@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cacheStations, getCachedStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "./mobileStationStore";
+import { cacheStations, getCachedStations, listMobileStationFavorites, mobileStationFavoritesEvent, toggleMobileStationFavorite, type MobileStation } from "./mobileStationStore";
 const station: MobileStation = { placeId: "test", name: "Posto", address: "Águas Lindas", lat: -15.7, lng: -48.2, openingHours: [] };
 beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
@@ -11,6 +11,16 @@ describe("armazenamento de postos", () => {
     cacheStations("postos", [station], -15.7, -48.2);
     expect(getCachedStations("postos", -15.7, -48.2)?.stations).toEqual([station]);
   });
+  it("announces successful favorite changes so offline counters can refresh", () => {
+    const listener = vi.fn();
+    window.addEventListener(mobileStationFavoritesEvent, listener);
+    toggleMobileStationFavorite(station);
+    expect(listener).toHaveBeenCalledTimes(1);
+    toggleMobileStationFavorite(station);
+    expect(listener).toHaveBeenCalledTimes(2);
+    window.removeEventListener(mobileStationFavoritesEvent, listener);
+  });
+
   it("does not report success or remove existing favorites when a write fails", () => {
     toggleMobileStationFavorite(station);
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new DOMException("Full", "QuotaExceededError"); });
