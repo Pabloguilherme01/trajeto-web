@@ -1,10 +1,11 @@
-import { ArrowRight, BookOpen, Compass, Fuel, HeartPulse, Landmark, MapPin, Navigation, Route, Search as SearchIcon, ShieldAlert, Siren, Store, X, Hospital, BusFront, ShoppingCart } from "lucide-react";
+import { ArrowRight, BookOpen, Compass, Fuel, HeartPulse, Landmark, MapPin, Navigation, Route, Search as SearchIcon, ShieldAlert, Siren, Store, X, Hospital, BusFront, ShoppingCart, Utensils, ShoppingBag } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { AGUAS_LINDAS_STATIONS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { getRecentSearches, rememberSearch } from "@/lib/mobilePreferences";
 import { getLocalRoutePresets } from "@/lib/localRoutePresets";
+import { LOCAL_PLACES, LOCAL_PLACES_UPDATED_AT, searchLocalPlaces } from "@/lib/localPlaces";
 import { searchPublicServices } from "@/lib/publicServices";
 
 const googleSearch = (query: string) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
@@ -16,11 +17,13 @@ const quickActions = [
   { label: "Perto de mim", hint: "Usar localização do aparelho", icon: Compass, kind: "nearby", query: "" },
   { label: "Saúde", hint: "UPA, HEAL, hospital e UBS", icon: HeartPulse, kind: "services", query: "saude" },
   { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "services", query: "seguranca" },
+  { label: "Comer", hint: "Restaurantes, lanches e café", icon: Utensils, kind: "places", query: "alimentacao" },
+  { label: "Compras", hint: "Lojas, mercados e eletrônicos", icon: ShoppingBag, kind: "places", query: "compras" },
   { label: "Segurança", hint: "Delegacia e canais policiais", icon: ShieldAlert, kind: "services", query: "seguranca" },
   { label: "Educação", hint: "Escolas e rede pública", icon: BookOpen, kind: "services", query: "educacao" },
   { label: "Trânsito", hint: "Mobilidade e atendimento", icon: BusFront, kind: "services", query: "transito" },
   { label: "Farmácias", hint: "Encontrar farmácias", icon: Store, kind: "external", query: "farmácias, Águas Lindas de Goiás, GO" },
-  { label: "Compras", hint: "Mercados e atacarejos", icon: ShoppingCart, kind: "external", query: "supermercados atacadistas, Águas Lindas de Goiás, GO" },
+  { label: "Mercados", hint: "Mercados e atacarejos", icon: ShoppingCart, kind: "external", query: "supermercados atacadistas, Águas Lindas de Goiás, GO" },
 ] as const;
 
 export default function SearchPage() {
@@ -53,6 +56,7 @@ export default function SearchPage() {
 
   const routeResults = useMemo(() => getLocalRoutePresets(query).slice(0, 10), [query]);
   const serviceResults = useMemo(() => searchPublicServices(query).slice(0, 12), [query]);
+  const placeResults = useMemo(() => searchLocalPlaces(query).slice(0, 12), [query]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -66,6 +70,7 @@ export default function SearchPage() {
     if (action.kind === "internal") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=postos"); return; }
     if (action.kind === "routes") { setLocation(appUrl("/buscar") + "?q="); return; }
     if (action.kind === "services") { setLocation(appUrl("/servicos") + (action.query ? "?categoria=" + encodeURIComponent(action.query) : "")); return; }
+    if (action.kind === "places") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(action.query)); return; }
     if (action.kind === "nearby") {
       if (!navigator.geolocation) { setLocation(appUrl("/postos")); return; }
       navigator.geolocation.getCurrentPosition(
@@ -154,6 +159,34 @@ export default function SearchPage() {
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-4" /></span>
               <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.displayName}</span><span className="mt-0.5 block line-clamp-2 text-[0.58rem] leading-snug text-white/38">{item.address || item.neighborhood || "Endereço não consolidado"}</span><span className="mt-1 block text-[0.5rem] font-bold text-white/22">{item.dataOrigin === "ANP" ? "ANP" : item.dataOrigin === "cross-check" ? "Dados cruzados" : "Catálogo local"}</span></span><ArrowRight className="size-4 shrink-0 text-white/25" /></button>)}
           </div>
+        </section>
+
+        <section className="mt-6" aria-labelledby="local-guide-title">
+          <div className="flex items-end justify-between gap-3">
+            <div><p className="text-[0.54rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Guia local</p><h2 id="local-guide-title" className="mt-1 text-xl font-black">{query ? "Comer, comprar e resolver" : "Lugares úteis em Águas Lindas"}</h2></div>
+            <span className="text-[0.55rem] text-white/25">{LOCAL_PLACES.length} referências · {LOCAL_PLACES_UPDATED_AT}</span>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {(query ? placeResults : LOCAL_PLACES.slice(0, 8)).map(place => {
+              const icon = place.category === "alimentacao" ? Utensils : place.category === "compras" ? ShoppingBag : place.category === "servicos" ? Landmark : MapPin;
+              const PlaceIcon = icon;
+              return (
+                <button key={place.id} type="button" onClick={() => {
+                  rememberSearch(place.name);
+                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery));
+                }} className="flex min-h-[5.1rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/20 active:scale-[.99]">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><PlaceIcon className="size-4" /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-black">{place.name}</span>
+                    <span className="mt-0.5 block truncate text-[0.58rem] text-white/40">{place.detail}</span>
+                    <span className="mt-1 block truncate text-[0.5rem] text-white/22">{place.address}</span>
+                  </span>
+                  <span className="text-[0.5rem] font-black uppercase tracking-[.08em] text-[#3DE3FF]">Ir</span>
+                </button>
+              );
+            })}
+          </div>
+          {!query && <button type="button" onClick={() => { setInput("compras"); setQuery("compras"); setLocation(appUrl("/buscar") + "?q=compras"); }} className="mt-3 min-h-11 w-full rounded-xl border border-white/8 bg-white/[.025] px-3 text-[0.58rem] font-black text-white/55">Ver mais locais de compras e serviços</button>}
         </section>
 
         {query && serviceResults.length > 0 && (
