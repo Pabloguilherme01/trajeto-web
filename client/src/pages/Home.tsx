@@ -89,7 +89,12 @@ export default function Home() {
   };
 
   const useLocationAsOrigin = () => {
-    if (locating || !navigator.geolocation) return;
+    if (locating) return;
+    if (!navigator.geolocation) {
+      setFormMessage("Localização não disponível neste navegador. Digite sua origem para continuar.");
+      return;
+    }
+    setFormMessage(null);
     setLocating(true);
     rememberIntent("route");
     navigator.geolocation.getCurrentPosition(
