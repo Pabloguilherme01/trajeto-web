@@ -205,7 +205,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
           onClick={resetScenario}
           className="min-h-10 shrink-0 rounded-xl border border-[#C7D2C9] px-3 text-[0.62rem] font-extrabold text-[#365E51] hover:border-[#163840]"
         >
-          Limpar
+          Limpar cálculo
         </button>
       </div>
 
