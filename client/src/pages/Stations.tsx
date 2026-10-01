@@ -782,7 +782,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   setVerifiedOnly(false);
                   setMappedOnly(false);
                   setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(item));
-                }} className="max-w-[12rem] min-h-11 shrink-0 truncate rounded-full border border-white/8 px-3 py-2 text-xs font-bold text-white/65">{item}</button>
+                }} className="min-h-11 w-[11.5rem] shrink-0 rounded-2xl border border-white/8 px-3 py-2 text-left text-xs font-bold leading-snug text-white/65">{item}</button>
                 ))}
               </div>
             )}
