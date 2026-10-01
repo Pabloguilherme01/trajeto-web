@@ -751,27 +751,55 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "coleta de lixo",
       "lixo",
       "varricao",
-      "rocagem",
-      "podagem",
       "limpeza de rua",
       "entulho",
     ],
     name: "Limpeza e Varrição Urbana",
     category: "cidadania",
     description:
-      "Canal municipal para limpeza pública, coleta, varrição, roçagem e podagem.",
+      "Canal municipal da divisão de limpeza e varrição urbana.",
     address: "Área Especial, Quadra 31, Setor 02, Águas Lindas de Goiás - GO",
     phone: "(61) 99303-4608",
     email: "infraeobras@aguaslindasdegoias.go.gov.br",
     hours: "Segunda a sexta, das 08h às 12h e das 13h às 17h",
     guidance:
-      "Informe rua, bairro e ponto de referência. Para ocorrências específicas, confirme o encaminhamento com a Secretaria de Infraestrutura e Obras.",
+      "Informe rua, bairro e ponto de referência para facilitar o encaminhamento da solicitação.",
     verifiedAt: "01/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl:
       "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/",
     mapQuery:
       "Secretaria Municipal de Infraestrutura e Obras, Área Especial, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "rocagem-podagem",
+    keywords: [
+      "rocagem",
+      "roçagem",
+      "podagem",
+      "poda",
+      "mutirao",
+      "mutirão",
+      "mato alto",
+      "capina",
+    ],
+    name: "Roçagem, Podagem e Mutirão",
+    category: "cidadania",
+    description:
+      "Canal municipal da divisão responsável por limpeza, varrição, mutirão, roçagem e podagem.",
+    address:
+      "Rua 16, Quadra 31, Área Especial, Setor 02, Águas Lindas de Goiás - GO",
+    phone: "(61) 3613-9458",
+    email: "infraeobras@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sábado, das 07h às 18h",
+    guidance:
+      "Informe rua, bairro e ponto de referência e descreva se a necessidade é roçagem, poda, capina ou mutirão.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/",
+    mapQuery:
+      "Secretaria Municipal de Infraestrutura e Obras, Rua 16, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-meio-ambiente",
