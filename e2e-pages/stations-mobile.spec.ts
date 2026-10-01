@@ -13,6 +13,8 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   }));
   await page.goto("mapa", { waitUntil: "domcontentloaded" });
   const map = page.locator("#aguas-lindas-map");
+  await expect(map.getByRole("button", { name: /Salvar mapa/i })).toBeVisible();
+  await expect(map.getByText("online", { exact: true })).toBeVisible();
   const picker = map.getByRole("combobox", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
   const options = await picker.locator("option").evaluateAll(items =>
