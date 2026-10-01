@@ -106,9 +106,8 @@ export function buildGoogleMapsSearchUrl(query: string) {
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query.trim());
 }
 
-export function buildGoogleMapsNearbyStationsUrl(lat: number, lng: number) {
-  const query = `postos de combustível @${lat},${lng}`;
-  return buildGoogleMapsSearchUrl(query);
+export function buildGoogleMapsNearbyStationsUrl(_lat: number, _lng: number) {
+  return buildGoogleMapsSearchUrl("postos de combustível perto de mim");
 }
 
 export function buildWazeNavigationUrl(destination: string, coordinates?: { lat: number; lng: number }) {
