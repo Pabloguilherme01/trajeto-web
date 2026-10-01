@@ -798,7 +798,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
               <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/45">{mapStations.length} referências</span>
             </div>
-            <div className="min-h-[480px] h-[min(70vh,680px)]">
+            <div className="relative">
               <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
@@ -903,7 +903,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
                 {!mapFirst && showMap && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
-                    <div className="min-h-[480px] h-[min(68vh,620px)]">
+                    <div className="relative">
                       <StationMap
                         stations={mapStations}
                         showTraffic={online}
@@ -966,7 +966,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <p className="text-xs font-black uppercase tracking-[.14em] text-[#FFCF96]">Mapa salvo no aparelho</p>
                   <p className="mt-1 text-sm leading-relaxed text-white/65">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis sem conexão. A navegação em aplicativos externos pode exigir internet.</p>
                 </div>
-                <div className="min-h-[480px] h-[min(68vh,620px)]">
+                <div className="relative">
                   <StationMap stations={mapStations} showTraffic={false} userCoords={userCoords} />
                 </div>
                 <div className="border-t border-white/8 px-3 py-2.5 text-xs text-white/65">{mapStations.length} referências armazenadas · {offlineMapAge}.</div>
@@ -1024,10 +1024,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
               <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 text-white/65" />
-                <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
+                <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 place-items-center rounded-lg text-white/65" aria-label="Limpar busca"><X className="size-3.5" /></button>}
               </label>
-              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-xs font-black text-white/65">
+              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="all">Combustível: todos</option>
                 <option value="gasolina-comum">Gasolina comum</option>
                 <option value="etanol">Etanol</option>
@@ -1036,7 +1036,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="glp-p13">GLP P13</option>
                 <option value="gnv">GNV</option>
               </select>
-              <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-xs font-black text-white/65">
+              <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
                 <option value="price">Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
@@ -1179,12 +1179,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <label className="min-w-0 flex-1">
                 <span className="sr-only">Filtrar diretório por bairro</span>
-                <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none">
+                <select value={neighborhoodFilter} onChange={event => setNeighborhoodFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-base font-bold text-white outline-none">
                   <option value="all">Todos os bairros</option>
                   {localNeighborhoods.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
                 </select>
               </label>
-              <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
+              <label className="min-w-0"><span className="sr-only">Filtrar diretório por bandeira</span><select value={brandFilter} onChange={event => setBrandFilter(event.target.value)} className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-base font-bold text-white outline-none"><option value="all">Todas as bandeiras</option>{localBrands.map(brand => <option key={brand} value={brand}>{brand}</option>)}</select></label>
               <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={addressOnly} onChange={event => setAddressOnly(event.target.checked)} className="size-4 accent-[#C7FF3C]" /> Com endereço</label>
               <label className={"flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold " + (verifiedFilterAvailable ? "text-white/70" : "text-white/65")}><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} disabled={!verifiedFilterAvailable} className="size-4 accent-[#C7FF3C] disabled:opacity-40" /> Dados ANP {verifiedFilterAvailable ? "(confirmados)" : "(snapshot oficial disponível)"}</label>
               <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/8 bg-[#0B1014] px-3 text-xs font-bold text-white/70"><input type="checkbox" checked={mappedOnly} onChange={event => setMappedOnly(event.target.checked)} className="size-4 accent-[#3DE3FF]" /> Com dados de mapas</label>
@@ -1240,7 +1240,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         <span>{station.brand ?? "Bandeira não consolidada"}</span>
                       </div>
                       <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02]">
-                        <summary className="cursor-pointer list-none px-3 py-2.5 text-xs font-black text-white/65">Ver dados completos deste cadastro</summary>
+                        <summary className="flex min-h-11 cursor-pointer list-none items-center px-3 py-2.5 text-xs font-black text-white/65">Ver dados completos deste cadastro</summary>
                         <div className="space-y-2 border-t border-white/8 px-3 py-3 text-xs leading-relaxed text-white/65">
                           <p><strong className="text-white/65">Situação:</strong> {station.status === "cadastro_ativo" ? "cadastro setorial ativo" : station.status}</p>
                           <p><strong className="text-white/65">Aliases:</strong> {station.aliases.length ? station.aliases.join(" · ") : "não informados"}</p>
@@ -1341,7 +1341,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             {showMap && !broadAguasLindasQuery && visibleStations.length > 0 && (
               <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
-                <div className="h-[min(62vh,500px)]"><StationMap stations={visibleStations} userCoords={userCoords} /></div>
+                <div className="relative"><StationMap stations={visibleStations} userCoords={userCoords} /></div>
               </section>
             )}
 

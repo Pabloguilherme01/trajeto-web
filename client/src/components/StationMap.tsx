@@ -153,7 +153,7 @@ function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations
   );
 }
 
-export function StationMap({ stations, heightClassName = "min-h-[480px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation, userCoords = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
+export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation, userCoords = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);

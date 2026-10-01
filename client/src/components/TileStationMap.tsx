@@ -41,7 +41,7 @@ function wrapTile(x: number, z: number) {
 export default function TileStationMap({
   stations,
   userCoords = null,
-  heightClassName = "min-h-[480px] h-[min(68vh,620px)]",
+  heightClassName = "min-h-[320px] h-[min(68vh,620px)]",
   onSelectStation,
   fallback,
 }: {
@@ -236,10 +236,10 @@ export default function TileStationMap({
   return (
     <div
       className={
-        "relative overflow-hidden rounded-[1.25rem] bg-[#dfe9e2] " +
-        heightClassName
+        "overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"
       }
     >
+      <div className={"relative " + heightClassName}>
       <div
         ref={viewport}
         role="region"
@@ -409,8 +409,9 @@ export default function TileStationMap({
           {drawable.map(station => <option key={stationKey(station)} value={stationKey(station)}>{station.name}</option>)}
         </select>
       </label>
+      </div>
 
-      <div className="absolute bottom-3 left-3 right-3 z-20 rounded-2xl border border-black/10 bg-white/95 p-3 shadow-xl backdrop-blur">
+      <div className="relative border-t border-black/10 bg-white/95 p-4">
         {selected ? (
           <div className="flex items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">
