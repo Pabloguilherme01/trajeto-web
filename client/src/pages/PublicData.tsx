@@ -47,6 +47,7 @@ const categoryMeta: Record<
 
 const DEPARTURE_RESOURCE_IDS = [
   "inmet-alertas",
+  "defesa-civil-alertas",
   "dnit-rodovias",
   "anatel-cobertura",
   "stpc-df-gtfs",
@@ -129,7 +130,7 @@ export default function PublicData() {
             e transporte do DF sem tratar referência histórica ou cobertura
             teórica como informação ao vivo.
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
             {departureResources.map(item => {
               const meta = categoryMeta[item.category];
               const Icon = meta.icon;
@@ -316,13 +317,15 @@ export default function PublicData() {
         <section className="mt-8 rounded-3xl border border-white/10 bg-[#0F171D] p-4 sm:p-5">
           <h2 className="text-lg font-black">Como o Trajeto usa esses dados</h2>
           <p className="mt-2 max-w-4xl text-sm leading-relaxed text-white/70">
-            ANP já alimenta recursos locais. ANTT entra como referência de
-            transporte e tarifa. CNES e Inep ajudam a validar saúde e educação.
-            PRF serve para contexto histórico rodoviário. IBGE identifica o
-            território, e OpenStreetMap complementa descoberta de lugares sem
-            ser apresentado como fonte oficial. Integrações futuras devem
-            sincronizar no build ou no servidor, nunca bloquear a experiência
-            mobile nem comprometer o modo offline.
+            ANP já alimenta recursos locais; ANTT e o futuro GTFS apoiam
+            transporte; INMET e Defesa Civil cobrem avisos oficiais; DNIT e PRF
+            oferecem contexto rodoviário; Anatel ajuda a planejar contingência
+            de conexão; CNES, SAMU, PNI e Farmácia Popular fortalecem saúde;
+            MDS apoia assistência social; Banco Central cobre serviços
+            financeiros; IBGE identifica o território; MonitorAr cobre
+            qualidade do ar; e OpenStreetMap complementa descoberta de lugares.
+            Bases grandes devem ser sincronizadas no build ou no servidor para
+            não bloquear o mobile nem comprometer o modo offline.
           </p>
         </section>
       </div>
