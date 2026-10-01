@@ -22,6 +22,11 @@ vi.mock("@/lib/pwa", () => ({
   getOfflineStorageStatus: state.storage,
   requestOfflineStoragePersistence: state.persist,
 }));
+vi.mock("@/lib/stationMapOffline", () => ({
+  getOfflineMapStations: () => ({ savedAt: "", stations: [] }),
+  getOfflineMapAgeLabel: () => "sem mapa salvo",
+  prepareOfflineStationMapFromCatalog: vi.fn(() => true),
+}));
 beforeEach(() => {
   vi.stubGlobal("React", React);
   state.check.mockReset().mockResolvedValue(false);
