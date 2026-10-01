@@ -69,6 +69,8 @@ const CT =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
 const PCGO =
   "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-de-atendimento/";
+const PCGO_REGIONAIS =
+  "https://goias.gov.br/policiacivil/delegacias-regionais/";
 const SEDUC =
   "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
 const ASSISTENCIA =
@@ -361,12 +363,14 @@ export const PUBLIC_SERVICES: PublicService[] = [
     category: "seguranca",
     description:
       "Delegacia regional da Polícia Civil com atendimento em Águas Lindas.",
-    address: "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO",
-    phone: "(61) 3618-7202",
-    extraPhone: "(62) 99506-5190",
+    address:
+      "Quadra 27, Rua 22, Área Especial, Parque Águas Bonitas I, Águas Lindas de Goiás - GO, 72926-052",
+    phone: "(61) 3613-4160",
+    verifiedAt: "01/10/2026",
     sourceLabel: "Polícia Civil de Goiás",
-    sourceUrl: PCGO,
-    mapQuery: "17ª Delegacia Regional de Polícia, Águas Lindas de Goiás, GO",
+    sourceUrl: PCGO_REGIONAIS,
+    mapQuery:
+      "17ª Delegacia Regional de Polícia, Quadra 27, Rua 22, Parque Águas Bonitas I, Águas Lindas de Goiás, GO",
   },
   {
     id: "policia-militar",
