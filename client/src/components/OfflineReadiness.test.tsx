@@ -15,12 +15,19 @@ const state = vi.hoisted(() => ({
   prepare: vi.fn(),
   storage: vi.fn(),
   persist: vi.fn(),
+  routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
 }));
 vi.mock("@/lib/pwa", () => ({
   getOfflineReadiness: state.check,
   prepareOfflineAccess: state.prepare,
   getOfflineStorageStatus: state.storage,
   requestOfflineStoragePersistence: state.persist,
+}));
+vi.mock("@/lib/offlineStore", () => ({
+  listOfflineRoutes: async () => state.routes,
+  offlineRouteEvent: "trajeto-offline-route-change",
+  isOfflineRouteStale: (savedAt: string) =>
+    Date.now() - Date.parse(savedAt) > 72 * 60 * 60 * 1000,
 }));
 vi.mock("@/lib/stationMapOffline", () => ({
   getOfflineMapStations: () => ({ savedAt: "", stations: [] }),
@@ -37,6 +44,7 @@ beforeEach(() => {
     usageBytes: 5 * 1024 * 1024,
     quotaBytes: 100 * 1024 * 1024,
   });
+  state.routes = [];
   state.persist.mockReset().mockResolvedValue({
     supported: true,
     persisted: true,
@@ -95,6 +103,18 @@ describe("offline preparation feedback", () => {
     fireEvent.click(protect);
     await waitFor(() => expect(state.persist).toHaveBeenCalled());
     await screen.findByText("Dados protegidos pelo navegador");
+  });
+
+  it("warns when saved routes are older than 72 hours", async () => {
+    state.routes = [{
+      id: "old",
+      origin: "Casa",
+      destination: "Hospital",
+      savedAt: new Date(Date.now() - 80 * 60 * 60 * 1000).toISOString(),
+      payload: {},
+    }];
+    render(<OfflineReadiness />);
+    await screen.findByText(/1 rota salva há mais de 72h/i);
   });
 
   it("recovers its button after an unexpected error", async () => {
