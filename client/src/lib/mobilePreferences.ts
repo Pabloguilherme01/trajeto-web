@@ -17,6 +17,52 @@ function notifyPreferenceChange() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(PREFERENCE_EVENT));
 }
 
+function privateUsageKey(origin: string, destination: string) {
+  return privateOriginForHistory(origin).trim().toLocaleLowerCase("pt-BR") +
+    "::" +
+    destination.trim().toLocaleLowerCase("pt-BR");
+}
+
+function migratePrivateRouteUsageStorage() {
+  try {
+    const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    if (usage && typeof usage === "object" && !Array.isArray(usage)) {
+      const next: Record<string, number> = {};
+      let changed = false;
+      for (const [key, rawValue] of Object.entries(usage)) {
+        const split = key.indexOf("::");
+        const origin = split >= 0 ? key.slice(0, split) : key;
+        const destination = split >= 0 ? key.slice(split + 2) : "";
+        const safeKey = privateUsageKey(origin, destination);
+        const value = Number(rawValue);
+        if (safeKey !== key) changed = true;
+        if (Number.isFinite(value)) next[safeKey] = (next[safeKey] ?? 0) + value;
+      }
+      if (changed) localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(next));
+    }
+
+    const eventUsage = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    if (eventUsage && typeof eventUsage === "object" && !Array.isArray(eventUsage)) {
+      const nextEvents: Record<string, string[]> = {};
+      let changed = false;
+      for (const [key, rawEvents] of Object.entries(eventUsage)) {
+        const split = key.indexOf("::");
+        const origin = split >= 0 ? key.slice(0, split) : key;
+        const destination = split >= 0 ? key.slice(split + 2) : "";
+        const safeKey = privateUsageKey(origin, destination);
+        if (safeKey !== key) changed = true;
+        const events = Array.isArray(rawEvents)
+          ? rawEvents.filter((value): value is string =>
+              typeof value === "string" && Number.isFinite(Date.parse(value))
+            )
+          : [];
+        nextEvents[safeKey] = [...(nextEvents[safeKey] ?? []), ...events].slice(-200);
+      }
+      if (changed) localStorage.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(nextEvents));
+    }
+  } catch {}
+}
+
 export function getEconomyMode() {
   try {
     const saved = localStorage.getItem(ECONOMY_KEY);
@@ -111,8 +157,9 @@ export function getMostUsedRoute(): RecentTrip | null {
 }
 export type RouteUsageStats = { total: number; recordedEvents: number; windowDays: number; averagePerDay: number | null };
 export function getRouteUsageStats(origin: string, destination: string, days = 30): RouteUsageStats {
+  migratePrivateRouteUsageStorage();
   const safeDays = Math.max(1, Math.min(365, Math.floor(days)));
-  const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  const key = privateUsageKey(origin, destination);
   try {
     const raw = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
     const events = raw && typeof raw === "object" && Array.isArray(raw[key]) ? raw[key] : [];
@@ -124,7 +171,8 @@ export function getRouteUsageStats(origin: string, destination: string, days = 3
   }
 }
 export function getRouteUsage(origin: string, destination: string) {
-  const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  migratePrivateRouteUsageStorage();
+  const key = privateUsageKey(origin, destination);
   try {
     const value = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
     return value && typeof value === "object" && Number.isFinite(Number(value[key])) ? Number(value[key]) : 0;
@@ -140,7 +188,8 @@ export function rememberTrip(origin: string, destination: string) {
       item.origin.trim().toLocaleLowerCase("pt-BR") !== normalizedOrigin.toLocaleLowerCase("pt-BR") ||
       item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination.toLocaleLowerCase("pt-BR"))].slice(0, MAX_RECENT_TRIPS);
     localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
-    const usageKey = normalizedOrigin.toLocaleLowerCase("pt-BR") + "::" + normalizedDestination.toLocaleLowerCase("pt-BR");
+    migratePrivateRouteUsageStorage();
+    const usageKey = privateUsageKey(normalizedOrigin, normalizedDestination);
     const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
     usage[usageKey] = Number.isFinite(Number(usage[usageKey])) ? Number(usage[usageKey]) + 1 : 1;
     localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(usage));
