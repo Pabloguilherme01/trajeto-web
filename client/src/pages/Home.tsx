@@ -6,10 +6,24 @@ import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, 
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
+import { PUBLIC_SERVICE_SHORTCUTS } from "@/lib/publicServices";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
+
+const HOME_CITIZEN_NEEDS = PUBLIC_SERVICE_SHORTCUTS.filter(item =>
+  [
+    "falta luz",
+    "lampada apagada",
+    "coleta lixo",
+    "dengue",
+    "cadunico",
+    "buraco rua",
+    "semaforo",
+    "vapt vupt",
+  ].includes(item.query)
+);
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -209,6 +223,35 @@ export default function Home() {
               <p className="mt-3 text-sm font-black">Serviços públicos</p>
               <p className="mt-1 text-xs text-white/55">Saúde, cidadania, benefícios e emergência</p>
             </button>
+          </div>
+        </section>
+
+        <section className="mt-5" aria-labelledby="citizen-needs-title">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-[#BDA5FF]">Resolver um problema</p>
+              <h2 id="citizen-needs-title" className="mt-1 text-xl font-black tracking-[-.035em]">Diga o que aconteceu.</h2>
+              <p className="mt-1 text-xs leading-relaxed text-white/55">Você não precisa saber qual órgão procurar.</p>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/60">Ver tudo</button>
+          </div>
+          <div className="mobile-scroll-x mt-3 flex snap-x gap-2 overflow-x-auto pb-1">
+            {HOME_CITIZEN_NEEDS.map(item => (
+              <button
+                key={item.query}
+                type="button"
+                onClick={() => {
+                  rememberSearch(item.query);
+                  vibration();
+                  setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(item.query));
+                }}
+                className="mobile-card min-h-[5.4rem] w-[12.5rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left active:scale-[.985]"
+              >
+                <span className="block text-sm font-black text-white">{item.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-white/60">{item.hint}</span>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-black text-[#BDA5FF]">Resolver <ArrowRight className="size-3.5" /></span>
+              </button>
+            ))}
           </div>
         </section>
 
