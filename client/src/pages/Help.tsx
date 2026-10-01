@@ -11,23 +11,23 @@ const steps = [
 
 export default function Help() {
   return (
-    <main className="min-h-[100dvh] bg-[#0B1014] pb-24 text-white md:pb-12">
+    <main className="min-h-[100dvh] bg-[#0D1418] pb-24 text-white md:pb-12">
       <div className="container max-w-4xl pt-6 sm:pt-10">
         <header className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.17em] text-[#3DE3FF]">Ajuda</p>
-            <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">Use o Trajeto em poucos passos.</h1>
+            <p className="soft-kicker text-xs text-[#79C6D0]">Ajuda</p>
+            <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.04em] sm:text-5xl">Use o Trajeto com tranquilidade.</h1>
           </div>
           <Link href={appUrl("/")} className="min-h-11 shrink-0 rounded-xl border border-white/10 px-3 text-xs font-black text-white/70">Início</Link>
         </header>
 
-        <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
-          <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e guarde seus atalhos neste aparelho. A central reúne serviços públicos de Águas Lindas e canais estaduais e nacionais de apoio.</p>
+        <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#141E23] p-5 sm:p-7">
+          <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e deixe o essencial preparado neste aparelho. A central reúne serviços de Águas Lindas e canais estaduais e nacionais de apoio.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
             {steps.map(step => (
-              <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0B1014] p-4">
+              <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0D1418] p-4">
                 <div className="flex items-center justify-between">
-                  <step.icon className="size-4 text-[#C7FF3C]" />
+                  <step.icon className="size-4 text-[#B7D86B]" />
                   <span className="text-xs font-black tracking-[.16em] text-white/60">{step.n}</span>
                 </div>
                 <h2 className="mt-5 text-sm font-black">{step.title}</h2>
@@ -38,42 +38,42 @@ export default function Help() {
         </section>
 
         <section className="mt-4">
-          <Link href={appUrl("/servicos")} className="block rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.055] p-5">
-            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]"><Landmark className="size-3.5" /> Utilidade pública</p>
+          <Link href={appUrl("/servicos")} className="block rounded-[1.4rem] border border-[#79C6D0]/20 bg-[#79C6D0]/[.055] p-5">
+            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#79C6D0]"><Landmark className="size-3.5" /> Utilidade pública</p>
             <p className="mt-2 text-lg font-black">Central de Águas Lindas</p>
             <p className="mt-1 text-sm leading-relaxed text-white/75">Saúde, segurança, assistência, trânsito, educação, cidadania e canais de emergência, com catálogo local e acesso offline.</p>
-            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3DE3FF] px-3 text-xs font-black text-[#0B1014]">Abrir central <ArrowRight className="size-3.5" /></span>
+            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#79C6D0] px-3 text-xs font-black text-[#0B1014]">Abrir central <ArrowRight className="size-3.5" /></span>
           </Link>
         </section>
 
         <section className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Link href={appUrl("/planejar")} className="rounded-[1.4rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.08] p-5">
-            <p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Começar</p>
+          <Link href={appUrl("/planejar")} className="rounded-[1.4rem] border border-[#B7D86B]/20 bg-[#B7D86B]/[.08] p-5">
+            <p className="text-xs font-black uppercase tracking-[.14em] text-[#B7D86B]">Começar</p>
             <p className="mt-2 text-lg font-black">Planejar uma rota</p>
             <p className="mt-1 text-sm text-white/75">Origem, destino, mapa, salvar e compartilhar.</p>
-            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir <ArrowRight className="size-3.5" /></span>
+            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#B7D86B] px-3 text-xs font-black text-[#0B1014]">Abrir <ArrowRight className="size-3.5" /></span>
           </Link>
-          <Link href={appUrl("/mapa")} className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.06] p-5">
-            <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Começar</p>
+          <Link href={appUrl("/mapa")} className="rounded-[1.4rem] border border-[#79C6D0]/20 bg-[#79C6D0]/[.06] p-5">
+            <p className="text-xs font-black uppercase tracking-[.14em] text-[#79C6D0]">Começar</p>
             <p className="mt-2 text-lg font-black">Encontrar postos</p>
             <p className="mt-1 text-sm text-white/75">Mapa, fichas, filtros, favoritos e navegação.</p>
-            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#3DE3FF]/25 px-3 text-xs font-black text-[#C9F7FF]">Abrir <ArrowRight className="size-3.5" /></span>
+            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#79C6D0]/25 px-3 text-xs font-black text-[#C7E9ED]">Abrir <ArrowRight className="size-3.5" /></span>
           </Link>
         </section>
 
         <section className="mt-4 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-5">
           <h2 className="text-base font-black">O que continua funcionando sem conta</h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" />Favoritos e rotas salvas ficam neste aparelho.</p>
-            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#C7FF3C]" />O mapa próprio do Trajeto não exige Google para aparecer.</p>
-            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><WifiOff className="mt-0.5 size-4 shrink-0 text-[#FFB86B]" />Com internet perdida, o app usa cache e dados já armazenados quando disponíveis.</p>
-            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#3DE3FF]" />Dados oficiais e referências secundárias são identificados separadamente.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Favoritos e rotas salvas ficam neste aparelho.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Os pontos do mapa de postos podem ficar salvos no aparelho; o desenho de ruas pode precisar de internet.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><WifiOff className="mt-0.5 size-4 shrink-0 text-[#D8B47A]" />Sem internet, o app prioriza o pacote preparado, favoritos, rotas e dados já armazenados neste aparelho.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#79C6D0]" />Dados oficiais e referências secundárias são identificados separadamente.</p>
           </div>
         </section>
 
         <OfflineReadiness />
 
-        <section className="mt-4 rounded-3xl border border-white/10 bg-[#121B22] p-5" aria-labelledby="practical-help-title">
+        <section className="mt-4 rounded-3xl border border-white/10 bg-[#141E23] p-5" aria-labelledby="practical-help-title">
           <h2 id="practical-help-title" className="text-lg font-bold">Ajuda prática</h2>
           <div className="mt-3 divide-y divide-white/10 text-sm text-white/80">
             <details><summary className="min-h-12 cursor-pointer py-3 font-bold">Como criar atalhos para os serviços que uso?</summary><p className="pb-4 leading-relaxed">Na central, toque no coração do serviço. Use Serviços salvos para encontrar seus contatos sem repetir a busca. Os favoritos ficam neste navegador e funcionam offline depois da preparação do app.</p><Link href={appUrl("/servicos") + "?salvos=1"} className="mb-4 inline-flex min-h-11 items-center rounded-xl border border-white/15 px-3 font-bold">Abrir serviços salvos</Link></details>
@@ -85,7 +85,7 @@ export default function Help() {
         </section>
 
         <section className="mt-4 pb-4 text-center text-sm leading-relaxed text-white/70">
-          Para trânsito, incidentes e chegada em tempo real, use o navegador externo escolhido.
+          Para trânsito, ruas atualizadas, incidentes e chegada em tempo real, use a conexão e o navegador externo escolhido.
         </section>
       </div>
     </main>
