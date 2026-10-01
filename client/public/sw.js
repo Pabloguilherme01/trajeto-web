@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v22";
+const VERSION = CACHE_PREFIX + "v23";
 const NETWORK_TIMEOUT_MS = 4000;
 const MAX_MAP_ENTRIES = 24;
 const STATIC_CACHE = VERSION + "-static";
