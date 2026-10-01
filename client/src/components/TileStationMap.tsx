@@ -10,6 +10,11 @@ import type { StationMapItem } from "@/components/StationMap";
 const TILE = 256;
 const DEFAULT_CENTER = { lat: -15.7545, lng: -48.2816 };
 
+function stationKey(station: StationMapItem) {
+  return station.id ?? station.cnpj ?? station.placeId ??
+    `${station.name}|${station.lat}|${station.lng}`;
+}
+
 function clampLat(lat: number) {
   return Math.max(-85.05112878, Math.min(85.05112878, lat));
 }
@@ -36,7 +41,7 @@ function wrapTile(x: number, z: number) {
 export default function TileStationMap({
   stations,
   userCoords = null,
-  heightClassName = "h-[min(68vh,620px)]",
+  heightClassName = "min-h-[320px] h-[min(68vh,620px)]",
   onSelectStation,
   fallback,
 }: {
@@ -63,7 +68,7 @@ export default function TileStationMap({
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
   const [selectedId, setSelectedId] = useState<string | null>(
-    drawable[0]?.id ?? null
+    drawable[0] ? stationKey(drawable[0]) : null
   );
   const [size, setSize] = useState({ width: 320, height: 520 });
   const [tileErrors, setTileErrors] = useState(0);
@@ -82,8 +87,8 @@ export default function TileStationMap({
   }, [userCoords?.lat, userCoords?.lng]);
 
   useEffect(() => {
-    if (!drawable.some(item => item.id === selectedId))
-      setSelectedId(drawable[0]?.id ?? null);
+    if (!drawable.some(item => stationKey(item) === selectedId))
+      setSelectedId(drawable[0] ? stationKey(drawable[0]) : null);
   }, [drawable, selectedId]);
 
   useEffect(() => {
@@ -203,7 +208,9 @@ export default function TileStationMap({
 
   const tileFallback = Boolean(fallback && tileErrors >= 5);
 
-  if (!drawable.length || tileFallback) {
+  if (tileFallback) return <>{fallback}</>;
+
+  if (!drawable.length) {
     return (
       <div
         className={
@@ -226,17 +233,35 @@ export default function TileStationMap({
     );
   }
 
-  const selected = drawable.find(item => item.id === selectedId) ?? null;
+  const selected = drawable.find(item => stationKey(item) === selectedId) ?? null;
 
   return (
     <div
       className={
-        "relative overflow-hidden rounded-[1.25rem] bg-[#dfe9e2] " +
-        heightClassName
+        "overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"
       }
     >
+      <div className={"relative " + heightClassName}>
       <div
         ref={viewport}
+        role="region"
+        aria-label="Mapa dos postos"
+        aria-description="Use as setas para mover, mais e menos para zoom e Home para recentrar."
+        tabIndex={0}
+        onKeyDown={event => {
+          if (event.target !== event.currentTarget) return;
+          const offsets: Record<string, [number, number]> = {
+            ArrowRight: [80, 0], ArrowLeft: [-80, 0],
+            ArrowDown: [0, 80], ArrowUp: [0, -80],
+          };
+          const offset = offsets[event.key];
+          if (offset) setCenter(unproject(centerPx.x + offset[0], centerPx.y + offset[1], zoom));
+          else if (event.key === "+" || event.key === "=") changeZoom(1);
+          else if (event.key === "-") changeZoom(-1);
+          else if (event.key === "Home") recenter();
+          else return;
+          event.preventDefault();
+        }}
         className={
           "absolute inset-0 select-none touch-none overflow-hidden " +
           (dragging ? "cursor-grabbing" : "cursor-grab")
@@ -289,19 +314,20 @@ export default function TileStationMap({
               position.top > height + 40
             )
               return null;
-            const active = station.id === selectedId;
+            const active = stationKey(station) === selectedId;
             return (
               <button
-                key={station.id ?? station.cnpj ?? String(index)}
+                key={stationKey(station)}
                 type="button"
-                className="pointer-events-auto absolute -translate-x-1/2 -translate-y-full"
+                className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
                 style={{ left: position.left, top: position.top }}
                 onPointerDown={event => event.stopPropagation()}
                 onClick={() => {
-                  setSelectedId(station.id ?? null);
+                  setSelectedId(stationKey(station));
                   onSelectStation?.(station);
                 }}
                 aria-label={"Abrir " + station.name}
+                aria-pressed={active}
               >
                 <span
                   className={
@@ -313,7 +339,7 @@ export default function TileStationMap({
                         : "bg-[#3DE3FF] text-[#163840]")
                   }
                 >
-                  <span className="text-[0.55rem] font-black">{index + 1}</span>
+                  <span className="text-xs font-black">{index + 1}</span>
                 </span>
               </button>
             );
@@ -369,20 +395,34 @@ export default function TileStationMap({
         </button>
       </div>
 
-      <div className="absolute left-3 top-[4.5rem] z-20 rounded-full bg-white/92 px-2.5 py-1 text-xs font-black text-[#607169] shadow">
-        Mapa geográfico · OpenStreetMap
+      <label className="absolute left-3 right-3 top-[4.5rem] z-20">
+        <span className="sr-only">Escolher posto no mapa</span>
+        <select
+          className="min-h-11 w-full min-w-0 rounded-xl border border-black/10 bg-white/95 px-3 text-base text-[#163840] shadow-lg"
+          value={selectedId ?? ""}
+          onChange={event => {
+            const station = drawable.find(item => stationKey(item) === event.target.value);
+            if (!station) return;
+            setSelectedId(stationKey(station));
+            setCenter({ lat: station.lat, lng: station.lng });
+            setZoom(value => Math.max(13, value));
+          }}
+        >
+          {drawable.map(station => <option key={stationKey(station)} value={stationKey(station)}>{station.name}</option>)}
+        </select>
+      </label>
       </div>
 
-      <div className="absolute bottom-3 left-3 right-3 z-20 rounded-2xl border border-black/10 bg-white/95 p-3 shadow-xl backdrop-blur">
+      <div className="relative border-t border-black/10 bg-white/95 p-4">
         {selected ? (
           <div className="flex items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">
-              <span className="text-[0.52rem] font-black">
-                {selected.source === "ANP" ? "ANP" : "LOCAL"}
+              <span className="text-xs font-black">
+                {selected.source === "ANP" ? "ANP" : selected.source === "Google" ? "MAPA" : "LOCAL"}
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-black text-[#163840]">
+              <p className="break-words text-base leading-snug font-black text-[#163840]">
                 {selected.name}
               </p>
               <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">
@@ -450,8 +490,7 @@ export default function TileStationMap({
           rel="noopener noreferrer"
           className="mt-2 block text-xs text-[#607169]"
         >
-          © OpenStreetMap contributors. As ruas de fundo exigem internet; sem
-          rede, use as referências locais disponíveis.
+          © OpenStreetMap contributors · ruas de fundo exigem internet.
         </a>
       </div>
     </div>
