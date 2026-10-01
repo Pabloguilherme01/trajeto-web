@@ -202,7 +202,7 @@ export default function SearchPage() {
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {serviceResults.map(service => (
-                <button key={service.id} type="button" onClick={() => setLocation(appUrl("/servicos") + "?q=" + encodeURIComponent(service.name))} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.99]">
+                <button key={service.id} type="button" onClick={() => setLocation(appUrl("/servicos") + "?servico=" + encodeURIComponent(service.id))} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.99]">
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#FFB86B]/10 text-[#FFB86B]"><Landmark className="size-4" /></span>
                   <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{service.name}</span><span className="mt-0.5 block line-clamp-2 text-[0.58rem] leading-snug text-white/38">{service.description}</span><span className="mt-1 block truncate text-[0.5rem] font-bold uppercase tracking-[.1em] text-white/22">{service.sourceLabel}</span></span>
                   <ArrowRight className="size-4 shrink-0 text-white/25" />

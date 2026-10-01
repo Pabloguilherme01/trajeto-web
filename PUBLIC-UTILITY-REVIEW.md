@@ -37,3 +37,13 @@ O primeiro acesso exige internet; armazenamento pode ser removido pelo navegador
 ## Validação
 
 Checagem TypeScript, build, testes de servidor, bibliotecas, componentes e páginas. Testes de navegador em mobile e desktop, incluindo base `/trajeto-web/`, filtros persistentes, menu em 320 × 568 e recarga offline de telas não visitadas. Consulte a execução CI do PR para o resultado final.
+
+## Segunda revisão: atalhos e suporte ao cidadão
+
+- Serviços públicos podem ser salvos neste aparelho, filtrados por favoritos e compartilhados por link individual com contatos e fonte. O filtro de favoritos permanece na URL. Gravações bloqueadas informam falha e não anunciam sucesso.
+- Telefones alternativos e contatos setoriais têm ações individuais. Links nacionais e estaduais exclusivamente remotos não oferecem uma rota sem endereço. Canais de emergência cabem em 320 px.
+- Ligue 180 e Disque 100 adicionados; energia e Saneago usam as centrais oficiais. Fontes consultadas em 01/10/2026: https://www.gov.br/mulheres/pt-br/ligue180 ; https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos ; https://go.equatorialenergia.com.br/canais-de-atendimento/ ; https://www.saneago.com.br/site . Agência virtual Saneago vinculada no portal oficial.
+- Ajuda inclui instalação, preparação offline, atalhos salvos, recuperação de falhas de armazenamento e links de suporte. O app não envia mensagens nem abre chamados automaticamente.
+- Instruções de instalação conferidas nas páginas oficiais: https://support.apple.com/pt-br/guide/iphone/iphea86e5236/ios e https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&hl=pt-BR .
+- Cache de postos ignora registros malformados e valida coordenadas, horários e idade. Falha de gravação preserva os favoritos existentes. Instalação tolera armazenamento bloqueado, informa erro e encerra o aviso após instalação ou cancelamento.
+- Regressões incluem persistência e recuperação offline dos serviços salvos, abertura de links individuais, telefones alternativos, armazenamento bloqueado, cache corrompido e instalação falha.

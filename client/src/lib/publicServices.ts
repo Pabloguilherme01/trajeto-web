@@ -22,9 +22,9 @@ export type PublicService = {
   actionLabel?: string;
   guidance?: string;
   verifiedAt?: string;
-  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás" | "SES-GO" | "SEAD Goiás";
+  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás" | "SES-GO" | "SEAD Goiás" | "Ministério das Mulheres" | "Direitos Humanos e Cidadania" | "Saneago" | "Equatorial Goiás";
   sourceUrl: string;
-  mapQuery: string;
+  mapQuery?: string;
 };
 
 export const PUBLIC_SERVICE_CATEGORIES: Array<{
@@ -578,13 +578,17 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "energia",
-    name: "Atendimento de energia",
+    name: "Equatorial Goiás · energia",
     category: "cidadania",
-    description: "Canal local de atendimento de energia listado pela Prefeitura.",
-    phone: "(61) 3618-1060",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: TELEFONES_UTEIS,
-    mapQuery: "atendimento energia Águas Lindas de Goiás, GO",
+    description: "Central estadual para falta de energia, contas e atendimento da distribuidora.",
+    phone: "0800 062 0196",
+    hours: "24 horas, todos os dias",
+    sourceLabel: "Equatorial Goiás",
+    sourceUrl: "https://go.equatorialenergia.com.br/canais-de-atendimento/",
+    actionUrl: "https://go.equatorialenergia.com.br/canais-de-atendimento/",
+    actionLabel: "Falta de luz e segunda via",
+    guidance: "Tenha o número da unidade consumidora e o endereço em mãos. Guarde o protocolo do atendimento.",
+    verifiedAt: "01/10/2026",
   },
   {
     id: "defesa-civil",
@@ -654,13 +658,17 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "saneago",
-    name: "Saneago",
+    name: "Saneago · água e esgoto",
     category: "cidadania",
-    description: "Canal municipal listado pela Prefeitura para atendimento de água e saneamento.",
-    phone: "(61) 3618-2488",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: TELEFONES_UTEIS,
-    mapQuery: "Saneago, Águas Lindas de Goiás, GO",
+    description: "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
+    phone: "0800 645 0115",
+    hours: "24 horas, todos os dias",
+    sourceLabel: "Saneago",
+    sourceUrl: "https://www.saneago.com.br/site",
+    actionUrl: "https://agencia-virtual.saneago.com.br/",
+    actionLabel: "Abrir agência virtual",
+    guidance: "Tenha a matrícula da conta e o endereço do imóvel para solicitar atendimento e guarde o protocolo.",
+    verifiedAt: "01/10/2026",
   },
   {
     id: "vapt-vupt",
@@ -697,6 +705,36 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
     mapQuery: "SAMU, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "ligue-180",
+    name: "Ligue 180 · atendimento à mulher",
+    category: "assistencia",
+    description: "Canal nacional gratuito de orientação e registro de denúncias de violência contra mulheres.",
+    phone: "180",
+    hours: "24 horas, todos os dias",
+    email: "central180@mulheres.gov.br",
+    sourceLabel: "Ministério das Mulheres",
+    sourceUrl: "https://www.gov.br/mulheres/pt-br/ligue180",
+    actionUrl: "https://www.gov.br/mulheres/pt-br/ligue180",
+    actionLabel: "Consultar canais de atendimento",
+    guidance: "O serviço orienta sobre a rede de proteção. Em emergência policial, ligue 190.",
+    verifiedAt: "01/10/2026",
+  },
+  {
+    id: "disque-100",
+    name: "Disque 100 · direitos humanos",
+    category: "assistencia",
+    description: "Canal nacional gratuito para denúncias de violações de direitos de crianças, idosos, pessoas com deficiência e outros grupos.",
+    phone: "100",
+    hours: "24 horas, todos os dias",
+    email: "ouvidoria@mdh.gov.br",
+    sourceLabel: "Direitos Humanos e Cidadania",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos",
+    actionUrl: "https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos",
+    actionLabel: "Consultar canais acessíveis",
+    guidance: "O portal oficial inclui chat e videochamada em Libras. Descreva a ocorrência, o local e quem precisa de proteção.",
+    verifiedAt: "01/10/2026",
   },
 ];
 

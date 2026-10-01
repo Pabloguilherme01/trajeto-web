@@ -207,6 +207,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       isOpen: local?.mapData?.operationalStatus === "open" ? true : local?.mapData?.operationalStatus === "closed" ? false : null,
     } satisfies MobileStation;
     const result = toggleMobileStationFavorite(station);
+    if (result.error) { toast.message("Não foi possível guardar o favorito. Confira o espaço e as permissões do navegador."); return; }
     setSaved(result.stations);
     vibration();
     toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");
@@ -688,6 +689,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   const toggleSaved = (station: typeof stations[number]) => {
     const result = toggleMobileStationFavorite(station as unknown as MobileStation);
+    if (result.error) { toast.message("Não foi possível guardar o favorito. Confira o espaço e as permissões do navegador."); return; }
     setSaved(result.stations);
     vibration();
     toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");

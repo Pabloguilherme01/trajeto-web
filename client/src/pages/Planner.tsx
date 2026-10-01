@@ -608,7 +608,7 @@ export default function Planner() {
                       <p className="mt-1 line-clamp-2 text-[0.62rem] leading-relaxed text-white/40">{station.address}</p>
                       {station.isOpen != null && <p className={"mt-2 text-[0.56rem] font-black " + (station.isOpen ? "text-[#C7FF3C]" : "text-white/35")}>{station.isOpen ? "Aberto na consulta salva" : "Fechado na consulta salva"}</p>}
                     </div>
-                    <button type="button" onClick={() => { toggleMobileStationFavorite(station); setSavedStations(listMobileStationFavorites()); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
+                    <button type="button" onClick={() => { const result = toggleMobileStationFavorite(station); if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador."); else setSavedStations(result.stations); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir agora</button>
