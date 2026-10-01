@@ -22,6 +22,15 @@ test("busca local oferece categorias prontas", async ({ page }) => {
   await expect(page).toHaveURL(/\/servicos\?categoria=saude/);
 });
 
+test("home encaminha problema urbano sem exigir nome da secretaria", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "Diga o que aconteceu." })).toBeVisible();
+  await page.getByRole("button", { name: /Buraco \/ asfalto/i }).click();
+  await expect(page).toHaveURL(/\/buscar\?q=buraco(?:%20|\+)rua/);
+  await expect(page.getByText(/Resposta rápida · Águas Lindas/i)).toBeVisible();
+  await expect(page.getByText("Secretaria Municipal de Infraestrutura e Obras", { exact: true })).toBeVisible();
+});
+
 test("atalho público leva da home para serviços municipais", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator("main").getByRole("button", { name: /Serviços públicos/i }).click();
