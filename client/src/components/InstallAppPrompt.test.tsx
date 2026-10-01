@@ -8,6 +8,7 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   Object.defineProperty(window, "matchMedia", { configurable: true, value: vi.fn(() => ({ matches: false })) });
   localStorage.clear();
+  Object.defineProperty(window.navigator, "maxTouchPoints", { configurable: true, value: 0 });
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 function offer(prompt = vi.fn().mockResolvedValue(undefined), outcome = "accepted") {
@@ -18,7 +19,7 @@ function offer(prompt = vi.fn().mockResolvedValue(undefined), outcome = "accepte
 describe("instalação do app", () => {
   it("recognizes iPadOS when Safari reports a desktop Mac platform", () => {
     vi.spyOn(window.navigator, "platform", "get").mockReturnValue("MacIntel");
-    vi.spyOn(window.navigator, "maxTouchPoints", "get").mockReturnValue(5);
+    Object.defineProperty(window.navigator, "maxTouchPoints", { configurable: true, value: 5 });
     vi.spyOn(window.navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Safari/605.1.15");
     expect(isAppleMobileDevice()).toBe(true);
     render(<InstallAppPrompt />);
