@@ -32,6 +32,20 @@ test("Pages: core citizen flows stay inside a 320px viewport and keep the dock t
     expect(navBox!.x + navBox!.width).toBeLessThanOrEqual(320.5);
     expect(navBox!.y + navBox!.height).toBeLessThanOrEqual(568.5);
 
+    const undersizedMainButtons = await page.locator("main button").evaluateAll(buttons =>
+      buttons.flatMap(button => {
+        const rect = button.getBoundingClientRect();
+        const style = getComputedStyle(button);
+        if (style.display === "none" || style.visibility === "hidden" || rect.width === 0 || rect.height === 0) return [];
+        const iconOnly = !(button.textContent || "").trim();
+        if (rect.height < 43.5 || (iconOnly && rect.width < 43.5)) {
+          return [{ label: button.getAttribute("aria-label") || button.textContent?.trim() || "button", width: rect.width, height: rect.height }];
+        }
+        return [];
+      })
+    );
+    expect(undersizedMainButtons, path || "home").toEqual([]);
+
     for (const button of await nav.getByRole("button").all()) {
       const box = await button.boundingBox();
       expect(box, path || "home").not.toBeNull();
