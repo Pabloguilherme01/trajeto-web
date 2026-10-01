@@ -29,10 +29,11 @@ test("ajuda offline mostra o que está salvo e continua acessível sem rede", as
   await expect(
     page.getByRole("heading", { name: /Essencial pronto neste aparelho|Prepare antes de sair/i })
   ).toBeVisible();
-  await expect(page.getByText(/Rotas salvas/i)).toBeVisible();
-  await expect(page.getByText(/Serviços salvos/i)).toBeVisible();
-  await expect(page.getByText(/Postos salvos/i)).toBeVisible();
-  await expect(page.getByText(/Pontos do mapa salvos/i)).toBeVisible();
+  const readiness = page.locator('section[aria-labelledby="offline-readiness-title"]');
+  await expect(readiness.getByText("Rotas salvas", { exact: true })).toBeVisible();
+  await expect(readiness.getByText("Serviços salvos", { exact: true })).toBeVisible();
+  await expect(readiness.getByText("Postos salvos", { exact: true })).toBeVisible();
+  await expect(readiness.getByText("Pontos do mapa salvos", { exact: true })).toBeVisible();
 
   await page.evaluate(async () => {
     if ("serviceWorker" in navigator) await navigator.serviceWorker.ready;
