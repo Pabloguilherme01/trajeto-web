@@ -556,6 +556,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Secretaria de Trânsito e Mobilidade Urbana",
     category: "transito",
     description: "Atendimento municipal de trânsito, mobilidade e agentes.",
+    guidance:
+      "Informe o local e o tipo de problema de sinalização ou mobilidade e confirme o encaminhamento com a equipe municipal.",
     address:
       "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
     phone: "(61) 92003-6668",
@@ -710,6 +712,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     category: "cidadania",
     description: "Atendimento municipal para infraestrutura e obras.",
     phone: "(61) 99303-4608",
+    guidance:
+      "Ao entrar em contato, informe rua, bairro e um ponto de referência e confirme o canal adequado para registrar a demanda.",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
     mapQuery:
