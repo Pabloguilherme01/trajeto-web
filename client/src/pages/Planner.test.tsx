@@ -15,7 +15,7 @@ vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTri
 vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: vi.fn(async () => ({ origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" })), buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
 vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: vi.fn(), removeOfflineRoute: vi.fn() }));
-vi.mock("@/components/RouteMap", () => ({ RouteMap: () => null }));
+vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map">mapa</div> }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
 const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value } });
@@ -39,6 +39,14 @@ describe("Planner travel state", () => {
     view.rerender(<Planner />);
     expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Hospital");
     expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("");
+  });
+
+  it("opens the in-app map automatically after a successful route", async () => {
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    expect(screen.getByText("Mapa da rota")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ocultar mapa" })).toBeTruthy();
   });
 
   it("removes external navigation after editing or clearing a static route", async () => {
