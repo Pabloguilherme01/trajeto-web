@@ -275,14 +275,13 @@ export function searchPublicDataResources(query: string) {
   const value = query.trim();
   if (!value) return [];
   return PUBLIC_DATA_RESOURCES.filter(item =>
-    matchesCatalogText(
-      value,
+    matchesCatalogText(value, [
       item.title,
       item.description,
       item.sourceLabel,
       item.category,
       item.keywords.join(" "),
-    ),
+    ]),
   );
 }
 
@@ -290,14 +289,13 @@ export function searchSemiurbanFares(query: string) {
   const value = query.trim();
   if (!value) return [];
   return SEMIURBAN_FARES.filter(item =>
-    matchesCatalogText(
-      value,
+    matchesCatalogText(value, [
       item.origin,
       item.destination,
       item.operator,
       item.sourceLabel,
       item.keywords.join(" "),
-    ),
+    ]),
   );
 }
 
