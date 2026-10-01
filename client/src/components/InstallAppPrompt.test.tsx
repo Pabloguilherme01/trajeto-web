@@ -1,7 +1,7 @@
 import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import InstallAppPrompt from "./InstallAppPrompt";
+import InstallAppPrompt, { isAppleMobileDevice } from "./InstallAppPrompt";
 import { pwaUpdateEvent } from "@/lib/pwa";
 
 beforeEach(() => {
@@ -16,6 +16,14 @@ function offer(prompt = vi.fn().mockResolvedValue(undefined), outcome = "accepte
   act(() => { window.dispatchEvent(event); });
 }
 describe("instalação do app", () => {
+  it("recognizes iPadOS when Safari reports a desktop Mac platform", () => {
+    vi.spyOn(window.navigator, "platform", "get").mockReturnValue("MacIntel");
+    vi.spyOn(window.navigator, "maxTouchPoints", "get").mockReturnValue(5);
+    vi.spyOn(window.navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Safari/605.1.15");
+    expect(isAppleMobileDevice()).toBe(true);
+    render(<InstallAppPrompt />);
+    expect(screen.getByText(/No iPhone:/i)).toBeTruthy();
+  });
   it("continues offering installation when local storage is blocked", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
     render(<InstallAppPrompt />);
