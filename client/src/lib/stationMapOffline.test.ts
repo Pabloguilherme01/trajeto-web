@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
+import { normalizeAnpFuelRow } from "@shared/anpRevendedores";
 
 const storage = new Map<string, string>();
 const localStorageMock = {
@@ -10,7 +11,7 @@ const localStorageMock = {
 
 Object.defineProperty(globalThis, "localStorage", { value: localStorageMock, configurable: true });
 Object.defineProperty(globalThis, "window", { value: globalThis, configurable: true });
-import { cacheOfflineMapStations, getOfflineMapAgeLabel, getOfflineMapStations, prepareOfflineStationMapFromCatalog } from "./stationMapOffline";
+import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineMapAgeLabel, getOfflineMapStations, prepareOfflineStationMapFromCatalog } from "./stationMapOffline";
 
 describe("stationMapOffline", () => {
   beforeEach(() => {
@@ -47,10 +48,23 @@ describe("stationMapOffline", () => {
     expect(snapshot.savedAt).toBeTruthy();
   });
 
-  it("can materialize the local station catalog for offline map use", () => {
+  it("can materialize cached ANP coordinates for offline map use", () => {
+    const row = normalizeAnpFuelRow({
+      cnpj: "13902675000178",
+      razaoSocial: "AGUAS LINDAS COMBUSTIVEIS LTDA",
+      endereco: "QUADRA 07",
+      bairro: "CAMPING CLUBE",
+      municipio: "AGUAS LINDAS DE GOIAS",
+      uf: "GO",
+      latitude: "-15.7646021",
+      longitude: "-48.2677716",
+    });
+    expect(row).toBeTruthy();
+    cacheOfflineAnpSnapshot([row!], "2026-10-01T12:00:00.000Z");
     expect(prepareOfflineStationMapFromCatalog()).toBe(true);
     const snapshot = getOfflineMapStations();
-    expect(snapshot.stations.length).toBeGreaterThan(0);
+    expect(snapshot.stations).toHaveLength(1);
+    expect(snapshot.stations[0]?.source).toBe("ANP");
     expect(snapshot.stations.every(station => Number.isFinite(station.lat) && Number.isFinite(station.lng))).toBe(true);
   });
 
