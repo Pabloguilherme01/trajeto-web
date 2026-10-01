@@ -494,7 +494,7 @@ export default function PublicServices() {
                 )}
                 {service.hours && (
                   <div className="mt-3 rounded-xl border border-white/8 bg-white/[.03] p-3">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-white/45">Atendimento</p>
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Atendimento</p>
                     <p className="mt-1 text-sm font-bold text-white/80">{service.hours}</p>
                   </div>
                 )}
