@@ -381,6 +381,12 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     return local;
   }
 
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    throw new Error(
+      "Esse local ainda não está disponível offline. Conecte-se uma vez para preparar o endereço ou use um destino salvo."
+    );
+  }
+
   const expanded = expandLocalQuery(query);
   const attempts = Array.from(
     new Set([
