@@ -56,6 +56,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [nearbyAutoAttempted, setNearbyAutoAttempted] = useState(false);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
@@ -518,9 +519,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   };
 
   useEffect(() => {
-    if (!nearbyRequested || userCoords || locating) return;
+    if (!nearbyRequested || nearbyAutoAttempted || userCoords || locating) return;
+    setNearbyAutoAttempted(true);
     useNearby();
-  }, [nearbyRequested, userCoords, locating]);
+  }, [nearbyRequested, nearbyAutoAttempted, userCoords, locating]);
 
   const handleMapStationSelect = (station: StationMapItem) => {
     const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
