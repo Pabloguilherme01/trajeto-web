@@ -77,7 +77,8 @@ describe("Planner travel state", () => {
     await screen.findByRole("button", { name: "Navegar agora" });
     expect(screen.getByRole("button", { name: "Salvar offline" })).toBeTruthy();
     expect(screen.getByText("Escolher navegador")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Mostrar mapa" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ocultar mapa" })).toBeTruthy();
+    expect(screen.getByTestId("route-map")).toBeTruthy();
   });
 
   it("ignores a calculation that returns after the destination changed", async () => {
