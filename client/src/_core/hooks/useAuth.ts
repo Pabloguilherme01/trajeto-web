@@ -1,5 +1,6 @@
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -14,9 +15,11 @@ export function useAuth(options?: UseAuthOptions) {
   // the state cookie, so calling it per render would overwrite the cookie and
   // desync it from an in-flight login's `state`.
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
+  const staticRuntime = isGitHubPagesRuntime();
   const utils = trpc.useUtils();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
+    enabled: !staticRuntime,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -29,7 +32,7 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logout = useCallback(async () => {
     try {
-      await logoutMutation.mutateAsync();
+      if (!staticRuntime) await logoutMutation.mutateAsync();
     } catch (error: unknown) {
       if (
         error instanceof TRPCClientError &&
@@ -48,7 +51,7 @@ export function useAuth(options?: UseAuthOptions) {
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
     }
-  }, [logoutMutation, utils]);
+  }, [logoutMutation, staticRuntime, utils]);
 
   const state = useMemo(() => {
     return {
@@ -88,7 +91,7 @@ export function useAuth(options?: UseAuthOptions) {
 
   return {
     ...state,
-    refresh: () => meQuery.refetch(),
+    refresh: () => staticRuntime ? Promise.resolve(meQuery) : meQuery.refetch(),
     logout,
   };
 }
