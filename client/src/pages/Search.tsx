@@ -316,7 +316,6 @@ export default function SearchPage() {
       );
       return;
     }
-    openExternal(action.query);
   };
   const openRoute = (destination: string) => {
     rememberSearch(destination);
@@ -335,7 +334,6 @@ export default function SearchPage() {
         type="button"
         aria-label={action.label}
         onClick={() => openQuick(action)}
-        disabled={!online && action.kind === "external"}
         className="flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left shadow-[0_10px_28px_rgba(0,0,0,.1)] transition hover:border-[#C7FF3C]/30 disabled:opacity-60"
       >
         <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
