@@ -42,6 +42,13 @@ describe("service worker", () => {
     worker.fetch.mockResolvedValue(new Response("unavailable", { status: 503 }));
     expect(await worker.networkFirst(new Request("https://example.com/data/test.json"), "data")).toBe(cached);
   });
+  it("keeps network data usable if storage is full", async () => {
+    const worker = loadWorker();
+    const response = new Response("online data");
+    worker.fetch.mockResolvedValue(response);
+    worker.cache.put.mockRejectedValue(new Error("QuotaExceededError"));
+    expect(await worker.networkFirst(new Request("https://example.com/data/test.json"), "data")).toBe(response);
+  });
   it("never intercepts private API requests", () => {
     const worker = loadWorker();
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "fetch")[1];

@@ -66,6 +66,10 @@ export default function PublicServices() {
 
   const results = useMemo(() => searchPublicServices(query, category), [query, category]);
 
+  useEffect(() => {
+    if (params.get("emergencia") === "1") document.getElementById("emergency-strip-title")?.scrollIntoView({ block: "start" });
+  }, [params]);
+
   const applyFilters = (value: string, next: PublicServiceCategory | "todos", replace = false) => {
     const search = new URLSearchParams();
     if (value.trim()) search.set("q", value.trim());

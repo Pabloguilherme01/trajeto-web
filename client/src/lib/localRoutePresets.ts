@@ -1,3 +1,4 @@
+import { matchesCatalogText } from "./catalogSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 
@@ -84,9 +85,5 @@ const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service 
 export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PLACE_DESTINATIONS, ...SUPPORT_DESTINATIONS];
 
 export function getLocalRoutePresets(query = "") {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  if (!normalized) return ALL_LOCAL_ROUTE_DESTINATIONS;
-  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item =>
-    [item.label, item.detail, item.destination, item.category].join(" ").toLocaleLowerCase("pt-BR").includes(normalized),
-  );
+  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => matchesCatalogText(query, [item.label, item.detail, item.destination, item.category]));
 }

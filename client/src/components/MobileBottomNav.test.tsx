@@ -39,7 +39,7 @@ it("keeps Health and Emergency inside the local public directory", async () => {
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
   fireEvent.click(screen.getByRole("button", { name: "Emergência" }));
-  expect(state.navigate).toHaveBeenCalledWith("/servicos#emergency-strip-title");
+  expect(state.navigate).toHaveBeenCalledWith("/servicos?emergencia=1#emergency-strip-title");
 });
 
 it("returns focus to More after dismissing the menu", async () => {

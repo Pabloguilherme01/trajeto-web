@@ -16,7 +16,7 @@ const quickActions = [
   { label: "Serviços públicos", hint: "Saúde, segurança e cidadania", icon: Landmark, kind: "services", query: "" },
   { label: "Perto de mim", hint: "Usar localização do aparelho", icon: Compass, kind: "nearby", query: "" },
   { label: "Saúde", hint: "UPA, HEAL, hospital e UBS", icon: HeartPulse, kind: "services", query: "saude" },
-  { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "services", query: "seguranca" },
+  { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, kind: "services", query: "emergencia" },
   { label: "Comer", hint: "Restaurantes, lanches e café", icon: Utensils, kind: "places", query: "alimentacao" },
   { label: "Compras", hint: "Lojas, mercados e eletrônicos", icon: ShoppingBag, kind: "places", query: "compras" },
   { label: "Segurança", hint: "Delegacia e canais policiais", icon: ShieldAlert, kind: "services", query: "seguranca" },
@@ -69,6 +69,7 @@ export default function SearchPage() {
   const openQuick = (action: typeof quickActions[number]) => {
     if (action.kind === "internal") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=postos"); return; }
     if (action.kind === "routes") { setLocation(appUrl("/planejar")); return; }
+    if (action.kind === "services" && action.query === "emergencia") { setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title"); return; }
     if (action.kind === "services") { setLocation(appUrl("/servicos") + (action.query ? "?categoria=" + encodeURIComponent(action.query) : "")); return; }
     if (action.kind === "places") { rememberSearch(action.query); setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(action.query)); return; }
     if (action.kind === "nearby") {

@@ -309,7 +309,7 @@ export default function Home() {
               { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => openServiceSearch("Centro Águas Lindas de Goiás, GO") },
               { label: "Saúde", hint: "UPA, hospital e UBS", icon: HeartPulse, action: () => setLocation(appUrl("/servicos") + "?categoria=saude") },
               { label: "Serviços", hint: "Prefeitura e cidadania", icon: Landmark, action: () => setLocation(appUrl("/servicos") + "?categoria=cidadania") },
-              { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?categoria=seguranca") },
+              { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title") },
             ].map(item => (
               <button
                 key={item.label}

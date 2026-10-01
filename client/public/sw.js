@@ -1,7 +1,7 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
 const VERSION = CACHE_PREFIX + "v19";
 const NETWORK_TIMEOUT_MS = 4000;
-const MAX_MAP_ENTRIES = 80;
+const MAX_MAP_ENTRIES = 24;
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
@@ -147,8 +147,8 @@ async function networkFirstNavigation(request) {
   try {
     const response = await fetchWithTimeout(request);
     if (response.ok) {
-      await cache.put(request, response.clone());
-      await cache.put("./index.html", response.clone());
+      await safeCachePut(cache, request, response);
+      await safeCachePut(cache, "./index.html", response);
       return response;
     }
 
@@ -175,7 +175,7 @@ async function staleWhileRevalidate(request, cacheName, event) {
   const cached = await cache.match(request, { ignoreVary: true });
   const network = fetch(request)
     .then(async response => {
-      if (response.ok) await cache.put(request, response.clone());
+      if (response.ok) await safeCachePut(cache, request, response);
       return response;
     })
     .catch(() => cached);
@@ -189,7 +189,7 @@ async function networkFirst(request, cacheName) {
 
   try {
     const response = await fetchWithTimeout(request);
-    if (response.ok) await cache.put(request, response.clone());
+    if (response.ok) await safeCachePut(cache, request, response);
     if (!response.ok) return await cache.match(request, { ignoreVary: true }) || response;
     return response;
   } catch {
@@ -209,9 +209,11 @@ async function tileNetworkFirst(request) {
   try {
     const response = await fetchWithTimeout(request);
     if (response.ok || response.type === "opaque") {
-      await cache.put(request, response.clone());
-      const keys = await cache.keys();
-      await Promise.all(keys.slice(0, Math.max(0, keys.length - MAX_MAP_ENTRIES)).map(key => cache.delete(key)));
+      await safeCachePut(cache, request, response);
+      try {
+        const keys = await cache.keys();
+        await Promise.all(keys.slice(0, Math.max(0, keys.length - MAX_MAP_ENTRIES)).map(key => cache.delete(key)));
+      } catch {}
     }
     return response;
   } catch {
@@ -244,5 +246,14 @@ async function offlineStatus() {
     return { ready: saved.every(Boolean) && snapshots.every(Boolean), version: VERSION };
   } catch {
     return { ready: false };
+  }
+}
+
+
+async function safeCachePut(cache, request, response) {
+  try {
+    await cache.put(request, response.clone());
+  } catch {
+    // A full or disabled cache must not break a successful network response.
   }
 }

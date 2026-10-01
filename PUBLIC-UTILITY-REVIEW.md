@@ -26,8 +26,8 @@ O telefone do SIC usa a seção específica do órgão, em vez do contato genér
 - Manifesto público `offline-assets.json` incluído no artefato Pages. A versão do service worker acompanha automaticamente os hashes do build.
 - Uma atualização incompleta não substitui a versão ativa. A versão nova espera a ação Atualizar quando já existe uma sessão controlada.
 - Verificação de atualização ao voltar ao app ou recuperar a conexão. Cache de dados é usado em falha de rede ou indisponibilidade do servidor; a espera de rede termina em quatro segundos.
-- Caches isolados por caminho do app; limpeza preserva outras aplicações. Respostas privadas de API não são armazenadas. Cache de mapas limitado às últimas 80 imagens consultadas.
-- Publicação Pages exige checagem de tipos antes do build. A sincronização ANP existente foi preservada.
+- Caches isolados por caminho do app; limpeza preserva outras aplicações. Respostas privadas de API não são armazenadas. Falhas de espaço no cache não interrompem respostas online. Cache de mapas limitado às últimas 24 imagens consultadas.
+- Publicação Pages exige checagem de tipos antes do build. A sincronização ANP a cada 12 horas passa a acionar a publicação após sucesso, pois commits feitos pelo GITHUB_TOKEN não geram um novo evento de build por push. Referência: https://docs.github.com/en/actions/concepts/security/github_token
 
 ## Limites verificáveis
 
