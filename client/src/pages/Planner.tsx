@@ -10,6 +10,7 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNav
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
+import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 
@@ -471,9 +472,31 @@ export default function Planner() {
               </label>
             )}
             {savedRoutes.length === 0 && savedStations.length === 0 ? (
-              <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
-                Nenhuma rota salva ainda. Calcule uma rota com origem e destino e o Trajeto criará automaticamente uma cópia neste aparelho.
-              </div>
+              <>
+                <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
+                  <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
+                  <p className="mt-1 text-[0.62rem] leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Para uma rota realmente disponível sem internet, calcule com origem e destino quando estiver conectado e salve automaticamente.</p>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    <a href="tel:190" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-[0.58rem] font-black">Polícia · 190</a>
+                    <a href="tel:192" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-[0.58rem] font-black">SAMU · 192</a>
+                    <a href="tel:193" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-[0.58rem] font-black">Bombeiros · 193</a>
+                  </div>
+                </div>
+                <section className="mt-4" aria-labelledby="offline-ready-title">
+                  <div className="flex items-end justify-between gap-3">
+                    <div><p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Destinos prontos</p><h3 id="offline-ready-title" className="mt-1 text-lg font-black">Abra uma rota sem preencher tudo.</h3></div>
+                    <span className="text-[0.5rem] text-white/25">catálogo incorporado</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
+                      <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination))} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left">
+                        <p className="truncate text-xs font-black">{route.label}</p>
+                        <p className="mt-1 line-clamp-2 text-[0.53rem] leading-snug text-white/35">{route.detail}</p>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </>
             ) : savedRoutes.length > 0 && filteredSavedRoutes.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-sm leading-relaxed text-white/45">
                 Nenhuma rota corresponde ao filtro.
