@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { OfflineRoutePreview, RouteMap } from "./RouteMap";
 
@@ -84,8 +84,9 @@ describe("RouteMap", () => {
         privateOrigin
       />
     );
-    expect(screen.getByRole("region", { name: "Prévia privada da viagem" })).toBeTruthy();
-    const href = screen
+    const region = screen.getByRole("region", { name: "Prévia privada da viagem" });
+    expect(region).toBeTruthy();
+    const href = within(region)
       .getByRole("link", { name: "Abrir no Google Maps" })
       .getAttribute("href") || "";
     expect(href).not.toContain("origin=");
