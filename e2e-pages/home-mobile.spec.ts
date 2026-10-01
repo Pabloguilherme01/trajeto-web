@@ -29,17 +29,19 @@ test("Pages: home remains readable and touch-friendly at 320px", async ({ page }
   expect(tinyText).toEqual([]);
 
   for (const control of [
+    page.getByRole("button", { name: /Status de conexão:/i }),
     page.getByRole("button", { name: "Compartilhar Trajeto" }),
     page.getByRole("button", { name: "Central completa" }),
     page.getByRole("button", { name: "Ver catálogo" }),
     page.getByRole("button", { name: "Abrir guia" }),
-    page.getByRole("button", { name: "Ver tudo" }),
     page.getByRole("button", { name: "Usar minha localização como origem" }),
   ]) {
     await control.scrollIntoViewIfNeeded();
     const box = await control.boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
   }
+
+  await expect(page.getByRole("heading", { name: "Acesso rápido." })).toHaveCount(0);
 
   const inputs = await page.locator("main input").all();
   for (const input of inputs) {
