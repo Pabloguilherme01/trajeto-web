@@ -8,6 +8,7 @@ import { compareFuelPrices } from "../lib/fuelEconomy";
 import { recommendFuelStop, selectFuelRecommendationCandidates } from "../lib/stationRecommendation";
 import { directionsWaypoint, realDetourKm } from "../lib/routeDetour";
 import { anpPricePlaceId, verifiedPlannerPriceReferences } from "../lib/plannerPriceReference";
+import { shouldPersistRouteSearch } from "../lib/routePrivacy";
 
 const plannerInput = z.object({
   origin: z.string().trim().min(3).max(240),
@@ -73,7 +74,7 @@ export const routesRouter = router({
       tankLiters: vehicle.tankLiters ? Number(vehicle.tankLiters) : null,
     }) : null;
     const selectedEconomy = economy ? economy[economy.recommendedFuel] : null;
-    const routeSearchPersistence = ctx.user ? createRouteSearch({
+    const routeSearchPersistence = shouldPersistRouteSearch(ctx.user?.id) ? createRouteSearch({
       userId: ctx.user?.id ?? null,
       origin: input.origin,
       destination: input.destination,

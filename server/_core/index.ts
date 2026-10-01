@@ -40,7 +40,7 @@ async function startServer() {
     }
 
     res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Referrer-Policy", "no-referrer");
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
     res.setHeader("X-Frame-Options", "DENY");
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
@@ -50,7 +50,7 @@ async function startServer() {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
       res.setHeader(
         "Content-Security-Policy",
-        "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com; connect-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com; frame-src https://*.google.com; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com;",
+        "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com; connect-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com https://nominatim.openstreetmap.org https://router.project-osrm.org data: blob:; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com; frame-src https://*.google.com; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com;",
       );
     }
     next();

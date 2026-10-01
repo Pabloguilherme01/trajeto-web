@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { clearRecentTrips, getRecentTrips, rememberTrip, getRouteUsageStats, removeRecentTrip } from "./mobilePreferences";
+import { clearRecentTrips, getRecentSearches, getRecentTrips, rememberSearch, rememberTrip, getRouteUsageStats, removeRecentTrip } from "./mobilePreferences";
 
 describe("mobilePreferences recent trips", () => {
   beforeEach(() => localStorage.clear());
@@ -37,10 +37,45 @@ describe("mobilePreferences recent trips", () => {
     rememberTrip("a", "b");
     expect(getRecentTrips()).toEqual([]);
   });
+
+  it("never persists a precise GPS origin in trip history", () => {
+    rememberTrip("-15.76123, -48.28123", "Hospital");
+    const trips = getRecentTrips();
+    expect(trips[0]?.origin).toBe("Minha localização");
+    expect(localStorage.getItem("trajeto-recent-trips")).not.toContain("-15.76123");
+  });
+});
+
+describe("mobilePreferences search privacy", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("scrubs precise coordinates from recent searches", () => {
+    rememberSearch("-15.76123, -48.28123");
+    expect(getRecentSearches()).toEqual(["Minha localização"]);
+    expect(localStorage.getItem("trajeto-recent-searches")).not.toContain("-15.76123");
+  });
 });
 
 describe("mobilePreferences route usage", () => {
   beforeEach(() => localStorage.clear());
+
+  it("migrates legacy usage keys that contain precise coordinates", () => {
+    localStorage.setItem(
+      "trajeto-route-usage",
+      JSON.stringify({ "-15.76123, -48.28123::hospital": 3 })
+    );
+    localStorage.setItem(
+      "trajeto-route-usage-events",
+      JSON.stringify({
+        "-15.76123, -48.28123::hospital": [new Date().toISOString()],
+      })
+    );
+
+    const stats = getRouteUsageStats("Minha localização", "Hospital", 30);
+    expect(stats.total).toBe(3);
+    expect(localStorage.getItem("trajeto-route-usage")).not.toContain("-15.76123");
+    expect(localStorage.getItem("trajeto-route-usage-events")).not.toContain("-15.76123");
+  });
 
   it("keeps a real timestamped usage history for route windows", () => {
     rememberTrip("Casa", "Trabalho");
