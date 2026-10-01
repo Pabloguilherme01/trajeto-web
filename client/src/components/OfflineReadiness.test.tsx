@@ -25,7 +25,7 @@ vi.mock("@/lib/pwa", () => ({
 vi.mock("@/lib/stationMapOffline", () => ({
   getOfflineMapStations: () => ({ savedAt: "", stations: [] }),
   getOfflineMapAgeLabel: () => "sem mapa salvo",
-  prepareOfflineStationMapFromCatalog: vi.fn(() => true),
+  prepareOfflineStationData: vi.fn(async () => ({ anpRows: 1, mapStations: 1, mapPrepared: true })),
 }));
 beforeEach(() => {
   vi.stubGlobal("React", React);
