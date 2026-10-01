@@ -2,6 +2,7 @@ import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
+import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -13,10 +14,13 @@ const CACHE_PREFIX = "trajeto:public-routing:";
 const REQUEST_TIMEOUT_MS = 9_000;
 const GEOCODER_MIN_INTERVAL_MS = import.meta.env.MODE === "test" ? 0 : 1_100;
 const GEOCODER_MISS_TTL_MS = 60_000;
+const GEOCODER_FAILURE_COOLDOWN_MS = 120_000;
+const GEOCODER_COOLDOWN_KEY = CACHE_PREFIX + "geocoder-unavailable-until";
 const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>();
 const geocoderMissUntil = new Map<string, number>();
 let geocoderQueue: Promise<void> = Promise.resolve();
 let geocoderLastStartedAt = 0;
+let geocoderUnavailableUntilFallback = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -55,6 +59,71 @@ function normalizeSearch(value: string) {
     .toLocaleLowerCase("pt-BR")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+}
+
+function opaqueCacheToken(value: string) {
+  let first = 2166136261;
+  let second = 0x9e3779b9;
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    first = Math.imul(first ^ code, 16777619);
+    second = Math.imul(second ^ code, 2246822519);
+  }
+  return (
+    (first >>> 0).toString(16).padStart(8, "0") +
+    (second >>> 0).toString(16).padStart(8, "0")
+  );
+}
+
+function geocodeCacheKey(value: string) {
+  // This token is not a secret or an authentication hash. Its purpose is to
+  // keep the user's typed address out of browser-storage key names.
+  return "geocode:" + opaqueCacheToken(normalizeSearch(value));
+}
+
+function getGeocoderSessionStorage() {
+  try {
+    if (typeof window !== "undefined") return window.sessionStorage;
+    if (typeof sessionStorage !== "undefined") return sessionStorage;
+  } catch {}
+  return undefined;
+}
+
+function getGeocoderUnavailableUntil() {
+  const storage = getGeocoderSessionStorage();
+  if (!storage) return geocoderUnavailableUntilFallback;
+  try {
+    const raw = storage.getItem(GEOCODER_COOLDOWN_KEY);
+    if (raw == null) {
+      geocoderUnavailableUntilFallback = 0;
+      return 0;
+    }
+    const value = Number(raw);
+    geocoderUnavailableUntilFallback =
+      Number.isFinite(value) && value > 0 ? value : 0;
+    return geocoderUnavailableUntilFallback;
+  } catch {
+    return geocoderUnavailableUntilFallback;
+  }
+}
+
+function setGeocoderUnavailableUntil(value: number) {
+  geocoderUnavailableUntilFallback = value > 0 ? value : 0;
+  const storage = getGeocoderSessionStorage();
+  if (!storage) return;
+  try {
+    if (value > 0) storage.setItem(GEOCODER_COOLDOWN_KEY, String(value));
+    else storage.removeItem(GEOCODER_COOLDOWN_KEY);
+  } catch {}
+}
+
+export function resetPublicRoutingTestState() {
+  if (import.meta.env.MODE !== "test") return;
+  geocoderUnavailableUntilFallback = 0;
+  geocoderMissUntil.clear();
+  geocoderInFlight.clear();
+  geocoderQueue = Promise.resolve();
+  geocoderLastStartedAt = 0;
 }
 
 function expandLocalQuery(value: string) {
@@ -153,6 +222,7 @@ export function publicGeocoderWaitMs(
 async function requestPublicGeocoder(query: string) {
   const key = normalizeSearch(query);
   const now = Date.now();
+  if (getGeocoderUnavailableUntil() > now) return undefined;
   if ((geocoderMissUntil.get(key) ?? 0) > now) return undefined;
 
   const existing = geocoderInFlight.get(key);
@@ -184,9 +254,12 @@ async function requestPublicGeocoder(query: string) {
         return undefined;
       }
       geocoderMissUntil.delete(key);
+      setGeocoderUnavailableUntil(0);
       return result;
     } catch (error) {
-      geocoderMissUntil.set(key, Date.now() + GEOCODER_MISS_TTL_MS);
+      const failedAt = Date.now();
+      geocoderMissUntil.set(key, failedAt + GEOCODER_MISS_TTL_MS);
+      setGeocoderUnavailableUntil(failedAt + GEOCODER_FAILURE_COOLDOWN_MS);
       throw error;
     }
   });
@@ -290,6 +363,9 @@ function localGeocode(value: string): PublicCoordinate | null {
   const normalized = normalizeSearch(value);
   if (!normalized) return null;
 
+  const preparedPoint = resolveLocalGeocodePoint(value);
+  if (preparedPoint) return preparedPoint;
+
   // A city-qualified street, hospital or station is never the city centre.
   const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
   if (
@@ -371,7 +447,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   const query = normalizeText(value);
   if (!query) throw new Error("Origem ou destino vazio.");
 
-  const cacheKey = "geocode:" + query.toLocaleLowerCase("pt-BR");
+  const cacheKey = geocodeCacheKey(query);
   const cached = cacheGet<PublicCoordinate>(cacheKey);
   if (isCoordinate(cached)) return cached;
 
@@ -415,7 +491,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const geocodedCoordinate = { lat, lng };
   cacheSet(cacheKey, geocodedCoordinate);
-  const expandedKey = "geocode:" + expanded.toLocaleLowerCase("pt-BR");
+  const expandedKey = geocodeCacheKey(expanded);
   if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
   return geocodedCoordinate;
 }
