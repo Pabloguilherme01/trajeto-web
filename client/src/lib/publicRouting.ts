@@ -388,22 +388,14 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   }
 
   const expanded = expandLocalQuery(query);
-  const attempts = Array.from(
-    new Set([
-      expanded,
-      query,
-      query + ", Águas Lindas de Goiás, Goiás, Brasil",
-    ])
-  );
-
   let result: NominatimResult | undefined;
-  for (const attempt of attempts) {
-    try {
-      result = await requestPublicGeocoder(attempt);
-      if (result?.lat && result.lon) break;
-    } catch {
-      // The next attempt is queued behind the same per-device request budget.
-    }
+  try {
+    // One user action performs at most one public geocoder request. Known
+    // services/places are expanded locally first; unknown destinations should
+    // be entered with enough address context instead of generating retries.
+    result = await requestPublicGeocoder(expanded);
+  } catch {
+    result = undefined;
   }
 
   const lat = Number(result?.lat);
