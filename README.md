@@ -1,22 +1,23 @@
 # Trajeto
 
-O Trajeto é uma ferramenta de decisão para quem se desloca de carro pelo Entorno do Distrito Federal.
+O Trajeto é uma ferramenta mobile de utilidade pública para **Águas Lindas de Goiás**, reunindo serviços públicos, contatos oficiais, lugares úteis, postos e rotas em uma experiência simples e preparada para conexão instável.
 
 ## Objetivo
 
-**Ajudar quem dirige pelo Entorno a escolher onde parar e por onde seguir, economizando tempo, combustível e desvio.**
+**Ajudar o cidadão a resolver uma necessidade local com poucos toques: encontrar o canal certo, ligar, abrir o serviço oficial, localizar um atendimento ou seguir uma rota.**
 
-A missão do produto é simples: transformar uma busca de posto ou rota em uma decisão prática. O Trajeto não tenta substituir o aplicativo de mapas; ele organiza contexto para responder **onde parar, quanto desviar, o que realmente pode ser economizado e de onde veio cada dado**.
+A mobilidade continua sendo um núcleo importante do produto, mas não define sozinha o Trajeto. O site deve responder tanto a necessidades de deslocamento quanto a tarefas cotidianas como saúde, assistência, cidadania, iluminação pública, limpeza urbana e emergência.
 
-O fluxo principal é:
+Os fluxos principais são:
 
-**buscar → comparar → decidir → navegar**
+**buscar → entender → agir**  
+**planejar → decidir → navegar**
 
-Toda nova funcionalidade deve justificar seu espaço por melhorar uma dessas quatro etapas. Se não melhorar a decisão ou o uso recorrente, fica fora da experiência principal.
+Toda nova funcionalidade deve justificar seu espaço por reduzir **tempo, toques, dados móveis ou incerteza**. Se apenas repetir informação já disponível, aumentar a densidade da tela ou depender de dado sem fonte confiável, deve ficar fora da experiência principal.
 
-A plataforma começa pública e simples: o usuário informa uma cidade, bairro, posto ou destino e recebe opções de abastecimento, contexto de rota e referências de fonte. Cadastro é opcional e só entra quando traz valor recorrente.
+A plataforma é pública e simples: cadastro não é necessário para acessar os recursos essenciais. Preferências, destinos e rotas podem permanecer no aparelho quando isso for suficiente.
 
-O foco inicial é o corredor **Águas Lindas de Goiás ↔ Distrito Federal**. A expansão para outros corredores deve acontecer somente quando houver cobertura de dados e uso real.
+O foco territorial inicial é **Águas Lindas de Goiás**, com atenção especial ao deslocamento pelo corredor **Águas Lindas ↔ Distrito Federal**. Expansões devem acontecer somente quando houver fonte confiável, manutenção viável e utilidade pública clara.
 
 ## Nova narrativa de produto
 
@@ -80,31 +81,34 @@ Cada recurso novo deve economizar **tempo, toques, dados ou dinheiro**. Recursos
 
 ## O que o usuário ganha
 
-- encontra postos sem precisar abrir várias fontes;
-- compara distância e impacto do desvio;
+- encontra serviços públicos e contatos oficiais sem depender de várias páginas;
+- acessa rapidamente saúde, assistência, cidadania, emergência e manutenção urbana;
+- encontra postos e lugares úteis com contexto de fonte;
+- compara distância e impacto do desvio em deslocamentos;
 - entende quando um preço é referência oficial e quando é dado de terceiros;
 - calcula cenários de combustível quando informa veículo e consumo;
 - abre a navegação no aplicativo de mapas escolhido;
-- pode salvar favoritos, veículos, rotas e alertas quando isso fizer sentido para uso recorrente.
+- mantém rotas, favoritos e preferências úteis no aparelho, inclusive para continuidade offline.
 
 ## Princípio de produto
 
 Cada tela deve responder a uma pergunta prática:
 
-1. **Onde abastecer?**
-2. **Quanto vou desviar?**
-3. **O que realmente economizo?**
-4. **Posso confiar na origem desse dado?**
+1. **O que preciso resolver?**
+2. **Qual canal, local ou rota me leva à próxima ação?**
+3. **O que funciona mesmo com conexão ruim ou sem internet?**
+4. **Posso confiar na origem e na data desse dado?**
 
-Se uma funcionalidade não ajuda uma dessas decisões, não deve ganhar espaço na experiência principal.
+Nos fluxos de mobilidade, o Trajeto também deve deixar claros distância, desvio, custo e fonte. Se uma funcionalidade não ajuda uma decisão ou ação concreta, não deve ganhar espaço na experiência principal.
 
 ## Experiência pública
 
-A página inicial tem uma única chamada principal: **consultar uma parada ou destino**.
+A página inicial prioriza uma pergunta simples: **o que você precisa resolver ou para onde precisa ir?**
 
-O fluxo recomendado é:
+Os fluxos recomendados são:
 
-**buscar → comparar → decidir → navegar**
+**buscar serviço ou lugar → abrir a próxima ação**  
+**planejar deslocamento → decidir → navegar**
 
 Não exigimos cadastro para descobrir valor. A conta aparece depois, como ferramenta de retenção para quem quer histórico, favoritos, veículo ou alertas.
 
