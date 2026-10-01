@@ -27,7 +27,6 @@ export type DepartureContext = {
 };
 
 const DF_CORRIDOR_TERMS = [
-  "brasilia",
   "taguatinga",
   "ceilandia",
   "samambaia",
@@ -44,9 +43,16 @@ function includesAny(text: string, terms: string[]) {
 }
 
 export function isDfCorridorTrip(origin = "", destination = "") {
-  const text = normalizeCatalogText(origin + " " + destination)
-    .replace(/br-070/g, "br 070");
-  return includesAny(text, DF_CORRIDOR_TERMS);
+  const normalizedOrigin = normalizeCatalogText(origin).replace(/br-070/g, "br 070");
+  const normalizedDestination = normalizeCatalogText(destination).replace(/br-070/g, "br 070");
+  const text = normalizedOrigin + " " + normalizedDestination;
+  const brasiliaEndpoint = [normalizedOrigin, normalizedDestination].some(
+    endpoint =>
+      endpoint.includes("brasilia") &&
+      !endpoint.includes("aguas lindas") &&
+      !endpoint.includes("jardim brasilia"),
+  );
+  return brasiliaEndpoint || includesAny(text, DF_CORRIDOR_TERMS);
 }
 
 export function getDepartureSignals({
