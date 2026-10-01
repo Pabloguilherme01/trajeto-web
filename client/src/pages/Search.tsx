@@ -121,18 +121,39 @@ const quickActions = [
     query: "transito",
   },
   {
+    label: "UBS e ESF",
+    hint: "Unidades de saúde por bairro",
+    icon: HeartPulse,
+    kind: "search",
+    query: "ubs",
+  },
+  {
+    label: "CRAS e CREAS",
+    hint: "Assistência social e famílias",
+    icon: Landmark,
+    kind: "search",
+    query: "cras",
+  },
+  {
+    label: "Documentos",
+    hint: "Vapt Vupt, TRE, SINE e mais",
+    icon: BookOpen,
+    kind: "search",
+    query: "vapt vupt",
+  },
+  {
     label: "Farmácias",
-    hint: "Google Maps · online",
+    hint: "Opções locais e rotas",
     icon: Store,
-    kind: "external",
-    query: "farmácias, Águas Lindas de Goiás, GO",
+    kind: "search",
+    query: "farmacia",
   },
   {
     label: "Mercados",
-    hint: "Google Maps · online",
+    hint: "Opções locais e rotas",
     icon: ShoppingCart,
-    kind: "external",
-    query: "supermercados atacadistas, Águas Lindas de Goiás, GO",
+    kind: "search",
+    query: "mercado",
   },
 ] as const;
 
@@ -272,7 +293,7 @@ export default function SearchPage() {
       );
       return;
     }
-    if (action.kind === "places") {
+    if (action.kind === "places" || action.kind === "search") {
       search(action.query);
       return;
     }
