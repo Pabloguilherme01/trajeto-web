@@ -23,7 +23,12 @@ describe("public routing fallback", () => {
         )
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    try {
+      localStorage.removeItem("trajeto-aguas-lindas-anp-offline-v1");
+    } catch {}
+  });
 
   it("geocodes endpoints and calculates a route without the application backend", async () => {
     const route = await calculatePublicRoute(
@@ -100,6 +105,36 @@ describe("public routing fallback", () => {
     const firstUrl = String(fetchMock.mock.calls[0][0]);
     expect(decodeURIComponent(firstUrl)).toContain("Hospital Municipal Bom Jesus");
     expect(decodeURIComponent(firstUrl)).toContain("Águas Lindas de Goiás");
+  });
+
+  it("resolves a prepared ANP station from local storage when the network is unavailable", async () => {
+    localStorage.setItem(
+      "trajeto-aguas-lindas-anp-offline-v1",
+      JSON.stringify({
+        retrievedAt: "2026-10-01T12:00:00.000Z",
+        savedAt: "2026-10-01T12:00:00.000Z",
+        rows: [{
+          cnpj: "13902675000178",
+          razaoSocial: "AGUAS LINDAS COMBUSTIVEIS LTDA",
+          endereco: "QUADRA 07",
+          bairro: "CAMPING CLUBE",
+          municipio: "AGUAS LINDAS DE GOIAS",
+          uf: "GO",
+          latitude: "-15.7646021",
+          longitude: "-48.2677716",
+        }],
+      })
+    );
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "AGUAS LINDAS COMBUSTIVEIS LTDA"
+    );
+
+    expect(route.destination.lat).toBeCloseTo(-15.7646021, 6);
+    expect(route.destination.lng).toBeCloseTo(-48.2677716, 6);
+    expect(route.source).toBe("local-estimate");
   });
 
   it("rejects origin and destination that resolve to the same point", async () => {
