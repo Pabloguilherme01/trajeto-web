@@ -18,7 +18,7 @@ describe("trip calculator draft", () => {
 
   it("persiste e recupera o cenário local", () => {
     saveTripCalculatorDraft({
-      distance: "35",
+      mode: "trabalho",\n      distance: "35",
       price: "5,89",
       consumption: "10",
       tank: "45",
@@ -33,7 +33,7 @@ describe("trip calculator draft", () => {
       monthlyBudget: "800",
     });
 
-    expect(loadTripCalculatorDraft()).toMatchObject({ distance: "35", price: "5,89", roundTrip: true, monthlyBudget: "800" });
+    expect(loadTripCalculatorDraft()).toMatchObject({ mode: "trabalho", distance: "35", price: "5,89", roundTrip: true, monthlyBudget: "800" });
   });
 
   it("ignora rascunho ausente ou inválido", () => {
