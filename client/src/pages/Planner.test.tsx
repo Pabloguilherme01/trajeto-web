@@ -132,7 +132,7 @@ describe("Planner travel state", () => {
       submit();
       await waitFor(() =>
         expect(state.publicRoute).toHaveBeenCalledWith(
-          "-15.7612, -48.2812",
+          "-15.761, -48.281",
           "Hospital",
           "driving"
         )
