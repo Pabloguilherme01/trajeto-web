@@ -320,7 +320,7 @@ export default function PublicServices() {
                   setQuery("");
                   applyFilters("", category, true);
                 }}
-                className="grid size-10 place-items-center rounded-xl text-white/70"
+                className="grid size-11 place-items-center rounded-xl text-white/70"
                 aria-label="Limpar busca"
               >
                 <X className="size-4" />

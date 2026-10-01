@@ -94,7 +94,7 @@ export default function TripReadinessCard() {
     <section className="mobile-card rounded-3xl border border-white/10 bg-[#10181F] p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,.2)] sm:p-6" aria-labelledby="trip-readiness-title">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[0.58rem] font-black uppercase tracking-[0.16em] text-[#3DE3FF]">Prontidão da viagem</p>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#3DE3FF]">Prontidão da viagem</p>
           <h2 id="trip-readiness-title" className="mt-1 font-display text-xl font-semibold tracking-[-0.045em]">{status}</h2>
           <p className="mt-1 text-xs leading-relaxed text-white/45">{readyCount}/{items.length} pontos verificados localmente · sem enviar seus dados para um servidor.</p>
         </div>
@@ -104,18 +104,18 @@ export default function TripReadinessCard() {
       </div>
       {routineLabel && (
         <div className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-3">
-          <p className="text-[0.52rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Rotina detectada localmente</p>
+          <p className="text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Rotina detectada localmente</p>
           <p className="mt-1 truncate text-xs font-extrabold text-white">{routineLabel}</p>
-          <p className="mt-1 text-[0.58rem] text-white/45">{mostUsedTrip ? "Esta é a rota mais usada na memória deste aparelho." : "Última rota registrada neste aparelho."}</p>
-          {routineOffline && <p className={"mt-1 text-[0.55rem] font-bold " + (isOfflineRouteStale(routineOffline.savedAt) ? "text-amber-200" : "text-[#C7FF3C]")}>{isOfflineRouteStale(routineOffline.savedAt) ? "Cópia offline antiga · revisar antes de depender dela." : "Cópia offline disponível para contingência."}</p>}
+          <p className="mt-1 text-xs text-white/45">{mostUsedTrip ? "Esta é a rota mais usada na memória deste aparelho." : "Última rota registrada neste aparelho."}</p>
+          {routineOffline && <p className={"mt-1 text-xs font-bold " + (isOfflineRouteStale(routineOffline.savedAt) ? "text-amber-200" : "text-[#C7FF3C]")}>{isOfflineRouteStale(routineOffline.savedAt) ? "Cópia offline antiga · revisar antes de depender dela." : "Cópia offline disponível para contingência."}</p>}
         </div>
       )}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible">
         {items.map(item => (
           <div key={item.label} className={"min-w-[10.5rem] snap-start rounded-2xl border p-3 sm:min-w-0 " + (item.ok ? "border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04]" : item.warn ? "border-[#FFC928]/20 bg-[#FFC928]/[.05]" : "border-white/8 bg-white/[.025]")}>
             {item.label === "Conexão" ? <CloudOff className="size-4 text-[#3DE3FF]" /> : item.label === "Veículo" ? <ShieldCheck className="size-4 text-[#3DE3FF]" /> : item.label === "Manutenção" ? <Wrench className="size-4 text-[#C7FF3C]" /> : item.label === "Combustível" ? <Fuel className="size-4 text-[#C7FF3C]" /> : <CheckCircle2 className="size-4 text-[#C7FF3C]" />}
-            <p className="mt-2 text-[0.58rem] font-black uppercase tracking-[.1em] text-white/50">{item.label}</p>
-            <p className="mt-1 text-[0.65rem] font-bold leading-relaxed text-white/80">{item.detail}</p>
+            <p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/50">{item.label}</p>
+            <p className="mt-1 text-xs font-bold leading-relaxed text-white/80">{item.detail}</p>
           </div>
         ))}
       </div>

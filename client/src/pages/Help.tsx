@@ -42,7 +42,7 @@ export default function Help() {
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]"><Landmark className="size-3.5" /> Utilidade pública</p>
             <p className="mt-2 text-lg font-black">Central de Águas Lindas</p>
             <p className="mt-1 text-sm leading-relaxed text-white/75">Saúde, segurança, assistência, trânsito, educação, cidadania e canais de emergência, com catálogo local e acesso offline.</p>
-            <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#3DE3FF] px-3 text-xs font-black text-[#0B1014]">Abrir central <ArrowRight className="size-3.5" /></span>
+            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3DE3FF] px-3 text-xs font-black text-[#0B1014]">Abrir central <ArrowRight className="size-3.5" /></span>
           </Link>
         </section>
 
@@ -51,13 +51,13 @@ export default function Help() {
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Começar</p>
             <p className="mt-2 text-lg font-black">Planejar uma rota</p>
             <p className="mt-1 text-sm text-white/75">Origem, destino, mapa, salvar e compartilhar.</p>
-            <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir <ArrowRight className="size-3.5" /></span>
+            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir <ArrowRight className="size-3.5" /></span>
           </Link>
           <Link href={appUrl("/mapa")} className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.06] p-5">
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Começar</p>
             <p className="mt-2 text-lg font-black">Encontrar postos</p>
             <p className="mt-1 text-sm text-white/75">Mapa, fichas, filtros, favoritos e navegação.</p>
-            <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#3DE3FF]/25 px-3 text-xs font-black text-[#C9F7FF]">Abrir <ArrowRight className="size-3.5" /></span>
+            <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#3DE3FF]/25 px-3 text-xs font-black text-[#C9F7FF]">Abrir <ArrowRight className="size-3.5" /></span>
           </Link>
         </section>
 

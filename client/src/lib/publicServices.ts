@@ -56,6 +56,8 @@ const UPA =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/upa/";
 const HMBJ =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/hospital-municipal-bom-jesus/";
+const CAPS =
+  "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/caps-centro-de-atencao-psicossocial/";
 const UNIDADES_SAUDE =
   "https://aguaslindasdegoias.go.gov.br/unidades-de-saude/";
 const TRANSITO =
@@ -113,11 +115,39 @@ export const PUBLIC_SERVICES: PublicService[] = [
     mapQuery: "Hospital Municipal Bom Jesus, Águas Lindas de Goiás, GO",
   },
   {
+    id: "caps",
+    name: "CAPS · Centro de Atenção Psicossocial",
+    category: "saude",
+    description:
+      "Atendimento municipal de saúde mental e acompanhamento psicossocial.",
+    address:
+      "Quadra 15, Loja 02, Lote 21, Jardim Brasília, Águas Lindas de Goiás - GO",
+    phone: "(61) 3618-1559",
+    hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
+    email: "saude@aguaslindasdegoias.go.gov.br",
+    guidance:
+      "Entre em contato antes de sair para confirmar o atendimento indicado para sua necessidade.",
+    keywords: [
+      "caps",
+      "saude mental",
+      "psicologia",
+      "psiquiatria",
+      "atendimento psicossocial",
+      "apoio psicologico",
+    ],
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: CAPS,
+    mapQuery: "CAPS, Quadra 15, Loja 02, Lote 21, Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
     id: "secretaria-saude",
     name: "Secretaria Municipal de Saúde",
     category: "saude",
     description: "Contato institucional e encaminhamentos da saúde municipal.",
-    phone: "(61) 3902-1097 / (61) 99227-7937",
+    phone: "(61) 3618-4096 / (61) 99227-7937",
+    email: "saude@aguaslindasdegoias.go.gov.br",
+    verifiedAt: "01/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
     mapQuery: "Secretaria Municipal de Saúde, Águas Lindas de Goiás, GO",
@@ -967,6 +997,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
 ];
 
 export const PUBLIC_SERVICE_SHORTCUTS = [
+  { label: "Saúde mental / CAPS", query: "saude mental", hint: "Atendimento psicossocial municipal" },
   { label: "Água e segunda via", query: "conta agua", hint: "Saneago" },
   { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
   {

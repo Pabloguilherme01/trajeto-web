@@ -71,11 +71,11 @@
       ]
     },
     {
-      "name": "Retomar última rota",
-      "short_name": "Retomar",
-      "description": "Abrir rapidamente o planejador e continuar a última viagem salva",
+      "name": "Planejar rota",
+      "short_name": "Planejar",
+      "description": "Abrir o planejador para informar origem e destino e escolher como navegar",
       "url": "./planejar",
-      "id": "retomar-rota",
+      "id": "planejar-rota",
       "icons": [
         {
           "src": "./icon-192.png",
