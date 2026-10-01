@@ -134,22 +134,26 @@ describe("public routing fallback", () => {
       "Hospital Municipal Bom Jesus"
     );
 
-    const firstUrl = String(fetchMock.mock.calls[0][0]);
-    expect(decodeURIComponent(firstUrl)).toContain("Hospital Municipal Bom Jesus");
-    expect(decodeURIComponent(firstUrl)).toContain("Águas Lindas de Goiás");
+    const firstUrl = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(firstUrl.searchParams.get("q")).toContain("Hospital Municipal Bom Jesus");
+    expect(firstUrl.searchParams.get("q")).toContain("Águas Lindas de Goiás");
   });
 
   it("resolves a prepared ANP station from local storage when the network is unavailable", async () => {
     const saved = new Map<string, string>();
-    vi.stubGlobal("localStorage", {
+    const storage = {
       getItem: (key: string) => saved.get(key) ?? null,
       setItem: (key: string, value: string) => saved.set(key, value),
       removeItem: (key: string) => saved.delete(key),
       clear: () => saved.clear(),
       key: () => null,
       length: 0,
+    };
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      value: storage,
     });
-    localStorage.setItem(
+    window.localStorage.setItem(
       "trajeto-aguas-lindas-anp-offline-v1",
       JSON.stringify({
         retrievedAt: "2026-10-01T12:00:00.000Z",
