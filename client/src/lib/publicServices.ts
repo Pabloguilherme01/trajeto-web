@@ -31,7 +31,8 @@ export type PublicService = {
     | "Equatorial Goiás"
     | "Ministério do Trabalho e Emprego"
     | "INSS"
-    | "Receita Federal";
+    | "Receita Federal"
+    | "CNES/DATASUS";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -56,6 +57,8 @@ const UPA =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/upa/";
 const HMBJ =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/hospital-municipal-bom-jesus/";
+const HMBJ_CNES =
+  "https://cnes2.datasus.gov.br/Mod_Conjunto.asp?VCo_Unidade=5200252442728";
 const CAPS =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/caps-centro-de-atencao-psicossocial/";
 const UNIDADES_SAUDE =
@@ -105,13 +108,19 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "hospital-bom-jesus",
     name: "Hospital Municipal Bom Jesus",
     category: "saude",
-    description: "Hospital municipal com atendimento contínuo.",
+    description:
+      "Hospital municipal. O CNES indica desativação temporária por reforma desde fevereiro de 2026.",
     address:
       "Q 109, Conjunto B, Lote 30/32, Setor 10, Águas Lindas de Goiás - GO",
     phone: "(61) 3548-7604",
-    hours: "24 horas",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: HMBJ,
+    hours: "Atendimento a confirmar antes de sair",
+    guidance:
+      "O cadastro CNES consultado em 01/10/2026 marca a unidade como desativada temporariamente por reforma, enquanto a página municipal ainda informa atendimento 24h. Confirme o funcionamento antes do deslocamento.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "CNES/DATASUS",
+    sourceUrl: HMBJ_CNES,
+    actionUrl: HMBJ,
+    actionLabel: "Ver página municipal",
     mapQuery: "Hospital Municipal Bom Jesus, Águas Lindas de Goiás, GO",
   },
   {
