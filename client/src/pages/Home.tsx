@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
+import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -143,7 +143,7 @@ export default function Home() {
   const shareHome = async () => {
     try {
       const url = window.location.origin + appUrl("/");
-      await shareText("Trajeto · planeje viagens, encontre postos e guarde rotas.", url, "Trajeto");
+      await shareText("Trajeto · serviços públicos, rotas, postos e lugares úteis de Águas Lindas.", url, "Trajeto");
       setShareDone(true);
       window.setTimeout(() => setShareDone(false), 1800);
     } catch {
@@ -179,20 +179,20 @@ export default function Home() {
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><SearchIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-black text-white">O que você procura?</span>
-              <span className="mt-0.5 block truncate text-[0.58rem] text-white/35">Posto, endereço, bairro ou serviço · Ctrl K</span>
+              <span className="mt-0.5 block truncate text-xs text-white/55">Serviço, posto, endereço, bairro ou lugar · Ctrl K</span>
             </span>
             <ArrowRight className="size-4 shrink-0 text-white/25" />
           </button>
         </section>
 
         <section className="mt-8">
-          <p className="text-[0.62rem] font-black uppercase tracking-[.18em] text-[#C7FF3C]">Mobilidade diária</p>
+          <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">Utilidade local</p>
           <h1 className="mobile-title mt-3 max-w-3xl font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
-            Chegue melhor.<br />
-            <span className="text-[#C7FF3C]">Decida antes de sair.</span>
+            Resolva na cidade.<br />
+            <span className="text-[#C7FF3C]">Chegue com menos esforço.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/50 sm:text-base">
-            Um fluxo simples para planejar a rota, encontrar uma parada e abrir a navegação certa sem atravessar várias telas.
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">
+            Serviços públicos, contatos, rotas, postos e lugares úteis de Águas Lindas em um fluxo simples, com o essencial disponível offline depois da preparação.
           </p>
         </section>
 
@@ -208,10 +208,10 @@ export default function Home() {
               <p className="mt-3 text-sm font-black">Encontrar postos</p>
               <p className="mt-1 text-[0.62rem] text-white/45">Perto de você ou no diretório</p>
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?salvos=1")} className="mobile-card min-h-24 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4 text-left active:scale-[.99]">
-              <Bookmark className="size-4 text-[#BDA5FF]" />
-              <p className="mt-3 text-sm font-black">Abrir salvos</p>
-              <p className="mt-1 text-[0.62rem] text-white/45">Rotas e postos guardados neste aparelho</p>
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-4 text-left active:scale-[.99]">
+              <Landmark className="size-4 text-[#FFB86B]" />
+              <p className="mt-3 text-sm font-black">Serviços públicos</p>
+              <p className="mt-1 text-xs text-white/55">Saúde, cidadania, benefícios e emergência</p>
             </button>
           </div>
         </section>

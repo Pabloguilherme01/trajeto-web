@@ -1,7 +1,14 @@
 test("Pages: cliques principais funcionam dentro da base hospedada", async ({ page }, testInfo) => {
   const mobile = testInfo.project.name.includes("mobile");
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Chegue melhor/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Resolva na cidade/i })).toBeVisible();
+
+  if (mobile) {
+    await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Serviços públicos", exact: true }).click();
+    await expect(page).toHaveURL(/\/trajeto-web\/servicos$/);
+    await expect(page.getByRole("heading", { name: /Águas Lindas em um só lugar/i })).toBeVisible();
+    await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Início" }).click();
+  }
 
   await page.getByRole("button", { name: /Planejar uma rota/i }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/planejar$/);
@@ -30,7 +37,7 @@ import { expect, test } from "@playwright/test";
 
 test("Pages: abre a home e navega entre os fluxos públicos", async ({ page }) => {
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Chegue melhor/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Resolva na cidade/i })).toBeVisible();
   await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await page.goto("salvos", { waitUntil: "domcontentloaded" });
