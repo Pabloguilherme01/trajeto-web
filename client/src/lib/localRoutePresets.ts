@@ -26,7 +26,6 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "posto-shell", label: "Posto Shell", detail: "Combustível · BR-070", destination: "Posto Shell, BR-070, 285, Mansões Centroeste, Águas Lindas de Goiás, GO", category: "combustivel" },
   { id: "zm", label: "ZM Combustíveis", detail: "Combustível · Recreio", destination: "ZM Combustíveis, Recreio das Águas Lindas, Águas Lindas de Goiás, GO", category: "combustivel" },
   { id: "policia-civil", label: "1ª Delegacia", detail: "Polícia Civil · Sol Nascente", destination: "1ª Delegacia de Polícia de Águas Lindas, Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás, GO", category: "servicos" },
-  { id: "saneago", label: "Saneago", detail: "Água e saneamento", destination: "Saneago, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "vapt-vupt", label: "Vapt Vupt", detail: "Serviços públicos", destination: "Vapt Vupt, Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "detran", label: "Detran-GO", detail: "Serviços de trânsito", destination: "Detran-GO, Águas Lindas de Goiás, GO", category: "transporte" },
   { id: "cora-coralina", label: "Cora Coralina", detail: "Colégio estadual", destination: "Colégio Estadual Cora Coralina, Rua 38, Mansões Village, Águas Lindas de Goiás, GO", category: "servicos" },
