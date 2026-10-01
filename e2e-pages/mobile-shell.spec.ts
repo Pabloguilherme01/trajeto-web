@@ -162,7 +162,15 @@ test("Pages: More and accessibility behave as bottom sheets on a small phone", a
 
 test("Pages: large text preference still fits a 320px phone", async ({ page }) => {
   await page.addInitScript(() => {
-    document.documentElement.classList.add("a11y-large");
+    localStorage.setItem(
+      "trajeto-accessibility-preferences",
+      JSON.stringify({
+        largeText: true,
+        highContrast: false,
+        reduceMotion: false,
+        compactMode: false,
+      })
+    );
   });
 
   for (const path of ["", "buscar", "servicos", "planejar", "postos"]) {
