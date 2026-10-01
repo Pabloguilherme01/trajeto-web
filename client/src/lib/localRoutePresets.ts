@@ -79,7 +79,14 @@ const LOCAL_PLACE_DESTINATIONS: LocalRoutePreset[] = LOCAL_PLACES.map(place => (
   category: place.category === "alimentacao" ? "alimentacao" : place.category === "compras" ? "compras" : place.category === "servicos" ? "servicos" : "centro",
 }));
 
-const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.id === "ouvidoria-municipal").map(service => ({
+// Public contacts with a route feed the destination picker automatically.
+// Preserve established shortcut IDs and skip services they already represent.
+const representedServices = new Set([
+  ...LOCAL_ROUTE_PRESETS.map(item => item.id),
+  "upa-mansoes-odisseia", "policia-civil-1", "pcgo-17-drp", "transito-mobilidade",
+  "coralina", "cepi-juscelino", "pm-go-aguas-lindas",
+]);
+const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.mapQuery && !representedServices.has(service.id)).map(service => ({
   id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: "servicos",
 }));
 export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PLACE_DESTINATIONS, ...SUPPORT_DESTINATIONS];

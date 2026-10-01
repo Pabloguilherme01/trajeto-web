@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v20";
+const VERSION = CACHE_PREFIX + "v21";
 const NETWORK_TIMEOUT_MS = 4000;
 const MAX_MAP_ENTRIES = 24;
 const STATIC_CACHE = VERSION + "-static";
@@ -143,38 +143,26 @@ self.addEventListener("fetch", event => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirstNavigation(request));
+    event.respondWith(appNavigation(request));
     return;
   }
 
   event.respondWith(staleWhileRevalidate(request, STATIC_CACHE, event));
 });
 
-async function networkFirstNavigation(request) {
+async function appNavigation(request) {
   const cache = await caches.open(STATIC_CACHE);
-
+  // The active worker owns one complete build. Keep its document pinned until
+  // the waiting worker is accepted; live HTML may reference unsaved new chunks.
+  const shell = await cache.match("./index.html", { ignoreVary: true });
+  if (shell) return shell;
   try {
-    const response = await fetchWithTimeout(request);
-    if (response.ok) {
-      await safeCachePut(cache, request, response);
-      await safeCachePut(cache, "./index.html", response);
-      return response;
-    }
-
-    return (
-      await cache.match(request, { ignoreVary: true }) ||
-      await cache.match("./index.html", { ignoreVary: true }) ||
-      response
-    );
+    return await fetchWithTimeout(request);
   } catch {
-    return (
-      await cache.match(request, { ignoreVary: true }) ||
-      await cache.match("./index.html", { ignoreVary: true }) ||
-      new Response("Trajeto indisponível offline.", {
-        status: 503,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      })
-    );
+    return new Response("Trajeto indisponível offline. Abra com internet para preparar o acesso.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 }
 

@@ -58,7 +58,7 @@ describe("service worker", () => {
   });
   it("cleans only previous cache versions inside this app's scope", async () => {
     const worker = loadWorker();
-    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v20-static"]);
+    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v21-static"]);
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "activate")[1];
     let completion: Promise<unknown>;
     handler({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
@@ -67,6 +67,22 @@ describe("service worker", () => {
   });
   it("does not announce readiness with a partial offline package", async () => {
     expect(await loadWorker().offlineStatus()).toEqual({ ready: false });
+  });
+  it("pins the complete installed shell while a new deployment awaits acceptance", async () => {
+    const worker = loadWorker(new Response('<script src="./assets/installed.js"></script>'));
+    worker.fetch.mockResolvedValue(new Response('<script src="./assets/not-saved.js"></script>'));
+    const request = new Request("https://example.com/trajeto-web/servicos?salvos=1");
+    expect(await (await worker.appNavigation(request)).clone().text()).toContain("installed.js");
+    expect(worker.fetch).not.toHaveBeenCalled();
+    expect(worker.cache.put).not.toHaveBeenCalled();
+    worker.fetch.mockRejectedValue(new Error("offline"));
+    expect(await (await worker.appNavigation(request)).clone().text()).toContain("installed.js");
+  });
+  it("does not cache a live document into an incomplete older build", async () => {
+    const worker = loadWorker();
+    worker.fetch.mockResolvedValue(new Response("new live document"));
+    expect(await (await worker.appNavigation(new Request("https://example.com/trajeto-web/"))).text()).toBe("new live document");
+    expect(worker.cache.put).not.toHaveBeenCalled();
   });
   it("keeps the refreshed document with its new assets when the HTTP cache has an older shell", async () => {
     const worker = loadWorker();
@@ -90,7 +106,7 @@ describe("service worker", () => {
     await completion!;
     worker.fetch.mockRejectedValue(new Error("offline"));
     for (const path of ["", "index.html", "servicos?salvos=1"]) {
-      const response = await worker.networkFirstNavigation(new Request(worker.self.registration.scope + path));
+      const response = await worker.appNavigation(new Request(worker.self.registration.scope + path));
       expect(await response.text()).toBe(fresh);
     }
   });

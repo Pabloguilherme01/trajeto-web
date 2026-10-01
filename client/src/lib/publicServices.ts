@@ -1,12 +1,7 @@
-import { matchesCatalogText } from "./catalogSearch";
+import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
-  | "saude"
-  | "seguranca"
-  | "assistencia"
-  | "transito"
-  | "educacao"
-  | "cidadania";
+  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania";
 
 export type PublicService = {
   id: string;
@@ -21,8 +16,19 @@ export type PublicService = {
   actionUrl?: string;
   actionLabel?: string;
   guidance?: string;
+  keywords?: string[];
+  whatsappOnly?: string[];
   verifiedAt?: string;
-  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás" | "SES-GO" | "SEAD Goiás" | "Ministério das Mulheres" | "Direitos Humanos e Cidadania" | "Saneago" | "Equatorial Goiás";
+  sourceLabel:
+    | "Prefeitura de Águas Lindas"
+    | "Polícia Civil de Goiás"
+    | "SEDUC Goiás"
+    | "SES-GO"
+    | "SEAD Goiás"
+    | "Ministério das Mulheres"
+    | "Direitos Humanos e Cidadania"
+    | "Saneago"
+    | "Equatorial Goiás";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -43,13 +49,22 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
 
 const PREFEITURA_CONTATOS = "https://aguaslindasdegoias.go.gov.br/contatos/";
 const TELEFONES_UTEIS = "https://aguaslindasdegoias.go.gov.br/telefones-uteis/";
-const UPA = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/upa/";
-const HMBJ = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/hospital-municipal-bom-jesus/";
-const UNIDADES_SAUDE = "https://aguaslindasdegoias.go.gov.br/unidades-de-saude/";
-const TRANSITO = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/";
-const CT = "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
-const PCGO = "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-de-atendimento/";
-const SEDUC = "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
+const UPA =
+  "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/upa/";
+const HMBJ =
+  "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/hospital-municipal-bom-jesus/";
+const UNIDADES_SAUDE =
+  "https://aguaslindasdegoias.go.gov.br/unidades-de-saude/";
+const TRANSITO =
+  "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/";
+const CT =
+  "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
+const PCGO =
+  "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-de-atendimento/";
+const SEDUC =
+  "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
+const ASSISTENCIA =
+  "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/";
 const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
@@ -58,7 +73,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "UPA Mansões Odisseia",
     category: "saude",
     description: "Atendimento de urgência e emergência municipal.",
-    address: "Quadra 3B, Lote 1/3, Mansões Odisseia, Águas Lindas de Goiás - GO",
+    address:
+      "Quadra 3B, Lote 1/3, Mansões Odisseia, Águas Lindas de Goiás - GO",
     phone: "(61) 3618-1602",
     hours: "24 horas",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -69,20 +85,24 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "heal",
     name: "HEAL · Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho",
     category: "saude",
-    description: "Hospital estadual de média e alta complexidade com pronto atendimento e linhas especializadas.",
-    address: "Rua 19, nº 792-902, Parque da Barragem 9, Águas Lindas de Goiás - GO",
+    description:
+      "Hospital estadual de média e alta complexidade com pronto atendimento e linhas especializadas.",
+    address:
+      "Rua 19, nº 792-902, Parque da Barragem 9, Águas Lindas de Goiás - GO",
     phone: "(61) 3774-2660",
     hours: "Sempre aberto",
     sourceLabel: "SES-GO",
     sourceUrl: HEAL,
-    mapQuery: "HEAL Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho, GO",
+    mapQuery:
+      "HEAL Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho, GO",
   },
   {
     id: "hospital-bom-jesus",
     name: "Hospital Municipal Bom Jesus",
     category: "saude",
     description: "Hospital municipal com atendimento contínuo.",
-    address: "Q 109, Conjunto B, Lote 30/32, Setor 10, Águas Lindas de Goiás - GO",
+    address:
+      "Q 109, Conjunto B, Lote 30/32, Setor 10, Águas Lindas de Goiás - GO",
     phone: "(61) 3548-7604",
     hours: "24 horas",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -194,7 +214,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "ESF Coimbra",
     category: "saude",
     description: "Unidade da rede municipal de saúde.",
-    address: "Quadra P, Lote 01, Chácara 10, Casa 03, Águas Lindas de Goiás - GO",
+    address:
+      "Quadra P, Lote 01, Chácara 10, Casa 03, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
     mapQuery: "ESF Coimbra, Águas Lindas de Goiás, GO",
@@ -283,8 +304,10 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "policia-civil-1",
     name: "1ª Delegacia de Polícia de Águas Lindas",
     category: "seguranca",
-    description: "Unidade da Polícia Civil para registros e atendimento policial.",
-    address: "Rua Adélia, Quadra 3, Área Especial, Setor Sol Nascente, Águas Lindas de Goiás - GO",
+    description:
+      "Unidade da Polícia Civil para registros e atendimento policial.",
+    address:
+      "Rua Adélia, Quadra 3, Área Especial, Setor Sol Nascente, Águas Lindas de Goiás - GO",
     phone: "(61) 3618-2716",
     sourceLabel: "Polícia Civil de Goiás",
     sourceUrl: PCGO,
@@ -294,7 +317,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "pcgo-17-drp",
     name: "17ª Delegacia Regional de Polícia",
     category: "seguranca",
-    description: "Delegacia regional da Polícia Civil com atendimento em Águas Lindas.",
+    description:
+      "Delegacia regional da Polícia Civil com atendimento em Águas Lindas.",
     address: "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO",
     phone: "(61) 3618-7202",
     extraPhone: "(62) 99506-5190",
@@ -328,7 +352,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "conselho-tutelar",
     name: "Conselho Tutelar",
     category: "assistencia",
-    description: "Proteção de crianças e adolescentes e recebimento de denúncias.",
+    description:
+      "Proteção de crianças e adolescentes e recebimento de denúncias.",
     address: "Quadra 11, Lote 13, Jardim Querência, Águas Lindas de Goiás - GO",
     phone: "(61) 99303-8040",
     extraPhone: "(61) 99303-9204",
@@ -341,45 +366,130 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "cras-1",
     name: "CRAS I · Jardim Brasília",
     category: "assistencia",
-    description: "Atendimento da assistência social para famílias e benefícios.",
+    description:
+      "Atendimento da assistência social para famílias e benefícios.",
     address: "Quadra 53, Lote 1B, Jardim Brasília, Águas Lindas de Goiás - GO",
     phone: "(61) 99294-2109",
     hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/centro-de-referencia-da-assistencia-social-cras-i-jardim-brasilia/",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/centro-de-referencia-da-assistencia-social-cras-i-jardim-brasilia/",
     mapQuery: "CRAS I Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "cadunico",
+    name: "Cadastro Único / Bolsa Família",
+    category: "assistencia",
+    description: "Atendimento municipal do Cadastro Único e do Bolsa Família.",
+    address:
+      "Avenida Perimetral, Quadra 113, loja 09, Pérola 02, Águas Lindas de Goiás - GO",
+    phone: "(61) 99302-9284",
+    email: "cadunico@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, 8h–12h e 13h–17h",
+    guidance:
+      "Entre em contato antes de sair para confirmar os documentos e a forma de atendimento.",
+    keywords: [
+      "cadunico",
+      "cad unico",
+      "cadastrar atualizar cadastro unico",
+      "bolsa familia",
+    ],
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: ASSISTENCIA,
+    mapQuery:
+      "Cadastro Único, Avenida Perimetral, Quadra 113, loja 09, Pérola 02, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "cras-2",
+    name: "CRAS II · Santa Lúcia",
+    category: "assistencia",
+    description:
+      "Unidade municipal de assistência social e orientação às famílias.",
+    address:
+      "Quadra 54, Área Especial, Santa Lúcia, Águas Lindas de Goiás - GO",
+    phone: "(61) 99294-8823",
+    hours: "Segunda a sexta, 8h–12h e 13h–17h",
+    guidance:
+      "Confirme por telefone qual unidade atende seu bairro antes de sair.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: ASSISTENCIA,
+    mapQuery:
+      "CRAS II, Quadra 54, Área Especial, Santa Lúcia, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "cras-3",
+    name: "CRAS III · Praça da Cultura",
+    category: "assistencia",
+    description: "Unidade municipal de assistência social no Setor 11.",
+    address:
+      "Avenida 05, Quadra 0, Lote 01, Setor 11, Águas Lindas de Goiás - GO",
+    phone: "(61) 99295-2076",
+    hours: "Segunda a sexta, 8h–12h e 13h–17h",
+    guidance:
+      "Confirme por telefone qual unidade atende seu bairro antes de sair.",
+    keywords: ["cras ceu"],
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: ASSISTENCIA,
+    mapQuery:
+      "CRAS III Praça da Cultura, Avenida 05, Quadra 0, Lote 01, Setor 11, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "creas",
+    name: "CREAS · proteção social",
+    category: "assistencia",
+    description:
+      "Atendimento especializado da assistência social para pessoas em situação de violência ou violação de direitos.",
+    address: "Quadra 42, Casa 51, Setor 02, Águas Lindas de Goiás - GO",
+    phone: "(61) 99296-0392",
+    email: "creas@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, 8h–12h e 13h–17h",
+    guidance:
+      "Entre em contato para orientação sobre o atendimento. Em emergência policial, ligue 190.",
+    verifiedAt: "01/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: ASSISTENCIA,
+    mapQuery: "CREAS, Quadra 42, Casa 51, Setor 02, Águas Lindas de Goiás, GO",
   },
   {
     id: "transito-mobilidade",
     name: "Secretaria de Trânsito e Mobilidade Urbana",
     category: "transito",
     description: "Atendimento municipal de trânsito, mobilidade e agentes.",
-    address: "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
+    address:
+      "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
     phone: "(61) 92003-6668",
     extraPhone: "(61) 92003-6674",
     hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TRANSITO,
-    mapQuery: "Secretaria de Trânsito e Mobilidade Urbana, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria de Trânsito e Mobilidade Urbana, Águas Lindas de Goiás, GO",
   },
   {
     id: "superintendencia-transito",
     name: "Superintendência Municipal de Trânsito",
     category: "transito",
     description: "Atendimento e operação municipal de trânsito.",
-    address: "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
+    address:
+      "Quadra 45, Lote 01, Área Pública, Jardim Brasília, Águas Lindas de Goiás - GO",
     phone: "(61) 99310-4493",
     extraPhone: "(61) 99310-4219",
     hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/superintendencia-municipal-de-transito/",
-    mapQuery: "Superintendência Municipal de Trânsito, Águas Lindas de Goiás, GO",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/superintendencia-municipal-de-transito/",
+    mapQuery:
+      "Superintendência Municipal de Trânsito, Águas Lindas de Goiás, GO",
   },
   {
     id: "educacao-estado",
     name: "Rede Estadual de Educação",
     category: "educacao",
-    description: "Lista oficial de escolas estaduais, com logradouro e município.",
+    description:
+      "Lista oficial de escolas estaduais, com logradouro e município.",
     sourceLabel: "SEDUC Goiás",
     sourceUrl: SEDUC,
     mapQuery: "escolas estaduais, Águas Lindas de Goiás, GO",
@@ -389,17 +499,20 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "CEPI Juscelino Kubitschek de Oliveira",
     category: "educacao",
     description: "Centro estadual em período integral.",
-    address: "Rua Mansões Odisseia, Parque Mansões Odisseia, Águas Lindas de Goiás - GO",
+    address:
+      "Rua Mansões Odisseia, Parque Mansões Odisseia, Águas Lindas de Goiás - GO",
     sourceLabel: "SEDUC Goiás",
     sourceUrl: SEDUC,
-    mapQuery: "CEPI Juscelino Kubitschek de Oliveira, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "CEPI Juscelino Kubitschek de Oliveira, Águas Lindas de Goiás, GO",
   },
   {
     id: "coralina",
     name: "Colégio Estadual Cora Coralina",
     category: "educacao",
     description: "Colégio estadual com Ensino Fundamental e Ensino Médio.",
-    address: "Rua 38, esq. com 4ª Avenida, Mansões Village, Águas Lindas de Goiás - GO",
+    address:
+      "Rua 38, esq. com 4ª Avenida, Mansões Village, Águas Lindas de Goiás - GO",
     sourceLabel: "SEDUC Goiás",
     sourceUrl: SEDUC,
     mapQuery: "Colégio Estadual Cora Coralina, Águas Lindas de Goiás, GO",
@@ -409,17 +522,20 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas",
     category: "educacao",
     description: "Unidade estadual de educação vinculada à rede da SEDUC.",
-    address: "Quadra 31, Área Especial, Avenida 02/03, Águas Lindas I, Águas Lindas de Goiás - GO",
+    address:
+      "Quadra 31, Área Especial, Avenida 02/03, Águas Lindas I, Águas Lindas de Goiás - GO",
     sourceLabel: "SEDUC Goiás",
     sourceUrl: SEDUC,
-    mapQuery: "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas, GO",
+    mapQuery:
+      "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas, GO",
   },
   {
     id: "paulo-freire",
     name: "Colégio Estadual Paulo Freire",
     category: "educacao",
     description: "Colégio estadual com Ensino Fundamental e Ensino Médio.",
-    address: "Área Especial I, Quadra 53, Lote 01-H, Jardim Brasília, Águas Lindas de Goiás - GO",
+    address:
+      "Área Especial I, Quadra 53, Lote 01-H, Jardim Brasília, Águas Lindas de Goiás - GO",
     sourceLabel: "SEDUC Goiás",
     sourceUrl: SEDUC,
     mapQuery: "Colégio Estadual Paulo Freire, Águas Lindas de Goiás, GO",
@@ -427,7 +543,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-educacao",
     name: "Secretaria Municipal de Educação",
-    category: "cidadania",
+    category: "educacao",
     description: "Atendimento da rede municipal de educação.",
     phone: "(61) 92002-3791 / (61) 92002-3483",
     extraPhone: "(61) 92002-3774",
@@ -443,13 +559,15 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99291-2169 / (61) 99297-9283",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery: "Secretaria Municipal de Assistência Social, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria Municipal de Assistência Social, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-mulher",
     name: "Secretaria Municipal da Mulher",
     category: "assistencia",
-    description: "Atendimento municipal para políticas públicas da mulher e família.",
+    description:
+      "Atendimento municipal para políticas públicas da mulher e família.",
     phone: "(61) 99304-8456",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
@@ -457,6 +575,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "secretaria-fazenda",
+    whatsappOnly: ["(61) 92005-3453", "(61) 99305-7551"],
     name: "Secretaria Municipal de Fazenda e Planejamento",
     category: "cidadania",
     description: "Atendimento tributário e de planejamento municipal.",
@@ -464,7 +583,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "ITBI: (61) 92005-3453 · Nota Fiscal/ISS: (61) 99305-7551",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery: "Secretaria Municipal de Fazenda e Planejamento, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria Municipal de Fazenda e Planejamento, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-administracao",
@@ -474,7 +594,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99306-5878",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery: "Secretaria Municipal de Administração, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria Municipal de Administração, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-infraestrutura",
@@ -484,7 +605,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99303-4608",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery: "Secretaria Municipal de Infraestrutura e Obras, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria Municipal de Infraestrutura e Obras, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-meio-ambiente",
@@ -494,7 +616,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99451-0844",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery: "Secretaria Municipal de Meio Ambiente, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria Municipal de Meio Ambiente, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-habitacao",
@@ -520,11 +643,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "desenvolvimento-economico",
     name: "Secretaria Municipal de Desenvolvimento Econômico",
     category: "cidadania",
-    description: "Atendimento e programas municipais para desenvolvimento econômico.",
+    description:
+      "Atendimento e programas municipais para desenvolvimento econômico.",
     phone: "(61) 99649-2690 / (61) 99310-6862",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery: "Secretaria Municipal de Desenvolvimento Econômico, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Secretaria Municipal de Desenvolvimento Econômico, Águas Lindas de Goiás, GO",
   },
   {
     id: "ouvidoria-sus",
@@ -570,7 +695,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "sebrae",
     name: "SEBRAE",
     category: "cidadania",
-    description: "Canal de apoio e atendimento empresarial listado pela Prefeitura.",
+    description:
+      "Canal de apoio e atendimento empresarial listado pela Prefeitura.",
     phone: "(61) 3902-1135",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
@@ -578,23 +704,33 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "energia",
+    keywords: [
+      "falta de luz",
+      "sem luz",
+      "sem energia",
+      "queda de energia",
+      "segunda via conta luz",
+    ],
     name: "Equatorial Goiás · energia",
     category: "cidadania",
-    description: "Central estadual para falta de energia, contas e atendimento da distribuidora.",
+    description:
+      "Central estadual para falta de energia, contas e atendimento da distribuidora.",
     phone: "0800 062 0196",
     hours: "24 horas, todos os dias",
     sourceLabel: "Equatorial Goiás",
     sourceUrl: "https://go.equatorialenergia.com.br/canais-de-atendimento/",
     actionUrl: "https://go.equatorialenergia.com.br/canais-de-atendimento/",
     actionLabel: "Falta de luz e segunda via",
-    guidance: "Tenha o número da unidade consumidora e o endereço em mãos. Guarde o protocolo do atendimento.",
+    guidance:
+      "Tenha o número da unidade consumidora e o endereço em mãos. Guarde o protocolo do atendimento.",
     verifiedAt: "01/10/2026",
   },
   {
     id: "defesa-civil",
     name: "Proteção e atendimento de emergência",
     category: "seguranca",
-    description: "Use 193 para incêndio, resgate e salvamento e 190 para emergência policial.",
+    description:
+      "Use 193 para incêndio, resgate e salvamento e 190 para emergência policial.",
     phone: "193",
     extraPhone: "190",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -605,8 +741,10 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "prefeitura",
     name: "Prefeitura de Águas Lindas de Goiás",
     category: "cidadania",
-    description: "Portal institucional, contatos, serviços e atendimento ao cidadão.",
-    address: "Área Especial 4, Avenida 2, Jardim Querência, Águas Lindas de Goiás - GO, CEP 72910-733",
+    description:
+      "Portal institucional, contatos, serviços e atendimento ao cidadão.",
+    address:
+      "Área Especial 4, Avenida 2, Jardim Querência, Águas Lindas de Goiás - GO, CEP 72910-733",
     phone: "(61) 3618-4007",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
@@ -616,35 +754,46 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "sic",
     name: "Serviço de Informação ao Cidadão · SIC",
     category: "cidadania",
-    description: "Solicite informações públicas e acompanhe a resposta pelo canal oficial.",
-    address: "Área Especial 4, Avenida 2, Jardim Querência, Águas Lindas de Goiás - GO",
+    description:
+      "Solicite informações públicas e acompanhe a resposta pelo canal oficial.",
+    address:
+      "Área Especial 4, Avenida 2, Jardim Querência, Águas Lindas de Goiás - GO",
     phone: "(61) 99306-3637",
     hours: "Segunda a sexta, 8h–12h e 13h–17h",
     email: "sic@aguaslindasdegoias.go.gov.br",
-    actionUrl: "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
+    actionUrl:
+      "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
     actionLabel: "Pedir informação",
-    guidance: "Abra SIC online na página oficial e guarde o protocolo para acompanhar a resposta.",
+    guidance:
+      "Abra SIC online na página oficial e guarde o protocolo para acompanhar a resposta.",
     verifiedAt: "01/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
     mapQuery: "Serviço de Informação ao Cidadão, Águas Lindas de Goiás, GO",
   },
   {
     id: "ouvidoria-municipal",
+    keywords: ["reclamacao", "reclamar", "problema servico publico"],
     name: "Ouvidoria Municipal",
     category: "cidadania",
-    description: "Canal para reclamações, sugestões, elogios e denúncias sobre serviços públicos.",
+    description:
+      "Canal para reclamações, sugestões, elogios e denúncias sobre serviços públicos.",
     address: "Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás - GO",
     phone: "(61) 99306-3637",
     hours: "Segunda a sexta, 8h–12h e 13h–17h",
     email: "ouvidoria@aguaslindasdegoias.go.gov.br",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/gabinete-do-prefeito/ouvidoria-municipal/",
-    actionUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/gabinete-do-prefeito/ouvidoria-municipal/",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/gabinete-do-prefeito/ouvidoria-municipal/",
+    actionUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/gabinete-do-prefeito/ouvidoria-municipal/",
     actionLabel: "Abrir canal oficial",
-    guidance: "Descreva o serviço, o local e a data do problema. Guarde o protocolo do canal oficial.",
+    guidance:
+      "Descreva o serviço, o local e a data do problema. Guarde o protocolo do canal oficial.",
     verifiedAt: "01/10/2026",
-    mapQuery: "Ouvidoria Municipal, Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Ouvidoria Municipal, Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás, GO",
   },
   {
     id: "procon",
@@ -658,38 +807,53 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "saneago",
+    keywords: [
+      "falta de agua",
+      "sem agua",
+      "segunda via conta agua",
+      "vazamento",
+    ],
     name: "Saneago · água e esgoto",
     category: "cidadania",
-    description: "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
+    description:
+      "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
     phone: "0800 645 0115",
     hours: "24 horas, todos os dias",
     sourceLabel: "Saneago",
     sourceUrl: "https://www.saneago.com.br/site",
     actionUrl: "https://agencia-virtual.saneago.com.br/",
     actionLabel: "Abrir agência virtual",
-    guidance: "Tenha a matrícula da conta e o endereço do imóvel para solicitar atendimento e guarde o protocolo.",
+    guidance:
+      "Tenha a matrícula da conta e o endereço do imóvel para solicitar atendimento e guarde o protocolo.",
     verifiedAt: "01/10/2026",
   },
   {
     id: "vapt-vupt",
     name: "Vapt Vupt",
     category: "cidadania",
-    description: "Unidade com atendimento de órgãos como Detran, INSS, Saneago e SINE.",
-    address: "Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás - GO, 72910-000",
+    description:
+      "Unidade com atendimento de órgãos como Detran, INSS, Saneago e SINE.",
+    address:
+      "Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás - GO, 72910-000",
     hours: "Segunda a sexta, 8h–17h; sem atendimento aos sábados",
     sourceLabel: "SEAD Goiás",
-    sourceUrl: "https://www.vaptvupt.goias.gov.br/unidade/aguas-lindas-de-goias",
-    actionUrl: "https://www.vaptvupt.goias.gov.br/unidade/aguas-lindas-de-goias",
+    sourceUrl:
+      "https://www.vaptvupt.goias.gov.br/unidade/aguas-lindas-de-goias",
+    actionUrl:
+      "https://www.vaptvupt.goias.gov.br/unidade/aguas-lindas-de-goias",
     actionLabel: "Agendar atendimento",
-    guidance: "Use Agendamento no portal oficial e consulte os documentos exigidos pelo serviço antes de sair.",
+    guidance:
+      "Use Agendamento no portal oficial e consulte os documentos exigidos pelo serviço antes de sair.",
     verifiedAt: "01/10/2026",
-    mapQuery: "Vapt Vupt, Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Vapt Vupt, Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás, GO",
   },
   {
     id: "detran",
     name: "Detran-GO",
-    category: "cidadania",
-    description: "Canal local listado pela Prefeitura para atendimento do Detran.",
+    category: "transito",
+    description:
+      "Canal local listado pela Prefeitura para atendimento do Detran.",
     phone: "(61) 3613-4058",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
@@ -699,7 +863,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "samu",
     name: "SAMU",
     category: "saude",
-    description: "Atendimento móvel de urgência. Em emergência, acione o serviço.",
+    description:
+      "Atendimento móvel de urgência. Em emergência, acione o serviço.",
     phone: "192",
     extraPhone: "(61) 3618-2013",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -710,7 +875,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "ligue-180",
     name: "Ligue 180 · atendimento à mulher",
     category: "assistencia",
-    description: "Canal nacional gratuito de orientação e registro de denúncias de violência contra mulheres.",
+    description:
+      "Canal nacional gratuito de orientação e registro de denúncias de violência contra mulheres.",
     phone: "180",
     hours: "24 horas, todos os dias",
     email: "central180@mulheres.gov.br",
@@ -718,29 +884,81 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl: "https://www.gov.br/mulheres/pt-br/ligue180",
     actionUrl: "https://www.gov.br/mulheres/pt-br/ligue180",
     actionLabel: "Consultar canais de atendimento",
-    guidance: "O serviço orienta sobre a rede de proteção. Em emergência policial, ligue 190.",
+    guidance:
+      "O serviço orienta sobre a rede de proteção. Em emergência policial, ligue 190.",
     verifiedAt: "01/10/2026",
   },
   {
     id: "disque-100",
     name: "Disque 100 · direitos humanos",
     category: "assistencia",
-    description: "Canal nacional gratuito para denúncias de violações de direitos de crianças, idosos, pessoas com deficiência e outros grupos.",
+    description:
+      "Canal nacional gratuito para denúncias de violações de direitos de crianças, idosos, pessoas com deficiência e outros grupos.",
     phone: "100",
     hours: "24 horas, todos os dias",
     email: "ouvidoria@mdh.gov.br",
     sourceLabel: "Direitos Humanos e Cidadania",
-    sourceUrl: "https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos",
-    actionUrl: "https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos",
+    sourceUrl:
+      "https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos",
+    actionUrl:
+      "https://www.gov.br/pt-br/servicos/denunciar-violacao-de-direitos-humanos",
     actionLabel: "Consultar canais acessíveis",
-    guidance: "O portal oficial inclui chat e videochamada em Libras. Descreva a ocorrência, o local e quem precisa de proteção.",
+    guidance:
+      "O portal oficial inclui chat e videochamada em Libras. Descreva a ocorrência, o local e quem precisa de proteção.",
     verifiedAt: "01/10/2026",
   },
 ];
 
-export function searchPublicServices(query = "", category: PublicServiceCategory | "todos" = "todos") {
+export const PUBLIC_SERVICE_SHORTCUTS = [
+  { label: "Água e segunda via", query: "conta agua", hint: "Saneago" },
+  { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
+  {
+    label: "CadÚnico e benefícios",
+    query: "cadunico",
+    hint: "Cadastro Único / Bolsa Família",
+  },
+  {
+    label: "Assistência à família",
+    query: "cras",
+    hint: "Veja as três unidades",
+  },
+  {
+    label: "Agendar Vapt Vupt",
+    query: "vapt vupt",
+    hint: "Canal oficial de agendamento",
+  },
+  {
+    label: "Reclamação municipal",
+    query: "ouvidoria municipal",
+    hint: "Ouvidoria e orientação",
+  },
+] as const;
+
+export function searchPublicServices(
+  query = "",
+  category: PublicServiceCategory | "todos" = "todos"
+) {
+  // Citizens search for a need rather than an agency name. Ignore only linking
+  // words; keep every substantive word so specific needs remain specific.
+  const search = normalizeCatalogText(query)
+    .split(" ")
+    .filter(
+      term => !["de", "da", "do", "das", "dos", "e", "para"].includes(term)
+    )
+    .join(" ");
   return PUBLIC_SERVICES.filter(service => {
     if (category !== "todos" && service.category !== category) return false;
-    return matchesCatalogText(query, [service.name, service.description, service.address, service.phone, service.extraPhone, service.category, service.guidance]);
+    return matchesCatalogText(search, [
+      service.name,
+      service.description,
+      service.address,
+      service.phone,
+      service.extraPhone,
+      service.category,
+      service.guidance,
+      service.actionLabel,
+      service.hours,
+      ...(service.keywords ?? []),
+    ]);
   });
 }
