@@ -1,3 +1,5 @@
+import { matchesCatalogText } from "./catalogSearch";
+
 export type PublicServiceCategory =
   | "saude"
   | "seguranca"
@@ -15,7 +17,12 @@ export type PublicService = {
   phone?: string;
   extraPhone?: string;
   hours?: string;
-  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás" | "SES-GO";
+  email?: string;
+  actionUrl?: string;
+  actionLabel?: string;
+  guidance?: string;
+  verifiedAt?: string;
+  sourceLabel: "Prefeitura de Águas Lindas" | "Polícia Civil de Goiás" | "SEDUC Goiás" | "SES-GO" | "SEAD Goiás";
   sourceUrl: string;
   mapQuery: string;
 };
@@ -584,7 +591,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Proteção e atendimento de emergência",
     category: "seguranca",
     description: "Use 193 para incêndio, resgate e salvamento e 190 para emergência policial.",
-    phone: "190 / 193",
+    phone: "193",
+    extraPhone: "190",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
     mapQuery: "Águas Lindas de Goiás, GO",
@@ -604,11 +612,35 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "sic",
     name: "Serviço de Informação ao Cidadão · SIC",
     category: "cidadania",
-    description: "Canal oficial para informação e atendimento ao cidadão.",
-    phone: "(61) 99303-9204",
+    description: "Solicite informações públicas e acompanhe a resposta pelo canal oficial.",
+    address: "Área Especial 4, Avenida 2, Jardim Querência, Águas Lindas de Goiás - GO",
+    phone: "(61) 99306-3637",
+    hours: "Segunda a sexta, 8h–12h e 13h–17h",
+    email: "sic@aguaslindasdegoias.go.gov.br",
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
+    actionLabel: "Pedir informação",
+    guidance: "Abra SIC online na página oficial e guarde o protocolo para acompanhar a resposta.",
+    verifiedAt: "01/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: "https://aguaslindasdegoias.go.gov.br/servico-de-informacao-ao-cidadao/",
     mapQuery: "Serviço de Informação ao Cidadão, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "ouvidoria-municipal",
+    name: "Ouvidoria Municipal",
+    category: "cidadania",
+    description: "Canal para reclamações, sugestões, elogios e denúncias sobre serviços públicos.",
+    address: "Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás - GO",
+    phone: "(61) 99306-3637",
+    hours: "Segunda a sexta, 8h–12h e 13h–17h",
+    email: "ouvidoria@aguaslindasdegoias.go.gov.br",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/gabinete-do-prefeito/ouvidoria-municipal/",
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/gabinete-do-prefeito/ouvidoria-municipal/",
+    actionLabel: "Abrir canal oficial",
+    guidance: "Descreva o serviço, o local e a data do problema. Guarde o protocolo do canal oficial.",
+    verifiedAt: "01/10/2026",
+    mapQuery: "Ouvidoria Municipal, Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás, GO",
   },
   {
     id: "procon",
@@ -634,11 +666,16 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "vapt-vupt",
     name: "Vapt Vupt",
     category: "cidadania",
-    description: "Atendimento de serviços públicos presenciais.",
-    phone: "(61) 3613-0075",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: TELEFONES_UTEIS,
-    mapQuery: "Vapt Vupt, Águas Lindas de Goiás, GO",
+    description: "Unidade com atendimento de órgãos como Detran, INSS, Saneago e SINE.",
+    address: "Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás - GO, 72910-000",
+    hours: "Segunda a sexta, 8h–17h; sem atendimento aos sábados",
+    sourceLabel: "SEAD Goiás",
+    sourceUrl: "https://www.vaptvupt.goias.gov.br/unidade/aguas-lindas-de-goias",
+    actionUrl: "https://www.vaptvupt.goias.gov.br/unidade/aguas-lindas-de-goias",
+    actionLabel: "Agendar atendimento",
+    guidance: "Use Agendamento no portal oficial e consulte os documentos exigidos pelo serviço antes de sair.",
+    verifiedAt: "01/10/2026",
+    mapQuery: "Vapt Vupt, Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás, GO",
   },
   {
     id: "detran",
@@ -664,17 +701,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
 ];
 
 export function searchPublicServices(query = "", category: PublicServiceCategory | "todos" = "todos") {
-  const normalized = query.trim().toLocaleLowerCase("pt-BR");
   return PUBLIC_SERVICES.filter(service => {
     if (category !== "todos" && service.category !== category) return false;
-    if (!normalized) return true;
-    return [
-      service.name,
-      service.description,
-      service.address,
-      service.phone,
-      service.extraPhone,
-      service.category,
-    ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(normalized);
+    return matchesCatalogText(query, [service.name, service.description, service.address, service.phone, service.extraPhone, service.category, service.guidance]);
   });
 }

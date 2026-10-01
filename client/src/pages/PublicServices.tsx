@@ -1,6 +1,7 @@
 import { ArrowRight, BookOpen, Building2, ExternalLink, HeartPulse, Landmark, MapPinned, Phone, ShieldAlert, Siren, TrafficCone, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
+import { phoneHref } from "@/lib/contactActions";
 import { appUrl } from "@/lib/appUrl";
 import { PUBLIC_SERVICE_CATEGORIES, PUBLIC_SERVICES, searchPublicServices, type PublicServiceCategory } from "@/lib/publicServices";
 
@@ -12,16 +13,6 @@ const categoryIcons = {
   educacao: BookOpen,
   cidadania: Landmark,
 } as const;
-
-function phoneHref(phone?: string) {
-  if (!phone) return null;
-  const digits = phone.replace(/\D/g, "");
-  return digits ? "tel:" + digits : null;
-}
-
-function mapsHref(query: string) {
-  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
-}
 
 export default function PublicServices() {
   const [, setLocation] = useLocation();
@@ -65,22 +56,33 @@ export default function PublicServices() {
       }
       if (event.key === "Escape" && document.activeElement === inputRef.current) {
         setQuery("");
+        applyFilters("", category, true);
         inputRef.current?.blur();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [category, setLocation]);
 
   const results = useMemo(() => searchPublicServices(query, category), [query, category]);
 
+  useEffect(() => {
+    if (params.get("emergencia") === "1") document.getElementById("emergency-strip-title")?.scrollIntoView({ block: "start" });
+  }, [params]);
+
+  const applyFilters = (value: string, next: PublicServiceCategory | "todos", replace = false) => {
+    const search = new URLSearchParams();
+    if (value.trim()) search.set("q", value.trim());
+    if (next !== "todos") search.set("categoria", next);
+    setLocation(appUrl("/servicos") + (search.size ? "?" + search.toString() : ""), { replace });
+  };
   const applyCategory = (next: PublicServiceCategory | "todos") => {
     setCategory(next);
-    setLocation(appUrl("/servicos") + (next === "todos" ? "" : "?categoria=" + encodeURIComponent(next)));
+    applyFilters(query, next);
   };
 
   const openMaps = (service: typeof PUBLIC_SERVICES[number]) => {
-    window.open(mapsHref(service.mapQuery), "_blank", "noopener,noreferrer");
+    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery));
   };
 
   return (
@@ -95,7 +97,7 @@ export default function PublicServices() {
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">{PUBLIC_SERVICES.length} registros públicos</span>
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">6 categorias</span>
               <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/45">offline por padrão</span>
-              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-[0.5rem] font-bold text-white/35">catálogo revisado · 30/09/2026</span>
+              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/65">Confira contatos e horários na fonte oficial</span>
             </div>
           </div>
           <button type="button" onClick={() => setLocation(appUrl("/"))} className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/10 px-3 text-xs font-black text-white/70">Início</button>
@@ -107,7 +109,7 @@ export default function PublicServices() {
               <p className="text-[0.5rem] font-black uppercase tracking-[.14em] text-[#FFB86B]">Utilidade imediata</p>
               <h2 id="emergency-strip-title" className="mt-1 text-sm font-black">Canais de emergência</h2>
             </div>
-            <span className="text-[0.5rem] font-bold text-white/30">ligação local</span>
+            <span className="text-xs font-bold text-white/65">precisa de rede telefônica</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
@@ -116,7 +118,7 @@ export default function PublicServices() {
               { label: "Bombeiros", number: "193" },
               { label: "Polícia Civil", number: "(61) 3618-2716" },
             ].map(item => (
-              <a key={item.label} href={phoneHref(item.number) ?? "#"} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1014] px-3 text-[0.62rem] font-black text-white/80 transition hover:border-[#FFB86B]/30 hover:text-white">
+              <a key={item.label} href={phoneHref(item.number) ?? "#"} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1014] px-3 text-sm font-bold text-white/80 transition hover:border-[#FFB86B]/30 hover:text-white">
                 <Phone className="size-3.5 text-[#FFB86B]" />
                 <span>{item.label}</span>
                 <span className="text-white/30">{item.number}</span>
@@ -126,7 +128,7 @@ export default function PublicServices() {
         </section>
 
         <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
-          <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
+          <form onSubmit={event => { event.preventDefault(); applyFilters(query, category); inputRef.current?.blur(); }} className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
             <MapPinned className="size-4 shrink-0 text-[#C7FF3C]" />
             <input
               ref={inputRef}
@@ -139,9 +141,10 @@ export default function PublicServices() {
               aria-label="Buscar serviços públicos"
               aria-keyshortcuts="Control+K Meta+K"
             />
-            {query && <button type="button" onClick={() => setQuery("")} className="grid size-10 place-items-center rounded-xl text-white/40" aria-label="Limpar busca"><X className="size-4" /></button>}
+            {query && <button type="button" onClick={() => { setQuery(""); applyFilters("", category, true); }} className="grid size-10 place-items-center rounded-xl text-white/40" aria-label="Limpar busca"><X className="size-4" /></button>}
+            <button type="submit" aria-label="Pesquisar serviços" className="grid size-11 shrink-0 place-items-center rounded-xl text-[#C7FF3C]"><ArrowRight className="size-5" /></button>
             <kbd className="hidden rounded-lg border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/25 sm:inline">Ctrl K</kbd>
-          </div>
+          </form>
 
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7" aria-label="Categorias de serviços">
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -158,7 +161,8 @@ export default function PublicServices() {
           </div>
         </section>
 
-        <section className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Serviços públicos">
+        <p role="status" aria-live="polite" className="mt-4 text-sm text-white/70">{results.length} serviços encontrados</p>
+        <section className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Serviços públicos">
           {results.map(service => {
             const Icon = categoryIcons[service.category];
             const call = phoneHref(service.phone);
@@ -171,33 +175,36 @@ export default function PublicServices() {
                   <div className="min-w-0 flex-1">
                     <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">{PUBLIC_SERVICE_CATEGORIES.find(item => item.id === service.category)?.shortLabel}</p>
                     <h2 className="mt-1 text-sm font-black leading-snug">{service.name}</h2>
-                    <p className="mt-1.5 text-[0.63rem] leading-relaxed text-white/45">{service.description}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-white/70">{service.description}</p>
                   </div>
                 </div>
-                {service.address && <p className="mt-3 line-clamp-3 text-[0.62rem] leading-relaxed text-white/35"><span className="font-black text-white/45">Endereço:</span> {service.address}</p>}
+                {service.address && <p className="mt-3 text-sm leading-relaxed text-white/65"><span className="font-black text-white/45">Endereço:</span> {service.address}</p>}
                 {(service.phone || service.extraPhone || service.hours) && (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {service.phone && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-[0.53rem] font-bold text-white/50">{service.phone}</span>}
-                    {service.extraPhone && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-[0.53rem] font-bold text-white/38">Alternativo · {service.extraPhone}</span>}
-                    {service.hours && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-[0.53rem] font-bold text-white/50">{service.hours}</span>}
+                    {service.phone && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-xs font-bold text-white/75">{service.phone}</span>}
+                    {service.extraPhone && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-xs font-bold text-white/65">Alternativo · {service.extraPhone}</span>}
+                    {service.hours && <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-xs font-bold text-white/75">{service.hours}</span>}
                   </div>
                 )}
+                {service.guidance && <p className="mt-3 rounded-xl bg-white/5 p-3 text-sm leading-relaxed text-white/75">{service.guidance}</p>}
+                {service.actionUrl && <a href={service.actionUrl} target="_blank" rel="noopener noreferrer" className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#3DE3FF]/30 px-3 text-sm font-bold text-[#C9F7FF]"><ExternalLink className="size-4" />{service.actionLabel} · online</a>}
+                {service.email && <a href={"mailto:" + service.email} className="mt-2 flex min-h-11 items-center justify-center break-all rounded-xl border border-white/10 px-3 text-sm text-white/75">{service.email}</a>}
                 <div className="mt-4 grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => openMaps(service)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014]">
+                  <button type="button" onClick={() => openMaps(service)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-bold text-[#0B1014]">
                     <MapPinned className="mr-1.5 inline size-3.5" />Rota
                   </button>
                   {call ? (
-                    <a href={call} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.62rem] font-black text-[#C9F7FF]">
+                    <a href={call} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-sm font-bold text-[#C9F7FF]">
                       <Phone className="mr-1.5 size-3.5" />Ligar
                     </a>
                   ) : (
-                    <a href={service.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/8 px-3 text-[0.62rem] font-black text-white/65">
+                    <a href={service.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/8 px-3 text-sm font-bold text-white/65">
                       <ExternalLink className="mr-1.5 size-3.5" />Fonte
                     </a>
                   )}
                 </div>
-                <a href={service.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 block text-center text-[0.5rem] font-bold text-white/25 hover:text-white/45">
-                  Fonte: {service.sourceLabel}
+                <a href={service.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 flex min-h-11 items-center justify-center text-center text-xs font-bold text-white/65 hover:text-white">
+                  Fonte: {service.sourceLabel}{service.verifiedAt ? " · conferido em " + service.verifiedAt : ""}
                 </a>
               </article>
             );
@@ -207,7 +214,8 @@ export default function PublicServices() {
         {!results.length && (
           <section className="mt-5 rounded-3xl border border-white/8 bg-[#121B22] p-6 text-center">
             <p className="text-sm font-black">Nenhum serviço corresponde ao filtro.</p>
-            <p className="mt-1 text-xs text-white/40">Experimente outro termo ou use a busca externa para locais comerciais.</p>
+            <p className="mt-1 text-sm text-white/65">Experimente outro termo ou veja todas as categorias.</p>
+            <button type="button" onClick={() => { setQuery(""); setCategory("todos"); applyFilters("", "todos"); }} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-sm font-bold text-[#0B1014]">Limpar filtros</button>
           </section>
         )}
 

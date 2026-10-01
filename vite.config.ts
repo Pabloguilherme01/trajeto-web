@@ -1,6 +1,8 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { defineConfig } from "vite";
 
 const root = import.meta.dirname;
@@ -8,7 +10,17 @@ const base = process.env.VITE_BASE_PATH || "/";
 
 export default defineConfig({
   base,
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), {
+    name: "version-offline-package",
+    apply: "build",
+    closeBundle() {
+      const output = path.resolve(root, "dist/public");
+      const manifest = readFileSync(path.join(output, "offline-assets.json"), "utf8");
+      const revision = createHash("sha256").update(manifest).digest("hex").slice(0, 12);
+      const worker = path.join(output, "sw.js");
+      writeFileSync(worker, readFileSync(worker, "utf8").replace('CACHE_PREFIX + "v19"', `CACHE_PREFIX + "v19-${revision}"`));
+    },
+  }],
   resolve: {
     alias: {
       "@": path.resolve(root, "client", "src"),
@@ -20,7 +32,7 @@ export default defineConfig({
   root: path.resolve(root, "client"),
   publicDir: path.resolve(root, "client", "public"),
   build: {
-    manifest: true,
+    manifest: "offline-assets.json",
     outDir: path.resolve(root, "dist/public"),
     emptyOutDir: true,
     rollupOptions: {

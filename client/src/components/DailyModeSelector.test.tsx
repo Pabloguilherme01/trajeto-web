@@ -23,7 +23,7 @@ describe("DailyModeSelector", () => {
   it("persists a manually selected mode", () => {
     render(<DailyModeSelector />);
     fireEvent.click(screen.getByRole("button", { name: "Trocar modo" }));
-    fireEvent.click(screen.getByRole("list").querySelector("button:nth-of-type(4)") as HTMLButtonElement);
+    fireEvent.click(screen.getByRole("button", { name: "Economia" }));
     expect(localStorage.getItem("trajeto-daily-mode")).toBe("economia");
   });
 });

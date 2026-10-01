@@ -21,7 +21,7 @@ test("mobile: Mais abre ajuda e pode ser fechado pelo teclado", async ({ page },
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(more).toBeFocused();
   await more.click();
-  await page.getByRole("button", { name: "Ajuda e uso offline" }).click();
+  await page.getByRole("button", { name: "Ajuda e offline" }).click();
   await expect(page).toHaveURL(/\/ajuda$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
