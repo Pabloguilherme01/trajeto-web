@@ -108,13 +108,13 @@ export default function AccessibilityPanel() {
         <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:block sm:p-3" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" onMouseDown={e=>{if(e.target===e.currentTarget)closePanel()}}>
           <section ref={panelRef} className="w-full max-h-[calc(100dvh-.5rem)] max-w-lg overflow-auto overscroll-contain rounded-b-none rounded-t-[1.75rem] border border-white/15 bg-[#0F171D] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl sm:mx-auto sm:mt-10 sm:max-h-[90vh] sm:rounded-3xl sm:p-6">
             <header className="flex items-start justify-between gap-4">
-              <div><p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]">Acesso rápido</p><h2 id="accessibility-title" className="mt-1 text-xl font-extrabold text-white">Acessibilidade e modo de uso</h2><p className="mt-1 text-xs text-[#8FA3AC]">Preferências ficam neste aparelho e podem ser alteradas a qualquer momento.</p></div>
+              <div><p className="soft-kicker text-xs text-[#C7FF3C]">Acesso rápido</p><h2 id="accessibility-title" className="mt-1 text-xl font-extrabold text-white">Acessibilidade e modo de uso</h2><p className="mt-1 text-xs text-[#8FA3AC]">Preferências ficam neste aparelho e podem ser alteradas a qualquer momento.</p></div>
               <button type="button" id="accessibility-close" onClick={closePanel} aria-label="Fechar acessibilidade" className="grid size-11 place-items-center rounded-xl border border-white/10 text-white"><X className="size-5"/></button>
             </header>
 
             <div className="mt-5">
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#7F919A]">Modos prontos</p>
-              <div className="mt-2 grid grid-cols-3 gap-2">
+              <p className="soft-kicker text-xs text-[#7F919A]">Modos prontos</p>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:true});setEconomyMode(true);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Economia<span className="mt-0.5 block text-xs font-normal text-[#8FA3AC]">menos dados e blocos</span></button>
                 <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:true,highContrast:true,reduceMotion:false,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Leitura<span className="mt-0.5 block text-xs font-normal text-[#8FA3AC]">texto e contraste</span></button>
                 <button type="button" onClick={()=>{setAccessibilityPreferences({largeText:false,highContrast:false,reduceMotion:true,compactMode:false});setEconomyMode(false);setPrefs(getAccessibilityPreferences());}} className="min-h-14 rounded-xl border border-white/10 bg-white/[0.03] px-2 text-left text-xs font-bold text-white">Condução<span className="mt-0.5 block text-xs font-normal text-[#8FA3AC]">menos movimento</span></button>
