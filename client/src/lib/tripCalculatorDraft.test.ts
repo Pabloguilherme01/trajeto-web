@@ -18,7 +18,8 @@ describe("trip calculator draft", () => {
 
   it("persiste e recupera o cenário local", () => {
     saveTripCalculatorDraft({
-      mode: "trabalho",\n      distance: "35",
+      mode: "trabalho",
+      distance: "35",
       price: "5,89",
       consumption: "10",
       tank: "45",
@@ -33,7 +34,13 @@ describe("trip calculator draft", () => {
       monthlyBudget: "800",
     });
 
-    expect(loadTripCalculatorDraft()).toMatchObject({ mode: "trabalho", distance: "35", price: "5,89", roundTrip: true, monthlyBudget: "800" });
+    expect(loadTripCalculatorDraft()).toMatchObject({
+      mode: "trabalho",
+      distance: "35",
+      price: "5,89",
+      roundTrip: true,
+      monthlyBudget: "800",
+    });
   });
 
   it("ignora rascunho ausente ou inválido", () => {
@@ -43,7 +50,7 @@ describe("trip calculator draft", () => {
   });
 
   it("remove o cenário salvo", () => {
-    saveTripCalculatorDraft({ distance: "20" });
+    saveTripCalculatorDraft({ distance: "20" } as never);
     clearTripCalculatorDraft();
     expect(loadTripCalculatorDraft()).toBeNull();
   });
