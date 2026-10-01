@@ -3,7 +3,7 @@ import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirecti
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
-    expect(buildNearbyStationsUrl("/postos", -15.86, -48.03)).toBe("/postos?q=postos&lat=-15.86&lng=-48.03");
+    expect(buildNearbyStationsUrl("/postos", -15.86, -48.03)).toBe("/postos?q=postos&perto=1");
     expect(buildNearbyStationsUrl("/postos", Number.NaN, Number.POSITIVE_INFINITY)).toBe("/postos?q=postos");
   });
 
@@ -18,7 +18,7 @@ describe("mobile tools", () => {
       "https://www.google.com/maps/search/?api=1&query=postos%20perto%20de%20%C3%81guas%20Lindas",
     );
     expect(buildGoogleMapsNearbyStationsUrl(-15.86, -48.03)).toBe(
-      "https://www.google.com/maps/search/?api=1&query=postos%20de%20combust%C3%ADvel%20%40-15.86%2C-48.03",
+      "https://www.google.com/maps/search/?api=1&query=postos%20de%20combust%C3%ADvel%20perto%20de%20mim",
     );
   });
 
@@ -59,6 +59,13 @@ describe("mobile tools", () => {
 
   it("keeps a useful generic message when there is no recommendation", () => {
     expect(buildRouteShareText("Casa", "Trabalho")).toBe("Planejei esta rota no Trajeto: Casa → Trabalho. Veja distância, duração e opções de abastecimento.");
+  });
+
+  it("never exposes a precise GPS origin in shared route text", () => {
+    const text = buildRouteShareText("-15.76123, -48.28123", "Hospital");
+    expect(text).toContain("Minha localização → Hospital");
+    expect(text).not.toContain("-15.76123");
+    expect(text).not.toContain("-48.28123");
   });
 
   it("builds an official Uber universal link with the station as destination", () => {
