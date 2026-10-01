@@ -35,6 +35,12 @@ describe("public routing fallback", () => {
       "Águas Lindas de Goiás, GO",
       "Brasília, DF"
     );
+    const requestOptions = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]?.[1];
+    expect(requestOptions).toMatchObject({
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+      cache: "no-store",
+    });
     expect(route.distanceMeters).toBe(10123);
     expect(route.durationSeconds).toBe(845);
     expect(route.polyline).toBe("abc123");
