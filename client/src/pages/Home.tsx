@@ -1,4 +1,4 @@
-import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff } from "lucide-react";
+import { ArrowRight, Bookmark, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -216,6 +216,30 @@ export default function Home() {
         </section>
 
         <div className="mt-5"><DailyModeSelector /></div>
+
+        <section className="mt-4 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.04] p-3" aria-labelledby="home-utility-title">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[0.53rem] font-black uppercase tracking-[.15em] text-[#FFB86B]">Utilidade imediata</p>
+              <h2 id="home-utility-title" className="mt-1 text-sm font-black">Precisa resolver agora?</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="min-h-10 rounded-xl border border-white/8 px-3 text-[0.55rem] font-black text-white/55">Central completa</button>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {[
+              { label: "Polícia", number: "190", href: "tel:190" },
+              { label: "SAMU", number: "192", href: "tel:192" },
+              { label: "Bombeiros", number: "193", href: "tel:193" },
+            ].map(item => (
+              <a key={item.label} href={item.href} className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-white/8 bg-[#0B1014] px-2 text-[0.6rem] font-black text-white/75 transition hover:border-[#FFB86B]/25 active:scale-[.98]">
+                <Phone className="size-3.5 text-[#FFB86B]" />
+                <span>{item.label}</span>
+                <span className="text-white/30">{item.number}</span>
+              </a>
+            ))}
+          </div>
+          <p className="mt-2 text-[0.52rem] leading-relaxed text-white/28">Os atalhos de emergência ficam disponíveis na interface sem depender do catálogo online.</p>
+        </section>
 
         <section className="mt-5" aria-labelledby="local-routes-title">
           <div className="flex items-end justify-between gap-3">
