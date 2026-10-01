@@ -43,6 +43,14 @@ describe("universal citizen search", () => {
       )
     ).toBe(true);
   });
+  it("finds transport and official data sources in the same search", () => {
+    const bus = getUniversalSearchResults("onibus entorno");
+    expect(bus.transitFares.length).toBeGreaterThan(0);
+    expect(bus.dataResources.map(item => item.id)).toContain("antt-monitriip");
+    expect(getUniversalSearchResults("CNES").dataResources.map(item => item.id)).toContain("cnes-saude");
+    expect(getUniversalSearchResults("BR 070").dataResources.map(item => item.id)).toContain("prf-acidentes");
+  });
+
   it("finds a citizen's need and a station without a backend", () => {
     expect(
       getUniversalSearchResults("segunda via da conta de agua").services.map(
