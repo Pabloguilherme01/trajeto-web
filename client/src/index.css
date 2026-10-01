@@ -108,7 +108,13 @@
 }
 
 @media (max-width: 767px) {
-  html { overscroll-behavior-x: none; }
+  html {
+    overscroll-behavior-x: none;
+    /* Focus and browser scroll-to-element must settle above the fixed dock. */
+    scroll-behavior: auto;
+    scroll-padding-top: 4rem;
+    scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
   body {
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
     -webkit-tap-highlight-color: transparent;

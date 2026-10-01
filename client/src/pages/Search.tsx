@@ -201,6 +201,9 @@ export default function SearchPage() {
               <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#FFB86B]">Serviços encontrados</p><h2 className="mt-1 text-xl font-black">Resultados públicos</h2></div>
               <span className="text-xs text-white/70">{serviceMatches.length} encontrados</span>
             </div>
+        {serviceMatches.length > serviceResults.length && <button type="button" onClick={() => setLocation(appUrl("/servicos") + "?q=" + encodeURIComponent(query))} className="mt-3 block min-h-11 w-full rounded-xl border border-[#FFB86B]/30 px-3 text-sm font-bold text-white">
+          Ver todos os {serviceMatches.length} serviços encontrados
+        </button>}
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {serviceResults.map(service => (
                 <button key={service.id} type="button" onClick={() => setLocation(appUrl("/servicos") + "?servico=" + encodeURIComponent(service.id))} className="flex min-h-[4.8rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.99]">
@@ -213,9 +216,7 @@ export default function SearchPage() {
           </section>
         )}
 
-        {query && serviceMatches.length > serviceResults.length && <button type="button" onClick={() => setLocation(appUrl("/servicos") + "?q=" + encodeURIComponent(query))} className="mt-3 min-h-11 w-full rounded-xl border border-[#FFB86B]/30 px-3 text-sm font-bold text-white">
-          Ver todos os {serviceMatches.length} serviços encontrados
-        </button>}
+
 
         <section className="mt-6 rounded-3xl border border-white/8 bg-white/[.025] p-4">
           <div className="flex items-start gap-3"><Hospital className="mt-0.5 size-4 text-[#3DE3FF]" /><div><p className="text-xs font-black">Serviços públicos</p><p className="mt-1 text-sm leading-relaxed text-white/70">Saúde, segurança, assistência, trânsito, educação e cidadania ficam disponíveis no catálogo incorporado.</p><button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"><Landmark className="size-3.5" />Abrir central</button></div></div>
