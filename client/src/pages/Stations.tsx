@@ -82,6 +82,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const lng = lngParam === null ? Number.NaN : Number(lngParam);
   const hasCoordinates = latParam !== null && lngParam !== null &&
     Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const nearbyRequested = params.get("perto") === "1";
   const showSavedOnly = params.get("salvos") === "1";
   const urlQuery = params.get("q")?.trim() || corridorPresets[0]?.query || "postos";
   const staticRuntime = isGitHubPagesRuntime();
@@ -424,10 +425,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     if (hasCoordinates) {
       setUserCoords({ lat, lng });
       setNearby(true);
-      return;
     }
-    setUserCoords(null);
-    setNearby(false);
   }, [hasCoordinates, lat, lng]);
 
   useEffect(() => {
@@ -509,7 +507,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         vibration(18);
         setQuery("postos");
         setInput("postos próximos");
-        setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
+        setLocation(appUrl("/postos") + "?q=postos&perto=1");
       },
       () => {
         setLocating(false);
@@ -518,6 +516,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
   };
+
+  useEffect(() => {
+    if (!nearbyRequested || userCoords || locating) return;
+    useNearby();
+  }, [nearbyRequested, userCoords, locating]);
 
   const handleMapStationSelect = (station: StationMapItem) => {
     const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
