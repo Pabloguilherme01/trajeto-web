@@ -94,18 +94,33 @@ export default function SearchPage() {
 
         <form onSubmit={submit} className="mt-5 flex min-h-14 items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#121B22] px-3 shadow-[0_12px_35px_rgba(0,0,0,.18)]">
           <SearchIcon className="size-5 shrink-0 text-[#C7FF3C]" />
-          <input ref={inputRef} value={input} onChange={event => setInput(event.target.value)} placeholder="Posto, endereço, bairro ou serviço" className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" aria-label="Buscar locais e serviços" />
+          <input ref={inputRef} value={input} onChange={event => setInput(event.target.value)} placeholder="Posto, endereço, bairro ou serviço" className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" aria-label="Buscar locais e serviços" aria-keyshortcuts="Control+K Meta+K" />
           <kbd className="hidden rounded-lg border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/25 sm:inline">Ctrl K</kbd>
           {input && <button type="button" onClick={() => { setInput(""); setQuery(""); setLocation(appUrl("/buscar")); }} className="grid size-10 place-items-center rounded-xl text-white/40" aria-label="Limpar busca"><X className="size-4" /></button>}
           <button type="submit" className="grid size-10 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar"><ArrowRight className="size-4" /></button>
         </form>
 
-        <section className="mt-4">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Ações rápidas">
-            {quickActions.map(action => {
+        <section className="mt-4" aria-labelledby="search-primary-title">
+          <div className="flex items-center justify-between gap-3"><h2 id="search-primary-title" className="text-[0.56rem] font-black uppercase tracking-[.15em] text-white/30">Comece por aqui</h2><span className="text-[0.5rem] text-white/20">1 toque</span></div>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Ações essenciais">
+            {quickActions.slice(0, 6).map(action => {
               const Icon = action.icon;
               return <button key={action.label} type="button" onClick={() => openQuick(action)} className="group min-h-[6.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C]/20 active:scale-[.985]">
                 <span className="grid size-9 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C] group-hover:bg-[#C7FF3C]/15"><Icon className="size-4" /></span>
+                <span className="mt-2 block text-xs font-black">{action.label}</span>
+                <span className="mt-0.5 block text-[0.55rem] leading-snug text-white/35">{action.hint}</span>
+              </button>;
+            })}
+          </div>
+        </section>
+
+        <section className="mt-4" aria-labelledby="search-explore-title">
+          <div className="flex items-center justify-between gap-3"><h2 id="search-explore-title" className="text-[0.56rem] font-black uppercase tracking-[.15em] text-white/30">Explorar</h2><span className="text-[0.5rem] text-white/20">mais opções</span></div>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Ações para explorar">
+            {quickActions.slice(6).map(action => {
+              const Icon = action.icon;
+              return <button key={action.label} type="button" onClick={() => openQuick(action)} className="group min-h-[5.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#3DE3FF]/20 active:scale-[.985]">
+                <span className="grid size-8 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF] group-hover:bg-[#3DE3FF]/15"><Icon className="size-4" /></span>
                 <span className="mt-2 block text-xs font-black">{action.label}</span>
                 <span className="mt-0.5 block text-[0.55rem] leading-snug text-white/35">{action.hint}</span>
               </button>;
