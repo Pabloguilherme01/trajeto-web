@@ -220,7 +220,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
-    hasCoordinates ? { query, lat, lng } : { query },
+    { query },
     {
       enabled: query.trim().length >= 3 && !showSavedOnly && !staticRuntime,
       retry: 1,
@@ -318,8 +318,15 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
   const mapSecondaryCount = mapStations.filter(station => station.source !== "ANP").length;
   const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt);
-  const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
-  const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
+  const cachedSnapshot = getCachedStations(query);
+  const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
+  const stations = userCoords && nearby
+    ? [...stationBase].sort((a, b) => {
+        const aDistance = haversineKm(userCoords.lat, userCoords.lng, a.lat, a.lng);
+        const bDistance = haversineKm(userCoords.lat, userCoords.lng, b.lat, b.lng);
+        return aDistance - bDistance;
+      })
+    : stationBase;
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
@@ -389,9 +396,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   useEffect(() => {
     if (liveStations.length > 0) {
-      cacheStations(query, liveStations as unknown as MobileStation[], hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
+      cacheStations(query, liveStations as unknown as MobileStation[]);
     }
-  }, [liveStations, query, hasCoordinates, lat, lng]);
+  }, [liveStations, query]);
 
   useEffect(() => {
     if (anpRows.length > 0) {
