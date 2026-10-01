@@ -307,7 +307,7 @@ export const LOCAL_PLACES: LocalPlace[] = [
   },
 ];
 
-export function searchLocalPlaces(query = "", category?: LocalPlaceCategory) {
+export function getLocalPlaces(category: LocalPlaceCategory) {\n  return LOCAL_PLACES.filter(place => place.category === category);\n}\n\nexport function searchLocalPlaces(query = "", category?: LocalPlaceCategory) {
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
   return LOCAL_PLACES.filter(place => {
     if (category && place.category !== category) return false;
