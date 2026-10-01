@@ -1,3 +1,5 @@
+import { privateOriginForHistory } from "@/lib/locationPrivacy";
+
 const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
@@ -13,6 +15,52 @@ export type MobileIntent = "route" | "stations" | "nearby" | "saved" | "search";
 
 function notifyPreferenceChange() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(PREFERENCE_EVENT));
+}
+
+function privateUsageKey(origin: string, destination: string) {
+  return privateOriginForHistory(origin).trim().toLocaleLowerCase("pt-BR") +
+    "::" +
+    destination.trim().toLocaleLowerCase("pt-BR");
+}
+
+function migratePrivateRouteUsageStorage() {
+  try {
+    const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    if (usage && typeof usage === "object" && !Array.isArray(usage)) {
+      const next: Record<string, number> = {};
+      let changed = false;
+      for (const [key, rawValue] of Object.entries(usage)) {
+        const split = key.indexOf("::");
+        const origin = split >= 0 ? key.slice(0, split) : key;
+        const destination = split >= 0 ? key.slice(split + 2) : "";
+        const safeKey = privateUsageKey(origin, destination);
+        const value = Number(rawValue);
+        if (safeKey !== key) changed = true;
+        if (Number.isFinite(value)) next[safeKey] = (next[safeKey] ?? 0) + value;
+      }
+      if (changed) localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(next));
+    }
+
+    const eventUsage = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    if (eventUsage && typeof eventUsage === "object" && !Array.isArray(eventUsage)) {
+      const nextEvents: Record<string, string[]> = {};
+      let changed = false;
+      for (const [key, rawEvents] of Object.entries(eventUsage)) {
+        const split = key.indexOf("::");
+        const origin = split >= 0 ? key.slice(0, split) : key;
+        const destination = split >= 0 ? key.slice(split + 2) : "";
+        const safeKey = privateUsageKey(origin, destination);
+        if (safeKey !== key) changed = true;
+        const events = Array.isArray(rawEvents)
+          ? rawEvents.filter((value): value is string =>
+              typeof value === "string" && Number.isFinite(Date.parse(value))
+            )
+          : [];
+        nextEvents[safeKey] = [...(nextEvents[safeKey] ?? []), ...events].slice(-200);
+      }
+      if (changed) localStorage.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(nextEvents));
+    }
+  } catch {}
 }
 
 export function getEconomyMode() {
@@ -31,11 +79,19 @@ export function setEconomyMode(enabled: boolean) {
 export function getRecentSearches(): string[] {
   try {
     const value = JSON.parse(localStorage.getItem(SEARCHES_KEY) || "[]");
-    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").slice(0, 5) : [];
+    if (!Array.isArray(value)) return [];
+    const next = value
+      .filter((item): item is string => typeof item === "string")
+      .map(item => privateOriginForHistory(item))
+      .slice(0, 5);
+    if (next.some((item, index) => item !== value[index])) {
+      localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
+    }
+    return next;
   } catch { return []; }
 }
 export function rememberSearch(query: string) {
-  const normalized = query.trim();
+  const normalized = privateOriginForHistory(query);
   if (normalized.length < 3) return;
   try {
     const next = [normalized, ...getRecentSearches().filter(item => item.toLowerCase() !== normalized.toLowerCase())].slice(0, 5);
@@ -46,7 +102,10 @@ export function rememberSearch(query: string) {
 export function getLastTrip(): { origin: string; destination: string } | null {
   try {
     const value = JSON.parse(localStorage.getItem(LAST_TRIP_KEY) || "null");
-    return value && typeof value.origin === "string" && typeof value.destination === "string" ? value : null;
+    if (!value || typeof value.origin !== "string" || typeof value.destination !== "string") return null;
+    const next = { origin: privateOriginForHistory(value.origin), destination: value.destination };
+    if (next.origin !== value.origin) localStorage.setItem(LAST_TRIP_KEY, JSON.stringify(next));
+    return next;
   } catch { return null; }
 }
 export type RecentTrip = { origin: string; destination: string; usedAt: string };
@@ -60,7 +119,15 @@ export function getRecentTrips(): RecentTrip[] {
   try {
     const value = JSON.parse(localStorage.getItem(RECENT_TRIPS_KEY) || "[]");
     if (!Array.isArray(value)) return [];
-    return value.filter(isRecentTrip).sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt)).slice(0, MAX_RECENT_TRIPS);
+    const valid = value
+      .filter(isRecentTrip)
+      .map(item => ({ ...item, origin: privateOriginForHistory(item.origin) }))
+      .sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt))
+      .slice(0, MAX_RECENT_TRIPS);
+    if (valid.some((item, index) => item.origin !== value.filter(isRecentTrip)[index]?.origin)) {
+      localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(valid));
+    }
+    return valid;
   } catch { return []; }
 }
 export function removeRecentTrip(origin: string, destination: string) {
@@ -90,8 +157,9 @@ export function getMostUsedRoute(): RecentTrip | null {
 }
 export type RouteUsageStats = { total: number; recordedEvents: number; windowDays: number; averagePerDay: number | null };
 export function getRouteUsageStats(origin: string, destination: string, days = 30): RouteUsageStats {
+  migratePrivateRouteUsageStorage();
   const safeDays = Math.max(1, Math.min(365, Math.floor(days)));
-  const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  const key = privateUsageKey(origin, destination);
   try {
     const raw = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
     const events = raw && typeof raw === "object" && Array.isArray(raw[key]) ? raw[key] : [];
@@ -103,14 +171,15 @@ export function getRouteUsageStats(origin: string, destination: string, days = 3
   }
 }
 export function getRouteUsage(origin: string, destination: string) {
-  const key = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  migratePrivateRouteUsageStorage();
+  const key = privateUsageKey(origin, destination);
   try {
     const value = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
     return value && typeof value === "object" && Number.isFinite(Number(value[key])) ? Number(value[key]) : 0;
   } catch { return 0; }
 }
 export function rememberTrip(origin: string, destination: string) {
-  const normalizedOrigin = origin.trim();
+  const normalizedOrigin = privateOriginForHistory(origin);
   const normalizedDestination = destination.trim();
   if (normalizedOrigin.length < 3 || normalizedDestination.length < 3) return;
   const trip: RecentTrip = { origin: normalizedOrigin, destination: normalizedDestination, usedAt: new Date().toISOString() };
@@ -119,7 +188,8 @@ export function rememberTrip(origin: string, destination: string) {
       item.origin.trim().toLocaleLowerCase("pt-BR") !== normalizedOrigin.toLocaleLowerCase("pt-BR") ||
       item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination.toLocaleLowerCase("pt-BR"))].slice(0, MAX_RECENT_TRIPS);
     localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
-    const usageKey = normalizedOrigin.toLocaleLowerCase("pt-BR") + "::" + normalizedDestination.toLocaleLowerCase("pt-BR");
+    migratePrivateRouteUsageStorage();
+    const usageKey = privateUsageKey(normalizedOrigin, normalizedDestination);
     const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
     usage[usageKey] = Number.isFinite(Number(usage[usageKey])) ? Number(usage[usageKey]) + 1 : 1;
     localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(usage));
