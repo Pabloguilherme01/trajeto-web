@@ -102,6 +102,36 @@ export async function getOfflineReadiness(): Promise<boolean> {
   return (await requestOfflineStatus("OFFLINE_STATUS", 5000)).ready;
 }
 
+async function waitForServiceWorkerController(timeoutMs = 8000) {
+  if (!("serviceWorker" in navigator)) return false;
+  if (navigator.serviceWorker.controller) return true;
+
+  return await new Promise<boolean>(resolve => {
+    let finished = false;
+    const finish = (value: boolean) => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(timer);
+      navigator.serviceWorker.removeEventListener("controllerchange", onChange);
+      resolve(value);
+    };
+    const onChange = () => finish(Boolean(navigator.serviceWorker.controller));
+    const timer = window.setTimeout(
+      () => finish(Boolean(navigator.serviceWorker.controller)),
+      timeoutMs
+    );
+    navigator.serviceWorker.addEventListener("controllerchange", onChange, {
+      once: true,
+    });
+    void navigator.serviceWorker.ready
+      .then(() => {
+        if (navigator.serviceWorker.controller) finish(true);
+      })
+      .catch(() => undefined);
+  });
+}
+
+
 export type OfflineStorageStatus = {
   supported: boolean;
   persisted: boolean;
@@ -149,7 +179,10 @@ export async function prepareOfflineAccess(): Promise<OfflinePreparation> {
       await navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL, updateViaCache: "none" });
     currentRegistration = registration;
     void registration.update().then(() => announceUpdate(registration)).catch(() => undefined);
-    if (!navigator.serviceWorker.controller) return { ready: false, reason: "preparing" };
+    if (!navigator.serviceWorker.controller) {
+      const controlled = await waitForServiceWorkerController();
+      if (!controlled) return { ready: false, reason: "preparing" };
+    }
     const result = await requestOfflineStatus("RESTORE_OFFLINE", 60000);
     if (!result.ready && registration.waiting) announceUpdate(registration);
     return result;
