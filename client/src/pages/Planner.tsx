@@ -661,10 +661,10 @@ export default function Planner() {
                 <CheckCircle2 className="size-5 shrink-0 text-[#C7FF3C]" />
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-2xl bg-white/[.045] p-3"><RouteIcon className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Distância</p><p className="mt-1 text-sm font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><Navigation className="size-3.5 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Tempo</p><p className="mt-1 text-sm font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/8 bg-white/[.045] p-3"><RouteIcon className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/45">Distância</p><p className="mt-1 text-base font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
+                <div className="rounded-2xl border border-white/8 bg-white/[.045] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/45">Tempo</p><p className="mt-1 text-base font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
+                <div className="col-span-2 rounded-2xl border border-white/8 bg-white/[.045] p-3 sm:col-span-1"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/45">Chegada estimada</p><p className="mt-1 text-base font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -704,12 +704,15 @@ export default function Planner() {
 
             {showMap && (
               <section className="mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22]">
-                <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[.15em] text-white/45">{online ? "Mapa da rota" : "Prévia offline"}</p>
-                    <p className="mt-0.5 text-xs text-white/35">{online ? "ruas + geometria no próprio Trajeto" : "rota salva sem depender do mapa de ruas"}</p>
+                <div className="flex items-center justify-between gap-3 border-b border-white/8 px-3 py-3 sm:px-4">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black uppercase tracking-[.15em] text-white/55">{online ? "Mapa da rota" : "Prévia offline"}</p>
+                    <p className="mt-0.5 truncate text-xs text-white/35">{online ? "ruas + geometria no próprio Trajeto" : "rota salva sem depender do mapa de ruas"}</p>
                   </div>
-                  <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-bold text-white/60">Fechar</button>
+                  <div className="flex shrink-0 gap-2">
+                    <button type="button" onClick={openPreferredNavigation} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Navegar</button>
+                    <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-bold text-white/60">Fechar</button>
+                  </div>
                 </div>
                 <div className="h-[min(62dvh,520px)] min-h-[360px]">
                   <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} />
