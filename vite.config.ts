@@ -16,9 +16,10 @@ export default defineConfig({
     closeBundle() {
       const output = path.resolve(root, "dist/public");
       const manifest = readFileSync(path.join(output, "offline-assets.json"), "utf8");
-      const revision = createHash("sha256").update(manifest).digest("hex").slice(0, 12);
       const worker = path.join(output, "sw.js");
-      writeFileSync(worker, readFileSync(worker, "utf8").replace('CACHE_PREFIX + "v19"', `CACHE_PREFIX + "v19-${revision}"`));
+      const source = readFileSync(worker, "utf8");
+      const revision = createHash("sha256").update(manifest).update(source).digest("hex").slice(0, 12);
+      writeFileSync(worker, source.replace(/CACHE_PREFIX \+ "(v\d+)"/, (_match, version) => `CACHE_PREFIX + "${version}-${revision}"`));
     },
   }],
   resolve: {

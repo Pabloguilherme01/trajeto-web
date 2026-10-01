@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v19";
+const VERSION = CACHE_PREFIX + "v20";
 const NETWORK_TIMEOUT_MS = 4000;
 const MAX_MAP_ENTRIES = 24;
 const STATIC_CACHE = VERSION + "-static";
@@ -23,30 +23,39 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(async cache => {
-        await cache.addAll(STATIC_SHELL);
+        await precacheFresh(cache, STATIC_SHELL);
         const response = await fetch("./index.html?precache=" + VERSION, { cache: "no-store" });
         if (!response.ok) throw new Error("App indisponível");
+        // Use the same fresh document that identifies this build's assets.
+        // The browser's HTTP cache may still contain an older index.html.
+        await cache.put("./", response.clone());
+        await cache.put("./index.html", response.clone());
+        await cache.put("./404.html", response.clone());
         const html = await response.text();
         const assets = collectIndexAssets(html);
-        await cache.addAll(assets);
+        await precacheFresh(cache, assets);
 
         // A public filename keeps the manifest inside the Pages artifact.
         // Installation only succeeds after all route chunks have been saved.
         const manifestResponse = await fetch("./offline-assets.json?precache=" + VERSION, { cache: "no-store" });
         if (!manifestResponse.ok) throw new Error("Pacote offline indisponível");
         const manifest = await manifestResponse.json();
-        await cache.addAll(collectManifestAssets(manifest));
+        await precacheFresh(cache, collectManifestAssets(manifest));
         await cache.put("./offline-assets.json", new Response(JSON.stringify(manifest), {
           headers: { "Content-Type": "application/json" },
         }));
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
-        await cache.addAll(["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"]);
+        await precacheFresh(cache, ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"]);
       })
       .then(() => caches.open(MAP_CACHE))
   );
 });
+
+function precacheFresh(cache, assets) {
+  return cache.addAll(assets.map(asset => new Request(new URL(asset, self.registration.scope), { cache: "reload" })));
+}
 
 self.addEventListener("activate", event => {
   event.waitUntil(
