@@ -2,6 +2,7 @@ import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
+import { createRequestBudget } from "@/lib/publicRequestBudget";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -11,6 +12,15 @@ const OSRM_URL =
   "https://router.project-osrm.org/route/v1/driving";
 const CACHE_PREFIX = "trajeto:public-routing:";
 const REQUEST_TIMEOUT_MS = 9_000;
+const SHARED_GEOCODER_MIN_INTERVAL_MS = (() => {
+  try {
+    return new URL(NOMINATIM_URL).hostname === "nominatim.openstreetmap.org"
+      ? 1_100
+      : 0;
+  } catch {
+    return 0;
+  }
+})();
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -39,6 +49,17 @@ type OsrmResponse = {
     geometry?: string;
   }>;
 };
+
+type PublicFetchError = Error & {
+  status?: number;
+  retryAfterMs?: number;
+};
+
+const geocoderBudget = createRequestBudget({
+  minIntervalMs: SHARED_GEOCODER_MIN_INTERVAL_MS,
+});
+const inFlightGeocodes = new Map<string, Promise<PublicCoordinate>>();
+let legacyPersistentRoutingCacheCleared = false;
 
 function normalizeText(value: string) {
   return value.trim().replace(/\s+/g, " ");
@@ -128,7 +149,16 @@ async function fetchJson<T>(url: string): Promise<T> {
       referrerPolicy: "origin",
       cache: "no-store",
     });
-    if (!response.ok) throw new Error("Serviço de rota indisponível.");
+    if (!response.ok) {
+      const retryAfterHeader = response.headers.get("Retry-After");
+      const retryAfterSeconds = Number(retryAfterHeader);
+      const error = new Error("Serviço de rota indisponível.") as PublicFetchError;
+      error.status = response.status;
+      if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+        error.retryAfterMs = retryAfterSeconds * 1000;
+      }
+      throw error;
+    }
     return (await response.json()) as T;
   } finally {
     globalThis.clearTimeout(timeout);
@@ -163,24 +193,42 @@ function isPublicRoute(value: unknown): value is PublicRoute {
   );
 }
 
+function clearLegacyPersistentRoutingCache() {
+  if (legacyPersistentRoutingCacheCleared) return;
+  legacyPersistentRoutingCacheCleared = true;
+  try {
+    const storage = globalThis.localStorage;
+    if (!storage) return;
+    const keys: string[] = [];
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (key?.startsWith(CACHE_PREFIX)) keys.push(key);
+    }
+    keys.forEach(key => storage.removeItem(key));
+  } catch {}
+}
+
 function cacheGet<T>(key: string): T | null {
-  for (const name of ["localStorage", "sessionStorage"] as const) {
-    try {
-      const storage = globalThis[name];
-      const raw = storage?.getItem(CACHE_PREFIX + key);
-      if (raw) return JSON.parse(raw) as T;
-    } catch {}
+  clearLegacyPersistentRoutingCache();
+  try {
+    const raw = globalThis.sessionStorage?.getItem(CACHE_PREFIX + key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 function cacheSet<T>(key: string, value: T) {
-  for (const name of ["localStorage", "sessionStorage"] as const) {
-    try {
-      const storage = globalThis[name];
-      storage?.setItem(CACHE_PREFIX + key, JSON.stringify(value));
-    } catch {}
-  }
+  clearLegacyPersistentRoutingCache();
+  try {
+    globalThis.sessionStorage?.setItem(CACHE_PREFIX + key, JSON.stringify(value));
+  } catch {}
+}
+
+export function resetPublicRoutingRequestBudgetForTests() {
+  geocoderBudget.reset();
+  inFlightGeocodes.clear();
+  legacyPersistentRoutingCacheCleared = false;
 }
 
 function haversineMeters(a: PublicCoordinate, b: PublicCoordinate) {
@@ -316,58 +364,83 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     return local;
   }
 
-  const request = async (q: string) => {
-    const url = new URL(NOMINATIM_URL);
-    url.searchParams.set("q", q);
-    url.searchParams.set("format", "jsonv2");
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("countrycodes", "br");
-    url.searchParams.set("accept-language", "pt-BR");
-    return fetchJson<NominatimResult[]>(url.toString());
-  };
+  const pending = inFlightGeocodes.get(cacheKey);
+  if (pending) return pending;
 
-  const expanded = expandLocalQuery(query);
-  const attempts = Array.from(
-    new Set([
-      expanded,
-      query,
-      query + ", Águas Lindas de Goiás, Goiás, Brasil",
-    ])
-  );
+  const networkLookup = (async () => {
+    const request = async (q: string) => {
+      const url = new URL(NOMINATIM_URL);
+      url.searchParams.set("q", q);
+      url.searchParams.set("format", "jsonv2");
+      url.searchParams.set("limit", "1");
+      url.searchParams.set("countrycodes", "br");
+      url.searchParams.set("accept-language", "pt-BR");
 
-  let result: NominatimResult | undefined;
-  for (const attempt of attempts) {
-    try {
-      const results = await request(attempt);
-      result = results[0];
-      if (result?.lat && result.lon) break;
-    } catch {
-      // Try the next query form before giving up.
-    }
-  }
+      return geocoderBudget.run(async () => {
+        try {
+          return await fetchJson<NominatimResult[]>(url.toString());
+        } catch (error) {
+          const providerError = error as PublicFetchError;
+          if (providerError.status === 429) {
+            geocoderBudget.cooldown(providerError.retryAfterMs ?? 60_000);
+          }
+          throw error;
+        }
+      });
+    };
 
-  const lat = Number(result?.lat);
-  const lng = Number(result?.lon);
-  if (!isCoordinate({ lat, lng })) {
-    const fallback = localGeocode(query);
-    if (fallback) {
-      cacheSet(cacheKey, fallback);
-      return fallback;
-    }
-    throw new Error(
-      "Não foi possível localizar “" +
-        query +
-        "”. Tente usar endereço completo, cidade ou coordenadas."
+    const expanded = expandLocalQuery(query);
+    const attempts = Array.from(
+      new Set([
+        expanded,
+        query,
+        query + ", Águas Lindas de Goiás, Goiás, Brasil",
+      ])
     );
+
+    let result: NominatimResult | undefined;
+    for (const attempt of attempts) {
+      try {
+        const results = await request(attempt);
+        result = results[0];
+        if (result?.lat && result.lon) break;
+      } catch {
+        // A provider/network failure should not trigger a retry storm.
+        break;
+      }
+    }
+
+    const lat = Number(result?.lat);
+    const lng = Number(result?.lon);
+    if (!isCoordinate({ lat, lng })) {
+      const fallback = localGeocode(query);
+      if (fallback) {
+        cacheSet(cacheKey, fallback);
+        return fallback;
+      }
+      throw new Error(
+        "Não foi possível localizar “" +
+          query +
+          "”. Tente usar endereço completo, cidade ou coordenadas."
+      );
+    }
+
+    const geocodedCoordinate = { lat, lng };
+    cacheSet(cacheKey, geocodedCoordinate);
+    const expandedKey = "geocode:" + expanded.toLocaleLowerCase("pt-BR");
+    if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
+    return geocodedCoordinate;
+  })();
+
+  inFlightGeocodes.set(cacheKey, networkLookup);
+  try {
+    return await networkLookup;
+  } finally {
+    if (inFlightGeocodes.get(cacheKey) === networkLookup) {
+      inFlightGeocodes.delete(cacheKey);
+    }
   }
-
-  const geocodedCoordinate = { lat, lng };
-  cacheSet(cacheKey, geocodedCoordinate);
-  const expandedKey = "geocode:" + expanded.toLocaleLowerCase("pt-BR");
-  if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
-  return geocodedCoordinate;
 }
-
 function corridorDistanceKm(
   point: PublicCoordinate,
   origin: PublicCoordinate,
