@@ -117,7 +117,7 @@ export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
   try {
     const [persisted, estimate] = await Promise.all([
       storage.persisted?.().catch(() => false) ?? Promise.resolve(false),
-      storage.estimate?.().catch(() => ({})) ?? Promise.resolve({}),
+      storage.estimate?.().catch(() => ({} as StorageEstimate)) ?? Promise.resolve({} as StorageEstimate),
     ]);
     return {
       supported: typeof storage.persist === "function",
