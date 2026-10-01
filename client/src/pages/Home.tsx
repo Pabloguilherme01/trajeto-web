@@ -8,6 +8,7 @@ import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
+import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
 
@@ -22,6 +23,7 @@ export default function Home() {
   const [recentTrips, setRecentTrips] = useState<RecentTrip[]>(getRecentTrips);
   const [destinations, setDestinations] = useState<MobileDestination[]>(() => getMobileDestinations());
   const [locating, setLocating] = useState(false);
+  const [originPrivate, setOriginPrivate] = useState(false);
   const [shareDone, setShareDone] = useState(false);
   const [formMessage, setFormMessage] = useState<string | null>(null);
 
@@ -81,7 +83,8 @@ export default function Home() {
     track("route_open", to);
     vibration();
     const params = new URLSearchParams({ destino: to });
-    if (from) params.set("origem", from);
+    if (originPrivate) params.set("local", "1");
+    else if (from) params.set("origem", from);
     setLocation(appUrl("/planejar") + "?" + params.toString());
   };
 
@@ -92,7 +95,12 @@ export default function Home() {
     navigator.geolocation.getCurrentPosition(
       position => {
         setLocating(false);
-        setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
+        setPrivateLocationHandoff({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setOriginPrivate(true);
+        setOrigin(PRIVATE_LOCATION_LABEL);
         vibration(16);
       },
       () => {
@@ -112,23 +120,8 @@ export default function Home() {
 
   const findNearby = () => {
     rememberIntent("nearby");
-    if (!navigator.geolocation) {
-      setLocation(appUrl("/postos") + "?q=postos");
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setLocating(false);
-        vibration(16);
-        setLocation(buildNearbyStationsUrl(appUrl("/postos"), position.coords.latitude, position.coords.longitude));
-      },
-      () => {
-        setLocating(false);
-        setLocation(appUrl("/postos") + "?q=postos");
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
-    );
+    vibration(12);
+    setLocation(buildNearbyStationsUrl(appUrl("/postos")));
   };
 
   const openServiceSearch = (query: string) => {
@@ -233,7 +226,7 @@ export default function Home() {
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</span>
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
+                <input value={origin} onChange={event => { clearPrivateLocationHandoff(); setOriginPrivate(false); setOrigin(event.target.value); }} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
                 <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
                   <LocateFixed className="size-4" />
                 </button>
