@@ -30,9 +30,9 @@ export default function MobileBottomNav() {
     };
     let blurTimer = 0;
     const sync = () => setEditingField(isEditable(document.activeElement));
-    const onFocusIn = () => {
+    const onFocusIn = (event: FocusEvent) => {
       window.clearTimeout(blurTimer);
-      sync();
+      setEditingField(isEditable(event.target instanceof Element ? event.target : null));
     };
     const onFocusOut = () => {
       window.clearTimeout(blurTimer);
