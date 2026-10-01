@@ -69,6 +69,16 @@ export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "mercado-paraiso", label: "Mini Mercado Paraíso", detail: "Mercado · Residencial Jardim Paraíso", destination: "Mini Mercado Paraíso, Rua das Azaléias, 195, Residencial Jardim Paraíso, Águas Lindas de Goiás, GO", category: "compras" },
 ];
 
+const LOCAL_PLACE_DESTINATIONS: LocalRoutePreset[] = LOCAL_PLACES.map(place => ({
+  id: "place-" + place.id,
+  label: place.name,
+  detail: place.detail,
+  destination: place.mapQuery,
+  category: place.category === "alimentacao" ? "alimentacao" : place.category === "compras" ? "compras" : place.category === "servicos" ? "servicos" : "centro",
+}));
+
+export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PLACE_DESTINATIONS];
+
 export function getLocalRoutePresets(query = "") {
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
   if (!normalized) return ALL_LOCAL_ROUTE_DESTINATIONS;
