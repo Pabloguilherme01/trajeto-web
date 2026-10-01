@@ -110,7 +110,7 @@ export default function SearchPage() {
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Ações essenciais">
             {quickActions.slice(0, 6).map(action => {
               const Icon = action.icon;
-              return <button key={action.label} type="button" onClick={() => openQuick(action)} className="group min-h-[6.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C]/20 active:scale-[.985]">
+              return <button key={action.label} type="button" aria-label={action.label} onClick={() => openQuick(action)} className="group min-h-[6.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#C7FF3C]/20 active:scale-[.985]">
                 <span className="grid size-9 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C] group-hover:bg-[#C7FF3C]/15"><Icon className="size-4" /></span>
                 <span className="mt-2 block text-xs font-black">{action.label}</span>
                 <span className="mt-0.5 block text-[0.55rem] leading-snug text-white/35">{action.hint}</span>
@@ -124,7 +124,7 @@ export default function SearchPage() {
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Ações para explorar">
             {quickActions.slice(6).map(action => {
               const Icon = action.icon;
-              return <button key={action.label} type="button" onClick={() => openQuick(action)} className="group min-h-[5.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#3DE3FF]/20 active:scale-[.985]">
+              return <button key={action.label} type="button" aria-label={action.label} onClick={() => openQuick(action)} className="group min-h-[5.4rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#3DE3FF]/20 active:scale-[.985]">
                 <span className="grid size-8 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF] group-hover:bg-[#3DE3FF]/15"><Icon className="size-4" /></span>
                 <span className="mt-2 block text-xs font-black">{action.label}</span>
                 <span className="mt-0.5 block text-[0.55rem] leading-snug text-white/35">{action.hint}</span>
