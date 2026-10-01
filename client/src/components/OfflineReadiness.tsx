@@ -30,7 +30,7 @@ import { listMobileStationFavorites } from "@/lib/mobileStationStore";
 import {
   getOfflineMapAgeLabel,
   getOfflineMapStations,
-  prepareOfflineStationMapFromCatalog,
+  prepareOfflineStationData,
 } from "@/lib/stationMapOffline";
 
 const preparationMessages: Record<
@@ -127,8 +127,8 @@ export default function OfflineReadiness() {
     setFeedback("");
     try {
       const persistence = requestOfflineStoragePersistence().catch(() => null);
-      prepareOfflineStationMapFromCatalog();
       const result = await prepareOfflineAccess();
+      await prepareOfflineStationData().catch(() => undefined);
       setReady(result.ready);
       const storageStatus = await persistence;
       if (storageStatus) setStorage(storageStatus);
