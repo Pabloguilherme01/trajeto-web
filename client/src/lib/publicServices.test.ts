@@ -109,6 +109,13 @@ describe("public services catalog", () => {
     );
   });
 
+  it("understands city problems in citizen language", () => {
+    expect(searchPublicServices("buraco rua").map(item => item.id)).toContain("secretaria-infraestrutura");
+    expect(searchPublicServices("asfalto").map(item => item.id)).toContain("secretaria-infraestrutura");
+    expect(searchPublicServices("semaforo").map(item => item.id)).toContain("transito-mobilidade");
+    expect(searchPublicServices("faixa de pedestre").map(item => item.id)).toContain("transito-mobilidade");
+  });
+
   it("covers common city maintenance and health surveillance needs with official municipal data", () => {
     const lighting = searchPublicServices("lampada apagada")[0];
     expect(lighting.id).toBe("iluminacao-publica");
