@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 
 test("postos: abre, filtra e mantém a ficha navegável", async ({ page }) => {
   await page.goto("/postos?q=postos", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre um posto por perto/i })).toBeVisible();
   await expect(page.getByText(/Diretório completo/i)).toBeVisible();
 
   const search = page.getByRole("textbox", { name: /filtrar diretório de postos/i });
@@ -21,7 +21,7 @@ test("postos: sincroniza busca da URL e expõe filtro de combustível", async ({
   await fuel.selectOption("etanol");
   await expect(fuel).toHaveValue("etanol");
 
-  const search = page.getByRole("textbox", { name: "Cidade, bairro ou posto" });
+  const search = page.getByRole("textbox", { name: "Onde você quer procurar?" });
   await search.fill("Ceilândia");
   await page.getByRole("button", { name: "Pesquisar", exact: true }).click();
   await expect(page).toHaveURL(/[?&]q=Ceil%C3%A2ndia/);
@@ -32,7 +32,7 @@ test("postos: sincroniza busca da URL e expõe filtro de combustível", async ({
 
 test("postos: acessibilidade sem violações críticas", async ({ page }) => {
   await page.goto("/postos?q=postos", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre um posto por perto/i })).toBeVisible();
   const results = await new AxeBuilder({ page })
     .exclude("#aguas-lindas-map")
     .analyze();
