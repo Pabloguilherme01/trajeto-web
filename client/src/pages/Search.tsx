@@ -248,6 +248,14 @@ export default function SearchPage() {
   const results = useMemo(() => getUniversalSearchResults(liveQuery), [liveQuery]);
   const primaryService = results.services[0];
   const primaryPhone = primaryService?.phone ? phoneHref(primaryService.phone) : null;
+  const primaryPlace = !primaryService ? results.places[0] : undefined;
+  const primaryRoute = !primaryService && !primaryPlace ? results.routes[0] : undefined;
+  const primaryDestination = primaryPlace
+    ? { title: primaryPlace.name, detail: primaryPlace.detail + " · " + primaryPlace.address, destination: primaryPlace.mapQuery }
+    : primaryRoute
+      ? { title: primaryRoute.label, detail: primaryRoute.detail, destination: primaryRoute.destination }
+      : null;
+  const primaryStation = !primaryService && !primaryDestination ? results.stations[0] : undefined;
   const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
   const search = (value: string) => {
     const next = value.trim();
@@ -474,6 +482,66 @@ export default function SearchPage() {
                     </a>
                   )}
                 </div>
+              </section>
+            )}
+            {!primaryService && primaryDestination && (
+              <section
+                className="rounded-[1.4rem] border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
+                aria-labelledby="search-auto-route-title"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]">
+                    <Route className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">
+                      Rota rápida · Águas Lindas
+                    </p>
+                    <h2 id="search-auto-route-title" className="mt-1 text-base font-black leading-snug">
+                      {primaryDestination.title}
+                    </h2>
+                    <p className="mt-1 text-sm leading-relaxed text-white/75">
+                      {primaryDestination.detail}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openRoute(primaryDestination.destination)}
+                  className="mt-3 min-h-11 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"
+                >
+                  Planejar rota
+                </button>
+              </section>
+            )}
+            {!primaryService && !primaryDestination && primaryStation && (
+              <section
+                className="rounded-[1.4rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] p-4 shadow-[0_14px_36px_rgba(0,0,0,.14)]"
+                aria-labelledby="search-auto-station-title"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#FFB86B]/10 text-[#FFB86B]">
+                    <Fuel className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#FFB86B]">
+                      Posto encontrado · Águas Lindas
+                    </p>
+                    <h2 id="search-auto-station-title" className="mt-1 text-base font-black leading-snug">
+                      {primaryStation.displayName}
+                    </h2>
+                    <p className="mt-1 text-sm leading-relaxed text-white/75">
+                      {primaryStation.address || primaryStation.neighborhood || "Consulte os detalhes do posto."}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLocation(appUrl("/local/" + encodeURIComponent(primaryStation.id)))}
+                  className="mt-3 min-h-11 w-full rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]"
+                >
+                  Ver posto
+                </button>
               </section>
             )}
             <p
