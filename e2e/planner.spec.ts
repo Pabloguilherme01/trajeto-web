@@ -7,8 +7,8 @@ test("favorito: planejar preenche o novo destino sem carregar a viagem anterior"
   await page.goto("/salvos", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Aberto na consulta salva")).toBeVisible();
   await page.locator("article").filter({ hasText: "Posto salvo" }).getByRole("button", { name: "Planejar", exact: true }).click();
-  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Rua de teste, Águas Lindas");
-  await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("");
+  await expect(page.getByPlaceholder("Digite o destino")).toHaveValue("Rua de teste, Águas Lindas");
+  await expect(page.getByPlaceholder("Seu ponto de partida")).toHaveValue("");
 });
 
 test("mobile: Mais abre ajuda e pode ser fechado pelo teclado", async ({ page }, testInfo) => {
@@ -21,8 +21,8 @@ test("mobile: Mais abre ajuda e pode ser fechado pelo teclado", async ({ page },
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(more).toBeFocused();
   await more.click();
-  await page.getByRole("button", { name: "Ajuda e offline" }).click();
-  await expect(page).toHaveURL(/\/ajuda$/);
+  await page.getByRole("button", { name: "Preparar offline" }).click();
+  await expect(page).toHaveURL(/\/ajuda#offline-readiness-title$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
@@ -44,12 +44,13 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
   await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Calcular rota" }).click();
 
-  await expect(page.getByText("12,3 km")).toBeVisible();
-  await expect(page.getByText("15 min")).toBeVisible();
-  await expect(page.getByText(/Trânsito ao vivo não disponível|Estimativa local/)).toBeVisible();
+  const distance = page.getByText("Distância", { exact: true }).locator("..");
+  const duration = page.getByText("Tempo", { exact: true }).locator("..");
+  await expect(distance.getByText("12,3 km", { exact: true })).toBeVisible();
+  await expect(duration.getByText("15 min", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Trânsito ao vivo não disponível|Estimativa local/).first()).toBeVisible();
 
-  await page.getByRole("button", { name: "Ver mapa" }).click();
-  await expect(page.getByRole("img", { name: /Prévia offline da rota/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Mapa de ruas da rota" })).toBeVisible();
 });
 
 
@@ -58,9 +59,11 @@ test("planejar: mantém a rota utilizável quando o OSRM está indisponível", a
   await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Calcular rota" }).click();
 
-  await expect(page.getByText(/Estimativa local/)).toBeVisible();
+  await expect(page.getByText(/Estimativa local/).first()).toBeVisible();
   await expect(page.getByText(/km/).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Começar navegação", exact: true })).toBeVisible();
+  await page.getByText("Escolher navegador", { exact: true }).click();
+  await expect(page.getByRole("button", { name: "Google", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Waze", exact: true })).toBeVisible();
 });
 
