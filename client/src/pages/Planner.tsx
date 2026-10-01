@@ -389,7 +389,7 @@ export default function Planner() {
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                  <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
+                  <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" autoCapitalize="words" autoCorrect="off" />
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
@@ -404,7 +404,7 @@ export default function Planner() {
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                  <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
+                  <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="go" autoCapitalize="words" autoCorrect="off" />
                 </div>
               </label>
 
@@ -429,7 +429,7 @@ export default function Planner() {
                         <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A]" : "border-white/8 bg-white/[.02] text-white/50")}>{label}</button>
                       ))}
                     </div>
-                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" />
+                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25" autoComplete="off" autoCapitalize="none" autoCorrect="off" inputMode="search" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="flex min-h-[4.6rem] items-center gap-3 rounded-xl border border-white/8 bg-[#121B22] px-3 text-left">
@@ -530,6 +530,11 @@ export default function Planner() {
                   onChange={event => setSavedRouteQuery(event.target.value)}
                   placeholder="Filtrar por origem ou destino"
                   className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  inputMode="search"
+                  enterKeyHint="search"
                 />
               </label>
             )}
