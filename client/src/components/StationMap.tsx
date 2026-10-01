@@ -255,13 +255,6 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }, [resolvedStations]);
 
   useEffect(() => {
-    if (!ready || !mapRef.current || !window.google?.maps || offline || !userCoords) return;
-    const approximate = coarsenCoordinatePoint(userCoords, 3);
-    mapRef.current.setCenter(approximate);
-    mapRef.current.setZoom(14);
-  }, [ready, offline, userCoords?.lat, userCoords?.lng]);
-
-  useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps || offline) return;
     markers.current.forEach(marker => { marker.map = null; });
     markers.current = [];
@@ -348,8 +341,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }
 
   if (isGitHubPagesRuntime()) {
-    const approximateUserCoords = userCoords ? coarsenCoordinatePoint(userCoords, 3) : null;
-    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={approximateUserCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
+    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={null} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
   }
 
   if (offline || mapUnavailable) {
