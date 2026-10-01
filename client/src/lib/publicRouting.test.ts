@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePublicRoute } from "./publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
@@ -23,17 +23,54 @@ describe("public routing fallback", () => {
         )
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    try {
+      localStorage.removeItem("trajeto-aguas-lindas-anp-offline-v1");
+    } catch {}
+  });
 
   it("geocodes endpoints and calculates a route without the application backend", async () => {
     const route = await calculatePublicRoute(
       "Águas Lindas de Goiás, GO",
       "Brasília, DF"
     );
+    const requestOptions = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]?.[1];
+    expect(requestOptions).toMatchObject({
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+      cache: "no-store",
+    });
     expect(route.distanceMeters).toBe(10123);
     expect(route.durationSeconds).toBe(845);
     expect(route.polyline).toBe("abc123");
     expect(route.origin).toEqual({ lat: -15.7545, lng: -48.2816 });
+  });
+
+  it("never sends the GPS origin to an online route provider", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]), {
+          status: 200,
+        })
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePrivateLocationRoute(
+      "-15.76123, -48.28123",
+      "Brasília, DF",
+      "driving"
+    );
+
+    expect(route.source).toBe("local-estimate");
+    expect(route.origin).toEqual({ lat: -15.761, lng: -48.281 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const onlyUrl = String(fetchMock.mock.calls[0][0]);
+    expect(onlyUrl).toContain("nominatim");
+    expect(onlyUrl).not.toContain("-15.76123");
+    expect(onlyUrl).not.toContain("-48.28123");
+    expect(onlyUrl).not.toContain("router.project-osrm.org");
   });
 
   it("falls back to a local estimate when the shared router is unavailable", async () => {
@@ -74,6 +111,78 @@ describe("public routing fallback", () => {
     );
     expect(route.destination).toEqual({ lat: -15.71, lng: -48.25 });
     expect(String(fetchMock.mock.calls[0][0])).toContain("nominatim");
+  });
+
+  it("expands a known local service name before geocoding", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.779", lon: "-48.265" }]))
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 4200, duration: 520, geometry: "service-route" }],
+          })
+        )
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "Hospital Municipal Bom Jesus"
+    );
+
+    const firstUrl = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(firstUrl.searchParams.get("q")).toContain("Hospital Municipal Bom Jesus");
+    expect(firstUrl.searchParams.get("q")).toContain("Águas Lindas de Goiás");
+  });
+
+  it("resolves a prepared ANP station from local storage when the network is unavailable", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: () => null,
+      length: 0,
+    };
+    vi.stubGlobal("window", { localStorage: storage });
+    storage.setItem(
+      "trajeto-aguas-lindas-anp-offline-v1",
+      JSON.stringify({
+        retrievedAt: "2026-10-01T12:00:00.000Z",
+        savedAt: "2026-10-01T12:00:00.000Z",
+        rows: [{
+          cnpj: "13902675000178",
+          razaoSocial: "AGUAS LINDAS COMBUSTIVEIS LTDA",
+          endereco: "QUADRA 07",
+          bairro: "CAMPING CLUBE",
+          municipio: "AGUAS LINDAS DE GOIAS",
+          uf: "GO",
+          latitude: "-15.7646021",
+          longitude: "-48.2677716",
+        }],
+      })
+    );
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "AGUAS LINDAS COMBUSTIVEIS LTDA"
+    );
+
+    expect(route.destination.lat).toBeCloseTo(-15.7646021, 6);
+    expect(route.destination.lng).toBeCloseTo(-48.2677716, 6);
+    expect(route.source).toBe("local-estimate");
+  });
+
+  it("rejects origin and destination that resolve to the same point", async () => {
+    await expect(
+      calculatePublicRoute("-15.7545,-48.2816", "-15.7545,-48.2816")
+    ).rejects.toThrow(/mesmo ponto/i);
   });
 
   it("recovers a road route after an estimate was cached during a network failure", async () => {
