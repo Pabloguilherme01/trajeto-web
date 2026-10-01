@@ -270,7 +270,7 @@ export default function Home() {
               <p className="text-xs font-black uppercase tracking-[.15em] text-[#FFB86B]">Utilidade imediata</p>
               <h2 id="home-utility-title" className="mt-1 text-sm font-black">Precisa resolver agora?</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver serviços</button>
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} aria-label="Central completa" className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver serviços</button>
           </div>
           <div className="mt-3 grid grid-cols-3 gap-2">
             {[
