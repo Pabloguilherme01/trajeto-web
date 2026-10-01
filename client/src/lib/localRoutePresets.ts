@@ -58,6 +58,13 @@ export const LOCAL_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "banco-brasil-4590", label: "Banco do Brasil · Agência 4590", detail: "Atendimento bancário · Jardim Brasília", destination: "Banco do Brasil Agência 4590, Avenida JK, S/N, Jardim Brasília, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "supermercado-alves", label: "Supermercado Alves", detail: "Mercado · Jardim Águas Lindas II", destination: "Supermercado Alves, Q 18 S/N LT 10, Avenida Águas Lindas 2, Jardim Águas Lindas II, Águas Lindas de Goiás, GO", category: "compras" },
   { id: "supermercado-rodrigues", label: "Supermercado Rodrigues", detail: "Mercado · Parque Águas Bonitas", destination: "Supermercado Rodrigues, Parque Águas Bonitas, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "caixa-jardim-brasilia", label: "Caixa Econômica · Jardim Brasília", detail: "Banco e ATM · Avenida JK", destination: "Caixa Econômica Federal, Quadra 11, Lote 18, Avenida JK, Jardim Brasília, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "praca-da-biblia", label: "Praça da Bíblia", detail: "Praça pública · Jardim Brasília", destination: "Praça da Bíblia, Rua 36, Jardim Brasília, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "praca-santa-lucia", label: "Praça do Santa Lúcia", detail: "Praça pública · Jardim Águas Lindas", destination: "Praça do Santa Lúcia, Quadra 26, Jardim Águas Lindas, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "praca-setor-02", label: "Praça Setor 02", detail: "Área pública · Setor 02", destination: "Praça Setor 02, Rua 7, Setor 3, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "viveiro-municipal", label: "Viveiro Municipal", detail: "Serviço municipal · Jardim Querência", destination: "Viveiro Municipal de Águas Lindas de Goiás, Rua 21, Jardim Querência, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "posto-perimetral", label: "Posto Perimetral", detail: "Combustível · Parque da Barragem", destination: "Posto Perimetral, Avenida Águas Lindas, Parque da Barragem, Águas Lindas de Goiás, GO", category: "combustivel" },
+  { id: "mercado-paraiso", label: "Mini Mercado Paraíso", detail: "Mercado · Residencial Jardim Paraíso", destination: "Mini Mercado Paraíso, Rua das Azaléias, 195, Residencial Jardim Paraíso, Águas Lindas de Goiás, GO", category: "compras" },
 ];
 
 export function getLocalRoutePresets(query = "") {
