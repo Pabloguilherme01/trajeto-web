@@ -123,6 +123,30 @@ describe("public routing fallback", () => {
     ).toHaveLength(1);
   });
 
+  it("uses prepared city coordinates before the public geocoder", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 5200, duration: 610, geometry: "local-known" }],
+        }),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "UPA Mansões Odisseia"
+    );
+
+    expect(route.destination).toEqual({ lat: -15.77665, lng: -48.27935 });
+    expect(route.source).toBe("osrm");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0][0])).toContain("router.project-osrm.org");
+    expect(String(fetchMock.mock.calls[0][0])).not.toContain("nominatim");
+  });
+
   it("geocodes endpoints and calculates a route without the application backend", async () => {
     const route = await calculatePublicRoute(
       "Águas Lindas de Goiás, GO",
