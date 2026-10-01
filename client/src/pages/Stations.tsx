@@ -56,6 +56,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [saved, setSaved] = useState<MobileStation[]>(listMobileStationFavorites);
   const [locating, setLocating] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [nearbyAutoAttempted, setNearbyAutoAttempted] = useState(false);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
@@ -82,7 +83,18 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const lng = lngParam === null ? Number.NaN : Number(lngParam);
   const hasCoordinates = latParam !== null && lngParam !== null &&
     Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const nearbyRequested = params.get("perto") === "1";
   const showSavedOnly = params.get("salvos") === "1";
+  useEffect(() => {
+    if (!hasCoordinates || typeof window === "undefined") return;
+    const clean = new URLSearchParams(window.location.search);
+    clean.delete("lat");
+    clean.delete("lng");
+    clean.set("perto", "1");
+    const nextUrl = appUrl("/postos") + "?" + clean.toString();
+    window.history.replaceState(window.history.state, "", nextUrl);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }, [hasCoordinates]);
   const urlQuery = params.get("q")?.trim() || corridorPresets[0]?.query || "postos";
   const staticRuntime = isGitHubPagesRuntime();
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -218,7 +230,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
-    hasCoordinates ? { query, lat, lng } : { query },
+    { query },
     {
       enabled: query.trim().length >= 3 && !showSavedOnly && !staticRuntime,
       retry: 1,
@@ -316,8 +328,15 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
   const mapSecondaryCount = mapStations.filter(station => station.source !== "ANP").length;
   const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt);
-  const cachedSnapshot = getCachedStations(query, hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
-  const stations = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
+  const cachedSnapshot = getCachedStations(query);
+  const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
+  const stations = userCoords && nearby
+    ? [...stationBase].sort((a, b) => {
+        const aDistance = haversineKm(userCoords.lat, userCoords.lng, a.lat, a.lng);
+        const bDistance = haversineKm(userCoords.lat, userCoords.lng, b.lat, b.lng);
+        return aDistance - bDistance;
+      })
+    : stationBase;
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = getRecentSearches();
@@ -387,9 +406,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   useEffect(() => {
     if (liveStations.length > 0) {
-      cacheStations(query, liveStations as unknown as MobileStation[], hasCoordinates ? lat : undefined, hasCoordinates ? lng : undefined);
+      cacheStations(query, liveStations as unknown as MobileStation[]);
     }
-  }, [liveStations, query, hasCoordinates, lat, lng]);
+  }, [liveStations, query]);
 
   useEffect(() => {
     if (anpRows.length > 0) {
@@ -421,14 +440,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [urlQuery, showSavedOnly, query, mapFirst]);
 
   useEffect(() => {
-    if (hasCoordinates) {
-      setUserCoords({ lat, lng });
-      setNearby(true);
-      return;
-    }
+    if (!hasCoordinates) return;
     setUserCoords(null);
     setNearby(false);
-  }, [hasCoordinates, lat, lng]);
+    setNearbyAutoAttempted(false);
+  }, [hasCoordinates]);
 
   useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
@@ -509,7 +525,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         vibration(18);
         setQuery("postos");
         setInput("postos próximos");
-        setLocation(appUrl("/postos") + "?q=postos&lat=" + position.coords.latitude + "&lng=" + position.coords.longitude);
+        setLocation(appUrl("/postos") + "?q=postos&perto=1");
       },
       () => {
         setLocating(false);
@@ -518,6 +534,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
     );
   };
+
+  useEffect(() => {
+    if (!nearbyRequested || nearbyAutoAttempted || userCoords || locating) return;
+    setNearbyAutoAttempted(true);
+    useNearby();
+  }, [nearbyRequested, nearbyAutoAttempted, userCoords, locating]);
 
   const handleMapStationSelect = (station: StationMapItem) => {
     const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
