@@ -168,7 +168,7 @@ export default function PublicServices() {
               value={query}
               onChange={event => setQuery(event.target.value)}
               placeholder="Buscar saúde, escola, polícia, prefeitura..."
-              className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25"
+              className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65"
               autoComplete="off"
               enterKeyHint="search"
               aria-label="Buscar serviços públicos"
@@ -176,7 +176,7 @@ export default function PublicServices() {
             />
             {query && <button type="button" onClick={() => { setQuery(""); applyFilters("", category, true); }} className="grid size-10 place-items-center rounded-xl text-white/70" aria-label="Limpar busca"><X className="size-4" /></button>}
             <button type="submit" aria-label="Pesquisar serviços" className="grid size-11 shrink-0 place-items-center rounded-xl text-[#C7FF3C]"><ArrowRight className="size-5" /></button>
-            <kbd className="hidden rounded-lg border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/25 sm:inline">Ctrl K</kbd>
+            <kbd className="hidden rounded-lg border border-white/8 bg-white/[.03] px-2 py-1 text-[0.5rem] font-black text-white/70 sm:inline">Ctrl K</kbd>
           </form>
 
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7" aria-label="Categorias de serviços">
