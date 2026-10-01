@@ -59,6 +59,24 @@ describe("mobilePreferences search privacy", () => {
 describe("mobilePreferences route usage", () => {
   beforeEach(() => localStorage.clear());
 
+  it("migrates legacy usage keys that contain precise coordinates", () => {
+    localStorage.setItem(
+      "trajeto-route-usage",
+      JSON.stringify({ "-15.76123, -48.28123::hospital": 3 })
+    );
+    localStorage.setItem(
+      "trajeto-route-usage-events",
+      JSON.stringify({
+        "-15.76123, -48.28123::hospital": [new Date().toISOString()],
+      })
+    );
+
+    const stats = getRouteUsageStats("Minha localização", "Hospital", 30);
+    expect(stats.total).toBe(3);
+    expect(localStorage.getItem("trajeto-route-usage")).not.toContain("-15.76123");
+    expect(localStorage.getItem("trajeto-route-usage-events")).not.toContain("-15.76123");
+  });
+
   it("keeps a real timestamped usage history for route windows", () => {
     rememberTrip("Casa", "Trabalho");
     rememberTrip("Casa", "Trabalho");
