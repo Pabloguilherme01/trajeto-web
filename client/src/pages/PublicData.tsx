@@ -1,14 +1,20 @@
 import {
   ArrowRight,
   BusFront,
+  CloudRain,
   Database,
   ExternalLink,
   Fuel,
   GraduationCap,
   HeartPulse,
+  Landmark,
   MapPinned,
+  Radio,
+  Route,
   ShieldAlert,
+  Users,
   WifiOff,
+  Wind,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -31,7 +37,24 @@ const categoryMeta: Record<
   territorio: { label: "Território", icon: MapPinned },
   lugares: { label: "Lugares", icon: MapPinned },
   combustivel: { label: "Combustível", icon: Fuel },
+  clima: { label: "Clima e alertas", icon: CloudRain },
+  rodovia: { label: "Rodovias", icon: Route },
+  conectividade: { label: "Conectividade", icon: Radio },
+  financeiro: { label: "Serviços financeiros", icon: Landmark },
+  assistencia: { label: "Assistência social", icon: Users },
+  ambiente: { label: "Meio ambiente", icon: Wind },
 };
+
+const DEPARTURE_RESOURCE_IDS = [
+  "inmet-alertas",
+  "dnit-rodovias",
+  "anatel-cobertura",
+  "stpc-df-gtfs",
+] as const;
+
+const departureResources = PUBLIC_DATA_RESOURCES.filter(item =>
+  DEPARTURE_RESOURCE_IDS.includes(item.id as (typeof DEPARTURE_RESOURCE_IDS)[number]),
+);
 
 export default function PublicData() {
   const [, setLocation] = useLocation();
@@ -90,6 +113,51 @@ export default function PublicData() {
             </p>
           )}
         </header>
+
+        <section
+          className="mt-6 rounded-3xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-4 sm:p-5"
+          aria-labelledby="departure-data-title"
+        >
+          <p className="text-xs font-bold uppercase tracking-[.12em] text-[#3DE3FF]">
+            Antes de sair
+          </p>
+          <h2 id="departure-data-title" className="mt-1 text-xl font-black">
+            Fontes que podem mudar sua decisão de viagem.
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/70">
+            O Trajeto conecta clima oficial, contexto rodoviário, cobertura móvel
+            e transporte do DF sem tratar referência histórica ou cobertura
+            teórica como informação ao vivo.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+            {departureResources.map(item => {
+              const meta = categoryMeta[item.category];
+              const Icon = meta.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() =>
+                    setLocation(
+                      appUrl("/dados") +
+                        "?recurso=" +
+                        encodeURIComponent(item.id),
+                    )
+                  }
+                  className="min-h-[7rem] rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left transition hover:border-[#3DE3FF]/30 active:scale-[.99]"
+                >
+                  <Icon className="size-4 text-[#3DE3FF]" />
+                  <span className="mt-2 block text-xs font-black">
+                    {item.title}
+                  </span>
+                  <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-white/60">
+                    {item.sourceLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
         <section id="transporte" className="mt-7" aria-labelledby="transport-title">
           <div className="flex items-end justify-between gap-3">
