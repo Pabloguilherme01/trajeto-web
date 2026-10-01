@@ -338,7 +338,16 @@ export default function Planner() {
     window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
-  const availableDestinations = useMemo(() => {\n    const query = destinationFilter.trim().toLocaleLowerCase("pt-BR");\n    return LOCAL_ROUTE_PRESETS.filter(item => {\n      if (destinationCategory !== "todos" && item.category !== destinationCategory) return false;\n      if (!query) return true;\n      return (item.label + " " + item.detail + " " + item.destination).toLocaleLowerCase("pt-BR").includes(query);\n    });\n  }, [destinationFilter, destinationCategory]);\n\n  const filteredSavedRoutes = useMemo(() => {
+  const availableDestinations = useMemo(() => {
+    const query = destinationFilter.trim().toLocaleLowerCase("pt-BR");
+    return LOCAL_ROUTE_PRESETS.filter(item => {
+      if (destinationCategory !== "todos" && item.category !== destinationCategory) return false;
+      if (!query) return true;
+      return (item.label + " " + item.detail + " " + item.destination).toLocaleLowerCase("pt-BR").includes(query);
+    });
+  }, [destinationFilter, destinationCategory]);
+
+  const filteredSavedRoutes = useMemo(() => {
     const query = savedRouteQuery.trim().toLocaleLowerCase("pt-BR");
     if (!query) return savedRoutes;
     return savedRoutes.filter(route =>
