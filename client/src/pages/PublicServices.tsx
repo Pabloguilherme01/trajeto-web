@@ -640,7 +640,7 @@ export default function PublicServices() {
               <p className="mt-1 text-sm leading-relaxed text-white/70">
                 {online
                   ? "Endereços, contatos e fontes são apresentados como cadastro local; a navegação abre o mapa escolhido."
-                  : "Este catálogo continua visível sem internet. Ir até lás, mapa externo e atualizações em tempo real podem exigir conexão."}
+                  : "Este catálogo continua visível sem internet. Rotas, mapas externos e atualizações em tempo real podem exigir conexão."}
               </p>
             </div>
           </div>
