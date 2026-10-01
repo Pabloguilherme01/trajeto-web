@@ -31,7 +31,7 @@ function brandConfig(local?: LocalStationRecord | null, anp?: AnpStation | null)
 function BrandMark({ local, anp }: { local?: LocalStationRecord | null; anp?: AnpStation | null }) {
   const config = brandConfig(local, anp);
   return (
-    <div aria-label={"Marca " + config.label} title={config.label} className={"grid size-12 shrink-0 place-items-center rounded-2xl border text-[0.56rem] font-black " + config.className}>
+    <div aria-label={"Marca " + config.label} title={config.label} className={"grid size-12 shrink-0 place-items-center rounded-2xl border text-xs font-black " + config.className}>
       {config.label}
     </div>
   );
@@ -160,23 +160,23 @@ export function StationDirectoryCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[0.48rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
+              <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
               <h3 className="mt-1 text-base font-black leading-tight text-white">{stationName}</h3>
-              <p className="mt-1 text-[0.56rem] leading-relaxed text-white/35">{legalName}</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/65">{legalName}</p>
             </div>
-            <button type="button" onClick={onToggleSaved} disabled={!onToggleSaved} className={"grid size-10 shrink-0 place-items-center rounded-xl border disabled:opacity-25 " + (saved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/10 text-[#FFB7A9]" : "border-white/8 text-white/45")} aria-label={saved ? "Remover posto dos salvos" : onToggleSaved ? "Salvar posto neste aparelho" : "Salvar indisponível sem coordenada"}>
+            <button type="button" onClick={onToggleSaved} disabled={!onToggleSaved} className={"grid size-11 shrink-0 place-items-center rounded-xl border disabled:opacity-25 " + (saved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/10 text-[#FFB7A9]" : "border-white/8 text-white/65")} aria-label={saved ? "Remover posto dos salvos" : onToggleSaved ? "Salvar posto neste aparelho" : "Salvar indisponível sem coordenada"}>
               <Heart className="size-4" fill={saved ? "currentColor" : "none"} />
             </button>
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">{catalogStatus}</span>
-            {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/35">sem cruzamento ANP</span>}
-            <span className="rounded-full border border-white/8 px-2 py-1 text-[0.45rem] font-black text-white/45">{distributor}</span>
-            {anp?.products?.length ? <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">ANP enriquecida</span> : null}
-            {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-[0.45rem] font-black text-[#D9FF91]">coordenada</span>}
-            {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.45rem] font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
-            {status && <span className={"rounded-full border px-2 py-1 text-[0.45rem] font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
+            <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{catalogStatus}</span>
+            {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-xs font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-xs font-black text-white/65">sem cruzamento ANP</span>}
+            <span className="rounded-full border border-white/8 px-2 py-1 text-xs font-black text-white/65">{distributor}</span>
+            {anp?.products?.length ? <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">ANP enriquecida</span> : null}
+            {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">coordenada</span>}
+            {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
+            {status && <span className={"rounded-full border px-2 py-1 text-xs font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
           </div>
         </div>
       </div>
@@ -184,18 +184,18 @@ export function StationDirectoryCard({
       <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3" aria-label="Confiança e atualização dos dados">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-white/45">Confiança dos dados</p>
+            <p className="text-xs font-black uppercase tracking-[.13em] text-white/65">Confiança dos dados</p>
             <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
-            <p className="text-[0.46rem] font-bold text-white/25">qualidade/frescor</p>
+            <p className="text-xs font-bold text-white/65">qualidade/frescor</p>
           </div>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
           <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
         </div>
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.48rem] text-white/30">
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/65">
           <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
           <span>Preço: {primaryPrice ? "ANP" : "não disponível"}</span>
           <span>Localização: {coords ? "coordenada" : "não confirmada"}</span>
@@ -205,28 +205,28 @@ export function StationDirectoryCard({
       <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <p className="text-[0.5rem] font-black uppercase tracking-[.13em] text-[#D9FF91]">Preço pesquisado pela ANP</p>
+            <p className="text-xs font-black uppercase tracking-[.13em] text-[#D9FF91]">Preço pesquisado pela ANP</p>
             {primaryPrice ? (
-              <p className="mt-1 text-2xl font-black tracking-[-.04em] text-white">{primaryPrice.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}<span className="ml-1 text-xs font-bold text-white/45">/{primaryPrice.unit}</span></p>
+              <p className="mt-1 text-2xl font-black tracking-[-.04em] text-white">{primaryPrice.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}<span className="ml-1 text-xs font-bold text-white/65">/{primaryPrice.unit}</span></p>
             ) : (
               <p className="mt-1 text-sm font-black text-white/70">Sem preço ANP nesta amostra</p>
             )}
           </div>
           <div className="text-right">
-            <p className="text-[0.48rem] font-black text-white/35">{primaryPrice ? primaryPrice.produto : "gasolina comum"}</p>
-            <p className="mt-1 text-[0.48rem] font-bold text-white/25">{priceDate ? "coleta " + priceDate : "sem coleta individual"}</p>
+            <p className="text-xs font-black text-white/65">{primaryPrice ? primaryPrice.produto : "gasolina comum"}</p>
+            <p className="mt-1 text-xs font-bold text-white/65">{priceDate ? "coleta " + priceDate : "sem coleta individual"}</p>
           </div>
         </div>
-        {prices.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{prices.slice(0, 5).map(price => <span key={price.productKey + price.salePrice} className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-[0.47rem] font-black text-white/55">{price.produto}: {price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/{price.unit}</span>)}</div>}
-        <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
+        {prices.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{prices.slice(0, 5).map(price => <span key={price.productKey + price.salePrice} className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/65">{price.produto}: {price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/{price.unit}</span>)}</div>}
+        <p className="mt-2 text-xs leading-relaxed text-white/65">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
       </section>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#3DE3FF]" />
-          <p className="text-[0.62rem] leading-relaxed text-white/55">{address || "Endereço não consolidado"}</p>
+          <p className="text-sm leading-relaxed text-white/65">{address || "Endereço não consolidado"}</p>
         </div>
-        <div className="mt-2 grid gap-2 text-[0.54rem] text-white/35 sm:grid-cols-2">
+        <div className="mt-2 grid gap-2 text-xs text-white/65 sm:grid-cols-2">
           <span>CNPJ: {cnpj ? formatCnpj(cnpj) : "não informado"}</span>
           <span>Bairro: {anp?.bairro || local?.neighborhood || "não informado"}</span>
           <span>CEP: {anp?.cep || "não informado"}</span>
@@ -236,77 +236,72 @@ export function StationDirectoryCard({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[.02] px-3 py-2.5">
-        <span className="text-[0.52rem] font-black text-white/45">Confiança dos dados</span>
-        <span className="text-[0.58rem] font-black text-[#C9F7FF]">{confidence}% · fonte/data explícitas</span>
-      </div>
-
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="col-span-3 min-h-11 flex items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-[0.58rem] font-black text-[#C9F7FF]">Abrir ficha completa</Link>}
-        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-3 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-[0.62rem] font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-[0.56rem] font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-[0.56rem] font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="col-span-2 sm:col-span-3 min-h-11 flex items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-xs font-black text-[#C9F7FF]">Abrir ficha completa</Link>}
+        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
       <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
-          <span className="text-[0.48rem] font-bold text-white/25">sem conta no Trajeto</span>
+          <p className="text-xs font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
+          <span className="text-xs font-bold text-white/65">sem conta no Trajeto</span>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => window.open(uberUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">Uber</button>
-          <button type="button" onClick={() => window.open(nineNineUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#FF6B35]/20 bg-[#FF6B35]/[.05] px-2 text-[0.56rem] font-black text-white/80 transition-transform duration-200 active:scale-[.98]">99</button>
+          <button type="button" onClick={() => window.open(uberUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.05] px-2 text-xs font-black text-white/80 transition-transform duration-200 active:scale-[.98]">Uber</button>
+          <button type="button" onClick={() => window.open(nineNineUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#FF6B35]/20 bg-[#FF6B35]/[.05] px-2 text-xs font-black text-white/80 transition-transform duration-200 active:scale-[.98]">99</button>
         </div>
-        <p className="mt-2 text-[0.48rem] leading-relaxed text-white/30">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
+        <p className="mt-2 text-xs leading-relaxed text-white/65">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
       </div>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[0.5rem] font-black uppercase tracking-[.12em] text-white/30">Contato e redes</p>
-          <span className="text-[0.48rem] font-bold text-white/20">sem login</span>
+          <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Contato e redes</p>
+          <span className="text-xs font-bold text-white/65">sem login</span>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-[0.55rem] font-black text-white/70">Instagram</button>
-          <button type="button" onClick={() => window.open(facebookSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center rounded-xl border border-[#1877F2]/20 bg-[#1877F2]/[.05] text-[0.55rem] font-black text-white/70">Facebook</button>
-          {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center justify-center rounded-xl border border-[#25D366]/20 bg-[#25D366]/[.05] text-[0.55rem] font-black text-white/70">WhatsApp</a> : <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55">Buscar contato</button>}
-          <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55">Mais na web</button>
+          <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-xs font-black text-white/70">Instagram</button>
+          <button type="button" onClick={() => window.open(facebookSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#1877F2]/20 bg-[#1877F2]/[.05] text-xs font-black text-white/70">Facebook</button>
+          {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-[#25D366]/20 bg-[#25D366]/[.05] text-xs font-black text-white/70">WhatsApp</a> : <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 text-xs font-black text-white/65">Buscar contato</button>}
+          <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 text-xs font-black text-white/65">Mais na web</button>
         </div>
-        <p className="mt-2 text-[0.5rem] leading-relaxed text-white/25">Instagram e Facebook usam busca pública pelo nome/endereço para evitar links inventados. WhatsApp aparece quando existe telefone público compatível.</p>
+        <p className="mt-2 text-xs leading-relaxed text-white/65">Instagram e Facebook usam busca pública pelo nome/endereço para evitar links inventados. WhatsApp aparece quando existe telefone público compatível.</p>
         <div className="mt-2 grid gap-2 rounded-xl border border-white/8 bg-white/[.02] p-2.5">
-          <p className="text-[0.46rem] font-black uppercase tracking-[.12em] text-white/30">Fontes oficiais complementares</p>
+          <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Fontes oficiais complementares</p>
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/acoes-de-fiscalizacao", "_blank", "noopener,noreferrer")} className="min-h-10 rounded-xl border border-white/8 text-[0.5rem] font-black text-white/55">Fiscalização ANP</button>
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/pmqc-programa-de-monitoramento-da-qualidade-dos-combustiveis", "_blank", "noopener,noreferrer")} className="min-h-10 rounded-xl border border-white/8 text-[0.5rem] font-black text-white/55">PMQC</button>
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/multas-aplicadas-com-vencimento-a-partir-de-2016", "_blank", "noopener,noreferrer")} className="min-h-10 rounded-xl border border-white/8 text-[0.5rem] font-black text-white/55">Multas ANP</button>
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos", "_blank", "noopener,noreferrer")} className="min-h-10 rounded-xl border border-white/8 text-[0.5rem] font-black text-white/55">Base cadastral</button>
+            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/acoes-de-fiscalizacao", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Fiscalização ANP</button>
+            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/pmqc-programa-de-monitoramento-da-qualidade-dos-combustiveis", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">PMQC</button>
+            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/multas-aplicadas-com-vencimento-a-partir-de-2016", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Multas ANP</button>
+            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Base cadastral</button>
           </div>
-        </div><div className="mt-2 grid gap-2 text-[0.5rem] text-white/30 sm:grid-cols-2">{local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="truncate underline decoration-white/10 underline-offset-2">{local.mapData.email}</a>}{local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="truncate underline decoration-white/10 underline-offset-2">Site oficial</a>}</div>
+        </div><div className="mt-2 grid gap-2 text-xs text-white/65 sm:grid-cols-2">{local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="truncate underline decoration-white/10 underline-offset-2">{local.mapData.email}</a>}{local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="truncate underline decoration-white/10 underline-offset-2">Site oficial</a>}</div>
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Phone className="size-3.5" />Ligar</a>}
-        <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
-        <button type="button" onClick={() => void share()} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/8 text-[0.55rem] font-black text-white/55"><Share2 className="size-3.5" />Compartilhar</button>
-        <button type="button" onClick={() => window.open(anpComVcUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] text-[0.55rem] font-black text-[#D9FF91]"><ExternalLink className="size-3.5" />ANP com VC</button>
-        <button type="button" onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/15 text-[0.55rem] font-black text-[#9FEFFF]"><ExternalLink className="size-3.5" />Consulta ANP</button>
+        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65"><Phone className="size-3.5" />Ligar</a>}
+        <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
+        <button type="button" onClick={() => void share()} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65"><Share2 className="size-3.5" />Compartilhar</button>
+        <button type="button" onClick={() => window.open(anpComVcUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] text-xs font-black text-[#D9FF91]"><ExternalLink className="size-3.5" />ANP com VC</button>
+        <button type="button" onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/15 text-xs font-black text-[#9FEFFF]"><ExternalLink className="size-3.5" />Consulta ANP</button>
       </div>
       <div className="mt-2 rounded-xl border border-[#3DE3FF]/12 bg-[#3DE3FF]/[.025] p-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[0.48rem] font-black uppercase tracking-[.12em] text-[#87DFF0]">ANP com VC · consulta complementar</p>
-          <span className="text-[0.45rem] font-bold text-white/25">oficial</span>
+          <p className="text-xs font-black uppercase tracking-[.12em] text-[#87DFF0]">ANP com VC · consulta complementar</p>
+          <span className="text-xs font-bold text-white/65">oficial</span>
         </div>
-        <p className="mt-1 text-[0.52rem] leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
-        <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-[0.54rem] font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
+        <p className="mt-1 text-xs leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
+        <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
       </div>
-      <p className="mt-2 text-[0.48rem] leading-relaxed text-white/25">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
+      <p className="mt-2 text-xs leading-relaxed text-white/65">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
 
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-[0.58rem] font-black text-white/55">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-xs font-black text-white/65">
           <span>Todos os dados disponíveis</span>
-          <Fuel className="size-4 text-white/25" />
+          <Fuel className="size-4 text-white/65" />
         </summary>
-        <div className="space-y-2 border-t border-white/8 px-3 py-3 text-[0.54rem] leading-relaxed text-white/45">
+        <div className="space-y-2 border-t border-white/8 px-3 py-3 text-xs leading-relaxed text-white/65">
           <p><strong className="text-white/65">Identidade:</strong> {local?.aliases?.join(" · ") || "sem aliases consolidados"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · identificação:</strong> código SIMP {anp?.codigoSimp || "—"} · autorização {anp?.autorizacao || "—"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · datas:</strong> publicação {formatDate(anp?.dataPublicacao)} · vinculação {formatDate(anp?.dataVinculacao)} · obtenção dos dados {formatDate(anp?.dataObtencao)}</p>
@@ -322,22 +317,22 @@ export function StationDirectoryCard({
           <p><strong className="text-white/65">Origem:</strong> {anp?.origemInformacao || "não informada"} · obtido em {formatDate(anp?.dataObtencao)}</p>
           <p><strong className="text-white/65">Geografia:</strong> {coords ? coords.lat.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + coords.lng.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas consolidadas"} · validação {anp?.validacao || "—"} · acurácia {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : "—"} · SRID {anp?.srid || "—"}</p>
           <div className="rounded-xl border border-white/8 bg-black/10 p-2.5">
-            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#87DFF0]">Produtos / tancagem / bicos</p>
+            <p className="font-black uppercase tracking-[.11em] text-xs text-[#87DFF0]">Produtos / tancagem / bicos</p>
             {products.length ? products.map((item, productIndex) => (
               <p key={productIndex} className="mt-1">{item.produto || "produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem || ""} · bicos {item.quantidadeBicos ?? "—"} · classe {item.classe || "—"}</p>
             )) : <p className="mt-1">Nenhum produto ANP materializado nesta consulta.</p>}
           </div>
           <div className="rounded-xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.025] p-2.5">
-            <p className="font-black uppercase tracking-[.11em] text-[0.45rem] text-[#D9FF91]">Referência secundária de mapas</p>
+            <p className="font-black uppercase tracking-[.11em] text-xs text-[#D9FF91]">Referência secundária de mapas</p>
             <p className="mt-1">Telefone {phone || "—"} · nota {local?.mapData?.rating ?? "—"} · avaliações {local?.mapData?.reviewCount ?? "—"} · horário {local?.mapData?.hours || "—"} · bandeira observada {local?.mapData?.observedBrand || "—"}</p>
             <p className="mt-1">Status observado: {statusLabel} · coletado em {formatDate(local?.mapData?.observedAt)}</p>
           </div>
           <p><strong className="text-white/65">Qualidade:</strong> {local?.dataQuality || (anp ? "ANP" : "catálogo")} · {local?.sourceNote || "Cadastro consolidado de fontes públicas."}</p>
           {anp?.observacao && <p><strong className="text-white/65">Observação ANP:</strong> {anp.observacao}</p>}
-          {coords && <p className="text-white/25">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
+          {coords && <p className="text-white/65">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
         </div>
       </details>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-[0.48rem] text-white/25">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-xs text-white/65">
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
         <span>Sem conta · uso direto</span>
       </div>
