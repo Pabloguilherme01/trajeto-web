@@ -22,7 +22,10 @@ export function getUniversalSearchResults(query: string) {
   const services = searchPublicServices(value);
   const stations = searchAguasLindasStations(value);
   const places = searchLocalPlaces(value);
-  const dataResources = searchPublicDataResources(value);
+  const serviceCategories = new Set<string>(services.map(item => item.category));
+  const dataResources = searchPublicDataResources(value).filter(
+    item => !serviceCategories.has(item.category)
+  );
   const transitFares = searchSemiurbanFares(value);
   const serviceIds = new Set(services.map(item => item.id));
   const placeIds = new Set(places.map(item => "place-" + item.id));
