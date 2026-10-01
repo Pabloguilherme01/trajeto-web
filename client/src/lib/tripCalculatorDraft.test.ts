@@ -38,7 +38,6 @@ describe("trip calculator draft", () => {
     expect(loadTripCalculatorDraft()).toMatchObject({
       mode: "trabalho",
       recurring: true,
-      recurring: true,
       distance: "35",
       price: "5,89",
       roundTrip: true,
