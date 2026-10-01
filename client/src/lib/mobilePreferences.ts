@@ -33,11 +33,19 @@ export function setEconomyMode(enabled: boolean) {
 export function getRecentSearches(): string[] {
   try {
     const value = JSON.parse(localStorage.getItem(SEARCHES_KEY) || "[]");
-    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").slice(0, 5) : [];
+    if (!Array.isArray(value)) return [];
+    const next = value
+      .filter((item): item is string => typeof item === "string")
+      .map(item => privateOriginForHistory(item))
+      .slice(0, 5);
+    if (next.some((item, index) => item !== value[index])) {
+      localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
+    }
+    return next;
   } catch { return []; }
 }
 export function rememberSearch(query: string) {
-  const normalized = query.trim();
+  const normalized = privateOriginForHistory(query);
   if (normalized.length < 3) return;
   try {
     const next = [normalized, ...getRecentSearches().filter(item => item.toLowerCase() !== normalized.toLowerCase())].slice(0, 5);
