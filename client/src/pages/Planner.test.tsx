@@ -2,6 +2,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Planner from "./Planner";
+import { clearPrivateLocationHandoff, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
@@ -23,6 +24,7 @@ const submit = () => fireEvent.click(screen.getByRole("button", { name: "Calcula
 
 beforeEach(() => {
   vi.stubGlobal("React", React);
+  clearPrivateLocationHandoff();
   state.path = "/planejar";
   state.search = "origem=Casa&destino=Trabalho";
   state.staticRuntime = false;
@@ -64,6 +66,31 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(state.mutate).not.toHaveBeenCalled();
+  });
+
+  it("consumes mobile GPS handoff without putting coordinates in the query string", async () => {
+    state.search = "local=1&destino=Hospital";
+    setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+
+    render(<Planner />);
+
+    expect(
+      (screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value
+    ).toBe("Minha localização");
+    expect(
+      (screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value
+    ).toBe("Hospital");
+    expect(state.search).not.toContain("-15.76123");
+    expect(state.search).not.toContain("-48.28123");
+
+    submit();
+    await waitFor(() =>
+      expect(state.privateRoute).toHaveBeenCalledWith(
+        "-15.76123, -48.28123",
+        "Hospital",
+        "driving"
+      )
+    );
   });
 
   it("keeps device GPS private while manual coordinate routing stays available", async () => {
