@@ -31,10 +31,19 @@ const MAP_KEY = "trajeto-aguas-lindas-map-offline-v1";
 const MAX_MAP_STATIONS = 120;
 const MAX_ANP_ROWS = 2500;
 
-function readJson<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
+function offlineStorage(): Storage | null {
   try {
-    const value = JSON.parse(window.localStorage.getItem(key) || "null");
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function readJson<T>(key: string, fallback: T): T {
+  const storage = offlineStorage();
+  if (!storage) return fallback;
+  try {
+    const value = JSON.parse(storage.getItem(key) || "null");
     return value == null ? fallback : value;
   } catch {
     return fallback;
@@ -42,9 +51,10 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 function writeJson(key: string, value: unknown) {
-  if (typeof window === "undefined") return false;
+  const storage = offlineStorage();
+  if (!storage) return false;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
