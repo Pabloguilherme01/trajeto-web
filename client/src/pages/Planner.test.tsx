@@ -7,6 +7,7 @@ import { clearPrivateLocationHandoff, setPrivateLocationHandoff } from "@/lib/lo
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
   navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(),
+  saveOffline: vi.fn(),
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
@@ -15,7 +16,7 @@ vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
 vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
-vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: vi.fn(), removeOfflineRoute: vi.fn() }));
+vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: state.saveOffline, removeOfflineRoute: vi.fn() }));
 vi.mock("@/components/RouteMap", () => ({ RouteMap: () => null }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
@@ -32,6 +33,7 @@ beforeEach(() => {
   const routeResult = { origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" };
   state.publicRoute.mockReset().mockResolvedValue(routeResult);
   state.privateRoute.mockReset().mockResolvedValue(routeResult);
+  state.saveOffline.mockReset().mockResolvedValue(undefined);
   state.lookup.mockReset();
   state.navigate.mockReset();
 });
@@ -91,6 +93,18 @@ describe("Planner travel state", () => {
         "driving"
       )
     );
+  });
+
+  it("does not auto-save a route created from the device location", async () => {
+    state.search = "local=1&destino=Hospital";
+    setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+
+    render(<Planner />);
+    submit();
+
+    await waitFor(() => expect(state.privateRoute).toHaveBeenCalled());
+    expect(state.saveOffline).not.toHaveBeenCalled();
+    expect(screen.getByText(/não foi salva automaticamente para proteger sua localização/i)).toBeTruthy();
   });
 
   it("keeps device GPS private while manual coordinate routing stays available", async () => {
