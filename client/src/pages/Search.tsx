@@ -229,6 +229,7 @@ export default function SearchPage() {
   const [expanded, setExpanded] = useState(false);
   const [resultLimit, setResultLimit] = useState(6);
   const [online, setOnline] = useState(() => navigator.onLine);
+  const results = useMemo(() => getUniversalSearchResults(query), [query]);
 
   const visibleDataResources = useMemo(
     () =>
