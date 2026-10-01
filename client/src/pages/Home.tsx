@@ -314,6 +314,7 @@ export default function Home() {
               <button
                 key={item.label}
                 type="button"
+                aria-label={item.label}
                 onClick={item.action}
                 className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/15 active:scale-[.985]"
               >

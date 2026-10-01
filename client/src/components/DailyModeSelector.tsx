@@ -90,10 +90,12 @@ export default function DailyModeSelector() {
             const Icon = icons[mode.id];
             const activeMode = mode.id === activeId;
             return (
-              <button key={mode.id} type="button" role="listitem" aria-pressed={activeMode} onClick={() => openMode(mode)} aria-label={mode.label} className={activeMode ? "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-[#C7FF3C]/50 bg-[#C7FF3C]/10 px-3 text-left" : "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-left"}>
+              <div key={mode.id} role="listitem" className="shrink-0">
+              <button type="button" aria-pressed={activeMode} onClick={() => openMode(mode)} aria-label={mode.label} className={activeMode ? "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-[#C7FF3C]/50 bg-[#C7FF3C]/10 px-3 text-left" : "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-left"}>
                 <span className="flex items-center gap-1.5 text-[0.64rem] font-extrabold text-white"><Icon className="size-3.5 text-[#3DE3FF]" />{mode.label}</span>
                 <span className="mt-1 block truncate text-[0.58rem] text-[#82939C]">{mode.detail}</span>
               </button>
+              </div>
             );
           })}
         </div>
