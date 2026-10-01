@@ -5,14 +5,14 @@ import Planner from "./Planner";
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
-  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(),
+  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(),
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.staticRuntime, supportsLiveRouting: () => !state.staticRuntime }));
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
-vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: vi.fn(async () => ({ origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" })), buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
+vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
 vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: vi.fn(), removeOfflineRoute: vi.fn() }));
 vi.mock("@/components/RouteMap", () => ({ RouteMap: () => null }));
@@ -27,6 +27,9 @@ beforeEach(() => {
   state.search = "origem=Casa&destino=Trabalho";
   state.staticRuntime = false;
   state.mutate.mockReset().mockResolvedValue(payload);
+  const routeResult = { origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" };
+  state.publicRoute.mockReset().mockResolvedValue(routeResult);
+  state.privateRoute.mockReset().mockResolvedValue(routeResult);
   state.lookup.mockReset();
   state.navigate.mockReset();
 });
@@ -61,6 +64,43 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(state.mutate).not.toHaveBeenCalled();
+  });
+
+  it("keeps device GPS private while manual coordinate routing stays available", async () => {
+    state.search = "destino=Hospital";
+    const getCurrentPosition = vi.fn((success: PositionCallback) =>
+      success({
+        coords: {
+          latitude: -15.76123,
+          longitude: -48.28123,
+          accuracy: 10,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      } as GeolocationPosition)
+    );
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+
+    render(<Planner />);
+    fireEvent.click(screen.getByRole("button", { name: "Usar localização atual" }));
+    expect(screen.getByPlaceholderText("De onde você sai")).toHaveValue("Minha localização");
+
+    submit();
+    await waitFor(() =>
+      expect(state.privateRoute).toHaveBeenCalledWith(
+        "-15.76123, -48.28123",
+        "Hospital",
+        "driving"
+      )
+    );
+    expect(state.mutate).not.toHaveBeenCalled();
+    expect(state.publicRoute).not.toHaveBeenCalled();
   });
 
   it("ignores a calculation that returns after the destination changed", async () => {
