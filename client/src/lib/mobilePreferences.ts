@@ -1,3 +1,5 @@
+import { privateOriginForHistory } from "@/lib/locationPrivacy";
+
 const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
 const LAST_TRIP_KEY = "trajeto-last-trip";
@@ -46,7 +48,10 @@ export function rememberSearch(query: string) {
 export function getLastTrip(): { origin: string; destination: string } | null {
   try {
     const value = JSON.parse(localStorage.getItem(LAST_TRIP_KEY) || "null");
-    return value && typeof value.origin === "string" && typeof value.destination === "string" ? value : null;
+    if (!value || typeof value.origin !== "string" || typeof value.destination !== "string") return null;
+    const next = { origin: privateOriginForHistory(value.origin), destination: value.destination };
+    if (next.origin !== value.origin) localStorage.setItem(LAST_TRIP_KEY, JSON.stringify(next));
+    return next;
   } catch { return null; }
 }
 export type RecentTrip = { origin: string; destination: string; usedAt: string };
@@ -60,7 +65,15 @@ export function getRecentTrips(): RecentTrip[] {
   try {
     const value = JSON.parse(localStorage.getItem(RECENT_TRIPS_KEY) || "[]");
     if (!Array.isArray(value)) return [];
-    return value.filter(isRecentTrip).sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt)).slice(0, MAX_RECENT_TRIPS);
+    const valid = value
+      .filter(isRecentTrip)
+      .map(item => ({ ...item, origin: privateOriginForHistory(item.origin) }))
+      .sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt))
+      .slice(0, MAX_RECENT_TRIPS);
+    if (valid.some((item, index) => item.origin !== value.filter(isRecentTrip)[index]?.origin)) {
+      localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(valid));
+    }
+    return valid;
   } catch { return []; }
 }
 export function removeRecentTrip(origin: string, destination: string) {
@@ -110,7 +123,7 @@ export function getRouteUsage(origin: string, destination: string) {
   } catch { return 0; }
 }
 export function rememberTrip(origin: string, destination: string) {
-  const normalizedOrigin = origin.trim();
+  const normalizedOrigin = privateOriginForHistory(origin);
   const normalizedDestination = destination.trim();
   if (normalizedOrigin.length < 3 || normalizedDestination.length < 3) return;
   const trip: RecentTrip = { origin: normalizedOrigin, destination: normalizedDestination, usedAt: new Date().toISOString() };
