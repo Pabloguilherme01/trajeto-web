@@ -107,7 +107,7 @@ export default function Home() {
     if (!lastTrip) return;
     rememberIntent("route");
     vibration();
-    setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination));
+    setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&auto=1");
   };
 
   const findNearby = () => {
@@ -257,7 +257,7 @@ export default function Home() {
                 type="button"
                 onClick={() => {
                   rememberIntent("route");
-                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination));
+                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
                 }}
                 className="mobile-card min-h-[5.8rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985]"
               >
@@ -284,7 +284,7 @@ export default function Home() {
                 <button key={place.id} type="button" onClick={() => {
                   rememberSearch(place.name);
                   rememberIntent("route");
-                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery));
+                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
                 }} className="mobile-card min-h-[7rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985]">
                   <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
                   <span className="mt-2 block truncate text-xs font-black">{place.name}</span>
