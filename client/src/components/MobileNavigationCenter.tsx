@@ -69,13 +69,13 @@ export default function MobileNavigationCenter({
   return (
     <section aria-labelledby="navigation-center-title" className="mt-6 overflow-hidden rounded-[1.5rem] border border-[#C7D4CA] bg-[#101A20] text-white shadow-[0_22px_70px_rgba(0,0,0,.24)]">
       <div className="border-b border-white/8 p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#C7FF3C]">Centro de navegação</p>
             <h2 id="navigation-center-title" className="mt-2 font-display text-[clamp(1.8rem,7vw,2.8rem)] font-semibold leading-[.95] tracking-[-.055em]">Pronto para ir.</h2>
             <p className="mt-2 line-clamp-2 break-words text-sm font-semibold leading-snug text-white/70" title={destination}>→ {destination}</p>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[.04] px-2.5 py-2 text-xs font-black text-white/65">
+          <span className="inline-flex min-h-9 self-start items-center gap-1.5 rounded-full border border-white/10 bg-white/[.04] px-2.5 py-2 text-xs font-bold leading-snug text-white/70">
             {offline ? <WifiOff className="size-3.5" /> : <CheckCircle2 className="size-3.5 text-[#C7FF3C]" />}
             <span aria-live="polite">{status}</span>
           </span>
@@ -100,7 +100,7 @@ export default function MobileNavigationCenter({
         </div>
 
         {activeRouteLabel && (
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3 py-2.5">
+          <div className="mt-3 flex flex-col gap-1.5 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Rota selecionada</p><p className="mt-0.5 text-xs font-black text-white">{activeRouteLabel}</p></div>
             <span className="text-xs text-white/65">{routeConfirmed ? "Confirmada" : "Selecione uma rota"}</span>
           </div>
