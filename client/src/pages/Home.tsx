@@ -189,7 +189,7 @@ export default function Home() {
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#B7D86B]/10 text-[#B7D86B]"><SearchIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-black text-white">O que você precisa hoje?</span>
-              <span className="mt-0.5 block truncate text-xs text-white/55">Ex.: UBS, falta de luz, buraco, posto ou endereço<span className="hidden sm:inline"> · Ctrl K</span></span>
+              <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/55">Ex.: UBS, falta de luz, buraco, posto ou endereço<span className="hidden sm:inline"> · Ctrl K</span></span>
             </span>
             <ArrowRight className="size-4 shrink-0 text-white/60" />
           </button>
@@ -338,7 +338,7 @@ export default function Home() {
                 className="mobile-card min-h-[5.8rem] rounded-2xl border border-white/8 bg-[#141E23] p-3 text-left transition hover:border-[#79C6D0]/20 active:scale-[.985]"
               >
                 <Route className="size-4 text-[#79C6D0]" aria-hidden="true" />
-                <span className="mt-2 block truncate text-xs font-black">{route.label}</span>
+                <span className="mt-2 block line-clamp-2 break-words text-sm font-bold leading-snug">{route.label}</span>
                 <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</span>
               </button>
             ))}
@@ -363,9 +363,9 @@ export default function Home() {
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
                 }} className="mobile-card min-h-[7rem] rounded-2xl border border-white/8 bg-[#141E23] p-3 text-left transition hover:border-[#D8B47A]/25 active:scale-[.985]">
                   <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#D8B47A]" : "text-[#79C6D0]")} aria-hidden="true" />
-                  <span className="mt-2 block truncate text-xs font-black">{place.name}</span>
+                  <span className="mt-2 block line-clamp-2 break-words text-sm font-bold leading-snug">{place.name}</span>
                   <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{place.detail}</span>
-                  <span className="mt-1 block truncate text-xs text-white/60">{place.address}</span>
+                  <span className="mt-1 block line-clamp-2 break-words text-xs leading-snug text-white/60">{place.address}</span>
                 </button>
               );
             })}
@@ -446,7 +446,7 @@ export default function Home() {
             <div className="mt-3 grid gap-2">
               {destinations.slice(0, 4).map(place => (
                 <button key={place.id} type="button" onClick={() => { rememberDestinationUsage(place); setDestination(place.value); }} className="flex min-h-11 items-center justify-between rounded-xl bg-[#0D1418] px-3 text-left">
-                  <span className="min-w-0"><span className="block truncate text-xs font-black text-white">{place.label}</span><span className="block truncate text-xs text-white/65">{place.value}</span></span>
+                  <span className="min-w-0"><span className="block line-clamp-2 break-words text-sm font-bold leading-snug text-white">{place.label}</span><span className="mt-0.5 block line-clamp-2 break-words text-xs leading-snug text-white/65">{place.value}</span></span>
                   <ArrowRight className="size-3.5 shrink-0 text-white/60" />
                 </button>
               ))}
@@ -489,8 +489,8 @@ export default function Home() {
                     <Route className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-black text-white">{trip.destination}</span>
-                    <span className="mt-0.5 block truncate text-xs text-white/65">{trip.origin} → destino</span>
+                    <span className="block line-clamp-2 break-words text-sm font-bold leading-snug text-white">{trip.destination}</span>
+                    <span className="mt-0.5 block line-clamp-2 break-words text-xs leading-snug text-white/65">{trip.origin} → destino</span>
                     <span className="mt-1 block text-xs font-bold uppercase tracking-[.1em] text-white/60">
                       {index === 0 ? "Mais recente" : "Reutilizar"}
                     </span>
