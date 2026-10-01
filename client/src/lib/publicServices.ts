@@ -30,7 +30,8 @@ export type PublicService = {
     | "Saneago"
     | "Equatorial Goiás"
     | "Ministério do Trabalho e Emprego"
-    | "INSS";
+    | "INSS"
+    | "Receita Federal";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -729,6 +730,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "defesa-civil",
+    keywords: ["defesa civil", "alagamento", "enchente", "desabamento", "risco estrutural"],
     name: "Proteção e atendimento de emergência",
     category: "seguranca",
     description:
@@ -858,6 +860,31 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "01/10/2026",
   },
   {
+    id: "receita-federal-pav",
+    keywords: [
+      "receita federal",
+      "cpf",
+      "cnpj",
+      "imposto de renda",
+      "regularizacao fiscal",
+      "certidao federal",
+      "pav",
+    ],
+    name: "Receita Federal · ponto conveniado",
+    category: "cidadania",
+    description:
+      "Ponto de atendimento conveniado da Receita Federal em Águas Lindas de Goiás.",
+    sourceLabel: "Receita Federal",
+    sourceUrl:
+      "https://www.gov.br/receitafederal/pt-br/canais_atendimento/fale-conosco/presencial/go/aguas-lindas-de-goias",
+    actionUrl:
+      "https://www.gov.br/receitafederal/pt-br/canais_atendimento/fale-conosco/presencial/go/aguas-lindas-de-goias",
+    actionLabel: "Consultar atendimento oficial",
+    guidance:
+      "Consulte a página oficial antes de sair para confirmar os serviços disponíveis e eventual necessidade de agendamento. O Trajeto não publica endereço ou horário sem confirmação oficial.",
+    verifiedAt: "01/10/2026",
+  },
+  {
     id: "vapt-vupt",
     name: "Vapt Vupt",
     category: "cidadania",
@@ -956,6 +983,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Agendar Vapt Vupt",
     query: "vapt vupt",
     hint: "Canal oficial de agendamento",
+  },
+  {
+    label: "CPF e Receita Federal",
+    query: "receita federal",
+    hint: "Ponto conveniado oficial",
   },
   {
     label: "Reclamação municipal",
