@@ -58,7 +58,7 @@ export default function MobileBottomNav() {
       </div>
     </nav>
     <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
-      <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border-white/10 bg-[#121B22] text-white">
+      <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="bottom-0 top-auto left-1/2 max-h-[min(82dvh,42rem)] w-full max-w-none translate-x-[-50%] translate-y-0 overflow-y-auto overscroll-contain rounded-b-none rounded-t-[1.6rem] border-white/10 bg-[#121B22] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-5 text-white sm:bottom-auto sm:top-[50%] sm:max-w-lg sm:translate-y-[-50%] sm:rounded-2xl sm:p-6">
         <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-white/70"><X className="size-5 shrink-0" /></DialogClose>
         <DialogTitle className="pr-10">Mais opções</DialogTitle>
         <DialogDescription>Busca, mapa, saúde, emergência, postos e recursos locais ficam aqui.</DialogDescription>
