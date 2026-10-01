@@ -1,5 +1,6 @@
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { supportsBackendAuth } from "@/lib/runtimeCapabilities";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -14,9 +15,11 @@ export function useAuth(options?: UseAuthOptions) {
   // the state cookie, so calling it per render would overwrite the cookie and
   // desync it from an in-flight login's `state`.
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
+  const canUseBackendAuth = supportsBackendAuth();
   const utils = trpc.useUtils();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
+    enabled: canUseBackendAuth,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -29,7 +32,7 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logout = useCallback(async () => {
     try {
-      await logoutMutation.mutateAsync();
+      if (canUseBackendAuth) await logoutMutation.mutateAsync();
     } catch (error: unknown) {
       if (
         error instanceof TRPCClientError &&
@@ -48,7 +51,7 @@ export function useAuth(options?: UseAuthOptions) {
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
     }
-  }, [logoutMutation, utils]);
+  }, [canUseBackendAuth, logoutMutation, utils]);
 
   const state = useMemo(() => {
     return {
@@ -88,7 +91,10 @@ export function useAuth(options?: UseAuthOptions) {
 
   return {
     ...state,
-    refresh: () => meQuery.refetch(),
+    refresh: async () => {
+      if (!canUseBackendAuth) return null;
+      return meQuery.refetch();
+    },
     logout,
   };
 }
