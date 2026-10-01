@@ -91,11 +91,11 @@ export default function Help() {
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Sem conta, uma rota calculada pelo backend não é salva no banco do Trajeto.</p>
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Telemetria de produto fica desligada por padrão e não é necessária para usar o site.</p>
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Histórico local usa “Minha localização” em vez da coordenada GPS exata.</p>
-            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Para cálculo online a origem GPS é reduzida antes de sair do aparelho.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Quando a origem vem do GPS, ela não é enviada ao backend nem ao motor de rotas online; o cálculo inicial fica local.</p>
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Ao abrir Google Maps, Waze ou Apple Maps, o Trajeto não coloca sua coordenada de origem no link.</p>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-white/60">
-            Uma rota online ainda precisa conversar com um serviço de roteamento. O Trajeto envia uma origem aproximada, sem cookies e sem referrer; como em qualquer requisição web direta, o provedor ainda pode receber o endereço IP da conexão. A localização exata não é usada como telemetria do Trajeto.
+            Quando você digita um destino que não existe no catálogo local, o Trajeto pode consultar um serviço externo para localizar esse destino. A posição atual do aparelho não é enviada nessa consulta. Como em qualquer requisição web direta, o serviço externo ainda pode receber o endereço IP da conexão. A localização exata não é usada como telemetria do Trajeto.
           </p>
           <div className="mt-4 rounded-2xl border border-white/10 bg-[#0D1418] p-3">
             <p className="text-sm font-bold">Quer apagar o histórico local?</p>
