@@ -21,6 +21,15 @@ describe("universal citizen search", () => {
       expect(results.places).toEqual([]);
     }
   );
+  it("prioritizes names that are closer to the citizen query", () => {
+    const health = getUniversalSearchResults("saude");
+    expect(health.services.length).toBeGreaterThan(1);
+    expect(health.services[0].name.toLocaleLowerCase("pt-BR")).toContain("saúde");
+
+    const vigil = getUniversalSearchResults("vigilancia");
+    expect(vigil.services[0]?.id).toBe("vigilancia-saude");
+  });
+
   it("returns no fake matches for an empty or unknown search", () => {
     expect(getUniversalSearchResults(" ").total).toBe(0);
     expect(getUniversalSearchResults("servico-inexistente-xyz").total).toBe(0);
