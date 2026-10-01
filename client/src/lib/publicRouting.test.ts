@@ -149,11 +149,8 @@ describe("public routing fallback", () => {
       key: () => null,
       length: 0,
     };
-    Object.defineProperty(window, "localStorage", {
-      configurable: true,
-      value: storage,
-    });
-    window.localStorage.setItem(
+    vi.stubGlobal("window", { localStorage: storage });
+    storage.setItem(
       "trajeto-aguas-lindas-anp-offline-v1",
       JSON.stringify({
         retrievedAt: "2026-10-01T12:00:00.000Z",
