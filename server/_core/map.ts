@@ -8,7 +8,9 @@ type MapsConfig = {
   apiKey: string;
 };
 
-const MAPS_REQUEST_TIMEOUT_MS = 15_000;
+const MAPS_REQUEST_TIMEOUT_MS = 10_000;
+const inFlightRequests = new Map<string, Promise<unknown>>();
+const MAX_IN_FLIGHT_KEYS = 500;
 
 function getMapsConfig(): MapsConfig {
   const baseUrl = ENV.forgeApiUrl;
@@ -114,6 +116,23 @@ export async function makeRequest<T = unknown>(
   params: Record<string, unknown> = {},
   options: RequestOptions = {}
 ): Promise<T> {
+  // Collapse only identical requests that are already in flight. Nothing is
+  // retained after completion, so coordinate-bearing requests are not cached.
+  const dedupeKey = options.method === "POST" || options.body
+    ? null
+    : endpoint + "?" + new URLSearchParams(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined && value !== null)
+          .map(([key, value]) => [key, String(value)])
+          .sort(([a], [b]) => a.localeCompare(b)),
+      ).toString();
+
+  if (dedupeKey) {
+    const existing = inFlightRequests.get(dedupeKey);
+    if (existing) return existing as Promise<T>;
+  }
+
+  const execute = async (): Promise<T> => {
   const startedAt = Date.now();
   const operation = endpoint.replace(/^\/maps\/api\//, "").replace(/\/json$/, "").slice(0, 80);
   let metricRecorded = false;
@@ -148,5 +167,16 @@ export async function makeRequest<T = unknown>(
   } catch (error) {
     if (!metricRecorded) void recordProviderMetric({ provider: "google_maps", operation, durationMs: Date.now() - startedAt, success: false });
     throw error;
+  }
+  };
+
+  const request = execute();
+  if (!dedupeKey || inFlightRequests.size >= MAX_IN_FLIGHT_KEYS) return request;
+
+  inFlightRequests.set(dedupeKey, request);
+  try {
+    return await request;
+  } finally {
+    if (inFlightRequests.get(dedupeKey) === request) inFlightRequests.delete(dedupeKey);
   }
 }
