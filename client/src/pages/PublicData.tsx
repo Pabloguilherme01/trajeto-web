@@ -1,14 +1,20 @@
 import {
   ArrowRight,
   BusFront,
+  CloudRain,
   Database,
   ExternalLink,
   Fuel,
   GraduationCap,
   HeartPulse,
+  Landmark,
   MapPinned,
+  Radio,
+  Route,
   ShieldAlert,
+  Users,
   WifiOff,
+  Wind,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -31,7 +37,25 @@ const categoryMeta: Record<
   territorio: { label: "Território", icon: MapPinned },
   lugares: { label: "Lugares", icon: MapPinned },
   combustivel: { label: "Combustível", icon: Fuel },
+  clima: { label: "Clima e alertas", icon: CloudRain },
+  rodovia: { label: "Rodovias", icon: Route },
+  conectividade: { label: "Conectividade", icon: Radio },
+  financeiro: { label: "Serviços financeiros", icon: Landmark },
+  assistencia: { label: "Assistência social", icon: Users },
+  ambiente: { label: "Meio ambiente", icon: Wind },
 };
+
+const DEPARTURE_RESOURCE_IDS = [
+  "inmet-alertas",
+  "defesa-civil-alertas",
+  "dnit-rodovias",
+  "anatel-cobertura",
+  "stpc-df-gtfs",
+] as const;
+
+const departureResources = PUBLIC_DATA_RESOURCES.filter(item =>
+  DEPARTURE_RESOURCE_IDS.includes(item.id as (typeof DEPARTURE_RESOURCE_IDS)[number]),
+);
 
 export default function PublicData() {
   const [, setLocation] = useLocation();
@@ -90,6 +114,51 @@ export default function PublicData() {
             </p>
           )}
         </header>
+
+        <section
+          className="mt-6 rounded-3xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-4 sm:p-5"
+          aria-labelledby="departure-data-title"
+        >
+          <p className="text-xs font-bold uppercase tracking-[.12em] text-[#3DE3FF]">
+            Antes de sair
+          </p>
+          <h2 id="departure-data-title" className="mt-1 text-xl font-black">
+            Fontes que podem mudar sua decisão de viagem.
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/70">
+            O Trajeto conecta clima oficial, contexto rodoviário, cobertura móvel
+            e transporte do DF sem tratar referência histórica ou cobertura
+            teórica como informação ao vivo.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
+            {departureResources.map(item => {
+              const meta = categoryMeta[item.category];
+              const Icon = meta.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() =>
+                    setLocation(
+                      appUrl("/dados") +
+                        "?recurso=" +
+                        encodeURIComponent(item.id),
+                    )
+                  }
+                  className="min-h-[7rem] rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left transition hover:border-[#3DE3FF]/30 active:scale-[.99]"
+                >
+                  <Icon className="size-4 text-[#3DE3FF]" />
+                  <span className="mt-2 block text-xs font-black">
+                    {item.title}
+                  </span>
+                  <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-white/60">
+                    {item.sourceLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
         <section id="transporte" className="mt-7" aria-labelledby="transport-title">
           <div className="flex items-end justify-between gap-3">
@@ -248,13 +317,15 @@ export default function PublicData() {
         <section className="mt-8 rounded-3xl border border-white/10 bg-[#0F171D] p-4 sm:p-5">
           <h2 className="text-lg font-black">Como o Trajeto usa esses dados</h2>
           <p className="mt-2 max-w-4xl text-sm leading-relaxed text-white/70">
-            ANP já alimenta recursos locais. ANTT entra como referência de
-            transporte e tarifa. CNES e Inep ajudam a validar saúde e educação.
-            PRF serve para contexto histórico rodoviário. IBGE identifica o
-            território, e OpenStreetMap complementa descoberta de lugares sem
-            ser apresentado como fonte oficial. Integrações futuras devem
-            sincronizar no build ou no servidor, nunca bloquear a experiência
-            mobile nem comprometer o modo offline.
+            ANP já alimenta recursos locais; ANTT e o futuro GTFS apoiam
+            transporte; INMET e Defesa Civil cobrem avisos oficiais; DNIT e PRF
+            oferecem contexto rodoviário; Anatel ajuda a planejar contingência
+            de conexão; CNES, SAMU, PNI e Farmácia Popular fortalecem saúde;
+            MDS apoia assistência social; Banco Central cobre serviços
+            financeiros; IBGE identifica o território; MonitorAr cobre
+            qualidade do ar; e OpenStreetMap complementa descoberta de lugares.
+            Bases grandes devem ser sincronizadas no build ou no servidor para
+            não bloquear o mobile nem comprometer o modo offline.
           </p>
         </section>
       </div>
