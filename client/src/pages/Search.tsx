@@ -485,8 +485,8 @@ export default function SearchPage() {
                             : MapPin
                       }
                       title={item.name}
-                      detail={item.address}
-                      source={item.detail}
+                      detail={item.detail + " · " + item.address}
+                      source={item.sourceLabel}
                       onClick={() => openRoute(item.mapQuery)}
                     />
                   ))}
