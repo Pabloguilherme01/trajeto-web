@@ -13,10 +13,12 @@ const CACHE_PREFIX = "trajeto:public-routing:";
 const REQUEST_TIMEOUT_MS = 9_000;
 const GEOCODER_MIN_INTERVAL_MS = import.meta.env.MODE === "test" ? 0 : 1_100;
 const GEOCODER_MISS_TTL_MS = 60_000;
+const GEOCODER_FAILURE_COOLDOWN_MS = 120_000;
 const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>();
 const geocoderMissUntil = new Map<string, number>();
 let geocoderQueue: Promise<void> = Promise.resolve();
 let geocoderLastStartedAt = 0;
+let geocoderUnavailableUntil = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -153,6 +155,7 @@ export function publicGeocoderWaitMs(
 async function requestPublicGeocoder(query: string) {
   const key = normalizeSearch(query);
   const now = Date.now();
+  if (geocoderUnavailableUntil > now) return undefined;
   if ((geocoderMissUntil.get(key) ?? 0) > now) return undefined;
 
   const existing = geocoderInFlight.get(key);
@@ -184,9 +187,12 @@ async function requestPublicGeocoder(query: string) {
         return undefined;
       }
       geocoderMissUntil.delete(key);
+      geocoderUnavailableUntil = 0;
       return result;
     } catch (error) {
-      geocoderMissUntil.set(key, Date.now() + GEOCODER_MISS_TTL_MS);
+      const failedAt = Date.now();
+      geocoderMissUntil.set(key, failedAt + GEOCODER_MISS_TTL_MS);
+      geocoderUnavailableUntil = failedAt + GEOCODER_FAILURE_COOLDOWN_MS;
       throw error;
     }
   });
