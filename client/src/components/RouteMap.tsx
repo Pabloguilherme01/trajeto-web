@@ -261,7 +261,7 @@ function wrapTileX(x: number, zoom: number) {
   return ((x % max) + max) % max;
 }
 
-function TileRouteMap({
+export function TileRouteMap({
   origin,
   destination,
   stops = [],
