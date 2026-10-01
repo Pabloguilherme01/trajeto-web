@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { clearRecentTrips, getRecentTrips, rememberTrip, getRouteUsageStats, removeRecentTrip } from "./mobilePreferences";
+import { clearRecentTrips, getRecentSearches, getRecentTrips, rememberSearch, rememberTrip, getRouteUsageStats, removeRecentTrip } from "./mobilePreferences";
 
 describe("mobilePreferences recent trips", () => {
   beforeEach(() => localStorage.clear());
@@ -43,6 +43,16 @@ describe("mobilePreferences recent trips", () => {
     const trips = getRecentTrips();
     expect(trips[0]?.origin).toBe("Minha localização");
     expect(localStorage.getItem("trajeto-recent-trips")).not.toContain("-15.76123");
+  });
+});
+
+describe("mobilePreferences search privacy", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("scrubs precise coordinates from recent searches", () => {
+    rememberSearch("-15.76123, -48.28123");
+    expect(getRecentSearches()).toEqual(["Minha localização"]);
+    expect(localStorage.getItem("trajeto-recent-searches")).not.toContain("-15.76123");
   });
 });
 
