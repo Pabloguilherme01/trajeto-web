@@ -219,4 +219,52 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
   .mobile-bottom-nav-safe {
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
   }
+  /* Tipografia responsiva: evita cortes, letras minúsculas e títulos desproporcionais. */
+  :where(main, [role="dialog"]) :where(h1, h2, h3, h4, p, li, label, summary, button, a, span) {
+    min-width: 0;
+  }
+  :where(main, [role="dialog"]) :where(h1, h2, h3, h4, p, li, label, summary, button, a) {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  .premium-surface h1 {
+    font-size: clamp(2rem, 9vw, 2.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  :where(main, [role="dialog"]) .text-xs {
+    font-size: clamp(0.75rem, 3.35vw, 0.8125rem);
+    line-height: 1.4;
+  }
+  :where(main, [role="dialog"]) .text-sm {
+    font-size: clamp(0.875rem, 3.8vw, 0.95rem);
+    line-height: 1.45;
+  }
+  .soft-kicker {
+    font-size: clamp(0.75rem, 3.2vw, 0.8rem);
+    letter-spacing: 0.055em;
+    line-height: 1.35;
+  }
+  .mobile-title {
+    font-size: clamp(2rem, 9vw, 2.75rem);
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+  }
+  .mobile-card,
+  .route-card {
+    min-width: 0;
+  }
+  .mobile-card :where(p, span, strong),
+  .route-card :where(p, span, strong) {
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 359px) {
+  .container { padding-inline: 0.875rem; }
+  .premium-surface h1,
+  .mobile-title {
+    font-size: clamp(1.9rem, 9vw, 2.15rem);
+  }
+  .soft-kicker { letter-spacing: 0.04em; }
 }
