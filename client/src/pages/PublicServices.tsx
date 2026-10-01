@@ -216,7 +216,7 @@ export default function PublicServices() {
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[0.56rem] font-black uppercase tracking-[.17em] text-[#C7FF3C]">
+            <p className="text-xs font-black uppercase tracking-[.17em] text-[#C7FF3C]">
               Central de serviços
             </p>
             <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">
@@ -489,24 +489,8 @@ export default function PublicServices() {
                     {service.address}
                   </p>
                 )}
-                {(service.phone || service.extraPhone || service.hours) && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {service.phone && (
-                      <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-xs font-bold text-white/75">
-                        {service.phone}
-                      </span>
-                    )}
-                    {service.extraPhone && (
-                      <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-xs font-bold text-white/65">
-                        Alternativo · {service.extraPhone}
-                      </span>
-                    )}
-                    {service.hours && (
-                      <span className="rounded-full border border-white/8 bg-white/[.02] px-2.5 py-1 text-xs font-bold text-white/75">
-                        {service.hours}
-                      </span>
-                    )}
-                  </div>
+                {service.hours && (
+                  <p className="mt-3 text-sm font-bold text-white/75">{service.hours}</p>
                 )}
                 {service.guidance && (
                   <p className="mt-3 rounded-xl bg-white/5 p-3 text-sm leading-relaxed text-white/75">
@@ -597,7 +581,7 @@ export default function PublicServices() {
                   href={service.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-2 flex min-h-11 items-center justify-center text-center text-xs font-bold text-white/65 hover:text-white"
+                  className="mt-2 flex min-h-11 items-center justify-center text-center text-sm font-bold text-white/75 hover:text-white"
                 >
                   Fonte: {service.sourceLabel}
                   {service.verifiedAt

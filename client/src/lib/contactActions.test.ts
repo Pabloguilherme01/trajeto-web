@@ -6,6 +6,20 @@ import {
 } from "./contactActions";
 
 describe("ações de contato", () => {
+  it("identifies emergency agencies instead of presenting police as alternative rescue", () => {
+    expect(
+      publicServiceContacts({ phone: "193", extraPhone: "190" }).map(item => [
+        item.label,
+        item.href,
+      ])
+    ).toEqual([
+      ["Bombeiros · resgate e salvamento", "tel:193"],
+      ["Polícia · emergência policial", "tel:190"],
+    ]);
+    expect(publicServiceContacts({ phone: "192" })[0].label).toBe(
+      "SAMU · emergência médica"
+    );
+  });
   it("supports freephone and national service numbers", () => {
     expect(phoneHref("0800 062 0196")).toBe("tel:08000620196");
     expect(phoneHref("180")).toBe("tel:180");
