@@ -7,7 +7,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, getPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
-import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
+import { findOfflineRouteByDestination, findOfflineRouteByTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
@@ -162,8 +162,34 @@ export default function Planner() {
       setError("Origem e destino precisam ser diferentes.");
       return;
     }
+    if (!online) {
+      const offlineRoutes = savedRoutes.length
+        ? savedRoutes
+        : await listOfflineRoutes().catch(() => []);
+      const savedMatch = from
+        ? findOfflineRouteByTrip(offlineRoutes, from, to) ??
+          findOfflineRouteByDestination(offlineRoutes, to)
+        : findOfflineRouteByDestination(offlineRoutes, to);
+      if (savedMatch) {
+        setOrigin(savedMatch.origin);
+        setDestination(savedMatch.destination);
+        setPlanned(savedMatch.payload as PlannedRoute);
+        setShowMap(true);
+        setFallbackReady(false);
+        setError(null);
+        setSavedMessage(
+          from &&
+            savedMatch.origin.trim().toLocaleLowerCase("pt-BR") !==
+              from.toLocaleLowerCase("pt-BR")
+            ? "Sem internet: abrimos a rota salva para este destino usando a origem gravada anteriormente."
+            : "Sem internet: abrimos a cópia salva desta rota."
+        );
+        vibration(14);
+        return;
+      }
+    }
     if (!online && !staticRuntime) {
-      setError("Sem internet. Para calcular uma rota nova no servidor, conecte-se ou abra uma rota salva.");
+      setError("Sem internet. Esta rota ainda não está salva neste aparelho.");
       return;
     }
 
@@ -387,6 +413,33 @@ export default function Planner() {
             {online ? "online" : "offline"}
           </span>
         </header>
+
+        {!savedMode && !online && (
+          <section className="mt-4 flex items-start justify-between gap-3 rounded-2xl border border-[#D8B47A]/20 bg-[#D8B47A]/[.05] p-3" aria-label="Rotas disponíveis offline">
+            <div className="flex min-w-0 gap-2.5">
+              <WifiOff className="mt-0.5 size-4 shrink-0 text-[#D8B47A]" />
+              <div>
+                <p className="text-sm font-bold">
+                  {savedRoutes.length
+                    ? `${savedRoutes.length} rota${savedRoutes.length === 1 ? "" : "s"} pronta${savedRoutes.length === 1 ? "" : "s"} sem internet`
+                    : "Nenhuma rota salva ainda"}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-white/65">
+                  {savedRoutes.length
+                    ? "Digite um destino já salvo e o Trajeto abre a cópia local automaticamente."
+                    : "Rotas novas podem depender de dados consultados antes. Salve seus trajetos mais usados quando estiver online."}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLocation(appUrl("/salvos"))}
+              className="min-h-11 shrink-0 rounded-xl border border-white/10 px-3 text-xs font-bold text-white/75"
+            >
+              Ver salvas
+            </button>
+          </section>
+        )}
 
         {!savedMode && (
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#141E23] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
