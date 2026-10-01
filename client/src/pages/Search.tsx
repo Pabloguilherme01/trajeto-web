@@ -159,7 +159,7 @@ const quickActions = [
   },
   {
     label: "Assistência social",
-    hint: "CRAS, CREAS e benefícios",
+    hint: "Família, proteção e benefícios",
     icon: HeartPulse,
     kind: "services",
     query: "cras",
