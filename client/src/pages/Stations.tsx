@@ -85,6 +85,16 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const nearbyRequested = params.get("perto") === "1";
   const showSavedOnly = params.get("salvos") === "1";
+  useEffect(() => {
+    if (!hasCoordinates || typeof window === "undefined") return;
+    const clean = new URLSearchParams(window.location.search);
+    clean.delete("lat");
+    clean.delete("lng");
+    clean.set("perto", "1");
+    const nextUrl = appUrl("/postos") + "?" + clean.toString();
+    window.history.replaceState(window.history.state, "", nextUrl);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }, [hasCoordinates]);
   const urlQuery = params.get("q")?.trim() || corridorPresets[0]?.query || "postos";
   const staticRuntime = isGitHubPagesRuntime();
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -430,11 +440,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [urlQuery, showSavedOnly, query, mapFirst]);
 
   useEffect(() => {
-    if (hasCoordinates) {
-      setUserCoords({ lat, lng });
-      setNearby(true);
-    }
-  }, [hasCoordinates, lat, lng]);
+    if (!hasCoordinates) return;
+    setUserCoords(null);
+    setNearby(false);
+    setNearbyAutoAttempted(false);
+  }, [hasCoordinates]);
 
   useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
