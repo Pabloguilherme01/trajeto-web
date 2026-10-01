@@ -50,6 +50,13 @@ describe("mobile search organization", () => {
     ).toBeNull();
     expect(screen.getByRole("status").textContent).toContain("3 resultado(s)");
   });
+  it("shows the source label for local places instead of presenting a category as a source", () => {
+    window.history.replaceState(null, "", "/buscar?q=giraffas");
+    render(<SearchPage />);
+    expect(screen.getAllByText("Consulta local").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Alimentação/).length).toBeGreaterThan(0);
+  });
+
   it("offers recovery for an unknown query and disables external search offline", () => {
     vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
     window.history.replaceState(null, "", "/buscar?q=nao-existe-xyz");
