@@ -215,8 +215,14 @@ export default function Planner() {
         const baseMessage = publicRoute.source === "local-estimate"
           ? "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
           : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.";
-        const autoSaved = await persistRouteLocally(publicPayload, resolvedOrigin, to);
-        setSavedMessage(baseMessage + (autoSaved ? " Cópia offline criada automaticamente." : ""));
+        const autoSaved = originPrivate
+          ? false
+          : await persistRouteLocally(publicPayload, resolvedOrigin, to);
+        setSavedMessage(
+          baseMessage +
+            (autoSaved ? " Cópia offline criada automaticamente." : "") +
+            (originPrivate ? " Esta rota não foi salva automaticamente para proteger sua localização." : "")
+        );
         if (resolvedOrigin) rememberTrip(originPrivate ? privateOriginForHistory(resolvedOrigin) : resolvedOrigin, to);
         track("route_open", to);
         vibration(14);
