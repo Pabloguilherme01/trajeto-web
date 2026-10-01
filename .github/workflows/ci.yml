@@ -38,6 +38,9 @@ jobs:
       - name: Service worker syntax
         run: node --check client/public/sw.js
 
+      - name: Enforce zero-cost public core
+        run: npm run check:zero-cost
+
       - name: Typecheck
         run: npm run check
 

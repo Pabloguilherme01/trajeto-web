@@ -19,11 +19,37 @@ const requiredFallbacks = [
   "nominatim.openstreetmap.org",
   "router.project-osrm.org",
   "local-estimate",
+  "VITE_PUBLIC_GEOCODER_URL",
+  "VITE_PUBLIC_ROUTING_URL",
 ];
 
 for (const marker of requiredFallbacks) {
   if (!routing.includes(marker)) {
     console.error("Zero-cost core: fallback gratuito ausente:", marker);
+    process.exitCode = 1;
+  }
+}
+
+const publicIndex = fs.readFileSync("client/index.html", "utf8");
+const forbiddenStaticSdks = [
+  "maps.googleapis.com/maps/api/js",
+  "api.mapbox.com/mapbox-gl-js",
+];
+
+for (const sdk of forbiddenStaticSdks) {
+  if (publicIndex.includes(sdk)) {
+    console.error("Zero-cost core: HTML público passou a carregar SDK comercial:", sdk);
+    process.exitCode = 1;
+  }
+}
+
+const serviceWorker = fs.readFileSync("client/public/sw.js", "utf8");
+for (const snapshot of [
+  "./data/aguas-lindas-anp.json",
+  "./data/aguas-lindas-anp-precos.json",
+]) {
+  if (!serviceWorker.includes(snapshot)) {
+    console.error("Zero-cost core: snapshot essencial deixou de ser preparado offline:", snapshot);
     process.exitCode = 1;
   }
 }
