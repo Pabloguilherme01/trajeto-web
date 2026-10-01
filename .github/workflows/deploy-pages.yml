@@ -50,6 +50,9 @@ jobs:
           test -f client/public/data/aguas-lindas-anp-precos.json
           node -e 'JSON.parse(require("node:fs").readFileSync("client/public/data/aguas-lindas-anp.json","utf8")); JSON.parse(require("node:fs").readFileSync("client/public/data/aguas-lindas-anp-precos.json","utf8"));'
 
+      - name: Enforce zero-cost public core
+        run: npm run check:zero-cost
+
       - name: Typecheck before publishing
         run: npm run check
 
