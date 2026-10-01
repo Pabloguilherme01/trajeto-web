@@ -67,6 +67,19 @@ describe("mobile search organization", () => {
     expect(screen.getAllByText(/Alimentação/).length).toBeGreaterThan(0);
   });
 
+  it("turns local place and station matches into automatic next actions", () => {
+    window.history.replaceState(null, "", "/buscar?q=giraffas");
+    render(<SearchPage />);
+    expect(screen.getByText(/Rota rápida · Águas Lindas/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Planejar rota" })).toBeTruthy();
+
+    cleanup();
+    window.history.replaceState(null, "", "/buscar?q=rham");
+    render(<SearchPage />);
+    expect(screen.getByText(/Posto encontrado · Águas Lindas/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ver posto" })).toBeTruthy();
+  });
+
   it("offers recovery for an unknown query and disables external search offline", () => {
     vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
     window.history.replaceState(null, "", "/buscar?q=nao-existe-xyz");
