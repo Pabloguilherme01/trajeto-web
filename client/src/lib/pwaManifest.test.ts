@@ -8,10 +8,19 @@ type ManifestIcon = {
   purpose?: string;
 };
 
+type ManifestShortcut = {
+  name: string;
+  short_name?: string;
+  description?: string;
+  url: string;
+  id?: string;
+};
+
 type WebManifest = {
   start_url?: string;
   scope?: string;
   icons?: ManifestIcon[];
+  shortcuts?: ManifestShortcut[];
 };
 
 describe("PWA manifest", () => {
@@ -33,5 +42,17 @@ describe("PWA manifest", () => {
   it("keeps start_url inside the declared scope", () => {
     expect(manifest.scope).toBe("./");
     expect(manifest.start_url?.startsWith("./")).toBe(true);
+  });
+
+  it("keeps installed shortcuts aligned with the public flows they open", () => {
+    expect(manifest.shortcuts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Serviços públicos", url: "./servicos" }),
+        expect.objectContaining({ name: "Canais de emergência" }),
+        expect.objectContaining({ name: "Planejar rota", short_name: "Planejar", url: "./planejar", id: "planejar-rota" }),
+        expect.objectContaining({ name: "Encontrar postos", url: "./postos?q=postos" }),
+      ]),
+    );
+    expect(manifest.shortcuts?.some(item => /retomar/i.test(item.name))).toBe(false);
   });
 });
