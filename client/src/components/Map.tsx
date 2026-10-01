@@ -50,6 +50,7 @@ interface MapViewProps {
   initialCenter?: google.maps.LatLngLiteral;
   initialZoom?: number;
   onMapReady?: (map: google.maps.Map) => void;
+  onLoadError?: () => void;
   deferUntilVisible?: boolean;
   showTraffic?: boolean;
   mapTypeId?: google.maps.MapTypeId;
@@ -62,6 +63,7 @@ export function MapView({
   initialCenter = { lat: 37.7749, lng: -122.4194 },
   initialZoom = 12,
   onMapReady,
+  onLoadError,
   deferUntilVisible = true,
   showTraffic = false,
   mapTypeId = "roadmap" as google.maps.MapTypeId,
@@ -119,6 +121,7 @@ export function MapView({
         setLoadError(null);
       } catch {
         setLoadError(error instanceof Error ? error.message : "Não foi possível carregar o mapa.");
+        onLoadError?.();
       }
     }
   });

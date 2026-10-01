@@ -46,6 +46,21 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   expect(layout.width, JSON.stringify(layout.overflowing)).toBeLessThanOrEqual(320);
 });
 
+test("Pages: background failure keeps the offline picker and navigation touchable", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.route("https://tile.openstreetmap.org/**", route => route.abort());
+  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  const map = page.locator("#aguas-lindas-map");
+  await expect(map.getByRole("img", { name: /Mapa offline esquemático/ })).toBeVisible();
+  const picker = map.getByRole("combobox", { name: "Escolher posto no mapa offline" });
+  await picker.click({ trial: true });
+  const option = await picker.locator("option").last().evaluate(el => ({ value: (el as HTMLOptionElement).value, name: el.textContent! }));
+  await picker.selectOption(option.value);
+  await expect(map.locator("p").filter({ hasText: option.name })).toBeVisible();
+  await map.getByRole("button", { name: "Navegar pelo Google Maps", exact: true }).click({ trial: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("Pages: saved station map does not clip its navigation card", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.addInitScript(() => localStorage.setItem("trajeto-mobile-station-favorites", JSON.stringify([
@@ -55,7 +70,7 @@ test("Pages: saved station map does not clip its navigation card", async ({ page
     contentType: "image/png",
     body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64"),
   }));
-  await page.goto("postos?salvos=1&q=teste", { waitUntil: "domcontentloaded" });
+  await page.goto("postos?salvos=1", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Mostrar mapa", exact: true }).click();
   const picker = page.getByRole("combobox", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();

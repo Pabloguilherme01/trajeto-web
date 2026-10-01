@@ -1325,7 +1325,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           </section>
         )}
 
-        {(!staticRuntime && (stations.length > 0 || showSavedOnly)) && (
+        {(showSavedOnly || (!staticRuntime && stations.length > 0)) && (
           <>
             <section className="mt-5 flex items-end justify-between gap-3">
               <div>
@@ -1339,7 +1339,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
             </section>
 
-            {showMap && !broadAguasLindasQuery && visibleStations.length > 0 && (
+            {showMap && (showSavedOnly || !broadAguasLindasQuery) && visibleStations.length > 0 && (
               <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
                 <div className="relative"><StationMap stations={visibleStations} userCoords={userCoords} /></div>
               </section>

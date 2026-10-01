@@ -208,7 +208,9 @@ export default function TileStationMap({
 
   const tileFallback = Boolean(fallback && tileErrors >= 5);
 
-  if (!drawable.length || tileFallback) {
+  if (tileFallback) return <>{fallback}</>;
+
+  if (!drawable.length) {
     return (
       <div
         className={

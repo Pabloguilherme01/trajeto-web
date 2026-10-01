@@ -79,8 +79,12 @@ function sourceLabel(source?: StationMapItem["source"]) {
   return "LOCAL";
 }
 
-function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations: Array<StationMapItem & { lat: number; lng: number }>; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
-  const [selectedId, setSelectedId] = useState<string | null>(stations[0]?.id ?? null);
+function offlineStationKey(station: StationMapItem) {
+  return station.id ?? station.cnpj ?? station.placeId ?? `${station.name}|${station.lat}|${station.lng}`;
+}
+
+function OfflineStationMap({ stations, onSelectStation, userCoords, heightClassName = "min-h-[320px] h-[min(68vh,620px)]" }: { stations: Array<StationMapItem & { lat: number; lng: number }>; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null; heightClassName?: string }) {
+  const [selectedId, setSelectedId] = useState<string | null>(stations[0] ? offlineStationKey(stations[0]) : null);
   const [zoom, setZoom] = useState(1);
   const points = useMemo(() => {
     if (!stations.length) return [];
@@ -99,7 +103,7 @@ function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations
       y: 500 - ((station.lat - minLat) / latSpan) * 440,
     })).map(point => ({ ...point, x: 60 + (point.x - 60) * 0.94 + 30, y: 500 + (point.y - 500) * 0.94 + 16 }));
   }, [stations]);
-  const selected = points.find(point => point.station.id === selectedId)?.station ?? points[0]?.station ?? null;
+  const selected = points.find(point => offlineStationKey(point.station) === selectedId)?.station ?? points[0]?.station ?? null;
   const viewBox = (1 - 1 / zoom) * 500 + " " + (1 - 1 / zoom) * 280 + " " + 1000 / zoom + " " + 560 / zoom;
   if (!stations.length) {
     return <div className="grid h-full w-full place-items-center bg-[#E8F0EA] p-6 text-center text-[#163840]">
@@ -110,7 +114,8 @@ function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations
     </div>;
   }
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#E8F0EA]">
+    <div className="w-full overflow-hidden bg-[#E8F0EA]">
+      <div className={"relative " + heightClassName}>
       <svg viewBox={viewBox} className="absolute inset-0 h-full w-full" role="img" aria-label={"Mapa offline esquemático com " + stations.length + " postos"}>
         <defs><pattern id="station-map-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#B9C9BD" strokeWidth="1" opacity=".55" /></pattern></defs>
         <rect width="1000" height="560" fill="#E8F0EA" /><rect width="1000" height="560" fill="url(#station-map-grid)" />
@@ -123,9 +128,9 @@ function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations
           </g>
         )}
         {points.map(point => {
-          const active = point.station.id === selectedId;
+          const active = offlineStationKey(point.station) === selectedId;
           const official = point.station.source === "ANP";
-          return <g key={point.station.id || "offline-" + point.index} onClick={() => { setSelectedId(point.station.id ?? null); onSelectStation?.(point.station); }} className="cursor-pointer">
+          return <g key={offlineStationKey(point.station)} onClick={() => { setSelectedId(offlineStationKey(point.station)); onSelectStation?.(point.station); }} className="cursor-pointer">
             {active && <circle cx={point.x} cy={point.y} r="18" fill={official ? "#C7FF3C" : "#3DE3FF"} opacity=".22" /> }
             <circle cx={point.x} cy={point.y} r={active ? 10 : 8} fill={official ? "#C7FF3C" : "#3DE3FF"} stroke="#163840" strokeWidth="3" />
             <text x={point.x} y={point.y + 4} textAnchor="middle" fontSize="8" fontWeight="900" fill="#163840">{point.index + 1}</text>
@@ -137,7 +142,16 @@ function OfflineStationMap({ stations, onSelectStation, userCoords }: { stations
         <button type="button" onClick={() => setZoom(value => Math.max(1, value - 0.25))} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
         <button type="button" onClick={() => setZoom(1)} className="grid size-11 place-items-center rounded-xl border border-black/10 bg-white/90 text-[#163840] shadow-sm" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       </div>
-      <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-black/10 bg-white/92 p-3 shadow-lg backdrop-blur">
+      <label className="absolute left-3 right-3 top-[4.5rem]">
+        <span className="sr-only">Escolher posto no mapa offline</span>
+        <select className="min-h-11 min-w-0 w-full rounded-xl border border-black/10 bg-white px-3 text-base text-[#163840]"
+          value={selected ? offlineStationKey(selected) : ""}
+          onChange={event => { setSelectedId(event.target.value); setZoom(1); }}>
+          {stations.map(station => <option key={offlineStationKey(station)} value={offlineStationKey(station)}>{station.name}</option>)}
+        </select>
+      </label>
+      </div>
+      <div className="relative border-t border-black/10 bg-white/92 p-4">
         <div className="flex flex-wrap items-start gap-3">
           <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/20 text-[#155163]"><span className="text-xs font-black">{selected ? sourceLabel(selected.source) : "—"}</span></div>
           <div className="min-w-0 flex-1 basis-[12rem]"><p className="break-words text-base font-black text-[#163840]">{selected?.name ?? "Selecione um posto"}</p><p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">{selected?.address ?? "Sem coordenada salva."}</p></div>
@@ -161,6 +175,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   const [tiltEnabled, setTiltEnabled] = useState(false);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [mapUnavailable, setMapUnavailable] = useState(false);
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
   const [resolvingCount, setResolvingCount] = useState(0);
@@ -331,11 +346,11 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }
 
   if (isGitHubPagesRuntime()) {
-    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={userCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
+    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={userCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
   }
 
-  if (offline) {
-    return <div className={"relative " + heightClassName}><OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} /></div>;
+  if (offline || mapUnavailable) {
+    return <OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />;
   }
 
   return (
@@ -352,7 +367,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
         </button>
       </div>
       {mapMessage && <div role="status" className="absolute left-3 right-3 top-[4.65rem] z-20 rounded-xl border border-white/10 bg-[#0B1014]/95 px-3 py-2 text-xs font-bold text-white shadow-lg">{mapMessage}</div>}
-      <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} fallback={<OfflineStationMap stations={drawableStations} onSelectStation={onSelectStation} userCoords={userCoords} />} onMapReady={map => { mapRef.current = map; setReady(true); }} />
+      <MapView className="h-full w-full overflow-hidden" heightClassName={heightClassName} initialCenter={{ lat: -15.7545, lng: -48.2816 }} initialZoom={12} showTraffic={showTraffic} onLoadError={() => setMapUnavailable(true)} onMapReady={map => { mapRef.current = map; setReady(true); }} />
       {resolvingCount > 0 && <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-xs font-black text-white shadow-xl backdrop-blur-xl" role="status" aria-live="polite">Posicionando {resolvingCount} posto(s). A ANP continua sendo a fonte cadastral principal.</div>}
       {drawableStations.length === 0 && <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 rounded-2xl border border-white/10 bg-[#0B1014]/90 px-3 py-2.5 text-center text-xs font-bold text-white/65 shadow-xl backdrop-blur-xl">Ainda buscando coordenadas dos postos. As fichas continuam disponíveis abaixo.</div>}
     </div>
