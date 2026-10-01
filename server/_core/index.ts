@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { runOperationalAlertsSchedule } from "../scheduled/operationalAlerts";
 import { createMemoryRateLimiter } from "./rateLimit";
+import { createConcurrencyLimiter } from "./concurrencyLimit";
 
 async function startServer() {
   const app = express();
@@ -81,6 +82,12 @@ async function startServer() {
     next();
   });
   app.use("/api/trpc/routes.plan", createMemoryRateLimiter({ windowMs: 60_000, max: 30, name: "planejamento de rotas" }));
+  // Bulkheads cap expensive in-flight work. Under a traffic spike the API
+  // sheds excess load quickly instead of exhausting sockets/memory and taking
+  // unrelated public-service endpoints down with it.
+  app.use("/api/trpc/routes.plan", createConcurrencyLimiter({ maxConcurrent: 24, name: "Planejamento de rotas" }));
+  app.use("/api/trpc/stationDirectory.search", createConcurrencyLimiter({ maxConcurrent: 40, name: "Busca de postos" }));
+  app.use("/api/trpc/stationDirectory.details", createConcurrencyLimiter({ maxConcurrent: 60, name: "Detalhes de posto" }));
   app.use("/api/trpc/stationDirectory.search", createMemoryRateLimiter({ windowMs: 60_000, max: 45, name: "busca de postos" }));
   app.use("/api/trpc/stationDirectory.details", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "detalhes de posto" }));
   app.use("/api/trpc/analytics.track", createMemoryRateLimiter({ windowMs: 60_000, max: 120, name: "telemetria" }));
