@@ -80,7 +80,7 @@ const LOCAL_PLACE_DESTINATIONS: LocalRoutePreset[] = LOCAL_PLACES.map(place => (
 }));
 
 const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.id === "ouvidoria-municipal").map(service => ({
-  id: service.id, label: service.name, detail: service.description, destination: service.mapQuery, category: "servicos",
+  id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: "servicos",
 }));
 export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PLACE_DESTINATIONS, ...SUPPORT_DESTINATIONS];
 

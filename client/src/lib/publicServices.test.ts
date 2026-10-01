@@ -25,6 +25,16 @@ describe("public services catalog", () => {
     expect(PUBLIC_SERVICES.some(item => item.id === "prefeitura")).toBe(true);
     expect(PUBLIC_SERVICES.some(item => item.id === "policia-civil-1")).toBe(true);
   });
+  it("includes verified national protection and utility channels without fictitious routes", () => {
+    for (const [id, number] of [["ligue-180", "180"], ["disque-100", "100"], ["energia", "0800 062 0196"], ["saneago", "0800 645 0115"]]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.phone).toBe(number);
+      expect(service.verifiedAt).toBe("01/10/2026");
+      expect(service.mapQuery).toBeUndefined();
+      expect(service.actionUrl).toMatch(/^https:\/\//);
+    }
+    expect(new Set(PUBLIC_SERVICES.map(item => item.id)).size).toBe(PUBLIC_SERVICES.length);
+  });
 
   it("filters by category and text without case sensitivity", () => {
     expect(searchPublicServices("cora coralina", "educacao").map(item => item.id)).toContain("coralina");

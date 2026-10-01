@@ -4,9 +4,9 @@ import OfflineReadiness from "@/components/OfflineReadiness";
 import { appUrl } from "@/lib/appUrl";
 
 const steps = [
-  { n: "01", icon: MapPinned, title: "Explore", text: "Abra o mapa, encontre postos e toque em uma referência para ver a ficha completa." },
+  { n: "01", icon: Landmark, title: "Encontre", text: "Busque serviços de saúde, assistência e cidadania. Consulte contatos, horários e a fonte oficial." },
   { n: "02", icon: RouteIcon, title: "Planeje", text: "Informe o destino. O cálculo próprio é opcional e a navegação externa continua disponível." },
-  { n: "03", icon: Fuel, title: "Salve", text: "Guarde locais e rotas no aparelho para recuperar tudo depois, inclusive com conexão limitada." },
+  { n: "03", icon: Fuel, title: "Salve", text: "Toque no coração para guardar serviços e postos. Rotas calculadas também podem ser salvas no aparelho." },
 ];
 
 export default function Help() {
@@ -22,7 +22,7 @@ export default function Help() {
         </header>
 
         <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
-          <p className="text-sm leading-relaxed text-white/60">O app foi organizado em quatro ações simples: abrir o mapa, planejar uma rota, encontrar postos e recuperar o que você salvou. O restante fica como apoio, sem bloquear o fluxo principal.</p>
+          <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e guarde seus atalhos neste aparelho. A central reúne serviços públicos de Águas Lindas e canais estaduais e nacionais de apoio.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
             {steps.map(step => (
               <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0B1014] p-4">
@@ -72,6 +72,17 @@ export default function Help() {
         </section>
 
         <OfflineReadiness />
+
+        <section className="mt-4 rounded-3xl border border-white/10 bg-[#121B22] p-5" aria-labelledby="practical-help-title">
+          <h2 id="practical-help-title" className="text-lg font-bold">Ajuda prática</h2>
+          <div className="mt-3 divide-y divide-white/10 text-sm text-white/80">
+            <details><summary className="min-h-12 cursor-pointer py-3 font-bold">Como criar atalhos para os serviços que uso?</summary><p className="pb-4 leading-relaxed">Na central, toque no coração do serviço. Use Serviços salvos para encontrar seus contatos sem repetir a busca. Os favoritos ficam neste navegador e funcionam offline depois da preparação do app.</p><Link href={appUrl("/servicos") + "?salvos=1"} className="mb-4 inline-flex min-h-11 items-center rounded-xl border border-white/15 px-3 font-bold">Abrir serviços salvos</Link></details>
+            <details><summary className="min-h-12 cursor-pointer py-3 font-bold">Como colocar o Trajeto na tela inicial?</summary><p className="pb-4 leading-relaxed">Use Instalar app quando o navegador oferecer essa opção. No Android, também procure Instalar ou Adicionar à tela inicial no menu do navegador. No iPhone, abra no Safari e use Compartilhar → Adicionar à Tela de Início. Instalar não substitui a conferência do pacote offline acima.</p></details>
+            <details><summary className="min-h-12 cursor-pointer py-3 font-bold">O que fazer se não abrir sem internet?</summary><p className="pb-4 leading-relaxed">Abra o site com internet, aguarde a preparação e toque em Conferir acesso offline. Quando aparecer Pronto para usar sem internet, desligue a conexão e teste a central. Evite o modo privado para guardar atalhos e não limpe os dados do navegador se quiser manter os favoritos e rotas.</p></details>
+            <details><summary className="min-h-12 cursor-pointer py-3 font-bold">Por que meu favorito não foi salvo?</summary><p className="pb-4 leading-relaxed">O navegador pode bloquear o armazenamento ou estar sem espaço. Verifique as permissões do site e o espaço do aparelho, tente salvar novamente e recarregue para conferir. O app informa quando a gravação falha.</p></details>
+            <details><summary className="min-h-12 cursor-pointer py-3 font-bold">Como informar um problema ou contato incorreto?</summary><p className="pb-3 leading-relaxed">Informe a tela, o que tentou fazer e a mensagem exibida. O formulário de suporte é público; descreva o problema sem documentos pessoais. Para uma solicitação sobre atendimento municipal, use a Ouvidoria e guarde o protocolo.</p><div className="mb-4 flex flex-wrap gap-2"><a href="https://github.com/Pabloguilherme01/trajeto-web/issues/new" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-xl border border-white/15 px-3 font-bold">Suporte do Trajeto · online</a><Link href={appUrl("/servicos") + "?servico=ouvidoria-municipal"} className="inline-flex min-h-11 items-center rounded-xl border border-white/15 px-3 font-bold">Ouvidoria Municipal</Link></div></details>
+          </div>
+        </section>
 
         <section className="mt-4 pb-4 text-center text-[0.56rem] leading-relaxed text-white/25">
           Para trânsito, incidentes e chegada em tempo real, use o navegador externo escolhido.

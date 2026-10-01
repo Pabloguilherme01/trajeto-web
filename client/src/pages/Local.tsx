@@ -9,6 +9,7 @@ import { buildLocationEntity } from "@/lib/stationEntity";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { indexAnpPricesByCnpj, loadAguasLindasAnpPrices, type AnpPriceSnapshot } from "@/lib/anpPrices";
+import { toast } from "sonner";
 
 export default function Local() {
   const [, params] = useRoute("/local/:id");
@@ -98,6 +99,7 @@ export default function Local() {
           ? false
           : null,
     });
+    if (result.error) { toast.message("Não foi possível guardar o favorito. Confira o espaço e as permissões do navegador."); return; }
     setSaved(result.stations);
     vibration();
   };
