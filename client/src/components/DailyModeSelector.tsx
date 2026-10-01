@@ -67,14 +67,14 @@ export default function DailyModeSelector() {
   };
 
   return (
-    <section className="container py-3 sm:py-4" aria-labelledby="daily-modes-title">
+    <section className="w-full min-w-0 max-w-full py-3 sm:py-4" aria-labelledby="daily-modes-title">
       <div className="rounded-2xl border border-white/10 bg-[#121B22] p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.15em] text-[#C7FF3C]"><BatteryCharging className="size-3.5" /> Modos rápidos</p>
             <h2 id="daily-modes-title" className="mt-1 text-sm font-extrabold text-white">Escolha como quer usar o Trajeto hoje</h2>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <button type="button" onClick={chooseAutomatic} className={selected === "automatico" ? "min-h-11 rounded-xl border border-[#C7FF3C]/40 bg-[#C7FF3C]/10 px-3 text-xs font-bold text-[#DFFF9A]" : "min-h-11 rounded-xl border border-white/10 px-3 text-xs font-bold text-[#DFFF9A]"}>
               Automático: {autoMode === "proxima" ? "próxima viagem" : autoMode === "repetir" ? "repetir" : autoMode === "economia" ? "economia" : autoMode === "conducao" ? "condução" : "offline"}
             </button>
