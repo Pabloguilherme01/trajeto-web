@@ -91,3 +91,30 @@ Esta revisão não remove módulos funcionais nem amplia promessas de dados offl
 - O cadastro não inventa endereço, telefone ou horário: esses campos ficam ausentes enquanto a fonte oficial consultada não os publica de forma verificável.
 - A busca por Defesa Civil, alagamento, enchente, desabamento e risco estrutural passa a recuperar o bloco de proteção e emergência já existente, mantendo 193/190 com a descrição correta e sem criar um número municipal não confirmado.
 - Adicionado atalho para CPF e Receita Federal entre as necessidades cidadãs frequentes.
+
+
+## Auditoria de consolidação mobile e utilidade pública — 01/10/2026
+
+### O que ficou forte
+
+- A navegação móvel concentra **Início, Serviços, Rotas e Mais** e mantém busca, mapa, emergência, saúde, postos, alimentação, compras, salvos e ajuda acessíveis sem transformar a barra inferior em um menu lotado.
+- A Home passa a evitar texto funcional abaixo de 12 px e os controles críticos adotam alvo de toque de pelo menos 44 px; campos de rota continuam com 16 px para reduzir zoom involuntário em celulares.
+- O mapa de postos combina mapa por tiles, lista de seleção acessível, foco por teclado, ficha separada do viewport e fallback esquemático quando o fundo externo falha. Favoritos e diretório continuam disponíveis no fluxo estático.
+- O catálogo público mantém fonte por serviço e ganhou o **CAPS de Águas Lindas**, pesquisável por “saúde mental”, além da atualização do contato oficial da Secretaria Municipal de Saúde.
+- O modo offline mantém shell, telas públicas, dados locais, serviços, favoritos e rotas salvas. A tela de Ajuda explica preparação, diagnóstico e recuperação do cache sem prometer recursos que dependem de rede.
+- A ANP continua sincronizada automaticamente a cada 12 horas. A suíte completa de regressão passa a ter execução semanal, além dos checks em push e pull request.
+
+### Limites que não devem ser escondidos do cidadão
+
+- Google Maps, Waze, Apple Maps, tiles de mapa, novos cálculos de rota, tráfego, chamadas telefônicas, WhatsApp, agendamentos e portais externos dependem de conectividade e da disponibilidade dos respectivos provedores.
+- GitHub Pages é adequado para o portal público estático e offline, mas não substitui um backend para notificações push personalizadas, autenticação persistente ou colaboração em tempo real.
+- Contatos e horários públicos podem mudar na fonte oficial. Por isso, novos registros não devem ser adicionados apenas por quantidade: endereço, telefone e horário precisam de fonte oficial verificável e data de revisão quando houver risco de desatualização.
+- “Offline” significa acesso ao que foi empacotado ou salvo no aparelho; não significa navegar em serviços externos sem rede.
+
+### Automação de prevenção
+
+- `Sync ANP Águas Lindas`: atualização cadastral e de preços duas vezes ao dia, com commit apenas quando há mudança semântica.
+- `CI`: TypeScript, testes de servidor/contratos/bibliotecas/componentes/páginas, build, navegador, acessibilidade e smoke de GitHub Pages em cada mudança e semanalmente.
+- `Deploy Trajeto to GitHub Pages`: valida o artefato, PWA, ícones, manifest, service worker e assets offline antes da publicação.
+
+A prioridade das próximas rodadas deve permanecer **confiabilidade, atualização de dados e redução de atrito**, não crescimento de funcionalidades sem necessidade comprovada.
