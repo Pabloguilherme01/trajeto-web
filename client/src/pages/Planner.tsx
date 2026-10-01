@@ -397,7 +397,7 @@ export default function Planner() {
               </label>
 
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; resetResult(); setOrigin(trip.origin); setDestination(trip.destination); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/60">Última rota</button>}
+                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) + "&auto=1"); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/60">Última rota</button>}
                 <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/50 disabled:opacity-30">Limpar</button>
               </div>
 
@@ -503,7 +503,7 @@ export default function Planner() {
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
-                      <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination))} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left">
+                      <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left">
                         <p className="truncate text-xs font-black">{route.label}</p>
                         <p className="mt-1 line-clamp-2 text-[0.53rem] leading-snug text-white/35">{route.detail}</p>
                       </button>
