@@ -749,7 +749,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Cidade, bairro ou posto</label>
               <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 shrink-0 text-[#3DE3FF]" />
-                <input id="station-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65" placeholder="Ex.: Águas Lindas de Goiás" />
+                <input id="station-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" autoCapitalize="words" autoCorrect="off" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65" placeholder="Ex.: Águas Lindas de Goiás" />
                 <button type="submit" className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar">
                   <ChevronRight className="size-5" />
                 </button>
@@ -1024,7 +1024,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
               <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 text-white/65" />
-                <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
+                <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" autoComplete="off" autoCapitalize="none" autoCorrect="off" inputMode="search" enterKeyHint="search" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 place-items-center rounded-lg text-white/65" aria-label="Limpar busca"><X className="size-3.5" /></button>}
               </label>
               <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
