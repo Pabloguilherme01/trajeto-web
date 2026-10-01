@@ -84,7 +84,7 @@ describe("offline preparation feedback", () => {
   );
   it("shows practical saved-content counters and can request storage protection", async () => {
     render(<OfflineReadiness />);
-    expect(await screen.findByText("Rotas salvos")).toBeTruthy();
+    expect(await screen.findByText("Rotas salvas")).toBeTruthy();
     expect(screen.getByText("Serviços salvos")).toBeTruthy();
     const protect = screen.getByRole("button", { name: "Proteger dados salvos" });
     fireEvent.click(protect);
