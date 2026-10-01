@@ -82,6 +82,11 @@ describe("public services catalog", () => {
     expect(PUBLIC_SERVICES.some(item => item.id === "hospital-bom-jesus")).toBe(
       true
     );
+    const bomJesus = PUBLIC_SERVICES.find(item => item.id === "hospital-bom-jesus")!;
+    expect(bomJesus.sourceLabel).toBe("CNES/DATASUS");
+    expect(bomJesus.verifiedAt).toBe("01/10/2026");
+    expect(bomJesus.hours).toMatch(/confirmar/i);
+    expect(bomJesus.guidance).toMatch(/temporariamente por reforma/i);
     const caps = PUBLIC_SERVICES.find(item => item.id === "caps");
     expect(caps?.phone).toBe("(61) 3618-1559");
     expect(caps?.verifiedAt).toBe("01/10/2026");
