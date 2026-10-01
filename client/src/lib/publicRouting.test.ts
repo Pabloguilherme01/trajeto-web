@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs } from "./publicRouting";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs, resetPublicRoutingTestState } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
+    resetPublicRoutingTestState();
     try {
       localStorage.clear();
       sessionStorage.clear();
@@ -89,6 +90,22 @@ describe("public routing fallback", () => {
     ).toHaveLength(1);
   });
 
+  it("opens a cooldown after a public geocoder failure so different searches do not hammer the provider", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error("provider down"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculatePublicRoute("-15.7545,-48.2816", "Destino falho A")
+    ).rejects.toThrow(/não foi possível localizar/i);
+    await expect(
+      calculatePublicRoute("-15.7545,-48.2816", "Destino falho B")
+    ).rejects.toThrow(/não foi possível localizar/i);
+
+    expect(
+      fetchMock.mock.calls.filter(call => String(call[0]).includes("nominatim"))
+    ).toHaveLength(1);
+  });
+
   it("uses at most one public geocoder request for an unknown destination", async () => {
     const fetchMock = vi
       .fn()
@@ -105,6 +122,72 @@ describe("public routing fallback", () => {
     expect(
       fetchMock.mock.calls.filter(call => String(call[0]).includes("nominatim"))
     ).toHaveLength(1);
+  });
+
+  it("uses prepared city coordinates before the public geocoder", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 5200, duration: 610, geometry: "local-known" }],
+        }),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "UPA Mansões Odisseia"
+    );
+
+    expect(route.destination).toEqual({ lat: -15.77665, lng: -48.27935 });
+    expect(route.source).toBe("osrm");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0][0])).toContain("router.project-osrm.org");
+    expect(String(fetchMock.mock.calls[0][0])).not.toContain("nominatim");
+  });
+
+  it("does not persist typed addresses in plaintext geocode cache keys", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: (index: number) => Array.from(saved.keys())[index] ?? null,
+      get length() {
+        return saved.size;
+      },
+    };
+    vi.stubGlobal("localStorage", storage);
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.79", lon: "-48.24" }]), {
+          status: 200,
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 6400, duration: 720, geometry: "private-cache" }],
+          }),
+          { status: 200 }
+        )
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const typedAddress = "Rua Particular 123, Águas Lindas de Goiás, GO";
+    await calculatePublicRoute("-15.7545,-48.2816", typedAddress);
+
+    const keys = Array.from(saved.keys());
+    expect(keys.some(key => key.startsWith("trajeto:public-routing:geocode:"))).toBe(true);
+    expect(keys.join(" ").toLocaleLowerCase("pt-BR")).not.toContain(
+      "rua particular 123"
+    );
   });
 
   it("geocodes endpoints and calculates a route without the application backend", async () => {
@@ -223,11 +306,11 @@ describe("public routing fallback", () => {
 
     await calculatePublicRoute(
       "-15.7545,-48.2816",
-      "Hospital Municipal Bom Jesus"
+      "CAPS"
     );
 
     const firstUrl = new URL(String(fetchMock.mock.calls[0][0]));
-    expect(firstUrl.searchParams.get("q")).toContain("Hospital Municipal Bom Jesus");
+    expect(firstUrl.searchParams.get("q")).toContain("CAPS");
     expect(firstUrl.searchParams.get("q")).toContain("Águas Lindas de Goiás");
   });
 
