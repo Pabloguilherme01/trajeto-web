@@ -89,6 +89,7 @@ export default function Help() {
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Sem conta, uma rota calculada pelo backend não é salva no banco do Trajeto.</p>
+            <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Telemetria de produto fica desligada por padrão e não é necessária para usar o site.</p>
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Histórico local usa “Minha localização” em vez da coordenada GPS exata.</p>
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Para cálculo online a origem GPS é reduzida antes de sair do aparelho.</p>
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Ao abrir Google Maps, Waze ou Apple Maps, o Trajeto não coloca sua coordenada de origem no link.</p>
