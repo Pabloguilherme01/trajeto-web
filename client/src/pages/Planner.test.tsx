@@ -18,7 +18,7 @@ vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOff
 vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map">mapa</div> }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
-const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value } });
+const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Digite o destino"), { target: { value } });
 const submit = () => fireEvent.click(screen.getByRole("button", { name: "Calcular rota" }));
 
 beforeEach(() => {
@@ -37,15 +37,15 @@ describe("Planner travel state", () => {
     const view = render(<Planner />);
     state.search = "destino=Hospital";
     view.rerender(<Planner />);
-    expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Hospital");
-    expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("");
+    expect((screen.getByPlaceholderText("Digite o destino") as HTMLInputElement).value).toBe("Hospital");
+    expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("");
   });
 
   it("opens the in-app map automatically after a successful route", async () => {
     render(<Planner />);
     submit();
     await screen.findByTestId("route-map");
-    expect(screen.getByText("Mapa da rota")).toBeTruthy();
+    expect(screen.getByText("Mapa do caminho")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Ocultar mapa" })).toBeTruthy();
   });
 
@@ -53,11 +53,11 @@ describe("Planner travel state", () => {
     state.staticRuntime = true;
     render(<Planner />);
     submit();
-    await screen.findByRole("button", { name: "Navegar agora" });
+    await screen.findByRole("button", { name: "Começar navegação" });
     changeDestination("Hospital");
-    expect(screen.queryByRole("button", { name: "Navegar agora" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Começar navegação" })).toBeNull();
     submit();
-    await screen.findByRole("button", { name: "Navegar agora" });
+    await screen.findByRole("button", { name: "Começar navegação" });
     fireEvent.click(screen.getByRole("button", { name: "Limpar" }));
     expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
   });
@@ -74,7 +74,7 @@ describe("Planner travel state", () => {
   it("keeps offline saving prominent and secondary providers tucked away", async () => {
     render(<Planner />);
     submit();
-    await screen.findByRole("button", { name: "Navegar agora" });
+    await screen.findByRole("button", { name: "Começar navegação" });
     expect(screen.getByRole("button", { name: "Salvar offline" })).toBeTruthy();
     expect(screen.getByText("Escolher navegador")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Ocultar mapa" })).toBeTruthy();
@@ -106,7 +106,7 @@ describe("Planner travel state", () => {
     state.lookup.mockResolvedValueOnce({ origin: "Origem salva", destination: "Destino salvo", payload });
     const view = render(<Planner />);
     await screen.findByRole("button", { name: "Salvar offline" });
-    expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Destino salvo");
+    expect((screen.getByPlaceholderText("Digite o destino") as HTMLInputElement).value).toBe("Destino salvo");
     state.lookup.mockResolvedValueOnce(null);
     state.search = "rota=missing";
     view.rerender(<Planner />);
