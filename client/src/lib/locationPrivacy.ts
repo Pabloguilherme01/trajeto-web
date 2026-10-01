@@ -42,6 +42,15 @@ export function coarsenCoordinateText(value: string, decimals = 4) {
   return parsed.lat.toFixed(safeDecimals) + ", " + parsed.lng.toFixed(safeDecimals);
 }
 
+export function coarsenCoordinatePoint(point: ParsedCoordinate, decimals = 3): ParsedCoordinate {
+  const safeDecimals = Math.max(2, Math.min(4, Math.floor(decimals)));
+  const scale = 10 ** safeDecimals;
+  return {
+    lat: Math.round(point.lat * scale) / scale,
+    lng: Math.round(point.lng * scale) / scale,
+  };
+}
+
 export function privateOriginForRouting(value: string) {
   if (isCurrentLocationLabel(value)) return "";
   return coarsenCoordinateText(value, 4);
