@@ -1080,6 +1080,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
 
 export const PUBLIC_SERVICE_SHORTCUTS = [
   { label: "Saúde mental / CAPS", query: "saude mental", hint: "Atendimento psicossocial municipal" },
+  { label: "Dengue e Vigilância", query: "dengue", hint: "Vigilância em Saúde" },
+  { label: "Conselho Tutelar", query: "conselho tutelar", hint: "Proteção de crianças e adolescentes" },
   { label: "Água e segunda via", query: "conta agua", hint: "Saneago" },
   { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
   {
