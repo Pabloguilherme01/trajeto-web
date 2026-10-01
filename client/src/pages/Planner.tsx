@@ -503,12 +503,13 @@ export default function Planner() {
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#141E23] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form ref={plannerFormRef} onSubmit={submit}>
               <label className="block">
-                <span className="text-xs font-black uppercase tracking-[.14em] text-white/65">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
+                <span className="text-xs font-black uppercase tracking-[.14em] text-white/65">Origem <span className="font-medium normal-case tracking-normal text-white/45">· opcional</span></span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0D1418] px-3">
                   <span className="size-2.5 rounded-full bg-[#79C6D0]" />
                   <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/60" placeholder="Seu ponto de partida" autoComplete="street-address" enterKeyHint="next" autoCapitalize="words" autoCorrect="off" />
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 place-items-center text-[#79C6D0] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
+                <p className="mt-1.5 text-xs leading-snug text-white/50">Se deixar vazio, tentamos usar a localização deste aparelho.</p>
               </label>
 
               <div className="my-2 flex justify-end">
