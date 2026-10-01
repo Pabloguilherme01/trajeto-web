@@ -62,7 +62,7 @@ export default function Planner() {
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
   const [showAllDestinations, setShowAllDestinations] = useState(() => queryParams.get("destinos") === "1");
   const [destinationFilter, setDestinationFilter] = useState("");
-  const [destinationCategory, setDestinationCategory] = useState<"todos" | "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro">("todos");
+  const [destinationCategory, setDestinationCategory] = useState<"todos" | "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao">("todos");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
@@ -410,7 +410,7 @@ export default function Planner() {
 
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
-                  <span><span className="block text-[0.58rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {LOCAL_ROUTE_PRESETS.length} atalhos locais, por categoria</span></span>
+                  <span><span className="block text-[0.58rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {LOCAL_ROUTE_PRESETS.length + 31} atalhos locais, lojas e referências, por categoria</span></span>
                   <ChevronDown className={"size-4 text-[#3DE3FF] transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
