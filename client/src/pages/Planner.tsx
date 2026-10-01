@@ -10,6 +10,7 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNav
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
+import DepartureAssistant from "@/components/DepartureAssistant";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
@@ -399,6 +400,14 @@ export default function Planner() {
     );
   }, [savedRoutes, savedRouteQuery]);
 
+  const hasOfflineRouteForDestination = useMemo(() => {
+    const target = destination.trim().toLocaleLowerCase("pt-BR");
+    if (target.length < 3) return false;
+    return savedRoutes.some(
+      route => route.destination.trim().toLocaleLowerCase("pt-BR") === target,
+    );
+  }, [savedRoutes, destination]);
+
   const publicRouteSource = planned
     ? (planned.route as typeof planned.route & { source?: "osrm" | "local-estimate" }).source
     : undefined;
@@ -539,6 +548,16 @@ export default function Planner() {
               </div>
             )}
           </section>
+        )}
+
+        {!savedMode && (
+          <DepartureAssistant
+            origin={originPrivate ? PRIVATE_LOCATION_LABEL : origin}
+            destination={destination}
+            mode={mode}
+            online={online}
+            hasOfflineRoute={hasOfflineRouteForDestination}
+          />
         )}
 
         {economyMode && !savedMode && !planned && (
