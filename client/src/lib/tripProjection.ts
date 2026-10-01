@@ -30,8 +30,6 @@ export function projectTripCosts(input: TripProjectionInput) {
   };
 }
 
-
-
 export type MonthlyBudgetStatus = {
   budget: number;
   monthlyCost: number;
@@ -60,6 +58,8 @@ export type FuelStatus = {
   fillCost: number;
   currentRangeKm: number;
   tripFuelNeeded: number;
+  fuelShortfallLiters: number;
+  minimumFuelCost: number;
   fuelRemainingAfterTrip: number;
   rangeRemainingAfterTripKm: number;
   canCompleteTrip: boolean;
@@ -84,6 +84,8 @@ export function calculateFuelStatus(input: {
   const fillCost = fuelNeededToFill * pricePerLiter;
   const currentRangeKm = currentFuelLiters * kmPerLiter;
   const tripFuelNeeded = tripDistanceKm / kmPerLiter;
+  const fuelShortfallLiters = Math.max(0, tripFuelNeeded - currentFuelLiters);
+  const minimumFuelCost = fuelShortfallLiters * pricePerLiter;
   const fuelRemainingAfterTrip = currentFuelLiters - tripFuelNeeded;
 
   return {
@@ -93,6 +95,8 @@ export function calculateFuelStatus(input: {
     fillCost,
     currentRangeKm,
     tripFuelNeeded,
+    fuelShortfallLiters,
+    minimumFuelCost,
     fuelRemainingAfterTrip,
     rangeRemainingAfterTripKm: Math.max(0, fuelRemainingAfterTrip) * kmPerLiter,
     canCompleteTrip: fuelRemainingAfterTrip >= 0,

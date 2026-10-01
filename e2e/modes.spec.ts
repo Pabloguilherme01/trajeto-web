@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("modo economia abre a calculadora local", async ({ page }) => {
   await page.goto("/planejar?economia=1", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Calculadora pronta." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Calcule o custo da viagem." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Quanto custa ir?" })).toBeVisible();
   await expect(page.getByRole("textbox", { name: /Distância de ida/i })).toBeVisible();
 });
 
