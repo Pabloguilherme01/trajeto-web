@@ -179,7 +179,7 @@ export default function Home() {
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><SearchIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-black text-white">O que você procura?</span>
-              <span className="mt-0.5 block truncate text-xs text-white/55">Serviço, posto, endereço, bairro ou lugar · Ctrl K</span>
+              <span className="mt-0.5 block truncate text-xs text-white/60">Serviço, posto, endereço ou bairro<span className="hidden sm:inline"> · Ctrl/⌘ K</span></span>
             </span>
             <ArrowRight className="size-4 shrink-0 text-white/60" />
           </button>
@@ -225,7 +225,7 @@ export default function Home() {
               <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rota rápida</p>
               <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Para onde você vai?</h2>
             </div>
-            <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-bold text-white/65">sem cadastro</span>
+            <span className="hidden rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-bold text-white/65 min-[360px]:inline-flex">sem cadastro</span>
           </div>
 
           <form onSubmit={submit} className="mt-4 space-y-2.5">
