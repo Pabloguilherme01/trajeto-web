@@ -89,6 +89,22 @@ describe("public routing fallback", () => {
     ).toHaveLength(1);
   });
 
+  it("opens a cooldown after a public geocoder failure so different searches do not hammer the provider", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error("provider down"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculatePublicRoute("-15.7545,-48.2816", "Destino falho A")
+    ).rejects.toThrow(/não foi possível localizar/i);
+    await expect(
+      calculatePublicRoute("-15.7545,-48.2816", "Destino falho B")
+    ).rejects.toThrow(/não foi possível localizar/i);
+
+    expect(
+      fetchMock.mock.calls.filter(call => String(call[0]).includes("nominatim"))
+    ).toHaveLength(1);
+  });
+
   it("uses at most one public geocoder request for an unknown destination", async () => {
     const fetchMock = vi
       .fn()
