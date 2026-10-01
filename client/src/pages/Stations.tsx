@@ -795,7 +795,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Mapa principal</p>
                 <h2 id="map-first-title" className="mt-1 text-lg font-black">Postos de Águas Lindas</h2>
-                <p className="mt-1 text-xs text-white/45">{online ? "ruas online + dados locais" : "coordenadas salvas no aparelho"}</p>
+                <p className="mt-1 text-xs text-white/65">{online ? "ruas online + dados locais" : "coordenadas salvas no aparelho"}</p>
               </div>
               <span className={"shrink-0 rounded-full border px-2.5 py-1 text-xs font-black " + (online ? "border-[#C7FF3C]/20 text-[#C7FF3C]" : "border-[#FFB86B]/25 text-[#FFCF96]")}>{online ? "online" : "offline"}</span>
             </div>
