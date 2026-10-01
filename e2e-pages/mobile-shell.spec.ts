@@ -86,6 +86,15 @@ test("Pages: core citizen flows stay inside a 320px viewport and keep the dock t
   }
 });
 
+test("Pages: home route composer sends a one-tap auto calculation to Planner", async ({ page }) => {
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /Águas Lindas na palma da mão/i })).toBeVisible();
+  await page.getByPlaceholder("Destino em Águas Lindas ou região").fill("Hospital Municipal Bom Jesus");
+  await page.getByRole("button", { name: "Traçar rota agora" }).click();
+  await expect(page).toHaveURL(/planejar\?destino=Hospital(?:%20|\+)Municipal(?:%20|\+)Bom(?:%20|\+)Jesus&auto=1/);
+  await expect(page.getByRole("heading", { name: "Para onde você vai?" })).toBeVisible();
+});
+
 test("Pages: search stays useful while the keyboard is open and restores the dock after submit", async ({
   page,
 }) => {
