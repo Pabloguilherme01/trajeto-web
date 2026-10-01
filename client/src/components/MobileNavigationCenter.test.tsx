@@ -42,7 +42,15 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getAllByRole("button", { name: /Waze/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByRole("button", { name: /Apple Maps/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Preferência da viagem")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Evitar pedágios" })).toBeTruthy();
+    const avoidTolls = screen.getByRole("button", { name: "Evitar pedágios" });
+    expect(avoidTolls).toBeTruthy();
+    expect(avoidTolls.className).toContain("min-h-11");
+    expect(screen.getByLabelText("Nova parada").className).toContain("text-base");
+    expect(
+      [...document.querySelectorAll("[class]")].some(element =>
+        /text-\[0\.[0-7]\d*rem\]/.test(element.getAttribute("class") || ""),
+      ),
+    ).toBe(false);
   });
 
   it("disables external navigation while offline but keeps the route actions visible", () => {
