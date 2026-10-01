@@ -2,6 +2,13 @@ import { Download, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { pwaUpdateEvent } from "@/lib/pwa";
 
+export function isAppleMobileDevice() {
+  const ua = navigator.userAgent || "";
+  const classicIOS = /iphone|ipad|ipod/i.test(ua);
+  const iPadDesktopMode = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return classicIOS || iPadDesktopMode;
+}
+
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -29,8 +36,7 @@ export default function InstallAppPrompt() {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener(pwaUpdateEvent, hideForUpdate);
     };
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (ios) setVisible(true);
+    if (isAppleMobileDevice()) setVisible(true);
     window.addEventListener("beforeinstallprompt", handler);
     const installed = () => { setVisible(false); setEvent(null); };
     window.addEventListener("appinstalled", installed);
@@ -41,7 +47,7 @@ export default function InstallAppPrompt() {
     };
   }, []);
 
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isIOS = isAppleMobileDevice();
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 
   if (isStandalone || (!event && !isIOS) || !visible) return null;
