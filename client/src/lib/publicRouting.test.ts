@@ -3,18 +3,33 @@ import { buildPublicRoutePayload, calculatePublicRoute } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify([{ lat: "-15.7545", lon: "-48.2816" }]), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        code: "Ok",
-        routes: [{ distance: 10123, duration: 845, geometry: "abc123" }],
-      }), { status: 200 })));
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]), {
+            status: 200,
+          })
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({
+              code: "Ok",
+              routes: [{ distance: 10123, duration: 845, geometry: "abc123" }],
+            }),
+            { status: 200 }
+          )
+        )
+    );
   });
   afterEach(() => vi.unstubAllGlobals());
 
   it("geocodes endpoints and calculates a route without the application backend", async () => {
-    const route = await calculatePublicRoute("Águas Lindas de Goiás, GO", "Brasília, DF");
+    const route = await calculatePublicRoute(
+      "Águas Lindas de Goiás, GO",
+      "Brasília, DF"
+    );
     expect(route.distanceMeters).toBe(10123);
     expect(route.durationSeconds).toBe(845);
     expect(route.polyline).toBe("abc123");
@@ -23,13 +38,102 @@ describe("public routing fallback", () => {
 
   it("falls back to a local estimate when the shared router is unavailable", async () => {
     vi.unstubAllGlobals();
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("network down"))
+    );
 
-    const route = await calculatePublicRoute("-15.7545,-48.2816", "-15.7942,-47.8822");
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "-15.7942,-47.8822"
+    );
     expect(route.source).toBe("local-estimate");
     expect(route.distanceMeters).toBeGreaterThan(0);
     expect(route.durationSeconds).toBeGreaterThan(0);
     expect(route.polyline.length).toBeGreaterThan(0);
+  });
+
+  it("geocodes a city-qualified address rather than silently routing to the centre", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.71", lon: "-48.25" }]))
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 900, duration: 180, geometry: "valid" }],
+          })
+        )
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    const route = await calculatePublicRoute(
+      "-15.70,-48.20",
+      "UPA Águas Lindas GO"
+    );
+    expect(route.destination).toEqual({ lat: -15.71, lng: -48.25 });
+    expect(String(fetchMock.mock.calls[0][0])).toContain("nominatim");
+  });
+
+  it("recovers a road route after an estimate was cached during a network failure", async () => {
+    const saved = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+    });
+    const fetchMock = vi.fn().mockRejectedValue(new Error("offline"));
+    vi.stubGlobal("fetch", fetchMock);
+    const args = ["-15.7,-48.2", "-15.8,-48.3"] as const;
+    expect((await calculatePublicRoute(...args)).source).toBe("local-estimate");
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 10000, duration: 800, geometry: "road" }],
+        })
+      )
+    );
+    expect((await calculatePublicRoute(...args)).source).toBe("osrm");
+  });
+
+  it("ignores corrupt coordinate and route caches instead of propagating invalid data", async () => {
+    vi.stubGlobal("localStorage", {
+      getItem: () => JSON.stringify({ lat: 999, lng: -48, source: "osrm" }),
+      setItem: vi.fn(),
+    });
+    const route = await calculatePublicRoute(
+      "Águas Lindas de Goiás, GO",
+      "Brasília, DF"
+    );
+    expect(route.destination).toEqual({ lat: -15.7942, lng: -47.8822 });
+    expect(route.source).toBe("osrm");
+  });
+
+  it("keeps coordinate routing available when accessing browser storage throws", async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "localStorage"
+    );
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      get: () => {
+        throw new Error("blocked storage");
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("network down"))
+    );
+    try {
+      expect(
+        (await calculatePublicRoute("-15.7,-48.2", "-15.8,-48.3")).source
+      ).toBe("local-estimate");
+    } finally {
+      if (descriptor)
+        Object.defineProperty(globalThis, "localStorage", descriptor);
+      else Reflect.deleteProperty(globalThis, "localStorage");
+    }
   });
 
   it("turns the public route into the planner contract", () => {

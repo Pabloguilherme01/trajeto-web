@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { phoneHref } from "./contactActions";
-import { PUBLIC_SERVICES, searchPublicServices } from "./publicServices";
+import { PUBLIC_SERVICES, PUBLIC_SERVICE_SHORTCUTS, searchPublicServices } from "./publicServices";
 
 describe("public services catalog", () => {
   it("finds serviços without accents and retains category filtering", () => {
     expect(searchPublicServices("informacao cidadao", "cidadania").map(service => service.id)).toContain("sic");
     expect(searchPublicServices("informacao cidadao", "saude")).toEqual([]);
+  });
+  it("finds everyday needs and all shortcut queries locally", () => {
+    expect(searchPublicServices("segunda via da conta de agua").map(item => item.id)).toEqual(["saneago"]);
+    expect(searchPublicServices("falta de luz").map(item => item.id)).toEqual(["energia"]);
+    expect(searchPublicServices("atualizar cad unico").map(item => item.id)).toEqual(["cadunico"]);
+    expect(searchPublicServices("bolsa familia", "assistencia").map(item => item.id)).toContain("cadunico");
+    expect(searchPublicServices("bolsa familia", "saude")).toEqual([]);
+    expect(searchPublicServices("cras").map(item => item.id)).toEqual(["cras-1", "cras-2", "cras-3"]);
+    for (const shortcut of PUBLIC_SERVICE_SHORTCUTS) expect(searchPublicServices(shortcut.query).length).toBeGreaterThan(0);
   });
   it("keeps every call action a single number and includes official support channels", () => {
     for (const service of PUBLIC_SERVICES) {

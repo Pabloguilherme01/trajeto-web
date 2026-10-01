@@ -1,7 +1,7 @@
 {
-  "name": "Trajeto · Rotas e Postos",
+  "name": "Trajeto · Águas Lindas",
   "short_name": "Trajeto",
-  "description": "Encontre postos, compare opções de abastecimento, planeje rotas e retome locais salvos, com suporte offline.",
+  "description": "Serviços públicos, contatos, locais e rotas de Águas Lindas de Goiás, com atalhos salvos e catálogo disponível offline após a preparação.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
@@ -43,6 +43,34 @@
   ],
   "shortcuts": [
     {
+      "name": "Serviços públicos",
+      "short_name": "Serviços",
+      "description": "Abrir a central offline de saúde, segurança, trânsito, educação e cidadania",
+      "url": "./servicos",
+      "id": "servicos-publicos",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Canais de emergência",
+      "short_name": "Emergência",
+      "description": "Abrir os contatos de Polícia, SAMU e Bombeiros",
+      "url": "./servicos?emergencia=1#emergency-strip-title",
+      "id": "emergencia",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
       "name": "Retomar última rota",
       "short_name": "Retomar",
       "description": "Abrir rapidamente o planejador e continuar a última viagem salva",
@@ -69,53 +97,14 @@
           "type": "image/png"
         }
       ]
-    },
-    {
-      "name": "Perto de mim",
-      "short_name": "Perto",
-      "description": "Abrir rapidamente a busca de postos próximos",
-      "url": "./postos?q=postos%20pr%C3%B3ximos",
-      "id": "perto",
-      "icons": [
-        {
-          "src": "./icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Serviços públicos",
-      "short_name": "Serviços",
-      "description": "Abrir a central offline de saúde, segurança, trânsito, educação e cidadania",
-      "url": "./servicos",
-      "id": "servicos-publicos",
-      "icons": [
-        {
-          "src": "./icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Salvos no aparelho",
-      "short_name": "Salvos",
-      "description": "Abrir locais e recursos salvos neste dispositivo",
-      "url": "./salvos",
-      "id": "salvos",
-      "icons": [
-        {
-          "src": "./icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
     }
   ],
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
   "id": "./",
-  "display_override": ["window-controls-overlay", "standalone"]
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ]
 }

@@ -1,10 +1,10 @@
-const APP_PREFIX = "trajeto-";
+const APP_PREFIXES = ["trajeto-", "trajeto:"];
 const LOCAL_DATA_EVENT = "trajeto-local-data-cleared";
 
 export function listLocalAppKeys(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    return Object.keys(window.localStorage).filter(key => key.startsWith(APP_PREFIX)).sort();
+    return Object.keys(window.localStorage).filter(key => APP_PREFIXES.some(prefix => key.startsWith(prefix))).sort();
   } catch {
     return [];
   }

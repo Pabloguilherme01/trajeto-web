@@ -1,7 +1,11 @@
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 
-const NOMINATIM_URL = import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() || "https://nominatim.openstreetmap.org/search";
-const OSRM_URL = import.meta.env.VITE_PUBLIC_ROUTING_URL?.trim() || "https://router.project-osrm.org/route/v1/driving";
+const NOMINATIM_URL =
+  import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
+  "https://nominatim.openstreetmap.org/search";
+const OSRM_URL =
+  import.meta.env.VITE_PUBLIC_ROUTING_URL?.trim() ||
+  "https://router.project-osrm.org/route/v1/driving";
 const CACHE_PREFIX = "trajeto:public-routing:";
 const REQUEST_TIMEOUT_MS = 9_000;
 
@@ -45,17 +49,28 @@ function normalizeSearch(value: string) {
 }
 
 function parseCoordinateInput(value: string): PublicCoordinate | null {
-  const match = normalizeText(value).match(/^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/);
+  const match = normalizeText(value).match(
+    /^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/
+  );
   if (!match) return null;
   const lat = Number(match[1]);
   const lng = Number(match[2]);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    Math.abs(lat) > 90 ||
+    Math.abs(lng) > 180
+  )
+    return null;
   return { lat, lng };
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
   const controller = new AbortController();
-  const timeout = globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = globalThis.setTimeout(
+    () => controller.abort(),
+    REQUEST_TIMEOUT_MS
+  );
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -63,15 +78,44 @@ async function fetchJson<T>(url: string): Promise<T> {
       signal: controller.signal,
     });
     if (!response.ok) throw new Error("Serviço de rota indisponível.");
-    return await response.json() as T;
+    return (await response.json()) as T;
   } finally {
     globalThis.clearTimeout(timeout);
   }
 }
 
+function isCoordinate(value: unknown): value is PublicCoordinate {
+  if (!value || typeof value !== "object") return false;
+  const point = value as PublicCoordinate;
+  return (
+    Number.isFinite(point.lat) &&
+    Number.isFinite(point.lng) &&
+    Math.abs(point.lat) <= 90 &&
+    Math.abs(point.lng) <= 180
+  );
+}
+
+function isPublicRoute(value: unknown): value is PublicRoute {
+  if (!value || typeof value !== "object") return false;
+  const route = value as PublicRoute;
+  return (
+    isCoordinate(route.origin) &&
+    isCoordinate(route.destination) &&
+    Number.isFinite(route.distanceMeters) &&
+    route.distanceMeters > 0 &&
+    Number.isFinite(route.durationSeconds) &&
+    route.durationSeconds > 0 &&
+    typeof route.polyline === "string" &&
+    route.polyline.length > 0 &&
+    ["osrm", "local-estimate"].includes(route.source) &&
+    ["driving", "walking", "cycling", "transit"].includes(route.mode)
+  );
+}
+
 function cacheGet<T>(key: string): T | null {
-  for (const storage of [globalThis.localStorage, globalThis.sessionStorage]) {
+  for (const name of ["localStorage", "sessionStorage"] as const) {
     try {
+      const storage = globalThis[name];
       const raw = storage?.getItem(CACHE_PREFIX + key);
       if (raw) return JSON.parse(raw) as T;
     } catch {}
@@ -80,21 +124,24 @@ function cacheGet<T>(key: string): T | null {
 }
 
 function cacheSet<T>(key: string, value: T) {
-  for (const storage of [globalThis.localStorage, globalThis.sessionStorage]) {
+  for (const name of ["localStorage", "sessionStorage"] as const) {
     try {
+      const storage = globalThis[name];
       storage?.setItem(CACHE_PREFIX + key, JSON.stringify(value));
     } catch {}
   }
 }
 
 function haversineMeters(a: PublicCoordinate, b: PublicCoordinate) {
-  const toRad = (value: number) => value * Math.PI / 180;
+  const toRad = (value: number) => (value * Math.PI) / 180;
   const earthMeters = 6_371_000;
   const dLat = toRad(b.lat - a.lat);
   const dLng = toRad(b.lng - a.lng);
   const lat1 = toRad(a.lat);
   const lat2 = toRad(b.lat);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return 2 * earthMeters * Math.asin(Math.sqrt(h));
 }
 
@@ -127,26 +174,42 @@ function localGeocode(value: string): PublicCoordinate | null {
   const normalized = normalizeSearch(value);
   if (!normalized) return null;
 
+  // A city-qualified street, hospital or station is never the city centre.
+  const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
   if (
-    normalized === "aguas lindas" ||
-    normalized === "aguas lindas de goias" ||
-    normalized.includes("aguas lindas de goias go") ||
-    normalized.includes("aguas lindas go")
+    [
+      "aguas lindas",
+      "aguas lindas go",
+      "aguas lindas de goias",
+      "aguas lindas de goias go",
+    ].includes(cityName)
   ) {
     return { lat: -15.7545, lng: -48.2816 };
   }
 
   const matches = searchAguasLindasStations(value);
-  const withCoordinates = matches.filter(station => Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude));
+  const withCoordinates = matches.filter(
+    station =>
+      Number.isFinite(station.anp?.latitude) &&
+      Number.isFinite(station.anp?.longitude)
+  );
   const exact = withCoordinates.filter(station => {
-    const stationText = normalizeSearch([
-      station.displayName,
-      station.legalName,
-      station.address,
-      station.neighborhood,
-      ...station.aliases,
-    ].filter(Boolean).join(" "));
-    return stationText === normalized || stationText.includes(normalized) || normalized.includes(stationText);
+    const stationText = normalizeSearch(
+      [
+        station.displayName,
+        station.legalName,
+        station.address,
+        station.neighborhood,
+        ...station.aliases,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    );
+    return (
+      stationText === normalized ||
+      stationText.includes(normalized) ||
+      normalized.includes(stationText)
+    );
   });
 
   const unique = exact.length === 1 ? exact[0] : null;
@@ -167,7 +230,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const cacheKey = "geocode:" + query.toLocaleLowerCase("pt-BR");
   const cached = cacheGet<PublicCoordinate>(cacheKey);
-  if (cached) return cached;
+  if (isCoordinate(cached)) return cached;
 
   const local = localGeocode(query);
   if (local) {
@@ -202,13 +265,17 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const lat = Number(result?.lat);
   const lng = Number(result?.lon);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+  if (!isCoordinate({ lat, lng })) {
     const fallback = localGeocode(query);
     if (fallback) {
       cacheSet(cacheKey, fallback);
       return fallback;
     }
-    throw new Error("Não foi possível localizar “" + query + "”. Tente usar endereço completo, cidade ou coordenadas.");
+    throw new Error(
+      "Não foi possível localizar “" +
+        query +
+        "”. Tente usar endereço completo, cidade ou coordenadas."
+    );
   }
 
   const geocodedCoordinate = { lat, lng };
@@ -216,14 +283,25 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   return geocodedCoordinate;
 }
 
-
-function corridorDistanceKm(point: PublicCoordinate, origin: PublicCoordinate, destination: PublicCoordinate) {
+function corridorDistanceKm(
+  point: PublicCoordinate,
+  origin: PublicCoordinate,
+  destination: PublicCoordinate
+) {
   const dx = destination.lng - origin.lng;
   const dy = destination.lat - origin.lat;
   const length2 = dx * dx + dy * dy;
-  const t = length2 === 0
-    ? 0
-    : Math.max(0, Math.min(1, ((point.lng - origin.lng) * dx + (point.lat - origin.lat) * dy) / length2));
+  const t =
+    length2 === 0
+      ? 0
+      : Math.max(
+          0,
+          Math.min(
+            1,
+            ((point.lng - origin.lng) * dx + (point.lat - origin.lat) * dy) /
+              length2
+          )
+        );
   const closest = { lat: origin.lat + dy * t, lng: origin.lng + dx * t };
   return {
     distanceKm: haversineMeters(point, closest) / 1000,
@@ -231,7 +309,10 @@ function corridorDistanceKm(point: PublicCoordinate, origin: PublicCoordinate, d
   };
 }
 
-function findLocalRouteStops(origin: PublicCoordinate, destination: PublicCoordinate) {
+function findLocalRouteStops(
+  origin: PublicCoordinate,
+  destination: PublicCoordinate
+) {
   return searchAguasLindasStations("postos")
     .map(station => {
       const lat = Number(station.anp?.latitude);
@@ -241,27 +322,54 @@ function findLocalRouteStops(origin: PublicCoordinate, destination: PublicCoordi
       return {
         placeId: "local:" + station.id,
         name: station.displayName || station.legalName || "Posto",
-        address: station.address || station.neighborhood || "Águas Lindas de Goiás",
+        address:
+          station.address || station.neighborhood || "Águas Lindas de Goiás",
         lat,
         lng,
         corridorKm: corridor.distanceKm,
         progress: corridor.progress,
-        isOpen: station.mapData?.operationalStatus === "open" ? true : station.mapData?.operationalStatus === "closed" ? false : undefined,
+        isOpen:
+          station.mapData?.operationalStatus === "open"
+            ? true
+            : station.mapData?.operationalStatus === "closed"
+              ? false
+              : undefined,
       };
     })
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
-    .filter(item => item.corridorKm <= 4 && item.progress > 0.03 && item.progress < 0.97)
+    .filter(
+      item =>
+        item.corridorKm <= 4 && item.progress > 0.03 && item.progress < 0.97
+    )
     .sort((a, b) => a.corridorKm - b.corridorKm || a.progress - b.progress)
     .slice(0, 6)
     .map(({ corridorKm: _corridorKm, progress: _progress, ...stop }) => stop);
 }
 
-function buildLocalEstimate(origin: PublicCoordinate, destination: PublicCoordinate, mode: PublicTravelMode): PublicRoute {
+function buildLocalEstimate(
+  origin: PublicCoordinate,
+  destination: PublicCoordinate,
+  mode: PublicTravelMode
+): PublicRoute {
   const directDistance = haversineMeters(origin, destination);
   const distanceMeters = Math.max(200, directDistance * 1.18);
   const directKm = directDistance / 1000;
-  const speedKmh = mode === "walking" ? 5 : mode === "cycling" ? 17 : mode === "transit" ? 28 : directKm <= 20 ? 38 : directKm <= 80 ? 58 : 72;
-  const durationSeconds = Math.max(60, (distanceMeters / 1000 / speedKmh) * 3600);
+  const speedKmh =
+    mode === "walking"
+      ? 5
+      : mode === "cycling"
+        ? 17
+        : mode === "transit"
+          ? 28
+          : directKm <= 20
+            ? 38
+            : directKm <= 80
+              ? 58
+              : 72;
+  const durationSeconds = Math.max(
+    60,
+    (distanceMeters / 1000 / speedKmh) * 3600
+  );
 
   return {
     origin,
@@ -274,24 +382,54 @@ function buildLocalEstimate(origin: PublicCoordinate, destination: PublicCoordin
   };
 }
 
-export async function calculatePublicRoute(originText: string, destinationText: string, mode: PublicTravelMode = "driving"): Promise<PublicRoute> {
+export async function calculatePublicRoute(
+  originText: string,
+  destinationText: string,
+  mode: PublicTravelMode = "driving"
+): Promise<PublicRoute> {
   const origin = await geocode(originText);
   const destination = await geocode(destinationText);
-  const coordinateKey = [
-    origin.lat.toFixed(5),
-    origin.lng.toFixed(5),
-    destination.lat.toFixed(5),
-    destination.lng.toFixed(5),
-  ].join(",") + ":" + mode;
+  const coordinateKey =
+    [
+      origin.lat.toFixed(5),
+      origin.lng.toFixed(5),
+      destination.lat.toFixed(5),
+      destination.lng.toFixed(5),
+    ].join(",") +
+    ":" +
+    mode;
 
   const cached = cacheGet<PublicRoute>("route:" + coordinateKey);
-  if (cached) return cached;
+  const offline =
+    typeof navigator !== "undefined" && navigator.onLine === false;
+  if (
+    isPublicRoute(cached) &&
+    cached.mode === mode &&
+    Math.abs(cached.origin.lat - origin.lat) < 0.00002 &&
+    Math.abs(cached.origin.lng - origin.lng) < 0.00002 &&
+    Math.abs(cached.destination.lat - destination.lat) < 0.00002 &&
+    Math.abs(cached.destination.lng - destination.lng) < 0.00002 &&
+    (cached.source === "osrm" || offline)
+  )
+    return cached;
+  if (offline) return buildLocalEstimate(origin, destination, mode);
 
-  const profile = mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
-  const routingBase = OSRM_URL.replace(/\/route\/v1\/[^/]+$/, "/route/v1/" + profile);
-  const url = routingBase + "/" +
-    origin.lng + "," + origin.lat + ";" +
-    destination.lng + "," + destination.lat +
+  const profile =
+    mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
+  const routingBase = OSRM_URL.replace(
+    /\/route\/v1\/[^/]+$/,
+    "/route/v1/" + profile
+  );
+  const url =
+    routingBase +
+    "/" +
+    origin.lng +
+    "," +
+    origin.lat +
+    ";" +
+    destination.lng +
+    "," +
+    destination.lat +
     "?alternatives=false&overview=full&geometries=polyline";
 
   try {
@@ -301,7 +439,15 @@ export async function calculatePublicRoute(originText: string, destinationText: 
     const durationSeconds = route?.duration;
     const polyline = route?.geometry;
 
-    if (data.code === "Ok" && Number.isFinite(distanceMeters) && Number.isFinite(durationSeconds) && typeof polyline === "string") {
+    if (
+      data.code === "Ok" &&
+      Number.isFinite(distanceMeters) &&
+      Number(distanceMeters) > 0 &&
+      Number.isFinite(durationSeconds) &&
+      Number(durationSeconds) > 0 &&
+      typeof polyline === "string" &&
+      polyline.length > 0
+    ) {
       const result: PublicRoute = {
         origin,
         destination,
@@ -326,7 +472,8 @@ export async function calculatePublicRoute(originText: string, destinationText: 
 
 function publicDistanceLabel(meters: number) {
   return meters >= 1000
-    ? (meters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
+    ? (meters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) +
+        " km"
     : Math.round(meters).toLocaleString("pt-BR") + " m";
 }
 

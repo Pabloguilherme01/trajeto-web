@@ -1,7 +1,8 @@
 /** Public directories sometimes list alternatives separated by a slash. */
 export function phoneHref(phone?: string) {
   let digits = phone?.split(/[\/·]/)[0].replace(/\D/g, "") ?? "";
-  if ([12, 13].includes(digits.length) && digits.startsWith("55")) digits = digits.slice(2);
+  if ([12, 13].includes(digits.length) && digits.startsWith("55"))
+    digits = digits.slice(2);
   return [3, 8, 10, 11].includes(digits.length) ? "tel:" + digits : null;
 }
 
@@ -11,10 +12,33 @@ export function phoneContacts(...values: Array<string | undefined>) {
     for (const part of value?.split(/·|\/(?=\s*(?:\+?\d|\(\d))/) ?? []) {
       const number = part.match(/\+?(?:\(\d{2}\)|\d)[\d\s()-]*\d/)?.[0].trim();
       const href = phoneHref(number);
-      if (!number || !href || contacts.some(contact => contact.href === href)) continue;
-      const label = part.replace(number, "").replace(/[:\s]+$/, "").trim();
+      if (!number || !href || contacts.some(contact => contact.href === href))
+        continue;
+      const label = part
+        .replace(number, "")
+        .replace(/[:\s]+$/, "")
+        .trim();
       contacts.push({ label, number, href });
     }
   }
   return contacts;
+}
+
+/** WhatsApp-only departments must not be presented as telephone call actions. */
+export function publicServiceContacts(service: {
+  phone?: string;
+  extraPhone?: string;
+  whatsappOnly?: string[];
+}) {
+  const whatsapp = new Set((service.whatsappOnly ?? []).map(phoneHref));
+  return phoneContacts(service.phone, service.extraPhone).map(contact => {
+    const digits = contact.href.slice(4);
+    const isWhatsApp =
+      whatsapp.has(contact.href) && [10, 11].includes(digits.length);
+    return {
+      ...contact,
+      channel: isWhatsApp ? ("whatsapp" as const) : ("phone" as const),
+      href: isWhatsApp ? "https://wa.me/55" + digits : contact.href,
+    };
+  });
 }

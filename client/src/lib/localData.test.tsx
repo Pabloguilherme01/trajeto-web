@@ -6,17 +6,20 @@ describe("localData", () => {
 
   it("lists only Trajeto-owned local keys", () => {
     localStorage.setItem("trajeto-daily-mode", "automatico");
+    localStorage.setItem("trajeto:public-service-favorites:v1", '["sic"]');
     localStorage.setItem("other-app-setting", "keep");
-    expect(listLocalAppKeys()).toEqual(["trajeto-daily-mode"]);
+    expect(listLocalAppKeys()).toEqual(["trajeto-daily-mode", "trajeto:public-service-favorites:v1"]);
   });
 
   it("clears Trajeto data without touching another app", () => {
     localStorage.setItem("trajeto-mobile-destinations", "[]");
     localStorage.setItem("trajeto-mobile-vehicle", "{}");
+    localStorage.setItem("trajeto:public-service-favorites:v1", '["sic"]');
     localStorage.setItem("other-app-setting", "keep");
-    expect(clearLocalAppData()).toBe(2);
+    expect(clearLocalAppData()).toBe(3);
     expect(localStorage.getItem("trajeto-mobile-destinations")).toBeNull();
     expect(localStorage.getItem("trajeto-mobile-vehicle")).toBeNull();
+    expect(localStorage.getItem("trajeto:public-service-favorites:v1")).toBeNull();
     expect(localStorage.getItem("other-app-setting")).toBe("keep");
   });
 });
