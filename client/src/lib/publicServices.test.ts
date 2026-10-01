@@ -126,6 +126,11 @@ describe("public services catalog", () => {
     expect(cleaning.id).toBe("limpeza-urbana");
     expect(cleaning.phone).toBe("(61) 99303-4608");
 
+    const pruning = searchPublicServices("podagem")[0];
+    expect(pruning.id).toBe("rocagem-podagem");
+    expect(pruning.phone).toBe("(61) 3613-9458");
+    expect(pruning.hours).toContain("sábado");
+
     const surveillance = searchPublicServices("vigilancia sanitaria", "saude")[0];
     expect(surveillance.id).toBe("vigilancia-saude");
     expect(surveillance.phone).toBe("(61) 3618-1409");
