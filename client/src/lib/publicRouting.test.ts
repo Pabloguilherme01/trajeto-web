@@ -133,7 +133,7 @@ describe("public routing fallback", () => {
   });
 
   it("does not call the public geocoder while the device is offline", async () => {
-    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    vi.stubGlobal("navigator", { onLine: false });
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
