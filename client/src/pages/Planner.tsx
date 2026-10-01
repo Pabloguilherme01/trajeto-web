@@ -265,7 +265,12 @@ export default function Planner() {
   };
 
   const useCurrentLocation = () => {
-    if (!navigator.geolocation || locating) return;
+    if (locating) return;
+    if (!navigator.geolocation) {
+      setError("Localização não disponível neste navegador. Digite a origem para continuar.");
+      return;
+    }
+    setError(null);
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       position => {
