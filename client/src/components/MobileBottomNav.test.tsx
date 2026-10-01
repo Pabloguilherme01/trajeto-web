@@ -37,10 +37,15 @@ describe("mobile navigation", () => {
     const nav = screen.getByRole("navigation", { name: "Navegação móvel" });
     const input = screen.getByRole("textbox", { name: "Campo móvel" });
     fireEvent.focus(input);
-    await waitFor(() => expect(nav.className).toContain("hidden"));
-    expect(nav.getAttribute("data-editing-field")).toBe("true");
+    await waitFor(() => {
+      expect(nav.getAttribute("data-editing-field")).toBe("true");
+      expect(nav.className.split(/\\s+/)).toContain("hidden");
+    });
     fireEvent.blur(input);
-    await waitFor(() => expect(nav.className).not.toContain("hidden"));
+    await waitFor(() => {
+      expect(nav.getAttribute("data-editing-field")).toBe("false");
+      expect(nav.className.split(/\\s+/)).not.toContain("hidden");
+    });
   });
 
   it("opens a fresh planner from Rotas instead of silently restoring a previous trip", () => {
