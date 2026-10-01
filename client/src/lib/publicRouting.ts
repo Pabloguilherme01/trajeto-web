@@ -242,7 +242,6 @@ function localGeocode(value: string): PublicCoordinate | null {
       [
         row.cnpj,
         row.razaoSocial,
-        row.nomeFantasia,
         row.endereco,
         row.bairro,
         row.municipio,
