@@ -106,6 +106,7 @@ describe("Planner travel state", () => {
   it("automatically uses device location when calculating without an origin", async () => {
     state.staticRuntime = true;
     state.search = "destino=Hospital";
+    const descriptor = Object.getOwnPropertyDescriptor(navigator, "geolocation");
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
       value: {
@@ -126,16 +127,21 @@ describe("Planner travel state", () => {
           } as GeolocationPosition),
       },
     });
-    render(<Planner />);
-    submit();
-    await waitFor(() =>
-      expect(state.publicRoute).toHaveBeenCalledWith(
-        "-15.76123, -48.28123",
-        "Hospital",
-        "driving"
-      )
-    );
-    expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("-15.76123, -48.28123");
+    try {
+      render(<Planner />);
+      submit();
+      await waitFor(() =>
+        expect(state.publicRoute).toHaveBeenCalledWith(
+          "-15.76123, -48.28123",
+          "Hospital",
+          "driving"
+        )
+      );
+      expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("-15.76123, -48.28123");
+    } finally {
+      if (descriptor) Object.defineProperty(navigator, "geolocation", descriptor);
+      else Reflect.deleteProperty(navigator, "geolocation");
+    }
   });
 
   it("offers external navigation with the current position as an optional origin", async () => {
