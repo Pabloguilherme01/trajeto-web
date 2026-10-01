@@ -392,10 +392,10 @@ export default function Planner() {
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form ref={plannerFormRef} onSubmit={submit}>
               <label className="block">
-                <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
+                <span className="text-xs font-black uppercase tracking-[.14em] text-white/65">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                  <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" autoCapitalize="words" autoCorrect="off" />
+                  <input value={origin} onChange={event => { resetResult(); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/60" placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" autoCapitalize="words" autoCorrect="off" />
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
@@ -407,10 +407,10 @@ export default function Planner() {
               </div>
 
               <label className="block">
-                <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Destino</span>
+                <span className="text-xs font-black uppercase tracking-[.14em] text-white/65">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                  <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="go" autoCapitalize="words" autoCorrect="off" />
+                  <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/60" placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="go" autoCapitalize="words" autoCorrect="off" />
                 </div>
               </label>
 
@@ -432,19 +432,19 @@ export default function Planner() {
                         ["combustivel", "Combustível"],
                         ["centro", "Centro"],
                       ] as const).map(([value, label]) => (
-                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A]" : "border-white/8 bg-white/[.02] text-white/50")}>{label}</button>
+                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A]" : "border-white/8 bg-white/[.02] text-white/65")}>{label}</button>
                       ))}
                     </div>
-                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25" autoComplete="off" autoCapitalize="none" autoCorrect="off" inputMode="search" enterKeyHint="search" />
+                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/60" autoComplete="off" autoCapitalize="none" autoCorrect="off" inputMode="search" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="flex min-h-[4.6rem] items-center gap-3 rounded-xl border border-white/8 bg-[#121B22] px-3 text-left">
                           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
-                          <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.label}</span><span className="mt-0.5 block truncate text-xs text-white/35">{item.detail}</span></span>
+                          <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.label}</span><span className="mt-0.5 block truncate text-xs text-white/65">{item.detail}</span></span>
                           <span className="text-xs font-black uppercase tracking-[.08em] text-[#C7FF3C]">Ir</span>
                         </button>
                       ))}
-                      {availableDestinations.length === 0 && <p className="rounded-xl bg-white/[.025] p-4 text-xs text-white/40">Nenhum destino corresponde ao filtro.</p>}
+                      {availableDestinations.length === 0 && <p className="rounded-xl bg-white/[.025] p-4 text-xs text-white/65">Nenhum destino corresponde ao filtro.</p>}
                     </div>
                   </div>
                 )}
@@ -452,12 +452,12 @@ export default function Planner() {
 
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                 {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) + "&auto=1"); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-white/60">Última rota</button>}
-                <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-white/50 disabled:opacity-30">Limpar</button>
+                <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-white/65 disabled:opacity-30">Limpar</button>
               </div>
 
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Modo</span>
+                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/65">Modo</span>
                   <span className="text-xs font-bold text-white/25">{mode === "driving" ? "carro" : mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : "transporte"}</span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
@@ -525,7 +525,7 @@ export default function Planner() {
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#BDA5FF]">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedRoutes.length + savedStations.length}</span>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/65">{savedRoutes.length + savedStations.length}</span>
             </div>
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70">{savedMessage}</p>}
             {savedRoutes.length > 0 && (
@@ -535,7 +535,7 @@ export default function Planner() {
                   value={savedRouteQuery}
                   onChange={event => setSavedRouteQuery(event.target.value)}
                   placeholder="Filtrar por origem ou destino"
-                  className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25"
+                  className="min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/60"
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -564,7 +564,7 @@ export default function Planner() {
                     {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
                       <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left">
                         <p className="truncate text-xs font-black">{route.label}</p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-snug text-white/35">{route.detail}</p>
+                        <p className="mt-1 line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</p>
                       </button>
                     ))}
                   </div>
@@ -584,7 +584,7 @@ export default function Planner() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
-                            <p className="mt-1 text-xs text-white/35">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
+                            <p className="mt-1 text-xs text-white/65">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
                           </div>
                           <span className={"shrink-0 rounded-full border px-2 py-1 text-xs font-black uppercase tracking-[.08em] " + (stale ? "border-amber-300/20 text-amber-200" : "border-[#C7FF3C]/15 text-[#C7FF3C]")}>
                             {stale ? "revisar" : "pronta"}
@@ -608,7 +608,7 @@ export default function Planner() {
           <section className="mt-5" aria-labelledby="saved-stations-title">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#3DE3FF]">Postos favoritos</p><h2 id="saved-stations-title" className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">Seus postos.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedStations.length}</span>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/65">{savedStations.length}</span>
             </div>
             <div className="mt-3 space-y-2">
               {savedStations.map(station => (
@@ -616,8 +616,8 @@ export default function Planner() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-black">{station.name}</p>
-                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{station.address}</p>
-                      {station.isOpen != null && <p className={"mt-2 text-xs font-black " + (station.isOpen ? "text-[#C7FF3C]" : "text-white/35")}>{station.isOpen ? "Aberto na consulta salva" : "Fechado na consulta salva"}</p>}
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/65">{station.address}</p>
+                      {station.isOpen != null && <p className={"mt-2 text-xs font-black " + (station.isOpen ? "text-[#C7FF3C]" : "text-white/65")}>{station.isOpen ? "Aberto na consulta salva" : "Fechado na consulta salva"}</p>}
                     </div>
                     <button type="button" onClick={() => { const result = toggleMobileStationFavorite(station); if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador."); else setSavedStations(result.stations); }} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
                   </div>
@@ -646,7 +646,7 @@ export default function Planner() {
               <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
               <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
             </div>
-            <p className="mt-3 text-center text-xs font-semibold text-white/30">Esse modo é compatível com hospedagem estática, como GitHub Pages.</p>
+            <p className="mt-3 text-center text-xs font-semibold text-white/65">Esse modo é compatível com hospedagem estática, como GitHub Pages.</p>
           </section>
         )}
 
@@ -669,14 +669,14 @@ export default function Planner() {
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
-                  <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
+                  <p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Trânsito</p>
                   <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-white/35">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/65">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
                 </div>
                 <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
-                  <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Pedágio</p>
+                  <p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Pedágio</p>
                   <p className="mt-1 text-xs font-black">Não informado</p>
-                  <p className="mt-1 text-xs text-white/35">o retorno básico da rota não fornece pedágio</p>
+                  <p className="mt-1 text-xs text-white/65">o retorno básico da rota não fornece pedágio</p>
                 </div>
               </div>
 
@@ -707,7 +707,7 @@ export default function Planner() {
                 <div className="flex items-center justify-between gap-3 border-b border-white/8 px-3 py-3 sm:px-4">
                   <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[.15em] text-white/55">{online ? "Mapa da rota" : "Prévia offline"}</p>
-                    <p className="mt-0.5 truncate text-xs text-white/35">{online ? "ruas + geometria no próprio Trajeto" : "rota salva sem depender do mapa de ruas"}</p>
+                    <p className="mt-0.5 truncate text-xs text-white/65">{online ? "ruas + geometria no próprio Trajeto" : "rota salva sem depender do mapa de ruas"}</p>
                   </div>
                   <div className="flex shrink-0 gap-2">
                     <button type="button" onClick={openPreferredNavigation} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Navegar</button>
@@ -734,12 +734,12 @@ export default function Planner() {
 
             {planned.stops.length > 0 && (
               <section className="mt-3">
-                <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">{publicRouteSource ? "No caminho" : "Paradas encontradas"}</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-xs text-white/30">{publicRouteSource ? "catálogo local · posição estimada no corredor" : "dados desta consulta"}</span></div>
+                <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">{publicRouteSource ? "No caminho" : "Paradas encontradas"}</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-xs text-white/65">{publicRouteSource ? "catálogo local · posição estimada no corredor" : "dados desta consulta"}</span></div>
                 <div className="mt-3 space-y-2">
                   {planned.stops.slice(0, 6).map(stop => (
                     <article key={stop.placeId} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0"><p className="truncate text-sm font-black">{stop.name}</p><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{stop.address}</p></div>
+                        <div className="min-w-0"><p className="truncate text-sm font-black">{stop.name}</p><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/65">{stop.address}</p></div>
                         <Fuel className="size-4 shrink-0 text-[#3DE3FF]" />
                       </div>
                       {stop.priceReference && <p className="mt-2 text-xs font-bold text-[#D9FF91]">Referência ANP: {Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>}
@@ -752,7 +752,7 @@ export default function Planner() {
 
             <section className="mt-3 rounded-3xl border border-white/8 bg-white/[.025] p-4">
               <details>
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-white/35" /></summary>
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-white/65" /></summary>
                 <div className="mt-3 grid gap-2 text-xs leading-relaxed text-white/65">
                   <p>Fonte da rota: {publicRouteSource === "local-estimate"
                     ? "estimativa local baseada nas coordenadas"
