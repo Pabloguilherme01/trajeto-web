@@ -185,157 +185,50 @@ export default function Home() {
           </button>
         </section>
 
-        <section className="mt-8">
-          <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">Utilidade local</p>
-          <h1 className="mobile-title mt-3 max-w-3xl font-display text-[clamp(2.8rem,10vw,5.7rem)] font-semibold leading-[.9] tracking-[-.075em]">
-            Resolva na cidade.<br />
-            <span className="text-[#C7FF3C]">Chegue com menos esforço.</span>
+        <section className="mt-6 sm:mt-8">
+          <p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Águas Lindas na mão</p>
+          <h1 className="mobile-title mt-2 max-w-3xl font-display text-[clamp(2.15rem,9vw,5.2rem)] font-semibold leading-[.94] tracking-[-.065em]">
+            Resolva o que precisa.<br />
+            <span className="text-[#C7FF3C]">Chegue onde precisa.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">
-            Serviços públicos, contatos, rotas, postos e lugares úteis de Águas Lindas em um fluxo simples, com o essencial disponível offline depois da preparação.
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 sm:mt-5 sm:text-base">
+            Rotas, serviços públicos, postos e lugares úteis de Águas Lindas com acesso rápido no celular.
           </p>
         </section>
 
-        <section className="mt-6" aria-label="Ações principais">
-          <div className="grid gap-2 sm:grid-cols-3">
-            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.08] p-4 text-left active:scale-[.99]">
-              <Route className="size-4 text-[#C7FF3C]" />
-              <p className="mt-3 text-sm font-black">{lastTrip ? "Continuar última rota" : "Planejar uma rota"}</p>
-              <p className="mt-1 text-xs text-white/65">{lastTrip ? "Retomar sem preencher tudo de novo" : "Informe origem e destino"}</p>
+        <section className="mt-5" aria-label="Ações principais">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
+              <div className="flex items-center justify-between gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/12 text-[#C7FF3C]"><Route className="size-4" /></span>
+                <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]/80" />
+              </div>
+              <p className="mt-2 text-sm font-black">{lastTrip ? "Continuar última rota" : "Planejar uma rota"}</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? "Retome sua última viagem em um toque." : "Origem, destino e rota sem cadastro."}</p>
             </button>
-            <button type="button" onClick={findNearby} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-4 text-left active:scale-[.99]">
+            <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Fuel className="size-4 text-[#3DE3FF]" />
-              <p className="mt-3 text-sm font-black">Encontrar postos</p>
-              <p className="mt-1 text-xs text-white/65">Perto de você ou no diretório</p>
+              <p className="mt-2.5 text-sm font-black">Postos</p>
+              <p className="mt-1 text-xs leading-snug text-white/68">Perto de você</p>
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-4 text-left active:scale-[.99]">
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Landmark className="size-4 text-[#FFB86B]" />
-              <p className="mt-3 text-sm font-black">Serviços públicos</p>
-              <p className="mt-1 text-xs text-white/55">Saúde, cidadania, benefícios e emergência</p>
+              <p className="mt-2.5 text-sm font-black">Serviços</p>
+              <p className="mt-1 text-xs leading-snug text-white/68">Saúde e cidadania</p>
             </button>
           </div>
         </section>
 
-        <div className="mt-5"><DailyModeSelector /></div>
-
-        <section className="mt-4 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.04] p-3" aria-labelledby="home-utility-title">
+        <section className="mt-4 rounded-[1.45rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.15em] text-[#FFB86B]">Utilidade imediata</p>
-              <h2 id="home-utility-title" className="mt-1 text-sm font-black">Precisa resolver agora?</h2>
-            </div>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Central completa</button>
-          </div>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {[
-              { label: "Polícia", number: "190", href: "tel:190" },
-              { label: "SAMU", number: "192", href: "tel:192" },
-              { label: "Bombeiros", number: "193", href: "tel:193" },
-            ].map(item => (
-              <a key={item.label} href={item.href} className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-white/8 bg-[#0B1014] px-2 text-xs font-black text-white/75 transition hover:border-[#FFB86B]/25 active:scale-[.98]">
-                <Phone className="size-3.5 text-[#FFB86B]" />
-                <span>{item.label}</span>
-                <span className="text-white/60">{item.number}</span>
-              </a>
-            ))}
-          </div>
-          <p className="mt-2 text-xs leading-relaxed text-white/60">Os atalhos de emergência ficam disponíveis na interface sem depender do catálogo online.</p>
-        </section>
-
-        <section className="mt-5" aria-labelledby="local-routes-title">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rotas locais</p>
-              <h2 id="local-routes-title" className="mt-1 text-xl font-black tracking-[-.035em]">Já deixe o destino pronto.</h2>
-            </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
-              <button
-                key={route.id}
-                type="button"
-                onClick={() => {
-                  rememberIntent("route");
-                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
-                }}
-                className="mobile-card min-h-[5.8rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985]"
-              >
-                <Route className="size-4 text-[#3DE3FF]" aria-hidden="true" />
-                <span className="mt-2 block truncate text-xs font-black">{route.label}</span>
-                <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-5" aria-labelledby="local-guide-home-title">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-[#FFB86B]">Guia local</p>
-              <h2 id="local-guide-home-title" className="mt-1 text-xl font-black tracking-[-.035em]">Comer, comprar, resolver.</h2>
-            </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Abrir guia</button>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {LOCAL_PLACES.filter(place => place.category === "alimentacao" || place.category === "compras").slice(0, 6).map(place => {
-              const PlaceIcon = place.category === "alimentacao" ? Utensils : ShoppingBag;
-              return (
-                <button key={place.id} type="button" onClick={() => {
-                  rememberSearch(place.name);
-                  rememberIntent("route");
-                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
-                }} className="mobile-card min-h-[7rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985]">
-                  <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
-                  <span className="mt-2 block truncate text-xs font-black">{place.name}</span>
-                  <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{place.detail}</span>
-                  <span className="mt-1 block truncate text-xs text-white/60">{place.address}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mt-4" aria-label="Atalhos por necessidade">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-white/60">Resolver agora</p>
-              <h2 className="mt-1 text-lg font-black tracking-[-.035em]">Acesso rápido.</h2>
-            </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver tudo</button>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => openServiceSearch("Centro Águas Lindas de Goiás, GO") },
-              { label: "Saúde", hint: "UPA, hospital e UBS", icon: HeartPulse, action: () => setLocation(appUrl("/servicos") + "?categoria=saude") },
-              { label: "Serviços", hint: "Prefeitura e cidadania", icon: Landmark, action: () => setLocation(appUrl("/servicos") + "?categoria=cidadania") },
-              { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title") },
-            ].map(item => (
-              <button
-                key={item.label}
-                type="button"
-                aria-label={item.label}
-                onClick={item.action}
-                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/15 active:scale-[.985]"
-              >
-                <item.icon className="size-4 text-[#C7FF3C]" aria-hidden="true" />
-                <span className="mt-2 block text-xs font-black">{item.label}</span>
-                <span className="mt-0.5 block text-xs text-white/65">{item.hint}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Próxima viagem</p>
-              <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Planejar rota.</h2>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rota rápida</p>
+              <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Para onde você vai?</h2>
             </div>
             <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-bold text-white/65">sem cadastro</span>
           </div>
 
-          <form onSubmit={submit} className="mt-5 space-y-2.5">
+          <form onSubmit={submit} className="mt-4 space-y-2.5">
             <label className="block">
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</span>
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
@@ -366,6 +259,117 @@ export default function Home() {
             </p>
           )}
 
+        </section>
+
+
+        <div className="mt-4 sm:mt-5"><DailyModeSelector /></div>
+
+        <section className="mt-4 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.04] p-3" aria-labelledby="home-utility-title">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.15em] text-[#FFB86B]">Utilidade imediata</p>
+              <h2 id="home-utility-title" className="mt-1 text-sm font-black">Precisa resolver agora?</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver serviços</button>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {[
+              { label: "Polícia", number: "190", href: "tel:190" },
+              { label: "SAMU", number: "192", href: "tel:192" },
+              { label: "Bombeiros", number: "193", href: "tel:193" },
+            ].map(item => (
+              <a key={item.label} href={item.href} className="inline-flex min-h-[4.25rem] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-white/8 bg-[#0B1014] px-1.5 py-2 text-center text-xs font-black text-white/75 transition hover:border-[#FFB86B]/25 active:scale-[.98]">
+                <Phone className="size-3.5 text-[#FFB86B]" />
+                <span className="max-w-full truncate">{item.label}</span>
+                <span className="text-white/60">{item.number}</span>
+              </a>
+            ))}
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-white/60">Os atalhos de emergência ficam disponíveis na interface sem depender do catálogo online.</p>
+        </section>
+
+        <section className="mt-5" aria-labelledby="local-routes-title">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rotas locais</p>
+              <h2 id="local-routes-title" className="mt-1 text-xl font-black tracking-[-.035em]">Já deixe o destino pronto.</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
+          </div>
+          <div className="mobile-scroll-x -mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
+            {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
+              <button
+                key={route.id}
+                type="button"
+                onClick={() => {
+                  rememberIntent("route");
+                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
+                }}
+                className="mobile-card min-h-[5.8rem] w-[46%] min-w-[8.5rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
+              >
+                <Route className="size-4 text-[#3DE3FF]" aria-hidden="true" />
+                <span className="mt-2 block truncate text-xs font-black">{route.label}</span>
+                <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-5" aria-labelledby="local-guide-home-title">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-[#FFB86B]">Guia local</p>
+              <h2 id="local-guide-home-title" className="mt-1 text-xl font-black tracking-[-.035em]">Comer, comprar, resolver.</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Abrir guia</button>
+          </div>
+          <div className="mobile-scroll-x -mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
+            {LOCAL_PLACES.filter(place => place.category === "alimentacao" || place.category === "compras").slice(0, 6).map(place => {
+              const PlaceIcon = place.category === "alimentacao" ? Utensils : ShoppingBag;
+              return (
+                <button key={place.id} type="button" onClick={() => {
+                  rememberSearch(place.name);
+                  rememberIntent("route");
+                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
+                }} className="mobile-card min-h-[6.75rem] w-[72%] min-w-[13rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
+                  <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
+                  <span className="mt-2 block truncate text-xs font-black">{place.name}</span>
+                  <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{place.detail}</span>
+                  <span className="mt-1 block truncate text-xs text-white/60">{place.address}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-5 sm:mt-6" aria-label="Atalhos por necessidade">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-white/60">Resolver agora</p>
+              <h2 className="mt-1 text-lg font-black tracking-[-.035em]">Acesso rápido.</h2>
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver tudo</button>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => openServiceSearch("Centro Águas Lindas de Goiás, GO") },
+              { label: "Saúde", hint: "UPA, hospital e UBS", icon: HeartPulse, action: () => setLocation(appUrl("/servicos") + "?categoria=saude") },
+              { label: "Serviços", hint: "Prefeitura e cidadania", icon: Landmark, action: () => setLocation(appUrl("/servicos") + "?categoria=cidadania") },
+              { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title") },
+            ].map(item => (
+              <button
+                key={item.label}
+                type="button"
+                aria-label={item.label}
+                onClick={item.action}
+                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/15 active:scale-[.985]"
+              >
+                <item.icon className="size-4 text-[#C7FF3C]" aria-hidden="true" />
+                <span className="mt-2 block text-xs font-black">{item.label}</span>
+                <span className="mt-0.5 block text-xs text-white/65">{item.hint}</span>
+              </button>
+            ))}
+          </div>
         </section>
 
         <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4">
@@ -468,7 +472,7 @@ export default function Home() {
           </section>
         )}
 
-        <footer className="mt-10 pb-4 text-center text-xs leading-relaxed text-white/60">
+        <footer className="mt-8 pb-4 text-center text-xs leading-relaxed text-white/60">
           Dados de rota e locais são apresentados com a fonte correspondente quando disponível. O Trajeto não substitui o aplicativo de navegação.
         </footer>
       </div>
