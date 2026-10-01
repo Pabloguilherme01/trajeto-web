@@ -418,6 +418,7 @@ export default function Planner() {
                     <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                       {([
                         ["todos", "Todos"],
+                        ["alimentacao", "Comer"],
                         ["saude", "Saúde"],
                         ["servicos", "Serviços"],
                         ["transporte", "Transporte"],
