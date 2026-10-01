@@ -792,18 +792,20 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         {mapFirst && showMap && !showSavedOnly && broadAguasLindasQuery && mapStations.length > 0 && (
           <section id="aguas-lindas-map" className="scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121B22] shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
             <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Mapa principal</p>
                 <h2 id="map-first-title" className="mt-1 text-lg font-black">Postos de Águas Lindas</h2>
+                <p className="mt-1 text-xs text-white/45">{online ? "ruas online + dados locais" : "coordenadas salvas no aparelho"}</p>
               </div>
-              <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/45">{mapStations.length} referências</span>
+              <span className={"shrink-0 rounded-full border px-2.5 py-1 text-xs font-black " + (online ? "border-[#C7FF3C]/20 text-[#C7FF3C]" : "border-[#FFB86B]/25 text-[#FFCF96]")}>{online ? "online" : "offline"}</span>
             </div>
             <div className="relative">
               <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
-              <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">Mais perto</button>
-              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/70">Ver fichas</button>
+              <button type="button" onClick={useNearby} disabled={locating} className="min-h-12 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
+              <button type="button" onClick={saveMapOffline} disabled={!mapStations.length} className="min-h-12 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] text-xs font-black text-[#C9F7FF] disabled:opacity-40"><Bookmark className="mr-1 inline size-3.5" />Salvar mapa</button>
+              <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="col-span-2 min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/70">Ver fichas e dados oficiais</button>
             </div>
           </section>
         )}
