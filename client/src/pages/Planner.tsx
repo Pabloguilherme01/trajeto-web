@@ -575,7 +575,7 @@ export default function Planner() {
 
               <button type="submit" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#B7D86B] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
                 <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : "Calcular rota"}</span>
-                {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
+                {planRoute.isPending || publicRoutePending ? <Loader2 className="size-5 animate-spin motion-reduce:animate-none" /> : <Navigation className="size-5" />}
               </button>
               {destination.trim().length >= 3 && (
                 <div className="mt-2 grid grid-cols-3 gap-2">
