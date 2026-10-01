@@ -546,6 +546,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "transito-mobilidade",
+    keywords: [
+      "semaforo",
+      "sinalizacao",
+      "placa de transito",
+      "faixa de pedestre",
+      "mobilidade urbana",
+    ],
     name: "Secretaria de Trânsito e Mobilidade Urbana",
     category: "transito",
     description: "Atendimento municipal de trânsito, mobilidade e agentes.",
@@ -690,6 +697,15 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "secretaria-infraestrutura",
+    keywords: [
+      "buraco na rua",
+      "buraco rua",
+      "asfalto",
+      "via danificada",
+      "drenagem",
+      "bueiro",
+      "obra publica",
+    ],
     name: "Secretaria Municipal de Infraestrutura e Obras",
     category: "cidadania",
     description: "Atendimento municipal para infraestrutura e obras.",
@@ -1159,6 +1175,16 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "CPF e Receita Federal",
     query: "receita federal",
     hint: "Ponto conveniado oficial",
+  },
+  {
+    label: "Buraco / asfalto",
+    query: "buraco rua",
+    hint: "Infraestrutura e obras",
+  },
+  {
+    label: "Sinalização / semáforo",
+    query: "semaforo",
+    hint: "Trânsito e mobilidade",
   },
   {
     label: "Reclamação municipal",
