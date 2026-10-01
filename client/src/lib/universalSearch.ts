@@ -19,21 +19,28 @@ function relevanceScore(query: string, values: Array<string | null | undefined>)
   if (!needle) return 0;
   const terms = needle.split(" ").filter(Boolean);
   let best = 0;
-  for (const raw of values) {
-    if (!raw) continue;
+  values.forEach((raw, fieldIndex) => {
+    if (!raw) return;
     const value = normalizeCatalogText(raw);
-    if (!value) continue;
-    if (value === needle) best = Math.max(best, 120);
-    else if (value.startsWith(needle)) best = Math.max(best, 100);
-    else if (value.includes(needle)) best = Math.max(best, 80);
+    if (!value) return;
+    // The first value is the visible name/label. A direct name match should
+    // outrank an alias or descriptive keyword, while those fields still keep
+    // useful citizen-language matches discoverable.
+    const nameBoost = fieldIndex === 0 ? 45 : 0;
+    if (value === needle) best = Math.max(best, 120 + nameBoost);
+    else if (value.startsWith(needle)) best = Math.max(best, 100 + nameBoost);
+    else if (value.includes(needle)) best = Math.max(best, 80 + nameBoost);
     if (terms.length > 1 && terms.every(term => value.includes(term))) {
-      best = Math.max(best, 60 + terms.filter(term => value.startsWith(term)).length * 5);
+      best = Math.max(
+        best,
+        60 + nameBoost + terms.filter(term => value.startsWith(term)).length * 5
+      );
     } else if (terms.some(term => value.startsWith(term))) {
-      best = Math.max(best, 45);
+      best = Math.max(best, 45 + nameBoost);
     } else if (terms.some(term => value.includes(term))) {
-      best = Math.max(best, 30);
+      best = Math.max(best, 30 + nameBoost);
     }
-  }
+  });
   return best;
 }
 
