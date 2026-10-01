@@ -19,7 +19,7 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -60,11 +60,14 @@ jobs:
       - name: Production build
         run: npm run build
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Browser E2E + accessibility
         run: npm run test:e2e
 
       - name: GitHub Pages base-path smoke
         run: timeout 300s npm run test:e2e:pages
+
+      - name: Cross-browser compatibility
+        run: npm run test:e2e:compat
