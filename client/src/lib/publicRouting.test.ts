@@ -147,6 +147,40 @@ describe("public routing fallback", () => {
     expect(String(fetchMock.mock.calls[0][0])).not.toContain("nominatim");
   });
 
+  it("does not persist typed addresses in plaintext geocode cache keys", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.79", lon: "-48.24" }]), {
+          status: 200,
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 6400, duration: 720, geometry: "private-cache" }],
+          }),
+          { status: 200 }
+        )
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const typedAddress = "Rua Particular 123, Águas Lindas de Goiás, GO";
+    await calculatePublicRoute("-15.7545,-48.2816", typedAddress);
+
+    const keys: string[] = [];
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key) keys.push(key);
+    }
+
+    expect(keys.some(key => key.startsWith("trajeto:public-routing:geocode:"))).toBe(true);
+    expect(keys.join(" ").toLocaleLowerCase("pt-BR")).not.toContain(
+      "rua particular 123"
+    );
+  });
+
   it("geocodes endpoints and calculates a route without the application backend", async () => {
     const route = await calculatePublicRoute(
       "Águas Lindas de Goiás, GO",
