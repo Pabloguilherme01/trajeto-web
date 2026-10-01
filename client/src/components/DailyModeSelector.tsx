@@ -93,7 +93,7 @@ export default function DailyModeSelector() {
               <div key={mode.id} role="listitem" className="shrink-0">
               <button type="button" aria-pressed={activeMode} onClick={() => openMode(mode)} aria-label={mode.label} className={activeMode ? "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-[#C7FF3C]/50 bg-[#C7FF3C]/10 px-3 text-left" : "min-h-14 min-w-[9.5rem] shrink-0 rounded-xl border border-white/10 bg-white/[0.025] px-3 text-left"}>
                 <span className="flex items-center gap-1.5 text-xs font-extrabold text-white"><Icon className="size-3.5 text-[#3DE3FF]" />{mode.label}</span>
-                <span className="mt-1 block truncate text-xs text-[#82939C]">{mode.detail}</span>
+                <span className="mt-1 block line-clamp-2 break-words text-xs leading-snug text-[#82939C]">{mode.detail}</span>
               </button>
               </div>
             );
@@ -104,8 +104,8 @@ export default function DailyModeSelector() {
         <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/8 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.13em] text-[#7F919A]">Ação preparada</p>
-            <p className="mt-1 truncate text-xs font-extrabold text-white">{active.label}</p>
-            <p className="mt-0.5 truncate text-xs text-[#7F919A]">{active.detail}</p>
+            <p className="mt-1 line-clamp-2 break-words text-sm font-bold leading-snug text-white">{active.label}</p>
+            <p className="mt-0.5 line-clamp-2 break-words text-xs leading-snug text-[#7F919A]">{active.detail}</p>
           </div>
           <button type="button" onClick={() => openMode(active)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">
             Abrir <ArrowRight className="size-3.5" />
