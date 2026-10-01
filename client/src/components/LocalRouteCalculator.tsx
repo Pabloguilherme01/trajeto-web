@@ -51,8 +51,8 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [activeMode, setActiveMode] = useState<TripCalculatorModeSelection>(restoredMode);
   const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : (draft?.distance ?? ""));
   const [price, setPrice] = useState(() => draft?.price || getRememberedPrice());
-  const [consumption, setConsumption] = useState(savedVehicle ? String(savedVehicle.consumption) : (draft?.consumption ?? ""));
-  const [tank, setTank] = useState(savedVehicle ? String(savedVehicle.tank) : (draft?.tank ?? ""));
+  const [consumption, setConsumption] = useState(draft?.consumption || (savedVehicle ? String(savedVehicle.consumption) : ""));
+  const [tank, setTank] = useState(draft?.tank || (savedVehicle ? String(savedVehicle.tank) : ""));
   const [currentFuel, setCurrentFuel] = useState(draft?.currentFuel ?? "");
   const [roundTrip, setRoundTrip] = useState(draft?.roundTrip ?? false);
   const [tripsPerWeek, setTripsPerWeek] = useState(draft?.tripsPerWeek ?? 1);
