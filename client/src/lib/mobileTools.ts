@@ -1,3 +1,5 @@
+import { privateRouteShareOrigin } from "@/lib/locationPrivacy";
+
 export function isStandaloneApp() {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(display-mode: standalone)").matches ||
@@ -12,7 +14,7 @@ export type RouteShareDecision = {
 };
 
 export function buildRouteShareText(origin: string, destination: string, decision?: RouteShareDecision | null) {
-  const route = `Planejei esta rota no Trajeto: ${origin.trim()} → ${destination.trim()}.`;
+  const route = `Planejei esta rota no Trajeto: ${privateRouteShareOrigin(origin)} → ${destination.trim()}.`;
   if (!decision?.name) return route + " Veja distância, duração e opções de abastecimento.";
 
   const priceValue = Number(decision.price);
@@ -47,10 +49,7 @@ export async function shareText(text: string, url: string, title = "Trajeto") {
 
 export function buildNearbyStationsUrl(basePath: string, lat?: number, lng?: number) {
   const params = new URLSearchParams({ q: "postos" });
-  if (Number.isFinite(lat) && Number.isFinite(lng)) {
-    params.set("lat", String(lat));
-    params.set("lng", String(lng));
-  }
+  if (Number.isFinite(lat) && Number.isFinite(lng)) params.set("perto", "1");
   return basePath + "?" + params.toString();
 }
 
