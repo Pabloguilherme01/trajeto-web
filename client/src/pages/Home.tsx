@@ -7,7 +7,8 @@ import { getMobileDestinations, rememberDestinationUsage, type MobileDestination
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICE_SHORTCUTS } from "@/lib/publicServices";
-import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { shareText, vibration } from "@/lib/mobileTools";
+import { privateOriginForUrl } from "@/lib/locationPrivacy";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
@@ -95,7 +96,8 @@ export default function Home() {
     track("route_open", to);
     vibration();
     const params = new URLSearchParams({ destino: to, auto: "1" });
-    if (from) params.set("origem", from);
+    const safeOrigin = privateOriginForUrl(from);
+    if (safeOrigin) params.set("origem", safeOrigin);
     setLocation(appUrl("/planejar") + "?" + params.toString());
   };
 
@@ -149,23 +151,8 @@ export default function Home() {
 
   const findNearby = () => {
     rememberIntent("nearby");
-    if (!navigator.geolocation) {
-      setLocation(appUrl("/postos") + "?q=postos");
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setLocating(false);
-        vibration(16);
-        setLocation(buildNearbyStationsUrl(appUrl("/postos"), position.coords.latitude, position.coords.longitude));
-      },
-      () => {
-        setLocating(false);
-        setLocation(appUrl("/postos") + "?q=postos");
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
-    );
+    vibration(12);
+    setLocation(appUrl("/postos") + "?q=postos&perto=1");
   };
 
   const shareHome = async () => {
