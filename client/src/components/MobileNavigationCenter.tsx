@@ -83,17 +83,17 @@ export default function MobileNavigationCenter({
 
         <div className="mt-5 grid grid-cols-3 gap-2">
           <div className="rounded-xl border border-white/8 bg-white/[.04] p-3">
-            <p className="text-xs font-bold uppercase tracking-[.12em] text-white/40">Rota</p>
+            <p className="text-xs font-bold uppercase tracking-[.12em] text-white/65">Rota</p>
             <p className="mt-1 text-base font-black">{distance}</p>
             <p className="text-xs text-white/65">{duration}</p>
           </div>
           <div className="rounded-xl border border-white/8 bg-white/[.04] p-3">
-            <p className="text-xs font-bold uppercase tracking-[.12em] text-white/40">Combustível</p>
+            <p className="text-xs font-bold uppercase tracking-[.12em] text-white/65">Combustível</p>
             <p className="mt-1 text-base font-black">{fuelCost != null ? fuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }).replace(/\u00A0/g, " ") : "—"}</p>
             <p className="text-xs text-white/65">{litersNeeded != null ? `${litersNeeded.toLocaleString("pt-BR")} L` : "configure o veículo"}</p>
           </div>
           <div className="rounded-xl border border-white/8 bg-white/[.04] p-3">
-            <p className="text-xs font-bold uppercase tracking-[.12em] text-white/40">Parada</p>
+            <p className="text-xs font-bold uppercase tracking-[.12em] text-white/65">Parada</p>
             <p className="mt-1 truncate text-base font-black">{recommendationName ?? "—"}</p>
             <p className="text-xs text-white/65">{detourKm != null ? `${detourKm.toLocaleString("pt-BR")} km de desvio` : "sem parada calculada"}</p>
           </div>
@@ -107,11 +107,11 @@ export default function MobileNavigationCenter({
         )}
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="rounded-xl border border-white/8 bg-white/[.025] px-3 py-2.5">
-            <p className="text-xs font-black uppercase tracking-[.12em] text-white/35">Origem</p>
+            <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</p>
             <p className="mt-1 truncate text-xs font-bold text-white/80" title={origin}>{origin}</p>
           </div>
           <div className="rounded-xl border border-white/8 bg-white/[.025] px-3 py-2.5">
-            <p className="text-xs font-black uppercase tracking-[.12em] text-white/35">Destino</p>
+            <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Destino</p>
             <p className="mt-1 truncate text-xs font-bold text-white/80" title={destination}>{destination}</p>
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function MobileNavigationCenter({
           </div>
         )}
         {recommendationName && detourKm != null && (
-          <p className="mt-3 text-xs leading-relaxed text-white/50">
+          <p className="mt-3 text-xs leading-relaxed text-white/65">
             Parada sugerida: <strong className="text-white/75">{recommendationName}</strong>. Desvio {detourSource === "real" ? "real" : "estimado"}.
           </p>
         )}
@@ -132,7 +132,7 @@ export default function MobileNavigationCenter({
         <button type="button" onClick={onNavigate} disabled={!canNavigate} aria-describedby={navigationReason ? "navigation-lock-help" : undefined} className="col-span-2 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] shadow-[0_10px_28px_rgba(199,255,60,.12)] active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-2">
           <Navigation className="size-5" /> Navegar agora
         </button>
-        {navigationReason && <p id="navigation-lock-help" className="col-span-2 rounded-xl border border-white/8 bg-white/[.025] px-3 py-2 text-center text-xs font-bold leading-relaxed text-white/50" role="status" aria-live="polite">{navigationReason}</p>}
+        {navigationReason && <p id="navigation-lock-help" className="col-span-2 rounded-xl border border-white/8 bg-white/[.025] px-3 py-2 text-center text-xs font-bold leading-relaxed text-white/65" role="status" aria-live="polite">{navigationReason}</p>}
         <button type="button" onClick={onStations} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-white/[.07] px-3 text-xs font-black text-white active:scale-[.98]">
           <Fuel className="size-4" /> Paradas
         </button>
@@ -160,7 +160,7 @@ export default function MobileNavigationCenter({
             {preferredProvider === "apple" && onAppleMapsPreferred && <button type="button" onClick={() => { saveNavigationPreferences({ provider: "apple", preference: routePreference }); onAppleMapsPreferred(routePreference, stops); }} disabled={!canNavigate} className="col-span-2 min-h-11 rounded-lg bg-[#C7FF3C] text-xs font-black text-[#0B1014] disabled:opacity-40">Abrir no Apple Maps</button>}
           </div>
         </div>}
-        {onMultiStopNavigate && <div className="col-span-2 rounded-xl border border-white/8 bg-white/[.03] p-3 sm:col-span-4"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black text-white">Múltiplas paradas</p><p id="multi-stop-help" className="mt-1 text-xs text-white/65">{stops.length < 3 ? `Até 3 paradas · ${stops.length}/3 adicionadas.` : "Limite de 3 paradas atingido."}</p></div></div>{stops.map((stop, index) => <div key={stop + index} className="mt-2 flex items-center gap-2 rounded-lg bg-white/[.04] px-3 py-2 text-xs text-white"><span className="font-black text-[#C7FF3C]">{index + 1}</span><span className="min-w-0 flex-1 truncate">{stop}</span><button type="button" aria-label={"Remover parada " + (index + 1)} onClick={() => removeStop(index)}><X className="size-3.5" /></button></div>)}{stops.length < 3 && <div className="mt-2 flex gap-2"><input value={stopDraft} onChange={event => setStopDraft(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); addStop(); } }} inputMode="text" enterKeyHint="done" placeholder="Ex.: posto, endereço ou cidade" className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[.04] px-3 py-3 text-base text-white outline-none placeholder:text-white/30" aria-label="Nova parada" aria-describedby="multi-stop-help" /><button type="button" onClick={addStop} className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-white/[.08] px-3 text-xs font-black"><Plus className="size-4" />Adicionar</button></div>}{stops.length > 0 && onMultiStopNavigate && <button type="button" onClick={() => onMultiStopNavigate(stops)} className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#C7FF3C] text-xs font-black text-[#0B1014]"><Navigation className="size-4" />Navegar com {stops.length} {stops.length === 1 ? "parada" : "paradas"} no Google Maps</button>}</div>}
+        {onMultiStopNavigate && <div className="col-span-2 rounded-xl border border-white/8 bg-white/[.03] p-3 sm:col-span-4"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black text-white">Múltiplas paradas</p><p id="multi-stop-help" className="mt-1 text-xs text-white/65">{stops.length < 3 ? `Até 3 paradas · ${stops.length}/3 adicionadas.` : "Limite de 3 paradas atingido."}</p></div></div>{stops.map((stop, index) => <div key={stop + index} className="mt-2 flex items-center gap-2 rounded-lg bg-white/[.04] px-3 py-2 text-xs text-white"><span className="font-black text-[#C7FF3C]">{index + 1}</span><span className="min-w-0 flex-1 truncate">{stop}</span><button type="button" aria-label={"Remover parada " + (index + 1)} onClick={() => removeStop(index)}><X className="size-3.5" /></button></div>)}{stops.length < 3 && <div className="mt-2 flex gap-2"><input value={stopDraft} onChange={event => setStopDraft(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); addStop(); } }} inputMode="text" enterKeyHint="done" placeholder="Ex.: posto, endereço ou cidade" className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[.04] px-3 py-3 text-base text-white outline-none placeholder:text-white/65" aria-label="Nova parada" aria-describedby="multi-stop-help" /><button type="button" onClick={addStop} className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-white/[.08] px-3 text-xs font-black"><Plus className="size-4" />Adicionar</button></div>}{stops.length > 0 && onMultiStopNavigate && <button type="button" onClick={() => onMultiStopNavigate(stops)} className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#C7FF3C] text-xs font-black text-[#0B1014]"><Navigation className="size-4" />Navegar com {stops.length} {stops.length === 1 ? "parada" : "paradas"} no Google Maps</button>}</div>}
         {snapshot && onRefresh && !offline && (
           <button type="button" onClick={onRefresh} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#C7FF3C]/25 px-3 text-xs font-black text-[#DFFF9A]">
             <RefreshCw className="size-4" /> Atualizar
@@ -170,7 +170,7 @@ export default function MobileNavigationCenter({
 
       {!offline && supportsLiveRouting() && <RouteIntelligenceCard origin={origin} destination={destination} waypoints={stops} />}
 
-      <p className="border-t border-white/8 px-4 py-2.5 text-center text-xs font-semibold leading-relaxed text-white/40">
+      <p className="border-t border-white/8 px-4 py-2.5 text-center text-xs font-semibold leading-relaxed text-white/65">
         {offline
           ? "A rota salva continua disponível. Dados novos e navegação externa precisam de conexão."
           : "O Google Maps abre a navegação externa. Mantenha a atenção na direção."}
