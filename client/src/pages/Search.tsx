@@ -14,6 +14,8 @@ import {
   Store,
   X,
   BusFront,
+  CloudRain,
+  Radio,
   ShoppingCart,
   Utensils,
   ShoppingBag,
@@ -130,6 +132,37 @@ const quickActions = [
     icon: Database,
     kind: "data",
     query: "",
+  },
+  {
+    label: "Alertas oficiais",
+    hint: "INMET e Defesa Civil",
+    icon: CloudRain,
+    kind: "data",
+    query: "alerta",
+    resourceId: "inmet-alertas",
+  },
+  {
+    label: "Cobertura 4G/5G",
+    hint: "Anatel · prepare o offline",
+    icon: Radio,
+    kind: "data",
+    query: "4g",
+    resourceId: "anatel-cobertura",
+  },
+  {
+    label: "Banco e pagamentos",
+    hint: "Correspondentes por município",
+    icon: Landmark,
+    kind: "data",
+    query: "banco",
+    resourceId: "bcb-correspondentes",
+  },
+  {
+    label: "Assistência social",
+    hint: "CRAS, CREAS e benefícios",
+    icon: HeartPulse,
+    kind: "services",
+    query: "cras",
   },
   {
     label: "Farmácias",
@@ -279,7 +312,15 @@ export default function SearchPage() {
       return;
     }
     if (action.kind === "data") {
-      setLocation(appUrl("/dados") + (action.query === "transporte" ? "#transporte" : ""));
+      const resourceId = "resourceId" in action ? action.resourceId : undefined;
+      setLocation(
+        appUrl("/dados") +
+          (resourceId
+            ? "?recurso=" + encodeURIComponent(resourceId)
+            : action.query === "transporte"
+              ? "#transporte"
+              : ""),
+      );
       return;
     }
     if (action.kind === "nearby") {
