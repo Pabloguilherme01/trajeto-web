@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  coarsenCoordinatePoint,
   coarsenCoordinateText,
   isPreciseLocationText,
   privateOriginForExternalNavigation,
@@ -22,8 +23,12 @@ describe("location privacy", () => {
     expect(privateOriginForHistory(gps)).toBe("Minha localização");
   });
 
-  it("reduces precision before online routing", () => {
+  it("reduces precision before online routing and maps", () => {
     expect(coarsenCoordinateText("-15.76123, -48.28123", 4)).toBe("-15.7612, -48.2812");
-    expect(privateOriginForRouting("-15.76123, -48.28123")).toBe("-15.7612, -48.2812");
+    expect(privateOriginForRouting("-15.76123, -48.28123")).toBe("-15.761, -48.281");
+    expect(coarsenCoordinatePoint({ lat: -15.76123, lng: -48.28123 }, 3)).toEqual({
+      lat: -15.761,
+      lng: -48.281,
+    });
   });
 });
