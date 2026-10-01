@@ -230,6 +230,18 @@ export default function SearchPage() {
   const [resultLimit, setResultLimit] = useState(6);
   const [online, setOnline] = useState(() => navigator.onLine);
 
+  const visibleDataResources = useMemo(
+    () =>
+      results.services.length > 0
+        ? results.dataResources.filter(
+            item => !item.localPath?.startsWith("/servicos"),
+          )
+        : results.dataResources,
+    [results.services.length, results.dataResources],
+  );
+  const visibleTotal =
+    results.total - (results.dataResources.length - visibleDataResources.length);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
@@ -446,8 +458,8 @@ export default function SearchPage() {
               aria-live="polite"
               className="break-words text-sm text-white/80"
             >
-              {results.total
-                ? results.total + " resultado(s) para “" + query + "”"
+              {visibleTotal
+                ? visibleTotal + " resultado(s) para “" + query + "”"
                 : "Nenhum resultado local para “" + query + "”."}
             </p>
             {results.services.length > 0 && (
@@ -524,16 +536,16 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
-            {results.dataResources.length > 0 && (
+            {visibleDataResources.length > 0 && (
               <section aria-labelledby="search-data-title">
                 <h2 id="search-data-title" className="text-lg font-bold">
                   Dados e fontes{" "}
                   <span className="text-sm font-normal text-white/75">
-                    ({results.dataResources.length})
+                    ({visibleDataResources.length})
                   </span>
                 </h2>
                 <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
-                  {results.dataResources.slice(0, resultLimit).map(item => (
+                  {visibleDataResources.slice(0, resultLimit).map(item => (
                     <ResultCard
                       key={item.id}
                       icon={Database}
@@ -635,7 +647,7 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
-            {[results.stations, results.places, results.routes, results.dataResources, results.transitFares].some(
+            {[results.stations, results.places, results.routes, visibleDataResources, results.transitFares].some(
               items => items.length > resultLimit
             ) && (
               <button
