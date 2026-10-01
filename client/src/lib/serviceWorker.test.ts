@@ -73,14 +73,28 @@ describe("service worker", () => {
     handler({ request: new Request("https://example.com/trajeto-web/api/trpc/auth.me"), respondWith });
     expect(respondWith).not.toHaveBeenCalled();
   });
+  it("does not intercept public OpenStreetMap tile requests", () => {
+    const worker = loadWorker();
+    const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "fetch")[1];
+    const respondWith = vi.fn();
+    handler({
+      request: new Request("https://tile.openstreetmap.org/13/2997/4790.png"),
+      respondWith,
+    });
+    expect(respondWith).not.toHaveBeenCalled();
+  });
   it("cleans only previous cache versions inside this app's scope", async () => {
     const worker = loadWorker();
-    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v22-static"]);
+    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v22-static", "trajeto-%2Ftrajeto-web%2F-v22-map", "trajeto-%2Ftrajeto-web%2F-v23-static"]);
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "activate")[1];
     let completion: Promise<unknown>;
     handler({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
     await completion!;
-    expect(worker.caches.delete.mock.calls).toEqual([["trajeto-%2Ftrajeto-web%2F-v19-static"]]);
+    expect(worker.caches.delete.mock.calls).toEqual([
+      ["trajeto-%2Ftrajeto-web%2F-v19-static"],
+      ["trajeto-%2Ftrajeto-web%2F-v22-static"],
+      ["trajeto-%2Ftrajeto-web%2F-v22-map"],
+    ]);
   });
   it("does not announce readiness with a partial offline package", async () => {
     expect(await loadWorker().offlineStatus()).toEqual({ ready: false });

@@ -50,6 +50,45 @@ it("tracks the actual viewport and keeps the selected station after catalog upda
   expect(screen.queryByRole("button", { name: "2D" })).toBeNull();
 });
 
+it("sends only the site origin as referrer for public OSM tiles", () => {
+  render(
+    <TileStationMap
+      stations={[
+        {
+          id: "a",
+          name: "Posto A",
+          address: "Rua A",
+          lat: -15.7545,
+          lng: -48.2816,
+        },
+      ]}
+    />
+  );
+  const tile = document.querySelector(
+    'img[src*="tile.openstreetmap.org"]'
+  ) as HTMLImageElement | null;
+  expect(tile).toBeTruthy();
+  expect(tile?.getAttribute("referrerpolicy")).toBe("origin");
+});
+
+it("keeps OSM attribution and correction links visible", () => {
+  render(
+    <TileStationMap
+      stations={[
+        {
+          id: "a",
+          name: "Posto A",
+          address: "Rua A",
+          lat: -15.7545,
+          lng: -48.2816,
+        },
+      ]}
+    />
+  );
+  expect(screen.getByRole("link", { name: /OpenStreetMap contributors/i })).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Corrigir mapa" }).getAttribute("href")).toContain("openstreetmap.org/fixthemap");
+});
+
 it("selects and centers a distant station from the accessible list even without ids", () => {
   render(<TileStationMap stations={[
     { name: "Posto Centro", address: "Rua A", lat: -15.7545, lng: -48.2816 },

@@ -9,6 +9,16 @@ import type { StationMapItem } from "@/components/StationMap";
 
 const TILE = 256;
 const DEFAULT_CENTER = { lat: -15.7545, lng: -48.2816 };
+const TILE_URL_TEMPLATE =
+  import.meta.env.VITE_PUBLIC_TILE_URL?.trim() ||
+  "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+function tileUrl(z: number, x: number, y: number) {
+  return TILE_URL_TEMPLATE
+    .replace("{z}", String(z))
+    .replace("{x}", String(x))
+    .replace("{y}", String(y));
+}
 
 function stationKey(station: StationMapItem) {
   return station.id ?? station.cnpj ?? station.placeId ??
@@ -284,15 +294,8 @@ export default function TileStationMap({
           {tiles.map(tile => (
             <img
               key={tile.key}
-              src={
-                "https://tile.openstreetmap.org/" +
-                zoom +
-                "/" +
-                tile.x +
-                "/" +
-                tile.y +
-                ".png"
-              }
+              src={tileUrl(zoom, tile.x, tile.y)}
+              referrerPolicy="origin"
               alt=""
               onError={() =>
                 setTileErrors(value => Math.min(tiles.length, value + 1))
@@ -484,14 +487,25 @@ export default function TileStationMap({
             Toque em um marcador para abrir a ficha.
           </p>
         )}
-        <a
-          href="https://www.openstreetmap.org/copyright"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 block text-xs text-[#607169]"
-        >
-          © OpenStreetMap contributors · ruas de fundo exigem internet.
-        </a>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#607169]">
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-8 items-center"
+          >
+            © OpenStreetMap contributors
+          </a>
+          <a
+            href="https://www.openstreetmap.org/fixthemap"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-8 items-center underline decoration-dotted underline-offset-2"
+          >
+            Corrigir mapa
+          </a>
+          <span>ruas de fundo exigem internet</span>
+        </div>
       </div>
     </div>
   );
