@@ -99,22 +99,45 @@ export default function Home() {
     setLocation(appUrl("/planejar") + "?" + params.toString());
   };
 
-  const useLocationAsOrigin = () => {
+  const useLocationAsOrigin = async () => {
     if (locating || !navigator.geolocation) return;
     setLocating(true);
     rememberIntent("route");
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setLocating(false);
-        setOrigin(position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5));
-        vibration(16);
-      },
-      () => {
-        setLocating(false);
-        setFormMessage("Não foi possível obter sua localização. Digite a origem ou tente novamente.");
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
-    );
+
+    const requestPosition = (options: PositionOptions) =>
+      new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
+
+    try {
+      let position: GeolocationPosition;
+      try {
+        position = await requestPosition({
+          enableHighAccuracy: true,
+          timeout: 6500,
+          maximumAge: 300000,
+        });
+      } catch {
+        position = await requestPosition({
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 900000,
+        });
+      }
+      setOrigin(
+        position.coords.latitude.toFixed(5) +
+          ", " +
+          position.coords.longitude.toFixed(5)
+      );
+      setFormMessage(null);
+      vibration(16);
+    } catch {
+      setFormMessage(
+        "Não foi possível obter sua localização. Digite a origem ou deixe vazio para o Planejador tentar novamente."
+      );
+    } finally {
+      setLocating(false);
+    }
   };
 
   const openLastTrip = () => {
