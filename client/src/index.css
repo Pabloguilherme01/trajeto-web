@@ -58,7 +58,7 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   html { scroll-behavior: smooth; background: #0D1418; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  body { @apply bg-background font-sans text-foreground antialiased; }
+  body { @apply bg-background font-sans text-foreground antialiased; line-height: 1.5; font-kerning: normal; text-rendering: optimizeLegibility; }
   button, a { -webkit-tap-highlight-color: transparent; }
   html, body { min-height: 100%; }
   body { min-height: 100vh; min-height: 100dvh; min-width: 0; }
