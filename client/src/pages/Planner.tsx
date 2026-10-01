@@ -60,6 +60,9 @@ export default function Planner() {
   const [showMap, setShowMap] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
+  const [showAllDestinations, setShowAllDestinations] = useState(() => queryParams.get("destinos") === "1");
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [destinationCategory, setDestinationCategory] = useState<"todos" | "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro">("todos");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
@@ -335,7 +338,7 @@ export default function Planner() {
     window.open(buildGoogleMapsDirectionsUrl(origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
   };
 
-  const filteredSavedRoutes = useMemo(() => {
+  const availableDestinations = useMemo(() => {\n    const query = destinationFilter.trim().toLocaleLowerCase("pt-BR");\n    return LOCAL_ROUTE_PRESETS.filter(item => {\n      if (destinationCategory !== "todos" && item.category !== destinationCategory) return false;\n      if (!query) return true;\n      return (item.label + " " + item.detail + " " + item.destination).toLocaleLowerCase("pt-BR").includes(query);\n    });\n  }, [destinationFilter, destinationCategory]);\n\n  const filteredSavedRoutes = useMemo(() => {
     const query = savedRouteQuery.trim().toLocaleLowerCase("pt-BR");
     if (!query) return savedRoutes;
     return savedRoutes.filter(route =>
@@ -395,6 +398,41 @@ export default function Planner() {
                   <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
               </label>
+
+              <div className="mt-3">
+                <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
+                  <span><span className="block text-[0.58rem] font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {LOCAL_ROUTE_PRESETS.length} atalhos locais, por categoria</span></span>
+                  <ChevronDown className={"size-4 text-[#3DE3FF] transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
+                </button>
+                {showAllDestinations && (
+                  <div id="all-destinations-panel" className="mt-2 rounded-2xl border border-white/8 bg-[#0E161C] p-3">
+                    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                      {([
+                        ["todos", "Todos"],
+                        ["saude", "Saúde"],
+                        ["servicos", "Serviços"],
+                        ["transporte", "Transporte"],
+                        ["compras", "Compras"],
+                        ["combustivel", "Combustível"],
+                        ["centro", "Centro"],
+                      ] as const).map(([value, label]) => (
+                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-10 shrink-0 rounded-full border px-3 text-[0.55rem] font-black " + (destinationCategory === value ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A]" : "border-white/8 bg-white/[.02] text-white/50")}>{label}</button>
+                      ))}
+                    </div>
+                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" />
+                    <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
+                      {availableDestinations.map(item => (
+                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="flex min-h-[4.6rem] items-center gap-3 rounded-xl border border-white/8 bg-[#121B22] px-3 text-left">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
+                          <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.label}</span><span className="mt-0.5 block truncate text-[0.55rem] text-white/35">{item.detail}</span></span>
+                          <span className="text-[0.5rem] font-black uppercase tracking-[.08em] text-[#C7FF3C]">Ir</span>
+                        </button>
+                      ))}
+                      {availableDestinations.length === 0 && <p className="rounded-xl bg-white/[.025] p-4 text-xs text-white/40">Nenhum destino corresponde ao filtro.</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                 {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination) + "&auto=1"); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-[0.58rem] font-bold text-white/60">Última rota</button>}
