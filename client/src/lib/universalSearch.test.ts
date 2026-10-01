@@ -26,6 +26,11 @@ describe("universal citizen search", () => {
     expect(health.services.length).toBeGreaterThan(1);
     expect(health.services[0].name.toLocaleLowerCase("pt-BR")).toContain("saúde");
 
+    expect(health.services.map(item => item.id)).toContain("caps");
+
+    const mentalHealth = getUniversalSearchResults("saude mental");
+    expect(mentalHealth.services[0]?.id).toBe("caps");
+
     const vigil = getUniversalSearchResults("vigilancia");
     expect(vigil.services[0]?.id).toBe("vigilancia-saude");
   });
