@@ -4,7 +4,7 @@ test("Pages: cliques principais funcionam dentro da base hospedada", async ({ pa
   await expect(page.getByRole("heading", { name: /Resolva na cidade/i })).toBeVisible();
 
   if (mobile) {
-    await page.getByRole("button", { name: "Serviços públicos" }).click();
+    await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Serviços públicos", exact: true }).click();
     await expect(page).toHaveURL(/\/trajeto-web\/servicos$/);
     await expect(page.getByRole("heading", { name: /Águas Lindas em um só lugar/i })).toBeVisible();
     await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Início" }).click();
