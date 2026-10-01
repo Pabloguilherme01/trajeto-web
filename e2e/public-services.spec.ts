@@ -28,7 +28,8 @@ test("home encaminha problema urbano sem exigir nome da secretaria", async ({ pa
   await page.getByRole("button", { name: /Buraco \/ asfalto/i }).click();
   await expect(page).toHaveURL(/\/buscar\?q=buraco(?:%20|\+)rua/);
   await expect(page.getByText(/Encontramos isto para você/i)).toBeVisible();
-  await expect(page.getByText("Secretaria Municipal de Infraestrutura e Obras", { exact: true })).toBeVisible();
+  const autoAnswer = page.locator('section[aria-labelledby="search-auto-answer-title"]');
+  await expect(autoAnswer.getByRole("heading", { name: "Secretaria Municipal de Infraestrutura e Obras", exact: true })).toBeVisible();
 });
 
 test("atalho público leva da home para serviços municipais", async ({ page }) => {
