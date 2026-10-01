@@ -5,6 +5,7 @@ import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobil
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
+import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
 
 export type StationMapItem = {
   id?: string;
@@ -255,7 +256,8 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
 
   useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps || offline || !userCoords) return;
-    mapRef.current.setCenter(userCoords);
+    const approximate = coarsenCoordinatePoint(userCoords, 3);
+    mapRef.current.setCenter(approximate);
     mapRef.current.setZoom(14);
   }, [ready, offline, userCoords?.lat, userCoords?.lng]);
 
@@ -306,7 +308,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
     setMapMessage(null);
     navigator.geolocation.getCurrentPosition(
       position => {
-        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const coords = coarsenCoordinatePoint({ lat: position.coords.latitude, lng: position.coords.longitude }, 3);
         const map = mapRef.current;
         if (!map) return;
         map.setCenter(coords);
@@ -346,7 +348,8 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }
 
   if (isGitHubPagesRuntime()) {
-    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={userCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
+    const approximateUserCoords = userCoords ? coarsenCoordinatePoint(userCoords, 3) : null;
+    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={approximateUserCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
   }
 
   if (offline || mapUnavailable) {
