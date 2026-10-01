@@ -4,6 +4,10 @@ import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
 
+export function backendAuthEnabled(staticRuntime: boolean) {
+  return !staticRuntime;
+}
+
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
   redirectPath?: string;
@@ -16,10 +20,11 @@ export function useAuth(options?: UseAuthOptions) {
   // desync it from an in-flight login's `state`.
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
   const staticRuntime = isGitHubPagesRuntime();
+  const canUseBackendAuth = backendAuthEnabled(staticRuntime);
   const utils = trpc.useUtils();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
-    enabled: !staticRuntime,
+    enabled: canUseBackendAuth,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -32,7 +37,7 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logout = useCallback(async () => {
     try {
-      if (!staticRuntime) await logoutMutation.mutateAsync();
+      if (canUseBackendAuth) await logoutMutation.mutateAsync();
     } catch (error: unknown) {
       if (
         error instanceof TRPCClientError &&
@@ -51,7 +56,7 @@ export function useAuth(options?: UseAuthOptions) {
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
     }
-  }, [logoutMutation, staticRuntime, utils]);
+  }, [canUseBackendAuth, logoutMutation, utils]);
 
   const state = useMemo(() => {
     return {
@@ -91,7 +96,10 @@ export function useAuth(options?: UseAuthOptions) {
 
   return {
     ...state,
-    refresh: () => staticRuntime ? Promise.resolve(meQuery) : meQuery.refetch(),
+    refresh: async () => {
+      if (!canUseBackendAuth) return null;
+      return meQuery.refetch();
+    },
     logout,
   };
 }
