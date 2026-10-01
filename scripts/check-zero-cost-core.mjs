@@ -44,7 +44,11 @@ for (const marker of [
 }
 
 const authHook = fs.readFileSync("client/src/_core/hooks/useAuth.ts", "utf8");
-if (!authHook.includes("supportsBackendAuth()") || !authHook.includes("enabled: canUseBackendAuth")) {
+if (
+  !authHook.includes("supportsBackendAuth()") ||
+  !authHook.includes("enabled: canUseBackendAuth") ||
+  !authHook.includes("if (!canUseBackendAuth) return;")
+) {
   console.error("Zero-cost core: autenticação de backend deve permanecer desabilitada no runtime estático.");
   process.exitCode = 1;
 }
