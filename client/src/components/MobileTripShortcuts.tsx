@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
 import { findOfflineRouteByDestination, listOfflineRoutes } from "@/lib/offlineStore";
+import { setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 import {
   getDestinationUsage,
   getFavoriteDestination,
@@ -127,10 +128,13 @@ export default function MobileTripShortcuts() {
     navigator.geolocation.getCurrentPosition(
       position => {
         setLocating(null);
+        setPrivateLocationHandoff({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
         setLocation(
           appUrl("/planejar") +
-          "?origem=" + encodeURIComponent(position.coords.latitude + ", " + position.coords.longitude) +
-          "&destino=" + encodeURIComponent(place.value),
+          "?local=1&destino=" + encodeURIComponent(place.value),
         );
       },
       () => {
