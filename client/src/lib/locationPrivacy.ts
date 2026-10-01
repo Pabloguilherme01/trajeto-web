@@ -59,3 +59,42 @@ export function privateOriginForRouting(value: string) {
 export function privateRouteShareOrigin(value: string) {
   return isPreciseLocationText(value) ? PRIVATE_LOCATION_LABEL : value.trim();
 }
+
+const PRIVATE_HISTORY_KEYS = [
+  "trajeto-recent-searches",
+  "trajeto-last-trip",
+  "trajeto-recent-trips",
+  "trajeto-route-usage",
+  "trajeto-route-usage-events",
+] as const;
+
+export function clearPrivateLocationHistory() {
+  let cleared = false;
+  for (const storageName of ["localStorage", "sessionStorage"] as const) {
+    let storage: Storage | null = null;
+    try {
+      storage = globalThis[storageName] ?? null;
+    } catch {
+      storage = null;
+    }
+    if (!storage) continue;
+
+    if (storageName === "localStorage") {
+      for (const key of PRIVATE_HISTORY_KEYS) {
+        if (storage.getItem(key) !== null) cleared = true;
+        storage.removeItem(key);
+      }
+    }
+
+    const routingKeys: string[] = [];
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (key?.startsWith("trajeto:public-routing:")) routingKeys.push(key);
+    }
+    for (const key of routingKeys) {
+      storage.removeItem(key);
+      cleared = true;
+    }
+  }
+  return cleared;
+}
