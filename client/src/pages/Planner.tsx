@@ -121,6 +121,7 @@ export default function Planner() {
         setOrigin(route.origin);
         setDestination(route.destination);
         setPlanned(route.payload as PlannedRoute);
+        setShowMap(true);
         const savedMode = (route.payload as PlannedRoute).route as PlannedRoute["route"] & { mode?: PublicTravelMode };
         if (savedMode.mode === "walking" || savedMode.mode === "cycling" || savedMode.mode === "transit" || savedMode.mode === "driving") setMode(savedMode.mode);
         setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
@@ -189,6 +190,7 @@ export default function Planner() {
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
+        setShowMap(true);
         const baseMessage = publicRoute.source === "local-estimate"
           ? "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
           : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.";
@@ -221,6 +223,7 @@ export default function Planner() {
       const result = await planRoute.mutateAsync({ origin: from, destination: to });
       if (version !== requestVersion.current) return;
       setPlanned(result);
+      setShowMap(true);
       setFallbackReady(false);
       const autoSaved = await persistRouteLocally(result, from, to);
       if (version !== requestVersion.current) return;
