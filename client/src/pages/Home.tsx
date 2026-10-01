@@ -94,7 +94,7 @@ export default function Home() {
     rememberSearch(to);
     track("route_open", to);
     vibration();
-    const params = new URLSearchParams({ destino: to });
+    const params = new URLSearchParams({ destino: to, auto: "1" });
     if (from) params.set("origem", from);
     setLocation(appUrl("/planejar") + "?" + params.toString());
   };
@@ -232,33 +232,70 @@ export default function Home() {
           </section>
         )}
 
-        <section className="mt-8">
+        <section className="mt-6">
           <p className="soft-kicker text-xs text-[#B7D86B]">Feito para Águas Lindas</p>
           <h1 className="mobile-title mt-3 w-full min-w-0 max-w-3xl break-words font-display text-[clamp(2.45rem,9vw,5.1rem)] font-semibold leading-[.98] tracking-[-.045em]">
-            O que você precisa na cidade,{" "}
-            <span className="text-[#B7D86B]">mais fácil de encontrar.</span>
+            Águas Lindas na palma da mão.{" "}
+            <span className="text-[#B7D86B]">Resolva e siga.</span>
           </h1>
           <p className="mt-5 max-w-2xl soft-copy text-sm sm:text-base">
-            Serviços, contatos, rotas e lugares úteis de Águas Lindas organizados para você encontrar o próximo passo com menos esforço — inclusive offline depois da preparação.
+            Encontre serviços, trace rotas e acesse o que importa na cidade com poucos toques — inclusive com recursos preparados para ficar offline.
           </p>
         </section>
 
-        <section className="mt-6" aria-label="Ações principais">
-          <div className="grid gap-2 sm:grid-cols-3">
-            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#B7D86B]/20 bg-[#B7D86B]/[.08] p-4 text-left active:scale-[.99]">
-              <Route className="size-4 text-[#B7D86B]" />
-              <p className="mt-3 text-sm font-black">{lastTrip ? "Continuar última rota" : "Traçar um caminho"}</p>
-              <p className="mt-1 text-xs text-white/65">{lastTrip ? "Retomar sem preencher tudo de novo" : "Origem, destino e rota no mesmo fluxo"}</p>
+        <section className="mt-5 overflow-hidden rounded-[1.55rem] border border-[#B7D86B]/18 bg-[linear-gradient(145deg,rgba(183,216,107,.08),rgba(20,30,35,.96)_44%)] p-4 shadow-[0_22px_58px_rgba(0,0,0,.24)] sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="soft-kicker text-xs text-[#79C6D0]">Ir para algum lugar</p>
+              <h2 className="mt-1 text-xl font-bold tracking-[-.025em]">Para onde você quer ir?</h2>
+            </div>
+            <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-bold text-white/65">rota em um toque</span>
+          </div>
+
+          <form onSubmit={submit} className="mt-5 space-y-2.5">
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem <span className="font-medium normal-case tracking-normal text-white/45">· opcional</span></span>
+              <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0D1418] px-3">
+                <div className="size-2.5 rounded-full bg-[#79C6D0]" />
+                <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="Sua localização ou endereço" autoComplete="street-address" autoCapitalize="words" autoCorrect="off" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
+                <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 place-items-center rounded-xl text-[#79C6D0] disabled:opacity-30" aria-label="Usar minha localização como origem">
+                  <LocateFixed className="size-4" />
+                </button>
+              </div>
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Destino</span>
+              <div className="flex items-center gap-2 rounded-2xl border border-[#B7D86B]/18 bg-[#0D1418] px-3">
+                <div className="size-2.5 rounded-full bg-[#B7D86B]" />
+                <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Destino em Águas Lindas ou região" autoComplete="street-address" autoCapitalize="words" autoCorrect="off" enterKeyHint="go" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
+              </div>
+            </label>
+
+            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#B7D86B] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
+              <span>{locating ? "Obtendo localização…" : "Traçar rota agora"}</span>
+              <ArrowRight className="size-5" />
             </button>
-            <button type="button" onClick={findNearby} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#79C6D0]/18 bg-[#79C6D0]/[.06] p-4 text-left active:scale-[.99]">
+          </form>
+          {formMessage && (
+            <p id="home-form-message" className="mt-3 rounded-2xl border border-[#D8B47A]/20 bg-[#D8B47A]/[.05] px-3 py-2.5 text-xs font-bold text-[#FFD59B]" role="status" aria-live="polite">
+              {formMessage}
+            </p>
+          )}
+
+        </section>
+
+        <section className="mt-4" aria-label="Ações principais">
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#79C6D0]/18 bg-[#79C6D0]/[.055] p-3.5 text-left active:scale-[.99]">
               <Fuel className="size-4 text-[#79C6D0]" />
-              <p className="mt-3 text-sm font-black">Postos por perto</p>
-              <p className="mt-1 text-xs text-white/65">Veja opções próximas e informações úteis</p>
+              <p className="mt-2.5 text-sm font-bold">Postos por perto</p>
+              <p className="mt-1 text-xs leading-snug text-white/65">Mapa e rota rápida</p>
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-24 rounded-[1.35rem] border border-[#D8B47A]/18 bg-[#D8B47A]/[.05] p-4 text-left active:scale-[.99]">
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#D8B47A]/18 bg-[#D8B47A]/[.045] p-3.5 text-left active:scale-[.99]">
               <Landmark className="size-4 text-[#D8B47A]" />
-              <p className="mt-3 text-sm font-black">Resolver um serviço</p>
-              <p className="mt-1 text-xs text-white/55">Saúde, documentos, benefícios e atendimento</p>
+              <p className="mt-2.5 text-sm font-bold">Serviços da cidade</p>
+              <p className="mt-1 text-xs leading-snug text-white/65">Saúde, documentos e ajuda</p>
             </button>
           </div>
         </section>
@@ -372,47 +409,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-7 rounded-[1.7rem] border border-white/10 bg-[#141E23] p-4 shadow-[0_22px_60px_rgba(0,0,0,.28)] sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-[#79C6D0]">Seu trajeto</p>
-              <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Monte seu caminho.</h2>
-            </div>
-            <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-bold text-white/65">simples e direto</span>
-          </div>
 
-          <form onSubmit={submit} className="mt-5 space-y-2.5">
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</span>
-              <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0D1418] px-3">
-                <div className="size-2.5 rounded-full bg-[#79C6D0]" />
-                <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="De onde você sai" autoComplete="street-address" autoCapitalize="words" autoCorrect="off" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
-                <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 place-items-center rounded-xl text-[#79C6D0] disabled:opacity-30" aria-label="Usar minha localização como origem">
-                  <LocateFixed className="size-4" />
-                </button>
-              </div>
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Destino</span>
-              <div className="flex items-center gap-2 rounded-2xl border border-[#B7D86B]/18 bg-[#0D1418] px-3">
-                <div className="size-2.5 rounded-full bg-[#B7D86B]" />
-                <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" autoCapitalize="words" autoCorrect="off" enterKeyHint="go" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
-              </div>
-            </label>
-
-            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#B7D86B] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
-              <span>{locating ? "Obtendo localização…" : "Calcular rota"}</span>
-              <ArrowRight className="size-5" />
-            </button>
-          </form>
-          {formMessage && (
-            <p id="home-form-message" className="mt-3 rounded-2xl border border-[#D8B47A]/20 bg-[#D8B47A]/[.05] px-3 py-2.5 text-xs font-bold text-[#FFD59B]" role="status" aria-live="polite">
-              {formMessage}
-            </p>
-          )}
-
-        </section>
 
         <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm font-black">
