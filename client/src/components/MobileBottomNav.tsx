@@ -94,7 +94,7 @@ export default function MobileBottomNav() {
       <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="bottom-0 top-auto left-1/2 max-h-[min(82dvh,42rem)] w-full max-w-none translate-x-[-50%] translate-y-0 overflow-y-auto overscroll-contain rounded-b-none rounded-t-[1.6rem] border-white/10 bg-[#121B22] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-5 text-white sm:bottom-auto sm:top-[50%] sm:max-w-lg sm:translate-y-[-50%] sm:rounded-2xl sm:p-6">
         <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-white/70"><X className="size-5 shrink-0" /></DialogClose>
         <DialogTitle className="pr-10">Mais opções</DialogTitle>
-        <DialogDescription>Busca, mapa, saúde, emergência, postos e recursos locais ficam aqui.</DialogDescription>
+        <DialogDescription>Busca, mapa, saúde, emergência, salvos e preparação offline ficam aqui.</DialogDescription>
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><Search className="size-5 shrink-0" /> Buscar no Trajeto</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/mapa")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><MapPinned className="size-5 shrink-0" /> Mapa e locais</button>
@@ -105,7 +105,7 @@ export default function MobileBottomNav() {
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=compras"); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><ShoppingBag className="size-5 text-[#3DE3FF]" /> Compras e lojas</button>
 
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><Bookmark className="size-5 shrink-0" /> Salvos</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><HelpCircle className="size-5 shrink-0" /> Ajuda e offline</button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda") + "#offline-readiness-title"); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><HelpCircle className="size-5 shrink-0" /> Preparar offline</button>
         </div>
         {!isGitHubPagesRuntime() && <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/minha-conta")); }} className="flex min-h-14 items-center gap-2 text-sm rounded-xl border border-white/10 px-4 text-left font-bold"><UserRound className="size-5 shrink-0" /> Minha conta</button>}
       </DialogContent>
