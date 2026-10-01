@@ -1,5 +1,6 @@
 import { Download, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { pwaUpdateEvent } from "@/lib/pwa";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -19,9 +20,15 @@ export default function InstallAppPrompt() {
       setVisible(true);
     };
 
+    const hideForUpdate = () => setVisible(false);
+    window.addEventListener(pwaUpdateEvent, hideForUpdate);
+
     let dismissedUntil = 0;
     try { dismissedUntil = Number(localStorage.getItem("trajeto-install-dismissed-until") || "0"); } catch {}
-    if (dismissedUntil > Date.now()) return () => window.removeEventListener("beforeinstallprompt", handler);
+    if (dismissedUntil > Date.now()) return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener(pwaUpdateEvent, hideForUpdate);
+    };
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if (ios) setVisible(true);
     window.addEventListener("beforeinstallprompt", handler);
@@ -30,6 +37,7 @@ export default function InstallAppPrompt() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installed);
+      window.removeEventListener(pwaUpdateEvent, hideForUpdate);
     };
   }, []);
 
@@ -67,7 +75,7 @@ export default function InstallAppPrompt() {
           {event && <button type="button" onClick={install} disabled={installing} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-4 py-2 text-xs font-extrabold text-[#0B1014] disabled:opacity-60 active:scale-[.98]">{installing ? "Abrindo instalação…" : "Instalar app"}</button>}
           {feedback && <p role="status" className="mt-2 text-xs leading-relaxed text-[#DFFF9D]">{feedback}</p>}
         </div>
-        <button type="button" onClick={() => { setVisible(false); try { localStorage.setItem("trajeto-install-dismissed-until", String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch {} }} className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/10 text-[#9FB0B8]" aria-label="Fechar aviso de instalação">
+        <button type="button" onClick={() => { setVisible(false); try { localStorage.setItem("trajeto-install-dismissed-until", String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch {} }} className="grid size-11 shrink-0 place-items-center rounded-lg border border-white/10 text-[#9FB0B8]" aria-label="Fechar aviso de instalação">
           <X className="size-4" />
         </button>
       </div>
