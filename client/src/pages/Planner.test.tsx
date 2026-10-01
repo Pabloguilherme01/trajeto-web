@@ -5,7 +5,7 @@ import Planner from "./Planner";
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
-  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
+  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(), routes: [] as Array<{ id: string; origin: string; destination: string; savedAt: string; payload: unknown }>,
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
@@ -14,6 +14,7 @@ vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
 vi.mock("@/lib/publicRouting", () => ({
   calculatePublicRoute: state.publicRoute,
+  calculatePrivateLocationRoute: state.privateRoute,
   buildPublicRoutePayload: vi.fn(result => ({
     route: {
       origin: result.origin,
@@ -64,6 +65,15 @@ beforeEach(() => {
     durationSeconds: 900,
     polyline: "encoded",
     source: "osrm",
+    mode: "driving",
+  });
+  state.privateRoute.mockReset().mockResolvedValue({
+    origin: { lat: -15.761, lng: -48.281 },
+    destination: { lat: -15.79, lng: -47.88 },
+    distanceMeters: 12000,
+    durationSeconds: 900,
+    polyline: "encoded-private",
+    source: "local-estimate",
     mode: "driving",
   });
   state.lookup.mockReset();
@@ -131,12 +141,13 @@ describe("Planner travel state", () => {
       render(<Planner />);
       submit();
       await waitFor(() =>
-        expect(state.publicRoute).toHaveBeenCalledWith(
-          "-15.761, -48.281",
+        expect(state.privateRoute).toHaveBeenCalledWith(
+          "-15.76123, -48.28123",
           "Hospital",
           "driving"
         )
       );
+      expect(state.publicRoute).not.toHaveBeenCalled();
       expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("-15.76123, -48.28123");
       expect(state.mutate).not.toHaveBeenCalled();
     } finally {
