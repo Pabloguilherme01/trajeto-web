@@ -29,7 +29,7 @@ export const LOCAL_GEOCODE_POINTS: LocalGeocodePoint[] = [
     lat: -15.77665,
     lng: -48.27935,
     verifiedAt: "2026-10-01",
-    sourceLabel: "CNES / localização cadastral publicada",
+    sourceLabel: "CNES/DATASUS via SaúdeNoPaís",
     sourceUrl: "https://saudenopais.com/estabelecimento/go/upa-iii-24h-mansoes-odisseia-cnes-0431451/",
   },
   {
@@ -43,7 +43,7 @@ export const LOCAL_GEOCODE_POINTS: LocalGeocodePoint[] = [
     lat: -15.74637,
     lng: -48.27584,
     verifiedAt: "2026-10-01",
-    sourceLabel: "CNES / localização cadastral publicada",
+    sourceLabel: "CNES/DATASUS via SaúdeNoPaís",
     sourceUrl: "https://saudenopais.com/estabelecimento/go/hospital-estadual-de-aguas-lindas-ronaldo-ramos-caiado-filho-cnes-4670906/",
   },
   {
