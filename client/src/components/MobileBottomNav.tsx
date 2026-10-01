@@ -1,4 +1,4 @@
-import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, Route } from "lucide-react";
+import { Bookmark, Fuel, Home, Navigation, UserRound, MoreHorizontal, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, Route, ShoppingBag, Utensils } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -75,6 +75,9 @@ export default function MobileBottomNav() {
           <button type="button" onClick={() => openExternalSearch("hospitais e UBS Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><HeartPulse className="size-5" /> Saúde</button>
           <button type="button" onClick={() => openExternalSearch("emergência Águas Lindas de Goiás, GO")} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><Siren className="size-5" /> Emergência</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><Fuel className="size-5" /> Encontrar postos</button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=alimentacao"); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><Utensils className="size-5 text-[#FFB86B]" /> Comer</button>
+          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=compras"); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><ShoppingBag className="size-5 text-[#3DE3FF]" /> Compras e lojas</button>
+
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><Bookmark className="size-5" /> Salvos</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/explorar")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><MapPinned className="size-5" /> Explorer</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 px-4 text-left font-bold"><HelpCircle className="size-5" /> Ajuda e offline</button>
