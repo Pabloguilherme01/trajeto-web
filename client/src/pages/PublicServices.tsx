@@ -493,12 +493,16 @@ export default function PublicServices() {
                   </p>
                 )}
                 {service.hours && (
-                  <p className="mt-3 text-sm font-bold text-white/75">{service.hours}</p>
+                  <div className="mt-3 rounded-xl border border-white/8 bg-white/[.03] p-3">
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-white/45">Atendimento</p>
+                    <p className="mt-1 text-sm font-bold text-white/80">{service.hours}</p>
+                  </div>
                 )}
                 {service.guidance && (
-                  <p className="mt-3 rounded-xl bg-white/5 p-3 text-sm leading-relaxed text-white/75">
-                    {service.guidance}
-                  </p>
+                  <div className="mt-3 rounded-xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.04] p-3">
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#D9FF91]">Antes de sair</p>
+                    <p className="mt-1 text-sm leading-relaxed text-white/78">{service.guidance}</p>
+                  </div>
                 )}
                 {service.actionUrl && (
                   <a
@@ -519,29 +523,9 @@ export default function PublicServices() {
                     {service.email}
                   </a>
                 )}
-                <div className={"mt-4 grid gap-2 " + (service.mapQuery ? "grid-cols-2" : "grid-cols-1")}>
-                  {service.mapQuery && (
-                    <button
-                      type="button"
-                      onClick={() => openMaps(service)}
-                      className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-bold text-[#0B1014]"
-                    >
-                      <MapPinned className="mr-1.5 inline size-3.5" />
-                      Rota
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => void shareService(service)}
-                    aria-label={"Compartilhar serviço: " + service.name}
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80"
-                  >
-                    <Share2 className="size-3.5" />
-                    Compartilhar
-                  </button>
-                </div>
                 {contacts.length > 0 && (
-                  <div className="mt-2 grid gap-2">
+                  <div className="mt-4 grid gap-2">
+
                     {contacts.map((contact, index) => (
                       <a
                         key={contact.href}
@@ -580,6 +564,27 @@ export default function PublicServices() {
                     ))}
                   </div>
                 )}
+                <div className={"mt-2 grid gap-2 " + (service.mapQuery ? "grid-cols-2" : "grid-cols-1")}>
+                  {service.mapQuery && (
+                    <button
+                      type="button"
+                      onClick={() => openMaps(service)}
+                      className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-bold text-[#0B1014]"
+                    >
+                      <MapPinned className="mr-1.5 inline size-3.5" />
+                      Rota
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void shareService(service)}
+                    aria-label={"Compartilhar serviço: " + service.name}
+                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80"
+                  >
+                    <Share2 className="size-3.5" />
+                    Compartilhar
+                  </button>
+                </div>
                 <a
                   href={service.sourceUrl}
                   target="_blank"
