@@ -20,6 +20,7 @@ const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>()
 const geocoderMissUntil = new Map<string, number>();
 let geocoderQueue: Promise<void> = Promise.resolve();
 let geocoderLastStartedAt = 0;
+let geocoderUnavailableUntilFallback = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -60,20 +61,39 @@ function normalizeSearch(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function getGeocoderUnavailableUntil() {
+function getGeocoderSessionStorage() {
   try {
-    const raw = globalThis.sessionStorage?.getItem(GEOCODER_COOLDOWN_KEY);
+    if (typeof window !== "undefined") return window.sessionStorage;
+    if (typeof sessionStorage !== "undefined") return sessionStorage;
+  } catch {}
+  return undefined;
+}
+
+function getGeocoderUnavailableUntil() {
+  const storage = getGeocoderSessionStorage();
+  if (!storage) return geocoderUnavailableUntilFallback;
+  try {
+    const raw = storage.getItem(GEOCODER_COOLDOWN_KEY);
+    if (raw == null) {
+      geocoderUnavailableUntilFallback = 0;
+      return 0;
+    }
     const value = Number(raw);
-    return Number.isFinite(value) && value > 0 ? value : 0;
+    geocoderUnavailableUntilFallback =
+      Number.isFinite(value) && value > 0 ? value : 0;
+    return geocoderUnavailableUntilFallback;
   } catch {
-    return 0;
+    return geocoderUnavailableUntilFallback;
   }
 }
 
 function setGeocoderUnavailableUntil(value: number) {
+  geocoderUnavailableUntilFallback = value > 0 ? value : 0;
+  const storage = getGeocoderSessionStorage();
+  if (!storage) return;
   try {
-    if (value > 0) globalThis.sessionStorage?.setItem(GEOCODER_COOLDOWN_KEY, String(value));
-    else globalThis.sessionStorage?.removeItem(GEOCODER_COOLDOWN_KEY);
+    if (value > 0) storage.setItem(GEOCODER_COOLDOWN_KEY, String(value));
+    else storage.removeItem(GEOCODER_COOLDOWN_KEY);
   } catch {}
 }
 
