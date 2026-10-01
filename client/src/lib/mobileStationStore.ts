@@ -19,6 +19,7 @@ export type MobileStation = {
 };
 
 const FAVORITES_KEY = "trajeto-mobile-station-favorites";
+export const mobileStationFavoritesEvent = "trajeto:mobile-station-favorites";
 const CACHE_KEY = "trajeto-mobile-station-cache";
 const MAX_FAVORITES = 20;
 const MAX_CACHED = 30;
@@ -51,6 +52,7 @@ export function toggleMobileStationFavorite(station: MobileStation) {
     : [station, ...current].slice(0, MAX_FAVORITES);
   try {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event(mobileStationFavoritesEvent));
     return { saved: !exists, stations: next, error: false };
   } catch {
     return { saved: exists, stations: current, error: true };
