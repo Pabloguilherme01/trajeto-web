@@ -125,6 +125,21 @@ describe("public services catalog", () => {
     expect(surveillance.mapQuery).toContain("Avenida Brasília");
   });
 
+  it("adds verified Santa Lúcia and Setor 10 health units and Vapt Vupt intents", () => {
+    const santa = searchPublicServices("ubs santa lucia", "saude")[0];
+    expect(santa.id).toBe("ubs-santa-lucia");
+    expect(santa.phone).toBe("(61) 3618-6530");
+    expect(santa.mapQuery).toContain("Santa Lúcia");
+
+    const setor10 = searchPublicServices("ubs setor 10", "saude")[0];
+    expect(setor10.id).toBe("ubs-setor-10");
+    expect(setor10.phone).toBe("(61) 3613-9605");
+
+    for (const term of ["titulo eleitor", "sine", "junta militar"]) {
+      expect(searchPublicServices(term).map(item => item.id)).toContain("vapt-vupt");
+    }
+  });
+
   it("filters by category and text without case sensitivity", () => {
     expect(
       searchPublicServices("cora coralina", "educacao").map(item => item.id)
