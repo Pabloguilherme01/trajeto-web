@@ -76,6 +76,38 @@ describe("public routing fallback", () => {
     expect(String(fetchMock.mock.calls[0][0])).toContain("nominatim");
   });
 
+  it("expands a known local service name before geocoding", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.779", lon: "-48.265" }]))
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 4200, duration: 520, geometry: "service-route" }],
+          })
+        )
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "Hospital Municipal Bom Jesus"
+    );
+
+    const firstUrl = String(fetchMock.mock.calls[0][0]);
+    expect(decodeURIComponent(firstUrl)).toContain("Hospital Municipal Bom Jesus");
+    expect(decodeURIComponent(firstUrl)).toContain("Águas Lindas de Goiás");
+  });
+
+  it("rejects origin and destination that resolve to the same point", async () => {
+    await expect(
+      calculatePublicRoute("-15.7545,-48.2816", "-15.7545,-48.2816")
+    ).rejects.toThrow(/mesmo ponto/i);
+  });
+
   it("recovers a road route after an estimate was cached during a network failure", async () => {
     const saved = new Map<string, string>();
     vi.stubGlobal("localStorage", {
