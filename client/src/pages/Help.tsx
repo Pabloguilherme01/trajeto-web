@@ -1,7 +1,9 @@
 import { ArrowRight, CheckCircle2, Fuel, Landmark, MapPinned, Route as RouteIcon, ShieldCheck, WifiOff } from "lucide-react";
+import { useState } from "react";
 import { Link } from "wouter";
 import OfflineReadiness from "@/components/OfflineReadiness";
 import { appUrl } from "@/lib/appUrl";
+import { clearPrivateLocationHistory } from "@/lib/locationPrivacy";
 
 const steps = [
   { n: "01", icon: Landmark, title: "Encontre", text: "Busque serviços de saúde, assistência e cidadania. Consulte contatos, horários e a fonte oficial." },
@@ -10,6 +12,17 @@ const steps = [
 ];
 
 export default function Help() {
+  const [privacyMessage, setPrivacyMessage] = useState("");
+
+  const clearLocationHistory = () => {
+    const cleared = clearPrivateLocationHistory();
+    setPrivacyMessage(
+      cleared
+        ? "Histórico de localização apagado deste aparelho."
+        : "Não havia histórico de localização para apagar."
+    );
+  };
+
   return (
     <main className="min-h-[100dvh] bg-[#0D1418] pb-24 text-white md:pb-12">
       <div className="container max-w-4xl pt-6 sm:pt-10">
@@ -81,8 +94,26 @@ export default function Help() {
             <p className="flex gap-2 text-sm leading-relaxed text-white/75"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#B7D86B]" />Ao abrir Google Maps, Waze ou Apple Maps, o Trajeto não coloca sua coordenada de origem no link.</p>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-white/60">
-            Uma rota online ainda precisa conversar com um serviço de roteamento. Esses serviços recebem apenas os dados necessários ao cálculo conforme o fluxo escolhido; a localização exata não é usada como telemetria do Trajeto.
+            Uma rota online ainda precisa conversar com um serviço de roteamento. O Trajeto envia uma origem aproximada, sem cookies e sem referrer; como em qualquer requisição web direta, o provedor ainda pode receber o endereço IP da conexão. A localização exata não é usada como telemetria do Trajeto.
           </p>
+          <div className="mt-4 rounded-2xl border border-white/10 bg-[#0D1418] p-3">
+            <p className="text-sm font-bold">Quer apagar o histórico local?</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/60">
+              Remove pesquisas recentes, histórico de trajetos e caches de geocodificação deste aparelho. Favoritos e rotas salvas manualmente não são apagados.
+            </p>
+            <button
+              type="button"
+              onClick={clearLocationHistory}
+              className="mt-3 min-h-11 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80"
+            >
+              Limpar histórico de localização
+            </button>
+            {privacyMessage && (
+              <p role="status" className="mt-2 text-xs font-bold text-[#B7D86B]">
+                {privacyMessage}
+              </p>
+            )}
+          </div>
         </section>
 
         <section className="mt-4 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-5">
