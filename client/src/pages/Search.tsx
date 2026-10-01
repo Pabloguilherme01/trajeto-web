@@ -275,7 +275,6 @@ export default function SearchPage() {
     setResultLimit(6);
   }, [params]);
 
-  const results = useMemo(() => getUniversalSearchResults(query), [query]);
   const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
   const search = (value: string) => {
     const next = value.trim();
