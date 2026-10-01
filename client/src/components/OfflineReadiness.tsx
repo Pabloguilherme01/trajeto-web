@@ -21,7 +21,7 @@ import {
   type OfflineStorageStatus,
 } from "@/lib/pwa";
 import { appUrl } from "@/lib/appUrl";
-import { listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
+import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent } from "@/lib/offlineStore";
 import {
   listPublicServiceFavorites,
   publicServiceFavoritesEvent,
@@ -51,6 +51,7 @@ const preparationMessages: Record<
 
 type OfflineSummary = {
   routes: number;
+  staleRoutes: number;
   services: number;
   stations: number;
   mapStations: number;
@@ -59,6 +60,7 @@ type OfflineSummary = {
 
 const emptySummary: OfflineSummary = {
   routes: 0,
+  staleRoutes: 0,
   services: 0,
   stations: 0,
   mapStations: 0,
@@ -92,6 +94,7 @@ export default function OfflineReadiness() {
     ]);
     setSummary({
       routes: routes.length,
+      staleRoutes: routes.filter(route => isOfflineRouteStale(route.savedAt)).length,
       services: listPublicServiceFavorites().length,
       stations: listMobileStationFavorites().length,
       mapStations: map.stations.length,
@@ -316,6 +319,12 @@ export default function OfflineReadiness() {
       </div>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3 text-xs leading-relaxed text-white/65">
+        {summary.staleRoutes > 0 && (
+          <p className="mb-2 rounded-xl border border-[#D8B47A]/18 bg-[#D8B47A]/[.04] px-2.5 py-2 text-[#E6CAA0]">
+            <span className="font-bold">{summary.staleRoutes} rota{summary.staleRoutes === 1 ? "" : "s"} salva{summary.staleRoutes === 1 ? "" : "s"} há mais de 72h.</span>{" "}
+            Revise quando estiver online antes de depender dela{summary.staleRoutes === 1 ? "" : "s"}.
+          </p>
+        )}
         <p>
           <span className="font-bold text-white/80">Mapa de postos:</span>{" "}
           {summary.mapAge}.
