@@ -11,7 +11,7 @@ test("central de serviços abre offline e filtra saúde", async ({ page }) => {
 
 test("busca local oferece categorias prontas", async ({ page }) => {
   await page.goto("/buscar", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Encontre e vá\./i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre o que precisa\./i })).toBeVisible();
   await expect(page.getByRole("button", { name: "Saúde", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Segurança", exact: true })).not.toBeVisible();
   await page.getByRole("button", { name: "Mais opções: postos, comércio e outras categorias" }).click();
@@ -24,16 +24,16 @@ test("busca local oferece categorias prontas", async ({ page }) => {
 
 test("home encaminha problema urbano sem exigir nome da secretaria", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: "Diga o que aconteceu." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Escolha pelo que aconteceu." })).toBeVisible();
   await page.getByRole("button", { name: /Buraco \/ asfalto/i }).click();
   await expect(page).toHaveURL(/\/buscar\?q=buraco(?:%20|\+)rua/);
-  await expect(page.getByText(/Resposta rápida · Águas Lindas/i)).toBeVisible();
+  await expect(page.getByText(/Encontramos isto para você/i)).toBeVisible();
   await expect(page.getByText("Secretaria Municipal de Infraestrutura e Obras", { exact: true })).toBeVisible();
 });
 
 test("atalho público leva da home para serviços municipais", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.locator("main").getByRole("button", { name: /Serviços públicos/i }).click();
+  await page.locator("main").getByRole("button", { name: /Resolver um serviço/i }).click();
   await expect(page).toHaveURL(/\/servicos$/);
   await page.getByRole("button", { name: "Saúde", exact: true }).click();
   await expect(page).toHaveURL(/\/servicos\?categoria=saude/);
