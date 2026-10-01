@@ -253,20 +253,20 @@ export default function PublicServices() {
           className="mt-5 rounded-[1.5rem] border border-[#D8B47A]/20 bg-[#D8B47A]/[.045] p-3"
           aria-labelledby="emergency-strip-title"
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <div>
               <p className="soft-kicker text-xs text-[#D8B47A]">
                 Se for urgente
               </p>
               <h2
                 id="emergency-strip-title"
-                className="mt-1 text-sm font-black"
+                className="mt-1 text-base font-bold"
               >
                 Canais de emergência
               </h2>
             </div>
-            <span className="text-xs font-bold text-white/65">
-              precisa de rede telefônica
+            <span className="text-xs font-medium leading-snug text-white/65">
+              Ligações precisam de rede telefônica.
             </span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
