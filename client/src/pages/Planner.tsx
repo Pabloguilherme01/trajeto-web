@@ -493,7 +493,7 @@ export default function Planner() {
                       {availableDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="flex min-h-[4.6rem] items-center gap-3 rounded-xl border border-white/8 bg-[#141E23] px-3 text-left">
                           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#79C6D0]/10 text-[#79C6D0]"><RouteIcon className="size-4" /></span>
-                          <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.label}</span><span className="mt-0.5 block truncate text-xs text-white/65">{item.detail}</span></span>
+                          <span className="min-w-0 flex-1"><span className="block line-clamp-2 break-words text-sm font-bold leading-snug">{item.label}</span><span className="mt-0.5 block line-clamp-2 break-words text-xs leading-snug text-white/65">{item.detail}</span></span>
                           <span className="text-xs font-black uppercase tracking-[.08em] text-[#B7D86B]">Ir</span>
                         </button>
                       ))}
@@ -616,7 +616,7 @@ export default function Planner() {
                   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
                       <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#141E23] p-3 text-left">
-                        <p className="truncate text-xs font-black">{route.label}</p>
+                        <p className="line-clamp-2 break-words text-sm font-bold leading-snug">{route.label}</p>
                         <p className="mt-1 line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</p>
                       </button>
                     ))}
@@ -636,7 +636,7 @@ export default function Planner() {
                       <article key={route.id} className="rounded-2xl border border-white/8 bg-[#141E23] p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
+                            <p className="line-clamp-2 break-words text-sm font-bold leading-snug">{route.origin} → {route.destination}</p>
                             <p className="mt-1 text-xs text-white/65">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
                           </div>
                           <span className={"shrink-0 rounded-full border px-2 py-1 text-xs font-black uppercase tracking-[.08em] " + (stale ? "border-amber-300/20 text-amber-200" : "border-[#B7D86B]/15 text-[#B7D86B]")}>
@@ -668,7 +668,7 @@ export default function Planner() {
                 <article key={station.placeId} className="rounded-2xl border border-white/8 bg-[#141E23] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-black">{station.name}</p>
+                      <p className="line-clamp-2 break-words text-sm font-bold leading-snug">{station.name}</p>
                       <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/65">{station.address}</p>
                       {station.isOpen != null && <p className={"mt-2 text-xs font-black " + (station.isOpen ? "text-[#B7D86B]" : "text-white/65")}>{station.isOpen ? "Aberto na consulta salva" : "Fechado na consulta salva"}</p>}
                     </div>
@@ -709,7 +709,7 @@ export default function Planner() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="soft-kicker text-xs text-[#B7D86B]">Caminho pronto</p>
-                  <h2 className="mt-1 truncate text-xl font-black">{origin} → {destination}</h2>
+                  <h2 className="mt-1 line-clamp-3 break-words text-lg font-bold leading-snug sm:text-xl">{origin} → {destination}</h2>
                 </div>
                 <CheckCircle2 className="size-5 shrink-0 text-[#B7D86B]" />
               </div>
@@ -757,14 +757,14 @@ export default function Planner() {
 
             {showMap && (
               <section className="mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#141E23]">
-                <div className="flex items-center justify-between gap-3 border-b border-white/8 px-3 py-3 sm:px-4">
+                <div className="flex flex-col gap-2 border-b border-white/8 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[.15em] text-white/55">{online ? "Mapa do caminho" : "Mapa salvo"}</p>
-                    <p className="mt-0.5 truncate text-xs text-white/65">{online ? "ruas + geometria no próprio Trajeto" : "rota salva sem depender do mapa de ruas"}</p>
+                    <p className="soft-kicker text-xs text-white/60">{online ? "Mapa do caminho" : "Mapa salvo"}</p>
+                    <p className="mt-0.5 line-clamp-2 break-words text-xs leading-snug text-white/65">{online ? "Ruas e geometria da rota no próprio Trajeto" : "Rota salva sem depender do mapa de ruas"}</p>
                   </div>
-                  <div className="flex shrink-0 gap-2">
-                    <button type="button" onClick={openPreferredNavigation} className="min-h-11 rounded-xl bg-[#B7D86B] px-3 text-xs font-black text-[#0B1014]">Navegar</button>
-                    <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-bold text-white/60">Fechar</button>
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+                    <button type="button" onClick={openPreferredNavigation} className="min-h-11 rounded-xl bg-[#B7D86B] px-3 text-sm font-bold text-[#0B1014]">Navegar</button>
+                    <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-sm font-bold text-white/70">Fechar</button>
                   </div>
                 </div>
                 <div className="h-[min(62dvh,520px)] min-h-[360px]">
@@ -792,7 +792,7 @@ export default function Planner() {
                   {planned.stops.slice(0, 6).map(stop => (
                     <article key={stop.placeId} className="rounded-2xl border border-white/8 bg-[#141E23] p-4">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0"><p className="truncate text-sm font-black">{stop.name}</p><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/65">{stop.address}</p></div>
+                        <div className="min-w-0"><p className="line-clamp-2 break-words text-sm font-bold leading-snug">{stop.name}</p><p className="mt-1 line-clamp-2 break-words text-xs leading-relaxed text-white/65">{stop.address}</p></div>
                         <Fuel className="size-4 shrink-0 text-[#79C6D0]" />
                       </div>
                       {stop.priceReference && <p className="mt-2 text-xs font-bold text-[#D9FF91]">Referência ANP: {Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>}
