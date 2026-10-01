@@ -12,8 +12,8 @@ import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
-import { buildPublicRoutePayload, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
-import { isCurrentLocationLabel, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForRouting, privateOriginForUrl } from "@/lib/locationPrivacy";
+import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
+import { isCurrentLocationLabel, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl } from "@/lib/locationPrivacy";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -251,7 +251,9 @@ export default function Planner() {
       const publicOrigin = from;
       try {
         const resolvedOrigin = publicOrigin;
-        const publicRoute = await calculatePublicRoute(privateOriginForRouting(resolvedOrigin), to, mode);
+        const publicRoute = isPreciseLocationText(resolvedOrigin)
+          ? await calculatePrivateLocationRoute(resolvedOrigin, to, mode)
+          : await calculatePublicRoute(resolvedOrigin, to, mode);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
@@ -298,7 +300,7 @@ export default function Planner() {
       if (version !== requestVersion.current) return;
       setPublicRoutePending(true);
       try {
-        const publicRoute = await calculatePublicRoute(privateOriginForRouting(from), to, "driving");
+        const publicRoute = await calculatePublicRoute(from, to, "driving");
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
