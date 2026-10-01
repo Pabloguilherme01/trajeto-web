@@ -309,6 +309,9 @@ export default function PublicServices() {
               placeholder="Buscar saúde, escola, polícia, prefeitura..."
               className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65"
               autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              inputMode="search"
               enterKeyHint="search"
               aria-label="Buscar serviços públicos"
               aria-keyshortcuts="Control+K Meta+K"
@@ -395,7 +398,7 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="min-h-20 min-w-0 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/5 p-3 text-left"
+                    className="min-h-24 min-w-0 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/5 p-3 text-left shadow-[0_10px_26px_rgba(0,0,0,.1)]"
                   >
                     <span className="block text-sm font-bold text-white">
                       {shortcut.label}
@@ -446,10 +449,10 @@ export default function PublicServices() {
             return (
               <article
                 key={service.id}
-                className="route-card rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4"
+                className="route-card mobile-card rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4 shadow-[0_12px_34px_rgba(0,0,0,.14)]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#3DE3FF]">
+                  <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#3DE3FF]">
                     <Icon className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -516,7 +519,7 @@ export default function PublicServices() {
                     {service.email}
                   </a>
                 )}
-                <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className={"mt-4 grid gap-2 " + (service.mapQuery ? "grid-cols-2" : "grid-cols-1")}>
                   {service.mapQuery && (
                     <button
                       type="button"
