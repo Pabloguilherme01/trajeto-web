@@ -132,25 +132,34 @@ describe("Planner travel state", () => {
       submit();
       await waitFor(() =>
         expect(state.publicRoute).toHaveBeenCalledWith(
-          "-15.76123, -48.28123",
+          "-15.7612, -48.2812",
           "Hospital",
           "driving"
         )
       );
       expect((screen.getByPlaceholderText("Seu ponto de partida") as HTMLInputElement).value).toBe("-15.76123, -48.28123");
+      expect(state.mutate).not.toHaveBeenCalled();
     } finally {
       if (descriptor) Object.defineProperty(navigator, "geolocation", descriptor);
       else Reflect.deleteProperty(navigator, "geolocation");
     }
   });
 
-  it("offers external navigation with the current position as an optional origin", async () => {
-    state.staticRuntime = true;
+  it("does not send a missing device location to the route backend", async () => {
+    state.staticRuntime = false;
     state.search = "destino=Hospital";
-    render(<Planner />);
-    submit();
-    await screen.findByRole("button", { name: "Abrir Google Maps" });
-    expect(state.mutate).not.toHaveBeenCalled();
+    const descriptor = Object.getOwnPropertyDescriptor(navigator, "geolocation");
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: undefined });
+    try {
+      render(<Planner />);
+      submit();
+      await screen.findByRole("alert");
+      expect(state.mutate).not.toHaveBeenCalled();
+      expect(state.publicRoute).not.toHaveBeenCalled();
+    } finally {
+      if (descriptor) Object.defineProperty(navigator, "geolocation", descriptor);
+      else Reflect.deleteProperty(navigator, "geolocation");
+    }
   });
 
   it("keeps offline saving prominent and secondary providers tucked away", async () => {
