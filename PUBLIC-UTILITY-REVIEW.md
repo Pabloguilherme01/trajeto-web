@@ -73,3 +73,14 @@ Validação desta revisão: checagem de tipos, build completo e testes unitário
 - Metadados do site passam a identificar a utilidade pública em Águas Lindas. Mantidos os módulos existentes, as fontes do catálogo e a atualização ANP já agendada.
 
 Validação inclui larguras de 320 a 1024 px, fonte ampliada, acessibilidade, contatos remotos offline, recuperação de um arquivo de tela removido, recarga offline e gravação de rota interrompida. A revisão não promete atendimento de terceiros ou disponibilidade de mapas externos sem conexão.
+
+## Quinta revisão: navegação móvel, hierarquia e procedência
+
+- Serviços públicos passam a ocupar uma posição fixa no dock mobile. O mapa continua acessível em Mais, com rótulo explícito, evitando esconder o diretório cidadão atrás de uma segunda camada.
+- O botão Rotas do dock sempre abre o planejador. Retomar uma viagem continua disponível onde a interface informa isso explicitamente, sem alterar silenciosamente a ação principal.
+- O estado ativo do dock cobre aliases de rota e telas secundárias, preservando orientação em Salvos, Mapa, Busca, Postos, fichas locais e Ajuda.
+- A Home apresenta Serviços públicos entre as três ações principais e descreve o Trajeto como utilidade local, sem remover rotas, postos ou o fluxo de mobilidade.
+- Resultados de lugares e comércio passam a exibir o campo de procedência real do catálogo. A descrição do estabelecimento deixa de ser apresentada visualmente como se fosse a fonte.
+- Rótulos críticos do dock, busca inicial e aviso de atualização receberam texto maior e contraste mais legível no celular.
+
+Esta revisão não remove módulos funcionais nem amplia promessas de dados offline. Informações de comércio com rótulo "Consulta local" continuam sendo referência local e devem ser confirmadas antes do deslocamento; diretórios oficiais mantêm sua fonte própria.
