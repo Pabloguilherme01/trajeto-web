@@ -148,14 +148,27 @@ export default function Planner() {
   const resolveCurrentOrigin = async () => {
     if (!navigator.geolocation) return null;
     setLocating(true);
+
+    const requestPosition = (options: PositionOptions) =>
+      new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
+
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
+      let position: GeolocationPosition;
+      try {
+        position = await requestPosition({
           enableHighAccuracy: true,
-          timeout: 8000,
+          timeout: 6500,
           maximumAge: 300000,
         });
-      });
+      } catch {
+        position = await requestPosition({
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 900000,
+        });
+      }
       return (
         position.coords.latitude.toFixed(5) +
         ", " +
