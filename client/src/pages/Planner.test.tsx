@@ -41,6 +41,28 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Planner travel state", () => {
+  it("does not reopen a saved route whose read finishes after deletion", async () => {
+    state.search = "rota=old-route";
+    let finish!: (value: unknown) => void;
+    state.lookup.mockReturnValue(new Promise(resolve => { finish = resolve; }));
+    render(<Planner />);
+    act(() => window.dispatchEvent(new Event(localDataEvent)));
+    await act(async () => finish({ id: "old-route", origin: "Casa antiga", destination: "Trabalho antigo", payload }));
+    expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("");
+    expect(screen.queryByTestId("route-map")).toBeNull();
+  });
+  it("keeps a manually edited origin when an earlier GPS request finishes", () => {
+    let gps!: PositionCallback;
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: {
+      getCurrentPosition: (callback: PositionCallback) => { gps = callback; },
+    } });
+    render(<Planner />);
+    fireEvent.click(screen.getByRole("button", { name: "Usar localização atual" }));
+    fireEvent.change(screen.getByPlaceholderText("De onde você sai"), { target: { value: "Origem manual" } });
+    act(() => gps({ coords: { latitude: -15.76123, longitude: -48.28123 } } as GeolocationPosition));
+    expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Origem manual");
+  });
+
   it("clears visible route data and rejects a GPS response received after deletion", async () => {
     let gps!: PositionCallback;
     Object.defineProperty(navigator, "geolocation", { configurable: true, value: {

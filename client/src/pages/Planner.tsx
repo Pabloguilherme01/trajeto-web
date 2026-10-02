@@ -86,11 +86,14 @@ export default function Planner() {
   const staticRuntime = !supportsLiveRouting();
   const requestVersion = useRef(0);
   const locationRequest = useRef(0);
+  const localDataVersion = useRef(0);
   const plannerFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedKey = useRef<string | null>(null);
 
   const resetResult = () => {
     requestVersion.current += 1;
+    locationRequest.current += 1;
+    setLocating(false);
     setPlanned(null);
     setFallbackReady(false);
     setShowMap(false);
@@ -100,6 +103,7 @@ export default function Planner() {
 
   useEffect(() => {
     const clearVisibleData = () => {
+      localDataVersion.current += 1;
       requestVersion.current += 1;
       locationRequest.current += 1;
       privateOriginRef.current = null;
@@ -121,6 +125,7 @@ export default function Planner() {
       window.removeEventListener(localDataEvent, clearVisibleData);
       requestVersion.current += 1;
       locationRequest.current += 1;
+      localDataVersion.current += 1;
     };
   }, []);
 
@@ -135,7 +140,10 @@ export default function Planner() {
   }, []);
 
   const refreshSavedRoutes = () => {
-    void listOfflineRoutes().then(setSavedRoutes).catch(() => setSavedRoutes([]));
+    const version = localDataVersion.current;
+    void listOfflineRoutes().then(routes => {
+      if (version === localDataVersion.current) setSavedRoutes(routes);
+    }).catch(() => { if (version === localDataVersion.current) setSavedRoutes([]); });
   };
 
   useEffect(() => {
@@ -157,9 +165,10 @@ export default function Planner() {
         ? consumePrivateLocationHandoff()
         : null;
     let active = true;
+    const dataVersion = localDataVersion.current;
     if (routeId) {
       void getOfflineRoute(routeId).then(route => {
-        if (!active) return;
+        if (!active || dataVersion !== localDataVersion.current) return;
         if (!route) { setError("Esta rota não está salva neste aparelho."); return; }
         if (route.id && route.id !== routeId) {
           window.history.replaceState(window.history.state, "", buildSavedRoutePlannerUrl(route.id));
@@ -173,7 +182,7 @@ export default function Planner() {
         const savedMode = (route.payload as PlannedRoute).route as PlannedRoute["route"] & { mode?: PublicTravelMode };
         if (savedMode.mode === "walking" || savedMode.mode === "cycling" || savedMode.mode === "transit" || savedMode.mode === "driving") setMode(savedMode.mode);
         setSavedMessage("Rota salva aberta. O trânsito pode estar desatualizado.");
-      }).catch(() => { if (active) setError("Não foi possível abrir a rota salva."); });
+      }).catch(() => { if (active && dataVersion === localDataVersion.current) setError("Não foi possível abrir a rota salva."); });
     } else if (privateHandoff) {
       privateOriginRef.current =
         privateHandoff.lat.toFixed(5) + ", " + privateHandoff.lng.toFixed(5);
