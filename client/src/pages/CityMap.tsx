@@ -320,6 +320,7 @@ export default function CityMap() {
               <button
                 key={layer.id}
                 type="button"
+                aria-label={layer.label}
                 aria-pressed={category === layer.id}
                 onClick={() => setCategory(layer.id)}
                 className={
