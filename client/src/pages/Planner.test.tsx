@@ -435,4 +435,34 @@ describe("Planner travel state", () => {
     expect(walking.parentElement?.className).toContain("min-[420px]:grid-cols-4");
   });
 
+
+  it("renders an internal map preview for saved routes", async () => {
+    state.path = "/salvos";
+    state.search = "";
+    state.listOffline.mockResolvedValueOnce([
+      {
+        id: "saved-map-route",
+        origin: "Terminal de Águas Lindas",
+        destination: "Hospital Bom Jesus",
+        savedAt: new Date().toISOString(),
+        payload: {
+          route: {
+            origin: { lat: -15.76, lng: -48.28 },
+            destination: { lat: -15.74, lng: -48.26 },
+            distanceMeters: 4200,
+            durationSeconds: 540,
+            polyline: "encoded",
+            source: "local-estimate",
+            mode: "driving",
+          },
+          stops: [],
+          recommendation: null,
+        },
+      },
+    ]);
+    render(<Planner />);
+    expect(await screen.findByText("Ver mapa desta rota no Trajeto")).toBeTruthy();
+    expect(screen.getByTestId("route-map")).toBeTruthy();
+  });
+
 });
