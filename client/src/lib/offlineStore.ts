@@ -130,14 +130,15 @@ async function withStore<T>(
 }
 
 export async function saveOfflineRoute(route: OfflineRoute) {
-  if (!isValidRoute(route)) {
+  const safeRoute = sanitizeOfflineRoute(route);
+  if (!isValidRoute(safeRoute)) {
     throw new Error("Não foi possível salvar: os dados da rota estão incompletos.");
   }
   if (!hasIndexedDb()) {
     throw new Error("Não foi possível salvar: o armazenamento offline não está disponível neste navegador.");
   }
 
-  await withStore("readwrite", store => store.put(route));
+  await withStore("readwrite", store => store.put(safeRoute));
   const routes = await listOfflineRoutes();
   if (routes.length > MAX_SAVED_ROUTES) {
     const excessIds = routes.slice(MAX_SAVED_ROUTES).map(item => item.id);
