@@ -1,0 +1,1082 @@
+{
+  "schema": 1,
+  "updatedAt": "2026-10-02",
+  "city": {
+    "name": "Águas Lindas de Goiás",
+    "state": "GO",
+    "ibgeCode": "5200258",
+    "areaKm2": 191.817,
+    "populationCensus2022": 225693,
+    "populationEstimate2026": 249978,
+    "profileSourceId": "ibge"
+  },
+  "sources": [
+    {
+      "id": "ibge",
+      "label": "IBGE · Cidades e Estados",
+      "url": "https://www.ibge.gov.br/cidades-e-estados/go/aguas-lindas-de-goias.html"
+    },
+    {
+      "id": "prefeitura-escolas",
+      "label": "Prefeitura de Águas Lindas · Escolas Municipais",
+      "url": "https://aguaslindasdegoias.go.gov.br/escolas-municipais-de-aguas-lindas-de-goias/"
+    },
+    {
+      "id": "seduc-escolas",
+      "label": "SEDUC Goiás · Lista de escolas da rede estadual",
+      "url": "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/"
+    },
+    {
+      "id": "semad-parque",
+      "label": "Governo de Goiás · Parque Estadual Águas Lindas",
+      "url": "https://goias.gov.br/parquesdegoias/parque-apa-e-unidade/parque-estadual-aguas-lindas-peal/"
+    },
+    {
+      "id": "antt-semiurbano",
+      "label": "ANTT · Transporte semiurbano DF/Entorno",
+      "url": "https://www.gov.br/antt/pt-br/assuntos/ultimas-noticias/entorno-do-df-novas-tarifas-da-taguatur-entram-em-vigor-a-partir-de-28-de-junho"
+    }
+  ],
+  "items": [
+    {
+      "id": "edu-municipal-centro-municipal-de-educacao-inclusiva",
+      "name": "Centro Municipal de Educação Inclusiva",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "destination": "Centro Municipal de Educação Inclusiva, Área Especial 01 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-creche-municipal-mundo-encantado",
+      "name": "Creche Municipal Mundo Encantado",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "QD 53 Lote 05 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "destination": "Creche Municipal Mundo Encantado, QD 53 Lote 05 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-creche-municipal-pires-perillo",
+      "name": "Creche Municipal Pires Perillo",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 67 Conjunto B Avenida 1B – Setor 08, Águas Lindas de Goiás - GO",
+      "destination": "Creche Municipal Pires Perillo, Quadra 67 Conjunto B Avenida 1B – Setor 08, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-creche-municipal-santa-lucia",
+      "name": "Creche Municipal Santa Lúcia",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 48 Lote 18 – Rua dos Pequizeiros nº 48 – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "destination": "Creche Municipal Santa Lúcia, Quadra 48 Lote 18 – Rua dos Pequizeiros nº 48 – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-acelina-alves-de-araujo",
+      "name": "Escola Municipal Acelina Alves de Araujo",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 44 – Camping Clube, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Acelina Alves de Araujo, Quadra 44 – Camping Clube, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-ana-lucia-oliveira-da-silva",
+      "name": "Escola Municipal Ana Lúcia Oliveira da Silva",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial Jardim América II, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Ana Lúcia Oliveira da Silva, Área Especial Jardim América II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-antonio-cicero-araujo-da-costa",
+      "name": "Escola Municipal Antônio Cícero Araújo da Costa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial QD. 03 Lote 03 – Mansões Odisséia, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Antônio Cícero Araújo da Costa, Área Especial QD. 03 Lote 03 – Mansões Odisséia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-antonio-de-jesus-leite",
+      "name": "Escola Municipal Antônio de Jesus Leite",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Jardim Querência, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Antônio de Jesus Leite, Área Especial 01 – Jardim Querência, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-antonio-luiz-gonzaga",
+      "name": "Escola Municipal Antônio Luiz Gonzaga",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 88 Conjunto A, 8 e 9 – Setor 11, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Antônio Luiz Gonzaga, Quadra 88 Conjunto A, 8 e 9 – Setor 11, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-camargo-ii",
+      "name": "Escola Municipal Camargo II",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Fazenda Camargo – Município de Águas Lindas, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Camargo II, Fazenda Camargo – Município de Águas Lindas, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-coimbra",
+      "name": "Escola Municipal Coimbra",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra P Lote 04 – Mansões Coimbra, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Coimbra, Quadra P Lote 04 – Mansões Coimbra, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-darci-ribeiro",
+      "name": "Escola Municipal Darci Ribeiro",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 22 Conjunto A – Setor 08, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Darci Ribeiro, Quadra 22 Conjunto A – Setor 08, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-domingos-simao-de-oliveira",
+      "name": "Escola Municipal Domingos Simão de Oliveira",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 18, Área Especial Jardim América IV, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Domingos Simão de Oliveira, Quadra 18, Área Especial Jardim América IV, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-edileuza-de-oliveira-azevedo-cavalcante",
+      "name": "Escola Municipal Edileuza de Oliveira Azevedo Cavalcante",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 07/10 – Jardim Guaíra I, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Edileuza de Oliveira Azevedo Cavalcante, Quadra 07/10 – Jardim Guaíra I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-ednalda-guedes-de-souza",
+      "name": "Escola Municipal Ednalda Guedes de Souza",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 04 – Águas Bonitas I, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Ednalda Guedes de Souza, Área Especial 04 – Águas Bonitas I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-ednalva-valdevino-dos-santos",
+      "name": "Escola Municipal Ednalva Valdevino dos Santos",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Ednalva Valdevino dos Santos, Área Especial 01 – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-emilia-ferreira-de-souza",
+      "name": "Escola Municipal Emília Ferreira de Souza",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Cidade do Entorno, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Emília Ferreira de Souza, Área Especial 01 – Cidade do Entorno, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-erotides-dias-costa",
+      "name": "Escola Municipal Erotides Dias Costa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Rua 26 QD.05 Lote 01 – Padre Lúcio, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Erotides Dias Costa, Rua 26 QD.05 Lote 01 – Padre Lúcio, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-fernando-cunha-junior",
+      "name": "Escola Municipal Fernando Cunha Junior",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 7 Lote 01 – Área Especial 03 – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Fernando Cunha Junior, Quadra 7 Lote 01 – Área Especial 03 – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-geracina-pereira-da-silva",
+      "name": "Escola Municipal Geracina Pereira da Silva",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Mansões Águas Lindas, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Geracina Pereira da Silva, Área Especial 01 – Mansões Águas Lindas, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-inacio-carneiro-da-costa",
+      "name": "Escola Municipal Inácio Carneiro da Costa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 41 Lotes 22/24 – Jardim Barragem II, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Inácio Carneiro da Costa, Quadra 41 Lotes 22/24 – Jardim Barragem II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-jardim-barragem-v",
+      "name": "Escola Municipal Jardim Barragem V",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Entre Quadras 36/38 Área Especial s/n – Jardim da Barragem V, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Jardim Barragem V, Entre Quadras 36/38 Área Especial s/n – Jardim da Barragem V, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-jardim-das-oliveiras",
+      "name": "Escola Municipal Jardim das Oliveiras",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 7, Área Pública 10 – Jardim das Oliveiras I, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Jardim das Oliveiras, Quadra 7, Área Pública 10 – Jardim das Oliveiras I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-jardim-itamaraca",
+      "name": "Escola Municipal Jardim Itamaracá",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 06 Área Especial – Residencial Alvorada / Mansões Itamaracá, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Jardim Itamaracá, Quadra 06 Área Especial – Residencial Alvorada / Mansões Itamaracá, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-joao-elizio-lima-pessoa",
+      "name": "Escola Municipal João Elízio Lima Pessoa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Avenida Diagonal A1 nº 02 – Pinheiro I, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal João Elízio Lima Pessoa, Avenida Diagonal A1 nº 02 – Pinheiro I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-jose-vitorino-de-souza",
+      "name": "Escola Municipal José Vitorino de Souza",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 31, Lotes 1/4, Área Especial – Jardim Recanto, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal José Vitorino de Souza, Quadra 31, Lotes 1/4, Área Especial – Jardim Recanto, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-juliana-eloy-da-silva",
+      "name": "Escola Municipal Juliana Eloy da Silva",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 22/23 – Jardim da Barragem V, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Juliana Eloy da Silva, Quadra 22/23 – Jardim da Barragem V, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-kennedy",
+      "name": "Escola Municipal Kennedy",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 52 Conjunto B, 29/31 – Setor 01, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Kennedy, Quadra 52 Conjunto B, 29/31 – Setor 01, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-maria-do-livramento",
+      "name": "Escola Municipal Maria do Livramento",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Zona Rural Quinta das Angélicas, Gleba 1, Chácara 17 – Quintas das Angélicas, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Maria do Livramento, Zona Rural Quinta das Angélicas, Gleba 1, Chácara 17 – Quintas das Angélicas, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-luiza-tereza",
+      "name": "Escola Municipal Luiza Tereza",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 1B Lote O – Mansões Pôr do Sol, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Luiza Tereza, Área Especial 1B Lote O – Mansões Pôr do Sol, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-maria-jose-costa-lima",
+      "name": "Escola Municipal Maria José Costa Lima",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 5D, 2 a 8 – Recreio das Águas Lindas III, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Maria José Costa Lima, Quadra 5D, 2 a 8 – Recreio das Águas Lindas III, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-maria-machado",
+      "name": "Escola Municipal Maria Machado",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "QD.39 Lote 36 – Jardim Guaíra, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Maria Machado, QD.39 Lote 36 – Jardim Guaíra, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-maristela-regina-neris",
+      "name": "Escola Municipal Maristela Regina Neris",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 1, Área Especial s/n – Jardim Pérola I, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Maristela Regina Neris, Quadra 1, Área Especial s/n – Jardim Pérola I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-med-gao",
+      "name": "Escola Municipal MED-GÃO",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial A/I nº 02 – Mansões Village, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal MED-GÃO, Área Especial A/I nº 02 – Mansões Village, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-meg-luz",
+      "name": "Escola Municipal MEG-LUZ",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 18 Conjunto A – Parque da Barragem Setor 03, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal MEG-LUZ, Quadra 18 Conjunto A – Parque da Barragem Setor 03, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-mestre-zezito",
+      "name": "Escola Municipal Mestre Zezito",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Rua 18, QD.56, Lote 10 – Águas Bonitas I, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Mestre Zezito, Rua 18, QD.56, Lote 10 – Águas Bonitas I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-nilzon-periquito-de-lima",
+      "name": "Escola Municipal Nilzon Periquito de Lima",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Rua 13 QD.A 01 – Mansões Olinda, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Nilzon Periquito de Lima, Rua 13 QD.A 01 – Mansões Olinda, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-orlando-soares-sousa",
+      "name": "Escola Municipal Orlando Soares Sousa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Quadra 6, 35/36 – Camping Clube, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Orlando Soares Sousa, Quadra 6, 35/36 – Camping Clube, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-perola-ii",
+      "name": "Escola Municipal Pérola II",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Jardim Pérola II, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Pérola II, Área Especial 01 – Jardim Pérola II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-prof-erika-flavia-vieira-de-souza",
+      "name": "Escola Municipal Profª Érika Flávia Vieira de Souza",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Av. 02 Setor 16 Área Especial – Solar da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Profª Érika Flávia Vieira de Souza, Av. 02 Setor 16 Área Especial – Solar da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-roberto-alves-da-silva",
+      "name": "Escola Municipal Roberto Alves da Silva",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 15 – Mansões Coimbra, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Roberto Alves da Silva, Área Especial 15 – Mansões Coimbra, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-rui-barbosa",
+      "name": "Escola Municipal Rui Barbosa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial s/n Cidade do Entorno – Jardim Brasília II, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Rui Barbosa, Área Especial s/n Cidade do Entorno – Jardim Brasília II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-sao-bartolomeu",
+      "name": "Escola Municipal São Bartolomeu",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Avenida Especial QD.142 – Setor 09, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal São Bartolomeu, Avenida Especial QD.142 – Setor 09, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-senador-emival-ramos-caiado",
+      "name": "Escola Municipal Senador Emival Ramos Caiado",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "QD.04 Lote 20 Rua das Palmas – Jardim Paraíso, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Senador Emival Ramos Caiado, QD.04 Lote 20 Rua das Palmas – Jardim Paraíso, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-vereador-erico-de-souza-ferreira",
+      "name": "Escola Municipal Vereador Érico de Souza Ferreira",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial 01 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Vereador Érico de Souza Ferreira, Área Especial 01 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-vicente-de-paula-lisboa",
+      "name": "Escola Municipal Vicente de Paula Lisboa",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Área Especial – Águas Lindas II, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Vicente de Paula Lisboa, Área Especial – Águas Lindas II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-municipal-escola-municipal-zelia-correa-cotrim",
+      "name": "Escola Municipal Zélia Correa Cotrim",
+      "detail": "Rede municipal de educação",
+      "category": "educacao",
+      "address": "Av. Tancredo Neves QD.73 Lote 14/20 – Jardim Pérola II, Águas Lindas de Goiás - GO",
+      "destination": "Escola Municipal Zélia Correa Cotrim, Av. Tancredo Neves QD.73 Lote 14/20 – Jardim Pérola II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "municipal"
+      ]
+    },
+    {
+      "id": "edu-estadual-52075583",
+      "name": "Centro de Ensino em Período Integral Juscelino Kubitschek de Oliveira",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Rua Mansões Odisseia s/n – Parque Mansões Odisséia, Águas Lindas de Goiás - GO",
+      "destination": "Centro de Ensino em Período Integral Juscelino Kubitschek de Oliveira, Rua Mansões Odisseia s/n – Parque Mansões Odisséia, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52075583"
+      ]
+    },
+    {
+      "id": "edu-estadual-52073467",
+      "name": "Colégio Estadual Emilia Ferreira Branco",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "QD N1 Lote 04 – Setor Coimbra, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Emilia Ferreira Branco, QD N1 Lote 04 – Setor Coimbra, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52073467"
+      ]
+    },
+    {
+      "id": "edu-estadual-52081850",
+      "name": "Colégio Estadual Piaget",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Q 31 Lotes 25 e 26 – Camping Club, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Piaget, Q 31 Lotes 25 e 26 – Camping Club, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52081850"
+      ]
+    },
+    {
+      "id": "edu-estadual-52078507",
+      "name": "Colégio Estadual Ayrton Senna da Silva",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Quadra 18 Área Especial – Jardim América IV, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Ayrton Senna da Silva, Quadra 18 Área Especial – Jardim América IV, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52078507"
+      ]
+    },
+    {
+      "id": "edu-estadual-52073459",
+      "name": "Colégio Estadual Maria do Carmo Lima",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Mansões Águas Lindas s/n – Mansões Águas Lindas, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Maria do Carmo Lima, Mansões Águas Lindas s/n – Mansões Águas Lindas, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52073459"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086046",
+      "name": "Centro de Ensino em Período Integral Machado de Assis",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "QD. 03 LT. 01 Área Especial – Parque das Águas Bonitas, Águas Lindas de Goiás - GO",
+      "destination": "Centro de Ensino em Período Integral Machado de Assis, QD. 03 LT. 01 Área Especial – Parque das Águas Bonitas, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086046"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086054",
+      "name": "Colégio Estadual Tancredo de Almeida Neves",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Entre Quadras 36/38 Área Especial – Jardim V, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Tancredo de Almeida Neves, Entre Quadras 36/38 Área Especial – Jardim V, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086054"
+      ]
+    },
+    {
+      "id": "edu-estadual-52078523",
+      "name": "Colégio Estadual Princesa Daiana",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Rua Setor 9, QD. 69, LT. 14 – Setor 14, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Princesa Daiana, Rua Setor 9, QD. 69, LT. 14 – Setor 14, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52078523"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086062",
+      "name": "Colégio Estadual Olavo Bilac",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Rua 38 c/ Rua 10 e Av. JK, APM Quadra 53, Lote 1-3 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Olavo Bilac, Rua 38 c/ Rua 10 e Av. JK, APM Quadra 53, Lote 1-3 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086062"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086089",
+      "name": "Colégio Estadual Ulysses Guimarães",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "QD 16 LT 2 – Solar da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Ulysses Guimarães, QD 16 LT 2 – Solar da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086089"
+      ]
+    },
+    {
+      "id": "edu-estadual-52079562",
+      "name": "Colégio Estadual Cora Coralina",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Rua 38 esq. c/ 4ª Avenida, s/n – Mansões Village, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Cora Coralina, Rua 38 esq. c/ 4ª Avenida, s/n – Mansões Village, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52079562"
+      ]
+    },
+    {
+      "id": "edu-estadual-52069630",
+      "name": "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas de Goiás",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Quadra 31 Área Especial Avenida 02/03 – Águas Lindas I, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas de Goiás, Quadra 31 Área Especial Avenida 02/03 – Águas Lindas I, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52069630"
+      ]
+    },
+    {
+      "id": "edu-estadual-52077411",
+      "name": "Colégio Estadual Paulo Freire",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Área Especial I QD.53 LT.01-H nº 01 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Paulo Freire, Área Especial I QD.53 LT.01-H nº 01 – Jardim Brasília, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52077411"
+      ]
+    },
+    {
+      "id": "edu-estadual-52107477",
+      "name": "Colégio Estadual Iris Rezende Machado",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Área Especial s/n – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Iris Rezende Machado, Área Especial s/n – Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52107477"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086100",
+      "name": "Centro de Ensino em Período Integral Rocha Leal",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Rua Acre esq. com Rua Minas Gerais – Jardim Guaíra I, Águas Lindas de Goiás - GO",
+      "destination": "Centro de Ensino em Período Integral Rocha Leal, Rua Acre esq. com Rua Minas Gerais – Jardim Guaíra I, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086100"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086038",
+      "name": "Colégio Estadual Rafael de Souza Barbosa",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "QD. 44 LT 43-51 – Setor 2, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Rafael de Souza Barbosa, QD. 44 LT 43-51 – Setor 2, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086038"
+      ]
+    },
+    {
+      "id": "edu-estadual-52086097",
+      "name": "Colégio Estadual Duque de Caxias",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Área Especial nº 01, 19/20 – Mansões Village, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Duque de Caxias, Área Especial nº 01, 19/20 – Mansões Village, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52086097"
+      ]
+    },
+    {
+      "id": "edu-estadual-52090949",
+      "name": "Colégio Estadual Mansões Odisséia",
+      "detail": "Rede estadual · Ensino Fundamental e/ou Médio",
+      "category": "educacao",
+      "address": "Avenida Contorno Área Comercial s/n – Parque Mansões Odisséia, Águas Lindas de Goiás - GO",
+      "destination": "Colégio Estadual Mansões Odisséia, Avenida Contorno Área Comercial s/n – Parque Mansões Odisséia, Águas Lindas de Goiás - GO",
+      "sourceId": "seduc-escolas",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "educacao",
+        "escola",
+        "estadual",
+        "52090949"
+      ]
+    },
+    {
+      "id": "ambiente-parque-estadual-aguas-lindas",
+      "name": "Parque Estadual Águas Lindas",
+      "detail": "Unidade de conservação estadual · proteção de mananciais e da região da Barragem do Descoberto",
+      "category": "meio-ambiente",
+      "address": "Acesso pela BR-070, km 20, rumo à Barragem do Rio Descoberto, Águas Lindas de Goiás - GO",
+      "destination": "Parque Estadual Águas Lindas, BR-070 km 20, Águas Lindas de Goiás - GO",
+      "sourceId": "semad-parque",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "parque",
+        "meio ambiente",
+        "barragem",
+        "descoberto",
+        "trilha"
+      ]
+    },
+    {
+      "id": "transporte-antt-taguatinga",
+      "name": "Ligação semiurbana · Águas Lindas ↔ Taguatinga",
+      "detail": "Transporte semiurbano regulado pela ANTT; consulte a fonte oficial para tarifa e operação vigentes.",
+      "category": "transporte",
+      "sourceId": "antt-semiurbano",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "onibus",
+        "taguatinga",
+        "antt",
+        "semiurbano",
+        "entorno"
+      ]
+    },
+    {
+      "id": "transporte-antt-ceilandia",
+      "name": "Ligação semiurbana · Águas Lindas ↔ Ceilândia",
+      "detail": "Transporte semiurbano regulado pela ANTT; consulte a fonte oficial para tarifa e operação vigentes.",
+      "category": "transporte",
+      "sourceId": "antt-semiurbano",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "onibus",
+        "ceilandia",
+        "antt",
+        "semiurbano",
+        "entorno"
+      ]
+    }
+  ]
+}
