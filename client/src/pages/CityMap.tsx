@@ -359,20 +359,7 @@ export default function CityMap() {
         </div>
       </section>
 
-      <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-        <button
-          type="button"
-          onClick={() => {
-            setExpandedMap(true);
-            requestAnimationFrame(() =>
-              mapSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-            );
-          }}
-          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#102028]"
-        >
-          <Maximize2 className="size-4 shrink-0" />
-          Abrir mapa
-        </button>
+      <div className="mt-2 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
         <button
           type="button"
           onClick={() => navigate(appUrl("/planejar"))}
