@@ -115,4 +115,15 @@ describe("offlineStore helpers", () => {
     expect(offlineRouteId("Minha localização", "Hospital")).toBe("minha localização::hospital");
     expect(offlineRouteId("Minha localização", "Hospital")).not.toContain("-15.");
   });
+
+  it("does not substitute a saved car route for a walking or transit trip", () => {
+    const routes = [{ id: "car", origin: "Centro", destination: "Hospital", savedAt: new Date().toISOString(), payload: { route: { mode: "driving" } } }];
+    expect(findBestOfflineRouteForTrip(routes, "Centro", "Hospital", "walking")).toBeNull();
+    expect(findBestOfflineRouteForTrip(routes, "Centro", "Hospital", "transit")).toBeNull();
+  });
+
+  it("rejects legacy OSRM routes relabeled for a different transport graph", () => {
+    const routes = [{ id: "legacy-foot", origin: "Centro", destination: "Hospital", savedAt: new Date().toISOString(), payload: { route: { mode: "walking", source: "osrm" } } }];
+    expect(findBestOfflineRouteForTrip(routes, "Centro", "Hospital", "walking")).toBeNull();
+  });
 });

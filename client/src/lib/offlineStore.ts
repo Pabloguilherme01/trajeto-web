@@ -317,16 +317,17 @@ export function findBestOfflineRouteForTrip(
   return (
     routes
       .filter(route => !isPreciseLocationText(route.origin))
+      .filter(route => offlineRouteTravelMode(route) === mode)
+      .filter(route => {
+        if (!isRecord(route.payload) || !isRecord(route.payload.route)) return false;
+        return route.payload.route.source !== "osrm" || mode === "driving";
+      })
       .filter(
         route =>
           normalizeOfflineMatchText(route.origin) === normalizedOrigin &&
           normalizeOfflineMatchText(route.destination) === normalizedDestination
       )
       .sort((a, b) => {
-        const modeScore =
-          Number(offlineRouteTravelMode(b) === mode) -
-          Number(offlineRouteTravelMode(a) === mode);
-        if (modeScore) return modeScore;
         return Date.parse(b.savedAt) - Date.parse(a.savedAt);
       })[0] ?? null
   );
