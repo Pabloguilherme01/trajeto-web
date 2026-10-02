@@ -1,4 +1,4 @@
-import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForHistory, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -61,6 +61,16 @@ function isValidPayload(payload: unknown) {
     typeof stop.address === "string" &&
     stop.address.length > 0,
   );
+}
+
+function sanitizeOfflineRoute(route: OfflineRoute): OfflineRoute {
+  const origin = privateOriginForHistory(route.origin);
+  if (origin === route.origin) return route;
+  return {
+    ...route,
+    id: offlineRouteId(origin, route.destination),
+    origin,
+  };
 }
 
 function isValidRoute(value: unknown): value is OfflineRoute {
@@ -163,7 +173,12 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
       request.onsuccess = () => {
         for (const candidate of request.result as unknown[]) {
           if (isValidRoute(candidate)) {
-            valid.push(candidate);
+            const safeRoute = sanitizeOfflineRoute(candidate);
+            valid.push(safeRoute);
+            if (safeRoute.id !== candidate.id || safeRoute.origin !== candidate.origin) {
+              store.put(safeRoute);
+              store.delete(candidate.id);
+            }
           } else if (isRecord(candidate) && typeof candidate.id === "string") {
             store.delete(candidate.id);
           }
@@ -200,7 +215,12 @@ export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> 
     return null;
   }
 
-  return route;
+  const safeRoute = sanitizeOfflineRoute(route);
+  if (safeRoute.id !== route.id || safeRoute.origin !== route.origin) {
+    await withStore("readwrite", store => store.put(safeRoute));
+    if (safeRoute.id !== route.id) await withStore("readwrite", store => store.delete(route.id));
+  }
+  return safeRoute;
 }
 
 export function offlineRouteId(origin: string, destination: string) {
