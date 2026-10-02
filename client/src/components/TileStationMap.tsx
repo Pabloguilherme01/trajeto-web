@@ -450,11 +450,11 @@ export default function TileStationMap({
           </div>
         </div>
 
-        <div className="absolute left-3 top-3 z-20 flex gap-1.5">
+        <div className="absolute left-3 right-3 top-3 z-20 flex max-w-full gap-1.5 overflow-x-auto overscroll-x-contain pb-1">
           <button
             type="button"
             onClick={() => { setHasUserMovedMap(true); changeZoom(1); }}
-            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Aumentar zoom"
           >
             <Plus className="size-4" />
@@ -478,7 +478,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => { setHasUserMovedMap(false); fitStations(); }}
-            className="min-h-11 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
+            className="min-h-11 shrink-0 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
           >
             Ver todos
           </button>
@@ -486,7 +486,7 @@ export default function TileStationMap({
             type="button"
             onClick={() => { setHasUserMovedMap(true); focusSelected(); }}
             disabled={!selectedId}
-            className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white shadow-lg disabled:opacity-40"
+            className="min-h-11 shrink-0 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white shadow-lg disabled:opacity-40"
           >
             Focar ponto
           </button>
