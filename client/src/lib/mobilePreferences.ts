@@ -11,6 +11,24 @@ const LAST_STATION_KEY = "trajeto-last-station";
 const LAST_INTENT_KEY = "trajeto-last-intent";
 const PREFERENCE_EVENT = "trajeto-preferences-change";
 
+const PRIVATE_NAVIGATION_KEYS = [
+  SEARCHES_KEY,
+  LAST_TRIP_KEY,
+  RECENT_TRIPS_KEY,
+  ROUTE_USAGE_KEY,
+  ROUTE_USAGE_EVENTS_KEY,
+  LAST_STATION_KEY,
+] as const;
+
+function navigationStorage() {
+  try {
+    for (const key of PRIVATE_NAVIGATION_KEYS) localStorage.removeItem(key);
+    return sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
 export type MobileIntent = "route" | "stations" | "nearby" | "saved" | "search";
 
 function notifyPreferenceChange() {
@@ -25,7 +43,7 @@ function privateUsageKey(origin: string, destination: string) {
 
 function migratePrivateRouteUsageStorage() {
   try {
-    const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    const usage = JSON.parse(navigationStorage()?.getItem(ROUTE_USAGE_KEY) || "{}");
     if (usage && typeof usage === "object" && !Array.isArray(usage)) {
       const next: Record<string, number> = {};
       let changed = false;
@@ -38,10 +56,10 @@ function migratePrivateRouteUsageStorage() {
         if (safeKey !== key) changed = true;
         if (Number.isFinite(value)) next[safeKey] = (next[safeKey] ?? 0) + value;
       }
-      if (changed) localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(next));
+      if (changed) navigationStorage()?.setItem(ROUTE_USAGE_KEY, JSON.stringify(next));
     }
 
-    const eventUsage = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    const eventUsage = JSON.parse(navigationStorage()?.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
     if (eventUsage && typeof eventUsage === "object" && !Array.isArray(eventUsage)) {
       const nextEvents: Record<string, string[]> = {};
       let changed = false;
@@ -58,7 +76,7 @@ function migratePrivateRouteUsageStorage() {
           : [];
         nextEvents[safeKey] = [...(nextEvents[safeKey] ?? []), ...events].slice(-200);
       }
-      if (changed) localStorage.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(nextEvents));
+      if (changed) navigationStorage()?.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(nextEvents));
     }
   } catch {}
 }
@@ -78,7 +96,7 @@ export function setEconomyMode(enabled: boolean) {
 }
 export function getRecentSearches(): string[] {
   try {
-    const value = JSON.parse(localStorage.getItem(SEARCHES_KEY) || "[]");
+    const value = JSON.parse(navigationStorage()?.getItem(SEARCHES_KEY) || "[]");
     if (!Array.isArray(value)) return [];
     const next = value
       .filter((item): item is string => typeof item === "string")
@@ -86,7 +104,7 @@ export function getRecentSearches(): string[] {
       .map(item => privateOriginForHistory(item))
       .slice(0, 5);
     if (next.some((item, index) => item !== value[index])) {
-      localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
+      navigationStorage()?.setItem(SEARCHES_KEY, JSON.stringify(next));
     }
     return next;
   } catch { return []; }
@@ -97,16 +115,16 @@ export function rememberSearch(query: string) {
   if (normalized.length < 3) return;
   try {
     const next = [normalized, ...getRecentSearches().filter(item => item.toLowerCase() !== normalized.toLowerCase())].slice(0, 5);
-    localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
+    navigationStorage()?.setItem(SEARCHES_KEY, JSON.stringify(next));
   } catch {}
   notifyPreferenceChange();
 }
 export function getLastTrip(): { origin: string; destination: string } | null {
   try {
-    const value = JSON.parse(localStorage.getItem(LAST_TRIP_KEY) || "null");
+    const value = JSON.parse(navigationStorage()?.getItem(LAST_TRIP_KEY) || "null");
     if (!value || typeof value.origin !== "string" || typeof value.destination !== "string") return null;
     const next = { origin: privateOriginForHistory(value.origin), destination: value.destination };
-    if (next.origin !== value.origin) localStorage.setItem(LAST_TRIP_KEY, JSON.stringify(next));
+    if (next.origin !== value.origin) navigationStorage()?.setItem(LAST_TRIP_KEY, JSON.stringify(next));
     return next;
   } catch { return null; }
 }
@@ -119,7 +137,7 @@ function isRecentTrip(value: unknown): value is RecentTrip {
 }
 export function getRecentTrips(): RecentTrip[] {
   try {
-    const value = JSON.parse(localStorage.getItem(RECENT_TRIPS_KEY) || "[]");
+    const value = JSON.parse(navigationStorage()?.getItem(RECENT_TRIPS_KEY) || "[]");
     if (!Array.isArray(value)) return [];
     const valid = value
       .filter(isRecentTrip)
@@ -127,7 +145,7 @@ export function getRecentTrips(): RecentTrip[] {
       .sort((a, b) => Date.parse(b.usedAt) - Date.parse(a.usedAt))
       .slice(0, MAX_RECENT_TRIPS);
     if (valid.some((item, index) => item.origin !== value.filter(isRecentTrip)[index]?.origin)) {
-      localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(valid));
+      navigationStorage()?.setItem(RECENT_TRIPS_KEY, JSON.stringify(valid));
     }
     return valid;
   } catch { return []; }
@@ -139,12 +157,12 @@ export function removeRecentTrip(origin: string, destination: string) {
     const next = getRecentTrips().filter(item =>
       item.origin.trim().toLocaleLowerCase("pt-BR") !== normalizedOrigin ||
       item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination);
-    localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
+    navigationStorage()?.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
   } catch {}
   notifyPreferenceChange();
 }
 export function clearRecentTrips() {
-  try { localStorage.removeItem(RECENT_TRIPS_KEY); } catch {}
+  try { navigationStorage()?.removeItem(RECENT_TRIPS_KEY); } catch {}
   notifyPreferenceChange();
 }
 export function getRouteUsageTrend(origin: string, destination: string, days = 30) {
@@ -163,7 +181,7 @@ export function getRouteUsageStats(origin: string, destination: string, days = 3
   const safeDays = Math.max(1, Math.min(365, Math.floor(days)));
   const key = privateUsageKey(origin, destination);
   try {
-    const raw = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    const raw = JSON.parse(navigationStorage()?.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
     const events = raw && typeof raw === "object" && Array.isArray(raw[key]) ? raw[key] : [];
     const cutoff = Date.now() - safeDays * 24 * 60 * 60 * 1000;
     const recent = events.filter((value: unknown): value is string => typeof value === "string" && Number.isFinite(Date.parse(value)) && Date.parse(value) >= cutoff);
@@ -176,7 +194,7 @@ export function getRouteUsage(origin: string, destination: string) {
   migratePrivateRouteUsageStorage();
   const key = privateUsageKey(origin, destination);
   try {
-    const value = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    const value = JSON.parse(navigationStorage()?.getItem(ROUTE_USAGE_KEY) || "{}");
     return value && typeof value === "object" && Number.isFinite(Number(value[key])) ? Number(value[key]) : 0;
   } catch { return 0; }
 }
@@ -192,30 +210,30 @@ export function rememberTrip(origin: string, destination: string) {
     const next = [trip, ...getRecentTrips().filter(item =>
       item.origin.trim().toLocaleLowerCase("pt-BR") !== normalizedOrigin.toLocaleLowerCase("pt-BR") ||
       item.destination.trim().toLocaleLowerCase("pt-BR") !== normalizedDestination.toLocaleLowerCase("pt-BR"))].slice(0, MAX_RECENT_TRIPS);
-    localStorage.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
+    navigationStorage()?.setItem(RECENT_TRIPS_KEY, JSON.stringify(next));
     migratePrivateRouteUsageStorage();
     const usageKey = privateUsageKey(normalizedOrigin, normalizedDestination);
-    const usage = JSON.parse(localStorage.getItem(ROUTE_USAGE_KEY) || "{}");
+    const usage = JSON.parse(navigationStorage()?.getItem(ROUTE_USAGE_KEY) || "{}");
     usage[usageKey] = Number.isFinite(Number(usage[usageKey])) ? Number(usage[usageKey]) + 1 : 1;
-    localStorage.setItem(ROUTE_USAGE_KEY, JSON.stringify(usage));
-    const events = JSON.parse(localStorage.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
+    navigationStorage()?.setItem(ROUTE_USAGE_KEY, JSON.stringify(usage));
+    const events = JSON.parse(navigationStorage()?.getItem(ROUTE_USAGE_EVENTS_KEY) || "{}");
     const currentEvents = Array.isArray(events[usageKey]) ? events[usageKey].filter((value: unknown) => typeof value === "string" && Number.isFinite(Date.parse(value))) : [];
     events[usageKey] = [...currentEvents, trip.usedAt].slice(-200);
-    localStorage.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(events));
-    localStorage.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: normalizedOrigin, destination: normalizedDestination }));
+    navigationStorage()?.setItem(ROUTE_USAGE_EVENTS_KEY, JSON.stringify(events));
+    navigationStorage()?.setItem(LAST_TRIP_KEY, JSON.stringify({ origin: normalizedOrigin, destination: normalizedDestination }));
   } catch {}
   rememberIntent("route");
 }
 export type LastStation = { placeId: string; name: string; address: string; query: string };
 export function getLastStation(): LastStation | null {
   try {
-    const value = JSON.parse(localStorage.getItem(LAST_STATION_KEY) || "null");
+    const value = JSON.parse(navigationStorage()?.getItem(LAST_STATION_KEY) || "null");
     return value && typeof value.placeId === "string" && typeof value.name === "string" && typeof value.address === "string" && typeof value.query === "string" ? value : null;
   } catch { return null; }
 }
 export function rememberStation(station: LastStation) {
   if (!station.placeId || station.name.trim().length < 2 || station.address.trim().length < 2) return;
-  try { localStorage.setItem(LAST_STATION_KEY, JSON.stringify({ placeId: station.placeId, name: station.name.trim(), address: station.address.trim(), query: station.query.trim() })); } catch {}
+  try { navigationStorage()?.setItem(LAST_STATION_KEY, JSON.stringify({ placeId: station.placeId, name: station.name.trim(), address: station.address.trim(), query: station.query.trim() })); } catch {}
   rememberIntent("stations");
 }
 export function getLastIntent(): MobileIntent | null {
