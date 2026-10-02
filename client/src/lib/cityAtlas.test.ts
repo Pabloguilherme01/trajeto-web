@@ -4,6 +4,7 @@ import {
   cityAtlasCounts,
   filterCityAtlas,
   normalizeCityAtlasSnapshot,
+  resolveCityAtlasPoint,
   type CityAtlasSnapshot,
 } from "./cityAtlas";
 
@@ -95,4 +96,17 @@ describe("city atlas", () => {
     expect((counts.educacao ?? 0) > 0).toBe(true);
     expect((counts.saude ?? 0) > 0).toBe(true);
   });
+
+  it("resolves a unique mapped destination for the internal planner preview", () => {
+    const value = snapshot();
+    value.items[0].lat = -15.75;
+    value.items[0].lng = -48.28;
+    value.items[0].coordinateSourceId = "official";
+    value.items[0].coordinateVerifiedAt = "2026-10-02";
+    expect(resolveCityAtlasPoint(value, "Escola Municipal Teste")).toEqual({
+      lat: -15.75,
+      lng: -48.28,
+    });
+  });
+
 });
