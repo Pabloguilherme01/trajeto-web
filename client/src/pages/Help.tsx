@@ -23,11 +23,11 @@ export default function Help() {
         </header>
 
         <AppUpdateCheck />
-        <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
+        <section className="mt-6 trajeto-card rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
           <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e guarde seus atalhos neste aparelho. A central reúne serviços públicos de Águas Lindas e canais estaduais e nacionais de apoio.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
             {steps.map(step => (
-              <article key={step.n} className="rounded-2xl border border-white/8 bg-[#0B1014] p-4">
+              <article key={step.n} className="trajeto-card rounded-2xl border border-white/8 bg-[#0B1014] p-4">
                 <div className="flex items-center justify-between">
                   <step.icon className="size-4 text-[#C7FF3C]" />
                   <span className="text-xs font-black tracking-[.16em] text-white/60">{step.n}</span>
@@ -75,7 +75,7 @@ export default function Help() {
 
         <OfflineReadiness />
 
-        <section className="mt-4 rounded-3xl border border-white/10 bg-[#121B22] p-5" aria-labelledby="practical-help-title">
+        <section className="mt-4 trajeto-card rounded-3xl border border-white/10 bg-[#121B22] p-5" aria-labelledby="practical-help-title">
           <h2 id="practical-help-title" className="text-lg font-bold">Ajuda prática</h2>
           <div className="mt-3 divide-y divide-white/10 text-sm text-white/80">
             <details><summary className="min-h-12 cursor-pointer py-3 font-bold">Como criar atalhos para os serviços que uso?</summary><p className="pb-4 leading-relaxed">Na central, toque no coração do serviço. Use Serviços salvos para encontrar seus contatos sem repetir a busca. Os favoritos ficam neste navegador e funcionam offline depois da preparação do app.</p><Link href={appUrl("/servicos") + "?salvos=1"} className="mb-4 inline-flex min-h-11 items-center rounded-xl border border-white/15 px-3 font-bold">Abrir serviços salvos</Link></details>
