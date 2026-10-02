@@ -682,7 +682,7 @@ describe("public routing fallback", () => {
     expect(route.destination).toEqual({ lat: -15.75, lng: -48.29 });
     const geocoderUrl = new URL(String(fetchMock.mock.calls[0][0]));
     expect(geocoderUrl.searchParams.get("q")).toMatch(/Recreio das Águas Lindas/i);
-    expect(geocoderUrl.searchParams.get("q")).not.toMatch(/^ZM Combustíveis/i);
+    expect(geocoderUrl.searchParams.get("q")).toMatch(/Águas Lindas de Goiás/i);
   });
 
 });
