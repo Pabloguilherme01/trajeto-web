@@ -17,7 +17,7 @@ describe("dailyModes", () => {
     expect(chooseAutomaticDailyMode({ online: true, savedRoutes: 0, favoriteDestination: false, lastTrip: false, economy: false, intent: null })).toBe("proxima");
   });
   it("does not serialize private origins in repeat and driving modes", () => {
-    localStorage.setItem("trajeto-last-trip", JSON.stringify({
+    sessionStorage.setItem("trajeto-last-trip", JSON.stringify({
       origin: "Minha localização",
       destination: "Hospital",
       usedAt: new Date().toISOString(),
