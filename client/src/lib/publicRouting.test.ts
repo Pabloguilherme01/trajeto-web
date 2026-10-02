@@ -719,4 +719,21 @@ describe("public routing fallback", () => {
     expect(geocoderUrl.searchParams.get("q")).toMatch(/Águas Lindas de Goiás/i);
   });
 
+
+  it("keeps walking and cycling estimates mode-specific and transparent", async () => {
+    const walking = await calculateOfflineRoute("-15.7545,-48.2816", "-15.764,-48.267", "walking");
+    const cycling = await calculateOfflineRoute("-15.7545,-48.2816", "-15.764,-48.267", "cycling");
+    const walkingPayload = buildPublicRoutePayload(walking);
+    const cyclingPayload = buildPublicRoutePayload(cycling);
+
+    expect(walking.mode).toBe("walking");
+    expect(cycling.mode).toBe("cycling");
+    expect(walking.durationSeconds).toBeGreaterThan(cycling.durationSeconds);
+    expect(walkingPayload.route.summary).toContain("caminhada");
+    expect(walkingPayload.traffic.detail).toContain("calçada");
+    expect(cyclingPayload.route.summary).toContain("bicicleta");
+    expect(cyclingPayload.traffic.detail).toContain("ciclovia");
+    expect(cyclingPayload.traffic.detail).toContain("segurança");
+  });
+
 });
