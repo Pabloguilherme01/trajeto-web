@@ -5,7 +5,7 @@ test("city map: filters destinations and opens planner with ride options at 320p
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("mapa", { waitUntil: "domcontentloaded" });
   await expect(
-    page.getByRole("heading", { name: "A cidade no seu caminho" })
+    page.getByRole("heading", { name: "Mapa completo da cidade" })
   ).toBeVisible();
   await page
     .getByRole("textbox", { name: "Buscar destino no mapa" })
