@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { normalizeRouterTarget } from "@/lib/appUrl";
@@ -66,6 +66,41 @@ function AuthReturnHandler() {
   return <AuthenticatedReturnHandler />;
 }
 
+function RouteChangeExperience() {
+  const [location] = useLocation();
+  const previousPath = useRef<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const path = location.split("?")[0].split("#")[0].replace(/\/$/, "") || "/";
+
+  useEffect(() => {
+    const changedPage = previousPath.current !== null && previousPath.current !== path;
+    previousPath.current = path;
+    if (!changedPage) return;
+
+    if (!location.includes("#")) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+
+    const labels: Record<string, string> = {
+      "/": "Início",
+      "/buscar": "Busca",
+      "/planejar": "Planejador",
+      "/rota": "Planejador",
+      "/salvos": "Rotas salvas",
+      "/servicos": "Serviços públicos",
+      "/dados": "Dados públicos",
+      "/mapa": "Mapa da cidade",
+      "/mapa/postos": "Mapa de postos",
+      "/postos": "Postos",
+      "/explorar": "Explorar",
+      "/ajuda": "Ajuda",
+    };
+    setAnnouncement("Tela aberta: " + (labels[path] ?? "Trajeto"));
+  }, [location, path]);
+
+  return <div className="sr-only" role="status" aria-live="polite">{announcement}</div>;
+}
+
 function Router() {
   const staticRuntime = isGitHubPagesRuntime();
   return (
@@ -106,6 +141,7 @@ export default function App() {
             <SiteNavigation />
             <MobileBottomNav />
             <AuthReturnHandler />
+            <RouteChangeExperience />
             <Router />
           </TooltipProvider>
         </ThemeProvider>
