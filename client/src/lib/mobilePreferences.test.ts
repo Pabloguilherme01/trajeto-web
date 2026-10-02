@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { clearRecentTrips, getRecentSearches, getRecentTrips, rememberSearch, rememberTrip, getRouteUsageStats, removeRecentTrip } from "./mobilePreferences";
 
 describe("mobilePreferences recent trips", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 
   it("keeps unique trips with the newest trip first", () => {
     rememberTrip("Casa", "Trabalho");
@@ -44,10 +44,17 @@ describe("mobilePreferences recent trips", () => {
     expect(trips).toEqual([]);
     expect(localStorage.getItem("trajeto-recent-trips")).toBeNull();
   });
+  it("keeps normal trip history only in the current browser session", () => {
+    rememberTrip("Casa", "Trabalho");
+    expect(sessionStorage.getItem("trajeto-recent-trips")).toContain("Trabalho");
+    expect(localStorage.getItem("trajeto-recent-trips")).toBeNull();
+    expect(localStorage.getItem("trajeto-last-trip")).toBeNull();
+  });
+
 });
 
 describe("mobilePreferences search privacy", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 
   it("does not keep GPS or current-location labels in recent searches", () => {
     rememberSearch("-15.76123, -48.28123");
@@ -56,19 +63,20 @@ describe("mobilePreferences search privacy", () => {
     expect(localStorage.getItem("trajeto-recent-searches")).toBeNull();
   });
 
-  it("removes legacy private-location entries from recent searches", () => {
+  it("purges legacy persistent recent searches instead of exposing them to another session", () => {
     localStorage.setItem(
       "trajeto-recent-searches",
       JSON.stringify(["Minha localização", "-15.76123, -48.28123", "Hospital"])
     );
-    expect(getRecentSearches()).toEqual(["Hospital"]);
+    expect(getRecentSearches()).toEqual([]);
+    expect(localStorage.getItem("trajeto-recent-searches")).toBeNull();
   });
 });
 
 describe("mobilePreferences route usage", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 
-  it("migrates legacy usage keys that contain precise coordinates", () => {
+  it("purges legacy persistent route usage instead of carrying it into another session", () => {
     localStorage.setItem(
       "trajeto-route-usage",
       JSON.stringify({ "-15.76123, -48.28123::hospital": 3 })
@@ -81,9 +89,9 @@ describe("mobilePreferences route usage", () => {
     );
 
     const stats = getRouteUsageStats("Minha localização", "Hospital", 30);
-    expect(stats.total).toBe(3);
-    expect(localStorage.getItem("trajeto-route-usage")).not.toContain("-15.76123");
-    expect(localStorage.getItem("trajeto-route-usage-events")).not.toContain("-15.76123");
+    expect(stats.total).toBe(0);
+    expect(localStorage.getItem("trajeto-route-usage")).toBeNull();
+    expect(localStorage.getItem("trajeto-route-usage-events")).toBeNull();
   });
 
   it("keeps a real timestamped usage history for route windows", () => {
