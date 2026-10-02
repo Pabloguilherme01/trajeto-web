@@ -191,6 +191,38 @@ describe("public routing fallback", () => {
     );
   });
 
+  it("preserves OSRM street-by-street instructions in the planner payload", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({
+        code: "Ok",
+        routes: [{
+          distance: 1800,
+          duration: 240,
+          geometry: "street-route",
+          legs: [{
+            steps: [
+              { distance: 400, duration: 50, name: "Avenida JK", maneuver: { type: "depart", modifier: "straight" } },
+              { distance: 900, duration: 120, name: "Rua 21", maneuver: { type: "turn", modifier: "right" } },
+              { distance: 500, duration: 70, name: "", maneuver: { type: "arrive", modifier: "straight" } },
+            ],
+          }],
+        }],
+      }), { status: 200 })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePublicRoute("-15.7545,-48.2816", "-15.764,-48.267");
+    const payload = buildPublicRoutePayload(route);
+
+    expect(String(fetchMock.mock.calls[0][0])).toContain("steps=true");
+    expect(route.steps?.map(step => step.instruction)).toEqual([
+      "Saia pela Avenida JK",
+      "Vire à direita na Rua 21",
+      "Chegue ao destino",
+    ]);
+    expect(payload.route.steps).toHaveLength(3);
+  });
+
   it("geocodes endpoints and calculates a route without the application backend", async () => {
     const route = await calculatePublicRoute(
       "Águas Lindas de Goiás, GO",
