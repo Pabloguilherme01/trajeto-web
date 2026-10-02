@@ -254,7 +254,7 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); openExternal(appleUrl, "Apple Maps"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
-      <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(destination)} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
+      <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1"} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
