@@ -263,6 +263,36 @@ export function buildCityAtlas(snapshot: CityAtlasSnapshot | null) {
   return [...merged.values()];
 }
 
+export function resolveCityAtlasPoint(
+  snapshot: CityAtlasSnapshot | null,
+  value: string,
+): { lat: number; lng: number } | null {
+  const query = normalizeCatalogText(value);
+  if (!query) return null;
+
+  const candidates = buildCityAtlas(snapshot).filter(item => {
+    if (!finiteCoordinate(item.lat, 90) || !finiteCoordinate(item.lng, 180)) return false;
+    const fields = [item.name, item.address, item.destination]
+      .filter((field): field is string => Boolean(field))
+      .map(normalizeCatalogText);
+    return fields.some(field =>
+      field === query ||
+      field.includes(query) ||
+      query.includes(field)
+    );
+  });
+
+  const exact = candidates.find(item =>
+    [item.name, item.address, item.destination]
+      .filter((field): field is string => Boolean(field))
+      .some(field => normalizeCatalogText(field) === query)
+  );
+  const match = exact ?? (candidates.length === 1 ? candidates[0] : null);
+  return match && typeof match.lat === "number" && typeof match.lng === "number"
+    ? { lat: match.lat, lng: match.lng }
+    : null;
+}
+
 export function filterCityAtlas(
   items: CityAtlasItem[],
   query: string,
