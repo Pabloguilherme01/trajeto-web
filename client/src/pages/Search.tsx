@@ -159,17 +159,17 @@ const quickActions = [
   },
   {
     label: "Farmácias",
-    hint: "Google Maps · online",
+    hint: "Catálogo local · funciona offline",
     icon: Store,
-    kind: "external",
-    query: "farmácias, Águas Lindas de Goiás, GO",
+    kind: "places",
+    query: "farmácia",
   },
   {
     label: "Mercados",
-    hint: "Google Maps · online",
+    hint: "Catálogo local · funciona offline",
     icon: ShoppingCart,
-    kind: "external",
-    query: "supermercados atacadistas, Águas Lindas de Goiás, GO",
+    kind: "places",
+    query: "mercado",
   },
 ] as const;
 
