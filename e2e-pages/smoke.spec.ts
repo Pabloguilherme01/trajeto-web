@@ -139,7 +139,7 @@ test("Pages: first visit prepares unvisited public screens for offline use", asy
     ["buscar", "Encontre e vá."],
     ["salvos", "Rotas salvas"],
     ["ajuda", "Use o Trajeto em poucos passos."],
-    ["mapa", "A cidade no seu caminho"],
+    ["mapa", "Mapa completo da cidade"],
   ]) {
     await page.goto(path, { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: new RegExp(title) }).first()).toBeVisible();
