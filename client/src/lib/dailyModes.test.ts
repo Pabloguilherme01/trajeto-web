@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { chooseAutomaticDailyMode } from "./dailyModes";
+import { buildDailyModes, chooseAutomaticDailyMode } from "./dailyModes";
 
 describe("dailyModes", () => {
   it("prioritizes offline continuation", () => {
