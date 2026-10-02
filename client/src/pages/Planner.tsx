@@ -9,16 +9,17 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
-import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
+import { findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
+import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
+import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -51,8 +52,12 @@ export default function Planner() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const pathname = location.split("?")[0].replace(/\/$/, "") || "/";
   const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
-  const economyMode = queryParams.get("economia") === "1";
-  const drivingMode = queryParams.get("conducao") === "1";
+  const requestedExperience = resolvePlannerExperience(queryParams);
+  const [experienceMode, setExperienceMode] =
+    useState<PlannerExperienceMode>(requestedExperience);
+  const economyMode = experienceMode === "economy";
+  const drivingMode = experienceMode === "driving";
+  const offlineMode = experienceMode === "offline";
   const initialTrip = useMemo(() => getLastTrip(), []);
   const [origin, setOrigin] = useState(() => {
     const queryOrigin = queryParams.get("origem");
@@ -140,6 +145,10 @@ export default function Planner() {
       window.removeEventListener("offline", update);
     };
   }, []);
+
+  useEffect(() => {
+    setExperienceMode(requestedExperience);
+  }, [requestedExperience]);
 
   const refreshSavedRoutes = () => {
     const version = localDataVersion.current;
@@ -233,15 +242,33 @@ export default function Planner() {
       setError("Origem e destino precisam ser diferentes.");
       return;
     }
-    if (!online && !staticRuntime) {
-      setError("Sem internet. Para calcular uma rota nova no servidor, conecte-se ou abra uma rota salva.");
-      return;
-    }
-
     resetResult();
     const version = requestVersion.current;
 
-    if (staticRuntime || mode !== "driving" || originPrivate) {
+    if ((offlineMode || !online) && from.length >= 2 && !originPrivate) {
+      const saved = findBestOfflineRouteForTrip(savedRoutes, from, to, mode);
+      if (saved) {
+        setPlanned(saved.payload as PlannedRoute);
+        setShowMap(true);
+        setFallbackReady(false);
+        setSavedMessage(
+          (offlineMode ? "Modo offline" : "Sem internet") +
+            ": usando a melhor rota já salva para esta viagem. Dados de trânsito podem estar desatualizados."
+        );
+        rememberTrip(from, to);
+        track("route_open", to);
+        vibration(12);
+        return;
+      }
+    }
+
+    if (
+      staticRuntime ||
+      mode !== "driving" ||
+      originPrivate ||
+      offlineMode ||
+      !online
+    ) {
       setError(null);
       setFallbackReady(false);
       setPublicRoutePending(true);
@@ -257,16 +284,34 @@ export default function Planner() {
           vibration(12);
           return;
         }
-        const publicRoute = originPrivate && privateOriginRef.current
-          ? await calculatePrivateLocationRoute(privateOriginRef.current, to, mode)
-          : await calculatePublicRoute(resolvedOrigin, to, mode);
+        const publicRoute =
+          offlineMode || !online
+            ? await calculateOfflineRoute(
+                originPrivate && privateOriginRef.current
+                  ? privateOriginRef.current
+                  : resolvedOrigin,
+                to,
+                mode
+              )
+            : originPrivate && privateOriginRef.current
+              ? await calculatePrivateLocationRoute(
+                  privateOriginRef.current,
+                  to,
+                  mode
+                )
+              : await calculatePublicRoute(resolvedOrigin, to, mode);
         if (version !== requestVersion.current) return;
         const publicPayload = buildPublicRoutePayload(publicRoute) as unknown as PlannedRoute;
         setPlanned(publicPayload);
         setShowMap(true);
-        const baseMessage = publicRoute.source === "local-estimate"
-          ? "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
-          : "Rota calculada no próprio Trajeto. Distância e duração vêm da rede viária pública; trânsito ao vivo fica no navegador escolhido.";
+        const baseMessage =
+          publicRoute.source === "local-estimate"
+            ? offlineMode || !online
+              ? "Rota preparada localmente sem usar provedores externos. Quando a conexão voltar, recalcule para atualizar ruas e trânsito."
+              : "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
+            : publicRoute.source === "mapbox"
+              ? "Rota inteligente calculada com Mapbox; no carro, o tempo pode considerar o trânsito disponível."
+              : "Rota calculada no próprio Trajeto com a rede viária pública.";
         const autoSaved = originPrivate
           ? false
           : await persistRouteLocally(publicPayload, resolvedOrigin, to);
@@ -484,7 +529,11 @@ export default function Planner() {
   }, [savedRoutes, destination]);
 
   const publicRouteSource = planned
-    ? (planned.route as typeof planned.route & { source?: "osrm" | "local-estimate" }).source
+    ? (
+        planned.route as typeof planned.route & {
+          source?: "mapbox" | "osrm" | "local-estimate";
+        }
+      ).source
     : undefined;
 
   const routeForMap = planned ? [{
@@ -580,8 +629,41 @@ export default function Planner() {
               </div>
 
               <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Como planejar</span>
+                  <span className="text-xs font-bold text-[#C7FF3C]">{PLANNER_EXPERIENCE_OPTIONS.find(item => item.id === experienceMode)?.label}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                  {PLANNER_EXPERIENCE_OPTIONS.map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-pressed={experienceMode === item.id}
+                      onClick={() => {
+                        resetResult();
+                        setExperienceMode(item.id);
+                        if (item.id === "economy" || item.id === "driving")
+                          setMode("driving");
+                      }}
+                      className={
+                        "min-h-11 rounded-xl border px-2 text-xs font-black " +
+                        (experienceMode === item.id
+                          ? "border-[#3DE3FF]/35 bg-[#3DE3FF]/10 text-[#C9F7FF]"
+                          : "border-white/8 bg-white/[.02] text-white/45")
+                      }
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-white/40">
+                  {plannerExperienceDetail(experienceMode)}
+                </p>
+              </div>
+
+              <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Modo</span>
+                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Deslocamento</span>
                   <span className="text-xs font-bold text-white/25">{mode === "driving" ? "carro" : mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : "transporte"}</span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
