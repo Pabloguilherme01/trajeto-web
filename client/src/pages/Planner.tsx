@@ -9,7 +9,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
-import { findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
+import { canPersistOfflineTrip, findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
@@ -323,14 +323,20 @@ export default function Planner() {
             : publicRoute.source === "mapbox"
               ? "Rota inteligente calculada com Mapbox; no carro, o tempo pode considerar o trânsito disponível."
               : "Rota calculada no próprio Trajeto com a rede viária pública.";
-        const autoSaved = originPrivate
-          ? false
-          : await persistRouteLocally(publicPayload, resolvedOrigin, to);
+        const publicOfflineTrip =
+          !originPrivate && canPersistOfflineTrip(resolvedOrigin, to);
+        const autoSaved = publicOfflineTrip
+          ? await persistRouteLocally(publicPayload, resolvedOrigin, to)
+          : false;
         if (version !== requestVersion.current) return;
         setSavedMessage(
           baseMessage +
             (autoSaved ? " Cópia offline criada automaticamente." : "") +
-            (originPrivate ? " Esta rota não foi salva automaticamente para proteger sua localização." : "")
+            (originPrivate
+              ? " Esta rota não foi salva automaticamente para proteger sua localização."
+              : !publicOfflineTrip
+                ? " Por privacidade, endereços pessoais ficam somente nesta sessão."
+                : "")
         );
         if (resolvedOrigin && !originPrivate) rememberTrip(resolvedOrigin, to);
         track("route_open", to);
@@ -436,9 +442,10 @@ export default function Planner() {
     // GPS-origin routes stay ephemeral: never persist a payload that can carry
     // the user's current-position geometry, even when "save offline" is tapped.
     if (originPrivate || isCurrentLocationLabel(routeOrigin)) return false;
-    const normalizedOrigin = originPrivate ? privateOriginForHistory(routeOrigin) : routeOrigin.trim();
+    const normalizedOrigin = routeOrigin.trim();
     const normalizedDestination = routeDestination.trim();
     if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
+    if (!canPersistOfflineTrip(normalizedOrigin, normalizedDestination)) return false;
     try {
       await saveOfflineRoute({
         id: offlineRouteId(normalizedOrigin, normalizedDestination, mode),
@@ -458,6 +465,10 @@ export default function Planner() {
     if (!planned) return;
     if (originPrivate || isCurrentLocationLabel(origin)) {
       setSavedMessage("Por privacidade, rotas iniciadas na sua localização ficam somente nesta sessão e não são salvas.");
+      return;
+    }
+    if (!canPersistOfflineTrip(origin, destination)) {
+      setSavedMessage("Por privacidade, endereços pessoais ou digitados manualmente ficam somente nesta sessão. Para salvar offline, use pontos públicos do catálogo.");
       return;
     }
     const saved = await persistRouteLocally(planned, origin, destination);
