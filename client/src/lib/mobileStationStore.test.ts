@@ -2,11 +2,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cacheStations, getCachedStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "./mobileStationStore";
 const station: MobileStation = { placeId: "test", name: "Posto", address: "Águas Lindas", lat: -15.7, lng: -48.2, openingHours: [] };
-beforeEach(() => localStorage.clear());
+beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 afterEach(() => vi.restoreAllMocks());
 describe("armazenamento de postos", () => {
   it("keeps valid cache usable alongside malformed records", () => {
-    localStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: 10 }, { query: "postos", lat: "bad", lng: 2, savedAt: new Date().toISOString(), stations: [] }]));
+    sessionStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: 10 }, { query: "postos", lat: "bad", lng: 2, savedAt: new Date().toISOString(), stations: [] }]));
     expect(getCachedStations("postos", -15.7, -48.2)).toBeNull();
     cacheStations("postos", [station], -15.7, -48.2);
     expect(getCachedStations("postos", -15.7, -48.2)?.stations).toEqual([station]);
@@ -22,13 +22,19 @@ describe("armazenamento de postos", () => {
     expect(toggleMobileStationFavorite({ ...station, lat: 200 }).error).toBe(true);
     cacheStations("postos", [{ ...station, lat: Number.NaN }]);
     expect(getCachedStations("postos")).toBeNull();
-    localStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: "postos", savedAt: new Date().toISOString(), stations: [station, { ...station, lat: 200 }] }]));
+    sessionStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: "postos", savedAt: new Date().toISOString(), stations: [station, { ...station, lat: 200 }] }]));
     expect(getCachedStations("postos")?.stations).toEqual([station]);
   });
   it("ignores expired and implausibly future snapshots", () => {
     for (const offset of [-25 * 3600000, 3600000]) {
-      localStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: "postos", savedAt: new Date(Date.now() + offset).toISOString(), stations: [station] }]));
+      sessionStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: "postos", savedAt: new Date(Date.now() + offset).toISOString(), stations: [station] }]));
       expect(getCachedStations("postos")).toBeNull();
     }
   });
+  it("keeps location-based station cache out of durable local storage", () => {
+    cacheStations("postos", [station], -15.7, -48.2);
+    expect(localStorage.getItem("trajeto-mobile-station-cache")).toBeNull();
+    expect(sessionStorage.getItem("trajeto-mobile-station-cache")).not.toBeNull();
+  });
+
 });
