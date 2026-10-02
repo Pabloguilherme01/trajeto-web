@@ -24,6 +24,10 @@ const MAX_FAVORITES = 20;
 const MAX_CACHED = 30;
 const CACHE_RETENTION_MS = 24 * 60 * 60 * 1000;
 
+function cacheStorage() {
+  try { return sessionStorage; } catch { return null; }
+}
+
 function readJson<T>(key: string, fallback: T): T {
   try {
     const value = JSON.parse(localStorage.getItem(key) || "null");
@@ -66,7 +70,8 @@ export type StationCache = {
 };
 
 export function getCachedStations(query: string, lat?: number, lng?: number): StationCache | null {
-  const all = readJson<unknown>(CACHE_KEY, []);
+  let all: unknown = [];
+  try { all = JSON.parse(cacheStorage()?.getItem(CACHE_KEY) || "[]"); } catch {}
   if (!Array.isArray(all)) return null;
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
   const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
@@ -83,7 +88,8 @@ export function getCachedStations(query: string, lat?: number, lng?: number): St
 export function cacheStations(query: string, stations: MobileStation[], lat?: number, lng?: number) {
   const validStations = stations.filter(isMobileStation);
   if (validStations.length === 0) return;
-  const all = readJson<unknown>(CACHE_KEY, []);
+  let all: unknown = [];
+  try { all = JSON.parse(cacheStorage()?.getItem(CACHE_KEY) || "[]"); } catch {}
   const current = Array.isArray(all) ? all.filter(isStationCache) : [];
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
   const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
@@ -94,7 +100,7 @@ export function cacheStations(query: string, stations: MobileStation[], lat?: nu
       return !(item.query.trim().toLocaleLowerCase("pt-BR") === normalized && itemLocation === locationKey);
     }),
   ].slice(0, 5);
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(next)); } catch {}
+  try { cacheStorage()?.setItem(CACHE_KEY, JSON.stringify(next)); } catch {}
 }
 
 function isMobileStation(value: unknown): value is MobileStation {
