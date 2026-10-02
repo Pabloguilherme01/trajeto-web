@@ -168,7 +168,7 @@ export default function PublicData() {
                         encodeURIComponent(item.id),
                     )
                   }
-                  className="min-h-[7rem] rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left transition hover:border-[#3DE3FF]/30 active:scale-[.99]"
+                  className="trajeto-card trajeto-card-interactive min-h-[7rem] rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left transition hover:border-[#3DE3FF]/30 active:scale-[.99]"
                 >
                   <Icon className="size-4 text-[#3DE3FF]" />
                   <span className="mt-2 block text-xs font-black">
@@ -203,7 +203,7 @@ export default function PublicData() {
             {SEMIURBAN_FARES.map(item => (
               <article
                 key={item.id}
-                className="rounded-3xl border border-white/10 bg-[#121B22] p-4"
+                className="trajeto-card rounded-3xl border border-white/10 bg-[#121B22] p-4"
               >
                 <div className="flex items-start gap-3">
                   <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
@@ -272,7 +272,7 @@ export default function PublicData() {
                   tabIndex={-1}
                   aria-current={selected ? "true" : undefined}
                   className={
-                    "scroll-mt-20 rounded-3xl border bg-[#121B22] p-4 outline-none transition " +
+                    "trajeto-card scroll-mt-20 rounded-3xl border bg-[#121B22] p-4 outline-none transition " +
                     (selected
                       ? "border-[#C7FF3C]/60 ring-1 ring-[#C7FF3C]/25"
                       : "border-white/10")
