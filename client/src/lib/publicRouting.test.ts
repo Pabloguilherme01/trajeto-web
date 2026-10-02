@@ -659,4 +659,30 @@ describe("public routing fallback", () => {
     expect(payload.traffic.label).toMatch(/trânsito Mapbox/i);
     expect(payload.traffic.detail).toMatch(/driving-traffic/i);
   });
+
+  it("expands a known station name to its catalog address before public geocoding", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.75", lon: "-48.29" }]), { status: 200 })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 3100, duration: 360, geometry: "station-route" }],
+        }), { status: 200 })
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "ZM Combustíveis, Recreio das Águas Lindas, Águas Lindas de Goiás, GO"
+    );
+
+    expect(route.destination).toEqual({ lat: -15.75, lng: -48.29 });
+    const geocoderUrl = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(geocoderUrl.searchParams.get("q")).toMatch(/Recreio das Águas Lindas/i);
+    expect(geocoderUrl.searchParams.get("q")).not.toMatch(/^ZM Combustíveis/i);
+  });
+
 });
