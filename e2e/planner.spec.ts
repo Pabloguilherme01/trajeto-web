@@ -28,6 +28,7 @@ test("mobile: Mais abre ajuda e pode ser fechado pelo teclado", async ({ page },
 
 
 test("planejar: calcula rota pública sem backend e mantém o mapa utilizável", async ({ page }) => {
+  await page.route("https://tile.openstreetmap.org/**", route => route.abort());
   await page.route("https://router.project-osrm.org/**", route => route.fulfill({
     status: 200,
     contentType: "application/json",

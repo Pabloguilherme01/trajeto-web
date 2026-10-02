@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
@@ -20,6 +21,7 @@ type RoutePreview = {
   id: string;
   polyline: string | null;
   selected?: boolean;
+  source?: "osrm" | "local-estimate";
   trafficIntervals?: TrafficInterval[];
   durationSeconds?: number | null;
   staticDurationSeconds?: number | null;
@@ -92,24 +94,21 @@ export function OfflineRoutePreview({
       ? [{ point: validDestination, label: "B", name: "Destino" }]
       : []),
   ];
-  const navigation =
-    validDestination
-      ? "https://www.google.com/maps/dir/?api=1" +
-        (privateOrigin || !validOrigin
-          ? ""
-          : "&origin=" + validOrigin.lat + "," + validOrigin.lng) +
-        "&destination=" +
-        validDestination.lat +
-        "," +
-        validDestination.lng +
-        "&travelmode=driving" +
-        (validStops.length
-          ? "&waypoints=" +
-            encodeURIComponent(
-              validStops.map(p => p.lat + "," + p.lng).join("|")
-            )
-          : "")
-      : null;
+  const navigation = validDestination
+    ? "https://www.google.com/maps/dir/?api=1" +
+      (privateOrigin || !validOrigin
+        ? ""
+        : "&origin=" + validOrigin.lat + "," + validOrigin.lng) +
+      "&destination=" +
+      validDestination.lat +
+      "," +
+      validDestination.lng +
+      "&travelmode=driving" +
+      (validStops.length
+        ? "&waypoints=" +
+          encodeURIComponent(validStops.map(p => p.lat + "," + p.lng).join("|"))
+        : "")
+    : null;
   return (
     <div className="flex h-full flex-col bg-[#E8F0EA] text-[#163840]">
       <div className="flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
@@ -147,9 +146,11 @@ export function OfflineRoutePreview({
         aria-label="Prévia offline da rota"
       >
         <title>
-          {pathPoints.length
-            ? "Geometria da rota disponível"
-            : "Pontos da viagem; trajeto indisponível"}
+          {selected?.source === "local-estimate"
+            ? "Estimativa entre coordenadas, sem trajeto pelas ruas. Confirme o percurso no aplicativo de navegação."
+            : pathPoints.length
+              ? "Geometria da rota disponível"
+              : "Pontos da viagem; trajeto indisponível"}
         </title>
         <g transform={`translate(500 280) scale(${zoom}) translate(-500 -280)`}>
           {line && (
@@ -191,9 +192,11 @@ export function OfflineRoutePreview({
       </svg>
       <div className="space-y-2 border-t border-black/10 bg-white/90 p-3 text-sm">
         <p>
-          {pathPoints.length
-            ? "Geometria disponível neste aparelho. Sem ruas de fundo ou trânsito ao vivo."
-            : "Somente os pontos informados. Não há geometria de rota disponível; nenhuma ligação representa um caminho transitável."}
+          {selected?.source === "local-estimate"
+            ? "Estimativa entre coordenadas, sem trajeto pelas ruas. Confirme o percurso no aplicativo de navegação."
+            : pathPoints.length
+              ? "Geometria disponível neste aparelho. Sem ruas de fundo ou trânsito ao vivo."
+              : "Somente os pontos informados. Não há geometria de rota disponível; nenhuma ligação representa um caminho transitável."}
         </p>
         {validStops.length > 0 && (
           <p>
@@ -475,6 +478,58 @@ export function RouteMap({
 
     setTraffic(next);
   };
+
+  if (
+    isGitHubPagesRuntime() &&
+    selectedRoute?.source === "osrm" &&
+    decodeMapPolyline(selectedRoute?.polyline ?? "").length > 1
+  ) {
+    const points = decodeMapPolyline(selectedRoute?.polyline ?? "");
+    return (
+      <section
+        className="overflow-hidden rounded-2xl border border-white/10"
+        aria-label="Mapa independente da viagem"
+      >
+        <TileStationMap
+          selectionLabel="Escolher ponto da viagem"
+          routePoints={points}
+          stations={[
+            ...(isMapPoint(origin)
+              ? [
+                  {
+                    id: "origin",
+                    name: "Origem",
+                    address: "Início da viagem",
+                    ...origin,
+                  },
+                ]
+              : []),
+            ...(isMapPoint(destination)
+              ? [
+                  {
+                    id: "destination",
+                    name: "Destino",
+                    address: "Chegada da viagem",
+                    ...destination,
+                  },
+                ]
+              : []),
+            ...stops,
+          ]}
+          fallback={
+            <div className="relative min-h-[420px] h-[min(68vh,620px)]">
+              <OfflineRoutePreview
+                origin={origin}
+                destination={destination}
+                routes={routes}
+                stops={stops}
+              />
+            </div>
+          }
+        />
+      </section>
+    );
+  }
 
   if (isGitHubPagesRuntime()) {
     return (

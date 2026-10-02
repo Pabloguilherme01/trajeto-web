@@ -17,6 +17,7 @@ test("Pages: route preview controls and real geometry remain available offline a
       }),
     })
   );
+  await page.route("https://tile.openstreetmap.org/**", route => route.abort());
   await page.goto(
     "planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822",
     { waitUntil: "domcontentloaded" }

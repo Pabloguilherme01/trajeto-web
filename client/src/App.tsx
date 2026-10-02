@@ -20,6 +20,7 @@ import Home from "./pages/Home";
 const SearchPage = lazy(() => import("./pages/Search"));
 const Planner = lazy(() => import("./pages/Planner"));
 const Operations = lazy(() => import("./pages/Operations"));
+const CityMap = lazy(() => import("./pages/CityMap"));
 const Stations = lazy(() => import("./pages/Stations"));
 const Local = lazy(() => import("./pages/Local"));
 const Explorer = lazy(() => import("./pages/Explorer"));
@@ -78,7 +79,8 @@ function Router() {
         <Route path="/servicos" component={PublicServices} />
         <Route path="/dados" component={PublicData} />
         <Route path="/operacoes">{staticRuntime ? <NotFound /> : <AdminOnly><Operations /></AdminOnly>}</Route>
-        <Route path="/mapa"><Stations mapFirst /></Route>
+        <Route path="/mapa/postos"><Stations mapFirst /></Route>
+        <Route path="/mapa" component={CityMap} />
         <Route path="/postos"><Stations /></Route>
         <Route path="/local/:id" component={Local} />
         <Route path="/explorar" component={Explorer} />

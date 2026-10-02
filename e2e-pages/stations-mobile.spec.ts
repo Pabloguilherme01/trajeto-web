@@ -11,7 +11,7 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
     contentType: "image/png",
     body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64"),
   }));
-  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  await page.goto("mapa/postos", { waitUntil: "domcontentloaded" });
   const map = page.locator("#aguas-lindas-map");
   const picker = map.getByRole("combobox", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
@@ -53,7 +53,7 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
 test("Pages: background failure keeps the offline picker and navigation touchable", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.route("https://tile.openstreetmap.org/**", route => route.abort());
-  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  await page.goto("mapa/postos", { waitUntil: "domcontentloaded" });
   const map = page.locator("#aguas-lindas-map");
   await expect(map.getByRole("img", { name: /Mapa offline esquemático/ })).toBeVisible();
   const picker = map.getByRole("combobox", { name: "Escolher posto no mapa offline" });

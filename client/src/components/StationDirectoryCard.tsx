@@ -6,7 +6,7 @@ import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Shar
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildUberRideUrl, build99MobilityUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
 
 function normalize(value: string) {
@@ -107,8 +107,6 @@ export function StationDirectoryCard({
   const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
   const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
   const appleUrl = buildAppleMapsDirectionsUrl(destination);
-  const uberUrl = buildUberRideUrl(address, coords || undefined);
-  const nineNineUrl = build99MobilityUrl(address);
   const preferredProvider = getPreferredNavigationProvider();
   const preferredUrl = preferredProvider === "waze" ? wazeUrl : preferredProvider === "apple" ? appleUrl : googleUrl;
   const anpUrl = "https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web";
@@ -245,17 +243,7 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-[#C7FF3C]/12 bg-[#C7FF3C]/[.025] p-3" aria-label="Mobilidade">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-black uppercase tracking-[.12em] text-[#D9FF91]">Mobilidade</p>
-          <span className="text-xs font-bold text-white/65">sem conta no Trajeto</span>
-        </div>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => window.open(uberUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/10 bg-white/[.05] px-2 text-xs font-black text-white/80 transition-transform duration-200 active:scale-[.98]">Uber</button>
-          <button type="button" onClick={() => window.open(nineNineUrl, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#FF6B35]/20 bg-[#FF6B35]/[.05] px-2 text-xs font-black text-white/80 transition-transform duration-200 active:scale-[.98]">99</button>
-        </div>
-        <p className="mt-2 text-xs leading-relaxed text-white/65">Uber recebe o destino pelo deep link oficial. A 99 abre o ponto de entrada público porque não foi encontrada uma interface pública atual documentando parâmetros de destino para integração externa.</p>
-      </div>
+      <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(address)} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">

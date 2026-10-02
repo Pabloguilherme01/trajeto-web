@@ -1,6 +1,7 @@
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
+import { groupAnpFuelRows } from "@shared/anpRevendedores";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 
@@ -413,7 +414,7 @@ function localGeocode(value: string): PublicCoordinate | null {
     return { lat: -15.7545, lng: -48.2816 };
   }
 
-  const snapshotMatches = getOfflineAnpSnapshot().rows.filter(row => {
+  const snapshotMatches = groupAnpFuelRows(getOfflineAnpSnapshot().rows).filter(row => {
     if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
       return false;
     const rowText = normalizeSearch(

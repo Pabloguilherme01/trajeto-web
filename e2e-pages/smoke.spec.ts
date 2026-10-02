@@ -64,7 +64,7 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
 });
 
 test("Pages: mapa e ficha local funcionam como recursos independentes", async ({ page }) => {
-  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  await page.goto("mapa/postos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await expect(page.locator("#aguas-lindas-map")).toBeVisible();
   await expect(page.locator("#aguas-lindas-map")).toHaveCount(1);
@@ -137,7 +137,7 @@ test("Pages: first visit prepares unvisited public screens for offline use", asy
     ["buscar", "Encontre e vá."],
     ["salvos", "Rotas salvas"],
     ["ajuda", "Use o Trajeto em poucos passos."],
-    ["mapa", "Encontre uma parada"],
+    ["mapa", "A cidade no seu caminho"],
   ]) {
     await page.goto(path, { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: new RegExp(title) }).first()).toBeVisible();
