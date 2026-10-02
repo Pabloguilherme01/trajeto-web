@@ -47,6 +47,7 @@ export default function CityMap() {
   const [category, setCategory] = useState<MapCategory>("todos");
   const [online, setOnline] = useState(() => navigator.onLine);
   const [expandedMap, setExpandedMap] = useState(false);
+  const [showAllCatalog, setShowAllCatalog] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -101,6 +102,18 @@ export default function CityMap() {
     () => filterCityAtlas(atlas, query, category),
     [atlas, query, category]
   );
+
+  const visibleDestinations = useMemo(
+    () =>
+      query.trim() || showAllCatalog
+        ? destinations
+        : destinations.slice(0, 36),
+    [destinations, query, showAllCatalog]
+  );
+
+  useEffect(() => {
+    setShowAllCatalog(false);
+  }, [category, query]);
 
   const markers = useMemo(() => {
     const publicPoints = destinations.flatMap(item => {
@@ -392,7 +405,7 @@ export default function CityMap() {
           ainda não houver um marcador com coordenada validada.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {destinations.map(item => {
+          {visibleDestinations.map(item => {
             const action = item.destination ?? item.address;
             return action ? (
               <button
@@ -447,6 +460,15 @@ export default function CityMap() {
           <p role="status" className="mt-3 text-sm text-white/70">
             Nenhum item encontrado. Tente outro nome, bairro ou camada.
           </p>
+        )}
+        {!query.trim() && destinations.length > visibleDestinations.length && (
+          <button
+            type="button"
+            onClick={() => setShowAllCatalog(true)}
+            className="mt-4 min-h-11 w-full rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-black text-white sm:w-auto"
+          >
+            Mostrar mais {destinations.length - visibleDestinations.length} itens
+          </button>
         )}
       </section>
 
