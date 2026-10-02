@@ -194,7 +194,7 @@ export default function CityMap() {
 
   const plan = (destination: string) =>
     navigate(
-      appUrl("/planejar") + "?destino=" + encodeURIComponent(destination)
+      appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1"
     );
 
   const mapHeight = expandedMap
