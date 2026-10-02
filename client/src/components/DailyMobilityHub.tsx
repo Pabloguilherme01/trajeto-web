@@ -12,6 +12,7 @@ import { summarizeSavedRoute } from "@/lib/tripReadiness";
 import { getAutomaticDailyMode, getSavedDailyMode, type DailyModeId } from "@/lib/dailyModes";
 import { getLastTrip } from "@/lib/mobilePreferences";
 import { chooseMobilePrimaryAction } from "@/lib/mobilePrimaryAction";
+import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 
 function money(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -86,7 +87,7 @@ export default function DailyMobilityHub() {
       ? {
           label: "Repetir última viagem",
           detail: primary.target.origin + " → " + primary.target.destination,
-          href: appUrl("/planejar") + "?origem=" + encodeURIComponent(primary.target.origin) + "&destino=" + encodeURIComponent(primary.target.destination),
+          href: buildReusableTripPlannerUrl({ origin: primary.target.origin, destination: primary.target.destination }),
         }
       : primary.kind === "offline"
         ? {
@@ -104,7 +105,7 @@ export default function DailyMobilityHub() {
             ? {
                 label: "Continuar última rota",
                 detail: latestRoute.origin + " → " + latestRoute.destination,
-                href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestRoute.id) + "&origem=" + encodeURIComponent(latestRoute.origin) + "&destino=" + encodeURIComponent(latestRoute.destination),
+                href: buildSavedRoutePlannerUrl(latestRoute.id),
               }
             : {
                 label: "Planejar minha próxima viagem",

@@ -7,6 +7,7 @@ import { saveMobileDestination, rememberDestinationUsage } from "@/lib/mobileDes
 import { saveMobileVehicle } from "@/lib/mobileVehicle";
 import { setMobilityBudget } from "@/lib/mobilityBudget";
 import { setSavedDailyMode } from "@/lib/dailyModes";
+import { rememberTrip } from "@/lib/mobilePreferences";
 import * as offlineStore from "@/lib/offlineStore";
 
 describe("DailyMobilityHub", () => {
@@ -75,6 +76,39 @@ describe("DailyMobilityHub", () => {
 
     await waitFor(() => expect(screen.getByText("Continuar rota salva")).toBeTruthy());
     expect(screen.getByRole("link", { name: /Continuar/i }).getAttribute("href")).toBe("/planejar?salvos=1");
+  });
+
+  it("does not serialize a private origin when repeating the last trip", async () => {
+    rememberTrip("Minha localização", "Hospital");
+
+    render(<DailyMobilityHub />);
+
+    await waitFor(() => expect(screen.getByText("Repetir última viagem")).toBeTruthy());
+    const href = screen.getByRole("link", { name: /Continuar/i }).getAttribute("href") ?? "";
+    expect(href).toContain("destino=Hospital");
+    expect(href).not.toContain("origem=");
+    expect(href).not.toContain("Minha");
+  });
+
+  it("opens the latest saved route by id only", async () => {
+    setSavedDailyMode("conducao");
+    vi.spyOn(offlineStore, "listOfflineRoutes").mockResolvedValue([{
+      id: "private-route",
+      origin: "Minha localização",
+      destination: "Hospital",
+      savedAt: new Date().toISOString(),
+      payload: {
+        route: { distanceLabel: "5 km", distanceMeters: 5000, durationSeconds: 600 },
+        stops: [{ placeId: "x", name: "Posto", address: "Rua 1" }],
+        anpReferences: [],
+      },
+    }]);
+
+    render(<DailyMobilityHub />);
+
+    await waitFor(() => expect(screen.getByText("Continuar última rota")).toBeTruthy());
+    const href = screen.getByRole("link", { name: /Continuar/i }).getAttribute("href") ?? "";
+    expect(href).toBe("/planejar?rota=private-route");
   });
 
 });
