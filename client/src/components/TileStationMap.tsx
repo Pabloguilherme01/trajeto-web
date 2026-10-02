@@ -443,7 +443,8 @@ export default function TileStationMap({
                   <span
                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
                     style={{ left, top, width: 14, height: 14 }}
-                    aria-label="Sua localização"
+                    aria-label="Sua localização privada nesta sessão"
+                    title="Sua posição não faz parte dos pontos públicos do mapa"
                   />
                 );
               })()}
@@ -471,7 +472,8 @@ export default function TileStationMap({
             type="button"
             onClick={() => { setHasUserMovedMap(true); recenter(); }}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
-            aria-label="Recentrar mapa"
+            aria-label={userCoords ? "Recentrar na minha localização" : "Recentrar mapa"}
+            title={userCoords ? "Usa sua posição somente neste mapa" : "Recentrar mapa"}
           >
             <LocateFixed className="size-4" />
           </button>
