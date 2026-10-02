@@ -110,3 +110,34 @@ it("allows keyboard panning without intercepting keys in the station picker", ()
   fireEvent.keyDown(screen.getByRole("combobox", { name: "Escolher posto no mapa" }), { key: "ArrowRight" });
   expect(marker.style.left).toBe("80px");
 });
+
+
+it("prefers the local fallback instead of external tiles when Save-Data is enabled", () => {
+  const previous = Object.getOwnPropertyDescriptor(navigator, "connection");
+  Object.defineProperty(navigator, "connection", {
+    configurable: true,
+    value: { saveData: true, effectiveType: "4g", addEventListener: vi.fn(), removeEventListener: vi.fn() },
+  });
+  try {
+    render(
+      <TileStationMap
+        stations={[
+          {
+            id: "a",
+            name: "Posto A",
+            address: "Rua A",
+            lat: -15.7545,
+            lng: -48.2816,
+          },
+        ]}
+        fallback={<div data-testid="local-map-fallback">mapa local</div>}
+      />
+    );
+    expect(screen.getByTestId("local-map-fallback")).toBeTruthy();
+    expect(document.querySelector('img[src*="tile.openstreetmap.org"]')).toBeNull();
+    expect(screen.queryByRole("button", { name: "Tentar carregar mapa de ruas" })).toBeNull();
+  } finally {
+    if (previous) Object.defineProperty(navigator, "connection", previous);
+    else delete (navigator as Navigator & { connection?: unknown }).connection;
+  }
+});
