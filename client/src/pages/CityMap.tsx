@@ -110,6 +110,10 @@ export default function CityMap() {
         : destinations.slice(0, 36),
     [destinations, query, showAllCatalog]
   );
+  const hiddenDestinationCount = Math.max(
+    0,
+    destinations.length - visibleDestinations.length
+  );
 
   useEffect(() => {
     setShowAllCatalog(false);
@@ -404,7 +408,7 @@ export default function CityMap() {
           Use a busca para localizar bairros, escolas e serviços mesmo quando
           ainda não houver um marcador com coordenada validada.
         </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div id="city-destination-grid" className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {visibleDestinations.map(item => {
             const action = item.destination ?? item.address;
             return action ? (
@@ -461,13 +465,15 @@ export default function CityMap() {
             Nenhum item encontrado. Tente outro nome, bairro ou camada.
           </p>
         )}
-        {!query.trim() && destinations.length > visibleDestinations.length && (
+        {!query.trim() && hiddenDestinationCount > 0 && (
           <button
             type="button"
+            aria-expanded={showAllCatalog}
+            aria-controls="city-destination-grid"
             onClick={() => setShowAllCatalog(true)}
             className="mt-4 min-h-11 w-full rounded-xl border border-white/15 bg-white/5 px-4 text-sm font-black text-white sm:w-auto"
           >
-            Mostrar mais {destinations.length - visibleDestinations.length} itens
+            Mostrar mais {hiddenDestinationCount} itens
           </button>
         )}
       </section>
