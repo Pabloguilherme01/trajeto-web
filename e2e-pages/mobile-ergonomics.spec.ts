@@ -1,6 +1,21 @@
 import { expect, test } from "@playwright/test";
 
 // Real public screens, with large text and the menu at the smallest supported width.
+
+// Installed/PWA-like narrow viewport: horizontal rails may scroll internally,
+// but must never widen the home document itself.
+test("home stays inside the viewport while reusable routes remain horizontally usable", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  const routes = page.getByRole("heading", { name: "Já deixe o destino pronto." }).locator("..").locator("..");
+  await expect(routes).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  const rail = routes.locator(".mobile-scroll-x").first();
+  expect(await rail.evaluate(element => element.scrollWidth >= element.clientWidth)).toBe(true);
+  await page.evaluate(() => document.documentElement.classList.add("a11y-large"));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("mobile directory remains readable with enlarged text and closes after choosing a destination", async ({
   page,
 }) => {
