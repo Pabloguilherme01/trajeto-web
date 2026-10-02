@@ -183,3 +183,12 @@ it("includes the local street map in offline readiness and recovery", async () =
   expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
   expect(saved.has("./data/aguas-lindas-offline-map.json")).toBe(true);
 });
+
+
+it("includes the city atlas in offline readiness and recovery", async () => {
+  const { worker, saved } = recoverableWorker(["./data/aguas-lindas-city-atlas.json"]);
+  expect(await worker.offlineStatus()).toMatchObject({ ready: false });
+  worker.fetch.mockResolvedValue(new Response("{}", { headers: { "Content-Type": "application/json" } }));
+  expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
+  expect(saved.has("./data/aguas-lindas-city-atlas.json")).toBe(true);
+});
