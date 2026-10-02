@@ -15,4 +15,9 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("(prefers-reduced-motion: reduce)");
     expect(source).toContain('behavior: reduceMotion ? "auto" : "smooth"');
   });
+
+  it("routes mapped services through the internal planner with automatic mapping", () => {
+    expect(source).toContain('appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery) + "&auto=1"');
+  });
+
 });
