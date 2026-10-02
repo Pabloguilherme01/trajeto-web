@@ -42,7 +42,7 @@ export default function Explorer() {
   return (
     <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-3xl pt-5 sm:pt-8">
-        <header className="rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5">
+        <header className="trajeto-card rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5">
           <div className="flex items-start gap-3">
             <div className="grid size-12 place-items-center rounded-2xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Compass className="size-6" /></div>
             <div className="min-w-0 flex-1">
@@ -63,7 +63,7 @@ export default function Explorer() {
             const done = completed.includes(mission.id);
             const Icon = mission.icon;
             return (
-              <article key={mission.id} className={"rounded-[1.35rem] border bg-[#121B22] p-4 " + (done ? "border-[#C7FF3C]/20" : "border-white/8")}>
+              <article key={mission.id} className={"trajeto-card trajeto-card-interactive rounded-[1.35rem] border bg-[#121B22] p-4 " + (done ? "border-[#C7FF3C]/20" : "border-white/8")}>
                 <div className="flex items-start gap-3">
                   <div className={"grid size-10 shrink-0 place-items-center rounded-xl " + (done ? "bg-[#C7FF3C]/10 text-[#C7FF3C]" : "bg-white/[.04] text-[#3DE3FF]")}>
                     {done ? <BadgeCheck className="size-5" /> : <Icon className="size-5" />}
