@@ -300,7 +300,30 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }
 
   if (isGitHubPagesRuntime()) {
-    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={onlineUserCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
+    if (userCoords) {
+      return (
+        <OfflineStationMap
+          stations={drawableStations}
+          heightClassName={heightClassName}
+          onSelectStation={onSelectStation}
+          userCoords={userCoords}
+        />
+      );
+    }
+    return (
+      <TileStationMap
+        stations={resolvedStations}
+        heightClassName={heightClassName}
+        onSelectStation={onSelectStation}
+        fallback={
+          <OfflineStationMap
+            stations={drawableStations}
+            heightClassName={heightClassName}
+            onSelectStation={onSelectStation}
+          />
+        }
+      />
+    );
   }
 
   if (offline || mapUnavailable) {
