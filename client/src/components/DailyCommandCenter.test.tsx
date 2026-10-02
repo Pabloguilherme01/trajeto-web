@@ -39,4 +39,5 @@ describe("DailyCommandCenter", () => {
     expect(screen.getByRole("button", { name: /economia/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /sem internet/i })).toBeTruthy();
   });
+
 });
