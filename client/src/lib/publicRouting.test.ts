@@ -292,6 +292,42 @@ describe("public routing fallback", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("reuses an address geocoded earlier when the device later needs an offline route", async () => {
+    const firstFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.79", lon: "-48.24" }]), {
+          status: 200,
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 6400, duration: 720, geometry: "cached-online" }],
+          }),
+          { status: 200 }
+        )
+      );
+    vi.stubGlobal("fetch", firstFetch);
+
+    await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "Rua Preparada 123, Águas Lindas de Goiás, GO"
+    );
+
+    const offlineFetch = vi.fn();
+    vi.stubGlobal("fetch", offlineFetch);
+    const route = await calculateOfflineRoute(
+      "-15.7545,-48.2816",
+      "Rua Preparada 123, Águas Lindas de Goiás, GO"
+    );
+
+    expect(route.source).toBe("local-estimate");
+    expect(route.destination).toEqual({ lat: -15.79, lng: -48.24 });
+    expect(offlineFetch).not.toHaveBeenCalled();
+  });
+
   it("fails closed in explicit offline mode when a place is not locally prepared", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
