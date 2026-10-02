@@ -42,27 +42,32 @@ export async function countLocalAppData(): Promise<number> {
 export async function clearLocalAppData(): Promise<number> {
   if (typeof window === "undefined") return 0;
 
-  let cleared = 0;
-  for (const [storage, keys] of [
-    [window.localStorage, listLocalAppKeys()],
-    [window.sessionStorage, listSessionAppKeys()],
-  ] as const) {
+  let cleared = clearPrivateLocationHandoff() ? 1 : 0;
+  let failed = false;
+  for (const name of ["localStorage", "sessionStorage"] as const) {
     try {
-      for (const key of keys) {
-        storage.removeItem(key);
-        cleared += 1;
+      const storage = window[name];
+      for (const key of listAppKeys(storage)) {
+        try {
+          storage.removeItem(key);
+          cleared += 1;
+        } catch {
+          failed = true;
+        }
       }
-    } catch {}
+    } catch {
+      failed = true;
+    }
   }
 
   try {
     cleared += await clearOfflineRoutes();
-  } catch {}
-  if (clearPrivateLocationHandoff()) cleared += 1;
+  } catch {
+    failed = true;
+  }
 
-  try {
-    window.dispatchEvent(new CustomEvent(LOCAL_DATA_EVENT));
-  } catch {}
+  window.dispatchEvent(new CustomEvent(LOCAL_DATA_EVENT));
+  if (failed) throw new Error("Não foi possível apagar todos os dados neste navegador.");
   return cleared;
 }
 
