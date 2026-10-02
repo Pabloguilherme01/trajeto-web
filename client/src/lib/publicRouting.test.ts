@@ -337,7 +337,9 @@ describe("public routing fallback", () => {
       "Rua Preparada 123, Águas Lindas de Goiás, GO"
     );
 
-    expect(route.source).toBe("local-estimate");
+    expect(route.source).toBe("osrm");
+    expect(route.polyline).toBe("cached-online");
+    expect(route.distanceMeters).toBe(6400);
     expect(route.destination).toEqual({ lat: -15.79, lng: -48.24 });
     expect(offlineFetch).not.toHaveBeenCalled();
   });
