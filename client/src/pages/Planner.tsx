@@ -646,8 +646,6 @@ export default function Planner() {
           </section>
         )}
 
-        {!savedMode && destination.trim().length >= 3 && <RideOptions destination={destination} online={online} />}
-
         {economyMode && !savedMode && !planned && <LocalRouteCalculator compact />}
 
         {drivingMode && !savedMode && (
