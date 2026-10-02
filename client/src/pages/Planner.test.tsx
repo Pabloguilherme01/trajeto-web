@@ -477,4 +477,38 @@ describe("Planner travel state", () => {
     expect(state.privateRoute).not.toHaveBeenCalled();
   });
 
+
+  it("calculates immediately after the user explicitly chooses GPS from the destination preview", async () => {
+    state.search = "destino=-15.7600%2C-48.2800&auto=1";
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: (success: PositionCallback) =>
+          success({
+            coords: {
+              latitude: -15.76123,
+              longitude: -48.28123,
+              accuracy: 12,
+              altitude: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+            },
+            timestamp: Date.now(),
+          } as GeolocationPosition),
+      },
+    });
+
+    render(<Planner />);
+    fireEvent.click(screen.getByRole("button", { name: "Usar minha localização e calcular" }));
+
+    await waitFor(() =>
+      expect(state.privateRoute).toHaveBeenCalledWith(
+        "-15.76123, -48.28123",
+        "-15.7600,-48.2800",
+        "driving"
+      )
+    );
+  });
+
 });
