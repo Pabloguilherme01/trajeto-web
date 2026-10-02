@@ -46,12 +46,16 @@ describe("location privacy", () => {
     localStorage.setItem("trajeto:public-routing:geocode:casa", JSON.stringify({ lat: -15.7, lng: -48.2 }));
     localStorage.setItem("trajeto-mobile-station-favorites", "keep");
     sessionStorage.setItem("trajeto:public-routing:route:test", "cached");
+    sessionStorage.setItem("trajeto-last-trip", JSON.stringify({ origin: "Casa", destination: "Trabalho" }));
+    sessionStorage.setItem("trajeto-last-station", JSON.stringify({ placeId: "a", name: "Posto", address: "Rua", query: "posto" }));
 
     expect(clearPrivateLocationHistory()).toBe(true);
     expect(localStorage.getItem("trajeto-recent-searches")).toBeNull();
     expect(localStorage.getItem("trajeto-route-usage")).toBeNull();
     expect(localStorage.getItem("trajeto:public-routing:geocode:casa")).toBeNull();
     expect(sessionStorage.getItem("trajeto:public-routing:route:test")).toBeNull();
+    expect(sessionStorage.getItem("trajeto-last-trip")).toBeNull();
+    expect(sessionStorage.getItem("trajeto-last-station")).toBeNull();
     expect(localStorage.getItem("trajeto-mobile-station-favorites")).toBe("keep");
   });
 
