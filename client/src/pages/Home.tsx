@@ -258,10 +258,10 @@ export default function Home() {
               <p className="mt-2 text-sm font-black">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota") : "Planejar uma rota"}</p>
               <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Confirme sua localização para refazer a rota." : "Retome sua última viagem em um toque.") : "Origem, destino e rota sem cadastro."}</p>
             </button>
-            <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
-              <Fuel className="size-4 text-[#3DE3FF]" />
-              <p className="mt-2.5 text-sm font-black">Postos</p>
-              <p className="mt-1 text-xs leading-snug text-white/68">Perto de você</p>
+            <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+              <MapPin className="size-4 text-[#3DE3FF]" />
+              <p className="mt-2.5 text-sm font-black">Mapa</p>
+              <p className="mt-1 text-xs leading-snug text-white/68">Explorar a cidade</p>
             </button>
             <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Landmark className="size-4 text-[#FFB86B]" />
