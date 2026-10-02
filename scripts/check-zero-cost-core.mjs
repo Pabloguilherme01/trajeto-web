@@ -92,6 +92,7 @@ const forbiddenSecretRefs = [
   "BUILT_IN_FORGE_API_KEY",
   "GOOGLE_MAPS_API_KEY",
   "MAPBOX_ACCESS_TOKEN",
+  "VITE_MAPBOX_PUBLIC_TOKEN",
 ];
 
 for (const secret of forbiddenSecretRefs) {
