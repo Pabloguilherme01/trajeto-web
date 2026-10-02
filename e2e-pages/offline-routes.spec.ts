@@ -63,10 +63,10 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
   });
   await planRoute(page);
   await page
-    .getByRole("button", { name: "Salvar offline", exact: true })
+    .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
   await expect(
-    page.getByText("Cópia offline atualizada neste aparelho.")
+    page.getByText("Viagem preparada para uso offline neste aparelho.")
   ).toBeVisible();
   const ids = await page.evaluate(async () => {
     const open = indexedDB.open("trajeto-offline", 2);
@@ -81,8 +81,9 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
     return keys;
   });
   expect(ids).toHaveLength(50);
-  expect(ids).not.toContain("seed-0");
-  expect(ids).toContain("seed-1");
+  expect(ids.some(id => String(id).startsWith("seed-"))).toBe(false);
+  expect(ids).not.toContain("origem 0::destino 0::driving");
+  expect(ids).toContain("origem 1::destino 1::driving");
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
@@ -120,13 +121,13 @@ test("Pages: an aborted IndexedDB transaction never announces a saved route", as
   });
   await planRoute(page);
   await page
-    .getByRole("button", { name: "Salvar offline", exact: true })
+    .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
   await expect(
-    page.getByText("Não foi possível salvar a rota neste aparelho.")
+    page.getByText("Não foi possível preparar esta viagem para uso offline.")
   ).toBeVisible();
   await expect(
-    page.getByText("Cópia offline atualizada neste aparelho.")
+    page.getByText("Viagem preparada para uso offline neste aparelho.")
   ).toHaveCount(0);
 });
 
@@ -176,7 +177,7 @@ test("Pages: legacy migration keeps the newest safe route for the same destinati
     { waitUntil: "domcontentloaded" },
   );
 
-  await expect(page).toHaveURL(/rota=minha(?:%20|\+)localiza%C3%A7%C3%A3o%3A%3Ahospital/i);
+  await expect(page).toHaveURL(/rota=minha(?:%20|\+)localiza%C3%A7%C3%A3o%3A%3Ahospital%3A%3Adriving/i);
   const saved = await page.evaluate(async () => {
     const request = indexedDB.open("trajeto-offline", 2);
     const db = await new Promise<IDBDatabase>(resolve => {
@@ -191,7 +192,7 @@ test("Pages: legacy migration keeps the newest safe route for the same destinati
   });
 
   expect(saved).toHaveLength(1);
-  expect(saved[0].id).toBe("minha localização::hospital");
+  expect(saved[0].id).toBe("minha localização::hospital::driving");
   expect(saved[0].savedAt).toBe("2026-10-01T10:00:00.000Z");
   expect(saved[0].payload.route.distanceMeters).toBe(2000);
 });

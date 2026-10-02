@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, RefreshCw, WifiOff } from "lucide-react";
+import { CheckCircle2, HardDrive, RefreshCw, WifiOff } from "lucide-react";
+import { formatStorageBytes, getOfflineStorageStatus, requestOfflineStoragePersistence, type OfflineStorageStatus } from "@/lib/offlineStorageStatus";
 import {
   getOfflineReadiness,
   prepareOfflineAccess,
@@ -27,10 +28,13 @@ export default function OfflineReadiness() {
   const [checking, setChecking] = useState(true);
   const [preparing, setPreparing] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [storageStatus, setStorageStatus] = useState<OfflineStorageStatus | null>(null);
+  const [requestingPersistence, setRequestingPersistence] = useState(false);
   const check = async () => {
     setChecking(true);
     try {
       setReady(await getOfflineReadiness());
+      setStorageStatus(await getOfflineStorageStatus());
     } catch {
       setReady(false);
       setFeedback(preparationMessages.unsupported);
@@ -50,6 +54,18 @@ export default function OfflineReadiness() {
       setFeedback(preparationMessages.connection);
     } finally {
       setPreparing(false);
+    }
+  };
+  const keepOfflineData = async () => {
+    setRequestingPersistence(true);
+    try {
+      const granted = await requestOfflineStoragePersistence();
+      setFeedback(granted
+        ? "O navegador aceitou manter os dados offline com proteção reforçada contra limpeza automática."
+        : "O navegador não garantiu armazenamento persistente. As rotas continuam salvas normalmente.");
+      setStorageStatus(await getOfflineStorageStatus());
+    } finally {
+      setRequestingPersistence(false);
     }
   };
   useEffect(() => {
@@ -122,6 +138,18 @@ export default function OfflineReadiness() {
                 ? "Conferir acesso offline"
                 : "Preparar acesso offline"}
           </button>
+          {storageStatus && (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-3 text-sm text-white/75">
+              <div className="flex items-center gap-2 font-bold text-white"><HardDrive className="size-4" /> Armazenamento offline</div>
+              <p className="mt-2">{storageStatus.routeCount} rota(s) preparada(s) · {formatStorageBytes(storageStatus.usageBytes)} usados{storageStatus.quotaBytes !== null ? " de " + formatStorageBytes(storageStatus.quotaBytes) : ""}.</p>
+              {storageStatus.storageRisk === "high" && <p className="mt-1 text-[#FFB86B]">Pouco espaço disponível. Remova rotas antigas antes de preparar novas viagens.</p>}
+              {storageStatus.persisted === false && (
+                <button type="button" disabled={requestingPersistence} onClick={() => void keepOfflineData()} className="mt-3 min-h-11 rounded-xl border border-white/20 px-3 py-2 font-bold text-white disabled:opacity-60">
+                  {requestingPersistence ? "Solicitando…" : "Manter dados offline neste aparelho"}
+                </button>
+              )}
+            </div>
+          )}
           {ready && (
             <p className="mt-3 text-sm leading-relaxed text-white/75">
               Para testar: ative o modo avião e abra a busca ou a central de

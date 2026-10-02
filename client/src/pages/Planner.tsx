@@ -432,7 +432,7 @@ export default function Planner() {
     if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
     try {
       await saveOfflineRoute({
-        id: offlineRouteId(normalizedOrigin, normalizedDestination),
+        id: offlineRouteId(normalizedOrigin, normalizedDestination, mode),
         origin: normalizedOrigin,
         destination: normalizedDestination,
         savedAt: new Date().toISOString(),
@@ -449,10 +449,10 @@ export default function Planner() {
     if (!planned) return;
     const saved = await persistRouteLocally(planned, origin, destination);
     if (saved) {
-      setSavedMessage("Cópia offline atualizada neste aparelho.");
+      setSavedMessage("Viagem preparada para uso offline neste aparelho.");
       vibration(16);
     } else {
-      setSavedMessage("Não foi possível salvar a rota neste aparelho.");
+      setSavedMessage("Não foi possível preparar esta viagem para uso offline.");
     }
   };
 
@@ -890,7 +890,7 @@ export default function Planner() {
               <>
                 <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
                   <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
-                  <p className="mt-1 text-xs leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Para uma rota realmente disponível sem internet, calcule com origem e destino quando estiver conectado e salve automaticamente.</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Para uma rota realmente disponível sem internet, calcule com origem e destino quando estiver conectado e prepare a viagem para uso offline.</p>
                   <div className="mt-3 grid grid-cols-3 gap-2">
                     <a href="tel:190" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
                     <a href="tel:192" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">SAMU · 192</a>
@@ -1032,7 +1032,7 @@ export default function Planner() {
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Salvar offline</button>
+                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 

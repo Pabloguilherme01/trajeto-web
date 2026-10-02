@@ -65,8 +65,9 @@ function isValidPayload(payload: unknown) {
 
 function sanitizeOfflineRoute(route: OfflineRoute): OfflineRoute {
   const origin = privateOriginForHistory(route.origin);
-  if (origin === route.origin) return route;
-  return { ...route, id: offlineRouteId(origin, route.destination), origin };
+  const id = offlineRouteId(origin, route.destination, offlineRouteTravelMode(route));
+  if (origin === route.origin && id === route.id) return route;
+  return { ...route, id, origin };
 }
 
 function isValidRoute(value: unknown): value is OfflineRoute {
@@ -226,47 +227,54 @@ export async function clearOfflineRoutes() {
 }
 
 function migratedOfflineRouteId(id: string) {
-  const separator = id.indexOf("::");
-  if (separator <= 0) return id;
-  const origin = id.slice(0, separator);
-  const destination = id.slice(separator + 2);
-  if (destination.trim().length < 2) return id;
+  const [origin = "", destination = "", mode] = id.split("::");
+  if (origin.trim().length < 2 || destination.trim().length < 2) return id;
   const safeOrigin = privateOriginForHistory(origin);
-  return safeOrigin === origin.trim() ? id : offlineRouteId(safeOrigin, destination);
+  if (safeOrigin === origin.trim()) return id;
+  const safeMode = mode === "walking" || mode === "cycling" || mode === "transit" || mode === "driving" ? mode : undefined;
+  return offlineRouteId(safeOrigin, destination, safeMode);
 }
 
 export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
   if (!hasIndexedDb()) return null;
 
   let route = await withStore<unknown>("readonly", store => store.get(id));
+  const migratedId = migratedOfflineRouteId(id);
+
+  if (!isValidRoute(route) && migratedId !== id) {
+    route = await withStore<unknown>("readonly", store => store.get(migratedId));
+  }
+
   if (!isValidRoute(route)) {
     if (isRecord(route) && typeof route.id === "string") {
       await removeOfflineRoute(route.id);
     }
-    const migratedId = migratedOfflineRouteId(id);
-    if (migratedId !== id) {
-      route = await withStore<unknown>("readonly", store => store.get(migratedId));
-    }
-    if (!isValidRoute(route)) return null;
+    // Old links did not carry the travel mode in the route id. Listing once
+    // migrates every valid record to the canonical mode-aware id and lets an
+    // old bookmark continue to resolve without duplicating saved routes.
+    const migrated = await listOfflineRoutes();
+    const baseId = migratedId !== id ? migratedId : id;
+    const candidate = migrated
+      .filter(item => item.id === baseId || item.id.startsWith(baseId + "::"))
+      .sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt))[0];
+    return candidate ?? null;
   }
 
   const safeRoute = sanitizeOfflineRoute(route);
   if (safeRoute.id !== route.id || safeRoute.origin !== route.origin) {
-    const existing = safeRoute.id !== route.id
-      ? await withStore<unknown>("readonly", store => store.get(safeRoute.id))
-      : null;
-    const routeToKeep = isValidRoute(existing) && Date.parse(existing.savedAt) > Date.parse(safeRoute.savedAt)
-      ? existing
-      : safeRoute;
-    await withStore("readwrite", store => store.put(routeToKeep));
-    if (safeRoute.id !== route.id) await withStore("readwrite", store => store.delete(route.id));
-    return routeToKeep;
+    const migrated = await listOfflineRoutes();
+    return migrated.find(item => item.id === safeRoute.id) ?? safeRoute;
   }
   return safeRoute;
 }
 
-export function offlineRouteId(origin: string, destination: string) {
-  return origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+export function offlineRouteId(
+  origin: string,
+  destination: string,
+  mode?: "driving" | "walking" | "cycling" | "transit"
+) {
+  const base = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  return mode ? base + "::" + mode : base;
 }
 
 

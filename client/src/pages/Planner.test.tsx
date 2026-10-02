@@ -86,7 +86,7 @@ describe("Planner travel state", () => {
       expect(screen.queryByRole("button", { name })).toBeNull();
     }
     expect(screen.getByRole("button", { name: "Compartilhar" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Salvar offline" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Preparar para offline" })).toBeTruthy();
   });
   it("keeps a manually edited origin when an earlier GPS request finishes", () => {
     let gps!: PositionCallback;
@@ -250,17 +250,17 @@ describe("Planner travel state", () => {
     submit();
     changeDestination("Hospital");
     await act(async () => { resolve(payload); });
-    expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
 
   it("discards the previous result before recalculating, including on failure", async () => {
     render(<Planner />);
     submit();
-    await screen.findByRole("button", { name: "Salvar offline" });
+    await screen.findByRole("button", { name: "Preparar para offline" });
     state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
-    expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
 
   it("reuses an exact saved route automatically in offline planner mode", async () => {
@@ -320,12 +320,12 @@ describe("Planner travel state", () => {
     state.search = "rota=saved-1";
     state.lookup.mockResolvedValueOnce({ origin: "Origem salva", destination: "Destino salvo", payload });
     const view = render(<Planner />);
-    await screen.findByRole("button", { name: "Salvar offline" });
+    await screen.findByRole("button", { name: "Preparar para offline" });
     expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Destino salvo");
     state.lookup.mockResolvedValueOnce(null);
     state.search = "rota=missing";
     view.rerender(<Planner />);
     await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("não está salva"));
-    expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
 });

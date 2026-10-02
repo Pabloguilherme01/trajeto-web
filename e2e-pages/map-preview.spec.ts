@@ -53,10 +53,10 @@ test("Pages: route preview controls and real geometry remain available offline a
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(320);
   await page
-    .getByRole("button", { name: "Salvar offline", exact: true })
+    .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
   await expect(
-    page.getByText("Cópia offline atualizada neste aparelho.")
+    page.getByText("Viagem preparada para uso offline neste aparelho.")
   ).toBeVisible();
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;

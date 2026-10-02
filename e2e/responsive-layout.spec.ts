@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("public screens stay inside the viewport before and after scrolling and focusing inputs", async ({ page }) => {
+test("public screens stay inside the viewport before and after scrolling and focusing inputs", async ({ page }, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "This matrix sets its own 280–768px viewports; run it once on Chromium instead of duplicating the same matrix."
+  );
   test.setTimeout(120_000);
   for (const width of [280, 320, 360, 390, 768]) {
     await page.setViewportSize({ width, height: 740 });
@@ -31,4 +35,20 @@ test("public screens stay inside the viewport before and after scrolling and foc
       }
     }
   }
+});
+
+
+test("home remains usable with enlarged text on a narrow installed-app-like viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.addStyleTag({ content: "html { font-size: 20px !important; }" });
+  await page.goto("./");
+  await expect(page.locator("main")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const layout = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    document: document.documentElement.scrollWidth,
+    body: document.body.scrollWidth,
+  }));
+  expect(Math.max(layout.document, layout.body)).toBeLessThanOrEqual(layout.viewport + 1);
+  await expect(page.getByRole("button", { name: /planejar|rota|buscar/i }).first()).toBeVisible();
 });
