@@ -15,9 +15,11 @@ describe("route experience", () => {
     expect(routeFreshness("2026-09-30T18:00:00.000Z", now)).toBe("stale");
   });
 
-  it("falls smart mode back to offline when connectivity disappears", () => {
+  it("falls network-dependent modes back to offline when connectivity disappears", () => {
     expect(effectivePlannerMode("smart", false, false)).toBe("offline");
-    expect(effectivePlannerMode("economy", false, false)).toBe("economy");
+    expect(effectivePlannerMode("economy", false, false)).toBe("offline");
+    expect(effectivePlannerMode("driving", false, false)).toBe("offline");
+    expect(effectivePlannerMode("private", false, false)).toBe("private");
   });
 
   it("only refreshes stale saved routes automatically in smart online mode", () => {
