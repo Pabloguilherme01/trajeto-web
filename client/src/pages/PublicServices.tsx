@@ -309,7 +309,7 @@ export default function PublicServices() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
+        <section className="mt-5 trajeto-card rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
           <form
             onSubmit={event => {
               event.preventDefault();
