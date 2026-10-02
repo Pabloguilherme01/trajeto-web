@@ -388,6 +388,14 @@ export default function CityMap() {
         aria-label="Mapa da cidade"
         className="mt-2 scroll-mt-3 overflow-hidden rounded-3xl border border-white/15 shadow-2xl"
       >
+        <div className="flex min-w-0 items-center justify-between gap-2 border-b border-white/10 bg-[#10191f] px-3 py-2 text-xs">
+          <span className="min-w-0 truncate font-bold text-white/70">
+            {online ? "Mapa de ruas online" : "Mapa vetorial offline"}
+          </span>
+          <span className="shrink-0 rounded-full border border-white/10 px-2 py-1 font-black text-[#C7FF3C]">
+            {markers.length} pontos
+          </span>
+        </div>
         {online && markers.length ? (
           <TileStationMap
             stations={markers}
