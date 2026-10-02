@@ -161,8 +161,8 @@ export default function Home() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] max-w-full overflow-x-clip bg-[#0B1014] pb-28 text-white md:pb-10">
-      <div className="container min-w-0 max-w-5xl overflow-x-clip pt-5 sm:pt-8 lg:pt-12">
+    <main className="premium-surface min-h-[100dvh] w-full min-w-0 max-w-[100vw] overflow-x-hidden bg-[#0B1014] pb-28 text-white md:pb-10">
+      <div className="container box-border min-w-0 max-w-5xl overflow-x-hidden pt-5 sm:pt-8 lg:pt-12">
         <header className="flex min-w-0 items-center justify-between gap-2">
           <div>
             <p className="text-xs font-black uppercase tracking-[.18em] text-[#71818A]">{greeting}</p>
@@ -307,7 +307,7 @@ export default function Home() {
             </div>
             <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
           </div>
-          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="mobile-scroll-x -mx-1 mt-3 flex max-w-[calc(100%+0.5rem)] snap-x gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1 sm:mx-0 sm:grid sm:max-w-full sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
               <button
                 key={route.id}
@@ -316,7 +316,7 @@ export default function Home() {
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
                 }}
-                className="mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
+                className="mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-0 max-w-[10rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
               >
                 <Route className="size-4 text-[#3DE3FF]" aria-hidden="true" />
                 <span className="mt-2 block break-words text-sm font-black">{route.label}</span>
