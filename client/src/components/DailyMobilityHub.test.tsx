@@ -79,7 +79,7 @@ describe("DailyMobilityHub", () => {
   });
 
   it("does not serialize a private origin when repeating the last trip", async () => {
-    rememberTrip({ origin: "Minha localização", destination: "Hospital" });
+    rememberTrip("Minha localização", "Hospital");
 
     render(<DailyMobilityHub />);
 
