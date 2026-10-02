@@ -6,6 +6,7 @@ export type MapboxRouteStep = {
   streetName?: string;
   distanceMeters: number;
   durationSeconds: number;
+  location?: { lat: number; lng: number };
 };
 
 export type MapboxRouteResult = {
@@ -59,7 +60,7 @@ type MapboxDirectionsResponse = {
         distance?: number;
         duration?: number;
         name?: string;
-        maneuver?: { instruction?: string };
+        maneuver?: { instruction?: string; location?: [number, number] };
       }>;
     }>;
   }>;
@@ -164,6 +165,9 @@ export async function requestOptionalMapboxRoute(
         streetName: step.name?.trim() || undefined,
         distanceMeters: Number(step.distance) || 0,
         durationSeconds: Number(step.duration) || 0,
+        location: Array.isArray(step.maneuver?.location) && step.maneuver.location.length === 2
+          ? { lng: Number(step.maneuver.location[0]), lat: Number(step.maneuver.location[1]) }
+          : undefined,
       }];
     })),
   };
