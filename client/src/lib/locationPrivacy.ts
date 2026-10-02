@@ -96,6 +96,7 @@ const PRIVATE_HISTORY_KEYS = [
   "trajeto-recent-trips",
   "trajeto-route-usage",
   "trajeto-route-usage-events",
+  "trajeto-last-station",
 ] as const;
 
 export function clearPrivateLocationHistory() {
@@ -109,11 +110,9 @@ export function clearPrivateLocationHistory() {
     }
     if (!storage) continue;
 
-    if (storageName === "localStorage") {
-      for (const key of PRIVATE_HISTORY_KEYS) {
-        if (storage.getItem(key) !== null) cleared = true;
-        storage.removeItem(key);
-      }
+    for (const key of PRIVATE_HISTORY_KEYS) {
+      if (storage.getItem(key) !== null) cleared = true;
+      storage.removeItem(key);
     }
 
     const routingKeys: string[] = [];
