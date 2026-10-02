@@ -6,6 +6,7 @@ import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
 import { findOfflineRouteByDestination, listOfflineRoutes } from "@/lib/offlineStore";
 import { setPrivateLocationHandoff } from "@/lib/locationPrivacy";
+import { buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import {
   getDestinationUsage,
   getFavoriteDestination,
@@ -66,7 +67,7 @@ export default function MobileTripShortcuts() {
       void listOfflineRoutes().then(routes => {
         const saved = findOfflineRouteByDestination(routes, place.value);
         if (saved) {
-          setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination));
+          setLocation(buildSavedRoutePlannerUrl(saved.id));
           return;
         }
         setFeedback("Sem internet: este destino só pode ser aberto se houver uma rota salva correspondente.");
@@ -109,7 +110,7 @@ export default function MobileTripShortcuts() {
       void listOfflineRoutes().then(routes => {
         const saved = findOfflineRouteByDestination(routes, place.value);
         if (saved) {
-          setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination));
+          setLocation(buildSavedRoutePlannerUrl(saved.id));
           return;
         }
         setFeedback("Esse destino não tem uma rota salva. Sem internet, salve a rota antes de sair.");

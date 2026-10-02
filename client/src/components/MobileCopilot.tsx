@@ -31,6 +31,7 @@ import {
 } from "@/lib/mobileDestinations";
 import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { buildNearbyStationsUrl, vibration } from "@/lib/mobileTools";
+import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 
 type Action = {
   title: string;
@@ -130,7 +131,7 @@ export default function MobileCopilot() {
         title: "Continue sua última rota",
         detail: latestOfflineRoute.origin + " → " + latestOfflineRoute.destination + " · " + formatAge(latestOfflineRoute.savedAt) + (isOfflineRouteStale(latestOfflineRoute.savedAt) ? " · dados antigos" : ""),
         label: "Abrir",
-        href: appUrl("/planejar") + "?rota=" + encodeURIComponent(latestOfflineRoute.id) + "&origem=" + encodeURIComponent(latestOfflineRoute.origin) + "&destino=" + encodeURIComponent(latestOfflineRoute.destination),
+        href: buildSavedRoutePlannerUrl(latestOfflineRoute.id),
         intent: "saved",
         icon: CloudOff,
       };
@@ -165,7 +166,7 @@ export default function MobileCopilot() {
         title: "Retomar sua última viagem",
         detail: `${state.lastTrip.origin} → ${state.lastTrip.destination}`,
         label: "Retomar",
-        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(state.lastTrip.origin) + "&destino=" + encodeURIComponent(state.lastTrip.destination),
+        href: buildReusableTripPlannerUrl(state.lastTrip),
         intent: "route",
         icon: Route,
       };
@@ -227,7 +228,7 @@ export default function MobileCopilot() {
         title: "Retomar sua última viagem",
         detail: `${state.lastTrip.origin} → ${state.lastTrip.destination}`,
         label: "Retomar",
-        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(state.lastTrip.origin) + "&destino=" + encodeURIComponent(state.lastTrip.destination),
+        href: buildReusableTripPlannerUrl(state.lastTrip),
         intent: "route",
         icon: Route,
       };
