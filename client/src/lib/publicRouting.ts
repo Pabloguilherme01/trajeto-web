@@ -531,6 +531,16 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   }
 
   const expanded = expandLocalQuery(query);
+  const expandedCoordinate = parseCoordinateInput(expanded);
+  if (expandedCoordinate) {
+    cacheSet(cacheKey, expandedCoordinate);
+    return expandedCoordinate;
+  }
+  const expandedLocal = localGeocode(expanded);
+  if (expandedLocal) {
+    cacheSet(cacheKey, expandedLocal);
+    return expandedLocal;
+  }
   let result: NominatimResult | undefined;
   try {
     // One user action performs at most one public geocoder request. Known
