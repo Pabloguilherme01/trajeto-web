@@ -49,8 +49,16 @@ export default function Planner() {
   const savedMode = pathname === "/salvos" || queryParams.get("salvos") === "1";
   const economyMode = queryParams.get("economia") === "1";
   const drivingMode = queryParams.get("conducao") === "1";
-  const [origin, setOrigin] = useState(() => queryParams.get("origem") || getLastTrip()?.origin || "");
-  const [destination, setDestination] = useState(() => queryParams.get("destino") || getLastTrip()?.destination || "");
+  const initialTrip = useMemo(() => getLastTrip(), []);
+  const [origin, setOrigin] = useState(() => {
+    const queryOrigin = queryParams.get("origem");
+    if (queryOrigin) return queryOrigin;
+    const historicalOrigin = initialTrip?.origin ?? "";
+    return isCurrentLocationLabel(historicalOrigin) ? "" : historicalOrigin;
+  });
+  const [destination, setDestination] = useState(
+    () => queryParams.get("destino") || initialTrip?.destination || "",
+  );
   const [mode, setMode] = useState<PublicTravelMode>(() => {
     const value = queryParams.get("modo");
     return value === "walking" || value === "cycling" || value === "transit" ? value : "driving";
