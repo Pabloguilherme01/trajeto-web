@@ -45,7 +45,7 @@ it("keeps the destination catalog usable offline without loading street maps", (
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
   render(<CityMap />);
   expect(screen.queryByText("Planejar ponto confirmado")).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "Saúde", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
   fireEvent.click(screen.getByRole("button", { name: /UPA.*Planejar viagem/ }));
   expect(navigate).toHaveBeenCalled();
 });
