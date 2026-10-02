@@ -201,8 +201,8 @@ describe("public routing fallback", () => {
           geometry: "street-route",
           legs: [{
             steps: [
-              { distance: 400, duration: 50, name: "Avenida JK", maneuver: { type: "depart", modifier: "straight" } },
-              { distance: 900, duration: 120, name: "Rua 21", maneuver: { type: "turn", modifier: "right" } },
+              { distance: 400, duration: 50, name: "Avenida JK", maneuver: { type: "depart", modifier: "straight", location: [-48.2816, -15.7545] } },
+              { distance: 900, duration: 120, name: "Rua 21", maneuver: { type: "turn", modifier: "right", location: [-48.274, -15.759] } },
               { distance: 500, duration: 70, name: "", maneuver: { type: "arrive", modifier: "straight" } },
             ],
           }],
@@ -221,6 +221,7 @@ describe("public routing fallback", () => {
       "Chegue ao destino",
     ]);
     expect(payload.route.steps).toHaveLength(3);
+    expect(route.steps?.[1].location).toEqual({ lat: -15.759, lng: -48.274 });
   });
 
   it("geocodes endpoints and calculates a route without the application backend", async () => {
