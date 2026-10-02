@@ -330,7 +330,7 @@ export default function DailyCommandCenter() {
             <p className="mt-5 text-xs font-extrabold text-white">Meu destino</p>
             <p className="mt-1 text-[0.58rem] text-white/40">{favorite ? "Ir agora" : "Salvar destino"}</p>
           </a>
-          <a href={lastTrip ? appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) : appUrl("/planejar")} className="group min-h-24 border-r border-white/8 p-4 transition hover:bg-white/[.035]">
+          <a href={lastTrip ? buildReusableTripPlannerUrl(lastTrip) : appUrl("/planejar")} className="group min-h-24 border-r border-white/8 p-4 transition hover:bg-white/[.035]">
             <Route className="size-4 text-[#BDA5FF]" />
             <p className="mt-5 text-xs font-extrabold text-white">Repetir</p>
             <p className="mt-1 truncate text-[0.58rem] text-white/40">{lastTrip ? lastTrip.origin + " → " + lastTrip.destination : "Primeira viagem"}</p>
