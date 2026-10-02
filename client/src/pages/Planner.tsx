@@ -278,7 +278,11 @@ export default function Planner() {
         if (!resolvedOrigin) {
           if (version !== requestVersion.current) return;
           setFallbackReady(true);
-          setSavedMessage("Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho.");
+          setSavedMessage(
+            offlineMode || !online
+              ? "Para calcular sem internet, informe uma origem local já conhecida ou abra uma rota salva neste aparelho."
+              : "Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho."
+          );
           rememberTrip("", to);
           track("route_open", to);
           vibration(12);
@@ -703,7 +707,30 @@ export default function Planner() {
             {error && (
               <div className="mt-3 rounded-2xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] p-3" role="alert">
                 <p className="text-xs font-bold text-[#FFD59B]">{error}</p>
-                {!online && destination.trim() && <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination), "_blank", "noopener,noreferrer")} className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-xs font-black text-[#FFD59B]">Abrir no Google Maps</button>}
+                {!online && (
+                  <button
+                    type="button"
+                    onClick={() => setLocation(appUrl("/salvos"))}
+                    className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-xs font-black text-[#FFD59B]"
+                  >
+                    Ver rotas salvas
+                  </button>
+                )}
+                {online && destination.trim() && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.open(
+                        buildGoogleMapsDirectionsUrl(origin, destination),
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                    className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-xs font-black text-[#FFD59B]"
+                  >
+                    Abrir no Google Maps
+                  </button>
+                )}
               </div>
             )}
           </section>
@@ -731,6 +758,15 @@ export default function Planner() {
         )}
 
         {economyMode && !savedMode && !planned && <LocalRouteCalculator compact />}
+
+        {offlineMode && !savedMode && (
+          <section className="mt-4 rounded-2xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.04] px-4 py-3" role="status" aria-live="polite">
+            <p className="text-xs font-black text-[#FFD59B]">Modo offline ativo</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/45">
+              O Trajeto evita provedores externos, reaproveita a rota salva exata quando existir e usa apenas dados locais para novas estimativas.
+            </p>
+          </section>
+        )}
 
         {drivingMode && !savedMode && (
           <section className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-4 py-3" role="status" aria-live="polite">
