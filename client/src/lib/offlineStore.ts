@@ -165,15 +165,17 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
       const tx = db.transaction(STORE, "readwrite");
       const store = tx.objectStore(STORE);
       const request = store.getAll();
-      const valid: OfflineRoute[] = [];
+      const validById = new Map<string, OfflineRoute>();
 
       request.onsuccess = () => {
         for (const candidate of request.result as unknown[]) {
           if (isValidRoute(candidate)) {
             const safeRoute = sanitizeOfflineRoute(candidate);
-            valid.push(safeRoute);
+            const existing = validById.get(safeRoute.id);
+            if (!existing || Date.parse(safeRoute.savedAt) > Date.parse(existing.savedAt)) {
+              validById.set(safeRoute.id, safeRoute);
+            }
             if (safeRoute.id !== candidate.id || safeRoute.origin !== candidate.origin) {
-              store.put(safeRoute);
               store.delete(candidate.id);
             }
           } else if (isRecord(candidate) && typeof candidate.id === "string") {
@@ -181,9 +183,12 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
           }
         }
 
+        for (const safeRoute of validById.values()) store.put(safeRoute);
       };
 
-      tx.oncomplete = () => resolve(valid.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt)));
+      tx.oncomplete = () => resolve(
+        [...validById.values()].sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt)),
+      );
       request.onerror = () => reject(request.error ?? new Error("Não foi possível ler as rotas salvas."));
       tx.onerror = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
       tx.onabort = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
