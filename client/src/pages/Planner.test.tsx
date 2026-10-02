@@ -328,4 +328,17 @@ describe("Planner travel state", () => {
     await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("não está salva"));
     expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
+
+  it("never persists a GPS-origin route even when offline save is requested", async () => {
+    state.search = "local=1&destino=Hospital";
+    setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    const saveButton = screen.getByRole("button", { name: "Preparar para offline" });
+    fireEvent.click(saveButton);
+    expect(state.saveOffline).not.toHaveBeenCalled();
+    expect(screen.getByText(/somente nesta sessão e não são salvas/i)).toBeTruthy();
+  });
+
 });
