@@ -46,3 +46,10 @@ describe("local route presets", () => {
     ).toBe(true);
   });
 });
+
+it("keeps hospital shortcuts consistent with the service attendance warning", () => {
+  const hospital = LOCAL_ROUTE_PRESETS.find(item => item.id === "hospital-bom-jesus");
+  expect(hospital?.detail).not.toMatch(/24h/i);
+  expect(hospital?.detail).toMatch(/confirm/i);
+  expect(getLocalRoutePresets("Hospital Bom Jesus").some(item => item.id === hospital?.id)).toBe(true);
+});
