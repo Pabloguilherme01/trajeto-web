@@ -9,6 +9,7 @@ import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, isCurrentLocationLabel, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
+import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
 
@@ -116,20 +117,11 @@ export default function Home() {
     );
   };
 
-  const reusableTripUrl = (trip: { origin: string; destination: string }) => {
-    const params = new URLSearchParams({ destino: trip.destination });
-    if (!isCurrentLocationLabel(trip.origin)) {
-      params.set("origem", trip.origin);
-      params.set("auto", "1");
-    }
-    return appUrl("/planejar") + "?" + params.toString();
-  };
-
   const openLastTrip = () => {
     if (!lastTrip) return;
     rememberIntent("route");
     vibration();
-    setLocation(reusableTripUrl(lastTrip));
+    setLocation(buildReusableTripPlannerUrl(lastTrip, { auto: true }));
   };
 
   const findNearby = () => {
@@ -441,7 +433,7 @@ export default function Home() {
                   type="button"
                   onClick={() => {
                     rememberIntent("route");
-                    setLocation(reusableTripUrl(trip));
+                    setLocation(buildReusableTripPlannerUrl(trip));
                   }}
                   className="flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left active:scale-[.99]"
                   aria-label={"Repetir rota " + trip.origin + " para " + trip.destination}
