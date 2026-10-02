@@ -13,7 +13,7 @@ export type LocalRoutePreset = {
 const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "upa", label: "UPA", detail: "Urgência e emergência · 24h", destination: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "heal", label: "HEAL", detail: "Hospital estadual · atendimento", destination: "HEAL Hospital Estadual de Águas Lindas Ronaldo Ramos Caiado Filho, Rua 19, 792, Parque da Barragem 9, Águas Lindas de Goiás, GO", category: "saude" },
-  { id: "hospital-bom-jesus", label: "Hospital Bom Jesus", detail: "Hospital municipal · 24h", destination: "Hospital Municipal Bom Jesus, Q 109, Setor 10, Águas Lindas de Goiás, GO", category: "saude" },
+  { id: "hospital-bom-jesus", label: "Hospital Bom Jesus", detail: "Confirme o atendimento antes de sair", destination: "Hospital Municipal Bom Jesus, Q 109, Setor 10, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "prefeitura", label: "Prefeitura", detail: "Serviços municipais", destination: "Prefeitura de Águas Lindas de Goiás, Área Especial 4, Avenida 2, Jardim Querência, GO", category: "servicos" },
   { id: "sic", label: "SIC", detail: "Informação ao cidadão", destination: "Serviço de Informação ao Cidadão, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "procon", label: "Procon", detail: "Defesa do consumidor", destination: "Procon Águas Lindas de Goiás, GO", category: "servicos" },
