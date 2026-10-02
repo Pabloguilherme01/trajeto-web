@@ -1,4 +1,4 @@
-import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -249,8 +249,10 @@ export function offlineRouteShareText(route: Pick<OfflineRoute, "origin" | "dest
     ".";
 }
 
-export function offlineRouteShareUrl(route: Pick<OfflineRoute, "id">) {
-  const params = new URLSearchParams({ rota: route.id.trim() });
+export function offlineRouteShareUrl(route: Pick<OfflineRoute, "origin" | "destination">) {
+  const params = new URLSearchParams({ destino: route.destination.trim() });
+  const origin = privateOriginForUrl(route.origin);
+  if (origin) params.set("origem", origin);
   return "/planejar?" + params.toString();
 }
 
