@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findOfflineRouteByDestination, findOfflineRouteByTrip, isOfflineRouteStale, offlineRouteId } from "./offlineStore";
+import { externalNavigationUrl, findOfflineRouteByDestination, findOfflineRouteByTrip, isOfflineRouteStale, offlineRouteId, offlineRouteShareText, offlineRouteShareUrl } from "./offlineStore";
 
 describe("offlineStore helpers", () => {
   it("normalizes route ids consistently", () => {
@@ -36,5 +36,19 @@ describe("offlineStore helpers", () => {
 
     expect(isOfflineRouteStale(fresh, now)).toBe(false);
     expect(isOfflineRouteStale(stale, now)).toBe(true);
+  });
+  it("omits private origins from external Google Maps URLs", () => {
+    const privateLabel = externalNavigationUrl({ origin: "Minha localização", destination: "Hospital" });
+    const precise = externalNavigationUrl({ origin: "-15.76123, -48.28123", destination: "Hospital" });
+
+    expect(privateLabel).not.toContain("origin=");
+    expect(precise).not.toContain("origin=");
+    expect(privateLabel).toContain("destination=Hospital");
+  });
+
+  it("shares offline routes by id without exposing origin or destination in the URL", () => {
+    const route = { id: "rota privada 1", origin: "Minha localização", destination: "Hospital" };
+    expect(offlineRouteShareUrl(route)).toBe("/planejar?rota=rota+privada+1");
+    expect(offlineRouteShareText(route)).toContain("Minha localização → Hospital");
   });
 });
