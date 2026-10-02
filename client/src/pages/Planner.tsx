@@ -333,7 +333,7 @@ export default function Planner() {
             (autoSaved ? " Cópia offline criada automaticamente." : "") +
             (originPrivate ? " Esta rota não foi salva automaticamente para proteger sua localização." : "")
         );
-        if (resolvedOrigin) rememberTrip(originPrivate ? privateOriginForHistory(resolvedOrigin) : resolvedOrigin, to);
+        if (resolvedOrigin) if (!originPrivate) rememberTrip(resolvedOrigin, to);
         track("route_open", to);
         vibration(14);
         return;
@@ -342,7 +342,7 @@ export default function Planner() {
         setSavedMessage(null);
         setFallbackReady(true);
         setError(routeError instanceof Error ? routeError.message : "Não foi possível calcular a rota pública.");
-        if (publicOrigin) rememberTrip(originPrivate ? privateOriginForHistory(publicOrigin) : publicOrigin, to);
+        if (publicOrigin) if (!originPrivate) rememberTrip(publicOrigin, to);
         vibration(8);
         return;
       } finally {
@@ -354,7 +354,7 @@ export default function Planner() {
     setSavedMessage(null);
     setFallbackReady(false);
     setShowMap(false);
-    rememberTrip(originPrivate ? privateOriginForHistory(from) : from, to);
+    if (!originPrivate) rememberTrip(from, to);
     track("route_open", to);
     try {
       const result = await planRoute.mutateAsync({ origin: from, destination: to });
