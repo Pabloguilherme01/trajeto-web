@@ -34,3 +34,19 @@ O mapa de ruas usa tiles públicos apenas para a área que o usuário está visu
 O pacote PWA inclui `aguas-lindas-offline-map.json`, uma base de 4.938 trechos de vias da área urbana de Águas Lindas, derivada de dados abertos do OpenStreetMap e distribuída com atribuição e ODbL (arquivo de licença adjacente). Esses vetores são preparados uma vez, publicados junto com o app e servidos pela mesma origem, sem consultas com coordenadas pessoais. Não são tiles baixados do servidor público. A verificação e a recuperação do pacote offline incluem esse arquivo.
 
 Cidade, postos e prévias de rotas compartilham o mapa local. Gestos, zoom, enquadramento, temas e pontos continuam disponíveis sem conexão; falha ou corrupção da base não remove os marcadores nem a geometria da viagem. Rotas reais já salvas mantêm sua geometria; estimativas ficam tracejadas e identificadas. A base urbana não oferece recálculo viário offline, trânsito ao vivo ou cobertura nacional.
+
+
+## Mapbox opcional
+
+O Mapbox pode enriquecer rotas online quando `VITE_MAPBOX_PUBLIC_TOKEN` estiver configurado com um token público `pk` dedicado ao projeto. Ele não faz parte do núcleo obrigatório:
+
+- carro usa `driving-traffic`; caminhada e bicicleta usam seus perfis próprios;
+- alternativas válidas são comparadas e a de menor duração é escolhida;
+- falha, timeout ou ausência do token cai para OSRM e estimativa local no carro; caminhada e bicicleta usam estimativa local;
+- falhas ativam um cooldown curto para evitar repetição de requisições;
+- requisições idênticas simultâneas são deduplicadas;
+- modo Offline nunca depende do Mapbox;
+- origem GPS privada continua fora dos provedores de rota do Trajeto;
+- nunca usar token secreto `sk` no cliente.
+
+Para produção, use um token público específico do Trajeto, com o menor conjunto de permissões e restrições de URL compatíveis com o GitHub Pages. A integração comercial continua opcional porque o Directions API é medido por requisições.
