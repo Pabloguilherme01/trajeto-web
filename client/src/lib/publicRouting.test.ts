@@ -207,6 +207,50 @@ describe("public routing fallback", () => {
     expect(route.origin).toEqual({ lat: -15.7545, lng: -48.2816 });
   });
 
+  it("coarsens manually typed coordinate origins before public routing or cache storage", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: (index: number) => Array.from(saved.keys())[index] ?? null,
+      get length() {
+        return saved.size;
+      },
+    };
+    vi.stubGlobal("localStorage", storage);
+    vi.stubGlobal("sessionStorage", storage);
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 9000, duration: 700, geometry: "coarse-origin" }],
+        }),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePublicRoute(
+      "-15.76123, -48.28123",
+      "-15.7942, -47.8822"
+    );
+
+    expect(route.origin).toEqual({ lat: -15.761, lng: -48.281 });
+    const routerUrl = String(fetchMock.mock.calls[0][0]);
+    expect(routerUrl).toContain("-48.281,-15.761;");
+    expect(routerUrl).not.toContain("-15.76123");
+    expect(routerUrl).not.toContain("-48.28123");
+
+    const persisted = Array.from(saved.entries())
+      .map(([key, value]) => key + "=" + value)
+      .join("\n");
+    expect(persisted).not.toContain("-15.76123");
+    expect(persisted).not.toContain("-48.28123");
+  });
+
   it("never sends the GPS origin to an online route provider", async () => {
     const fetchMock = vi
       .fn()
