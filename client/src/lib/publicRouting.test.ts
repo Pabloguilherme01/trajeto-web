@@ -161,6 +161,7 @@ describe("public routing fallback", () => {
       },
     };
     vi.stubGlobal("localStorage", storage);
+    vi.stubGlobal("sessionStorage", storage);
 
     const fetchMock = vi
       .fn()
