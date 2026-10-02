@@ -661,11 +661,22 @@ export async function calculatePublicRoute(
   destinationText: string,
   mode: PublicTravelMode = "driving"
 ): Promise<PublicRoute> {
-  const origin = await geocode(originText);
+  const resolvedOrigin = await geocode(originText);
   const destination = await geocode(destinationText);
-  if (haversineMeters(origin, destination) < 20) {
+  if (haversineMeters(resolvedOrigin, destination) < 20) {
     throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
   }
+
+  // Coordinates typed manually can still describe a private starting point.
+  // Keep normal addresses untouched, but reduce explicit coordinate origins to
+  // neighborhood/block precision before they enter route URLs or cache keys.
+  const origin = parseCoordinateInput(originText)
+    ? {
+        lat: Math.round(resolvedOrigin.lat * 1000) / 1000,
+        lng: Math.round(resolvedOrigin.lng * 1000) / 1000,
+      }
+    : resolvedOrigin;
+
   const coordinateKey =
     [
       origin.lat.toFixed(5),
