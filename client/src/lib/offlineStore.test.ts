@@ -46,9 +46,14 @@ describe("offlineStore helpers", () => {
     expect(privateLabel).toContain("destination=Hospital");
   });
 
-  it("shares offline routes by id without exposing origin or destination in the URL", () => {
-    const route = { id: "rota privada 1", origin: "Minha localização", destination: "Hospital" };
-    expect(offlineRouteShareUrl(route)).toBe("/planejar?rota=rota+privada+1");
-    expect(offlineRouteShareText(route)).toContain("Minha localização → Hospital");
+  it("shares offline routes as portable planner links without exposing private origins", () => {
+    const privateRoute = { origin: "Minha localização", destination: "Hospital" };
+    const legacyCoordinateRoute = { origin: "-15.76123, -48.28123", destination: "Hospital" };
+    const publicRoute = { origin: "Centro", destination: "Hospital" };
+
+    expect(offlineRouteShareUrl(privateRoute)).toBe("/planejar?destino=Hospital");
+    expect(offlineRouteShareUrl(legacyCoordinateRoute)).toBe("/planejar?destino=Hospital");
+    expect(offlineRouteShareUrl(publicRoute)).toBe("/planejar?destino=Hospital&origem=Centro");
+    expect(offlineRouteShareText(privateRoute)).toContain("Minha localização → Hospital");
   });
 });
