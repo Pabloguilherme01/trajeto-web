@@ -1,5 +1,5 @@
 import { appUrl } from "@/lib/appUrl";
-import { isCurrentLocationLabel } from "@/lib/locationPrivacy";
+import { privateOriginForUrl } from "@/lib/locationPrivacy";
 
 export type ReusableTrip = { origin: string; destination: string };
 
@@ -8,10 +8,10 @@ export function buildReusableTripPlannerUrl(
   options: { auto?: boolean; drivingMode?: boolean } = {},
 ) {
   const params = new URLSearchParams({ destino: trip.destination.trim() });
-  const origin = trip.origin.trim();
-  const privateOrigin = isCurrentLocationLabel(origin);
+  const origin = privateOriginForUrl(trip.origin);
+  const privateOrigin = !origin && Boolean(trip.origin.trim());
 
-  if (origin && !privateOrigin) params.set("origem", origin);
+  if (origin) params.set("origem", origin);
   if (options.auto && !privateOrigin) params.set("auto", "1");
   if (options.drivingMode) params.set("conducao", "1");
 

@@ -33,4 +33,17 @@ describe("trip links", () => {
     expect(url).not.toContain("origem=");
     expect(url).not.toContain("destino=");
   });
+  it("does not serialize a precise coordinate origin from legacy history", () => {
+    const url = buildReusableTripPlannerUrl(
+      { origin: "-15.76123, -48.28123", destination: "Hospital" },
+      { auto: true },
+    );
+
+    expect(url).toContain("destino=Hospital");
+    expect(url).not.toContain("origem=");
+    expect(url).not.toContain("-15.76123");
+    expect(url).not.toContain("-48.28123");
+    expect(url).not.toContain("auto=1");
+  });
+
 });
