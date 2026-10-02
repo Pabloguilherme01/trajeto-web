@@ -8,6 +8,11 @@ describe("identidade de postos", () => {
     expect(anp).toBe(local);
   });
 
+  it("ignora diferenças de fonte quando o CNPJ é o mesmo", () => {
+    expect(stationIdentityKey({ cnpj: "12.560.575/0001-48", placeId: "google-guaira", address: "BR-070", name: "Posto Ipiranga" }))
+      .toBe(stationIdentityKey({ cnpj: "12.560.575/0001-48", placeId: null, address: "Quadra 28", name: "Posto Guaíra" }));
+  });
+
   it("usa placeId quando não há CNPJ e endereço normalizado como último recurso", () => {
     expect(stationIdentityKey({ cnpj: null, placeId: "abc", address: "Rua 1", name: "Posto" })).toBe("place:abc");
     expect(stationIdentityKey({ cnpj: null, placeId: null, address: "Av. Águas Líndas, 10", name: "Posto" })).toBe("address:av aguas lindas 10");
