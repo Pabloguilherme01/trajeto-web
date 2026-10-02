@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("public screens stay inside the viewport before and after scrolling and focusing inputs", async ({ page }) => {
+test("public screens stay inside the viewport before and after scrolling and focusing inputs", async ({ page }, testInfo) => {
+  test.skip(
+    testInfo.project.name === "chromium-mobile",
+    "This matrix sets its own 280–768px viewports; run it once on Chromium instead of duplicating the same matrix."
+  );
   test.setTimeout(120_000);
   for (const width of [280, 320, 360, 390, 768]) {
     await page.setViewportSize({ width, height: 740 });
