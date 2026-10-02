@@ -14,7 +14,7 @@ it("keeps stations without ids selectable when background tiles fail", () => {
   ]} />);
   const tiles = screen.getAllByRole("presentation");
   tiles.slice(0, 5).forEach(tile => fireEvent.error(tile));
-  expect(screen.getByRole("img", { name: /Mapa offline esquemático/ })).toBeTruthy();
+  expect(screen.getByRole("img", { name: /Mapa offline vetorial/ })).toBeTruthy();
   const picker = screen.getByRole("combobox", { name: "Escolher posto no mapa offline" });
   const option = screen.getByRole("option", { name: "Posto B" }) as HTMLOptionElement;
   fireEvent.change(picker, { target: { value: option.value } });

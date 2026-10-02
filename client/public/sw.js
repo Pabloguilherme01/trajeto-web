@@ -1,9 +1,11 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v23";
+const VERSION = CACHE_PREFIX + "v24";
 const NETWORK_TIMEOUT_MS = 4000;
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
+
+const LOCAL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json", "./data/aguas-lindas-offline-map.json"];
 
 const STATIC_SHELL = [
   "./",
@@ -46,7 +48,7 @@ self.addEventListener("install", event => {
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
-        await precacheFresh(cache, ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"]);
+        await precacheFresh(cache, LOCAL_SNAPSHOTS);
       })
       .then(() => caches.open(MAP_CACHE))
   );
@@ -217,7 +219,7 @@ async function offlineStatus() {
     const assets = [...STATIC_SHELL, ...collectManifestAssets(await response.json())];
     const saved = await Promise.all(assets.map(asset => cache.match(asset, { ignoreVary: true })));
     const data = await caches.open(DATA_CACHE);
-    const snapshots = await Promise.all(["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"].map(asset => data.match(asset, { ignoreVary: true })));
+    const snapshots = await Promise.all(LOCAL_SNAPSHOTS.map(asset => data.match(asset, { ignoreVary: true })));
     return { ready: saved.every(Boolean) && snapshots.every(Boolean), version: VERSION };
   } catch {
     return { ready: false };
@@ -243,7 +245,7 @@ async function restoreOfflinePackage() {
       if (!await cache.match(asset, { ignoreVary: true })) missing.push({ cache, asset });
     }
     const data = await caches.open(DATA_CACHE);
-    for (const asset of ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"]) {
+    for (const asset of LOCAL_SNAPSHOTS) {
       if (!await data.match(asset, { ignoreVary: true })) missing.push({ cache: data, asset });
     }
     // Keep downloads bounded on phones. A missing old chunk may have been

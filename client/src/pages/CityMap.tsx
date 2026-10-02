@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { MapPin, Search, ShieldCheck } from "lucide-react";
+import { OfflineStationMap } from "@/components/StationMap";
 import TileStationMap from "@/components/TileStationMap";
 import {
   LOCAL_GEOCODE_POINTS,
@@ -118,7 +119,7 @@ export default function CityMap() {
     navigate(
       appUrl("/planejar") + "?destino=" + encodeURIComponent(destination)
     );
-  const fallback = (
+  const emptyFallback = (
     <div className="grid min-h-[320px] place-items-center rounded-2xl bg-[#17262d] p-6 text-center">
       <div>
         <MapPin className="mx-auto size-8 text-[#C7FF3C]" />
@@ -130,6 +131,7 @@ export default function CityMap() {
       </div>
     </div>
   );
+  const fallback = markers.length ? <OfflineStationMap stations={markers} itemLabel="destino" onPlanDestination={item => plan(item.source === "ANP" ? item.name + ", " + item.address : item.address)} /> : emptyFallback;
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-white sm:px-6">
       <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">

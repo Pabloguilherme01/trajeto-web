@@ -55,7 +55,7 @@ test("Pages: background failure keeps the offline picker and navigation touchabl
   await page.route("https://tile.openstreetmap.org/**", route => route.abort());
   await page.goto("mapa/postos", { waitUntil: "domcontentloaded" });
   const map = page.locator("#aguas-lindas-map");
-  await expect(map.getByRole("img", { name: /Mapa offline esquemático/ })).toBeVisible();
+  await expect(map.getByRole("img", { name: /Mapa offline vetorial/ })).toBeVisible();
   const picker = map.getByRole("combobox", { name: "Escolher posto no mapa offline" });
   await picker.click({ trial: true });
   const option = await picker.locator("option").last().evaluate(el => ({ value: (el as HTMLOptionElement).value, name: el.textContent! }));
