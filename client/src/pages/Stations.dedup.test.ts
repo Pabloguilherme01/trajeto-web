@@ -17,4 +17,16 @@ describe("identidade de postos", () => {
     expect(stationIdentityKey({ cnpj: null, placeId: "abc", address: "Rua 1", name: "Posto" })).toBe("place:abc");
     expect(stationIdentityKey({ cnpj: null, placeId: null, address: "Av. Águas Líndas, 10", name: "Posto" })).toBe("address:av aguas lindas 10");
   });
+
+  it("keeps station identity stable for very long mobile-facing address text", () => {
+    const key = stationIdentityKey({
+      cnpj: null,
+      placeId: null,
+      name: "Posto com nome extremamente longo",
+      address: "Avenida de nome muito extenso, Quadra 999, Lote 999, Jardim da Barragem VI, Águas Lindas de Goiás",
+    });
+    expect(key).toContain("avenida de nome muito extenso");
+    expect(key).not.toContain("á");
+  });
+
 });
