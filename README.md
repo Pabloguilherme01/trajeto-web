@@ -1,32 +1,32 @@
 # Trajeto
 
-O Trajeto é uma ferramenta de decisão para quem se desloca de carro pelo Entorno do Distrito Federal.
+O Trajeto é uma **plataforma mobile de utilidade pública e mobilidade para Águas Lindas de Goiás e o Entorno do Distrito Federal**. O núcleo público funciona sem conta e preserva uma experiência útil mesmo com conexão limitada ou indisponível.
 
 ## Objetivo
 
-**Ajudar quem dirige pelo Entorno a escolher onde parar e por onde seguir, economizando tempo, combustível e desvio.**
+**Resolver necessidades locais e decisões de deslocamento com poucos toques, dados verificáveis e continuidade offline.**
 
-A missão do produto é simples: transformar uma busca de posto ou rota em uma decisão prática. O Trajeto não tenta substituir o aplicativo de mapas; ele organiza contexto para responder **onde parar, quanto desviar, o que realmente pode ser economizado e de onde veio cada dado**.
+O produto combina rotas, postos, serviços públicos, contatos úteis e recursos de preparação de viagem sem tentar substituir um aplicativo completo de navegação. Para mapas curva a curva, o Trajeto pode encaminhar o usuário ao navegador de sua escolha; dentro do app, prioriza contexto, dados locais, estimativas claramente identificadas e ações práticas.
 
 O fluxo principal é:
 
-**buscar → comparar → decidir → navegar**
+**buscar → resolver → decidir → navegar**
 
-Toda nova funcionalidade deve justificar seu espaço por melhorar uma dessas quatro etapas. Se não melhorar a decisão ou o uso recorrente, fica fora da experiência principal.
+Toda nova funcionalidade deve justificar seu espaço por reduzir tempo, toques, dados, custo ou incerteza para o cidadão. Recursos que apenas aumentam complexidade sem melhorar uma decisão concreta ficam fora do núcleo.
 
-A plataforma começa pública e simples: o usuário informa uma cidade, bairro, posto ou destino e recebe opções de abastecimento, contexto de rota e referências de fonte. Cadastro é opcional e só entra quando traz valor recorrente.
+A experiência pública começa simples: pesquisar uma necessidade, serviço, lugar, posto ou destino; receber a próxima ação adequada; e continuar com conteúdo preparado no aparelho quando possível. Cadastro e backend permanecem opcionais.
 
-O foco inicial é o corredor **Águas Lindas de Goiás ↔ Distrito Federal**. A expansão para outros corredores deve acontecer somente quando houver cobertura de dados e uso real.
+O foco inicial é **Águas Lindas de Goiás e o corredor com o Distrito Federal**. A expansão territorial depende de cobertura de dados, fontes e utilidade comprovada.
 
-## Nova narrativa de produto
+## Direção de produto
 
-O Trajeto evolui de uma ferramenta para encontrar postos para um **copiloto de deslocamento**.
+O Trajeto evoluiu de uma ferramenta de postos para um **copiloto local de utilidade pública e deslocamento**.
 
-A promessa passa a ser:
+A promessa é:
 
-> **Decida onde parar. Saiba por onde seguir.**
+> **Encontre o que precisa. Saiba por onde seguir.**
 
-O produto deve reduzir o número de decisões durante uma viagem e manter a próxima ação pronta no celular.
+O produto deve reduzir decisões desnecessárias, preservar privacidade de localização e manter a próxima ação pronta no celular.
 
 ### Loop principal
 
