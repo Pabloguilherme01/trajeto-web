@@ -156,6 +156,9 @@ export default function Planner() {
     const initialDirect = Math.max(1, meters(planned.route.origin, destinationPoint));
     let bestDistance = planned.route.distanceMeters;
     const watchId = navigator.geolocation.watchPosition(position => {
+      // Ignore coarse/noisy fixes so GPS drift cannot falsely shorten the trip.
+      const accuracy = Number(position.coords.accuracy);
+      if (!Number.isFinite(accuracy) || accuracy > 80) return;
       const directRemaining = meters(
         { lat: position.coords.latitude, lng: position.coords.longitude },
         destinationPoint
@@ -1058,7 +1061,7 @@ export default function Planner() {
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Navegação pronta</p>
                 <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">{staticRuntime ? "Navegação pronta para este site estático." : "O serviço de cálculo não respondeu, mas sua viagem não ficou travada."}</h2>
-                <p className="mt-2 text-xs leading-relaxed text-white/45">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
+                <p className="mt-2 text-xs leading-relaxed text-white/45">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância ou tempo foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
