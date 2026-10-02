@@ -341,4 +341,15 @@ describe("Planner travel state", () => {
     expect(screen.getByText(/somente nesta sessão e não são salvas/i)).toBeTruthy();
   });
 
+
+  it("does not share a route derived from device GPS", async () => {
+    state.search = "local=1&destino=Hospital";
+    setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    fireEvent.click(screen.getByRole("button", { name: "Compartilhar" }));
+    expect(screen.getByText(/não podem ser compartilhadas/i)).toBeTruthy();
+  });
+
 });
