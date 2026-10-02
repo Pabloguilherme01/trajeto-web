@@ -609,6 +609,7 @@ export default function Planner() {
     trafficIntervals: [],
     durationSeconds: planned.route.durationSeconds,
     distanceMeters: planned.route.distanceMeters,
+    steps: (planned.route as typeof planned.route & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps ?? [],
   }] : [];
 
   return (
@@ -1037,8 +1038,8 @@ export default function Planner() {
                 <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
-              {Array.isArray((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number }> }).steps) &&
-                ((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number }> }).steps?.length ?? 0) > 0 && (
+              {Array.isArray((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps) &&
+                ((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps?.length ?? 0) > 0 && (
                 <section className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-3" aria-labelledby="street-directions-title">
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -1050,7 +1051,7 @@ export default function Planner() {
                     </span>
                   </div>
                   <ol className="mt-3 space-y-2">
-                    {(planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number }> }).steps?.map((step, index) => (
+                    {(planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps?.map((step, index) => (
                       <li key={index + "-" + step.instruction} className="flex gap-3 rounded-xl bg-white/[.035] p-3">
                         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#C7FF3C] text-xs font-black text-[#0B1014]">{index + 1}</span>
                         <div className="min-w-0">
