@@ -20,7 +20,11 @@ export function effectivePlannerMode(
   hasExactSavedRoute: boolean
 ): PlannerExperienceMode {
   if (requested === "offline") return "offline";
-  if (!online && (requested === "smart" || hasExactSavedRoute)) return "offline";
+  // Connectivity is a runtime constraint, not a separate user preference.
+  // When the device is offline, every network-dependent experience behaves
+  // as Offline. Privacy remains explicit because it carries stricter rules
+  // even when no network is available.
+  if (!online && requested !== "private") return "offline";
   return requested;
 }
 
