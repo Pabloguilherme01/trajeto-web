@@ -35,6 +35,11 @@
       "id": "antt-semiurbano",
       "label": "ANTT · Transporte semiurbano DF/Entorno",
       "url": "https://www.gov.br/antt/pt-br/assuntos/ultimas-noticias/entorno-do-df-novas-tarifas-da-taguatur-entram-em-vigor-a-partir-de-28-de-junho"
+    },
+    {
+      "id": "prefeitura-pmgirs",
+      "label": "Prefeitura de Águas Lindas · PMGIRS 2023",
+      "url": "https://aguaslindasdegoias.go.gov.br/wp-content/uploads/2023/09/Revisao_Plano_PMGIRS_Aguas_Lindas.pdf"
     }
   ],
   "items": [
@@ -1076,6 +1081,1094 @@
         "antt",
         "semiurbano",
         "entorno"
+      ]
+    },
+    {
+      "id": "bairro-jardim-barragem-ii",
+      "name": "Jardim Barragem II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Barragem II, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Barragem II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-brasilia",
+      "name": "Jardim Brasília",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Brasília, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Brasília, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-barragem-iv",
+      "name": "Jardim Barragem IV",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Barragem IV, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Barragem IV, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-barragem-iii",
+      "name": "Jardim Barragem III",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Barragem III, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Barragem III, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-da-barragem-v",
+      "name": "Jardim da Barragem V",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim da Barragem V, Águas Lindas de Goiás - GO",
+      "destination": "Jardim da Barragem V, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-solar-da-barragem",
+      "name": "Condomínio Solar da Barragem",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Solar da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Solar da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-barragem-vi",
+      "name": "Jardim Barragem VI",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Barragem VI, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Barragem VI, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-recreio-da-barragem",
+      "name": "Recreio da Barragem",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Recreio da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Recreio da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-ilha-bela",
+      "name": "Ilha Bela",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Ilha Bela, Águas Lindas de Goiás - GO",
+      "destination": "Ilha Bela, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-itamaraca",
+      "name": "Setor Itamaracá",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor Itamaracá, Águas Lindas de Goiás - GO",
+      "destination": "Setor Itamaracá, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-prive-jardim-dos-pinheiros",
+      "name": "Condomínio Privê Jardim dos Pinheiros",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Privê Jardim dos Pinheiros, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Privê Jardim dos Pinheiros, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-por-do-sol",
+      "name": "Mansões Pôr do Sol",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Pôr do Sol, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Pôr do Sol, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-village",
+      "name": "Mansões Village",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Village, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Village, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-prive-mansoes-aguas-lindas",
+      "name": "Condomínio Privê Mansões Águas Lindas",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Privê Mansões Águas Lindas, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Privê Mansões Águas Lindas, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-olinda",
+      "name": "Mansões Olinda",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Olinda, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Olinda, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-parque-da-barragem",
+      "name": "Parque da Barragem",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Parque da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Parque da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-08",
+      "name": "Setor 08",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 08, Águas Lindas de Goiás - GO",
+      "destination": "Setor 08, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-15",
+      "name": "Setor 15",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 15, Águas Lindas de Goiás - GO",
+      "destination": "Setor 15, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-imperatriz",
+      "name": "Mansões Imperatriz",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Imperatriz, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Imperatriz, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-lago-descoberto",
+      "name": "Mansões Lago Descoberto",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Lago Descoberto, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Lago Descoberto, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-residencial-portal-da-barragem",
+      "name": "Residencial Portal da Barragem",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Residencial Portal da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Residencial Portal da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-guaira-i",
+      "name": "Jardim Guaíra I",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Guaíra I, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Guaíra I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-guaira-ii",
+      "name": "Jardim Guaíra II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Guaíra II, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Guaíra II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-vitoria",
+      "name": "Jardim Vitória",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Vitória, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Vitória, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-sol-nascente",
+      "name": "Sol Nascente",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Sol Nascente, Águas Lindas de Goiás - GO",
+      "destination": "Sol Nascente, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-chacaras-queda-do-descoberto",
+      "name": "Chácaras Queda do Descoberto",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Chácaras Queda do Descoberto, Águas Lindas de Goiás - GO",
+      "destination": "Chácaras Queda do Descoberto, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-alteroza",
+      "name": "Jardim Alteroza",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Alteroza, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Alteroza, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-california",
+      "name": "Jardim Califórnia",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Califórnia, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Califórnia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-america-i",
+      "name": "Jardim América I",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim América I, Águas Lindas de Goiás - GO",
+      "destination": "Jardim América I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-america-ii",
+      "name": "Jardim América II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim América II, Águas Lindas de Goiás - GO",
+      "destination": "Jardim América II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-parque-aguas-bonitas-i",
+      "name": "Parque Águas Bonitas I",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Parque Águas Bonitas I, Águas Lindas de Goiás - GO",
+      "destination": "Parque Águas Bonitas I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-parque-aguas-bonitas-etapa-b",
+      "name": "Parque Águas Bonitas Etapa B",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Parque Águas Bonitas Etapa B, Águas Lindas de Goiás - GO",
+      "destination": "Parque Águas Bonitas Etapa B, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-america-iii",
+      "name": "Jardim América III",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim América III, Águas Lindas de Goiás - GO",
+      "destination": "Jardim América III, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-america-iv",
+      "name": "Jardim América IV",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim América IV, Águas Lindas de Goiás - GO",
+      "destination": "Jardim América IV, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-america-v",
+      "name": "Jardim América V",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim América V, Águas Lindas de Goiás - GO",
+      "destination": "Jardim América V, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-america-vi",
+      "name": "Jardim América VI",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim América VI, Águas Lindas de Goiás - GO",
+      "destination": "Jardim América VI, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-cidade-jardim",
+      "name": "Cidade Jardim",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Cidade Jardim, Águas Lindas de Goiás - GO",
+      "destination": "Cidade Jardim, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-perola-i",
+      "name": "Jardim Pérola I",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Pérola I, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Pérola I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-perola-ii",
+      "name": "Jardim Pérola II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Pérola II, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Pérola II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-das-laranjeiras",
+      "name": "Jardim das Laranjeiras",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim das Laranjeiras, Águas Lindas de Goiás - GO",
+      "destination": "Jardim das Laranjeiras, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-oliveira",
+      "name": "Jardim Oliveira",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Oliveira, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Oliveira, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-bela-vista",
+      "name": "Condomínio Bela Vista",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Bela Vista, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Bela Vista, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-coimbra",
+      "name": "Setor Coimbra",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor Coimbra, Águas Lindas de Goiás - GO",
+      "destination": "Setor Coimbra, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-querencia",
+      "name": "Jardim Querência",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Querência, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Querência, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-02",
+      "name": "Setor 02",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 02, Águas Lindas de Goiás - GO",
+      "destination": "Setor 02, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-03",
+      "name": "Setor 03",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 03, Águas Lindas de Goiás - GO",
+      "destination": "Setor 03, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-04",
+      "name": "Setor 04",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 04, Águas Lindas de Goiás - GO",
+      "destination": "Setor 04, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-05",
+      "name": "Setor 05",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 05, Águas Lindas de Goiás - GO",
+      "destination": "Setor 05, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-06",
+      "name": "Setor 06",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 06, Águas Lindas de Goiás - GO",
+      "destination": "Setor 06, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-setor-07",
+      "name": "Setor 07",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Setor 07, Águas Lindas de Goiás - GO",
+      "destination": "Setor 07, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-camping-club",
+      "name": "Camping Club",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Camping Club, Águas Lindas de Goiás - GO",
+      "destination": "Camping Club, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-camargo",
+      "name": "Mansões Camargo",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Camargo, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Camargo, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-mansoes-odisseia",
+      "name": "Mansões Odisseia",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Mansões Odisseia, Águas Lindas de Goiás - GO",
+      "destination": "Mansões Odisseia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-eden",
+      "name": "Éden",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Éden, Águas Lindas de Goiás - GO",
+      "destination": "Éden, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-royal-parque",
+      "name": "Royal Parque",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Royal Parque, Águas Lindas de Goiás - GO",
+      "destination": "Royal Parque, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-aguas-bonitas-ii",
+      "name": "Águas Bonitas II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Águas Bonitas II, Águas Lindas de Goiás - GO",
+      "destination": "Águas Bonitas II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-aguas-bonitas-iii",
+      "name": "Águas Bonitas III",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Águas Bonitas III, Águas Lindas de Goiás - GO",
+      "destination": "Águas Bonitas III, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-prive-recreio-de-aguas-lindas-ii",
+      "name": "Condomínio Privê Recreio de Águas Lindas II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Privê Recreio de Águas Lindas II, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Privê Recreio de Águas Lindas II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-aguas-lindas-ii",
+      "name": "Jardim Águas Lindas II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Águas Lindas II, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Águas Lindas II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-santa-lucia",
+      "name": "Jardim Santa Lúcia",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "destination": "Jardim Santa Lúcia, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-recanto-da-barragem",
+      "name": "Recanto da Barragem",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Recanto da Barragem, Águas Lindas de Goiás - GO",
+      "destination": "Recanto da Barragem, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-do-entorno-i",
+      "name": "Jardim do Entorno I",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim do Entorno I, Águas Lindas de Goiás - GO",
+      "destination": "Jardim do Entorno I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-jardim-do-entorno-ii",
+      "name": "Jardim do Entorno II",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Jardim do Entorno II, Águas Lindas de Goiás - GO",
+      "destination": "Jardim do Entorno II, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-cidade-do-entorno",
+      "name": "Cidade do Entorno",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Cidade do Entorno, Águas Lindas de Goiás - GO",
+      "destination": "Cidade do Entorno, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-parque-do-bosque",
+      "name": "Parque do Bosque",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Parque do Bosque, Águas Lindas de Goiás - GO",
+      "destination": "Parque do Bosque, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-embaixador",
+      "name": "Condomínio Embaixador",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Embaixador, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Embaixador, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-condominio-embaixador-i",
+      "name": "Condomínio Embaixador I",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Condomínio Embaixador I, Águas Lindas de Goiás - GO",
+      "destination": "Condomínio Embaixador I, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
+      ]
+    },
+    {
+      "id": "bairro-padre-lucio",
+      "name": "Padre Lúcio",
+      "detail": "Bairro/setor identificado no plano municipal de gestão de resíduos",
+      "category": "referencia",
+      "address": "Padre Lúcio, Águas Lindas de Goiás - GO",
+      "destination": "Padre Lúcio, Águas Lindas de Goiás - GO",
+      "sourceId": "prefeitura-pmgirs",
+      "verifiedAt": "2026-10-02",
+      "keywords": [
+        "bairro",
+        "setor",
+        "regiao",
+        "aguas lindas"
       ]
     }
   ]
