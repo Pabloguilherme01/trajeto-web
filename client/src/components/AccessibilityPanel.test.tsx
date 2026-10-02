@@ -1,5 +1,5 @@
 import React from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AccessibilityPanel from "./AccessibilityPanel";
@@ -23,4 +23,33 @@ describe("AccessibilityPanel", () => {
     expect(localStorage.getItem("other-app-setting")).toBe("keep");
     expect(screen.getByText(/nenhum dado local do trajeto está salvo/i)).toBeTruthy();
   });
+});
+
+it("offers deletion for a GPS handoff with no permanent data", async () => {
+  localStorage.clear();
+  const user = userEvent.setup();
+  render(<AccessibilityPanel />);
+  await user.click(screen.getAllByRole("button", { name: /abrir acessibilidade/i })[0]);
+  expect(screen.getByRole("button", { name: /limpar dados do trajeto/i })).toBeTruthy();
+  cleanup();
+});
+
+it("reports failed deletion instead of claiming all data was removed", async () => {
+  localStorage.setItem("trajeto-blocked", "private");
+  const user = userEvent.setup();
+  render(<AccessibilityPanel />);
+  await user.click(screen.getAllByRole("button", { name: /abrir acessibilidade/i })[0]);
+  await user.click(screen.getByRole("button", { name: /limpar dados do trajeto/i }));
+  const blocked = vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+    throw new DOMException("Blocked", "SecurityError");
+  });
+  try {
+    await user.click(screen.getByRole("button", { name: /confirmar limpeza/i }));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.queryByText(/dados locais removidos/i)).toBeNull();
+  } finally {
+    blocked.mockRestore();
+    cleanup();
+    localStorage.clear();
+  }
 });
