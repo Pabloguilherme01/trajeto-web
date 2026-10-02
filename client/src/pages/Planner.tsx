@@ -486,9 +486,13 @@ export default function Planner() {
 
   const shareRoute = async () => {
     if (!planned) return;
+    if (routeOriginIsPrivate) {
+      setSavedMessage("Por privacidade, rotas iniciadas na sua localização não podem ser compartilhadas. Troque a origem por um local público para compartilhar.");
+      return;
+    }
     try {
       const text = buildRouteShareText(
-        routeOriginIsPrivate ? PRIVATE_LOCATION_LABEL : origin,
+        origin,
         destination,
         planned.recommendation ? {
           name: planned.recommendation.name,
@@ -498,7 +502,7 @@ export default function Planner() {
         } : null
       );
       const params = new URLSearchParams({ destino: destination.trim(), modo: mode });
-      if (!routeOriginIsPrivate) params.set("origem", origin.trim());
+      params.set("origem", origin.trim());
       const url = window.location.origin + appUrl("/planejar") + "?" + params.toString();
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
