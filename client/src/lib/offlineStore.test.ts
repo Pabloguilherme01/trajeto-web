@@ -51,4 +51,9 @@ describe("offlineStore helpers", () => {
     expect(offlineRouteShareUrl(route)).toBe("/planejar?rota=rota+privada+1");
     expect(offlineRouteShareText(route)).toContain("Minha localização → Hospital");
   });
+  it("builds a safe offline id after a private origin is normalized", () => {
+    expect(offlineRouteId("Minha localização", "Hospital")).toBe("minha localização::hospital");
+    expect(offlineRouteId("Minha localização", "Hospital")).not.toContain("-15.");
+  });
+
 });
