@@ -547,7 +547,7 @@ export function RouteMap({
       />
       {mapReady && (
         <>
-          <div className="absolute left-3 top-3 flex max-w-[calc(100%-24px)] flex-wrap gap-2">
+          <div className="absolute left-3 right-3 top-3 flex max-w-[calc(100%-24px)] flex-wrap gap-2">
             <button
               type="button"
               onClick={fitRoute}
@@ -629,7 +629,7 @@ export function RouteMap({
           </div>
           {selectedRoute && (
             <div
-              className="absolute bottom-3 left-3 max-w-[min(360px,calc(100%-84px))] rounded-xl border border-white/10 bg-[#0B1014]/90 p-3 text-white shadow-lg backdrop-blur"
+              className="absolute bottom-3 left-3 right-3 max-w-[360px] rounded-xl border border-white/10 bg-[#0B1014]/90 p-3 text-white shadow-lg backdrop-blur"
               aria-live="polite"
             >
               <p className="text-xs font-black uppercase tracking-[0.14em] text-[#3DE3FF]">
