@@ -66,3 +66,12 @@ it("keeps education as a first-class city layer", () => {
     screen.getByRole("button", { name: /Cora Coralina.*Planejar viagem/ })
   ).toBeTruthy();
 });
+
+it("expands the mobile-friendly catalog on demand with accessible semantics", () => {
+  render(<CityMap />);
+  const expand = screen.getByRole("button", { name: /Mostrar mais/ });
+  expect(expand.getAttribute("aria-controls")).toBe("city-destination-grid");
+  expect(expand.getAttribute("aria-expanded")).toBe("false");
+  fireEvent.click(expand);
+  expect(screen.queryByRole("button", { name: /Mostrar mais/ })).toBeNull();
+});
