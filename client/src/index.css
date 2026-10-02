@@ -216,3 +216,29 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Small-screen reading and controls shared by every public page. */
+@media (max-width: 767px) {
+  main :is(p, label, summary) {
+    overflow-wrap: anywhere;
+  }
+  main :is([class*="text-[10px]"], [class*="text-[11px]"], [class*="text-[0.4"], [class*="text-[0.5"], [class*="text-[0.6"], [class*="text-[.5"], [class*="text-[.6"]) {
+    font-size: .75rem;
+    line-height: 1.5;
+  }
+  main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
+    min-height: 44px;
+    max-width: 100%;
+  }
+  [data-slot="dialog-content"] {
+    max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  [data-slot="dialog-close"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  /* A pressed map marker must keep its camera transform. */
+  .offline-map button:active { transform: none; }
+}
