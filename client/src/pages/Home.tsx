@@ -11,6 +11,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, isCurrentLocationLabel, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import TripReadinessCard from "@/components/TripReadinessCard";
+import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
 import DailyModeSelector from "@/components/DailyModeSelector";
 import { localDataEvent } from "@/lib/localData";
 
@@ -98,7 +99,7 @@ export default function Home() {
     rememberSearch(to);
     track("route_open", to);
     vibration();
-    const params = new URLSearchParams({ destino: to });
+    const params = new URLSearchParams({ destino: to, auto: "1" });
     if (originPrivate) params.set("local", "1");
     else if (from) params.set("origem", from);
     setLocation(appUrl("/planejar") + "?" + params.toString());
@@ -195,36 +196,13 @@ export default function Home() {
 
         <section className="mt-6 sm:mt-8">
           <p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Águas Lindas na mão</p>
-          <h1 className="mobile-title mt-2 max-w-3xl font-display text-[clamp(1.9rem,7.8vw,4.8rem)] font-semibold leading-[.94] tracking-[-.065em]">
+          <h1 className="mobile-title mt-2 max-w-3xl font-display text-[clamp(1.65rem,6.5vw,4.8rem)] font-semibold leading-[1.08] sm:leading-[.94] tracking-[-.065em]">
             Resolva na cidade.<br />
             <span className="text-[#C7FF3C]">Chegue onde precisa.</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 sm:mt-5 sm:text-base">
-            Rotas, serviços públicos, postos e lugares úteis de Águas Lindas com acesso rápido no celular.
+            Escolha seu destino. Encontre rotas e serviços em Águas Lindas.
           </p>
-        </section>
-
-        <section className="mt-5" aria-label="Ações principais">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
-              <div className="flex items-center justify-between gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/12 text-[#C7FF3C]"><Route className="size-4" /></span>
-                <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]/80" />
-              </div>
-              <p className="mt-2 text-sm font-black">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota") : "Planejar uma rota"}</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Confirme sua localização para refazer a rota." : "Retome sua última viagem em um toque.") : "Origem, destino e rota sem cadastro."}</p>
-            </button>
-            <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
-              <Fuel className="size-4 text-[#3DE3FF]" />
-              <p className="mt-2.5 text-sm font-black">Postos</p>
-              <p className="mt-1 text-xs leading-snug text-white/68">Perto de você</p>
-            </button>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
-              <Landmark className="size-4 text-[#FFB86B]" />
-              <p className="mt-2.5 text-sm font-black">Serviços</p>
-              <p className="mt-1 text-xs leading-snug text-white/68">Saúde e cidadania</p>
-            </button>
-          </div>
         </section>
 
         <section className="mt-4 rounded-[1.45rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
@@ -270,6 +248,31 @@ export default function Home() {
         </section>
 
 
+        <section className="mt-5" aria-label="Ações principais">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
+              <div className="flex items-center justify-between gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/12 text-[#C7FF3C]"><Route className="size-4" /></span>
+                <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]/80" />
+              </div>
+              <p className="mt-2 text-sm font-black">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota") : "Planejar uma rota"}</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Confirme sua localização para refazer a rota." : "Retome sua última viagem em um toque.") : "Origem, destino e rota sem cadastro."}</p>
+            </button>
+            <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+              <Fuel className="size-4 text-[#3DE3FF]" />
+              <p className="mt-2.5 text-sm font-black">Postos</p>
+              <p className="mt-1 text-xs leading-snug text-white/68">Perto de você</p>
+            </button>
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+              <Landmark className="size-4 text-[#FFB86B]" />
+              <p className="mt-2.5 text-sm font-black">Serviços</p>
+              <p className="mt-1 text-xs leading-snug text-white/68">Saúde e cidadania</p>
+            </button>
+          </div>
+        </section>
+
+        <ReadyRouteShortcuts />
+
         <div className="mt-4 sm:mt-5"><DailyModeSelector /></div>
 
         <section className="mt-4 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.04] p-3" aria-labelledby="home-utility-title">
@@ -288,7 +291,7 @@ export default function Home() {
             ].map(item => (
               <a key={item.label} href={item.href} className="inline-flex min-h-[4.25rem] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-white/8 bg-[#0B1014] px-1.5 py-2 text-center text-xs font-black text-white/75 transition hover:border-[#FFB86B]/25 active:scale-[.98]">
                 <Phone className="size-3.5 text-[#FFB86B]" />
-                <span className="max-w-full truncate">{item.label}</span>
+                <span className="max-w-full break-words">{item.label}</span>
                 <span className="text-white/60">{item.number}</span>
               </a>
             ))}
@@ -316,7 +319,7 @@ export default function Home() {
                 className="mobile-card min-h-[5.8rem] w-[46%] min-w-[8.5rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
               >
                 <Route className="size-4 text-[#3DE3FF]" aria-hidden="true" />
-                <span className="mt-2 block truncate text-xs font-black">{route.label}</span>
+                <span className="mt-2 block break-words text-sm font-black">{route.label}</span>
                 <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</span>
               </button>
             ))}
@@ -341,9 +344,9 @@ export default function Home() {
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
                 }} className="mobile-card min-h-[6.75rem] w-[72%] min-w-[13rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
                   <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
-                  <span className="mt-2 block truncate text-xs font-black">{place.name}</span>
+                  <span className="mt-2 block break-words text-sm font-black">{place.name}</span>
                   <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{place.detail}</span>
-                  <span className="mt-1 block truncate text-xs text-white/60">{place.address}</span>
+                  <span className="mt-1 block break-words text-xs text-white/60">{place.address}</span>
                 </button>
               );
             })}

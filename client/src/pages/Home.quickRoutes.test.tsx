@@ -1,0 +1,32 @@
+import React from "react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import Home from "./Home";
+const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
+vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
+vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
+vi.mock("@/components/TripReadinessCard", () => ({ default: () => null }));
+vi.mock("@/components/DailyModeSelector", () => ({ default: () => null }));
+Object.assign(globalThis, { React });
+afterEach(() => { cleanup(); localStorage.clear(); navigate.mockClear(); });
+it("puts the quick form before service cards and starts calculation in one submit", () => {
+  render(<Home />);
+  const origin = screen.getByPlaceholderText("De onde você sai");
+  expect(origin.compareDocumentPosition(screen.getByRole("button", { name: /Planejar uma rota/ })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  fireEvent.change(origin, { target: { value: "Prefeitura de Águas Lindas de Goiás" } });
+  fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value: "UPA Mansões Odisseia" } });
+  fireEvent.click(screen.getByRole("button", { name: "Calcular rota" }));
+  const url = new URL(navigate.mock.calls[0][0], "https://example.com");
+  expect(url.searchParams.get("origem")).toBe("Prefeitura de Águas Lindas de Goiás");
+  expect(url.searchParams.get("destino")).toBe("UPA Mansões Odisseia");
+  expect(url.searchParams.get("auto")).toBe("1");
+});
+it("opens a ready trip with both endpoints", () => {
+  render(<Home />);
+  fireEvent.click(screen.getByText("12 trajetos prontos pela cidade"));
+  fireEvent.click(screen.getByRole("button", { name: /Prefeitura → UPA/ }));
+  const url = new URL(navigate.mock.calls[0][0], "https://example.com");
+  expect(url.searchParams.get("origem")).toMatch(/Prefeitura/);
+  expect(url.searchParams.get("destino")).toMatch(/UPA/);
+  expect(url.searchParams.get("auto")).toBe("1");
+});

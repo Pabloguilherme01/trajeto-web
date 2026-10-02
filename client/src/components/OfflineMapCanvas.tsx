@@ -64,6 +64,7 @@ export default function OfflineMapCanvas({
   zoom,
   onZoom,
   resetKey = 0,
+  focusRequest,
   ariaLabel = "Mapa vetorial offline",
   onSelect,
   className = "h-[360px]",
@@ -74,6 +75,7 @@ export default function OfflineMapCanvas({
   zoom: number;
   onZoom: (zoom: number) => void;
   resetKey?: number;
+  focusRequest?: { point: MapPoint; key: number } | null;
   ariaLabel?: string;
   onSelect?: (marker: OfflineMapMarker) => void;
   className?: string;
@@ -166,6 +168,13 @@ export default function OfflineMapCanvas({
     );
     return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, scale: scale * zoom };
   }, [fingerprint, markers, routePoints, size.width, size.height, zoom]);
+  const lastFocusRequest = useRef<typeof focusRequest>(null);
+  useEffect(() => {
+    if (!focusRequest || lastFocusRequest.current === focusRequest) return;
+    lastFocusRequest.current = focusRequest;
+    const point = world(focusRequest.point);
+    setPan({ x: -(point.x - camera.x) * camera.scale, y: -(point.y - camera.y) * camera.scale });
+  }, [focusRequest, camera]);
   const project = (point: MapPoint) => {
     const p = world(point);
     return {

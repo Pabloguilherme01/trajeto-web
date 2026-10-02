@@ -93,19 +93,20 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
   const [selectedId, setSelectedId] = useState<string | null>(stations[0] ? offlineStationKey(stations[0]) : null);
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
+  const [focusRequest, setFocusRequest] = useState<{ point: { lat: number; lng: number }; key: number } | null>(null);
   const selected = stations.find(station => offlineStationKey(station) === selectedId) ?? stations[0] ?? null;
   const markers = stations.map((station, i) => ({ ...station, id: offlineStationKey(station), label: String(i + 1) }));
   if (userCoords) markers.push({ ...userCoords, id: "device-location", name: "Sua posição local", address: "", label: "●" });
-  const select = (id: string) => { setSelectedId(id); const station = stations.find(item => offlineStationKey(item) === id); if (station) onSelectStation?.(station); };
+  const select = (id: string) => { setSelectedId(id); const station = stations.find(item => offlineStationKey(item) === id); if (station) { setFocusRequest(previous => ({ point: station, key: (previous?.key ?? 0) + 1 })); onSelectStation?.(station); } };
   return <div className="overflow-hidden bg-[#eef2eb] text-[#163840]">
     <div className="flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
       <button type="button" onClick={() => setZoom(v => Math.min(6, v + .5))} disabled={zoom >= 6} className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40" aria-label="Aumentar zoom"><Plus className="size-4" /></button>
       <button type="button" onClick={() => setZoom(v => Math.max(1, v - .5))} disabled={zoom <= 1} className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
-      <button type="button" onClick={() => { setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-xl bg-white" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
+      <button type="button" onClick={() => { setFocusRequest(null); setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-xl bg-white" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       <span className="text-xs font-black">Disponível sem conexão</span>
       <label className="w-full"><span className="sr-only">Escolher {itemLabel} no mapa offline</span><select className="min-h-11 min-w-0 w-full rounded-xl border border-black/10 bg-white px-3 text-base" value={selected ? offlineStationKey(selected) : ""} onChange={event => select(event.target.value)}>{stations.map(station => <option key={offlineStationKey(station)} value={offlineStationKey(station)}>{station.name}</option>)}</select></label>
     </div>
-    <OfflineMapCanvas markers={markers} zoom={zoom} onZoom={setZoom} resetKey={resetKey} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
+    <OfflineMapCanvas markers={markers} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
     <div className="border-t border-black/10 bg-white p-4">
       <p className="break-words text-base font-black">{selected?.name ?? "Nenhum ponto nesta categoria"}</p><p className="mt-1 break-words text-sm leading-relaxed text-[#607169]">{selected?.address}</p>
       {selected && <div className="mt-3 flex flex-wrap gap-2">
