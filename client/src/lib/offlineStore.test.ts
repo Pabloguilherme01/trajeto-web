@@ -4,6 +4,8 @@ import { externalNavigationUrl, findBestOfflineRouteForTrip, findOfflineRouteByD
 describe("offlineStore helpers", () => {
   it("normalizes route ids consistently", () => {
     expect(offlineRouteId("  Águas Lindas ", " Brasília ")).toBe("águas lindas::brasília");
+    expect(offlineRouteId("Águas Lindas", "Brasília", "walking")).toBe("águas lindas::brasília::walking");
+    expect(offlineRouteId("Águas Lindas", "Brasília", "driving")).not.toBe(offlineRouteId("Águas Lindas", "Brasília", "walking"));
   });
 
   it("finds a saved route by destination without case sensitivity", () => {
