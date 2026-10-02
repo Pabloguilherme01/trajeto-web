@@ -76,10 +76,10 @@ it("expands the mobile-friendly catalog on demand with accessible semantics", ()
   expect(screen.queryByRole("button", { name: /Mostrar mais/ })).toBeNull();
 });
 
-it("offers direct mobile actions to open the large map and the planner", () => {
+it("offers a direct planner action without duplicating map expansion controls", () => {
   render(<CityMap />);
-  fireEvent.click(screen.getByRole("button", { name: "Abrir mapa" }));
-  expect(screen.getByRole("button", { name: "Mapa normal" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Abrir mapa" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Mapa grande" })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Planejar rota" }));
   expect(navigate).toHaveBeenCalledWith(expect.stringContaining("/planejar"));
 });
