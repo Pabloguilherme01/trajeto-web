@@ -369,7 +369,7 @@ function isPublicRoute(value: unknown): value is PublicRoute {
 }
 
 function cacheGet<T>(key: string): T | null {
-  for (const name of ["localStorage", "sessionStorage"] as const) {
+  for (const name of ["sessionStorage"] as const) {
     try {
       const storage = globalThis[name];
       const raw = storage?.getItem(CACHE_PREFIX + key);
@@ -380,7 +380,10 @@ function cacheGet<T>(key: string): T | null {
 }
 
 function cacheSet<T>(key: string, value: T) {
-  for (const name of ["localStorage", "sessionStorage"] as const) {
+  // Routing/geocoding results can reveal places a person searched for.
+  // Keep them session-scoped so another user of the same browser profile
+  // cannot inherit a previous person's location-derived cache.
+  for (const name of ["sessionStorage"] as const) {
     try {
       const storage = globalThis[name];
       storage?.setItem(CACHE_PREFIX + key, JSON.stringify(value));
