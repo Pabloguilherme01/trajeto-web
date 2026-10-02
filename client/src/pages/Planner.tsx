@@ -1029,7 +1029,12 @@ export default function Planner() {
                               stops={(route.payload as PlannedRoute).stops ?? []}
                               routes={[{
                                 id: route.id,
-                                source: ((route.payload as PlannedRoute).route as PlannedRoute["route"] & { source?: string }).source ?? "offline",
+                                source: (() => {
+                                  const savedSource = ((route.payload as PlannedRoute).route as PlannedRoute["route"] & { source?: string }).source;
+                                  return savedSource === "mapbox" || savedSource === "osrm" || savedSource === "local-estimate"
+                                    ? savedSource
+                                    : "local-estimate";
+                                })(),
                                 polyline: (route.payload as PlannedRoute).route.polyline ?? null,
                                 selected: true,
                                 durationSeconds: (route.payload as PlannedRoute).route.durationSeconds,
