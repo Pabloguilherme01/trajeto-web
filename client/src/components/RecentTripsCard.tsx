@@ -2,7 +2,6 @@ import React from "react";
 import { ArrowLeftRight, ArrowRight, History, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { appUrl } from "@/lib/appUrl";
 import { clearRecentTrips, getRecentTrips, getRouteUsage, mobilePreferenceEvent, removeRecentTrip, type RecentTrip } from "@/lib/mobilePreferences";
 import { findOfflineRouteByTrip, listOfflineRoutes } from "@/lib/offlineStore";
 import { isCurrentLocationLabel } from "@/lib/locationPrivacy";
