@@ -161,14 +161,14 @@ export default function Home() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-10">
-      <div className="container max-w-5xl pt-5 sm:pt-8 lg:pt-12">
-        <header className="flex items-center justify-between">
+    <main className="premium-surface min-h-[100dvh] max-w-full overflow-x-clip bg-[#0B1014] pb-28 text-white md:pb-10">
+      <div className="container min-w-0 max-w-5xl overflow-x-clip pt-5 sm:pt-8 lg:pt-12">
+        <header className="flex min-w-0 items-center justify-between gap-2">
           <div>
             <p className="text-xs font-black uppercase tracking-[.18em] text-[#71818A]">{greeting}</p>
             <p className="mt-1 brand-wordmark text-[1.2rem] text-white">trajeto</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2">
             <span className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-[#C7FF3C]/20 bg-[#C7FF3C]/5 text-[#C7FF3C]" : "border-[#FFB86B]/25 bg-[#FFB86B]/5 text-[#FFB86B]")}>
               {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
               {online ? "online" : "offline"}
@@ -205,8 +205,8 @@ export default function Home() {
           </p>
         </section>
 
-        <section className="mt-4 rounded-[1.45rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
+        <section className="mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rota rápida</p>
               <h2 className="mt-1 text-xl font-black tracking-[-.04em]">Para onde você vai?</h2>
@@ -251,7 +251,7 @@ export default function Home() {
         <section className="mt-5" aria-label="Ações principais">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/12 text-[#C7FF3C]"><Route className="size-4" /></span>
                 <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]/80" />
               </div>
@@ -276,7 +276,7 @@ export default function Home() {
         <div className="mt-4 sm:mt-5"><DailyModeSelector /></div>
 
         <section className="mt-4 rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.04] p-3" aria-labelledby="home-utility-title">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.15em] text-[#FFB86B]">Utilidade imediata</p>
               <h2 id="home-utility-title" className="mt-1 text-sm font-black">Precisa resolver agora?</h2>
@@ -300,14 +300,14 @@ export default function Home() {
         </section>
 
         <section className="mt-5" aria-labelledby="local-routes-title">
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rotas locais</p>
               <h2 id="local-routes-title" className="mt-1 text-xl font-black tracking-[-.035em]">Já deixe o destino pronto.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
           </div>
-          <div className="mobile-scroll-x -mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
               <button
                 key={route.id}
@@ -316,7 +316,7 @@ export default function Home() {
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
                 }}
-                className="mobile-card min-h-[5.8rem] w-[46%] min-w-[8.5rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
+                className="mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
               >
                 <Route className="size-4 text-[#3DE3FF]" aria-hidden="true" />
                 <span className="mt-2 block break-words text-sm font-black">{route.label}</span>
@@ -327,14 +327,14 @@ export default function Home() {
         </section>
 
         <section className="mt-5" aria-labelledby="local-guide-home-title">
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.16em] text-[#FFB86B]">Guia local</p>
               <h2 id="local-guide-home-title" className="mt-1 text-xl font-black tracking-[-.035em]">Comer, comprar, resolver.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Abrir guia</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Abrir guia</button>
           </div>
-          <div className="mobile-scroll-x -mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_PLACES.filter(place => place.category === "alimentacao" || place.category === "compras").slice(0, 6).map(place => {
               const PlaceIcon = place.category === "alimentacao" ? Utensils : ShoppingBag;
               return (
@@ -342,7 +342,7 @@ export default function Home() {
                   rememberSearch(place.name);
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
-                }} className="mobile-card min-h-[6.75rem] w-[72%] min-w-[13rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
+                }} className="mobile-card min-h-[6.75rem] w-[min(72%,18rem)] min-w-[11rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
                   <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
                   <span className="mt-2 block break-words text-sm font-black">{place.name}</span>
                   <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{place.detail}</span>
@@ -354,12 +354,12 @@ export default function Home() {
         </section>
 
         <section className="mt-5 sm:mt-6" aria-label="Atalhos por necessidade">
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.16em] text-white/60">Resolver agora</p>
               <h2 className="mt-1 text-lg font-black tracking-[-.035em]">Acesso rápido.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver tudo</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver tudo</button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
@@ -435,7 +435,7 @@ export default function Home() {
 
         {recentTrips.length > 0 && (
           <section className="mt-7 rounded-3xl border border-white/8 bg-white/[.025] p-4" aria-labelledby="recent-trips-title">
-            <div className="flex items-end justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.16em] text-white/60">Rotas reutilizáveis</p>
                 <h2 id="recent-trips-title" className="mt-1 text-lg font-black tracking-[-.035em]">Continue de onde parou.</h2>
