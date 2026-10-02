@@ -8,7 +8,7 @@ import { localDataEvent } from "@/lib/localData";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
 import { canPersistOfflineTrip, findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
@@ -349,7 +349,7 @@ export default function Planner() {
           setSavedMessage(
             offlineMode || !online
               ? "Para calcular sem internet, informe uma origem local já conhecida ou abra uma rota salva neste aparelho."
-              : "Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho."
+              : "Destino localizado no mapa do Trajeto. Informe a origem ou toque em usar localização atual para calcular a rota completa."
           );
           track("route_open", to);
           vibration(12);
@@ -576,7 +576,9 @@ export default function Planner() {
       const url = window.location.origin + appUrl("/planejar") + "?" + params.toString();
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
-    } catch {}
+    } catch {
+      setSavedMessage("Não foi possível compartilhar esta rota agora.");
+    }
   };
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
@@ -589,17 +591,18 @@ export default function Planner() {
       : provider === "waze"
         ? buildWazeNavigationUrl(destination)
         : buildAppleMapsDirectionsUrl(destination, externalOrigin);
-    window.open(target, "_blank", "noopener,noreferrer");
+    if (!openExternalUrl(target)) {
+      setSavedMessage("O navegador bloqueou a navegação externa. Permita pop-ups para continuar.");
+      return;
+    }
     track("route_open", destination || origin);
   };
 
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
     if (!stop) { setSavedMessage("Não há endereço disponível para esta parada."); return; }
-    window.open(
-      buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true),
-      "_blank",
-      "noopener,noreferrer"
-    );
+    if (!openExternalUrl(buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true))) {
+      setSavedMessage("O navegador bloqueou a abertura da navegação para esta parada.");
+    }
   };
 
   const availableDestinations = useMemo(() => {
@@ -967,9 +970,20 @@ export default function Planner() {
               privateOrigin
               forceOffline
             />
-            <p className="border-t border-white/8 px-4 py-3 text-xs leading-relaxed text-white/55">
-              Informe a origem ou use sua localização atual para transformar esta prévia em uma rota completa. O ponto exibido vem de coordenada informada ou do catálogo local do Trajeto.
-            </p>
+            <div className="border-t border-white/8 px-4 py-3">
+              <p className="text-xs leading-relaxed text-white/55">
+                Informe a origem ou use sua localização atual para transformar esta prévia em uma rota completa. O ponto exibido vem de coordenada informada ou do catálogo local do Trajeto.
+              </p>
+              <button
+                type="button"
+                onClick={useCurrentLocation}
+                disabled={locating}
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014] disabled:opacity-50"
+              >
+                <LocateFixed className="size-4" />
+                {locating ? "Obtendo localização…" : "Usar minha localização e calcular"}
+              </button>
+            </div>
           </section>
         )}
 
@@ -1145,9 +1159,9 @@ export default function Planner() {
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir Google Maps</button>
-              <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
-              <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+              <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir Google Maps</button>
+              <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
+              <button type="button" onClick={() => openExternal("apple")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
             </div>
             <p className="mt-3 text-center text-xs font-semibold text-white/30">Esse modo é compatível com hospedagem estática, como GitHub Pages.</p>
           </section>
