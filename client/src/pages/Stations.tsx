@@ -825,7 +825,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Mapa principal</p>
                 <h2 id="map-first-title" className="mt-1 text-lg font-black">Postos de Águas Lindas</h2>
               </div>
-              <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/45">{mapStations.length} referências</span>
+              <div className="flex shrink-0 flex-col items-end gap-2">
+                <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/65">{mapStations.length} referências</span>
+                <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-bold text-white/75">Ocultar mapa</button>
+              </div>
             </div>
             <div className="relative">
               <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
@@ -938,7 +941,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                     <p className="text-xs font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
                     <p className="mt-1 text-sm leading-relaxed text-white/65">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}. {mapSecondaryCount > 0 ? mapSecondaryCount + " referências secundárias também foram agregadas ao mapa." : ""}</p>
                   </div>
-                  <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>
+                  {!mapFirst && <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>}
                 </div>
 
                 {!mapFirst && showMap && mapStations.length > 0 && (
