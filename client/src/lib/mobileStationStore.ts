@@ -24,8 +24,18 @@ const MAX_FAVORITES = 20;
 const MAX_CACHED = 30;
 const CACHE_RETENTION_MS = 24 * 60 * 60 * 1000;
 
+let legacyCachePurged = false;
+
 function cacheStorage() {
-  try { return sessionStorage; } catch { return null; }
+  try {
+    if (!legacyCachePurged) {
+      legacyCachePurged = true;
+      localStorage.removeItem(CACHE_KEY);
+    }
+    return sessionStorage;
+  } catch {
+    return null;
+  }
 }
 
 function readJson<T>(key: string, fallback: T): T {
