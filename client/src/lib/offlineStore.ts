@@ -1,4 +1,4 @@
-import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -285,6 +285,43 @@ export function findOfflineRouteByTrip(routes: OfflineRoute[], origin: string, d
     route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
     route.destination.trim().toLocaleLowerCase("pt-BR") === normalizedDestination,
   ) ?? null;
+}
+
+export function offlineRouteTravelMode(route: OfflineRoute) {
+  if (!isRecord(route.payload) || !isRecord(route.payload.route)) return "driving";
+  const mode = route.payload.route.mode;
+  return mode === "walking" || mode === "cycling" || mode === "transit"
+    ? mode
+    : "driving";
+}
+
+export function findBestOfflineRouteForTrip(
+  routes: OfflineRoute[],
+  origin: string,
+  destination: string,
+  mode: "driving" | "walking" | "cycling" | "transit" = "driving"
+) {
+  const normalizedOrigin = origin.trim().toLocaleLowerCase("pt-BR");
+  const normalizedDestination = destination.trim().toLocaleLowerCase("pt-BR");
+  if (!normalizedOrigin || !normalizedDestination) return null;
+
+  return (
+    routes
+      .filter(route => !isPreciseLocationText(route.origin))
+      .filter(
+        route =>
+          route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
+          route.destination.trim().toLocaleLowerCase("pt-BR") ===
+            normalizedDestination
+      )
+      .sort((a, b) => {
+        const modeScore =
+          Number(offlineRouteTravelMode(b) === mode) -
+          Number(offlineRouteTravelMode(a) === mode);
+        if (modeScore) return modeScore;
+        return Date.parse(b.savedAt) - Date.parse(a.savedAt);
+      })[0] ?? null
+  );
 }
 
 export function isOfflineRouteStale(savedAt: string, now = Date.now(), maxAgeMs = STALE_ROUTE_MAX_AGE_MS) {
