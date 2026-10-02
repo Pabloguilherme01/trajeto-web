@@ -631,6 +631,37 @@ function buildLocalEstimate(
   };
 }
 
+export async function calculateOfflineRoute(
+  originText: string,
+  destinationText: string,
+  mode: PublicTravelMode = "driving"
+): Promise<PublicRoute> {
+  const parsedOrigin = parseCoordinateInput(originText);
+  const originResolved = parsedOrigin ?? localGeocode(originText);
+  const destination = parseCoordinateInput(destinationText) ?? localGeocode(destinationText);
+
+  if (!originResolved || !destination) {
+    throw new Error(
+      "Essa rota ainda não está preparada para cálculo totalmente offline. Use uma rota salva ou conecte-se uma vez para preparar os locais."
+    );
+  }
+
+  const origin = parsedOrigin
+    ? {
+        lat: Math.round(originResolved.lat * 1000) / 1000,
+        lng: Math.round(originResolved.lng * 1000) / 1000,
+      }
+    : originResolved;
+
+  if (haversineMeters(origin, destination) < 20) {
+    throw new Error(
+      "Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes."
+    );
+  }
+
+  return buildLocalEstimate(origin, destination, mode);
+}
+
 export async function calculatePrivateLocationRoute(
   originText: string,
   destinationText: string,
