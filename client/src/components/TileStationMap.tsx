@@ -207,6 +207,13 @@ export default function TileStationMap({
 
   const recenter = () => setCenter(userCoords ?? DEFAULT_CENTER);
 
+  const focusSelected = () => {
+    const selected = drawable.find(item => stationKey(item) === selectedId);
+    if (!selected) return;
+    setCenter({ lat: selected.lat, lng: selected.lng });
+    setZoom(value => Math.max(14, value));
+  };
+
   const changeZoom = (delta: number) => {
     setZoom(value => Math.max(8, Math.min(17, value + delta)));
   };
@@ -464,6 +471,14 @@ export default function TileStationMap({
             className="min-h-11 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
           >
             Ver todos
+          </button>
+          <button
+            type="button"
+            onClick={focusSelected}
+            disabled={!selectedId}
+            className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white shadow-lg disabled:opacity-40"
+          >
+            Focar ponto
           </button>
         </div>
 
