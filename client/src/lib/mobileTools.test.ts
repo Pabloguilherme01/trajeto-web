@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, openExternalUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -128,4 +128,12 @@ describe("mobile tools", () => {
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined });
     await expect(shareText("Rota", "https://example.com/rota")).rejects.toThrow("Compartilhamento indisponível");
   });
+
+  it("reports whether an external destination was actually opened", () => {
+    const open = vi.spyOn(window, "open").mockReturnValue({} as Window);
+    expect(openExternalUrl("https://example.com")).toBe(true);
+    open.mockReturnValueOnce(null);
+    expect(openExternalUrl("https://example.com/blocked")).toBe(false);
+  });
+
 });
