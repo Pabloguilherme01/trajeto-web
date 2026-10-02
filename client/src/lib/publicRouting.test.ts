@@ -432,9 +432,9 @@ describe("public routing fallback", () => {
     vi.stubGlobal("fetch", fetchMock);
     const args = ["-15.7,-48.2", "-15.8,-48.3"] as const;
     expect((await calculatePublicRoute(...args)).source).toBe("local-estimate");
-    sessionStorage.removeItem(
-      "trajeto:public-routing:router-unavailable-until"
-    );
+    // Simulate the cooldown window having elapsed without depending on a
+    // browser storage implementation in this Node-based unit test.
+    resetPublicRoutingTestState();
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
