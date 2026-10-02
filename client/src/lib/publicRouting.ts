@@ -939,7 +939,7 @@ export async function calculatePublicRoute(
           polyline,
           source: "osrm",
           mode,
-          steps: (route.legs ?? []).flatMap(leg => (leg.steps ?? []).map(step => ({
+          steps: (route?.legs ?? []).flatMap(leg => (leg.steps ?? []).map(step => ({
             instruction: osrmInstruction(step),
             streetName: step.name?.trim() || undefined,
             distanceMeters: Number(step.distance) || 0,
