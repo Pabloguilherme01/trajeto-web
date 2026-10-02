@@ -51,6 +51,23 @@ describe("mobile tools", () => {
     expect(buildAppleMapsDirectionsUrl("Brasília, DF", "Águas Lindas, GO")).toBe("https://maps.apple.com/directions?destination=Bras%C3%ADlia%2C+DF&mode=driving&source=%C3%81guas+Lindas%2C+GO");
   });
 
+  it("omits private or precise origins from external navigation URLs", () => {
+    const privateGoogle = buildGoogleMapsDirectionsUrl("Minha localização", "Hospital");
+    const preciseGoogle = buildGoogleMapsDirectionsUrl("-15.76123, -48.28123", "Hospital");
+    const privateApple = buildAppleMapsDirectionsUrl("Hospital", "Minha localização");
+    const preciseApple = buildAppleMapsDirectionsUrl("Hospital", "-15.76123, -48.28123");
+
+    for (const url of [privateGoogle, preciseGoogle, privateApple, preciseApple]) {
+      expect(url).not.toContain("15.76123");
+      expect(url).not.toContain("48.28123");
+      expect(url).not.toContain("Minha+localiza");
+    }
+    expect(privateGoogle).not.toContain("origin=");
+    expect(preciseGoogle).not.toContain("origin=");
+    expect(privateApple).not.toContain("source=");
+    expect(preciseApple).not.toContain("source=");
+  });
+
   it("shares the native route decision with useful context", () => {
     expect(buildRouteShareText("Águas Lindas", "Brasília", {
       name: "Posto Exemplo", price: 5.89, detourKm: 1.4, detourSource: "real",

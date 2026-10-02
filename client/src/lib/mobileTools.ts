@@ -1,4 +1,4 @@
-import { privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { privateOriginForExternalNavigation, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 
 export function isStandaloneApp() {
   if (typeof window === "undefined") return false;
@@ -61,7 +61,7 @@ export function buildGoogleMapsDirectionsUrl(
   travelMode: GoogleMapsTravelMode = "driving",
   navigate = false,
 ) {
-  const normalizedOrigin = origin.trim();
+  const normalizedOrigin = privateOriginForExternalNavigation(origin);
   const normalizedDestination = destination.trim();
   const params = new URLSearchParams({ api: "1" });
   if (normalizedOrigin) params.set("origin", normalizedOrigin);
@@ -130,7 +130,8 @@ export function buildAppleMapsDirectionsUrl(
   waypoints: string[] = [],
 ) {
   const params = new URLSearchParams({ destination: destination.trim(), mode: "driving" });
-  if (origin?.trim()) params.set("source", origin.trim());
+  const normalizedOrigin = privateOriginForExternalNavigation(origin ?? "");
+  if (normalizedOrigin) params.set("source", normalizedOrigin);
   if (preference === "avoid-tolls") params.set("avoid", "tolls");
   if (preference === "avoid-highways") params.set("avoid", "highways");
   const normalizedWaypoints = waypoints.map(item => item.trim()).filter(Boolean).slice(0, 3);
