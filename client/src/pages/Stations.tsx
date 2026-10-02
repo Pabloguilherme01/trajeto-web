@@ -917,7 +917,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3">
                   <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
-                    <p className="mt-1 text-sm leading-relaxed text-white/65">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}. {mapSecondaryCount > 0 ? mapSecondaryCount + " referências secundárias também foram agregadas ao mapa." : ""}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-white/65">{mapStations.length} postos consolidados no mapa · {anpWithCoordinates} com coordenadas ANP{mapSecondaryCount > 0 ? ` · ${mapSecondaryCount} referências complementares` : ""}{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} fichas ANP sem coordenada` : ""}.</p>
                   </div>
                   {!mapFirst && <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>}
                 </div>
@@ -933,7 +933,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                       />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-xs text-white/65">
-                      <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
+                      <span>{mapStations.length} postos únicos · {mapOfficialCount} com base ANP{mapSecondaryCount > 0 ? " · " + mapSecondaryCount + " complementares" : ""}</span>
                       <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
                       <span>{anpWithoutCoordinates > 0 ? String(anpWithoutCoordinates) + " cadastro(s) ANP sem coordenada · ficha continua disponível" : "cobertura coordenada ANP completa nesta consulta"}</span>
                     </div>
