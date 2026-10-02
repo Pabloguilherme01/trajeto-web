@@ -100,3 +100,25 @@ export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PL
 export function getLocalRoutePresets(query = "") {
   return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => matchesCatalogText(query, [item.label, item.detail, item.destination, item.category]));
 }
+
+export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string };
+
+// Existing verified destinations; the city reference is approximate, not a street address.
+const readyEndpoints: Record<string, { label: string; destination: string }> = {
+  ...Object.fromEntries(CITY_ROUTE_PRESETS.map(place => [place.id, place])),
+  centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO" },
+};
+const readyPairs = [
+  ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
+  ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"],
+  ["prefeitura", "upa"], ["upa", "heal"], ["prefeitura", "rodoviaria"],
+  ["aguas-lindas-shopping", "rodoviaria"], ["upa", "aguas-lindas-shopping"],
+  ["heal", "aguas-lindas-shopping"], ["rodoviaria", "prefeitura"],
+] as const;
+export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
+  id: `${from}-to-${to}`,
+  origin: readyEndpoints[from].destination,
+  destination: readyEndpoints[to].destination,
+  label: `${readyEndpoints[from].label} → ${readyEndpoints[to].label}`,
+  detail: from === "centro" ? "Origem aproximada · ajuste seu endereço" : "Origem e destino preenchidos",
+}));

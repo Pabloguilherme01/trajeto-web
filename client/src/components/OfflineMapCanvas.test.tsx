@@ -155,3 +155,23 @@ it("keeps the place beneath a pinch midpoint stable", async () => {
   });
   expect(parseFloat(marker.style.left)).toBeCloseTo(250 + 3 * (initial - 150));
 });
+it("centers an explicitly selected destination and preserves subsequent panning", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const markers = [
+    { id: "a", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
+    { id: "b", name: "Destino", label: "B", lat: -15.76, lng: -48.27 },
+  ];
+  const view = render(<Canvas markers={markers} zoom={2} onZoom={() => {}} />);
+  await screen.findByText(/Ruas locais disponíveis/);
+  const focusRequest = { point: markers[1], key: 1 };
+  view.rerender(<Canvas markers={markers} zoom={2} onZoom={() => {}} focusRequest={focusRequest} />);
+  const marker = screen.getByRole("button", { name: "Selecionar Destino" });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(160);
+  expect(parseFloat(marker.style.top)).toBeCloseTo(180);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Explorar mapa offline" }), { key: "ArrowRight" });
+  const panned = marker.style.left;
+  expect(parseFloat(panned)).not.toBe(160);
+  view.rerender(<Canvas markers={[...markers]} zoom={2} onZoom={() => {}} focusRequest={focusRequest} />);
+  expect(marker.style.left).toBe(panned);
+});
