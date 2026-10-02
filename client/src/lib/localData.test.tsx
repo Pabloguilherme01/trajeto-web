@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearLocalAppData, exportLocalAppData, listLocalAppKeys } from "./localData";
+import { clearLocalAppData, countLocalAppData, exportLocalAppData, listLocalAppKeys, listSessionAppKeys } from "./localData";
 
 describe("localData", () => {
-  afterEach(() => localStorage.clear());
+  afterEach(() => { localStorage.clear(); sessionStorage.clear(); });
 
   it("lists only Trajeto-owned local keys", () => {
     localStorage.setItem("trajeto-daily-mode", "automatico");
@@ -11,16 +11,23 @@ describe("localData", () => {
     expect(listLocalAppKeys()).toEqual(["trajeto-daily-mode", "trajeto:public-service-favorites:v1"]);
   });
 
-  it("clears Trajeto data without touching another app", () => {
+  it("clears Trajeto local and session data without touching another app", async () => {
     localStorage.setItem("trajeto-mobile-destinations", "[]");
     localStorage.setItem("trajeto-mobile-vehicle", "{}");
     localStorage.setItem("trajeto:public-service-favorites:v1", '["sic"]');
     localStorage.setItem("other-app-setting", "keep");
-    expect(clearLocalAppData()).toBe(3);
+    sessionStorage.setItem("trajeto:public-routing:route:test", "cached");
+    sessionStorage.setItem("other-session-key", "keep");
+
+    expect(listSessionAppKeys()).toEqual(["trajeto:public-routing:route:test"]);
+    expect(await countLocalAppData()).toBe(4);
+    expect(await clearLocalAppData()).toBe(4);
     expect(localStorage.getItem("trajeto-mobile-destinations")).toBeNull();
     expect(localStorage.getItem("trajeto-mobile-vehicle")).toBeNull();
     expect(localStorage.getItem("trajeto:public-service-favorites:v1")).toBeNull();
+    expect(sessionStorage.getItem("trajeto:public-routing:route:test")).toBeNull();
     expect(localStorage.getItem("other-app-setting")).toBe("keep");
+    expect(sessionStorage.getItem("other-session-key")).toBe("keep");
   });
 });
 
