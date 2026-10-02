@@ -427,6 +427,9 @@ export default function Planner() {
   };
 
   const persistRouteLocally = async (route: PlannedRoute, routeOrigin: string, routeDestination: string) => {
+    // GPS-origin routes stay ephemeral: never persist a payload that can carry
+    // the user's current-position geometry, even when "save offline" is tapped.
+    if (originPrivate || isCurrentLocationLabel(routeOrigin)) return false;
     const normalizedOrigin = originPrivate ? privateOriginForHistory(routeOrigin) : routeOrigin.trim();
     const normalizedDestination = routeDestination.trim();
     if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
@@ -447,6 +450,10 @@ export default function Planner() {
 
   const saveCurrentRoute = async () => {
     if (!planned) return;
+    if (originPrivate || isCurrentLocationLabel(origin)) {
+      setSavedMessage("Por privacidade, rotas iniciadas na sua localização ficam somente nesta sessão e não são salvas.");
+      return;
+    }
     const saved = await persistRouteLocally(planned, origin, destination);
     if (saved) {
       setSavedMessage("Viagem preparada para uso offline neste aparelho.");
