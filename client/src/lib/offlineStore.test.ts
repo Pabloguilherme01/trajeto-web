@@ -15,6 +15,22 @@ describe("offlineStore helpers", () => {
     expect(findOfflineRouteByDestination(routes, " brasília ")?.id).toBe("1");
   });
 
+  it("matches saved destinations across accents and repeated spaces", () => {
+    const routes = [
+      {
+        id: "1",
+        origin: "Águas Lindas",
+        destination: "Praça da Bíblia",
+        savedAt: new Date().toISOString(),
+        payload: {},
+      },
+    ];
+
+    expect(findOfflineRouteByDestination(routes, " praca   da biblia ")?.id).toBe(
+      "1"
+    );
+  });
+
   it("finds an exact saved trip instead of a destination-only match", () => {
     const routes = [
       { id: "1", origin: "Casa", destination: "Brasília", savedAt: new Date().toISOString(), payload: {} },
