@@ -18,7 +18,7 @@ Cada registro deve trazer, sempre que aplicável:
 - `sourceId`;
 - data de verificação;
 - palavras-chave;
-- coordenadas **somente quando verificadas por fonte confiável**.
+- coordenadas **somente quando verificadas por fonte confiável**; quando existirem, `coordinateSourceId` e `coordinateVerifiedAt` são obrigatórios.
 
 A lista `sources` do próprio snapshot mantém a proveniência. Dados oficiais de Prefeitura, Governo
 de Goiás, IBGE, ANTT e outros órgãos públicos devem ser preferidos a catálogos comerciais.
@@ -69,7 +69,7 @@ online e não são requisito do núcleo offline.
 3. manter `id` existente quando o local for o mesmo;
 4. atualizar `verifiedAt` e `updatedAt`;
 5. adicionar a fonte à lista `sources` quando for nova;
-6. adicionar coordenadas apenas quando verificadas;
+6. adicionar coordenadas apenas quando verificadas, registrando também `coordinateSourceId` e `coordinateVerifiedAt`;
 7. executar typecheck, testes de biblioteca, testes de página, responsividade e smoke do GitHub Pages.
 
 Atualizações grandes devem entrar em PR independente. O mapa deve continuar útil mesmo se uma fonte
