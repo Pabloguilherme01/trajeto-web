@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateFuelStatus, fuelLitersFromTankFraction, projectTripCosts } from "./tripProjection";
+import { calculateFuelStatus, compareEthanolGasoline, fuelLitersFromTankFraction, projectTripCosts } from "./tripProjection";
 
 describe("projectTripCosts", () => {
   it("calcula ida e volta e projeção semanal e mensal", () => {
@@ -110,5 +110,27 @@ describe("projectTripCosts", () => {
     expect(fuelLitersFromTankFraction(40, 1)).toBe(40);
     expect(fuelLitersFromTankFraction(40, 1.5)).toBe(40);
     expect(fuelLitersFromTankFraction(40, -1)).toBe(0);
+  });
+});
+
+
+describe("compareEthanolGasoline", () => {
+  it("uses real cost per km when both vehicle consumptions are known", () => {
+    const result = compareEthanolGasoline({
+      ethanolPrice: 4,
+      gasolinePrice: 6,
+      ethanolKmPerLiter: 7,
+      gasolineKmPerLiter: 12,
+    });
+    expect(result?.method).toBe("real-cost-per-km");
+    expect(result?.recommended).toBe("gasoline");
+    expect(result?.ethanolCostPerKm).toBeCloseTo(4 / 7);
+    expect(result?.gasolineCostPerKm).toBeCloseTo(0.5);
+  });
+
+  it("uses the 70 percent rule only when consumption data is unavailable", () => {
+    expect(compareEthanolGasoline({ ethanolPrice: 4, gasolinePrice: 6 })?.recommended).toBe("ethanol");
+    expect(compareEthanolGasoline({ ethanolPrice: 4.5, gasolinePrice: 6 })?.recommended).toBe("gasoline");
+    expect(compareEthanolGasoline({ ethanolPrice: 4.2, gasolinePrice: 6 })?.recommended).toBe("tie");
   });
 });
