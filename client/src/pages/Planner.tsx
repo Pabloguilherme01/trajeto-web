@@ -950,7 +950,7 @@ export default function Planner() {
         )}
 
         {savedMode && (
-          <section className="mt-5">
+          <section className="mt-5 min-w-0 overflow-x-hidden">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#BDA5FF]">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
               <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedRoutes.length + savedStations.length}</span>
@@ -999,23 +999,23 @@ export default function Planner() {
               </div>
             ) : (
               filteredSavedRoutes.length > 0 && (
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 min-w-0 space-y-2 overflow-x-hidden">
                   {filteredSavedRoutes.map(route => {
                     const stale = isOfflineRouteStale(route.savedAt);
                     return (
-                      <article key={route.id} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
-                        <div className="flex items-start justify-between gap-3">
+                      <article key={route.id} className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/8 bg-[#121B22] p-4">
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
+                            <p className="break-words text-xs font-black [overflow-wrap:anywhere]">{route.origin} → {route.destination}</p>
                             <p className="mt-1 text-xs text-white/35">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
                           </div>
                           <span className={"shrink-0 rounded-full border px-2 py-1 text-xs font-black uppercase tracking-[.08em] " + (stale ? "border-amber-300/20 text-amber-200" : "border-[#C7FF3C]/15 text-[#C7FF3C]")}>
                             {stale ? "revisar" : "pronta"}
                           </span>
                         </div>
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-                          <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
-                          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(route.origin, route.destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Navegar agora</button>
+                        <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                          <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 min-w-0 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black leading-tight text-[#0B1014]">Abrir rota</button>
+                          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(route.origin, route.destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 min-w-0 rounded-xl border border-white/8 px-3 text-xs font-black leading-tight text-white/70">Navegar agora</button>
                         </div>
                         <button type="button" onClick={() => void removeSavedRoute(route)} aria-label={"Excluir rota salva " + route.destination} className="mt-2 min-h-10 w-full rounded-xl border border-[#FF7D6A]/20 text-xs font-black text-[#FFB7A9]"><Trash2 className="mr-1.5 inline size-3.5" />Excluir da biblioteca</button>
                       </article>
