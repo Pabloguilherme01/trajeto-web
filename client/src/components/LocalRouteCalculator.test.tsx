@@ -187,3 +187,13 @@ it("shows automatic route distances to metre precision without floating point ta
   cleanup();
   localStorage.clear();
 });
+
+
+it("clears a previous route distance when the new route distance is invalid", () => {
+  localStorage.clear();
+  const { rerender } = render(<LocalRouteCalculator initialDistanceKm={12} />);
+  rerender(<LocalRouteCalculator initialDistanceKm={Number.NaN} />);
+  expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("");
+  cleanup();
+  localStorage.clear();
+});
