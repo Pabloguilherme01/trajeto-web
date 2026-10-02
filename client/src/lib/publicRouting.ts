@@ -1002,11 +1002,19 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       durationLabel: publicDurationLabel(result.durationSeconds),
       polyline: result.polyline,
       summary: estimated
-        ? "Estimativa local baseada nas coordenadas disponíveis para o modo selecionado."
+        ? result.mode === "walking"
+          ? "Estimativa local para caminhada; confirme calçadas, travessias e acessos no local."
+          : result.mode === "cycling"
+            ? "Estimativa local para bicicleta; não presume ciclovia nem segurança viária."
+            : "Estimativa local baseada nas coordenadas disponíveis para o modo selecionado."
         : mapbox
           ? result.mode === "driving"
             ? "Rota Mapbox calculada com perfil de direção sensível ao trânsito disponível."
-            : "Rota viária calculada com Mapbox."
+            : result.mode === "walking"
+              ? "Rota de caminhada calculada com perfil pedestre Mapbox."
+              : result.mode === "cycling"
+                ? "Rota de bicicleta calculada com perfil ciclável Mapbox."
+                : "Rota viária calculada com Mapbox."
           : "Rota viária calculada com OpenStreetMap/OSRM.",
       source: result.source,
       mode: result.mode,
@@ -1024,7 +1032,11 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       detail: estimated
         ? result.mode === "transit"
           ? "Estimativa de deslocamento sem linhas, horários, espera ou conexões confirmados. Consulte o operador de transporte antes de sair."
-          : "Distância e tempo são estimados a partir das coordenadas disponíveis; não confirmam ruas ou caminhos adequados ao modo selecionado. Use a navegação externa para conferir o trajeto atualizado."
+          : result.mode === "walking"
+            ? "Estimativa sem confirmação de calçada, faixa de pedestres, iluminação ou acessibilidade. Confira as condições do caminho antes de seguir."
+            : result.mode === "cycling"
+              ? "Estimativa sem confirmação de ciclovia, acostamento, pavimento ou segurança do trecho. Confira as condições antes de pedalar."
+              : "Distância e tempo são estimados a partir das coordenadas disponíveis; não confirmam ruas ou caminhos adequados ao modo selecionado. Use a navegação externa para conferir o trajeto atualizado."
         : mapbox && result.mode === "driving"
           ? "O tempo da rota usa o perfil driving-traffic do Mapbox quando essa camada opcional está configurada."
           : mapbox
