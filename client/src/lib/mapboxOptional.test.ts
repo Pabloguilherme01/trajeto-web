@@ -2,11 +2,13 @@ import { afterEach, expect, it, vi } from "vitest";
 import {
   hasOptionalMapboxConfigured,
   requestOptionalMapboxRoute,
+  resetOptionalMapboxTestState,
 } from "./mapboxOptional";
 
 const testToken = ["pk", "ci-public-token"].join(".");
 
 afterEach(() => {
+  resetOptionalMapboxTestState();
   vi.unstubAllGlobals();
 });
 
