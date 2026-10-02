@@ -1,12 +1,15 @@
 import React from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { OfflineRoutePreview, RouteMap } from "./RouteMap";
+
+afterEach(cleanup);
 
 Object.defineProperty(window, "google", {
   value: {
     maps: {
       TrafficLayer: vi.fn(() => ({ setMap: vi.fn() })),
+      Polyline: vi.fn(() => ({ setMap: vi.fn() })),
       LatLngBounds: vi.fn(() => ({ extend: vi.fn() })),
     },
   },
@@ -28,6 +31,12 @@ vi.mock("@/components/Map", () => ({
 }));
 
 describe("RouteMap", () => {
+  it("keeps saved road geometry local when explicit offline mode is requested", () => {
+    render(<RouteMap forceOffline origin={{ lat: -15.8, lng: -48 }} destination={{ lat: -15.9, lng: -47.9 }} stops={[]} routes={[{ id: "saved", source: "osrm", polyline: "r`d_B~~teHbwFg_mA" }]} />);
+    expect(screen.getByRole("region", { name: "Mapa offline da viagem" })).toBeTruthy();
+    expect(screen.queryByTestId("map-view")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Abrir no Google Maps" })).toBeNull();
+  });
   it("does not invent endpoints or navigation before a trip is defined", () => {
     render(<OfflineRoutePreview stops={[]} />);
     expect(screen.getByText("Defina a origem e o destino")).toBeTruthy();
