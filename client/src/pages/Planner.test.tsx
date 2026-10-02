@@ -2,6 +2,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Planner from "./Planner";
+import { localDataEvent } from "@/lib/localData";
 import { clearPrivateLocationHandoff, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 
 const state = vi.hoisted(() => ({
@@ -40,6 +41,33 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Planner travel state", () => {
+  it("clears visible route data and rejects a GPS response received after deletion", async () => {
+    let gps!: PositionCallback;
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: {
+      getCurrentPosition: (callback: PositionCallback) => { gps = callback; },
+    } });
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    fireEvent.click(screen.getByRole("button", { name: "Usar localização atual" }));
+    act(() => window.dispatchEvent(new Event(localDataEvent)));
+    act(() => gps({ coords: { latitude: -15.76123, longitude: -48.28123 } } as GeolocationPosition));
+    expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("");
+    expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("");
+    expect(screen.queryByTestId("route-map")).toBeNull();
+    expect(screen.getByRole("button", { name: "Usar localização atual" }).hasAttribute("disabled")).toBe(false);
+  });
+  it("rejects a route response received after deletion", async () => {
+    let resolve!: (value: typeof payload) => void;
+    state.mutate.mockReturnValue(new Promise(done => { resolve = done; }));
+    render(<Planner />);
+    submit();
+    act(() => window.dispatchEvent(new Event(localDataEvent)));
+    await act(async () => resolve(payload));
+    expect(screen.queryByTestId("route-map")).toBeNull();
+    expect(state.saveOffline).not.toHaveBeenCalled();
+  });
+
   it.each([false, true])("opens the map automatically after calculation (static=%s)", async staticRuntime => {
     state.staticRuntime = staticRuntime;
     render(<Planner />);

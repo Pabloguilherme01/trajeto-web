@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
+import { localDataEvent } from "@/lib/localData";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
@@ -84,6 +85,7 @@ export default function Planner() {
   const planRoute = trpc.routes.plan.useMutation();
   const staticRuntime = !supportsLiveRouting();
   const requestVersion = useRef(0);
+  const locationRequest = useRef(0);
   const plannerFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedKey = useRef<string | null>(null);
 
@@ -96,7 +98,31 @@ export default function Planner() {
     setSavedMessage(null);
   };
 
-  useEffect(() => () => { requestVersion.current += 1; }, []);
+  useEffect(() => {
+    const clearVisibleData = () => {
+      requestVersion.current += 1;
+      locationRequest.current += 1;
+      privateOriginRef.current = null;
+      setOriginPrivate(false);
+      setLocating(false);
+      setOrigin("");
+      setDestination("");
+      setPlanned(null);
+      setFallbackReady(false);
+      setPublicRoutePending(false);
+      setShowMap(false);
+      setError(null);
+      setSavedMessage(null);
+      setSavedRoutes([]);
+      setSavedStations([]);
+    };
+    window.addEventListener(localDataEvent, clearVisibleData);
+    return () => {
+      window.removeEventListener(localDataEvent, clearVisibleData);
+      requestVersion.current += 1;
+      locationRequest.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -233,6 +259,7 @@ export default function Planner() {
         const autoSaved = originPrivate
           ? false
           : await persistRouteLocally(publicPayload, resolvedOrigin, to);
+        if (version !== requestVersion.current) return;
         setSavedMessage(
           baseMessage +
             (autoSaved ? " Cópia offline criada automaticamente." : "") +
@@ -287,8 +314,10 @@ export default function Planner() {
     }
     setError(null);
     setLocating(true);
+    const locationVersion = ++locationRequest.current;
     navigator.geolocation.getCurrentPosition(
       position => {
+        if (locationVersion !== locationRequest.current) return;
         setLocating(false);
         resetResult();
         privateOriginRef.current = position.coords.latitude.toFixed(5) + ", " + position.coords.longitude.toFixed(5);
@@ -297,6 +326,7 @@ export default function Planner() {
         vibration(14);
       },
       () => {
+        if (locationVersion !== locationRequest.current) return;
         setLocating(false);
         setError("Não foi possível obter sua localização.");
       },
@@ -320,6 +350,8 @@ export default function Planner() {
   };
 
   const clear = () => {
+    locationRequest.current += 1;
+    setLocating(false);
     resetResult();
     privateOriginRef.current = null;
     setOriginPrivate(false);
