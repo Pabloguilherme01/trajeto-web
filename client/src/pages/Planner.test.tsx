@@ -14,6 +14,8 @@ vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useS
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.staticRuntime, supportsLiveRouting: () => !state.staticRuntime }));
+vi.mock("@/lib/cityAtlas", () => ({ loadCityAtlasSnapshot: vi.fn().mockResolvedValue(null), resolveCityAtlasPoint: vi.fn(() => null) }));
+vi.mock("@/lib/localGeocoding", () => ({ resolveLocalGeocodePoint: vi.fn(() => null) }));
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
 vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, calculateOfflineRoute: state.offlineRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline, source: result.source, mode: result.mode }, stops: [], anpReferences: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
@@ -463,6 +465,16 @@ describe("Planner travel state", () => {
     render(<Planner />);
     expect(await screen.findByText("Ver mapa desta rota no Trajeto")).toBeTruthy();
     expect(screen.getByTestId("route-map")).toBeTruthy();
+  });
+
+
+  it("shows a destination on the internal map before an origin is provided", () => {
+    state.search = "destino=-15.7600%2C-48.2800&auto=1";
+    render(<Planner />);
+    expect(screen.getByText("Destino localizado no Trajeto")).toBeTruthy();
+    expect(screen.getByTestId("route-map")).toBeTruthy();
+    expect(state.publicRoute).not.toHaveBeenCalled();
+    expect(state.privateRoute).not.toHaveBeenCalled();
   });
 
 });
