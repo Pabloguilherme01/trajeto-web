@@ -13,7 +13,7 @@ import {
   normalizeAnpFuelRow,
   type AnpFuelRow,
 } from "@shared/anpRevendedores";
-import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
+import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 
@@ -29,7 +29,7 @@ export default function CityMap() {
         if (!response.ok) throw new Error("snapshot");
         return response.json();
       })
-      .then((payload: { data?: unknown[] }) => {
+      .then((payload: { data?: unknown[]; retrievedAt?: string }) => {
         if (controller.signal.aborted) return;
         const rows = (Array.isArray(payload.data) ? payload.data : [])
           .map(item =>
@@ -38,7 +38,7 @@ export default function CityMap() {
               : null
           )
           .filter((row): row is AnpFuelRow => Boolean(row));
-        if (rows.length) setAnpRows(rows);
+        if (rows.length) { setAnpRows(rows); cacheOfflineAnpSnapshot(rows, payload.retrievedAt); }
       })
       .catch(() => {});
     return () => controller.abort();
@@ -188,7 +188,7 @@ export default function CityMap() {
           <TileStationMap
             stations={markers}
             selectionLabel="Escolher destino no mapa"
-            onPlanDestination={item => plan(item.address)}
+            onPlanDestination={item => plan(item.source === "ANP" ? item.name + ", " + item.address : item.address)}
             fallback={fallback}
           />
         ) : (

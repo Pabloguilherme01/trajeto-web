@@ -420,7 +420,7 @@ describe("public routing fallback", () => {
     expect(firstUrl.searchParams.get("q")).toContain("Águas Lindas de Goiás");
   });
 
-  it("resolves a prepared ANP station from local storage when the network is unavailable", async () => {
+  it("resolves an ANP station with repeated fuel rows offline without duplicate geocoding", async () => {
     const saved = new Map<string, string>();
     const storage = {
       getItem: (key: string) => saved.get(key) ?? null,
@@ -445,7 +445,7 @@ describe("public routing fallback", () => {
           uf: "GO",
           latitude: "-15.7646021",
           longitude: "-48.2677716",
-        }],
+        }].flatMap(row => [{ ...row, produto: "GASOLINA" }, { ...row, produto: "ETANOL" }]),
       })
     );
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
