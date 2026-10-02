@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Database,
@@ -47,6 +47,7 @@ export default function CityMap() {
   const [category, setCategory] = useState<MapCategory>("todos");
   const [online, setOnline] = useState(() => navigator.onLine);
   const [expandedMap, setExpandedMap] = useState(false);
+  const mapSectionRef = useRef<HTMLElement | null>(null);
   const [showAllCatalog, setShowAllCatalog] = useState(false);
 
   useEffect(() => {
@@ -357,9 +358,34 @@ export default function CityMap() {
         </div>
       </section>
 
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <button
+          type="button"
+          onClick={() => {
+            setExpandedMap(true);
+            requestAnimationFrame(() =>
+              mapSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            );
+          }}
+          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#102028]"
+        >
+          <Maximize2 className="size-4 shrink-0" />
+          Abrir mapa
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(appUrl("/planejar"))}
+          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 text-sm font-black"
+        >
+          <Route className="size-4 shrink-0" />
+          Planejar rota
+        </button>
+      </div>
+
       <section
+        ref={mapSectionRef}
         aria-label="Mapa da cidade"
-        className="mt-2 overflow-hidden rounded-3xl border border-white/15 shadow-2xl"
+        className="mt-2 scroll-mt-3 overflow-hidden rounded-3xl border border-white/15 shadow-2xl"
       >
         {online && markers.length ? (
           <TileStationMap
