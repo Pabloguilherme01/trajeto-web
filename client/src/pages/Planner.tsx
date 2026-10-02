@@ -15,6 +15,7 @@ import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRo
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
+import { buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -134,6 +135,9 @@ export default function Planner() {
       void getOfflineRoute(routeId).then(route => {
         if (!active) return;
         if (!route) { setError("Esta rota não está salva neste aparelho."); return; }
+        if (route.id !== routeId) {
+          window.history.replaceState(window.history.state, "", buildSavedRoutePlannerUrl(route.id));
+        }
         privateOriginRef.current = null;
         setOriginPrivate(false);
         setOrigin(route.origin);
@@ -351,7 +355,7 @@ export default function Planner() {
   };
 
   const openSavedRoute = (route: OfflineRoute) => {
-    setLocation(appUrl("/planejar") + "?rota=" + encodeURIComponent(route.id));
+    setLocation(buildSavedRoutePlannerUrl(route.id));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
