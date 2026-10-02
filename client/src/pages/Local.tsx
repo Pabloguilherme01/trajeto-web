@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useRoute } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
 import { listMobileStationFavorites, toggleMobileStationFavorite } from "@/lib/mobileStationStore";
 import { buildLocationEntity } from "@/lib/stationEntity";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
@@ -107,7 +107,24 @@ export default function Local() {
   const share = async () => {
     try {
       await shareText(entity.name + " · " + entity.address, window.location.href, "Trajeto · local");
-    } catch {}
+      toast.message("Local compartilhado.");
+    } catch {
+      toast.error("Não foi possível compartilhar este local agora.");
+    }
+  };
+
+  const openExternal = (url: string, label: string) => {
+    if (!openExternalUrl(url)) toast.message(`O navegador bloqueou ${label}. Permita pop-ups para continuar.`);
+  };
+
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(entity.address);
+      vibration();
+      toast.message("Endereço copiado.");
+    } catch {
+      toast.error("Não foi possível copiar o endereço neste navegador.");
+    }
   };
 
   return (
@@ -179,11 +196,11 @@ export default function Local() {
             <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1"} className="flex min-h-12 items-center justify-center rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014] sm:col-span-3">
               <Navigation className="mr-1 inline size-3.5" /> Abrir mapa no Trajeto
             </Link>
-            <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#C7FF3C]/20 text-xs font-black text-[#D9FF91]">
+            <button type="button" onClick={() => openExternal(googleUrl, "Google Maps")} className="min-h-12 rounded-xl border border-[#C7FF3C]/20 text-xs font-black text-[#D9FF91]">
               Google Maps
             </button>
-            <button type="button" onClick={() => window.open(wazeUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#3DE3FF]/20 text-xs font-black text-[#C9F7FF]">Waze</button>
-            <button type="button" onClick={() => window.open(appleUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/8 text-xs font-black text-white/70">Apple Maps</button>
+            <button type="button" onClick={() => openExternal(wazeUrl, "Waze")} className="min-h-12 rounded-xl border border-[#3DE3FF]/20 text-xs font-black text-[#C9F7FF]">Waze</button>
+            <button type="button" onClick={() => openExternal(appleUrl, "Apple Maps")} className="min-h-12 rounded-xl border border-white/8 text-xs font-black text-white/70">Apple Maps</button>
           </div>
           <p className="mt-3 text-[0.52rem] leading-relaxed text-white/45">O Trajeto abre primeiro o mapa interno; Google Maps, Waze e Apple Maps ficam como opções externas de navegação.</p>
           <p className="mt-2 text-[0.52rem] text-white/30">
@@ -205,7 +222,7 @@ export default function Local() {
           <button type="button" onClick={() => void share()} className="min-h-12 rounded-xl border border-white/8 text-xs font-black text-white/70">
             <Share2 className="mr-1 inline size-3.5" /> Compartilhar
           </button>
-          <button type="button" onClick={async () => { try { await navigator.clipboard.writeText(entity.address); vibration(); } catch {} }} className="min-h-12 rounded-xl border border-white/8 text-xs font-black text-white/70">
+          <button type="button" onClick={() => void copyAddress()} className="min-h-12 rounded-xl border border-white/8 text-xs font-black text-white/70">
             <Copy className="mr-1 inline size-3.5" /> Copiar endereço
           </button>
         </div>
