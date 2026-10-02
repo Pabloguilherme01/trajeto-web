@@ -1,3 +1,6 @@
+import React from "react";
+import { cleanup, render, screen } from "@testing-library/react";
+import LocalRouteCalculator from "./LocalRouteCalculator";
 import { describe, expect, it } from "vitest";
 import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
 
@@ -173,4 +176,14 @@ describe("local route calculator contract", () => {
       tripsPerWeek: 5,
     })).toBeNull();
   });
+});
+
+it("shows automatic route distances to metre precision without floating point tails", () => {
+  localStorage.clear();
+  const { rerender } = render(<LocalRouteCalculator initialDistanceKm={1519.3 / 1000} />);
+  expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("1.519");
+  rerender(<LocalRouteCalculator initialDistanceKm={2378.7 / 1000} />);
+  expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("2.379");
+  cleanup();
+  localStorage.clear();
 });
