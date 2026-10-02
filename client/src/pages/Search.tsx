@@ -190,7 +190,7 @@ function ResultCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-20 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
+      className="flex min-h-20 min-w-0 items-center gap-3 trajeto-card trajeto-card-interactive rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
     >
       <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
         <Icon className="size-5" />
@@ -340,7 +340,7 @@ export default function SearchPage() {
         type="button"
         aria-label={action.label}
         onClick={() => openQuick(action)}
-        className="flex min-h-20 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30"
+        className="flex min-h-20 min-w-0 items-center gap-2 trajeto-card trajeto-card-interactive rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30"
       >
         <Icon className="size-5 shrink-0 text-[#C7FF3C]" />
         <span className="min-w-0">
@@ -625,7 +625,7 @@ export default function SearchPage() {
               </button>
             )}
             <section
-              className="rounded-2xl border border-white/10 bg-[#121B22] p-4"
+              className="trajeto-card rounded-2xl border border-white/10 bg-[#121B22] p-4"
               aria-label="Ajuda para encontrar"
             >
               <p className="text-sm leading-relaxed text-white/80">
