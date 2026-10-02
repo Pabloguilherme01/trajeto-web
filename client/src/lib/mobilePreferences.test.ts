@@ -42,7 +42,7 @@ describe("mobilePreferences recent trips", () => {
     rememberTrip("-15.76123, -48.28123", "Hospital");
     const trips = getRecentTrips();
     expect(trips).toEqual([]);
-    expect(localStorage.getItem("trajeto-recent-trips")).not.toContain("-15.76123");
+    expect(localStorage.getItem("trajeto-recent-trips")).toBeNull();
   });
 });
 
