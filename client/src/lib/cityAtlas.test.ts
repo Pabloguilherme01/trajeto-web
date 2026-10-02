@@ -52,6 +52,17 @@ describe("city atlas", () => {
     expect(normalized?.items).toHaveLength(0);
   });
 
+  it("rejects coordinates without explicit official provenance", () => {
+    const value = snapshot() as any;
+    value.items[0].lat = -15.75;
+    value.items[0].lng = -48.28;
+    expect(normalizeCityAtlasSnapshot(value)?.items).toHaveLength(0);
+
+    value.items[0].coordinateSourceId = "official";
+    value.items[0].coordinateVerifiedAt = "2026-10-02";
+    expect(normalizeCityAtlasSnapshot(value)?.items).toHaveLength(1);
+  });
+
   it("merges supplemental official data with the existing city catalog", () => {
     const items = buildCityAtlas(snapshot());
     const school = items.find(item => item.name === "Escola Municipal Teste");
