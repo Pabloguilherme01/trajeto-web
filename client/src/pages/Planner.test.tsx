@@ -404,4 +404,24 @@ describe("Planner travel state", () => {
     expect(screen.getByText(/Sua posição não é salva/i)).toBeTruthy();
   });
 
+
+  it("keeps reusable route cards mobile-safe for long place names", async () => {
+    state.path = "/salvos";
+    state.search = "salvos=1";
+    state.listOffline.mockResolvedValue([{
+      id: "long-route",
+      origin: "Avenida extremamente longa de Águas Lindas de Goiás",
+      destination: "Estabelecimento com um nome muito comprido no Jardim da Barragem VI",
+      savedAt: new Date().toISOString(),
+      payload: { ...payload, route: { ...payload.route, mode: "driving" } },
+    }]);
+
+    render(<Planner />);
+    const routeText = await screen.findByText(/Avenida extremamente longa/);
+    expect(routeText.className).toContain("break-words");
+    expect(routeText.className).toContain("[overflow-wrap:anywhere]");
+    expect(screen.getByRole("button", { name: "Abrir rota" }).parentElement?.className).toContain("grid-cols-1");
+    expect(screen.getByRole("button", { name: "Abrir rota" }).parentElement?.className).toContain("min-[360px]:grid-cols-2");
+  });
+
 });
