@@ -49,7 +49,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const restoredMode: TripCalculatorModeSelection = isTripCalculatorModeSelection(draft?.mode) ? draft.mode : "automatico";
   const [restoredDraft, setRestoredDraft] = useState(() => Boolean(draft));
   const [activeMode, setActiveMode] = useState<TripCalculatorModeSelection>(restoredMode);
-  const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(initialDistanceKm) : (draft?.distance ?? ""));
+  const [distance, setDistance] = useState(initialDistanceKm > 0 ? String(Number(initialDistanceKm.toFixed(3))) : (draft?.distance ?? ""));
   const [price, setPrice] = useState(() => draft?.price || getRememberedPrice());
   const [consumption, setConsumption] = useState(draft?.consumption || (savedVehicle ? String(savedVehicle.consumption) : ""));
   const [tank, setTank] = useState(draft?.tank || (savedVehicle ? String(savedVehicle.tank) : ""));
@@ -65,7 +65,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
   const [monthlyBudget, setMonthlyBudget] = useState(draft?.monthlyBudget ?? "");
 
   useEffect(() => {
-    if (initialDistanceKm > 0) setDistance(String(initialDistanceKm));
+    if (initialDistanceKm > 0) setDistance(String(Number(initialDistanceKm.toFixed(3))));
   }, [initialDistanceKm]);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     if (modeId === "automatico") {
       setRoundTrip(false);
       setTripsPerWeek(1);
-      if (initialDistanceKm > 0) setDistance(String(initialDistanceKm));
+      if (initialDistanceKm > 0) setDistance(String(Number(initialDistanceKm.toFixed(3))));
       const rememberedPrice = getRememberedPrice();
       if (rememberedPrice) setPrice(current => current || rememberedPrice);
       const vehicle = getMobileVehicle();
@@ -127,7 +127,7 @@ export default function LocalRouteCalculator({ initialDistanceKm = 0, compact = 
     clearTripCalculatorDraft();
     setRestoredDraft(false);
     setActiveMode("automatico");
-    setDistance(initialDistanceKm > 0 ? String(initialDistanceKm) : "");
+    setDistance(initialDistanceKm > 0 ? String(Number(initialDistanceKm.toFixed(3))) : "");
     setPrice("");
     setConsumption(savedVehicle ? String(savedVehicle.consumption) : "");
     setTank(savedVehicle ? String(savedVehicle.tank) : "");
