@@ -16,11 +16,15 @@ const GEOCODER_MIN_INTERVAL_MS = import.meta.env.MODE === "test" ? 0 : 1_100;
 const GEOCODER_MISS_TTL_MS = 60_000;
 const GEOCODER_FAILURE_COOLDOWN_MS = 120_000;
 const GEOCODER_COOLDOWN_KEY = CACHE_PREFIX + "geocoder-unavailable-until";
+const ROUTER_FAILURE_COOLDOWN_MS = 60_000;
+const ROUTER_COOLDOWN_KEY = CACHE_PREFIX + "router-unavailable-until";
 const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>();
+const routerInFlight = new Map<string, Promise<PublicRoute>>();
 const geocoderMissUntil = new Map<string, number>();
 let geocoderQueue: Promise<void> = Promise.resolve();
 let geocoderLastStartedAt = 0;
 let geocoderUnavailableUntilFallback = 0;
+let routerUnavailableUntilFallback = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "osrm" | "local-estimate";
@@ -117,11 +121,41 @@ function setGeocoderUnavailableUntil(value: number) {
   } catch {}
 }
 
+function getRouterUnavailableUntil() {
+  const storage = getGeocoderSessionStorage();
+  if (!storage) return routerUnavailableUntilFallback;
+  try {
+    const raw = storage.getItem(ROUTER_COOLDOWN_KEY);
+    if (raw == null) {
+      routerUnavailableUntilFallback = 0;
+      return 0;
+    }
+    const value = Number(raw);
+    routerUnavailableUntilFallback =
+      Number.isFinite(value) && value > 0 ? value : 0;
+    return routerUnavailableUntilFallback;
+  } catch {
+    return routerUnavailableUntilFallback;
+  }
+}
+
+function setRouterUnavailableUntil(value: number) {
+  routerUnavailableUntilFallback = value > 0 ? value : 0;
+  const storage = getGeocoderSessionStorage();
+  if (!storage) return;
+  try {
+    if (value > 0) storage.setItem(ROUTER_COOLDOWN_KEY, String(value));
+    else storage.removeItem(ROUTER_COOLDOWN_KEY);
+  } catch {}
+}
+
 export function resetPublicRoutingTestState() {
   if (import.meta.env.MODE !== "test") return;
   geocoderUnavailableUntilFallback = 0;
+  routerUnavailableUntilFallback = 0;
   geocoderMissUntil.clear();
   geocoderInFlight.clear();
+  routerInFlight.clear();
   geocoderQueue = Promise.resolve();
   geocoderLastStartedAt = 0;
 }
@@ -642,75 +676,95 @@ export async function calculatePublicRoute(
     ":" +
     mode;
 
-  const cached = cacheGet<PublicRoute>("route:" + coordinateKey);
+  const cacheKey = "route:" + coordinateKey;
+  const cached = cacheGet<PublicRoute>(cacheKey);
   const offline =
     typeof navigator !== "undefined" && navigator.onLine === false;
-  if (
+  const cachedMatches =
     isPublicRoute(cached) &&
     cached.mode === mode &&
     Math.abs(cached.origin.lat - origin.lat) < 0.00002 &&
     Math.abs(cached.origin.lng - origin.lng) < 0.00002 &&
     Math.abs(cached.destination.lat - destination.lat) < 0.00002 &&
-    Math.abs(cached.destination.lng - destination.lng) < 0.00002 &&
-    (cached.source === "osrm" || offline)
-  )
-    return cached;
+    Math.abs(cached.destination.lng - destination.lng) < 0.00002;
+
+  if (cachedMatches && (cached.source === "osrm" || offline)) return cached;
   if (offline) return buildLocalEstimate(origin, destination, mode);
 
-  const profile =
-    mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
-  const routingBase = OSRM_URL.replace(
-    /\/route\/v1\/[^/]+$/,
-    "/route/v1/" + profile
-  );
-  const url =
-    routingBase +
-    "/" +
-    origin.lng +
-    "," +
-    origin.lat +
-    ";" +
-    destination.lng +
-    "," +
-    destination.lat +
-    "?alternatives=false&overview=full&geometries=polyline";
-
-  try {
-    const data = await fetchJson<OsrmResponse>(url);
-    const route = data.routes?.[0];
-    const distanceMeters = route?.distance;
-    const durationSeconds = route?.duration;
-    const polyline = route?.geometry;
-
-    if (
-      data.code === "Ok" &&
-      Number.isFinite(distanceMeters) &&
-      Number(distanceMeters) > 0 &&
-      Number.isFinite(durationSeconds) &&
-      Number(durationSeconds) > 0 &&
-      typeof polyline === "string" &&
-      polyline.length > 0
-    ) {
-      const result: PublicRoute = {
-        origin,
-        destination,
-        distanceMeters: Number(distanceMeters),
-        durationSeconds: Number(durationSeconds),
-        polyline,
-        source: "osrm",
-        mode,
-      };
-      cacheSet("route:" + coordinateKey, result);
-      return result;
-    }
-  } catch {
-    // A local estimate keeps the public site usable when the shared routing
-    // service is throttled, unavailable, or the device is offline.
+  const now = Date.now();
+  if (getRouterUnavailableUntil() > now) {
+    if (cachedMatches) return cached;
+    const estimated = buildLocalEstimate(origin, destination, mode);
+    cacheSet(cacheKey, estimated);
+    return estimated;
   }
 
-  const estimated = buildLocalEstimate(origin, destination, mode);
-  cacheSet("route:" + coordinateKey, estimated);
-  return estimated;
+  const existing = routerInFlight.get(coordinateKey);
+  if (existing) return existing;
+
+  const task = (async () => {
+    const profile =
+      mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
+    const routingBase = OSRM_URL.replace(
+      /\/route\/v1\/[^/]+$/,
+      "/route/v1/" + profile
+    );
+    const url =
+      routingBase +
+      "/" +
+      origin.lng +
+      "," +
+      origin.lat +
+      ";" +
+      destination.lng +
+      "," +
+      destination.lat +
+      "?alternatives=false&overview=full&geometries=polyline";
+
+    try {
+      const data = await fetchJson<OsrmResponse>(url);
+      const route = data.routes?.[0];
+      const distanceMeters = route?.distance;
+      const durationSeconds = route?.duration;
+      const polyline = route?.geometry;
+
+      if (
+        data.code === "Ok" &&
+        Number.isFinite(distanceMeters) &&
+        Number(distanceMeters) > 0 &&
+        Number.isFinite(durationSeconds) &&
+        Number(durationSeconds) > 0 &&
+        typeof polyline === "string" &&
+        polyline.length > 0
+      ) {
+        setRouterUnavailableUntil(0);
+        const result: PublicRoute = {
+          origin,
+          destination,
+          distanceMeters: Number(distanceMeters),
+          durationSeconds: Number(durationSeconds),
+          polyline,
+          source: "osrm",
+          mode,
+        };
+        cacheSet(cacheKey, result);
+        return result;
+      }
+    } catch {
+      setRouterUnavailableUntil(Date.now() + ROUTER_FAILURE_COOLDOWN_MS);
+    }
+
+    const estimated = buildLocalEstimate(origin, destination, mode);
+    cacheSet(cacheKey, estimated);
+    return estimated;
+  })();
+
+  routerInFlight.set(coordinateKey, task);
+  const cleanup = () => {
+    if (routerInFlight.get(coordinateKey) === task) routerInFlight.delete(coordinateKey);
+  };
+  void task.then(cleanup, cleanup);
+  return task;
 }
 
 function publicDistanceLabel(meters: number) {
