@@ -13,4 +13,10 @@ describe("Stations nearby offline", () => {
     expect(source).toContain("continua funcionando offline com o GPS do aparelho e o catálogo local");
     expect(source).toContain("Sua posição não é enviada ao diretório");
   });
+
+  it("makes station deep links accessible and motion-aware", () => {
+    expect(source).toContain("(prefers-reduced-motion: reduce)");
+    expect(source).toContain("element.focus({ preventScroll: true })");
+    expect(source).toContain('behavior: reduceMotion ? "auto" : "smooth"');
+  });
 });
