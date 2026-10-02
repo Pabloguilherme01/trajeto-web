@@ -90,6 +90,7 @@ export default function Planner() {
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
   const [publicRoutePending, setPublicRoutePending] = useState(false);
+  const [liveRemaining, setLiveRemaining] = useState<{ distanceMeters: number; durationSeconds: number } | null>(null);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
   const staticRuntime = !supportsLiveRouting();
@@ -108,6 +109,7 @@ export default function Planner() {
     setShowMap(false);
     setError(null);
     setSavedMessage(null);
+    setLiveRemaining(null);
   };
 
   useEffect(() => {
@@ -137,6 +139,40 @@ export default function Planner() {
       localDataVersion.current += 1;
     };
   }, []);
+
+  useEffect(() => {
+    if (!planned || !originPrivate || !navigator.geolocation) {
+      setLiveRemaining(null);
+      return;
+    }
+    const meters = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+      const rad = (v: number) => v * Math.PI / 180;
+      const dLat = rad(b.lat - a.lat);
+      const dLng = rad(b.lng - a.lng);
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+      return 12_742_000 * Math.asin(Math.sqrt(h));
+    };
+    const destinationPoint = planned.route.destination;
+    const initialDirect = Math.max(1, meters(planned.route.origin, destinationPoint));
+    let bestDistance = planned.route.distanceMeters;
+    const watchId = navigator.geolocation.watchPosition(position => {
+      const directRemaining = meters(
+        { lat: position.coords.latitude, lng: position.coords.longitude },
+        destinationPoint
+      );
+      bestDistance = Math.min(bestDistance, Math.max(0, planned.route.distanceMeters * Math.min(1, directRemaining / initialDirect)));
+      const ratio = planned.route.distanceMeters > 0 ? bestDistance / planned.route.distanceMeters : 0;
+      setLiveRemaining({
+        distanceMeters: bestDistance,
+        durationSeconds: Math.max(0, planned.route.durationSeconds * ratio),
+      });
+    }, () => {}, {
+      enableHighAccuracy: mode === "walking" || mode === "cycling",
+      maximumAge: 10_000,
+      timeout: 12_000,
+    });
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [planned, originPrivate, mode]);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -1046,9 +1082,9 @@ export default function Planner() {
               </div>
 
               <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-2xl bg-white/[.045] p-3"><RouteIcon className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Distância</p><p className="mt-1 text-sm font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><Navigation className="size-3.5 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Tempo</p><p className="mt-1 text-sm font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
+                <div className="rounded-2xl bg-white/[.045] p-3"><RouteIcon className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Distância</p><p className="mt-1 text-sm font-black">{formatDistance(liveRemaining?.distanceMeters ?? planned.route.distanceMeters)}</p>{liveRemaining && <span className="mt-1 block text-[10px] font-bold text-[#3DE3FF]">ao vivo</span>}</div>
+                <div className="rounded-2xl bg-white/[.045] p-3"><Navigation className="size-3.5 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Tempo</p><p className="mt-1 text-sm font-black">{formatDuration(liveRemaining?.durationSeconds ?? planned.route.durationSeconds)}</p>{liveRemaining && <span className="mt-1 block text-[10px] font-bold text-[#C7FF3C]">restante</span>}</div>
+                <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(liveRemaining?.durationSeconds ?? planned.route.durationSeconds)}</p>{liveRemaining && <span className="mt-1 block text-[10px] font-bold text-[#FFB86B]">atualizando</span>}</div>
               </div>
 
               {Array.isArray((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps) &&
@@ -1080,16 +1116,13 @@ export default function Planner() {
                 </section>
               )}
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {liveRemaining && <p className="mt-3 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 py-2 text-xs font-semibold text-white/55">Navegação ao vivo ativa: distância restante, tempo e chegada diminuem no aparelho conforme você avança. Sua posição não é salva.</p>}
+
+              <div className="mt-3">
                 <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
                   <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
                   <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/35">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
-                </div>
-                <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
-                  <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Pedágio</p>
-                  <p className="mt-1 text-xs font-black">Não informado</p>
-                  <p className="mt-1 text-xs text-white/35">o retorno básico da rota não fornece pedágio</p>
                 </div>
               </div>
 
