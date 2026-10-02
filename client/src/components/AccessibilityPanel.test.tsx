@@ -24,3 +24,16 @@ describe("AccessibilityPanel", () => {
     expect(screen.getByText(/nenhum dado local do trajeto está salvo/i)).toBeTruthy();
   });
 });
+
+it("offers deletion when only private session routes remain", async () => {
+  localStorage.clear();
+  sessionStorage.setItem("trajeto:public-routing:route:private", "private route");
+  const user = userEvent.setup();
+  render(<AccessibilityPanel />);
+  await user.click(screen.getAllByRole("button", { name: /abrir acessibilidade/i })[0]);
+  await user.click(screen.getByRole("button", { name: /limpar dados do trajeto/i }));
+  await user.click(screen.getByRole("button", { name: /confirmar limpeza/i }));
+  expect(sessionStorage.getItem("trajeto:public-routing:route:private")).toBeNull();
+  cleanup();
+  sessionStorage.clear();
+});
