@@ -66,7 +66,7 @@ function isValidPayload(payload: unknown) {
 function sanitizeOfflineRoute(route: OfflineRoute): OfflineRoute {
   const origin = privateOriginForHistory(route.origin);
   if (origin === route.origin) return route;
-  return { ...route, id: offlineRouteId(origin, route.destination), origin };
+  return { ...route, id: offlineRouteId(origin, route.destination, offlineRouteTravelMode(route)), origin };
 }
 
 function isValidRoute(value: unknown): value is OfflineRoute {
@@ -226,13 +226,12 @@ export async function clearOfflineRoutes() {
 }
 
 function migratedOfflineRouteId(id: string) {
-  const separator = id.indexOf("::");
-  if (separator <= 0) return id;
-  const origin = id.slice(0, separator);
-  const destination = id.slice(separator + 2);
-  if (destination.trim().length < 2) return id;
+  const [origin = "", destination = "", mode] = id.split("::");
+  if (origin.trim().length < 2 || destination.trim().length < 2) return id;
   const safeOrigin = privateOriginForHistory(origin);
-  return safeOrigin === origin.trim() ? id : offlineRouteId(safeOrigin, destination);
+  if (safeOrigin === origin.trim()) return id;
+  const safeMode = mode === "walking" || mode === "cycling" || mode === "transit" || mode === "driving" ? mode : undefined;
+  return offlineRouteId(safeOrigin, destination, safeMode);
 }
 
 export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
@@ -265,8 +264,13 @@ export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> 
   return safeRoute;
 }
 
-export function offlineRouteId(origin: string, destination: string) {
-  return origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+export function offlineRouteId(
+  origin: string,
+  destination: string,
+  mode?: "driving" | "walking" | "cycling" | "transit"
+) {
+  const base = origin.trim().toLocaleLowerCase("pt-BR") + "::" + destination.trim().toLocaleLowerCase("pt-BR");
+  return mode ? base + "::" + mode : base;
 }
 
 
