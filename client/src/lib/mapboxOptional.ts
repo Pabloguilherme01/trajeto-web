@@ -13,7 +13,7 @@ export type MapboxRouteResult = {
   distanceMeters: number;
   durationSeconds: number;
   polyline: string;
-  steps: MapboxRouteStep[];
+  steps?: MapboxRouteStep[];
 };
 
 const DIRECTIONS_BASE = "https://api.mapbox.com/directions/v5/mapbox";
@@ -153,23 +153,25 @@ export async function requestOptionalMapboxRoute(
 
   if (data.code !== "Ok" || !route) return null;
 
+  const steps = (route.legs ?? []).flatMap(leg => (leg.steps ?? []).flatMap(step => {
+    const instruction = step.maneuver?.instruction?.trim();
+    if (!instruction) return [];
+    return [{
+      instruction,
+      streetName: step.name?.trim() || undefined,
+      distanceMeters: Number(step.distance) || 0,
+      durationSeconds: Number(step.duration) || 0,
+      location: Array.isArray(step.maneuver?.location) && step.maneuver.location.length === 2
+        ? { lng: Number(step.maneuver.location[0]), lat: Number(step.maneuver.location[1]) }
+        : undefined,
+    }];
+  }));
+
   return {
     distanceMeters: Number(route.distance),
     durationSeconds: Number(route.duration),
     polyline: route.geometry as string,
-    steps: (route.legs ?? []).flatMap(leg => (leg.steps ?? []).flatMap(step => {
-      const instruction = step.maneuver?.instruction?.trim();
-      if (!instruction) return [];
-      return [{
-        instruction,
-        streetName: step.name?.trim() || undefined,
-        distanceMeters: Number(step.distance) || 0,
-        durationSeconds: Number(step.duration) || 0,
-        location: Array.isArray(step.maneuver?.location) && step.maneuver.location.length === 2
-          ? { lng: Number(step.maneuver.location[0]), lat: Number(step.maneuver.location[1]) }
-          : undefined,
-      }];
-    })),
+    ...(steps.length ? { steps } : {}),
   };
   })().catch(error => {
     unavailableUntil = Date.now() + FAILURE_COOLDOWN_MS;
