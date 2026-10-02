@@ -307,7 +307,7 @@ export default function Home() {
             </div>
             <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
           </div>
-          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
               <button
                 key={route.id}
@@ -334,7 +334,7 @@ export default function Home() {
             </div>
             <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Abrir guia</button>
           </div>
-          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_PLACES.filter(place => place.category === "alimentacao" || place.category === "compras").slice(0, 6).map(place => {
               const PlaceIcon = place.category === "alimentacao" ? Utensils : ShoppingBag;
               return (
