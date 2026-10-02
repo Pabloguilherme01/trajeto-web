@@ -32,3 +32,19 @@ test("public screens stay inside the viewport before and after scrolling and foc
     }
   }
 });
+
+
+test("home remains usable with enlarged text on a narrow installed-app-like viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.addStyleTag({ content: "html { font-size: 20px !important; }" });
+  await page.goto("./");
+  await expect(page.locator("main")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const layout = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    document: document.documentElement.scrollWidth,
+    body: document.body.scrollWidth,
+  }));
+  expect(Math.max(layout.document, layout.body)).toBeLessThanOrEqual(layout.viewport + 1);
+  await expect(page.getByRole("button", { name: /planejar|rota|buscar/i }).first()).toBeVisible();
+});
