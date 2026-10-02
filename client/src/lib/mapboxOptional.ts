@@ -89,29 +89,31 @@ export async function requestOptionalMapboxRoute(
   const url = new URL(
     DIRECTIONS_BASE + "/" + profile + "/" + coordinates
   );
-  url.searchParams.set("alternatives", "false");
+  url.searchParams.set("alternatives", "true");
   url.searchParams.set("overview", "full");
   url.searchParams.set("geometries", "polyline");
   url.searchParams.set("steps", "false");
   url.searchParams.set("access_token", token);
 
   const data = await fetchMapboxJson<MapboxDirectionsResponse>(url.toString());
-  const route = data.routes?.[0];
-  const distanceMeters = Number(route?.distance);
-  const durationSeconds = Number(route?.duration);
-  const polyline = route?.geometry;
+  const route =
+    data.routes
+      ?.filter(
+        item =>
+          Number.isFinite(Number(item.distance)) &&
+          Number(item.distance) > 0 &&
+          Number.isFinite(Number(item.duration)) &&
+          Number(item.duration) > 0 &&
+          typeof item.geometry === "string" &&
+          item.geometry.length > 0
+      )
+      .sort((a, b) => Number(a.duration) - Number(b.duration))[0] ?? null;
 
-  if (
-    data.code !== "Ok" ||
-    !Number.isFinite(distanceMeters) ||
-    distanceMeters <= 0 ||
-    !Number.isFinite(durationSeconds) ||
-    durationSeconds <= 0 ||
-    typeof polyline !== "string" ||
-    !polyline
-  ) {
-    return null;
-  }
+  if (data.code !== "Ok" || !route) return null;
 
-  return { distanceMeters, durationSeconds, polyline };
+  return {
+    distanceMeters: Number(route.distance),
+    durationSeconds: Number(route.duration),
+    polyline: route.geometry as string,
+  };
 }
