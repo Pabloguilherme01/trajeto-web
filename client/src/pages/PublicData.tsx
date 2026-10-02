@@ -23,6 +23,7 @@ import {
   PUBLIC_DATA_HUB_UPDATED_AT,
   PUBLIC_DATA_RESOURCES,
   SEMIURBAN_FARES,
+  publicDataFreshnessLabel,
   type PublicDataCategory,
 } from "@/lib/publicDataHub";
 
@@ -288,6 +289,9 @@ export default function PublicData() {
                         </h3>
                         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[.65rem] font-bold uppercase tracking-wide text-white/65">
                           {item.official ? "Oficial" : "Comunitária"}
+                        </span>
+                        <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/5 px-2 py-0.5 text-[.65rem] font-bold text-[#8DEEFF]">
+                          {publicDataFreshnessLabel(item)}
                         </span>
                       </div>
                       <p className="mt-1 text-xs font-bold text-[#C7FF3C]">
