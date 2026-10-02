@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { externalNavigationUrl, findBestOfflineRouteForTrip, findOfflineRouteByDestination, findOfflineRouteByTrip, isOfflineRouteStale, offlineRouteId, offlineRouteShareText, offlineRouteShareUrl } from "./offlineStore";
+import { canPersistOfflineTrip, externalNavigationUrl, findBestOfflineRouteForTrip, findOfflineRouteByDestination, findOfflineRouteByTrip, isOfflineRouteStale, isPublicOfflineEndpoint, offlineRouteId, offlineRouteShareText, offlineRouteShareUrl } from "./offlineStore";
 
 describe("offlineStore helpers", () => {
   it("normalizes route ids consistently", () => {
@@ -128,4 +128,17 @@ describe("offlineStore helpers", () => {
     const routes = [{ id: "legacy-foot", origin: "Centro", destination: "Hospital", savedAt: new Date().toISOString(), payload: { route: { mode: "walking", source: "osrm" } } }];
     expect(findBestOfflineRouteForTrip(routes, "Centro", "Hospital", "walking")).toBeNull();
   });
+
+  it("persists offline routes only when both endpoints are known public places", () => {
+    expect(
+      canPersistOfflineTrip(
+        "Águas Lindas de Goiás, GO",
+        "UPA Mansões Odisseia, Águas Lindas de Goiás, GO"
+      )
+    ).toBe(true);
+    expect(isPublicOfflineEndpoint("ZM Combustíveis")).toBe(true);
+    expect(canPersistOfflineTrip("Casa", "UPA Mansões Odisseia, Águas Lindas de Goiás, GO")).toBe(false);
+    expect(canPersistOfflineTrip("-15.76123, -48.28123", "UPA Mansões Odisseia, Águas Lindas de Goiás, GO")).toBe(false);
+  });
+
 });
