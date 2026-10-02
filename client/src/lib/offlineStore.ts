@@ -65,8 +65,9 @@ function isValidPayload(payload: unknown) {
 
 function sanitizeOfflineRoute(route: OfflineRoute): OfflineRoute {
   const origin = privateOriginForHistory(route.origin);
-  if (origin === route.origin) return route;
-  return { ...route, id: offlineRouteId(origin, route.destination, offlineRouteTravelMode(route)), origin };
+  const id = offlineRouteId(origin, route.destination, offlineRouteTravelMode(route));
+  if (origin === route.origin && id === route.id) return route;
+  return { ...route, id, origin };
 }
 
 function isValidRoute(value: unknown): value is OfflineRoute {
@@ -238,28 +239,31 @@ export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> 
   if (!hasIndexedDb()) return null;
 
   let route = await withStore<unknown>("readonly", store => store.get(id));
+  const migratedId = migratedOfflineRouteId(id);
+
+  if (!isValidRoute(route) && migratedId !== id) {
+    route = await withStore<unknown>("readonly", store => store.get(migratedId));
+  }
+
   if (!isValidRoute(route)) {
     if (isRecord(route) && typeof route.id === "string") {
       await removeOfflineRoute(route.id);
     }
-    const migratedId = migratedOfflineRouteId(id);
-    if (migratedId !== id) {
-      route = await withStore<unknown>("readonly", store => store.get(migratedId));
-    }
-    if (!isValidRoute(route)) return null;
+    // Old links did not carry the travel mode in the route id. Listing once
+    // migrates every valid record to the canonical mode-aware id and lets an
+    // old bookmark continue to resolve without duplicating saved routes.
+    const migrated = await listOfflineRoutes();
+    const baseId = migratedId !== id ? migratedId : id;
+    const candidate = migrated
+      .filter(item => item.id === baseId || item.id.startsWith(baseId + "::"))
+      .sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt))[0];
+    return candidate ?? null;
   }
 
   const safeRoute = sanitizeOfflineRoute(route);
   if (safeRoute.id !== route.id || safeRoute.origin !== route.origin) {
-    const existing = safeRoute.id !== route.id
-      ? await withStore<unknown>("readonly", store => store.get(safeRoute.id))
-      : null;
-    const routeToKeep = isValidRoute(existing) && Date.parse(existing.savedAt) > Date.parse(safeRoute.savedAt)
-      ? existing
-      : safeRoute;
-    await withStore("readwrite", store => store.put(routeToKeep));
-    if (safeRoute.id !== route.id) await withStore("readwrite", store => store.delete(route.id));
-    return routeToKeep;
+    const migrated = await listOfflineRoutes();
+    return migrated.find(item => item.id === safeRoute.id) ?? safeRoute;
   }
   return safeRoute;
 }
