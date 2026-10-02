@@ -208,6 +208,20 @@ describe("public routing fallback", () => {
   });
 
   it("coarsens manually typed coordinate origins before public routing or cache storage", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: (index: number) => Array.from(saved.keys())[index] ?? null,
+      get length() {
+        return saved.size;
+      },
+    };
+    vi.stubGlobal("localStorage", storage);
+    vi.stubGlobal("sessionStorage", storage);
+
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({
@@ -230,10 +244,9 @@ describe("public routing fallback", () => {
     expect(routerUrl).not.toContain("-15.76123");
     expect(routerUrl).not.toContain("-48.28123");
 
-    const persisted = Array.from({ length: localStorage.length }, (_, index) => {
-      const key = localStorage.key(index) ?? "";
-      return key + "=" + (localStorage.getItem(key) ?? "");
-    }).join("\n");
+    const persisted = Array.from(saved.entries())
+      .map(([key, value]) => key + "=" + value)
+      .join("\n");
     expect(persisted).not.toContain("-15.76123");
     expect(persisted).not.toContain("-48.28123");
   });
