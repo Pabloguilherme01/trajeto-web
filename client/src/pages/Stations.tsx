@@ -452,7 +452,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const target = decodeURIComponent(hash.slice("#posto-".length));
     if (!target) return;
     const timer = window.setTimeout(() => {
-      document.getElementById("posto-" + encodeURIComponent(target))?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const element = document.getElementById("posto-" + encodeURIComponent(target));
+      if (!element) return;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      element.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      element.focus({ preventScroll: true });
     }, 120);
     return () => window.clearTimeout(timer);
   }, [directoryCards.length, directorySearch, location]);
@@ -867,8 +874,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
-              <button type="button" onClick={useNearby} disabled={locating || !online} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]">Postos perto de mim</button>
+              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF] disabled:opacity-50">Postos perto de mim</button>
             </div>
+            {!online && (
+              <p className="mt-2 text-xs leading-relaxed text-[#DFFF9D]">
+                “Perto de mim” continua funcionando offline com o GPS do aparelho e o catálogo local. Sua posição não é enviada ao diretório.
+              </p>
+            )}
           </section>
         )}
 
