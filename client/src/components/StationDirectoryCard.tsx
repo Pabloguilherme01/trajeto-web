@@ -162,7 +162,7 @@ export function StationDirectoryCard({
       transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduceMotion ? undefined : { y: -3 }}
       whileTap={reduceMotion ? undefined : { scale: 0.997 }}
-      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
+      className="group relative min-w-0 max-w-full scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
@@ -172,7 +172,7 @@ export function StationDirectoryCard({
             <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
               <h3 className="mt-1 text-base font-black leading-tight text-white">{stationName}</h3>
-              <p className="mt-1 text-xs leading-relaxed text-white/65">{legalName}</p>
+              <p className="mt-1 break-words text-xs leading-relaxed text-white/65 [overflow-wrap:anywhere]">{legalName}</p>
             </div>
             <button type="button" onClick={onToggleSaved} disabled={!onToggleSaved} className={"grid size-11 shrink-0 place-items-center rounded-xl border disabled:opacity-25 " + (saved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/10 text-[#FFB7A9]" : "border-white/8 text-white/65")} aria-label={saved ? "Remover posto dos salvos" : onToggleSaved ? "Salvar posto neste aparelho" : "Salvar indisponível sem coordenada"}>
               <Heart className="size-4" fill={saved ? "currentColor" : "none"} />
@@ -192,7 +192,7 @@ export function StationDirectoryCard({
       </div>
 
       <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3" aria-label="Confiança e atualização dos dados">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.13em] text-white/65">Confiança dos dados</p>
             <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
@@ -213,7 +213,7 @@ export function StationDirectoryCard({
       </section>
 
       <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.13em] text-[#D9FF91]">Preço pesquisado pela ANP</p>
             {primaryPrice ? (
@@ -234,7 +234,7 @@ export function StationDirectoryCard({
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#3DE3FF]" />
-          <p className="text-sm leading-relaxed text-white/65">{address || "Endereço não consolidado"}</p>
+          <p className="break-words text-sm leading-relaxed text-white/65 [overflow-wrap:anywhere]">{address || "Endereço não consolidado"}</p>
         </div>
         <div className="mt-2 grid gap-2 text-xs text-white/65 sm:grid-cols-2">
           <span>CNPJ: {cnpj ? formatCnpj(cnpj) : "não informado"}</span>
@@ -246,9 +246,9 @@ export function StationDirectoryCard({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
         {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="col-span-2 sm:col-span-3 min-h-11 flex items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-xs font-black text-[#C9F7FF]">Abrir ficha completa</Link>}
-        <button type="button" onClick={() => openExternal(preferredUrl, "navegação")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
+        <button type="button" onClick={() => openExternal(preferredUrl, "navegação")} className="min-h-12 min-w-0 min-[360px]:col-span-2 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("google"); openExternal(googleUrl, "Google Maps"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); openExternal(wazeUrl, "Waze"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
         <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); openExternal(appleUrl, "Apple Maps"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
@@ -261,7 +261,7 @@ export function StationDirectoryCard({
           <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Contato e redes</p>
           <span className="text-xs font-bold text-white/65">sem login</span>
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mt-2 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
           <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-xs font-black text-white/70">Instagram</button>
           <button type="button" onClick={() => window.open(facebookSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#1877F2]/20 bg-[#1877F2]/[.05] text-xs font-black text-white/70">Facebook</button>
           {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-[#25D366]/20 bg-[#25D366]/[.05] text-xs font-black text-white/70">WhatsApp</a> : <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 text-xs font-black text-white/65">Buscar contato</button>}
@@ -270,7 +270,7 @@ export function StationDirectoryCard({
         <p className="mt-2 text-xs leading-relaxed text-white/65">Instagram e Facebook usam busca pública pelo nome/endereço para evitar links inventados. WhatsApp aparece quando existe telefone público compatível.</p>
         <div className="mt-2 grid gap-2 rounded-xl border border-white/8 bg-white/[.02] p-2.5">
           <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Fontes oficiais complementares</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2">
             <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/acoes-de-fiscalizacao", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Fiscalização ANP</button>
             <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/pmqc-programa-de-monitoramento-da-qualidade-dos-combustiveis", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">PMQC</button>
             <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/multas-aplicadas-com-vencimento-a-partir-de-2016", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Multas ANP</button>
@@ -279,7 +279,7 @@ export function StationDirectoryCard({
         </div><div className="mt-2 grid gap-2 text-xs text-white/65 sm:grid-cols-2">{local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="truncate underline decoration-white/10 underline-offset-2">{local.mapData.email}</a>}{local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="truncate underline decoration-white/10 underline-offset-2">Site oficial</a>}</div>
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mt-2 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
         {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65"><Phone className="size-3.5" />Ligar</a>}
         <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
         <button type="button" onClick={() => void share()} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65"><Share2 className="size-3.5" />Compartilhar</button>
@@ -332,7 +332,7 @@ export function StationDirectoryCard({
           {coords && <p className="text-white/65">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
         </div>
       </details>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-xs text-white/65">
+      <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-2 border-t border-white/6 pt-3 text-xs text-white/65">
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
         <span>Sem conta · uso direto</span>
       </div>
