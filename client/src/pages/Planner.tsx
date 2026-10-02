@@ -291,7 +291,6 @@ export default function Planner() {
               ? "Para calcular sem internet, informe uma origem local já conhecida ou abra uma rota salva neste aparelho."
               : "Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho."
           );
-          rememberTrip("", to);
           track("route_open", to);
           vibration(12);
           return;
@@ -333,7 +332,7 @@ export default function Planner() {
             (autoSaved ? " Cópia offline criada automaticamente." : "") +
             (originPrivate ? " Esta rota não foi salva automaticamente para proteger sua localização." : "")
         );
-        if (resolvedOrigin) if (!originPrivate) rememberTrip(resolvedOrigin, to);
+        if (resolvedOrigin && !originPrivate) rememberTrip(resolvedOrigin, to);
         track("route_open", to);
         vibration(14);
         return;
@@ -342,7 +341,7 @@ export default function Planner() {
         setSavedMessage(null);
         setFallbackReady(true);
         setError(routeError instanceof Error ? routeError.message : "Não foi possível calcular a rota pública.");
-        if (publicOrigin) if (!originPrivate) rememberTrip(publicOrigin, to);
+        if (publicOrigin && !originPrivate) rememberTrip(publicOrigin, to);
         vibration(8);
         return;
       } finally {
