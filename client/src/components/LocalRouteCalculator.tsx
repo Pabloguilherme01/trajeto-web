@@ -2,7 +2,7 @@ import React from "react";
 import { Fuel, Gauge, Route as RouteIcon, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
-import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, fuelLitersFromTankFraction, projectTripCosts } from "@/lib/tripProjection";
+import { calculateFuelStatus, compareEthanolGasoline, compareMonthlyBudget, compareTripScenarios, fuelLitersFromTankFraction, projectTripCosts } from "@/lib/tripProjection";
 import { clearTripCalculatorDraft, loadTripCalculatorDraft, saveTripCalculatorDraft } from "@/lib/tripCalculatorDraft";
 import { getTripCalculatorMode, isRecurringTripMode, isTripCalculatorModeSelection, TRIP_CALCULATOR_MODES, type TripCalculatorModeId, type TripCalculatorModeSelection } from "@/lib/tripCalculatorModes";
 
@@ -224,6 +224,12 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       recurring,
     });
     const budgetStatus = recurring ? compareMonthlyBudget(projection.monthlyCost, numberValue(monthlyBudget)) : null;
+    const fuelChoice = compareEthanolGasoline({
+      ethanolPrice: pricePerLiter,
+      gasolinePrice: numberValue(alternativePrice),
+      ethanolKmPerLiter: kmPerLiter,
+      gasolineKmPerLiter: numberValue(alternativeConsumption),
+    });
 
     return {
       projection,
@@ -233,6 +239,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       fuelStatus,
       comparison,
       budgetStatus,
+      fuelChoice,
       currentFuelInvalid,
       currentFuelAboveTank,
     };
@@ -537,6 +544,14 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
               <input value={alternativeConsumption} onChange={e => setAlternativeConsumption(e.target.value)} inputMode="decimal" placeholder="Ex.: 8,5" className="mt-1.5 min-h-11 w-full rounded-xl border border-[#A7CDBA] bg-white px-3 py-2.5 text-sm text-[#163840] outline-none focus:border-[#163840]" />
             </label>
           </div>
+
+          {values?.fuelChoice && (
+            <div className="mt-3 rounded-xl border border-[#B7D8C1] bg-[#F0F8F2] p-4" role="status">
+              <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#56766A]">Etanol × gasolina</p>
+              <p className="mt-1 text-sm font-black text-[#163840]">{values.fuelChoice.recommended === "ethanol" ? "Etanol tem o menor custo estimado." : values.fuelChoice.recommended === "gasoline" ? "Gasolina tem o menor custo estimado." : "Os dois combustíveis estão praticamente empatados."}</p>
+              <p className="mt-1 text-[0.62rem] leading-relaxed text-[#5F746E]">{values.fuelChoice.method === "real-cost-per-km" ? "Comparação feita pelo custo real por km usando preço e consumo dos dois combustíveis." : "Sem os dois consumos, o Trajeto usa a regra de 70% apenas como referência."}</p>
+            </div>
+          )}
 
           {values?.comparison && (
             <div className="mt-3 rounded-xl border border-[#C7D2C9] bg-white p-4">
