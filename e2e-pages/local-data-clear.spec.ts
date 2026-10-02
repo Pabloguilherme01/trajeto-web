@@ -1,5 +1,32 @@
 import { expect, test } from "@playwright/test";
 
+test("Pages: clearing data resets the visible home and discards a pending GPS result", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("trajeto-recent-searches", JSON.stringify(["Rua particular de teste"]));
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: {
+      getCurrentPosition: (success: PositionCallback) => {
+        window.addEventListener("test-gps-result", () => success({
+          coords: { latitude: -15.76123, longitude: -48.28123 },
+        } as GeolocationPosition), { once: true });
+      },
+    } });
+  });
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  await page.getByPlaceholder("De onde você sai").fill("Casa de teste");
+  await page.getByPlaceholder("Para onde você vai").fill("Hospital");
+  await page.getByRole("button", { name: "Usar minha localização como origem" }).click();
+  await page.getByRole("button", { name: "Abrir acessibilidade" }).click();
+  await page.getByRole("button", { name: "Limpar dados do Trajeto neste aparelho" }).click();
+  await page.getByRole("button", { name: "Confirmar limpeza" }).click();
+  await expect(page.getByText("Dados locais removidos. O Trajeto voltou ao estado inicial neste aparelho.")).toBeVisible();
+  await page.getByRole("button", { name: "Fechar acessibilidade" }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event("test-gps-result")));
+  await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("");
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("");
+  await expect(page.getByRole("button", { name: "Buscar novamente: Rua particular de teste" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Usar minha localização como origem" })).toBeEnabled();
+});
+
 test("Pages: clearing Trajeto device data also removes offline routes and session caches", async ({ page }) => {
   await page.goto("salvos", { waitUntil: "domcontentloaded" });
 

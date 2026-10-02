@@ -1,8 +1,9 @@
 import { defineConfig } from "@playwright/test";
-import base from "./playwright.config";
+import base from "./playwright.pages.config";
 
 export default defineConfig({
   ...base,
+  testDir: "./e2e",
   testMatch: "responsive-layout.spec.ts",
   projects: [
     { name: "responsive-chromium", use: { browserName: "chromium", isMobile: true, hasTouch: true } },

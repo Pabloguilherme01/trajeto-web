@@ -1,5 +1,5 @@
 import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, rememberIntent, rememberSearch, type RecentTrip } from "@/lib/mobilePreferences";
@@ -12,6 +12,7 @@ import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, isCurrentLocationL
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
+import { localDataEvent } from "@/lib/localData";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -27,6 +28,7 @@ export default function Home() {
   const [originPrivate, setOriginPrivate] = useState(false);
   const [shareDone, setShareDone] = useState(false);
   const [formMessage, setFormMessage] = useState<string | null>(null);
+  const locationRequest = useRef(0);
 
   useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
@@ -49,14 +51,27 @@ export default function Home() {
     };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
+    const onDataCleared = () => {
+      // A GPS response requested before deletion must not restore private data.
+      locationRequest.current += 1;
+      setLocating(false);
+      setOrigin("");
+      setDestination("");
+      setOriginPrivate(false);
+      setFormMessage(null);
+      refresh();
+    };
     refresh();
     window.addEventListener("focus", refresh);
     window.addEventListener(mobilePreferenceEvent, refresh);
+    window.addEventListener(localDataEvent, onDataCleared);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
       window.removeEventListener("focus", refresh);
       window.removeEventListener(mobilePreferenceEvent, refresh);
+      window.removeEventListener(localDataEvent, onDataCleared);
+      locationRequest.current += 1;
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
@@ -97,9 +112,11 @@ export default function Home() {
     }
     setFormMessage(null);
     setLocating(true);
+    const request = ++locationRequest.current;
     rememberIntent("route");
     navigator.geolocation.getCurrentPosition(
       position => {
+        if (request !== locationRequest.current) return;
         setLocating(false);
         setPrivateLocationHandoff({
           lat: position.coords.latitude,
@@ -110,6 +127,7 @@ export default function Home() {
         vibration(16);
       },
       () => {
+        if (request !== locationRequest.current) return;
         setLocating(false);
         setFormMessage("Não foi possível obter sua localização. Digite a origem ou tente novamente.");
       },
