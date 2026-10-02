@@ -38,7 +38,7 @@ it("filters accent-insensitive destinations and carries the selected destination
     target: { value: "xxxxxxxxx" },
   });
   expect(screen.getByRole("status").textContent).toContain(
-    "Nenhum destino encontrado"
+    "Nenhum item encontrado"
   );
 });
 it("keeps the destination catalog usable offline without loading street maps", () => {
