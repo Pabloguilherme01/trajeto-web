@@ -1,10 +1,18 @@
 export type MapboxCoordinate = { lat: number; lng: number };
 export type MapboxTravelMode = "driving" | "walking" | "cycling" | "transit";
 
+export type MapboxRouteStep = {
+  instruction: string;
+  streetName?: string;
+  distanceMeters: number;
+  durationSeconds: number;
+};
+
 export type MapboxRouteResult = {
   distanceMeters: number;
   durationSeconds: number;
   polyline: string;
+  steps: MapboxRouteStep[];
 };
 
 const DIRECTIONS_BASE = "https://api.mapbox.com/directions/v5/mapbox";
@@ -46,6 +54,14 @@ type MapboxDirectionsResponse = {
     distance?: number;
     duration?: number;
     geometry?: string;
+    legs?: Array<{
+      steps?: Array<{
+        distance?: number;
+        duration?: number;
+        name?: string;
+        maneuver?: { instruction?: string };
+      }>;
+    }>;
   }>;
 };
 
@@ -116,7 +132,8 @@ export async function requestOptionalMapboxRoute(
   url.searchParams.set("alternatives", "true");
   url.searchParams.set("overview", "full");
   url.searchParams.set("geometries", "polyline");
-  url.searchParams.set("steps", "false");
+  url.searchParams.set("steps", "true");
+  url.searchParams.set("language", "pt-BR");
   url.searchParams.set("access_token", token);
 
   const data = await fetchMapboxJson<MapboxDirectionsResponse>(url.toString());
@@ -139,6 +156,16 @@ export async function requestOptionalMapboxRoute(
     distanceMeters: Number(route.distance),
     durationSeconds: Number(route.duration),
     polyline: route.geometry as string,
+    steps: (route.legs ?? []).flatMap(leg => (leg.steps ?? []).flatMap(step => {
+      const instruction = step.maneuver?.instruction?.trim();
+      if (!instruction) return [];
+      return [{
+        instruction,
+        streetName: step.name?.trim() || undefined,
+        distanceMeters: Number(step.distance) || 0,
+        durationSeconds: Number(step.duration) || 0,
+      }];
+    })),
   };
   })().catch(error => {
     unavailableUntil = Date.now() + FAILURE_COOLDOWN_MS;
