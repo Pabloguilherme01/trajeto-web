@@ -20,6 +20,8 @@ import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocatio
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
+import { loadCityAtlasSnapshot, resolveCityAtlasPoint, type CityAtlasSnapshot } from "@/lib/cityAtlas";
+import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import { effectivePlannerMode, plannerActionLabel, routeFreshness, shouldAutoRefreshSavedRoute } from "@/lib/routeExperience";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
@@ -45,6 +47,15 @@ function formatDistance(meters: number | null | undefined) {
 function formatArrival(seconds: number | null | undefined) {
   if (!seconds || seconds <= 0) return "—";
   return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
+}
+
+function parsePreviewCoordinate(value: string) {
+  const match = value.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/);
+  if (!match) return null;
+  const lat = Number(match[1]);
+  const lng = Number(match[2]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat, lng };
 }
 
 export default function Planner() {
@@ -90,6 +101,7 @@ export default function Planner() {
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
   const [publicRoutePending, setPublicRoutePending] = useState(false);
+  const [routePreviewAtlas, setRoutePreviewAtlas] = useState<CityAtlasSnapshot | null | undefined>(undefined);
   const [liveRemaining, setLiveRemaining] = useState<{ distanceMeters: number; durationSeconds: number } | null>(null);
   const track = useProductEvents();
   const planRoute = trpc.routes.plan.useMutation();
@@ -99,6 +111,15 @@ export default function Planner() {
   const localDataVersion = useRef(0);
   const plannerFormRef = useRef<HTMLFormElement>(null);
   const autoSubmittedKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (savedMode || planned || destination.trim().length < 3 || routePreviewAtlas !== undefined) return;
+    let active = true;
+    void loadCityAtlasSnapshot().then(snapshot => {
+      if (active) setRoutePreviewAtlas(snapshot);
+    });
+    return () => { active = false; };
+  }, [savedMode, planned, destination, routePreviewAtlas]);
 
   const resetResult = () => {
     requestVersion.current += 1;
@@ -651,6 +672,14 @@ export default function Planner() {
     steps: (planned.route as typeof planned.route & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps ?? [],
   }] : [];
 
+  const destinationPreviewPoint = useMemo(() => {
+    const value = destination.trim();
+    if (value.length < 3) return null;
+    return parsePreviewCoordinate(value)
+      ?? resolveLocalGeocodePoint(value)
+      ?? resolveCityAtlasPoint(routePreviewAtlas ?? null, value);
+  }, [destination, routePreviewAtlas]);
+
   return (
     <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
@@ -921,6 +950,28 @@ export default function Planner() {
         )}
 
         {!savedMode && destination.trim().length >= 3 && <RideOptions destination={destination} online={online} />}
+
+        {!savedMode && !planned && destinationPreviewPoint && (
+          <section className="mt-4 trajeto-card overflow-hidden" aria-labelledby="destination-preview-map-title">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Mapa interno</p>
+                <h2 id="destination-preview-map-title" className="mt-1 break-words text-base font-black">Destino localizado no Trajeto</h2>
+              </div>
+              <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2.5 py-1 text-xs font-black text-[#D9FF91]">sem enviar GPS</span>
+            </div>
+            <RouteMap
+              destination={destinationPreviewPoint}
+              stops={[]}
+              routes={[]}
+              privateOrigin
+              forceOffline
+            />
+            <p className="border-t border-white/8 px-4 py-3 text-xs leading-relaxed text-white/55">
+              Informe a origem ou use sua localização atual para transformar esta prévia em uma rota completa. O ponto exibido vem de coordenada informada ou do catálogo local do Trajeto.
+            </p>
+          </section>
+        )}
 
         {economyMode && !savedMode && !planned && (
           <section className="mt-4 rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4" aria-labelledby="economy-mode-title">
