@@ -754,7 +754,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         </header>
 
         {!showSavedOnly && (
-          <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <section className="mt-5 trajeto-card rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form onSubmit={submit}>
               <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Cidade, bairro ou posto</label>
               <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
@@ -822,7 +822,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {staticRuntime && !showSavedOnly && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
+          <section className="mt-5 trajeto-card rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
               <div className="min-w-0">
@@ -869,7 +869,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
-          <section className="mt-4 overflow-hidden rounded-[1.7rem] border border-white/8 bg-white/[.025] p-4 shadow-[0_18px_65px_rgba(0,0,0,.20)] backdrop-blur sm:p-5" aria-label="Painel rápido dos postos">
+          <section className="mt-4 overflow-hidden trajeto-card rounded-[1.7rem] border border-white/8 bg-white/[.025] p-4 shadow-[0_18px_65px_rgba(0,0,0,.20)] backdrop-blur sm:p-5" aria-label="Painel rápido dos postos">
             <div className="flex items-start gap-3">
               <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
                 <Sparkles className="size-5" />
@@ -895,7 +895,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
+          <section className="mt-5 trajeto-card rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-bold text-white">
                 Consultar dados oficiais e exportar cadastro
@@ -1003,7 +1003,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {broadAguasLindasQuery && !showSavedOnly && (
-          <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
+          <section id="complete-stations" className="scroll-mt-24 mt-5 trajeto-card trajeto-panel-accent rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
@@ -1132,7 +1132,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {staticRuntime && !showSavedOnly && !broadAguasLindasQuery && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="local-directory-title">
+          <section className="mt-5 trajeto-card trajeto-panel-accent rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="local-directory-title">
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório local</p>
