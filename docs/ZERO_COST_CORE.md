@@ -28,3 +28,9 @@ Integrações de backend, banco, OAuth, Google Maps/Places ou equivalentes podem
 ## Mapas e tiles públicos
 
 O mapa de ruas usa tiles públicos apenas para a área que o usuário está visualizando. O Trajeto não deve baixar, pré-carregar ou empacotar tiles do OpenStreetMap para uso offline. A ação de salvar no aparelho guarda somente pontos/coordenadas e dados locais dos postos, nunca o mapa-base. O provedor de tiles deve permanecer configurável por `VITE_PUBLIC_TILE_URL`, com atribuição visível e Referer limitado ao origin do site. O cache dos tiles externos fica a cargo do cache HTTP normal do navegador; o service worker do Trajeto não deve interceptar nem armazenar esses tiles.
+
+### Base vetorial offline local
+
+O pacote PWA inclui `aguas-lindas-offline-map.json`, uma base de 4.938 trechos de vias da área urbana de Águas Lindas, derivada de dados abertos do OpenStreetMap e distribuída com atribuição e ODbL (arquivo de licença adjacente). Esses vetores são preparados uma vez, publicados junto com o app e servidos pela mesma origem, sem consultas com coordenadas pessoais. Não são tiles baixados do servidor público. A verificação e a recuperação do pacote offline incluem esse arquivo.
+
+Cidade, postos e prévias de rotas compartilham o mapa local. Gestos, zoom, enquadramento, temas e pontos continuam disponíveis sem conexão; falha ou corrupção da base não remove os marcadores nem a geometria da viagem. Rotas reais já salvas mantêm sua geometria; estimativas ficam tracejadas e identificadas. A base urbana não oferece recálculo viário offline, trânsito ao vivo ou cobertura nacional.
