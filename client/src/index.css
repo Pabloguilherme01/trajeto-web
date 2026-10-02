@@ -131,8 +131,9 @@
   .mobile-touch { min-height: 48px; min-width: 48px; }
   .mobile-bottom-space { padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)); }
   .mobile-section-title { text-wrap: balance; }
-  .mobile-card { content-visibility: auto; contain-intrinsic-size: 420px; }
-  .route-card { content-visibility: auto; contain-intrinsic-size: 220px; }
+  /* Cards must participate in normal sizing on narrow screens, including
+     offscreen cards and browser focus/scroll restoration. */
+  .mobile-card, .route-card { min-width: 0; }
   .route-card:nth-child(n+17) { animation: none !important; }
   .mobile-card button, .mobile-card a { min-height: 44px; }
   @media (prefers-reduced-motion: reduce) {
