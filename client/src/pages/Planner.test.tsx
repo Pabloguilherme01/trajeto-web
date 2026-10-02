@@ -365,4 +365,43 @@ describe("Planner travel state", () => {
     expect(screen.getByText(/não podem ser compartilhadas/i)).toBeTruthy();
   });
 
+
+  it("ignores inaccurate GPS fixes while updating private live progress", async () => {
+    state.search = "destino=Hospital";
+    let watchSuccess: PositionCallback | undefined;
+    const getCurrentPosition = vi.fn((success: PositionCallback) =>
+      success({
+        coords: { latitude: -15.76, longitude: -48.28, accuracy: 10, altitude: null, altitudeAccuracy: null, heading: null, speed: null },
+        timestamp: Date.now(),
+      } as GeolocationPosition)
+    );
+    const watchPosition = vi.fn((success: PositionCallback) => {
+      watchSuccess = success;
+      return 9;
+    });
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition, watchPosition, clearWatch: vi.fn() },
+    });
+
+    render(<Planner />);
+    fireEvent.click(screen.getByRole("button", { name: "Usar localização atual" }));
+    submit();
+    await waitFor(() => expect(state.privateRoute).toHaveBeenCalled());
+    await waitFor(() => expect(watchPosition).toHaveBeenCalled());
+
+    act(() => watchSuccess?.({
+      coords: { latitude: -15.789, longitude: -47.881, accuracy: 150, altitude: null, altitudeAccuracy: null, heading: null, speed: null },
+      timestamp: Date.now(),
+    } as GeolocationPosition));
+    expect(screen.queryByText("ao vivo")).toBeNull();
+
+    act(() => watchSuccess?.({
+      coords: { latitude: -15.789, longitude: -47.881, accuracy: 12, altitude: null, altitudeAccuracy: null, heading: null, speed: null },
+      timestamp: Date.now(),
+    } as GeolocationPosition));
+    expect(await screen.findByText("ao vivo")).toBeTruthy();
+    expect(screen.getByText(/Sua posição não é salva/i)).toBeTruthy();
+  });
+
 });
