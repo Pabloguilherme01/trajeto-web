@@ -1017,6 +1017,30 @@ export default function Planner() {
                           <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 min-w-0 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black leading-tight text-[#0B1014]">Abrir rota</button>
                           <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(route.origin, route.destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 min-w-0 rounded-xl border border-white/8 px-3 text-xs font-black leading-tight text-white/70">Navegar agora</button>
                         </div>
+                        <details className="mt-2 overflow-hidden rounded-xl border border-[#3DE3FF]/15 bg-[#0B1014]">
+                          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 text-xs font-black text-[#C9F7FF]">
+                            <span>Ver mapa desta rota no Trajeto</span>
+                            <MapIcon className="size-4 shrink-0" />
+                          </summary>
+                          <div className="border-t border-white/8">
+                            <RouteMap
+                              origin={(route.payload as PlannedRoute).route.origin}
+                              destination={(route.payload as PlannedRoute).route.destination}
+                              stops={(route.payload as PlannedRoute).stops ?? []}
+                              routes={[{
+                                id: route.id,
+                                source: ((route.payload as PlannedRoute).route as PlannedRoute["route"] & { source?: string }).source ?? "offline",
+                                polyline: (route.payload as PlannedRoute).route.polyline ?? null,
+                                selected: true,
+                                durationSeconds: (route.payload as PlannedRoute).route.durationSeconds,
+                                distanceMeters: (route.payload as PlannedRoute).route.distanceMeters,
+                                steps: (((route.payload as PlannedRoute).route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number; location?: { lat: number; lng: number } }> }).steps ?? []),
+                              }]}
+                              privateOrigin={false}
+                              forceOffline
+                            />
+                          </div>
+                        </details>
                         <button type="button" onClick={() => void removeSavedRoute(route)} aria-label={"Excluir rota salva " + route.destination} className="mt-2 min-h-10 w-full rounded-xl border border-[#FF7D6A]/20 text-xs font-black text-[#FFB7A9]"><Trash2 className="mr-1.5 inline size-3.5" />Excluir da biblioteca</button>
                       </article>
                     );
