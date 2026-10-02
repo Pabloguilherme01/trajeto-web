@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fuelLitersFromTankFraction, projectTripCosts } from "./tripProjection";
+import { calculateFuelStatus, fuelLitersFromTankFraction, projectTripCosts } from "./tripProjection";
 
 describe("projectTripCosts", () => {
   it("calcula ida e volta e projeção semanal e mensal", () => {
@@ -68,6 +68,40 @@ describe("projectTripCosts", () => {
     expect(result.weeklyCost).toBe(0);
     expect(result.monthlyCost).toBe(0);
     expect(result.annualCost).toBe(0);
+  });
+
+  it("separa abastecimento de saída de reabastecimento no caminho", () => {
+    const result = calculateFuelStatus({
+      tankLiters: 40,
+      currentFuelLiters: 10,
+      pricePerLiter: 6,
+      kmPerLiter: 10,
+      tripDistanceKm: 900,
+    });
+
+    expect(result?.tripFitsOneTank).toBe(false);
+    expect(result?.maxRangeKm).toBe(400);
+    expect(result?.fuelNeededBeforeDeparture).toBe(30);
+    expect(result?.departureFuelCost).toBe(180);
+    expect(result?.additionalFuelDuringTripLiters).toBe(50);
+    expect(result?.minimumRefuelStops).toBe(2);
+    expect(result?.minimumFuelCost).toBe(480);
+  });
+
+  it("mantém abastecimento mínimo antes de sair quando a viagem cabe em um tanque", () => {
+    const result = calculateFuelStatus({
+      tankLiters: 40,
+      currentFuelLiters: 5,
+      pricePerLiter: 6,
+      kmPerLiter: 10,
+      tripDistanceKm: 200,
+    });
+
+    expect(result?.tripFitsOneTank).toBe(true);
+    expect(result?.fuelNeededBeforeDeparture).toBe(15);
+    expect(result?.departureFuelCost).toBe(90);
+    expect(result?.additionalFuelDuringTripLiters).toBe(0);
+    expect(result?.minimumRefuelStops).toBe(0);
   });
 
   it("converte atalhos do marcador de tanque sem ultrapassar a capacidade", () => {

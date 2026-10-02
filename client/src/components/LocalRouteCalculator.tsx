@@ -43,14 +43,21 @@ function rememberPrice(value: string) {
   } catch {}
 }
 
+function clearRememberedPrice() {
+  try {
+    localStorage.removeItem(PRICE_KEY);
+  } catch {}
+}
+
 export default function LocalRouteCalculator({ initialDistanceKm, compact = false }: LocalRouteCalculatorProps) {
-  const savedVehicle = getMobileVehicle();
+  const [savedVehicle, setSavedVehicle] = useState(() => getMobileVehicle());
   const [draft] = useState(() => loadTripCalculatorDraft());
   const restoredMode: TripCalculatorModeSelection = isTripCalculatorModeSelection(draft?.mode) ? draft.mode : "automatico";
   const [restoredDraft, setRestoredDraft] = useState(() => Boolean(draft));
   const [activeMode, setActiveMode] = useState<TripCalculatorModeSelection>(restoredMode);
   const [distance, setDistance] = useState(typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0 ? String(Number(initialDistanceKm.toFixed(3))) : (draft?.distance ?? ""));
-  const [price, setPrice] = useState(() => draft?.price || getRememberedPrice());
+  const [rememberedPrice, setRememberedPrice] = useState(() => getRememberedPrice());
+  const [price, setPrice] = useState(() => draft?.price || rememberedPrice);
   const [consumption, setConsumption] = useState(draft?.consumption || (savedVehicle ? String(savedVehicle.consumption) : ""));
   const [tank, setTank] = useState(draft?.tank || (savedVehicle ? String(savedVehicle.tank) : ""));
   const [currentFuel, setCurrentFuel] = useState(draft?.currentFuel ?? "");
@@ -66,10 +73,40 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
 
   useEffect(() => {
     if (initialDistanceKm === undefined) return;
-    setDistance(Number.isFinite(initialDistanceKm) && initialDistanceKm > 0 ? String(Number(initialDistanceKm.toFixed(3))) : "");
+    const nextDistance = Number.isFinite(initialDistanceKm) && initialDistanceKm > 0
+      ? String(Number(initialDistanceKm.toFixed(3)))
+      : "";
+    setDistance(nextDistance);
+    if (!nextDistance) return;
+    setActiveMode("automatico");
+    setRecurring(false);
+    setRoundTrip(false);
+    setTripsPerWeek(1);
+    setRestoredDraft(false);
   }, [initialDistanceKm]);
 
   useEffect(() => {
+    const hasMeaningfulDraft = Boolean(
+      (initialDistanceKm === undefined && distance.trim()) ||
+      price.trim() ||
+      currentFuel.trim() ||
+      toll.trim() ||
+      parking.trim() ||
+      other.trim() ||
+      alternativePrice.trim() ||
+      alternativeConsumption.trim() ||
+      monthlyBudget.trim() ||
+      activeMode !== "automatico" ||
+      recurring ||
+      roundTrip ||
+      tripsPerWeek !== 1
+    );
+
+    if (!hasMeaningfulDraft) {
+      clearTripCalculatorDraft();
+      return;
+    }
+
     saveTripCalculatorDraft({
       mode: activeMode,
       recurring,
@@ -87,11 +124,12 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       alternativeConsumption,
       monthlyBudget,
     });
-  }, [activeMode, recurring, distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
+  }, [initialDistanceKm, activeMode, recurring, distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
 
   useEffect(() => {
     const refreshVehicle = () => {
       const vehicle = getMobileVehicle();
+      setSavedVehicle(vehicle);
       if (!vehicle) return;
       setConsumption(current => current || String(vehicle.consumption));
       setTank(current => current || String(vehicle.tank));
@@ -110,7 +148,6 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       setRoundTrip(false);
       setTripsPerWeek(1);
       if (typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0) setDistance(String(Number(initialDistanceKm.toFixed(3))));
-      const rememberedPrice = getRememberedPrice();
       if (rememberedPrice) setPrice(current => current || rememberedPrice);
       const vehicle = getMobileVehicle();
       if (vehicle) {
@@ -126,6 +163,8 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
 
   const resetScenario = () => {
     clearTripCalculatorDraft();
+    clearRememberedPrice();
+    setRememberedPrice("");
     setRestoredDraft(false);
     setActiveMode("automatico");
     setDistance(typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0 ? String(Number(initialDistanceKm.toFixed(3))) : "");
@@ -148,9 +187,9 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
     const signals: string[] = [];
     if (typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0) signals.push("distância da rota");
     if (savedVehicle) signals.push("veículo salvo");
-    if (getRememberedPrice()) signals.push("último preço");
+    if (rememberedPrice) signals.push("último preço");
     return signals;
-  }, [initialDistanceKm, savedVehicle]);
+  }, [initialDistanceKm, savedVehicle, rememberedPrice]);
 
   const values = useMemo(() => {
     const oneWayDistanceKm = numberValue(distance);
@@ -282,7 +321,18 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
             Combustível
             <div className="mt-1.5 flex min-h-12 items-center rounded-xl border border-[#A7CDBA] bg-white px-3 focus-within:border-[#163840]">
               <span className="mr-1 text-xs font-bold text-[#71877E]">R$</span>
-              <input value={price} onChange={e => setPrice(e.target.value)} onBlur={() => rememberPrice(price)} inputMode="decimal" placeholder="5,89" aria-describedby="local-calculator-note" className="min-w-0 flex-1 bg-transparent text-base font-bold text-[#163840] outline-none" />
+              <input
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                onBlur={() => {
+                  rememberPrice(price);
+                  setRememberedPrice(getRememberedPrice());
+                }}
+                inputMode="decimal"
+                placeholder="5,89"
+                aria-describedby="local-calculator-note"
+                className="min-w-0 flex-1 bg-transparent text-base font-bold text-[#163840] outline-none"
+              />
               <span className="text-xs font-bold text-[#71877E]">/L</span>
             </div>
           </label>
@@ -343,11 +393,24 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
                     Deve restar cerca de <strong>{values.fuelStatus.fuelRemainingAfterTrip.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L</strong>, equivalentes a <strong>{values.fuelStatus.rangeRemainingAfterTripKm.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} km</strong>.
                   </p>
                 </>
+              ) : values.fuelStatus.tripFitsOneTank ? (
+                <>
+                  <p className="mt-1 text-sm font-extrabold text-[#8A4434]">Abasteça pelo menos {values.fuelStatus.fuelNeededBeforeDeparture.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L antes de sair.</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#7A5148]">
+                    Custo mínimo estimado antes da saída: <strong>{values.fuelStatus.departureFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>.
+                  </p>
+                </>
               ) : (
                 <>
-                  <p className="mt-1 text-sm font-extrabold text-[#8A4434]">Abasteça pelo menos {values.fuelStatus.fuelShortfallLiters.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L antes de sair.</p>
+                  <p className="mt-1 text-sm font-extrabold text-[#8A4434]">Esta viagem ultrapassa a autonomia de um tanque.</p>
                   <p className="mt-1 text-xs leading-relaxed text-[#7A5148]">
-                    Custo mínimo estimado para completar a viagem: <strong>{values.fuelStatus.minimumFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>.
+                    Para sair com o tanque cheio, abasteça <strong>{values.fuelStatus.fuelNeededBeforeDeparture.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L</strong>
+                    {" "}({values.fuelStatus.departureFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}).
+                    No caminho, ainda serão necessários cerca de <strong>{values.fuelStatus.additionalFuelDuringTripLiters.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L</strong>
+                    {" "}em pelo menos <strong>{values.fuelStatus.minimumRefuelStops} parada(s)</strong>.
+                  </p>
+                  <p className="mt-1 text-[0.62rem] text-[#7A5148]">
+                    Combustível adicional estimado ao longo de toda a viagem: {values.fuelStatus.minimumFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}.
                   </p>
                 </>
               )}
@@ -368,7 +431,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
             </div>
           )}
 
-          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && (
+          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && !values.fuelStatus && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">
               Pela autonomia de tanque informada, esta viagem pode exigir aproximadamente {values.estimatedRefuels} parada(s) adicional(is) para abastecer.
             </p>
