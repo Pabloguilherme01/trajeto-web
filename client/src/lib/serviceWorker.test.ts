@@ -85,7 +85,7 @@ describe("service worker", () => {
   });
   it("cleans only previous cache versions inside this app's scope", async () => {
     const worker = loadWorker();
-    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v22-static", "trajeto-%2Ftrajeto-web%2F-v22-map", "trajeto-%2Ftrajeto-web%2F-v23-static"]);
+    worker.caches.keys.mockResolvedValue(["other-app-cache", "trajeto-%2Fother%2F-v18-static", "trajeto-%2Ftrajeto-web%2F-v19-static", "trajeto-%2Ftrajeto-web%2F-v22-static", "trajeto-%2Ftrajeto-web%2F-v22-map", "trajeto-%2Ftrajeto-web%2F-v23-static", "trajeto-%2Ftrajeto-web%2F-v24-static"]);
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "activate")[1];
     let completion: Promise<unknown>;
     handler({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
@@ -94,6 +94,7 @@ describe("service worker", () => {
       ["trajeto-%2Ftrajeto-web%2F-v19-static"],
       ["trajeto-%2Ftrajeto-web%2F-v22-static"],
       ["trajeto-%2Ftrajeto-web%2F-v22-map"],
+      ["trajeto-%2Ftrajeto-web%2F-v23-static"],
     ]);
   });
   it("does not announce readiness with a partial offline package", async () => {
@@ -172,4 +173,12 @@ describe("service worker", () => {
       expect(await response.text()).toBe(fresh);
     }
   });
+});
+
+it("includes the local street map in offline readiness and recovery", async () => {
+  const { worker, saved } = recoverableWorker(["./data/aguas-lindas-offline-map.json"]);
+  expect(await worker.offlineStatus()).toMatchObject({ ready: false });
+  worker.fetch.mockResolvedValue(new Response("{}", { headers: { "Content-Type": "application/json" } }));
+  expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
+  expect(saved.has("./data/aguas-lindas-offline-map.json")).toBe(true);
 });

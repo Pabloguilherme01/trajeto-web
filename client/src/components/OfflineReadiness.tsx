@@ -95,7 +95,7 @@ export default function OfflineReadiness() {
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/70">
             Busca, serviços públicos, contatos, postos e rotas já salvas ficam
-            disponíveis após a preparação. Mapas externos, novos cálculos e
+            disponíveis após a preparação, junto com as ruas da área urbana de Águas Lindas. Mapas externos, novas rotas viárias e
             agendamentos precisam de internet; ligações precisam de rede
             telefônica.
           </p>

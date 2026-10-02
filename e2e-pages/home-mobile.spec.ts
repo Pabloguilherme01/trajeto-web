@@ -111,7 +111,7 @@ test("Pages: help entry actions keep 44px targets on small phones", async ({ pag
   await page.goto("ajuda", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Use o Trajeto em poucos passos/i })).toBeVisible();
 
-  for (const text of ["Abrir central", "Planejar uma rota", "Encontrar postos"]) {
+  for (const text of ["Abrir central", "Planejar uma rota", "Explorar a cidade"]) {
     const link = page.getByRole("link", { name: new RegExp(text, "i") }).first();
     await link.scrollIntoViewIfNeeded();
     const box = await link.boundingBox();

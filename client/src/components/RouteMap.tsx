@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import OfflineMapCanvas from "@/components/OfflineMapCanvas";
 import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
@@ -44,56 +45,35 @@ export function OfflineRoutePreview({
   privateOrigin = false,
 }: RouteMapProps) {
   const [zoom, setZoom] = useState(1);
+  const [resetKey, setResetKey] = useState(0);
+  const [selectedPoint, setSelectedPoint] = useState("");
   const validOrigin = isMapPoint(origin) ? origin : undefined;
   const validDestination = isMapPoint(destination) ? destination : undefined;
   const validStops = stops.filter(isMapPoint);
   const selected = routes.find(route => route.selected) ?? routes[0];
-  const pathPoints = decodeMapPolyline(selected?.polyline ?? "");
-  const points = [
-    validOrigin,
-    validDestination,
-    ...validStops,
-    ...pathPoints,
-  ].filter(isMapPoint);
-  if (!points.length)
-    return (
-      <div className="grid h-full place-items-center p-6 text-center text-white">
-        <div>
-          <p className="font-bold">Defina a origem e o destino</p>
-          <p className="mt-2 text-sm text-white/70">
-            O mapa mostrará os pontos informados e a geometria da rota quando
-            disponível.
-          </p>
-        </div>
-      </div>
-    );
-  const minLat = Math.min(...points.map(p => p.lat)),
-    maxLat = Math.max(...points.map(p => p.lat));
-  const minLng = Math.min(...points.map(p => p.lng)),
-    maxLng = Math.max(...points.map(p => p.lng));
-  const project = (p: { lat: number; lng: number }) => ({
-    x: 60 + ((p.lng - minLng) / Math.max(maxLng - minLng, 0.002)) * 880,
-    y: 500 - ((p.lat - minLat) / Math.max(maxLat - minLat, 0.002)) * 440,
-  });
-  const line = pathPoints
-    .map((p, i) => {
-      const v = project(p);
-      return `${i ? "L" : "M"}${v.x} ${v.y}`;
-    })
-    .join(" ");
+  const routePoints = decodeMapPolyline(selected?.polyline ?? "");
   const markers = [
     ...(validOrigin
-      ? [{ point: validOrigin, label: "A", name: "Origem" }]
+      ? [{ ...validOrigin, id: "origin", name: "Origem", label: "A" }]
       : []),
-    ...validStops.map((point, i) => ({
-      point,
+    ...validStops.map((stop, i) => ({
+      ...stop,
+      id: "stop-" + i,
+      name: stop.name,
       label: String(i + 1),
-      name: point.name,
     })),
     ...(validDestination
-      ? [{ point: validDestination, label: "B", name: "Destino" }]
+      ? [
+          {
+            ...validDestination,
+            id: "destination",
+            name: "Destino",
+            label: "B",
+          },
+        ]
       : []),
   ];
+  if (!markers.length && !routePoints.length) return <div className="p-6 text-center text-white"><p className="font-bold">Defina a origem e o destino</p><p className="mt-2 text-sm text-white/70">O mapa mostrará os pontos informados e a geometria da rota quando disponível.</p></div>;
   const navigation = validDestination
     ? "https://www.google.com/maps/dir/?api=1" +
       (privateOrigin || !validOrigin
@@ -110,92 +90,57 @@ export function OfflineRoutePreview({
         : "")
     : null;
   return (
-    <div className="flex h-full flex-col bg-[#E8F0EA] text-[#163840]">
+    <div className="bg-[#eef2eb] text-[#163840]">
       <div className="flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
-        <p className="flex-1 text-sm font-bold">Prévia local da viagem</p>
+        <p className="min-w-0 flex-1 text-sm font-black">
+          Mapa local da viagem
+        </p>
         <button
           type="button"
           aria-label="Diminuir zoom da prévia"
           disabled={zoom <= 1}
           onClick={() => setZoom(v => Math.max(1, v - 0.5))}
-          className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40"
+          className="grid size-11 place-items-center rounded-xl bg-white shadow-sm disabled:opacity-40"
         >
           <Minus className="size-5" />
         </button>
         <button
           type="button"
           aria-label="Aumentar zoom da prévia"
-          disabled={zoom >= 3}
-          onClick={() => setZoom(v => Math.min(3, v + 0.5))}
-          className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40"
+          disabled={zoom >= 6}
+          onClick={() => setZoom(v => Math.min(6, v + 0.5))}
+          className="grid size-11 place-items-center rounded-xl bg-white shadow-sm disabled:opacity-40"
         >
           <Plus className="size-5" />
         </button>
         <button
           type="button"
-          onClick={() => setZoom(1)}
-          className="min-h-11 rounded-xl bg-white px-3 text-sm"
+          onClick={() => {
+            setZoom(1);
+            setResetKey(v => v + 1);
+          }}
+          className="min-h-11 rounded-xl bg-white px-3 text-sm font-bold shadow-sm"
         >
           Enquadrar
         </button>
       </div>
-      <svg
-        viewBox="0 0 1000 560"
-        className="min-h-0 w-full flex-1"
-        role="img"
-        aria-label="Prévia offline da rota"
-      >
-        <title>
-          {selected?.source === "local-estimate"
-            ? "Estimativa entre coordenadas, sem trajeto pelas ruas. Confirme o percurso no aplicativo de navegação."
-            : pathPoints.length
-              ? "Geometria da rota disponível"
-              : "Pontos da viagem; trajeto indisponível"}
-        </title>
-        <g transform={`translate(500 280) scale(${zoom}) translate(-500 -280)`}>
-          {line && (
-            <path
-              d={line}
-              fill="none"
-              stroke="#163840"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          )}
-          {markers.map((m, i) => {
-            const p = project(m.point);
-            return (
-              <g key={i}>
-                <title>{m.name}</title>
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r="20"
-                  fill={m.label === "B" ? "#C7FF3C" : "#3DE3FF"}
-                  stroke="#163840"
-                  strokeWidth="3"
-                />
-                <text
-                  x={p.x}
-                  y={p.y + 5}
-                  textAnchor="middle"
-                  fontSize="16"
-                  fontWeight="bold"
-                >
-                  {m.label}
-                </text>
-              </g>
-            );
-          })}
-        </g>
-      </svg>
-      <div className="space-y-2 border-t border-black/10 bg-white/90 p-3 text-sm">
+      <OfflineMapCanvas
+        markers={markers}
+        routePoints={routePoints}
+        zoom={zoom}
+        onZoom={setZoom}
+        resetKey={resetKey}
+        estimated={selected?.source === "local-estimate"}
+        ariaLabel="Prévia offline da rota"
+        onSelect={marker => setSelectedPoint(marker.name)}
+      />
+      <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
+        {selectedPoint && <p className="font-black">{selectedPoint}</p>}
         <p>
           {selected?.source === "local-estimate"
             ? "Estimativa entre coordenadas, sem trajeto pelas ruas. Confirme o percurso no aplicativo de navegação."
-            : pathPoints.length
-              ? "Geometria disponível neste aparelho. Sem ruas de fundo ou trânsito ao vivo."
+            : routePoints.length
+              ? "Geometria disponível neste aparelho. Ruas locais salvas de Águas Lindas; sem trânsito ao vivo."
               : "Somente os pontos informados. Não há geometria de rota disponível; nenhuma ligação representa um caminho transitável."}
         </p>
         {validStops.length > 0 && (
@@ -205,7 +150,7 @@ export function OfflineRoutePreview({
           </p>
         )}
         {selected?.distanceMeters != null && (
-          <p>
+          <p className="font-black">
             {(selected.distanceMeters / 1000).toLocaleString("pt-BR", {
               maximumFractionDigits: 1,
             })}{" "}
@@ -226,8 +171,9 @@ export function OfflineRoutePreview({
           </a>
         )}
         <p className="text-xs text-[#607169]">
-          O aplicativo externo pode exigir internet. A prévia local não oferece
-          navegação curva a curva.
+          Ruas offline cobrem a área urbana cadastrada. A prévia local não
+          oferece navegação curva a curva. O aplicativo externo pode exigir
+          internet.
         </p>
       </div>
     </div>
@@ -450,7 +396,7 @@ export function RouteMap({
   if (privateOrigin) {
     return (
       <section
-        className="relative h-[min(68vh,620px)] min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
         aria-label="Prévia privada da viagem"
       >
         <OfflineRoutePreview
@@ -517,7 +463,7 @@ export function RouteMap({
             ...stops,
           ]}
           fallback={
-            <div className="relative min-h-[420px] h-[min(68vh,620px)]">
+            <div className="relative">
               <OfflineRoutePreview
                 origin={origin}
                 destination={destination}
@@ -534,7 +480,7 @@ export function RouteMap({
   if (isGitHubPagesRuntime()) {
     return (
       <section
-        className="relative h-[min(68vh,620px)] min-h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
         aria-label="Mapa independente da viagem"
       >
         <OfflineRoutePreview
