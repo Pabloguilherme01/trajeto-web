@@ -742,10 +742,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   return (
     <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_15%_0%,rgba(61,227,255,.08),transparent_28%),radial-gradient(circle_at_90%_8%,rgba(199,255,60,.06),transparent_24%),#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
-        <header className="flex items-center justify-between gap-3">
+        <header className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.17em] text-[#3DE3FF]">Postos</p>
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">{showSavedOnly ? "Seus salvos." : "Encontre uma parada."}</h1>
+            <h1 className="mt-1 break-words font-display text-[clamp(1.7rem,8vw,2.25rem)] font-semibold leading-tight tracking-[-.05em]">{showSavedOnly ? "Seus salvos." : "Encontre uma parada."}</h1>
           </div>
           <span className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-[#C7FF3C]/20 text-[#C7FF3C]" : "border-[#FFB86B]/25 text-[#FFB86B]")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
@@ -837,14 +837,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <div className="mt-2 grid gap-2">
                   {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => (
                     <div key={item.displayName + item.address} className="rounded-xl border border-white/8 bg-[#0B1014]/70 p-3">
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
                         <div className="min-w-0">
                           <p className="text-sm font-black text-white">{item.displayName}</p>
                           <p className="mt-1 text-xs leading-relaxed text-white/65">{item.address}</p>
                         </div>
                         <span className="shrink-0 rounded-full border border-[#FFB86B]/20 px-2 py-1 text-xs font-black text-[#FFD09A]">mapa</span>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65 sm:grid-cols-4">
+                      <div className="mt-2 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 text-xs text-white/65 sm:grid-cols-4">
                         <span>Telefone: {item.phone ?? "não informado"}</span>
                         <span>Horário: {item.hours ?? "não informado"}</span>
                         <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
@@ -885,7 +885,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="mt-4 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
               <button type="button" onClick={() => { setShowMap(true); window.setTimeout(() => document.getElementById("aguas-lindas-map")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20); }} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] transition-transform duration-200 active:scale-[.98]"><MapIcon className="mr-1 inline size-3.5" />Abrir mapa</button>
               <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-12 rounded-2xl border border-white/8 bg-white/[.035] px-3 text-sm font-black text-white/75 transition-transform duration-200 active:scale-[.98]"><Fuel className="mr-1 inline size-3.5" />Ver fichas</button>
               <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-sm font-black text-[#C9F7FF] disabled:opacity-35 transition-transform duration-200 active:scale-[.98]"><MapPin className="mr-1 inline size-3.5" />Mais perto</button>
@@ -902,7 +902,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <span className="text-xs font-normal text-white/65">ANP</span>
               </summary>
 
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Fonte oficial ANP</p>
                 <h2 id="anp-directory-title" className="mt-1 text-xl font-black">Cadastro técnico dos postos</h2>
@@ -943,7 +943,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   </section>
                 )}
 
-                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="mt-4 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
                   <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
                   <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
                   <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
@@ -954,7 +954,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   {anpStations.slice(0, 12).map(station => (
                     <details key={station.cnpj} className="rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
                       <summary className="cursor-pointer list-none px-3.5 py-3">
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
                           <div className="min-w-0">
                             <p className="text-sm font-black text-white">{station.razaoSocial ?? "Razão social não informada"}</p>
                             <p className="mt-1 text-xs text-white/65">CNPJ {station.cnpj} · Autorização {station.autorizacao ?? "não informada"}</p>
@@ -1004,7 +1004,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
         {broadAguasLindasQuery && !showSavedOnly && (
           <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
                 <h2 id="complete-stations-title" className="mt-1 text-xl font-black">Cada posto, uma ficha completa</h2>
@@ -1019,7 +1019,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
 
             <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Referência municipal de preços</p>
                   <p className="mt-1 text-xs text-white/65">{AGUAS_LINDAS_PRICE_REFERENCE.period} · ANP · não é preço individual em tempo real</p>
@@ -1029,7 +1029,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <button type="button" onClick={() => void refreshStationData()} className="min-h-11 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-xs font-black text-[#9FEFFF]">Atualizar</button>
                 </div>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65 sm:grid-cols-3">
+              <div className="mt-2 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 text-xs text-white/65 sm:grid-cols-3">
                 <span>Gasolina <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
                 <span>Etanol <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.ethanol.average.toFixed(2).replace(".", ",")}/L</strong></span>
                 <span>Diesel S10 <strong className="text-white/70">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS10.average.toFixed(2).replace(".", ",")}/L</strong></span>
@@ -1039,7 +1039,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
@@ -1133,13 +1133,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
         {staticRuntime && !showSavedOnly && !broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="local-directory-title">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório local</p>
                 <h2 id="local-directory-title" className="mt-1 text-xl font-black">{localDirectory.length} cadastro(s) encontrados</h2>
                 <p className="mt-2 text-sm leading-relaxed text-white/65">Base de Águas Lindas atualizada em {new Date(AGUAS_LINDAS_STATIONS_UPDATED_AT + "T12:00:00").toLocaleDateString("pt-BR")}. Sincronização ANP de referência: {new Date(AGUAS_LINDAS_STATIONS_LAST_SYNC + "T12:00:00").toLocaleDateString("pt-BR")}. {AGUAS_LINDAS_STATIONS_SOURCE}</p>
             <div className="mt-3 rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] p-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-black uppercase tracking-[.12em] text-[#C9F7FF]">Base oficial ANP</p>
                 <span className="text-xs font-bold text-white/65">28/09/2026</span>
               </div>
@@ -1147,14 +1147,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos","_blank","noopener,noreferrer")} className="mt-2 min-h-11 rounded-lg border border-white/8 px-3 text-xs font-black text-white/60">Abrir base oficial da ANP</button>
             </div>
             <div className="mt-3 rounded-xl border border-white/8 bg-[#0B1014] p-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Referência de preços ANP</p>
                   <p className="mt-1 text-xs text-white/65">{AGUAS_LINDAS_PRICE_REFERENCE.period} · médias municipais</p>
                 </div>
                 <span className="text-xs font-black text-white/65">não é preço em tempo real</span>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65 sm:grid-cols-3">
+              <div className="mt-2 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 text-xs text-white/65 sm:grid-cols-3">
                 <span>Gasolina: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.gasolineCommon.average.toFixed(2).replace(".", ",")}/L</strong></span>
                 <span>Etanol: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.ethanol.average.toFixed(2).replace(".", ",")}/L</strong></span>
                 <span>Diesel S10: <strong className="text-white/75">R$ {AGUAS_LINDAS_PRICE_REFERENCE.dieselS10.average.toFixed(2).replace(".", ",")}/L</strong></span>
@@ -1164,7 +1164,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
               <p className="mt-2 text-xs leading-relaxed text-white/65">{AGUAS_LINDAS_PRICE_REFERENCE.note}</p>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+            <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 min-[360px]:grid-cols-2 md:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3">
                 <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Cadastros</p>
                 <p className="mt-1 text-lg font-black text-white">{AGUAS_LINDAS_STATION_STATS.total}</p>
@@ -1194,7 +1194,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-2">
+            <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Filtros locais{activeLocalFilterCount ? " · " + activeLocalFilterCount + " ativo(s)" : ""}</p>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={exportLocalCsv} className="min-h-11 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-xs font-black text-[#C9F7FF]">Exportar CSV</button>
@@ -1217,7 +1217,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             {localDirectory.length ? (
               <>
-              <div className="mt-4 flex items-center justify-between gap-2" aria-live="polite">
+              <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-2" aria-live="polite">
                 <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">{localDirectory.length} resultado(s) · {localDirectory.filter(item => item.address).length} com endereço</p>
                 <span className="text-xs text-white/65">ordenado por bairro</span>
               </div>
@@ -1407,7 +1407,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             {compared.length > 0 && (
               <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#121B22] p-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
                   <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Comparação</p><h3 className="mt-1 text-xl font-black">{compared.length} parada(s)</h3></div>
                   <button type="button" onClick={() => setCompareIds([])} className="grid size-9 place-items-center rounded-lg border border-white/8 text-white/65" aria-label="Limpar comparação"><X className="size-4" /></button>
                 </div>
