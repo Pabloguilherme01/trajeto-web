@@ -20,6 +20,7 @@ import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocatio
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
+import { effectivePlannerMode, plannerActionLabel, routeFreshness, shouldAutoRefreshSavedRoute } from "@/lib/routeExperience";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -251,9 +252,15 @@ export default function Planner() {
         setPlanned(saved.payload as PlannedRoute);
         setShowMap(true);
         setFallbackReady(false);
+        const freshness = routeFreshness(saved.savedAt);
         setSavedMessage(
           (offlineMode ? "Modo offline" : "Sem internet") +
-            ": usando a melhor rota já salva para esta viagem. Dados de trânsito podem estar desatualizados."
+            ": usando a melhor rota já salva para esta viagem. " +
+            (freshness === "fresh"
+              ? "Cópia recente neste aparelho."
+              : freshness === "aging"
+                ? "Cópia salva hoje; trânsito pode ter mudado."
+                : "Cópia antiga; recalcule quando a conexão voltar.")
         );
         rememberTrip(from, to);
         track("route_open", to);
@@ -532,6 +539,32 @@ export default function Planner() {
     );
   }, [savedRoutes, destination]);
 
+  const exactSavedRoute = useMemo(
+    () =>
+      originPrivate
+        ? null
+        : findBestOfflineRouteForTrip(
+            savedRoutes,
+            origin.trim(),
+            destination.trim(),
+            mode
+          ),
+    [savedRoutes, origin, destination, mode, originPrivate]
+  );
+  const activeExperienceMode = effectivePlannerMode(
+    experienceMode,
+    online,
+    Boolean(exactSavedRoute)
+  );
+  const exactSavedRouteFreshness = exactSavedRoute
+    ? routeFreshness(exactSavedRoute.savedAt)
+    : null;
+  const primaryActionLabel = plannerActionLabel(
+    activeExperienceMode,
+    mode,
+    online
+  );
+
   const publicRouteSource = planned
     ? (
         planned.route as typeof planned.route & {
@@ -686,7 +719,7 @@ export default function Planner() {
               </div>
 
               <button type="submit" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
-                <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : "Calcular rota"}</span>
+                <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
               {destination.trim().length >= 3 && (
@@ -733,6 +766,56 @@ export default function Planner() {
                 )}
               </div>
             )}
+          </section>
+        )}
+
+        {!savedMode && (
+          <section className="mt-4 grid gap-2 sm:grid-cols-3" aria-label="Estado do planejamento">
+            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[11px] font-black uppercase tracking-[.12em] text-white/35">Modo efetivo</p>
+              <p className="mt-1 text-sm font-black text-white">
+                {PLANNER_EXPERIENCE_OPTIONS.find(item => item.id === activeExperienceMode)?.label}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-white/45">
+                {!online && experienceMode === "smart"
+                  ? "Inteligente mudou para offline automaticamente."
+                  : plannerExperienceDetail(activeExperienceMode)}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[11px] font-black uppercase tracking-[.12em] text-white/35">Cópia local</p>
+              <p className="mt-1 text-sm font-black text-white">
+                {exactSavedRoute
+                  ? exactSavedRouteFreshness === "fresh"
+                    ? "Pronta · recente"
+                    : exactSavedRouteFreshness === "aging"
+                      ? "Pronta · salva hoje"
+                      : "Pronta · antiga"
+                  : "Ainda não preparada"}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-white/45">
+                {exactSavedRoute
+                  ? exactSavedRouteFreshness === "stale"
+                    ? "Pode abrir sem rede; atualize quando estiver online."
+                    : "Esta viagem pode ser recuperada no aparelho."
+                  : "Calcule online uma vez para aumentar a cobertura offline."}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[11px] font-black uppercase tracking-[.12em] text-white/35">Rede</p>
+              <p className={"mt-1 text-sm font-black " + (online ? "text-[#C7FF3C]" : "text-[#FFB86B]")}>
+                {online ? "Conectado" : "Sem conexão"}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-white/45">
+                {online
+                  ? exactSavedRoute && exactSavedRouteFreshness && shouldAutoRefreshSavedRoute(experienceMode, online, exactSavedRouteFreshness)
+                    ? "Modo Inteligente vai preferir recalcular esta cópia antiga."
+                    : "Rotas e dados disponíveis podem ser atualizados."
+                  : exactSavedRoute
+                    ? "A rota local continua disponível."
+                    : "Use destinos preparados ou uma rota salva."}
+              </p>
+            </div>
           </section>
         )}
 
