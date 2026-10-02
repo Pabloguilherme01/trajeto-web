@@ -1020,7 +1020,7 @@ export default function Planner() {
                         <details className="mt-2 overflow-hidden rounded-xl border border-[#3DE3FF]/15 bg-[#0B1014]">
                           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 text-xs font-black text-[#C9F7FF]">
                             <span>Ver mapa desta rota no Trajeto</span>
-                            <MapIcon className="size-4 shrink-0" />
+                            <Map className="size-4 shrink-0" />
                           </summary>
                           <div className="border-t border-white/8">
                             <RouteMap
