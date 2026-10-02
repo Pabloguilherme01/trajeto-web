@@ -129,3 +129,69 @@ test("Pages: an aborted IndexedDB transaction never announces a saved route", as
     page.getByText("Cópia offline atualizada neste aparelho.")
   ).toHaveCount(0);
 });
+
+
+test("Pages: legacy migration keeps the newest safe route for the same destination", async ({ page }) => {
+  await page.goto("salvos", { waitUntil: "domcontentloaded" });
+  await page.evaluate(async () => {
+    const request = indexedDB.open("trajeto-offline", 2);
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains("routes"))
+          request.result.createObjectStore("routes", { keyPath: "id" });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const payload = (distanceMeters: number) => ({
+      route: { distanceLabel: distanceMeters / 1000 + " km", distanceMeters, durationSeconds: 60 },
+      stops: [],
+      anpReferences: [],
+    });
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("routes", "readwrite");
+      const store = tx.objectStore("routes");
+      store.put({
+        id: "-15.76123, -48.28123::hospital",
+        origin: "-15.76123, -48.28123",
+        destination: "Hospital",
+        savedAt: "2026-09-01T10:00:00.000Z",
+        payload: payload(1000),
+      });
+      store.put({
+        id: "minha localização::hospital",
+        origin: "Minha localização",
+        destination: "Hospital",
+        savedAt: "2026-10-01T10:00:00.000Z",
+        payload: payload(2000),
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  });
+
+  await page.goto(
+    "planejar?rota=" + encodeURIComponent("-15.76123, -48.28123::hospital"),
+    { waitUntil: "domcontentloaded" },
+  );
+
+  await expect(page).toHaveURL(/rota=minha(?:%20|\+)localiza%C3%A7%C3%A3o%3A%3Ahospital/i);
+  const saved = await page.evaluate(async () => {
+    const request = indexedDB.open("trajeto-offline", 2);
+    const db = await new Promise<IDBDatabase>(resolve => {
+      request.onsuccess = () => resolve(request.result);
+    });
+    const rows = await new Promise<any[]>(resolve => {
+      const read = db.transaction("routes").objectStore("routes").getAll();
+      read.onsuccess = () => resolve(read.result);
+    });
+    db.close();
+    return rows;
+  });
+
+  expect(saved).toHaveLength(1);
+  expect(saved[0].id).toBe("minha localização::hospital");
+  expect(saved[0].savedAt).toBe("2026-10-01T10:00:00.000Z");
+  expect(saved[0].payload.route.distanceMeters).toBe(2000);
+});
