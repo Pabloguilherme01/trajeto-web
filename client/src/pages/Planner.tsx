@@ -432,7 +432,7 @@ export default function Planner() {
     if (normalizedOrigin.length < 2 || normalizedDestination.length < 2) return false;
     try {
       await saveOfflineRoute({
-        id: offlineRouteId(normalizedOrigin, normalizedDestination),
+        id: offlineRouteId(normalizedOrigin, normalizedDestination, mode),
         origin: normalizedOrigin,
         destination: normalizedDestination,
         savedAt: new Date().toISOString(),
