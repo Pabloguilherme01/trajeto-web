@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
@@ -39,4 +40,10 @@ describe("DailyCommandCenter", () => {
     expect(screen.getByRole("button", { name: /economia/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /sem internet/i })).toBeTruthy();
   });
+  it("does not hand-build the repeat-card origin URL", () => {
+    const source = readFileSync(new URL("./DailyCommandCenter.tsx", import.meta.url), "utf8");
+    expect(source).toContain("buildReusableTripPlannerUrl(lastTrip)");
+    expect(source).not.toContain('"?origem=" + encodeURIComponent(lastTrip.origin)');
+  });
+
 });
