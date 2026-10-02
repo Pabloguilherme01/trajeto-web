@@ -8,7 +8,7 @@ test("public screens stay inside the viewport before and after scrolling and foc
       await page.goto(path);
       await expect(page.locator("main")).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
-      for (const position of [0, 700, 1400, 0]) {
+      for (const position of [0, 700, 1400, 2500, 5000, 0]) {
         await page.evaluate(y => window.scrollTo(0, y), position);
         const layout = await page.evaluate(() => ({
           viewport: document.documentElement.clientWidth,
@@ -18,7 +18,7 @@ test("public screens stay inside the viewport before and after scrolling and foc
             .filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > document.documentElement.clientWidth + 1 && getComputedStyle(el).position !== "absolute"; })
             .slice(0, 5).map(el => ({ tag: el.tagName, class: el.className, width: el.getBoundingClientRect().width })),
         }));
-        expect(Math.max(layout.document, layout.body), `${path} at ${width}px: ${JSON.stringify(layout)}`).toBeLessThanOrEqual(layout.viewport + 1);
+        expect(Math.max(layout.document, layout.body), `${path} at ${width}px: ${JSON.stringify(layout)}`).toBeLessThanOrEqual(width + 1);
       }
       const input = page.locator('main input:not([type="hidden"])').first();
       if (await input.count()) {
