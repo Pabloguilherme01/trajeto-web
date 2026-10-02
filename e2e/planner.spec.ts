@@ -74,3 +74,21 @@ test("planejar: aceita destino sem GPS e oferece navegação externa", async ({ 
   await expect(page.getByRole("button", { name: "Abrir Waze", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Abrir Apple Maps", exact: true })).toBeVisible();
 });
+
+
+test("planejar: última rota privada reabre só o destino e não dispara cálculo automático", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "trajeto-last-trip",
+      JSON.stringify({ origin: "Minha localização", destination: "Hospital" }),
+    );
+  });
+
+  await page.goto("/planejar", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Última rota", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/planejar\?destino=Hospital$/);
+  await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("");
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Hospital");
+  await expect(page.getByText(/toque em usar localização atual/i)).toHaveCount(0);
+});
