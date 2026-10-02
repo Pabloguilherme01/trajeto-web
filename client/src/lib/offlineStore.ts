@@ -219,8 +219,15 @@ export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> 
 
   const safeRoute = sanitizeOfflineRoute(route);
   if (safeRoute.id !== route.id || safeRoute.origin !== route.origin) {
-    await withStore("readwrite", store => store.put(safeRoute));
+    const existing = safeRoute.id !== route.id
+      ? await withStore<unknown>("readonly", store => store.get(safeRoute.id))
+      : null;
+    const routeToKeep = isValidRoute(existing) && Date.parse(existing.savedAt) > Date.parse(safeRoute.savedAt)
+      ? existing
+      : safeRoute;
+    await withStore("readwrite", store => store.put(routeToKeep));
     if (safeRoute.id !== route.id) await withStore("readwrite", store => store.delete(route.id));
+    return routeToKeep;
   }
   return safeRoute;
 }
