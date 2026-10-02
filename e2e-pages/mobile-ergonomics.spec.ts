@@ -26,7 +26,7 @@ test("mobile directory remains readable with enlarged text and closes after choo
   await dialog.getByRole("button", { name: "Mapa e locais" }).click();
   await expect(dialog).toHaveCount(0);
   await expect(
-    page.getByRole("heading", { name: "A cidade no seu caminho" })
+    page.getByRole("heading", { name: "Mapa completo da cidade" })
   ).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
