@@ -1,0 +1,23 @@
+name: Responsive browsers
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: responsive-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  responsive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test --config=playwright.responsive.config.ts --workers=3
