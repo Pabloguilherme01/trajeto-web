@@ -53,7 +53,7 @@ describe("mobilePreferences search privacy", () => {
     rememberSearch("-15.76123, -48.28123");
     rememberSearch("Minha localização");
     expect(getRecentSearches()).toEqual([]);
-    expect(localStorage.getItem("trajeto-recent-searches")).not.toContain("-15.76123");
+    expect(localStorage.getItem("trajeto-recent-searches")).toBeNull();
   });
 
   it("removes legacy private-location entries from recent searches", () => {
