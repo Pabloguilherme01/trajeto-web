@@ -1,4 +1,4 @@
-import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -63,6 +63,12 @@ function isValidPayload(payload: unknown) {
   );
 }
 
+function sanitizeOfflineRoute(route: OfflineRoute): OfflineRoute {
+  const origin = privateOriginForHistory(route.origin);
+  if (origin === route.origin) return route;
+  return { ...route, id: offlineRouteId(origin, route.destination), origin };
+}
+
 function isValidRoute(value: unknown): value is OfflineRoute {
   if (!isRecord(value)) return false;
   return (
@@ -124,14 +130,15 @@ async function withStore<T>(
 }
 
 export async function saveOfflineRoute(route: OfflineRoute) {
-  if (!isValidRoute(route)) {
+  const safeRoute = sanitizeOfflineRoute(route);
+  if (!isValidRoute(safeRoute)) {
     throw new Error("Não foi possível salvar: os dados da rota estão incompletos.");
   }
   if (!hasIndexedDb()) {
     throw new Error("Não foi possível salvar: o armazenamento offline não está disponível neste navegador.");
   }
 
-  await withStore("readwrite", store => store.put(route));
+  await withStore("readwrite", store => store.put(safeRoute));
   const routes = await listOfflineRoutes();
   if (routes.length > MAX_SAVED_ROUTES) {
     const excessIds = routes.slice(MAX_SAVED_ROUTES).map(item => item.id);
@@ -158,20 +165,30 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
       const tx = db.transaction(STORE, "readwrite");
       const store = tx.objectStore(STORE);
       const request = store.getAll();
-      const valid: OfflineRoute[] = [];
+      const validById = new Map<string, OfflineRoute>();
 
       request.onsuccess = () => {
         for (const candidate of request.result as unknown[]) {
           if (isValidRoute(candidate)) {
-            valid.push(candidate);
+            const safeRoute = sanitizeOfflineRoute(candidate);
+            const existing = validById.get(safeRoute.id);
+            if (!existing || Date.parse(safeRoute.savedAt) > Date.parse(existing.savedAt)) {
+              validById.set(safeRoute.id, safeRoute);
+            }
+            if (safeRoute.id !== candidate.id || safeRoute.origin !== candidate.origin) {
+              store.delete(candidate.id);
+            }
           } else if (isRecord(candidate) && typeof candidate.id === "string") {
             store.delete(candidate.id);
           }
         }
 
+        for (const safeRoute of validById.values()) store.put(safeRoute);
       };
 
-      tx.oncomplete = () => resolve(valid.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt)));
+      tx.oncomplete = () => resolve(
+        [...validById.values()].sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt)),
+      );
       request.onerror = () => reject(request.error ?? new Error("Não foi possível ler as rotas salvas."));
       tx.onerror = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
       tx.onabort = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
@@ -189,18 +206,44 @@ export async function removeOfflineRoute(id: string) {
   return true;
 }
 
+function migratedOfflineRouteId(id: string) {
+  const separator = id.indexOf("::");
+  if (separator <= 0) return id;
+  const origin = id.slice(0, separator);
+  const destination = id.slice(separator + 2);
+  if (destination.trim().length < 2) return id;
+  const safeOrigin = privateOriginForHistory(origin);
+  return safeOrigin === origin.trim() ? id : offlineRouteId(safeOrigin, destination);
+}
+
 export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
   if (!hasIndexedDb()) return null;
 
-  const route = await withStore<unknown>("readonly", store => store.get(id));
+  let route = await withStore<unknown>("readonly", store => store.get(id));
   if (!isValidRoute(route)) {
     if (isRecord(route) && typeof route.id === "string") {
       await removeOfflineRoute(route.id);
     }
-    return null;
+    const migratedId = migratedOfflineRouteId(id);
+    if (migratedId !== id) {
+      route = await withStore<unknown>("readonly", store => store.get(migratedId));
+    }
+    if (!isValidRoute(route)) return null;
   }
 
-  return route;
+  const safeRoute = sanitizeOfflineRoute(route);
+  if (safeRoute.id !== route.id || safeRoute.origin !== route.origin) {
+    const existing = safeRoute.id !== route.id
+      ? await withStore<unknown>("readonly", store => store.get(safeRoute.id))
+      : null;
+    const routeToKeep = isValidRoute(existing) && Date.parse(existing.savedAt) > Date.parse(safeRoute.savedAt)
+      ? existing
+      : safeRoute;
+    await withStore("readwrite", store => store.put(routeToKeep));
+    if (safeRoute.id !== route.id) await withStore("readwrite", store => store.delete(route.id));
+    return routeToKeep;
+  }
+  return safeRoute;
 }
 
 export function offlineRouteId(origin: string, destination: string) {
