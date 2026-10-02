@@ -248,6 +248,68 @@ describe("public routing fallback", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("deduplicates identical router requests while they are in flight", async () => {
+    let resolveRouter: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn((url: string | URL | Request) => {
+      const value = String(url);
+      if (value.includes("router.project-osrm.org")) {
+        return new Promise<Response>(resolve => {
+          resolveRouter = resolve;
+        });
+      }
+      return Promise.resolve(new Response(JSON.stringify([]), { status: 200 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const args = ["-15.7545,-48.2816", "-15.7942,-47.8822"] as const;
+    const first = calculatePublicRoute(...args);
+    const second = calculatePublicRoute(...args);
+
+    await vi.waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(call =>
+          String(call[0]).includes("router.project-osrm.org")
+        )
+      ).toHaveLength(1)
+    );
+
+    resolveRouter?.(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 10000, duration: 800, geometry: "shared-route" }],
+        }),
+        { status: 200 }
+      )
+    );
+
+    const [a, b] = await Promise.all([first, second]);
+    expect(a.source).toBe("osrm");
+    expect(b.source).toBe("osrm");
+  });
+
+  it("uses cached/local estimates during router cooldown instead of hammering OSRM", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error("router down"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const first = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "-15.7942,-47.8822"
+    );
+    const second = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "-15.80,-47.90"
+    );
+
+    expect(first.source).toBe("local-estimate");
+    expect(second.source).toBe("local-estimate");
+    expect(
+      fetchMock.mock.calls.filter(call =>
+        String(call[0]).includes("router.project-osrm.org")
+      )
+    ).toHaveLength(1);
+  });
+
   it("falls back to a local estimate when the shared router is unavailable", async () => {
     vi.unstubAllGlobals();
     vi.stubGlobal(
@@ -370,6 +432,9 @@ describe("public routing fallback", () => {
     vi.stubGlobal("fetch", fetchMock);
     const args = ["-15.7,-48.2", "-15.8,-48.3"] as const;
     expect((await calculatePublicRoute(...args)).source).toBe("local-estimate");
+    // Simulate the cooldown window having elapsed without depending on a
+    // browser storage implementation in this Node-based unit test.
+    resetPublicRoutingTestState();
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
