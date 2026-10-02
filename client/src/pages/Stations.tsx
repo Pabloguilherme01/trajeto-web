@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsSearchUrl, openExternalUrl, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -732,7 +732,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     try {
       const url = window.location.origin + appUrl("/postos") + "?q=" + encodeURIComponent(query);
       await shareText("Postos em " + query + " · consulta do Trajeto", url, "Trajeto · postos");
-    } catch {}
+      toast.message("Consulta de postos compartilhada.");
+    } catch {
+      toast.error("Não foi possível compartilhar esta consulta agora.");
+    }
+  };
+
+  const openExternal = (url: string, label: string) => {
+    if (!openExternalUrl(url)) toast.message(`O navegador bloqueou ${label}. Permita pop-ups para continuar.`);
   };
 
   const openSaved = () => {
@@ -851,14 +858,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
                         <span className="col-span-2 sm:col-span-1">{item.note}</span>
                       </div>
-                      <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir no Google Maps</button>
+                      <button type="button" onClick={() => openExternal(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "Google Maps")} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir no Google Maps</button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
+              <button type="button" onClick={() => openExternal(buildGoogleMapsSearchUrl(query), "Google Maps")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
               <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF] disabled:opacity-50">Postos perto de mim</button>
             </div>
             {!online && (
@@ -975,7 +982,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                           {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
                         </div>
                         <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
-                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#C7FF3C]/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
+                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => openExternal("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "Google Maps")} className="min-h-11 rounded-xl border border-[#C7FF3C]/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
                         {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
                       </div>
                     </details>
@@ -1252,7 +1259,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <button type="button" onClick={() => window.open(stationMapsSearchUrl(station), "_blank", "noopener,noreferrer")} className="min-h-11 flex-1 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]">Abrir no Google Maps</button>
+                        <button type="button" onClick={() => openExternal(stationMapsSearchUrl(station), "Google Maps")} className="min-h-11 flex-1 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014]">Abrir no Google Maps</button>
                         {station.address && <button type="button" onClick={() => void copyAddress(station)} className="min-h-11 rounded-xl border border-white/8 px-3 text-sm font-black text-white/65">Copiar endereço</button>}
                         <button type="button" onClick={() => void copyCnpj(station.cnpj)} className="min-h-11 rounded-xl border border-white/8 px-3 text-sm font-black text-white/65">Copiar CNPJ</button>
                         <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web", "_blank", "noopener,noreferrer")} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-sm font-black text-[#C9F7FF]">Verificar situação na ANP</button>
@@ -1347,7 +1354,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           <section className="mt-5 rounded-3xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-5">
             <p className="text-sm font-black">A consulta não respondeu.</p>
             <p className="mt-1 text-xs leading-relaxed text-white/65">O objetivo continua disponível no Google Maps enquanto o serviço do Trajeto não responde.</p>
-            <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="mt-4 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">Abrir no Google Maps</button>
+            <button type="button" onClick={() => openExternal(buildGoogleMapsSearchUrl(query), "Google Maps")} className="mt-4 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">Abrir no Google Maps</button>
           </section>
         )}
 
