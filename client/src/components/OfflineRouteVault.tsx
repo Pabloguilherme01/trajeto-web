@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { shareText } from "@/lib/mobileTools";
-import { externalNavigationUrl, isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, removeOfflineRoute, wazeNavigationUrl, type OfflineRoute } from "@/lib/offlineStore";
+import { externalNavigationUrl, isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, offlineRouteShareText, offlineRouteShareUrl, removeOfflineRoute, wazeNavigationUrl, type OfflineRoute } from "@/lib/offlineStore";
+import { buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 
 function formatAge(savedAt: string) {
   const time = Date.parse(savedAt);
@@ -60,12 +61,7 @@ export default function OfflineRouteVault() {
   }, [refresh]);
 
   const openRoute = (route: OfflineRoute) => {
-    setLocation(
-      appUrl("/planejar") +
-      "?rota=" + encodeURIComponent(route.id) +
-      "&origem=" + encodeURIComponent(route.origin) +
-      "&destino=" + encodeURIComponent(route.destination),
-    );
+    setLocation(buildSavedRoutePlannerUrl(route.id));
   };
 
   const navigateExternally = (route: OfflineRoute) => {
@@ -88,8 +84,8 @@ export default function OfflineRouteVault() {
   const shareRoute = async (route: OfflineRoute) => {
     try {
       await shareText(
-        `Rota salva no Trajeto: ${route.origin} → ${route.destination}.`,
-        window.location.origin + appUrl("/planejar") + "?origem=" + encodeURIComponent(route.origin) + "&destino=" + encodeURIComponent(route.destination),
+        offlineRouteShareText(route),
+        window.location.origin + appUrl(offlineRouteShareUrl(route)),
         "Rota salva no Trajeto",
       );
       setFeedback("Origem e destino preparados para compartilhar. O destinatário precisará de internet para recalcular a rota.");
