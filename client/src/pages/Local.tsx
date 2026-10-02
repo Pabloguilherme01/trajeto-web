@@ -117,7 +117,7 @@ export default function Local() {
           <ArrowLeft className="size-4" /> Mapa
         </Link>
 
-        <header className="mt-4 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 shadow-[0_22px_60px_rgba(0,0,0,.22)]">
+        <header className="mt-4 trajeto-card rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 shadow-[0_22px_60px_rgba(0,0,0,.22)]">
           <div className="flex items-start gap-3">
             <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
               <Fuel className="size-5" />
@@ -150,7 +150,7 @@ export default function Local() {
         </header>
 
         <section className="mt-3 grid gap-3 sm:grid-cols-2">
-          <article className="rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
+          <article className="trajeto-card rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
             <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Identificação</p>
             <dl className="mt-3 space-y-2 text-xs text-white/55">
               <div className="flex justify-between gap-3"><dt>CNPJ</dt><dd className="font-black text-white">{local.cnpj}</dd></div>
@@ -160,7 +160,7 @@ export default function Local() {
             </dl>
           </article>
 
-          <article className="rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
+          <article className="trajeto-card rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
             <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">Contato e serviços</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {entity.services.map(item => (
@@ -187,7 +187,7 @@ export default function Local() {
           </p>
         </section>
 
-        <section className="mt-3 rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
+        <section className="mt-3 trajeto-card rounded-[1.35rem] border border-white/8 bg-[#121B22] p-4">
           <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-white/35">Dados e confiança</p>
           <p className="mt-2 text-xs leading-relaxed text-white/50">{local.sourceNote}</p>
           <p className="mt-2 text-xs text-white/45">Cadastro: {local.dataOrigin === "ANP" ? "ANP" : local.dataOrigin === "cross-check" ? "dados cruzados" : "catálogo local"}.</p>
