@@ -24,14 +24,12 @@ const MAX_FAVORITES = 20;
 const MAX_CACHED = 30;
 const CACHE_RETENTION_MS = 24 * 60 * 60 * 1000;
 
-let legacyCachePurged = false;
-
 function cacheStorage() {
   try {
-    if (!legacyCachePurged) {
-      legacyCachePurged = true;
-      localStorage.removeItem(CACHE_KEY);
-    }
+    // Remove any location-bearing cache written by older versions. This is
+    // intentionally idempotent so shared-device cleanup does not depend on
+    // module lifetime or application restart order.
+    localStorage.removeItem(CACHE_KEY);
     return sessionStorage;
   } catch {
     return null;
