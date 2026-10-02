@@ -270,20 +270,29 @@ export function offlineRouteId(origin: string, destination: string) {
 }
 
 
+function normalizeOfflineMatchText(value: string) {
+  return value
+    .trim()
+    .toLocaleLowerCase("pt-BR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
 export function findOfflineRouteByDestination(routes: OfflineRoute[], destination: string) {
-  const target = destination.trim().toLocaleLowerCase("pt-BR");
+  const target = normalizeOfflineMatchText(destination);
   if (!target) return null;
-  return routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target) ?? null;
+  return routes.find(route => normalizeOfflineMatchText(route.destination) === target) ?? null;
 }
 
 export function findOfflineRouteByTrip(routes: OfflineRoute[], origin: string, destination: string) {
-  const normalizedOrigin = origin.trim().toLocaleLowerCase("pt-BR");
-  const normalizedDestination = destination.trim().toLocaleLowerCase("pt-BR");
+  const normalizedOrigin = normalizeOfflineMatchText(origin);
+  const normalizedDestination = normalizeOfflineMatchText(destination);
   if (!normalizedOrigin || !normalizedDestination) return null;
 
   return routes.find(route =>
-    route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
-    route.destination.trim().toLocaleLowerCase("pt-BR") === normalizedDestination,
+    normalizeOfflineMatchText(route.origin) === normalizedOrigin &&
+    normalizeOfflineMatchText(route.destination) === normalizedDestination,
   ) ?? null;
 }
 
@@ -301,8 +310,8 @@ export function findBestOfflineRouteForTrip(
   destination: string,
   mode: "driving" | "walking" | "cycling" | "transit" = "driving"
 ) {
-  const normalizedOrigin = origin.trim().toLocaleLowerCase("pt-BR");
-  const normalizedDestination = destination.trim().toLocaleLowerCase("pt-BR");
+  const normalizedOrigin = normalizeOfflineMatchText(origin);
+  const normalizedDestination = normalizeOfflineMatchText(destination);
   if (!normalizedOrigin || !normalizedDestination) return null;
 
   return (
@@ -310,9 +319,8 @@ export function findBestOfflineRouteForTrip(
       .filter(route => !isPreciseLocationText(route.origin))
       .filter(
         route =>
-          route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
-          route.destination.trim().toLocaleLowerCase("pt-BR") ===
-            normalizedDestination
+          normalizeOfflineMatchText(route.origin) === normalizedOrigin &&
+          normalizeOfflineMatchText(route.destination) === normalizedDestination
       )
       .sort((a, b) => {
         const modeScore =
