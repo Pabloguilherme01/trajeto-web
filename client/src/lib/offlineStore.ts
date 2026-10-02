@@ -1,3 +1,4 @@
+import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -231,11 +232,26 @@ export function isOfflineRouteStale(savedAt: string, now = Date.now(), maxAgeMs 
 }
 
 export function externalNavigationUrl(route: Pick<OfflineRoute, "origin" | "destination">) {
-  return "https://www.google.com/maps/dir/?api=1&origin=" +
-    encodeURIComponent(route.origin) +
-    "&destination=" +
-    encodeURIComponent(route.destination) +
-    "&travelmode=driving";
+  const params = new URLSearchParams({
+    destination: route.destination.trim(),
+    travelmode: "driving",
+  });
+  const origin = privateOriginForExternalNavigation(route.origin);
+  if (origin) params.set("origin", origin);
+  return "https://www.google.com/maps/dir/?api=1&" + params.toString();
+}
+
+export function offlineRouteShareText(route: Pick<OfflineRoute, "origin" | "destination">) {
+  return "Rota salva no Trajeto: " +
+    privateRouteShareOrigin(route.origin) +
+    " → " +
+    route.destination.trim() +
+    ".";
+}
+
+export function offlineRouteShareUrl(route: Pick<OfflineRoute, "id">) {
+  const params = new URLSearchParams({ rota: route.id.trim() });
+  return "/planejar?" + params.toString();
 }
 
 export function wazeNavigationUrl(route: Pick<OfflineRoute, "destination">) {

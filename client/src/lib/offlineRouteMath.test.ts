@@ -56,8 +56,9 @@ describe("offline route reuse", () => {
 
   it("builds external navigation with both origin and destination", () => {
     const url = externalNavigationUrl(routes[0]);
-    expect(url).toContain("origin=%C3%81guas%20Lindas%20de%20Goi%C3%A1s");
-    expect(url).toContain("destination=Bras%C3%ADlia%2C%20DF");
+    const parsed = new URL(url);
+    expect(parsed.searchParams.get("origin")).toBe("Águas Lindas de Goiás");
+    expect(parsed.searchParams.get("destination")).toBe("Brasília, DF");
     expect(url).toContain("travelmode=driving");
   });
 
