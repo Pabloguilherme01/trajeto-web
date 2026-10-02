@@ -184,3 +184,53 @@ export function compareTripScenarios(input: {
     differencePerYear: baseline.annualCost - alternative.annualCost,
   };
 }
+
+
+export type FuelChoiceComparison = {
+  method: "real-cost-per-km" | "seventy-percent";
+  recommended: "ethanol" | "gasoline" | "tie";
+  ethanolCostPerKm: number | null;
+  gasolineCostPerKm: number | null;
+  ethanolPriceRatio: number;
+};
+
+export function compareEthanolGasoline(input: {
+  ethanolPrice: number;
+  gasolinePrice: number;
+  ethanolKmPerLiter?: number;
+  gasolineKmPerLiter?: number;
+}): FuelChoiceComparison | null {
+  const ethanolPrice = Math.max(0, input.ethanolPrice);
+  const gasolinePrice = Math.max(0, input.gasolinePrice);
+  if (!ethanolPrice || !gasolinePrice) return null;
+
+  const ethanolConsumption = Math.max(0, input.ethanolKmPerLiter ?? 0);
+  const gasolineConsumption = Math.max(0, input.gasolineKmPerLiter ?? 0);
+  const ethanolPriceRatio = ethanolPrice / gasolinePrice;
+
+  if (ethanolConsumption > 0 && gasolineConsumption > 0) {
+    const ethanolCostPerKm = ethanolPrice / ethanolConsumption;
+    const gasolineCostPerKm = gasolinePrice / gasolineConsumption;
+    const difference = Math.abs(ethanolCostPerKm - gasolineCostPerKm);
+    const tieThreshold = Math.min(ethanolCostPerKm, gasolineCostPerKm) * 0.005;
+    return {
+      method: "real-cost-per-km",
+      recommended: difference <= tieThreshold
+        ? "tie"
+        : ethanolCostPerKm < gasolineCostPerKm ? "ethanol" : "gasoline",
+      ethanolCostPerKm,
+      gasolineCostPerKm,
+      ethanolPriceRatio,
+    };
+  }
+
+  return {
+    method: "seventy-percent",
+    recommended: Math.abs(ethanolPriceRatio - 0.7) <= 0.001
+      ? "tie"
+      : ethanolPriceRatio < 0.7 ? "ethanol" : "gasoline",
+    ethanolCostPerKm: null,
+    gasolineCostPerKm: null,
+    ethanolPriceRatio,
+  };
+}
