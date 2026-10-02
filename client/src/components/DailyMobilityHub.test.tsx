@@ -91,6 +91,7 @@ describe("DailyMobilityHub", () => {
   });
 
   it("opens the latest saved route by id only", async () => {
+    setSavedDailyMode("conducao");
     vi.spyOn(offlineStore, "listOfflineRoutes").mockResolvedValue([{
       id: "private-route",
       origin: "Minha localização",
