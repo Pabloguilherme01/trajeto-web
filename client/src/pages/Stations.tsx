@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsSearchUrl, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -717,14 +717,15 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   };
 
   const navigateTo = (station: typeof stations[number]) => {
-    const provider = getPreferredNavigationProvider();
-    if (typeof station.lat === "number" && typeof station.lng === "number") {
-      const urls = openNavigation(station.lat, station.lng, station.name);
-      const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
-      window.open(url, "_blank", "noopener,noreferrer");
+    const destination = typeof station.lat === "number" && typeof station.lng === "number"
+      ? station.lat + "," + station.lng
+      : [station.name, station.address].filter(Boolean).join(", ");
+    if (!destination.trim()) {
+      toast.message("Este posto ainda não possui destino suficiente para traçar a rota.");
       return;
     }
-    window.open(buildGoogleMapsSearchUrl([station.name, station.address].filter(Boolean).join(", ")), "_blank", "noopener,noreferrer");
+    rememberIntent("route");
+    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1");
   };
 
   const shareCurrent = async () => {
