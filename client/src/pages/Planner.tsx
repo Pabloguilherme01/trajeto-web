@@ -11,6 +11,7 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNav
 import { getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
+import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
@@ -487,6 +488,7 @@ export default function Planner() {
 
   const routeForMap = planned ? [{
     id: "principal",
+    source: publicRouteSource,
     polyline: planned.route.polyline ?? null,
     selected: true,
     trafficIntervals: [],
@@ -633,6 +635,8 @@ export default function Planner() {
           />
         )}
 
+        {!savedMode && destination.trim().length >= 3 && <RideOptions destination={destination} online={online} />}
+
         {economyMode && !savedMode && !planned && (
           <section className="mt-4 rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4" aria-labelledby="economy-mode-title">
             <div className="flex items-start gap-3">
@@ -641,6 +645,8 @@ export default function Planner() {
             </div>
           </section>
         )}
+
+        {!savedMode && destination.trim().length >= 3 && <RideOptions destination={destination} online={online} />}
 
         {economyMode && !savedMode && !planned && <LocalRouteCalculator compact />}
 

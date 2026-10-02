@@ -14,15 +14,18 @@ const TILE_URL_TEMPLATE =
   "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 function tileUrl(z: number, x: number, y: number) {
-  return TILE_URL_TEMPLATE
-    .replace("{z}", String(z))
+  return TILE_URL_TEMPLATE.replace("{z}", String(z))
     .replace("{x}", String(x))
     .replace("{y}", String(y));
 }
 
 function stationKey(station: StationMapItem) {
-  return station.id ?? station.cnpj ?? station.placeId ??
-    `${station.name}|${station.lat}|${station.lng}`;
+  return (
+    station.id ??
+    station.cnpj ??
+    station.placeId ??
+    `${station.name}|${station.lat}|${station.lng}`
+  );
 }
 
 function clampLat(lat: number) {
@@ -54,12 +57,18 @@ export default function TileStationMap({
   heightClassName = "min-h-[320px] h-[min(68vh,620px)]",
   onSelectStation,
   fallback,
+  selectionLabel = "Escolher posto no mapa",
+  routePoints = [],
+  onPlanDestination,
 }: {
   stations: StationMapItem[];
   userCoords?: { lat: number; lng: number } | null;
   heightClassName?: string;
   onSelectStation?: (station: StationMapItem) => void;
   fallback?: React.ReactNode;
+  selectionLabel?: string;
+  routePoints?: Array<{ lat: number; lng: number }>;
+  onPlanDestination?: (station: StationMapItem) => void;
 }) {
   const drawable = useMemo(
     () =>
@@ -75,6 +84,16 @@ export default function TileStationMap({
     [stations]
   );
 
+  const [offline, setOffline] = useState(() => !navigator.onLine);
+  useEffect(() => {
+    const update = () => setOffline(!navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -149,9 +168,7 @@ export default function TileStationMap({
     }
   }
 
-  const markerPosition = (
-    station: StationMapItem & { lat: number; lng: number }
-  ) => {
+  const markerPosition = (station: { lat: number; lng: number }) => {
     const p = project(station.lat, station.lng, zoom);
     return {
       left: width / 2 + p.x - centerPx.x,
@@ -196,7 +213,11 @@ export default function TileStationMap({
 
   const fitStations = () => {
     if (!drawable.length) return;
-    const points = [...drawable, ...(userCoords ? [userCoords] : [])];
+    const points = [
+      ...drawable,
+      ...routePoints,
+      ...(userCoords ? [userCoords] : []),
+    ];
     const minLat = Math.min(...points.map(p => p.lat)),
       maxLat = Math.max(...points.map(p => p.lat));
     const minLng = Math.min(...points.map(p => p.lng)),
@@ -216,9 +237,27 @@ export default function TileStationMap({
     setZoom(next);
   };
 
-  const tileFallback = Boolean(fallback && tileErrors >= 5);
+  useEffect(() => {
+    if (routePoints.length > 1) fitStations();
+  }, [routePoints]);
 
-  if (tileFallback) return <>{fallback}</>;
+  const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
+
+  if (tileFallback)
+    return (
+      <div>
+        {fallback}
+        {!offline && (
+          <button
+            type="button"
+            onClick={() => setTileErrors(0)}
+            className="m-3 min-h-11 rounded-xl border border-white/20 px-4 text-sm font-bold text-white"
+          >
+            Tentar carregar mapa de ruas
+          </button>
+        )}
+      </div>
+    );
 
   if (!drawable.length) {
     return (
@@ -243,177 +282,214 @@ export default function TileStationMap({
     );
   }
 
-  const selected = drawable.find(item => stationKey(item) === selectedId) ?? null;
+  const selected =
+    drawable.find(item => stationKey(item) === selectedId) ?? null;
 
   return (
-    <div
-      className={
-        "overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"
-      }
-    >
+    <div className={"overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
       <div className={"relative " + heightClassName}>
-      <div
-        ref={viewport}
-        role="region"
-        aria-label="Mapa dos postos"
-        aria-description="Use as setas para mover, mais e menos para zoom e Home para recentrar."
-        tabIndex={0}
-        onKeyDown={event => {
-          if (event.target !== event.currentTarget) return;
-          const offsets: Record<string, [number, number]> = {
-            ArrowRight: [80, 0], ArrowLeft: [-80, 0],
-            ArrowDown: [0, 80], ArrowUp: [0, -80],
-          };
-          const offset = offsets[event.key];
-          if (offset) setCenter(unproject(centerPx.x + offset[0], centerPx.y + offset[1], zoom));
-          else if (event.key === "+" || event.key === "=") changeZoom(1);
-          else if (event.key === "-") changeZoom(-1);
-          else if (event.key === "Home") recenter();
-          else return;
-          event.preventDefault();
-        }}
-        className={
-          "absolute inset-0 select-none touch-none overflow-hidden " +
-          (dragging ? "cursor-grabbing" : "cursor-grab")
-        }
-        onPointerDown={beginDrag}
-        onPointerMove={drag}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-      >
         <div
-          className="absolute"
-          style={{
-            width: TILE * (radius * 2 + 1),
-            height: TILE * (radius * 2 + 1),
-            left: width / 2 - radius * TILE - (centerPx.x - baseTileX * TILE),
-            top: height / 2 - radius * TILE - (centerPx.y - baseTileY * TILE),
-            transformOrigin: "50% 50%",
-          }}
-        >
-          {tiles.map(tile => (
-            <img
-              key={tile.key}
-              src={tileUrl(zoom, tile.x, tile.y)}
-              referrerPolicy="origin"
-              alt=""
-              onError={() =>
-                setTileErrors(value => Math.min(tiles.length, value + 1))
-              }
-              draggable={false}
-              className="absolute size-64 max-w-none"
-              style={{ left: tile.left, top: tile.top }}
-            />
-          ))}
-        </div>
-
-        <div className="pointer-events-none absolute inset-0">
-          {drawable.map((station, index) => {
-            const position = markerPosition(station);
-            if (
-              position.left < -30 ||
-              position.left > width + 30 ||
-              position.top < -40 ||
-              position.top > height + 40
-            )
-              return null;
-            const active = stationKey(station) === selectedId;
-            return (
-              <button
-                key={stationKey(station)}
-                type="button"
-                className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
-                style={{ left: position.left, top: position.top }}
-                onPointerDown={event => event.stopPropagation()}
-                onClick={() => {
-                  setSelectedId(stationKey(station));
-                  onSelectStation?.(station);
-                }}
-                aria-label={"Abrir " + station.name}
-                aria-pressed={active}
-              >
-                <span
-                  className={
-                    "grid size-8 place-items-center rounded-full border-2 border-white shadow-lg transition " +
-                    (active
-                      ? "scale-110 bg-[#C7FF3C] text-[#163840]"
-                      : station.source === "ANP"
-                        ? "bg-[#C7FF3C] text-[#163840]"
-                        : "bg-[#3DE3FF] text-[#163840]")
-                  }
-                >
-                  <span className="text-xs font-black">{index + 1}</span>
-                </span>
-              </button>
-            );
-          })}
-
-          {userCoords &&
-            (() => {
-              const p = project(userCoords.lat, userCoords.lng, zoom);
-              const left = width / 2 + p.x - centerPx.x;
-              const top = height / 2 + p.y - centerPx.y;
-              return (
-                <span
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
-                  style={{ left, top, width: 14, height: 14 }}
-                  aria-label="Sua localização"
-                />
+          ref={viewport}
+          role="region"
+          aria-label={
+            selectionLabel === "Escolher posto no mapa"
+              ? "Mapa dos postos"
+              : "Mapa de destinos"
+          }
+          aria-description="Use as setas para mover, mais e menos para zoom e Home para recentrar."
+          tabIndex={0}
+          onKeyDown={event => {
+            if (event.target !== event.currentTarget) return;
+            const offsets: Record<string, [number, number]> = {
+              ArrowRight: [80, 0],
+              ArrowLeft: [-80, 0],
+              ArrowDown: [0, 80],
+              ArrowUp: [0, -80],
+            };
+            const offset = offsets[event.key];
+            if (offset)
+              setCenter(
+                unproject(centerPx.x + offset[0], centerPx.y + offset[1], zoom)
               );
-            })()}
-        </div>
-      </div>
-
-      <div className="absolute left-3 top-3 z-20 flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => changeZoom(1)}
-          className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
-          aria-label="Aumentar zoom"
-        >
-          <Plus className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => changeZoom(-1)}
-          className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
-          aria-label="Diminuir zoom"
-        >
-          <Minus className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={recenter}
-          className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
-          aria-label="Recentrar mapa"
-        >
-          <LocateFixed className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={fitStations}
-          className="min-h-11 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
-        >
-          Ver todos
-        </button>
-      </div>
-
-      <label className="absolute left-3 right-3 top-[4.5rem] z-20">
-        <span className="sr-only">Escolher posto no mapa</span>
-        <select
-          className="min-h-11 w-full min-w-0 rounded-xl border border-black/10 bg-white/95 px-3 text-base text-[#163840] shadow-lg"
-          value={selectedId ?? ""}
-          onChange={event => {
-            const station = drawable.find(item => stationKey(item) === event.target.value);
-            if (!station) return;
-            setSelectedId(stationKey(station));
-            setCenter({ lat: station.lat, lng: station.lng });
-            setZoom(value => Math.max(13, value));
+            else if (event.key === "+" || event.key === "=") changeZoom(1);
+            else if (event.key === "-") changeZoom(-1);
+            else if (event.key === "Home") recenter();
+            else return;
+            event.preventDefault();
           }}
+          className={
+            "absolute inset-0 select-none touch-none overflow-hidden " +
+            (dragging ? "cursor-grabbing" : "cursor-grab")
+          }
+          onPointerDown={beginDrag}
+          onPointerMove={drag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
         >
-          {drawable.map(station => <option key={stationKey(station)} value={stationKey(station)}>{station.name}</option>)}
-        </select>
-      </label>
+          <div
+            className="absolute"
+            style={{
+              width: TILE * (radius * 2 + 1),
+              height: TILE * (radius * 2 + 1),
+              left: width / 2 - radius * TILE - (centerPx.x - baseTileX * TILE),
+              top: height / 2 - radius * TILE - (centerPx.y - baseTileY * TILE),
+              transformOrigin: "50% 50%",
+            }}
+          >
+            {tiles.map(tile => (
+              <img
+                key={tile.key}
+                src={tileUrl(zoom, tile.x, tile.y)}
+                referrerPolicy="origin"
+                alt=""
+                onError={() =>
+                  setTileErrors(value => Math.min(tiles.length, value + 1))
+                }
+                draggable={false}
+                className="absolute size-64 max-w-none"
+                style={{ left: tile.left, top: tile.top }}
+              />
+            ))}
+          </div>
+
+          {routePoints.length > 1 && (
+            <svg
+              className="pointer-events-none absolute inset-0 h-full w-full"
+              aria-label="Trajeto pelas ruas"
+              role="img"
+            >
+              {["#ffffff", "#147b88"].map((color, index) => (
+                <polyline
+                  key={color}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={index ? 5 : 9}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={routePoints
+                    .map(point => {
+                      const p = markerPosition(point);
+                      return `${p.left},${p.top}`;
+                    })
+                    .join(" ")}
+                />
+              ))}
+            </svg>
+          )}
+          <div className="pointer-events-none absolute inset-0">
+            {drawable.map((station, index) => {
+              const position = markerPosition(station);
+              if (
+                position.left < -30 ||
+                position.left > width + 30 ||
+                position.top < -40 ||
+                position.top > height + 40
+              )
+                return null;
+              const active = stationKey(station) === selectedId;
+              return (
+                <button
+                  key={stationKey(station)}
+                  type="button"
+                  className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
+                  style={{ left: position.left, top: position.top }}
+                  onPointerDown={event => event.stopPropagation()}
+                  onClick={() => {
+                    setSelectedId(stationKey(station));
+                    onSelectStation?.(station);
+                  }}
+                  aria-label={"Abrir " + station.name}
+                  aria-pressed={active}
+                >
+                  <span
+                    className={
+                      "grid size-8 place-items-center rounded-full border-2 border-white shadow-lg transition " +
+                      (active
+                        ? "scale-110 bg-[#C7FF3C] text-[#163840]"
+                        : station.source === "ANP"
+                          ? "bg-[#C7FF3C] text-[#163840]"
+                          : "bg-[#3DE3FF] text-[#163840]")
+                    }
+                  >
+                    <span className="text-xs font-black">{index + 1}</span>
+                  </span>
+                </button>
+              );
+            })}
+
+            {userCoords &&
+              (() => {
+                const p = project(userCoords.lat, userCoords.lng, zoom);
+                const left = width / 2 + p.x - centerPx.x;
+                const top = height / 2 + p.y - centerPx.y;
+                return (
+                  <span
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
+                    style={{ left, top, width: 14, height: 14 }}
+                    aria-label="Sua localização"
+                  />
+                );
+              })()}
+          </div>
+        </div>
+
+        <div className="absolute left-3 top-3 z-20 flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => changeZoom(1)}
+            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            aria-label="Aumentar zoom"
+          >
+            <Plus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => changeZoom(-1)}
+            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            aria-label="Diminuir zoom"
+          >
+            <Minus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={recenter}
+            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            aria-label="Recentrar mapa"
+          >
+            <LocateFixed className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={fitStations}
+            className="min-h-11 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
+          >
+            Ver todos
+          </button>
+        </div>
+
+        <label className="absolute left-3 right-3 top-[4.5rem] z-20">
+          <span className="sr-only">{selectionLabel}</span>
+          <select
+            className="min-h-11 w-full min-w-0 rounded-xl border border-black/10 bg-white/95 px-3 text-base text-[#163840] shadow-lg"
+            value={selectedId ?? ""}
+            onChange={event => {
+              const station = drawable.find(
+                item => stationKey(item) === event.target.value
+              );
+              if (!station) return;
+              setSelectedId(stationKey(station));
+              onSelectStation?.(station);
+              setCenter({ lat: station.lat, lng: station.lng });
+              setZoom(value => Math.max(13, value));
+            }}
+          >
+            {drawable.map(station => (
+              <option key={stationKey(station)} value={stationKey(station)}>
+                {station.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="relative border-t border-black/10 bg-white/95 p-4">
@@ -421,7 +497,11 @@ export default function TileStationMap({
           <div className="flex items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">
               <span className="text-xs font-black">
-                {selected.source === "ANP" ? "ANP" : selected.source === "Google" ? "MAPA" : "LOCAL"}
+                {selected.source === "ANP"
+                  ? "ANP"
+                  : selected.source === "Google"
+                    ? "MAPA"
+                    : "LOCAL"}
               </span>
             </div>
             <div className="min-w-0 flex-1">
@@ -432,6 +512,15 @@ export default function TileStationMap({
                 {selected.address || "Endereço não informado"}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
+                {onPlanDestination && (
+                  <button
+                    type="button"
+                    onClick={() => onPlanDestination(selected)}
+                    className="min-h-11 rounded-lg bg-[#C7FF3C] px-3 text-xs font-black text-[#163840]"
+                  >
+                    Planejar até aqui
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() =>
