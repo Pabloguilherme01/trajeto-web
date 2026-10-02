@@ -8,7 +8,8 @@ import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
-import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, isCurrentLocationLabel, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
+import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import TripReadinessCard from "@/components/TripReadinessCard";
 import DailyModeSelector from "@/components/DailyModeSelector";
 
@@ -78,7 +79,7 @@ export default function Home() {
     }
     setFormMessage(null);
     rememberIntent("route");
-    if (from) rememberSearch(from);
+    if (from && !originPrivate) rememberSearch(from);
     rememberSearch(to);
     track("route_open", to);
     vibration();
@@ -120,7 +121,7 @@ export default function Home() {
     if (!lastTrip) return;
     rememberIntent("route");
     vibration();
-    setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&auto=1");
+    setLocation(buildReusableTripPlannerUrl(lastTrip, { auto: true }));
   };
 
   const findNearby = () => {
@@ -201,8 +202,8 @@ export default function Home() {
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/12 text-[#C7FF3C]"><Route className="size-4" /></span>
                 <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]/80" />
               </div>
-              <p className="mt-2 text-sm font-black">{lastTrip ? "Continuar última rota" : "Planejar uma rota"}</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? "Retome sua última viagem em um toque." : "Origem, destino e rota sem cadastro."}</p>
+              <p className="mt-2 text-sm font-black">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota") : "Planejar uma rota"}</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Confirme sua localização para refazer a rota." : "Retome sua última viagem em um toque.") : "Origem, destino e rota sem cadastro."}</p>
             </button>
             <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Fuel className="size-4 text-[#3DE3FF]" />
@@ -432,11 +433,7 @@ export default function Home() {
                   type="button"
                   onClick={() => {
                     rememberIntent("route");
-                    setLocation(
-                      appUrl("/planejar") +
-                        "?origem=" + encodeURIComponent(trip.origin) +
-                        "&destino=" + encodeURIComponent(trip.destination),
-                    );
+                    setLocation(buildReusableTripPlannerUrl(trip));
                   }}
                   className="flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3 text-left active:scale-[.99]"
                   aria-label={"Repetir rota " + trip.origin + " para " + trip.destination}

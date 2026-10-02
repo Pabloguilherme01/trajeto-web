@@ -29,6 +29,8 @@ import {
 } from "@/lib/mobileDestinations";
 import { getLastStation, getLastTrip, mobilePreferenceEvent, type LastStation } from "@/lib/mobilePreferences";
 import { getMobilityContext } from "@/lib/mobilityContext";
+import { isCurrentLocationLabel } from "@/lib/locationPrivacy";
+import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import { getMobileVehicle, mobileVehicleEvent } from "@/lib/mobileVehicle";
 import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 
@@ -112,9 +114,9 @@ export default function DailyCommandCenter() {
   ];
   const primary = active?.id === "repetir" && lastTrip
     ? {
-        label: "Repetir última viagem",
+        label: isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Repetir última viagem",
         detail: lastTrip.origin + " → " + lastTrip.destination,
-        href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination),
+        href: buildReusableTripPlannerUrl(lastTrip),
       }
     : active?.id === "proxima" && favorite
       ? {
@@ -132,13 +134,13 @@ export default function DailyCommandCenter() {
             ? {
                 label: "Abrir modo condução",
                 detail: lastTrip.origin + " → " + lastTrip.destination,
-                href: appUrl("/planejar") + "?origem=" + encodeURIComponent(lastTrip.origin) + "&destino=" + encodeURIComponent(lastTrip.destination) + "&modo=conducao",
+                href: buildReusableTripPlannerUrl(lastTrip, { drivingMode: true }),
               }
             : active?.id === "offline" && routes[0]
           ? {
               label: "Continuar rota salva",
               detail: routes[0].origin + " → " + routes[0].destination,
-              href: appUrl("/planejar") + "?rota=" + encodeURIComponent(routes[0].id) + "&origem=" + encodeURIComponent(routes[0].origin) + "&destino=" + encodeURIComponent(routes[0].destination),
+              href: buildSavedRoutePlannerUrl(routes[0].id),
             }
           : {
               label: "Planejar próxima viagem",

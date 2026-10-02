@@ -2,9 +2,10 @@ import React from "react";
 import { ArrowLeftRight, ArrowRight, History, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { appUrl } from "@/lib/appUrl";
 import { clearRecentTrips, getRecentTrips, getRouteUsage, mobilePreferenceEvent, removeRecentTrip, type RecentTrip } from "@/lib/mobilePreferences";
 import { findOfflineRouteByTrip, listOfflineRoutes } from "@/lib/offlineStore";
+import { isCurrentLocationLabel } from "@/lib/locationPrivacy";
+import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 
 function formatAge(usedAt: string) {
   const time = Date.parse(usedAt);
@@ -76,16 +77,19 @@ export default function RecentTripsCard() {
 
   const prepareRoutine = () => {
     if (!mostUsedTrip) return;
-    const query = "?origem=" + encodeURIComponent(mostUsedTrip.origin) + "&destino=" + encodeURIComponent(mostUsedTrip.destination);
-    setLocation(appUrl("/planejar") + query);
+    setLocation(buildReusableTripPlannerUrl(mostUsedTrip));
   };
 
   const openReverseTrip = async (trip: RecentTrip) => {
+    if (isCurrentLocationLabel(trip.origin)) {
+      setFeedback("A localização exata dessa viagem não foi salva. Planeje a volta informando o destino novamente.");
+      return;
+    }
     const origin = trip.destination;
     const destination = trip.origin;
 
     if (navigator.onLine) {
-      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(origin) + "&destino=" + encodeURIComponent(destination));
+      setLocation(buildReusableTripPlannerUrl({ origin, destination }));
       return;
     }
 
@@ -96,10 +100,7 @@ export default function RecentTripsCard() {
         setFeedback("A volta desta viagem não tem uma cópia salva neste aparelho. Conecte-se à internet para calculá-la.");
         return;
       }
-      setLocation(
-        appUrl("/planejar") +
-        "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination),
-      );
+      setLocation(buildSavedRoutePlannerUrl(saved.id));
     } catch {
       setFeedback("Não foi possível consultar as rotas salvas. Tente novamente.");
     }
@@ -107,7 +108,7 @@ export default function RecentTripsCard() {
 
   const openTrip = async (trip: RecentTrip) => {
     if (navigator.onLine) {
-      setLocation(appUrl("/planejar") + "?origem=" + encodeURIComponent(trip.origin) + "&destino=" + encodeURIComponent(trip.destination));
+      setLocation(buildReusableTripPlannerUrl(trip));
       return;
     }
     try {
@@ -117,10 +118,7 @@ export default function RecentTripsCard() {
         setFeedback("Esta viagem não tem uma cópia salva neste aparelho. Conecte-se à internet para recalculá-la.");
         return;
       }
-      setLocation(
-        appUrl("/planejar") +
-        "?rota=" + encodeURIComponent(saved.id) + "&origem=" + encodeURIComponent(saved.origin) + "&destino=" + encodeURIComponent(saved.destination),
-      );
+      setLocation(buildSavedRoutePlannerUrl(saved.id));
     } catch {
       setFeedback("Não foi possível consultar as rotas salvas. Tente novamente.");
     }

@@ -49,10 +49,19 @@ describe("mobilePreferences recent trips", () => {
 describe("mobilePreferences search privacy", () => {
   beforeEach(() => localStorage.clear());
 
-  it("scrubs precise coordinates from recent searches", () => {
+  it("does not keep GPS or current-location labels in recent searches", () => {
     rememberSearch("-15.76123, -48.28123");
-    expect(getRecentSearches()).toEqual(["Minha localização"]);
-    expect(localStorage.getItem("trajeto-recent-searches")).not.toContain("-15.76123");
+    rememberSearch("Minha localização");
+    expect(getRecentSearches()).toEqual([]);
+    expect(localStorage.getItem("trajeto-recent-searches")).toBeNull();
+  });
+
+  it("removes legacy private-location entries from recent searches", () => {
+    localStorage.setItem(
+      "trajeto-recent-searches",
+      JSON.stringify(["Minha localização", "-15.76123, -48.28123", "Hospital"])
+    );
+    expect(getRecentSearches()).toEqual(["Hospital"]);
   });
 });
 
