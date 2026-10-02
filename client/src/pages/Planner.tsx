@@ -722,7 +722,7 @@ export default function Planner() {
                 <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
-              {destination.trim().length >= 3 && (
+              {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
                     Google
@@ -732,6 +732,16 @@ export default function Planner() {
                   </button>
                   <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
                     Apple
+                  </button>
+                </div>
+              )}
+              {destination.trim().length >= 3 && (!online || activeExperienceMode === "offline") && (
+                <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.035] px-3 py-2">
+                  <p className="text-xs leading-relaxed text-white/55">
+                    Navegação externa oculta para evitar um atalho que depende de internet.
+                  </p>
+                  <button type="button" onClick={() => setLocation(appUrl("/salvos"))} className="min-h-10 shrink-0 rounded-xl border border-[#FFB86B]/20 px-3 text-xs font-black text-[#FFD59B]">
+                    Salvas
                   </button>
                 </div>
               )}
