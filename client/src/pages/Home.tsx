@@ -250,7 +250,7 @@ export default function Home() {
 
         <section className="mt-5" aria-label="Ações principais">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
+            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card trajeto-card trajeto-card-interactive col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-[#C7FF3C]/25 bg-[#C7FF3C]/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
               <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/12 text-[#C7FF3C]"><Route className="size-4" /></span>
                 <ArrowRight className="size-4 shrink-0 text-[#C7FF3C]/80" />
@@ -258,12 +258,12 @@ export default function Home() {
               <p className="mt-2 text-sm font-black">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota") : "Planejar uma rota"}</p>
               <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Confirme sua localização para refazer a rota." : "Retome sua última viagem em um toque.") : "Origem, destino e rota sem cadastro."}</p>
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+            <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="mobile-card trajeto-card trajeto-card-interactive min-h-[6.2rem] rounded-[1.35rem] border border-[#3DE3FF]/18 bg-[#3DE3FF]/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <MapPin className="size-4 text-[#3DE3FF]" />
               <p className="mt-2.5 text-sm font-black">Mapa</p>
               <p className="mt-1 text-xs leading-snug text-white/68">Explorar a cidade</p>
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card trajeto-card trajeto-card-interactive min-h-[6.2rem] rounded-[1.35rem] border border-[#FFB86B]/18 bg-[#FFB86B]/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Landmark className="size-4 text-[#FFB86B]" />
               <p className="mt-2.5 text-sm font-black">Serviços</p>
               <p className="mt-1 text-xs leading-snug text-white/68">Saúde e cidadania</p>
@@ -316,7 +316,7 @@ export default function Home() {
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
                 }}
-                className="mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-0 max-w-[10rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
+                className="mobile-card trajeto-card trajeto-card-interactive min-h-[5.8rem] w-[min(46%,10rem)] min-w-0 max-w-[10rem] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#3DE3FF]/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
               >
                 <Route className="size-4 text-[#3DE3FF]" aria-hidden="true" />
                 <span className="mt-2 block break-words text-sm font-black">{route.label}</span>
@@ -342,7 +342,7 @@ export default function Home() {
                   rememberSearch(place.name);
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
-                }} className="mobile-card min-h-[6.75rem] w-[min(72%,18rem)] min-w-[11rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
+                }} className="mobile-card trajeto-card trajeto-card-interactive min-h-[6.75rem] w-[min(72%,18rem)] min-w-[11rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left transition hover:border-[#FFB86B]/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
                   <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-[#FFB86B]" : "text-[#3DE3FF]")} aria-hidden="true" />
                   <span className="mt-2 block break-words text-sm font-black">{place.name}</span>
                   <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{place.detail}</span>
