@@ -34,7 +34,6 @@ type RoutePreview = {
   durationSeconds?: number | null;
   staticDurationSeconds?: number | null;
   distanceMeters?: number | null;
-  toll?: { amount: number | null; currency?: string } | null;
   steps?: RouteStepPreview[];
 };
 type RouteMapProps = {
@@ -650,15 +649,6 @@ export function RouteMap({
                 )}
                 {trafficImpactMinutes != null && (
                   <span>+{trafficImpactMinutes} min trânsito</span>
-                )}
-                {selectedRoute.toll?.amount != null && (
-                  <span>
-                    {selectedRoute.toll.amount.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: selectedRoute.toll.currency || "BRL",
-                    })}{" "}
-                    pedágio
-                  </span>
                 )}
               </div>
               {(trafficCounts.slow > 0 || trafficCounts.jam > 0) && (
