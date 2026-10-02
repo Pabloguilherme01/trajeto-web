@@ -1,4 +1,8 @@
 import { PRIVATE_LOCATION_LABEL, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { normalizeCatalogText } from "@/lib/catalogSearch";
+import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_READY_ROUTES } from "@/lib/localRoutePresets";
+import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
+import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -7,6 +11,32 @@ const MAX_SAVED_ROUTES = 50;
 const MAX_TEXT_LENGTH = 500;
 const MAX_PAYLOAD_BYTES = 900_000;
 const STALE_ROUTE_MAX_AGE_MS = 72 * 60 * 60 * 1000;
+
+const PUBLIC_OFFLINE_ENDPOINTS = new Set(
+  [
+    ...ALL_LOCAL_ROUTE_DESTINATIONS.flatMap(item => [item.label, item.destination]),
+    ...LOCAL_READY_ROUTES.flatMap(route => [route.origin, route.destination]),
+    ...AGUAS_LINDAS_STATIONS.flatMap(station => [
+      station.displayName,
+      station.legalName,
+      station.address,
+      ...station.aliases,
+    ]),
+  ]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .map(normalizeCatalogText)
+);
+
+export function isPublicOfflineEndpoint(value: string) {
+  if (isPreciseLocationText(value)) return false;
+  const normalized = normalizeCatalogText(value);
+  if (!normalized) return false;
+  return PUBLIC_OFFLINE_ENDPOINTS.has(normalized) || Boolean(resolveLocalGeocodePoint(value));
+}
+
+export function canPersistOfflineTrip(origin: string, destination: string) {
+  return isPublicOfflineEndpoint(origin) && isPublicOfflineEndpoint(destination);
+}
 
 export type OfflineRoute = {
   id: string;
@@ -131,6 +161,9 @@ async function withStore<T>(
 }
 
 export async function saveOfflineRoute(route: OfflineRoute) {
+  if (!canPersistOfflineTrip(route.origin, route.destination)) {
+    throw new Error("Por privacidade, somente rotas entre pontos públicos conhecidos podem ser salvas offline.");
+  }
   const safeRoute = sanitizeOfflineRoute(route);
   if (!isValidRoute(safeRoute)) {
     throw new Error("Não foi possível salvar: os dados da rota estão incompletos.");
@@ -171,6 +204,10 @@ export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
       request.onsuccess = () => {
         for (const candidate of request.result as unknown[]) {
           if (isValidRoute(candidate)) {
+            if (!canPersistOfflineTrip(candidate.origin, candidate.destination)) {
+              store.delete(candidate.id);
+              continue;
+            }
             const safeRoute = sanitizeOfflineRoute(candidate);
             const existing = validById.get(safeRoute.id);
             if (!existing || Date.parse(safeRoute.savedAt) > Date.parse(existing.savedAt)) {
@@ -243,6 +280,11 @@ export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> 
 
   if (!isValidRoute(route) && migratedId !== id) {
     route = await withStore<unknown>("readonly", store => store.get(migratedId));
+  }
+
+  if (isValidRoute(route) && !canPersistOfflineTrip(route.origin, route.destination)) {
+    await removeOfflineRoute(route.id);
+    return null;
   }
 
   if (!isValidRoute(route)) {
