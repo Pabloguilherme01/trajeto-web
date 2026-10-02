@@ -2,7 +2,8 @@ export type PlannerExperienceMode =
   | "smart"
   | "offline"
   | "economy"
-  | "driving";
+  | "driving"
+  | "private";
 
 export const PLANNER_EXPERIENCE_OPTIONS: Array<{
   id: PlannerExperienceMode;
@@ -29,6 +30,11 @@ export const PLANNER_EXPERIENCE_OPTIONS: Array<{
     label: "Condução",
     detail: "Foco em dirigir, mapa da viagem e atalhos de navegação.",
   },
+  {
+    id: "private",
+    label: "Privado",
+    detail: "Mantém a localização atual somente nesta sessão, sem salvar a origem GPS ou compartilhá-la entre usuários.",
+  },
 ];
 
 export function resolvePlannerExperience(
@@ -39,7 +45,8 @@ export function resolvePlannerExperience(
     explicit === "smart" ||
     explicit === "offline" ||
     explicit === "economy" ||
-    explicit === "driving"
+    explicit === "driving" ||
+    explicit === "private"
   )
     return explicit;
 
