@@ -62,7 +62,7 @@ describe("Planner travel state", () => {
   it("changes the main action when explicit offline mode is selected", () => {
     state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
     render(<Planner />);
-    expect(screen.getByRole("button", { name: "Usar rota offline" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Calcular rota" }).textContent).toContain("Usar rota offline");
     expect(screen.queryByRole("button", { name: "Abrir Google Maps agora" })).toBeNull();
   });
 
@@ -75,6 +75,18 @@ describe("Planner travel state", () => {
     await act(async () => finish({ id: "old-route", origin: "Casa antiga", destination: "Trabalho antigo", payload }));
     expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("");
     expect(screen.queryByTestId("route-map")).toBeNull();
+  });
+
+  it("keeps external navigation hidden after an offline result is calculated", async () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    for (const name of ["Google Maps", "Waze", "Apple Maps"]) {
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    }
+    expect(screen.getByRole("button", { name: "Compartilhar" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Salvar offline" })).toBeTruthy();
   });
   it("keeps a manually edited origin when an earlier GPS request finishes", () => {
     let gps!: PositionCallback;
