@@ -179,7 +179,7 @@ export default function PublicServices() {
   const openMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
     if (!service.mapQuery) return;
     setLocation(
-      appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery)
+      appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery) + "&auto=1"
     );
   };
   const toggleSaved = (service: (typeof PUBLIC_SERVICES)[number]) => {
