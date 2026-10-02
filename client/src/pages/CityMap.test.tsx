@@ -31,9 +31,9 @@ it("filters accent-insensitive destinations and carries the selected destination
   fireEvent.click(
     screen.getByRole("button", { name: "Planejar ponto confirmado" })
   );
-  expect(decodeURIComponent(navigate.mock.calls[0][0])).toContain(
-    "destino=UPA Mansões Odisseia"
-  );
+  const plannedUrl = decodeURIComponent(navigate.mock.calls[0][0]);
+  expect(plannedUrl).toContain("destino=UPA Mansões Odisseia");
+  expect(plannedUrl).toContain("auto=1");
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "xxxxxxxxx" },
   });
