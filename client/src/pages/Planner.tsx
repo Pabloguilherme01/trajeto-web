@@ -59,6 +59,7 @@ export default function Planner() {
   const economyMode = experienceMode === "economy";
   const drivingMode = experienceMode === "driving";
   const offlineMode = experienceMode === "offline";
+  const privateMode = experienceMode === "private";
   const initialTrip = useMemo(() => getLastTrip(), []);
   const [origin, setOrigin] = useState(() => {
     const queryOrigin = queryParams.get("origem");
@@ -397,7 +398,13 @@ export default function Planner() {
         setLocating(false);
         setError("Não foi possível obter sua localização.");
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+      {
+        // Privacy mode does not need unnecessarily precise GPS. Other modes
+        // keep the current navigation behavior while still remaining in memory.
+        enableHighAccuracy: !privateMode,
+        timeout: 8000,
+        maximumAge: privateMode ? 600000 : 300000,
+      },
     );
   };
 
