@@ -42,6 +42,13 @@ function getInitialQuery() {
   return new URLSearchParams(window.location.search).get("q") || corridorPresets[0]?.query || "postos";
 }
 
+export function stationIdentityKey(station: Pick<StationMapItem, "cnpj" | "placeId" | "address" | "name">) {
+  const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  if (station.cnpj?.trim()) return "cnpj:" + station.cnpj.trim();
+  if (station.placeId?.trim()) return "place:" + station.placeId.trim();
+  return "address:" + normalize(station.address || station.name);
+}
+
 export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [location, setLocation] = useLocation();
   const search = useSearch();
@@ -286,11 +293,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const seen = new Set<string>();
     const merged: StationMapItem[] = [];
     for (const station of [...directory, ...live, ...offlineMap]) {
-      const key = station.cnpj
-        ? "cnpj:" + station.cnpj
-        : station.placeId
-          ? "place:" + station.placeId
-          : "address:" + normalize(station.address || station.name);
+      const key = stationIdentityKey(station);
       const coordinateKey = typeof station.lat === "number" && typeof station.lng === "number"
         ? "coord:" + station.lat.toFixed(5) + "," + station.lng.toFixed(5)
         : null;
