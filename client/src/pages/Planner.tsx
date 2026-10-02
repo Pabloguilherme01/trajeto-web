@@ -1037,6 +1037,35 @@ export default function Planner() {
                 <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
+              {Array.isArray((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number }> }).steps) &&
+                ((planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number }> }).steps?.length ?? 0) > 0 && (
+                <section className="mt-4 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.035] p-3" aria-labelledby="street-directions-title">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Ruas da rota</p>
+                      <h3 id="street-directions-title" className="mt-1 text-base font-black">Passo a passo</h3>
+                    </div>
+                    <span className="text-xs font-bold text-white/35">
+                      {(planned.route as PlannedRoute["route"] & { steps?: unknown[] }).steps?.length} passos
+                    </span>
+                  </div>
+                  <ol className="mt-3 space-y-2">
+                    {(planned.route as PlannedRoute["route"] & { steps?: Array<{ instruction: string; streetName?: string; distanceMeters: number; durationSeconds: number }> }).steps?.map((step, index) => (
+                      <li key={index + "-" + step.instruction} className="flex gap-3 rounded-xl bg-white/[.035] p-3">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#C7FF3C] text-xs font-black text-[#0B1014]">{index + 1}</span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black leading-snug">{step.instruction}</p>
+                          {step.streetName && !step.instruction.toLocaleLowerCase("pt-BR").includes(step.streetName.toLocaleLowerCase("pt-BR")) && (
+                            <p className="mt-0.5 truncate text-xs text-white/45">{step.streetName}</p>
+                          )}
+                          <p className="mt-1 text-xs font-semibold text-white/30">{formatDistance(step.distanceMeters)} · {formatDuration(step.durationSeconds)}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
                   <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
