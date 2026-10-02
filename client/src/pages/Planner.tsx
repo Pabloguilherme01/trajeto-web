@@ -666,7 +666,7 @@ export default function Planner() {
         </header>
 
         {!savedMode && (
-          <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <section className="mt-5 trajeto-card rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form ref={plannerFormRef} onSubmit={submit}>
               <label className="block">
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
@@ -1055,7 +1055,7 @@ export default function Planner() {
         )}
 
         {fallbackReady && !planned && !savedMode && destination.trim() && online && activeExperienceMode !== "offline" && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="navigation-fallback-title">
+          <section className="mt-5 trajeto-card rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="navigation-fallback-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
               <div className="min-w-0">
@@ -1147,7 +1147,7 @@ export default function Planner() {
             </div>
 
             {showMap && (
-              <section className="mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22]">
+              <section className="mt-3 overflow-hidden trajeto-card rounded-[1.6rem] border border-white/8 bg-[#121B22]">
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 px-4 py-3">
                   <p className="text-xs font-black uppercase tracking-[.15em] text-white/35">Mapa da rota</p>
                   <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
