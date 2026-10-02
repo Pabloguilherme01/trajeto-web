@@ -176,7 +176,7 @@ test("Pages: legacy migration keeps the newest safe route for the same destinati
     { waitUntil: "domcontentloaded" },
   );
 
-  await expect(page).toHaveURL(/rota=minha(?:%20|\+)localiza%C3%A7%C3%A3o%3A%3Ahospital/i);
+  await expect(page).toHaveURL(/rota=minha(?:%20|\+)localiza%C3%A7%C3%A3o%3A%3Ahospital%3A%3Adriving/i);
   const saved = await page.evaluate(async () => {
     const request = indexedDB.open("trajeto-offline", 2);
     const db = await new Promise<IDBDatabase>(resolve => {
@@ -191,7 +191,7 @@ test("Pages: legacy migration keeps the newest safe route for the same destinati
   });
 
   expect(saved).toHaveLength(1);
-  expect(saved[0].id).toBe("minha localização::hospital");
+  expect(saved[0].id).toBe("minha localização::hospital::driving");
   expect(saved[0].savedAt).toBe("2026-10-01T10:00:00.000Z");
   expect(saved[0].payload.route.distanceMeters).toBe(2000);
 });
