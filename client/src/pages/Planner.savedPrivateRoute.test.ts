@@ -7,7 +7,8 @@ describe("Planner saved private route semantics", () => {
   it("treats a saved current-location label as private across sharing and external navigation", () => {
     expect(source).toContain("originPrivate || isCurrentLocationLabel(origin)");
     expect(source).toContain("if (!routeOriginIsPrivate) params.set(\"origem\", origin.trim())");
-    expect(source).toContain("routeOriginIsPrivate ? privateOriginForExternalNavigation");
+    expect(source).toContain("routeOriginIsPrivate");
+    expect(source).toContain("privateOriginForExternalNavigation(PRIVATE_LOCATION_LABEL)");
     expect(source).toContain("routeOriginIsPrivate ? \"\" : origin");
   });
 
