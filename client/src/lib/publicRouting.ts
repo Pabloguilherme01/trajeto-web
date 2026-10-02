@@ -637,8 +637,21 @@ export async function calculateOfflineRoute(
   mode: PublicTravelMode = "driving"
 ): Promise<PublicRoute> {
   const parsedOrigin = parseCoordinateInput(originText);
-  const originResolved = parsedOrigin ?? localGeocode(originText);
-  const destination = parseCoordinateInput(destinationText) ?? localGeocode(destinationText);
+  const parsedDestination = parseCoordinateInput(destinationText);
+  const cachedOrigin = cacheGet<PublicCoordinate>(
+    geocodeCacheKey(normalizeText(originText))
+  );
+  const cachedDestination = cacheGet<PublicCoordinate>(
+    geocodeCacheKey(normalizeText(destinationText))
+  );
+  const originResolved =
+    parsedOrigin ??
+    localGeocode(originText) ??
+    (isCoordinate(cachedOrigin) ? cachedOrigin : null);
+  const destination =
+    parsedDestination ??
+    localGeocode(destinationText) ??
+    (isCoordinate(cachedDestination) ? cachedDestination : null);
 
   if (!originResolved || !destination) {
     throw new Error(
