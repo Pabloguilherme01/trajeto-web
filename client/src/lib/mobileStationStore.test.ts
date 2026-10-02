@@ -37,4 +37,16 @@ describe("armazenamento de postos", () => {
     expect(sessionStorage.getItem("trajeto-mobile-station-cache")).not.toBeNull();
   });
 
+  it("purges legacy proximity cache from local storage", () => {
+    localStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{
+      query: "postos",
+      lat: -15.7,
+      lng: -48.2,
+      savedAt: new Date().toISOString(),
+      stations: [station],
+    }]));
+    expect(getCachedStations("postos", -15.7, -48.2)).toBeNull();
+    expect(localStorage.getItem("trajeto-mobile-station-cache")).toBeNull();
+  });
+
 });
