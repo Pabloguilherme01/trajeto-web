@@ -439,7 +439,7 @@ export default function Planner() {
     }
   };
 
-  const useCurrentLocation = () => {
+  const useCurrentLocation = (submitAfter = false) => {
     if (locating) return;
     if (!navigator.geolocation) {
       setError("Localização não disponível neste navegador. Digite a origem para continuar.");
@@ -457,6 +457,7 @@ export default function Planner() {
         setOriginPrivate(true);
         setOrigin(PRIVATE_LOCATION_LABEL);
         vibration(14);
+        if (submitAfter) window.setTimeout(() => plannerFormRef.current?.requestSubmit(), 0);
       },
       () => {
         if (locationVersion !== locationRequest.current) return;
@@ -705,7 +706,7 @@ export default function Planner() {
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
                   <input value={origin} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
-                  <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
+                  <button type="button" onClick={() => useCurrentLocation(false)} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
 
@@ -976,7 +977,7 @@ export default function Planner() {
               </p>
               <button
                 type="button"
-                onClick={useCurrentLocation}
+                onClick={() => useCurrentLocation(true)}
                 disabled={locating}
                 className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014] disabled:opacity-50"
               >
