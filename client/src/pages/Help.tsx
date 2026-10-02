@@ -1,6 +1,7 @@
 import { ArrowRight, CheckCircle2, Fuel, Landmark, MapPinned, Route as RouteIcon, ShieldCheck, WifiOff } from "lucide-react";
 import { Link } from "wouter";
 import OfflineReadiness from "@/components/OfflineReadiness";
+import AppUpdateCheck from "@/components/AppUpdateCheck";
 import { appUrl } from "@/lib/appUrl";
 
 const steps = [
@@ -21,6 +22,7 @@ export default function Help() {
           <Link href={appUrl("/")} className="min-h-11 shrink-0 rounded-xl border border-white/10 px-3 text-xs font-black text-white/70">Início</Link>
         </header>
 
+        <AppUpdateCheck />
         <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
           <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e guarde seus atalhos neste aparelho. A central reúne serviços públicos de Águas Lindas e canais estaduais e nacionais de apoio.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
