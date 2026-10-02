@@ -666,6 +666,28 @@ export async function calculateOfflineRoute(
       }
     : originResolved;
 
+  const cachedRouteKey =
+    "route:" +
+    [
+      origin.lat.toFixed(5),
+      origin.lng.toFixed(5),
+      destination.lat.toFixed(5),
+      destination.lng.toFixed(5),
+    ].join(",") +
+    ":" +
+    mode;
+  const cachedRoute = cacheGet<PublicRoute>(cachedRouteKey);
+  if (
+    isPublicRoute(cachedRoute) &&
+    cachedRoute.mode === mode &&
+    Math.abs(cachedRoute.origin.lat - origin.lat) < 0.00002 &&
+    Math.abs(cachedRoute.origin.lng - origin.lng) < 0.00002 &&
+    Math.abs(cachedRoute.destination.lat - destination.lat) < 0.00002 &&
+    Math.abs(cachedRoute.destination.lng - destination.lng) < 0.00002
+  ) {
+    return cachedRoute;
+  }
+
   if (haversineMeters(origin, destination) < 20) {
     throw new Error(
       "Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes."
