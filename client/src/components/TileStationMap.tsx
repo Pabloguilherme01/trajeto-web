@@ -102,6 +102,7 @@ export default function TileStationMap({
   const [size, setSize] = useState({ width: 320, height: 520 });
   const [tileErrors, setTileErrors] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [hasUserMovedMap, setHasUserMovedMap] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
     id: number;
@@ -186,6 +187,7 @@ export default function TileStationMap({
       cy: centerPx.y,
     };
     setDragging(true);
+    setHasUserMovedMap(true);
   };
 
   const drag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -245,8 +247,16 @@ export default function TileStationMap({
   };
 
   useEffect(() => {
-    if (routePoints.length > 1) fitStations();
+    if (routePoints.length > 1) {
+      fitStations();
+      setHasUserMovedMap(false);
+    }
   }, [routePoints]);
+
+  useEffect(() => {
+    if (!drawable.length || routePoints.length > 1 || hasUserMovedMap) return;
+    fitStations();
+  }, [drawable.length, width, height]);
 
   const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
 
@@ -443,7 +453,7 @@ export default function TileStationMap({
         <div className="absolute left-3 top-3 z-20 flex gap-1.5">
           <button
             type="button"
-            onClick={() => changeZoom(1)}
+            onClick={() => { setHasUserMovedMap(true); changeZoom(1); }}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Aumentar zoom"
           >
@@ -451,7 +461,7 @@ export default function TileStationMap({
           </button>
           <button
             type="button"
-            onClick={() => changeZoom(-1)}
+            onClick={() => { setHasUserMovedMap(true); changeZoom(-1); }}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Diminuir zoom"
           >
@@ -459,7 +469,7 @@ export default function TileStationMap({
           </button>
           <button
             type="button"
-            onClick={recenter}
+            onClick={() => { setHasUserMovedMap(true); recenter(); }}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Recentrar mapa"
           >
@@ -467,14 +477,14 @@ export default function TileStationMap({
           </button>
           <button
             type="button"
-            onClick={fitStations}
+            onClick={() => { setHasUserMovedMap(false); fitStations(); }}
             className="min-h-11 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
           >
             Ver todos
           </button>
           <button
             type="button"
-            onClick={focusSelected}
+            onClick={() => { setHasUserMovedMap(true); focusSelected(); }}
             disabled={!selectedId}
             className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white shadow-lg disabled:opacity-40"
           >
@@ -494,6 +504,7 @@ export default function TileStationMap({
               if (!station) return;
               setSelectedId(stationKey(station));
               onSelectStation?.(station);
+              setHasUserMovedMap(true);
               setCenter({ lat: station.lat, lng: station.lng });
               setZoom(value => Math.max(13, value));
             }}
