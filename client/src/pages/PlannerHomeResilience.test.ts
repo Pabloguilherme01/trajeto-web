@@ -10,12 +10,12 @@ describe("Planner private-history defaults", () => {
   });
 });
 
-describe("Home offline local search", () => {
+describe("Home internal search", () => {
   const source = readFileSync(new URL("./Home.tsx", import.meta.url), "utf8");
 
-  it("keeps service searches inside the app while offline", () => {
-    expect(source).toContain("if (!online)");
-    expect(source).toContain("setLocation(internalSearch)");
-    expect(source).toContain("buildGoogleMapsSearchUrl(query)");
+  it("keeps discovery shortcuts inside the Trajeto instead of requiring Google Maps", () => {
+    expect(source).toContain('setLocation(appUrl("/buscar") + "?q=centro")');
+    expect(source).toContain('rememberIntent("search")');
+    expect(source).not.toContain("buildGoogleMapsSearchUrl(query)");
   });
 });

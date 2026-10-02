@@ -6,7 +6,7 @@ import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, 
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
-import { buildGoogleMapsSearchUrl, buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, isCurrentLocationLabel, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
@@ -128,18 +128,6 @@ export default function Home() {
     rememberIntent("nearby");
     vibration(12);
     setLocation(buildNearbyStationsUrl(appUrl("/postos")));
-  };
-
-  const openServiceSearch = (query: string) => {
-    rememberSearch(query);
-    rememberIntent("search");
-    const internalSearch = appUrl("/buscar") + "?q=" + encodeURIComponent(query);
-    if (!online) {
-      setLocation(internalSearch);
-      return;
-    }
-    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
-    if (!opened) setLocation(internalSearch);
   };
 
   const shareHome = async () => {
@@ -354,7 +342,7 @@ export default function Home() {
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => openServiceSearch("Centro Águas Lindas de Goiás, GO") },
+              { label: "Centro", hint: "Explorar a região", icon: MapPin, action: () => { rememberSearch("centro"); rememberIntent("search"); setLocation(appUrl("/buscar") + "?q=centro"); } },
               { label: "Saúde", hint: "UPA, hospital e UBS", icon: HeartPulse, action: () => setLocation(appUrl("/servicos") + "?categoria=saude") },
               { label: "Serviços", hint: "Prefeitura e cidadania", icon: Landmark, action: () => setLocation(appUrl("/servicos") + "?categoria=cidadania") },
               { label: "Emergência", hint: "Polícia, bombeiros e SAMU", icon: Siren, action: () => setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title") },
