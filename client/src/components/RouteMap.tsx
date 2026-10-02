@@ -18,6 +18,13 @@ type TrafficInterval = {
   endPolylinePointIndex?: number;
   speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM";
 };
+type RouteStepPreview = {
+  instruction: string;
+  streetName?: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  location?: { lat: number; lng: number };
+};
 type RoutePreview = {
   id: string;
   polyline: string | null;
@@ -28,6 +35,7 @@ type RoutePreview = {
   staticDurationSeconds?: number | null;
   distanceMeters?: number | null;
   toll?: { amount: number | null; currency?: string } | null;
+  steps?: RouteStepPreview[];
 };
 type RouteMapProps = {
   origin?: { lat: number; lng: number };
@@ -474,6 +482,16 @@ export function RouteMap({
                 ]
               : []),
             ...stops,
+            ...((selectedRoute?.steps ?? [])
+              .filter(step => isMapPoint(step.location))
+              .slice(0, 40)
+              .map((step, index) => ({
+                id: "maneuver-" + index,
+                name: (index + 1) + ". " + step.instruction,
+                address: step.streetName || "Ponto de conversão da rota",
+                lat: step.location!.lat,
+                lng: step.location!.lng,
+              }))),
           ]}
           fallback={
             <div className="relative">
