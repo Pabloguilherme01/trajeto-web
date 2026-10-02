@@ -135,11 +135,26 @@ export default function PublicServices() {
   );
 
   useEffect(() => {
-    if (params.get("emergencia") === "1")
-      document
-        .getElementById("emergency-strip-title")
-        ?.scrollIntoView({ block: "start" });
-  }, [params]);
+    const targetId = selectedService
+      ? "service-" + selectedService.id
+      : params.get("emergencia") === "1"
+        ? "emergency-strip"
+        : "";
+    if (!targetId) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      target.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [params, selectedService]);
 
   const applyFilters = (
     value: string,
@@ -251,7 +266,9 @@ export default function PublicServices() {
         </header>
 
         <section
-          className="mt-5 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3"
+          id="emergency-strip"
+          tabIndex={-1}
+          className="mt-5 scroll-mt-20 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3 outline-none"
           aria-labelledby="emergency-strip-title"
         >
           <div className="flex items-center justify-between gap-3">
@@ -446,7 +463,10 @@ export default function PublicServices() {
             return (
               <article
                 key={service.id}
-                className="route-card rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4"
+                id={"service-" + service.id}
+                tabIndex={-1}
+                aria-current={selectedService?.id === service.id ? "true" : undefined}
+                className="route-card scroll-mt-20 rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4 outline-none"
               >
                 <div className="flex items-start gap-3">
                   <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#3DE3FF]">
