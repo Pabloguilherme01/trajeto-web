@@ -146,6 +146,7 @@ export function StationDirectoryCard({
   return (
     <motion.article
       id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
+      tabIndex={-1}
       initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.12 }}
