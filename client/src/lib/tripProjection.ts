@@ -60,9 +60,15 @@ export type FuelStatus = {
   fuelNeededToFill: number;
   fillCost: number;
   currentRangeKm: number;
+  maxRangeKm: number;
   tripFuelNeeded: number;
+  tripFitsOneTank: boolean;
   fuelShortfallLiters: number;
   minimumFuelCost: number;
+  fuelNeededBeforeDeparture: number;
+  departureFuelCost: number;
+  additionalFuelDuringTripLiters: number;
+  minimumRefuelStops: number;
   fuelRemainingAfterTrip: number;
   rangeRemainingAfterTripKm: number;
   canCompleteTrip: boolean;
@@ -86,9 +92,15 @@ export function calculateFuelStatus(input: {
   const fuelNeededToFill = tankLiters - currentFuelLiters;
   const fillCost = fuelNeededToFill * pricePerLiter;
   const currentRangeKm = currentFuelLiters * kmPerLiter;
+  const maxRangeKm = tankLiters * kmPerLiter;
   const tripFuelNeeded = tripDistanceKm / kmPerLiter;
+  const tripFitsOneTank = tripFuelNeeded <= tankLiters;
   const fuelShortfallLiters = Math.max(0, tripFuelNeeded - currentFuelLiters);
   const minimumFuelCost = fuelShortfallLiters * pricePerLiter;
+  const fuelNeededBeforeDeparture = tripFitsOneTank ? fuelShortfallLiters : fuelNeededToFill;
+  const departureFuelCost = fuelNeededBeforeDeparture * pricePerLiter;
+  const additionalFuelDuringTripLiters = tripFitsOneTank ? 0 : Math.max(0, tripFuelNeeded - tankLiters);
+  const minimumRefuelStops = tripFitsOneTank ? 0 : Math.max(1, Math.ceil(tripFuelNeeded / tankLiters) - 1);
   const fuelRemainingAfterTrip = currentFuelLiters - tripFuelNeeded;
 
   return {
@@ -97,9 +109,15 @@ export function calculateFuelStatus(input: {
     fuelNeededToFill,
     fillCost,
     currentRangeKm,
+    maxRangeKm,
     tripFuelNeeded,
+    tripFitsOneTank,
     fuelShortfallLiters,
     minimumFuelCost,
+    fuelNeededBeforeDeparture,
+    departureFuelCost,
+    additionalFuelDuringTripLiters,
+    minimumRefuelStops,
     fuelRemainingAfterTrip,
     rangeRemainingAfterTripKm: Math.max(0, fuelRemainingAfterTrip) * kmPerLiter,
     canCompleteTrip: fuelRemainingAfterTrip >= 0,

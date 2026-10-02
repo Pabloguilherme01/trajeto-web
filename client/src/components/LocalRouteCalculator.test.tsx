@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LocalRouteCalculator from "./LocalRouteCalculator";
 import { describe, expect, it } from "vitest";
 import { calculateFuelStatus, compareMonthlyBudget, compareTripScenarios, projectTripCosts } from "@/lib/tripProjection";
@@ -194,6 +194,74 @@ it("clears a previous route distance when the new route distance is invalid", ()
   const { rerender } = render(<LocalRouteCalculator initialDistanceKm={12} />);
   rerender(<LocalRouteCalculator initialDistanceKm={Number.NaN} />);
   expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("");
+  cleanup();
+  localStorage.clear();
+});
+
+
+it("starts a newly calculated route as an automatic one-off trip instead of inheriting an old routine", async () => {
+  cleanup();
+  localStorage.clear();
+  localStorage.setItem("trajeto-trip-calculator-draft", JSON.stringify({
+    mode: "trabalho",
+    recurring: true,
+    distance: "18",
+    price: "6",
+    consumption: "10",
+    tank: "40",
+    currentFuel: "",
+    roundTrip: true,
+    tripsPerWeek: 5,
+    toll: "",
+    parking: "",
+    other: "",
+    alternativePrice: "",
+    alternativeConsumption: "",
+    monthlyBudget: "",
+  }));
+
+  render(<LocalRouteCalculator initialDistanceKm={12} />);
+
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: /Automático/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("sem projeção semanal")).toBeTruthy();
+  });
+
+  expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("12");
+  cleanup();
+  localStorage.clear();
+});
+
+it("clears the calculator draft and remembered price without recreating an empty draft", async () => {
+  cleanup();
+  localStorage.clear();
+  localStorage.setItem("trajeto-last-fuel-price", "5,99");
+  localStorage.setItem("trajeto-trip-calculator-draft", JSON.stringify({
+    mode: "automatico",
+    recurring: false,
+    distance: "20",
+    price: "5,99",
+    consumption: "10",
+    tank: "",
+    currentFuel: "",
+    roundTrip: false,
+    tripsPerWeek: 1,
+    toll: "",
+    parking: "",
+    other: "",
+    alternativePrice: "",
+    alternativeConsumption: "",
+    monthlyBudget: "",
+  }));
+
+  render(<LocalRouteCalculator />);
+  fireEvent.click(screen.getByRole("button", { name: "Limpar cálculo" }));
+
+  await waitFor(() => {
+    expect(localStorage.getItem("trajeto-trip-calculator-draft")).toBeNull();
+    expect(localStorage.getItem("trajeto-last-fuel-price")).toBeNull();
+  });
+
   cleanup();
   localStorage.clear();
 });
