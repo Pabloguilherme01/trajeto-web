@@ -103,6 +103,22 @@ export function getLocalRoutePresets(query = "") {
 
 export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string };
 
+export function buildReadyCityRoute(
+  from: LocalRoutePreset,
+  to: LocalRoutePreset,
+  options?: { approximateOrigin?: boolean },
+): ReadyCityRoute {
+  return {
+    id: `${from.id}-to-${to.id}`,
+    origin: from.destination,
+    destination: to.destination,
+    label: `${from.label} → ${to.label}`,
+    detail: options?.approximateOrigin
+      ? "Origem aproximada · ajuste seu endereço"
+      : "Origem e destino preenchidos",
+  };
+}
+
 // Existing verified destinations; the city reference is approximate, not a street address.
 const readyEndpoints: Record<string, { label: string; destination: string }> = {
   ...Object.fromEntries(CITY_ROUTE_PRESETS.map(place => [place.id, place])),
@@ -115,10 +131,10 @@ const readyPairs = [
   ["aguas-lindas-shopping", "rodoviaria"], ["upa", "aguas-lindas-shopping"],
   ["heal", "aguas-lindas-shopping"], ["rodoviaria", "prefeitura"],
 ] as const;
-export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
-  id: `${from}-to-${to}`,
-  origin: readyEndpoints[from].destination,
-  destination: readyEndpoints[to].destination,
-  label: `${readyEndpoints[from].label} → ${readyEndpoints[to].label}`,
-  detail: from === "centro" ? "Origem aproximada · ajuste seu endereço" : "Origem e destino preenchidos",
-}));
+export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) =>
+  buildReadyCityRoute(
+    { id: from, ...readyEndpoints[from], detail: "", category: "centro" },
+    { id: to, ...readyEndpoints[to], detail: "", category: "centro" },
+    { approximateOrigin: from === "centro" },
+  )
+);
