@@ -6,6 +6,7 @@ import {
   buildWazeNavigationUrl,
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
+import { prefersLowDataMode } from "@/lib/runtimeCapabilities";
 
 const TILE = 256;
 const DEFAULT_CENTER = { lat: -15.7545, lng: -48.2816 };
@@ -85,6 +86,7 @@ export default function TileStationMap({
   );
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
+  const [lowData, setLowData] = useState(() => prefersLowDataMode());
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine);
     window.addEventListener("online", update);
@@ -93,6 +95,14 @@ export default function TileStationMap({
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
     };
+  }, []);
+
+  useEffect(() => {
+    const connection = (navigator as Navigator & { connection?: EventTarget }).connection;
+    if (!connection?.addEventListener) return;
+    const update = () => setLowData(prefersLowDataMode());
+    connection.addEventListener("change", update);
+    return () => connection.removeEventListener("change", update);
   }, []);
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
@@ -146,7 +156,7 @@ export default function TileStationMap({
   const centerPx = project(center.lat, center.lng, zoom);
   const baseTileX = Math.floor(centerPx.x / TILE);
   const baseTileY = Math.floor(centerPx.y / TILE);
-  const radius = 2;
+  const radius = lowData ? 1 : 2;
   const tiles: Array<{
     x: number;
     y: number;
@@ -258,13 +268,13 @@ export default function TileStationMap({
     fitStations();
   }, [drawable.length, width, height]);
 
-  const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
+  const tileFallback = Boolean(fallback && (offline || lowData || tileErrors >= 5));
 
   if (tileFallback)
     return (
       <div>
         {fallback}
-        {!offline && (
+        {!offline && !lowData && (
           <button
             type="button"
             onClick={() => setTileErrors(0)}
