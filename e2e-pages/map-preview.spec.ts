@@ -32,12 +32,14 @@ test("Pages: route preview controls and real geometry remain available offline a
   await expect(
     map.getByText(/Geometria disponível neste aparelho/)
   ).toBeVisible();
-  await expect(
-    map.getByRole("link", { name: "Abrir no Google Maps" })
-  ).toHaveAttribute(
-    "href",
-    /origin=-15.7545,-48.2816&destination=-15.7942,-47.8822/
+  const navigationHref = await map
+    .getByRole("link", { name: "Abrir no Google Maps" })
+    .getAttribute("href");
+  expect(navigationHref).toContain(
+    "origin=-15.754,-48.282&destination=-15.7942,-47.8822"
   );
+  expect(navigationHref).not.toContain("-15.7545");
+  expect(navigationHref).not.toContain("-48.2816");
   await map.getByRole("button", { name: "Aumentar zoom da prévia" }).click();
   await expect(
     map.getByRole("button", { name: "Diminuir zoom da prévia" })
