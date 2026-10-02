@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { motion, useReducedMotion } from "framer-motion";
+import { toast } from "sonner";
 import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
@@ -132,13 +133,22 @@ export function StationDirectoryCard({
       setCopied(true);
       vibration();
       window.setTimeout(() => setCopied(false), 1400);
-    } catch {}
+    } catch {
+      toast.error("Não foi possível copiar neste navegador.");
+    }
   };
 
   const share = async () => {
     try {
       await shareText(stationName + " · " + address + (cnpj ? " · CNPJ " + formatCnpj(cnpj) : ""), shareUrl, "Trajeto · posto");
-    } catch {}
+    } catch {
+      toast.error("Não foi possível compartilhar agora.");
+    }
+  };
+
+  const openExternal = (url: string, label: string) => {
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) toast.message(`O navegador bloqueou a abertura de ${label}. Permita pop-ups para continuar.`);
   };
 
   return (
@@ -237,10 +247,10 @@ export function StationDirectoryCard({
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="col-span-2 sm:col-span-3 min-h-11 flex items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-xs font-black text-[#C9F7FF]">Abrir ficha completa</Link>}
-        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
+        <button type="button" onClick={() => openExternal(preferredUrl, "navegação")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); openExternal(googleUrl, "Google Maps"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); openExternal(wazeUrl, "Waze"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
+        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); openExternal(appleUrl, "Apple Maps"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
       <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(address)} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
