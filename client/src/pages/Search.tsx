@@ -159,17 +159,17 @@ const quickActions = [
   },
   {
     label: "Farmácias",
-    hint: "Google Maps · online",
+    hint: "Catálogo local · funciona offline",
     icon: Store,
-    kind: "external",
-    query: "farmácias, Águas Lindas de Goiás, GO",
+    kind: "places",
+    query: "farmácia",
   },
   {
     label: "Mercados",
-    hint: "Google Maps · online",
+    hint: "Catálogo local · funciona offline",
     icon: ShoppingCart,
-    kind: "external",
-    query: "supermercados atacadistas, Águas Lindas de Goiás, GO",
+    kind: "places",
+    query: "mercado",
   },
 ] as const;
 
@@ -271,15 +271,15 @@ export default function SearchPage() {
     event.preventDefault();
     search(input);
   };
-  const openExternal = (value: string) => {
-    if (online)
-      window.open(
-        "https://www.google.com/maps/search/?api=1&query=" +
-          encodeURIComponent(value),
-        "_blank",
-        "noopener,noreferrer"
-      );
+  const openGoogleMapsSearch = (value: string) => {
+    if (!online) return;
+    window.open(
+      "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(value),
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
+
   const openQuick = (action: (typeof quickActions)[number]) => {
     if (action.kind === "internal") {
       setLocation(appUrl("/postos") + "?q=postos");
@@ -322,7 +322,6 @@ export default function SearchPage() {
       setLocation(appUrl("/postos") + "?q=postos&perto=1");
       return;
     }
-    openExternal(action.query);
   };
   const openRoute = (destination: string) => {
     rememberSearch(destination);
@@ -341,8 +340,7 @@ export default function SearchPage() {
         type="button"
         aria-label={action.label}
         onClick={() => openQuick(action)}
-        disabled={!online && action.kind === "external"}
-        className="flex min-h-20 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 disabled:opacity-60"
+        className="flex min-h-20 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30"
       >
         <Icon className="size-5 shrink-0 text-[#C7FF3C]" />
         <span className="min-w-0">
@@ -645,7 +643,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    openExternal(query + ", Águas Lindas de Goiás, GO")
+                    openGoogleMapsSearch(query + ", Águas Lindas de Goiás, GO")
                   }
                   disabled={!online}
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-bold disabled:opacity-60"
