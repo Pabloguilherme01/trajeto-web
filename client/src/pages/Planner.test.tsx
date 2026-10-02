@@ -329,6 +329,19 @@ describe("Planner travel state", () => {
     expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
 
+
+  it("keeps manually typed personal routes session-only", async () => {
+    state.search = "origem=Casa&destino=Trabalho";
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    fireEvent.click(screen.getByRole("button", { name: "Preparar para offline" }));
+    expect(state.saveOffline).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(/endereços pessoais ou digitados manualmente ficam somente nesta sessão/i)
+    ).toBeTruthy();
+  });
+
   it("never persists a GPS-origin route even when offline save is requested", async () => {
     state.search = "local=1&destino=Hospital";
     setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
