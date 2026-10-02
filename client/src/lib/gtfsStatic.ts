@@ -26,6 +26,9 @@ function uniqueIds(items: Array<{ id: string }>) {
 export function normalizeGtfsStaticSnapshot(value: unknown): GtfsStaticSnapshot | null {
   if (!record(value) || value.schema !== 1 || !text(value.feedId) || !text(value.sourceId)) return null;
   if (!text(value.generatedAt) || !Number.isFinite(Date.parse(value.generatedAt as string))) return null;
+  if (value.validFrom !== undefined && (!text(value.validFrom) || !Number.isFinite(Date.parse(value.validFrom as string)))) return null;
+  if (value.validUntil !== undefined && (!text(value.validUntil) || !Number.isFinite(Date.parse(value.validUntil as string)))) return null;
+  if (text(value.validFrom) && text(value.validUntil) && Date.parse(value.validFrom as string) > Date.parse(value.validUntil as string)) return null;
   if (!Array.isArray(value.agencies) || !Array.isArray(value.routes) || !Array.isArray(value.stops) ||
       !Array.isArray(value.trips) || !Array.isArray(value.stopTimes)) return null;
 
@@ -62,6 +65,17 @@ export function normalizeGtfsStaticSnapshot(value: unknown): GtfsStaticSnapshot 
 
   return {
     schema: 1, feedId: value.feedId as string, sourceId: value.sourceId as string,
-    generatedAt: value.generatedAt as string, agencies, routes, stops, trips, stopTimes,
+    generatedAt: value.generatedAt as string,
+    validFrom: text(value.validFrom) ? value.validFrom as string : undefined,
+    validUntil: text(value.validUntil) ? value.validUntil as string : undefined,
+    agencies, routes, stops, trips, stopTimes,
   };
+}
+
+
+export function gtfsSnapshotStatus(snapshot: GtfsStaticSnapshot, now = new Date()) {
+  const timestamp = now.getTime();
+  if (snapshot.validFrom && timestamp < Date.parse(snapshot.validFrom)) return "future" as const;
+  if (snapshot.validUntil && timestamp > Date.parse(snapshot.validUntil)) return "expired" as const;
+  return "current" as const;
 }
