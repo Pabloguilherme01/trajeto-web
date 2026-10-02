@@ -26,8 +26,15 @@ describe("planner modes", () => {
     ).toBe("offline");
   });
 
+  it("recognizes the explicit privacy-first mode", () => {
+    expect(
+      resolvePlannerExperience(new URLSearchParams("experiencia=private"))
+    ).toBe("private");
+  });
+
   it("keeps each mode explanatory", () => {
     expect(plannerExperienceDetail("offline")).toMatch(/rotas salvas/i);
     expect(plannerExperienceDetail("smart")).toMatch(/melhor camada/i);
+    expect(plannerExperienceDetail("private")).toMatch(/somente nesta sessão/i);
   });
 });
