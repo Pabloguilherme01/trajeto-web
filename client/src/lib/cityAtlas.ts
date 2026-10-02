@@ -55,6 +55,8 @@ export type CityAtlasSnapshot = {
     keywords?: string[];
     lat?: number;
     lng?: number;
+    coordinateSourceId?: string;
+    coordinateVerifiedAt?: string;
   }>;
 };
 
@@ -162,8 +164,16 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
       typeof item.sourceId !== "string" ||
       !sourceMap.has(item.sourceId)
     ) return [];
-    if (item.lat !== undefined && !finiteCoordinate(item.lat, 90)) return [];
-    if (item.lng !== undefined && !finiteCoordinate(item.lng, 180)) return [];
+    const hasLat = item.lat !== undefined;
+    const hasLng = item.lng !== undefined;
+    if (hasLat !== hasLng) return [];
+    if (hasLat && (!finiteCoordinate(item.lat, 90) || !finiteCoordinate(item.lng, 180))) return [];
+    if (hasLat && (
+      typeof item.coordinateSourceId !== "string" ||
+      !sourceMap.has(item.coordinateSourceId) ||
+      typeof item.coordinateVerifiedAt !== "string" ||
+      !Number.isFinite(Date.parse(item.coordinateVerifiedAt))
+    )) return [];
     return [{
       id: item.id,
       name: item.name,
