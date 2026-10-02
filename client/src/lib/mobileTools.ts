@@ -161,6 +161,12 @@ export function openNavigation(lat: number, lng: number, label?: string) {
   return { google, waze, apple };
 }
 
+export function openExternalUrl(url: string) {
+  if (typeof window === "undefined") return false;
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  return Boolean(opened);
+}
+
 export function vibration(pattern: number | number[] = 12) {
   try { navigator.vibrate?.(pattern); } catch {}
 }
