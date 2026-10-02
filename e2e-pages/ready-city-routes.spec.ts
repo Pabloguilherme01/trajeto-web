@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+// Service-worker requests can bypass page.route and defeat the simulated failures.
+test.use({ serviceWorkers: "block" });
+
 test("mobile home calculates directly and exposes 12 ready trips without overflow", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.route("https://router.project-osrm.org/**", route => route.abort());

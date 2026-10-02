@@ -56,4 +56,21 @@ describe("trip calculator draft", () => {
     clearTripCalculatorDraft();
     expect(loadTripCalculatorDraft()).toBeNull();
   });
+
+  it("descarta tipos corrompidos sem perder campos válidos", () => {
+    localStorage.setItem("trajeto-trip-calculator-draft", JSON.stringify({
+      distance: 20, price: "5,89", consumption: {}, currentFuel: true,
+      roundTrip: "false", recurring: "false", tripsPerWeek: -2, mode: "inexistente",
+    }));
+    expect(loadTripCalculatorDraft()).toEqual({ price: "5,89" });
+  });
+
+  it("ignora arrays e frequência fracionária ou fora do limite", () => {
+    localStorage.setItem("trajeto-trip-calculator-draft", "[]");
+    expect(loadTripCalculatorDraft()).toBeNull();
+    for (const tripsPerWeek of [0, 22, 1.5]) {
+      localStorage.setItem("trajeto-trip-calculator-draft", JSON.stringify({ tripsPerWeek }));
+      expect(loadTripCalculatorDraft()).toBeNull();
+    }
+  });
 });

@@ -50,7 +50,10 @@ function writeJson(key: string, value: unknown) {
 }
 
 export function getOfflineAnpSnapshot(): OfflineAnpSnapshot {
-  const value = readJson<unknown>(ANP_KEY, null);
+  return normalizeAnpSnapshot(readJson<unknown>(ANP_KEY, null));
+}
+
+function normalizeAnpSnapshot(value: unknown): OfflineAnpSnapshot {
   if (!value || typeof value !== "object") return { retrievedAt: null, savedAt: "", rows: [] };
 
   const rawRows = Array.isArray((value as { rows?: unknown }).rows) ? (value as { rows: unknown[] }).rows : [];
@@ -80,8 +83,8 @@ export function cacheOfflineAnpSnapshot(rows: AnpFuelRow[], retrievedAt?: string
 }
 
 export async function hydrateOfflineAnpSnapshot() {
-  const snapshot = await idbGet<OfflineAnpSnapshot>("data", ANP_KEY);
-  if (snapshot?.rows?.length) {
+  const snapshot = normalizeAnpSnapshot(await idbGet<unknown>("data", ANP_KEY));
+  if (snapshot.rows.length) {
     writeJson(ANP_KEY, snapshot);
     return snapshot;
   }
@@ -96,12 +99,17 @@ function isOfflineMapEntry(value: unknown): value is OfflineStationMapEntry {
     typeof item.address === "string" &&
     typeof item.lat === "number" &&
     Number.isFinite(item.lat) &&
+    Math.abs(item.lat) <= 90 &&
     typeof item.lng === "number" &&
-    Number.isFinite(item.lng);
+    Number.isFinite(item.lng) &&
+    Math.abs(item.lng) <= 180;
 }
 
 export function getOfflineMapStations(): OfflineMapSnapshot {
-  const value = readJson<unknown>(MAP_KEY, null);
+  return normalizeMapSnapshot(readJson<unknown>(MAP_KEY, null));
+}
+
+function normalizeMapSnapshot(value: unknown): OfflineMapSnapshot {
   if (!value || typeof value !== "object") return { savedAt: "", stations: [] };
   const raw = Array.isArray((value as { stations?: unknown }).stations) ? (value as { stations: unknown[] }).stations : [];
   return {
@@ -114,7 +122,7 @@ export function cacheOfflineMapStations(stations: OfflineStationMapEntry[]) {
   if (!stations.length) return false;
 
   const current = getOfflineMapStations().stations;
-  const merged = [...stations.filter(station => station.source !== "Google"), ...current.filter(station => station.source !== "Google")];
+  const merged = [...stations.filter(isOfflineMapEntry).filter(station => station.source !== "Google"), ...current];
   const seen = new Set<string>();
   const deduped = merged.filter(station => {
     const key = station.cnpj
@@ -132,8 +140,8 @@ export function cacheOfflineMapStations(stations: OfflineStationMapEntry[]) {
 }
 
 export async function hydrateOfflineMapStations() {
-  const snapshot = await idbGet<OfflineMapSnapshot>("map", MAP_KEY);
-  if (snapshot?.stations?.length) {
+  const snapshot = normalizeMapSnapshot(await idbGet<unknown>("map", MAP_KEY));
+  if (snapshot.stations.length) {
     writeJson(MAP_KEY, snapshot);
     return snapshot;
   }
