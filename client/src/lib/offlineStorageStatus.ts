@@ -33,8 +33,8 @@ export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
     };
   }
 
-  const estimate = typeof storage.estimate === "function"
-    ? await storage.estimate().catch(() => ({}))
+  const estimate: StorageEstimate = typeof storage.estimate === "function"
+    ? await storage.estimate().catch(() => ({} as StorageEstimate))
     : {};
   const usageBytes = typeof estimate.usage === "number" ? estimate.usage : null;
   const quotaBytes = typeof estimate.quota === "number" ? estimate.quota : null;
