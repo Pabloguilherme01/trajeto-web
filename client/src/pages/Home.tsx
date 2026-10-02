@@ -390,7 +390,17 @@ export default function Home() {
             </div>
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
               {recentSearches.slice(0, 5).map(item => (
-                <button key={item} type="button" onClick={() => { setDestination(item); rememberSearch(item); }} className="max-w-[13rem] shrink-0 truncate rounded-full border border-white/8 bg-white/[.035] px-3.5 py-2.5 text-xs font-bold text-white/65">
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    rememberSearch(item);
+                    rememberIntent("search");
+                    setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(item));
+                  }}
+                  className="max-w-[13rem] shrink-0 truncate rounded-full border border-white/8 bg-white/[.035] px-3.5 py-2.5 text-xs font-bold text-white/65"
+                  aria-label={"Buscar novamente: " + item}
+                >
                   {item}
                 </button>
               ))}
