@@ -123,3 +123,35 @@ it("rejects an empty street pack rather than claiming offline readiness", async 
     screen.getByRole("button", { name: "Selecionar Origem" })
   ).toBeTruthy();
 });
+
+it("keeps the place beneath a pinch midpoint stable", async () => {
+  class Pointer extends MouseEvent {
+    pointerId: number;
+    constructor(
+      type: string,
+      init: MouseEventInit & { pointerId?: number } = {}
+    ) {
+      super(type, init);
+      this.pointerId = init.pointerId ?? 0;
+    }
+  }
+  vi.stubGlobal("PointerEvent", Pointer);
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
+  await setup();
+  await screen.findByText(/Ruas locais disponíveis/);
+  const map = screen.getByRole("region", { name: "Explorar mapa offline" });
+  const marker = screen.getByRole("button", { name: "Selecionar Origem" });
+  const initial = parseFloat(marker.style.left);
+  fireEvent.pointerDown(map, { pointerId: 1, clientX: 100, clientY: 100 });
+  fireEvent.pointerDown(map, { pointerId: 2, clientX: 200, clientY: 100 });
+  fireEvent.pointerMove(map, { pointerId: 2, clientX: 300, clientY: 100 });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(200 + 2 * (initial - 150));
+  act(() => {
+    fireEvent.pointerMove(map, { pointerId: 2, clientX: 350, clientY: 100 });
+    fireEvent.pointerMove(map, { pointerId: 2, clientX: 400, clientY: 100 });
+  });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(250 + 3 * (initial - 150));
+});

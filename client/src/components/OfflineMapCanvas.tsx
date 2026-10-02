@@ -85,6 +85,8 @@ export default function OfflineMapCanvas({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 320, height: 360 });
   const viewport = useRef<HTMLDivElement>(null);
+  const gestureZoom = useRef(zoom);
+  gestureZoom.current = zoom;
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const validMarkers = markers.filter(isMapPoint);
   const validGeometry = routePoints.filter(isMapPoint);
@@ -178,36 +180,40 @@ export default function OfflineMapCanvas({
         return `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
       })
       .join(" ");
+  // Project and bound each road once per pack, rather than walking every
+  // coordinate on each gesture. Only visible roads become SVG paths.
   const roads = useMemo(
     () =>
-      pack?.roads.map(road => ({
-        ...road,
-        world: road.points.map(([lat, lng]) => world({ lat, lng })),
-      })) ?? [],
+      pack?.roads.map(road => {
+        const points = road.points.map(([lat, lng]) => world({ lat, lng }));
+        const bounds = {
+          minX: Infinity,
+          maxX: -Infinity,
+          minY: Infinity,
+          maxY: -Infinity,
+        };
+        for (const point of points) {
+          bounds.minX = Math.min(bounds.minX, point.x);
+          bounds.maxX = Math.max(bounds.maxX, point.x);
+          bounds.minY = Math.min(bounds.minY, point.y);
+          bounds.maxY = Math.max(bounds.maxY, point.y);
+        }
+        return { ...road, world: points, bounds };
+      }) ?? [],
     [pack]
   );
-  const visible = roads.filter(road => {
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
-    for (const p of road.world) {
-      const x = size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
-        y = size.height / 2 + (p.y - camera.y) * camera.scale + pan.y;
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    }
+  const visible = roads.filter(({ bounds }) => {
+    const left = size.width / 2 - camera.x * camera.scale + pan.x;
+    const top = size.height / 2 - camera.y * camera.scale + pan.y;
     return (
-      maxX > -80 &&
-      minX < size.width + 80 &&
-      maxY > -80 &&
-      minY < size.height + 80
+      bounds.maxX * camera.scale + left > -80 &&
+      bounds.minX * camera.scale + left < size.width + 80 &&
+      bounds.maxY * camera.scale + top > -80 &&
+      bounds.minY * camera.scale + top < size.height + 80
     );
   });
   const labels = new Set<string>();
-  const cells = new Set<string>();
+  const labelBoxes: { x: number; y: number; width: number }[] = [];
   const metresPerPixel =
     (40075016.686 * Math.cos((15.75 * Math.PI) / 180)) / camera.scale;
   const scaleMetres =
@@ -223,8 +229,25 @@ export default function OfflineMapCanvas({
     if (other) {
       const before = Math.hypot(previous.x - other.x, previous.y - other.y),
         after = Math.hypot(event.clientX - other.x, event.clientY - other.y);
-      if (before > 10)
-        onZoom(Math.max(1, Math.min(6, (zoom * after) / before)));
+      if (before > 10) {
+        const currentZoom = gestureZoom.current;
+        const nextZoom = Math.max(
+          1,
+          Math.min(6, (currentZoom * after) / before)
+        );
+        const ratio = nextZoom / currentZoom;
+        gestureZoom.current = nextZoom;
+        const rect = viewport.current?.getBoundingClientRect();
+        const oldX = (previous.x + other.x) / 2 - (rect?.left ?? 0);
+        const oldY = (previous.y + other.y) / 2 - (rect?.top ?? 0);
+        const nextX = (event.clientX + other.x) / 2 - (rect?.left ?? 0);
+        const nextY = (event.clientY + other.y) / 2 - (rect?.top ?? 0);
+        setPan(p => ({
+          x: nextX - size.width / 2 - ratio * (oldX - size.width / 2 - p.x),
+          y: nextY - size.height / 2 - ratio * (oldY - size.height / 2 - p.y),
+        }));
+        onZoom(nextZoom);
+      }
     } else
       setPan(p => ({
         x: p.x + event.clientX - previous.x,
@@ -240,7 +263,7 @@ export default function OfflineMapCanvas({
   return (
     <div
       className={
-        "relative overflow-hidden rounded-2xl " +
+        "offline-map relative overflow-hidden rounded-2xl " +
         (dark ? "bg-[#18272d]" : "bg-[#eef2eb]")
       }
     >
@@ -358,33 +381,45 @@ export default function OfflineMapCanvas({
               const x =
                   size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
                 y = size.height / 2 + (p.y - camera.y) * camera.scale + pan.y;
-              const cell = `${Math.floor(x / 115)}:${Math.floor(y / 35)}`;
+              const text = road.name.slice(0, 42);
+              const width = text.length * 6.5 + 12;
               if (
                 labels.has(road.name) ||
-                cells.has(cell) ||
+                labelBoxes.some(
+                  box =>
+                    Math.abs(box.y - y) < 22 &&
+                    Math.abs(box.x - x) < (box.width + width) / 2
+                ) ||
+                validMarkers.some(marker => {
+                  const point = project(marker);
+                  return (
+                    Math.abs(point.y - y) < 30 &&
+                    Math.abs(point.x - x) < width / 2 + 24
+                  );
+                }) ||
                 labels.size >= 35 ||
-                x < 35 ||
-                x > size.width - 35 ||
+                x < width / 2 + 8 ||
+                x > size.width - width / 2 - 8 ||
                 y < 50 ||
                 y > size.height - 40
               )
                 return null;
               labels.add(road.name);
-              cells.add(cell);
+              labelBoxes.push({ x, y, width });
               return (
                 <text
                   key={road.id}
                   x={x}
                   y={y}
                   textAnchor="middle"
-                  fontSize="10"
+                  fontSize="12"
                   fontWeight="600"
                   fill={dark ? "#e3edec" : "#566760"}
                   paintOrder="stroke"
                   stroke={dark ? "#18272d" : "#eef2eb"}
                   strokeWidth="3"
                 >
-                  {road.name.slice(0, 42)}
+                  {text}
                 </text>
               );
             })}
@@ -440,7 +475,7 @@ export default function OfflineMapCanvas({
         >
           {dark ? "Claro" : "Escuro"}
         </button>
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 p-2 text-[10px] font-bold text-[#27414b]">
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 p-2 text-xs font-bold text-[#27414b]">
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
             className="border-x border-b border-[#27414b]"
@@ -450,7 +485,7 @@ export default function OfflineMapCanvas({
             : scaleMetres + " m"}
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-[11px] text-[#536760]">
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-xs text-[#536760]">
         <span role="status">
           {pack
             ? `Ruas locais disponíveis · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
