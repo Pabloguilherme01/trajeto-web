@@ -36,6 +36,7 @@ export type PublicRouteStep = {
   streetName?: string;
   distanceMeters: number;
   durationSeconds: number;
+  location?: PublicCoordinate;
 };
 
 export type PublicRoute = {
@@ -66,7 +67,7 @@ type OsrmResponse = {
         distance?: number;
         duration?: number;
         name?: string;
-        maneuver?: { type?: string; modifier?: string };
+        maneuver?: { type?: string; modifier?: string; location?: [number, number] };
       }>;
     }>;
   }>;
@@ -943,6 +944,9 @@ export async function calculatePublicRoute(
             streetName: step.name?.trim() || undefined,
             distanceMeters: Number(step.distance) || 0,
             durationSeconds: Number(step.duration) || 0,
+            location: Array.isArray(step.maneuver?.location) && step.maneuver.location.length === 2
+              ? { lng: Number(step.maneuver.location[0]), lat: Number(step.maneuver.location[1]) }
+              : undefined,
           }))),
         };
         cacheSet(cacheKey, result);
