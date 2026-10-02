@@ -3,7 +3,7 @@ import { Accessibility, Check, RotateCcw, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
 import { setEconomyMode } from "@/lib/mobilePreferences";
-import { clearLocalAppData, exportLocalAppData, listLocalAppKeys, localDataEvent } from "@/lib/localData";
+import { clearLocalAppData, countLocalAppData, exportLocalAppData, localDataEvent } from "@/lib/localData";
 import { OPEN_ACCESSIBILITY_EVENT } from "@/components/DailyCommandCenter";
 
 const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:string}> = [
@@ -16,8 +16,9 @@ const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:s
 export default function AccessibilityPanel() {
   const [open,setOpen]=useState(false);
   const [prefs,setPrefs]=useState<AccessibilityPreferences>(()=>getAccessibilityPreferences());
-  const [localDataCount,setLocalDataCount]=useState(()=>listLocalAppKeys().length);
-  const [clearStep,setClearStep]=useState<"idle"|"confirm"|"done">("idle");
+  const [localDataCount,setLocalDataCount]=useState(0);
+  const [clearingData,setClearingData]=useState(false);
+  const [clearStep,setClearStep]=useState<"idle"|"confirm"|"done"|"error">("idle");
   const [backupStatus,setBackupStatus]=useState<"idle"|"done"|"error">("idle");
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const openPanel = () => { returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setOpen(true); };
@@ -49,15 +50,27 @@ export default function AccessibilityPanel() {
   },[open]);
 
   useEffect(()=>{
+    let active = true;
     const refresh=()=>setPrefs(getAccessibilityPreferences());
-    const onLocalData=()=>setLocalDataCount(listLocalAppKeys().length);
+    const refreshLocalData=()=>{
+      void countLocalAppData().then(count=>{ if (active) setLocalDataCount(count); });
+    };
+    refreshLocalData();
     window.addEventListener(accessibilityPreferenceEvent,refresh);
-    window.addEventListener(localDataEvent,onLocalData);
+    window.addEventListener(localDataEvent,refreshLocalData);
+    window.addEventListener("focus",refreshLocalData);
     return()=>{
+      active = false;
       window.removeEventListener(accessibilityPreferenceEvent,refresh);
-      window.removeEventListener(localDataEvent,onLocalData);
+      window.removeEventListener(localDataEvent,refreshLocalData);
+      window.removeEventListener("focus",refreshLocalData);
     };
   },[]);
+
+  useEffect(()=>{
+    if (!open) return;
+    void countLocalAppData().then(setLocalDataCount);
+  },[open]);
 
   useEffect(()=>{
     const root=document.documentElement;
@@ -112,7 +125,7 @@ export default function AccessibilityPanel() {
             <button type="button" onClick={()=>{resetAccessibilityPreferences();setPrefs(getAccessibilityPreferences());}} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 px-4 text-xs font-bold text-[#B8C7CE]"><RotateCcw className="size-4"/>Restaurar padrão</button>
               <div className="mt-3">
                 <button type="button" onClick={()=>setBackupStatus(exportLocalAppData() ? "done" : "error")} className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 text-xs font-extrabold text-white">Exportar backup local</button>
-                {backupStatus === "done" && <p role="status" className="mt-2 text-[0.68rem] font-bold text-[#DFFF9A]">Backup criado no aparelho. Ele contém apenas os dados locais do Trajeto.</p>}
+                {backupStatus === "done" && <p role="status" className="mt-2 text-[0.68rem] font-bold text-[#DFFF9A]">Backup criado no aparelho. Ele inclui preferências e atalhos do armazenamento local; rotas offline ficam fora deste arquivo.</p>}
                 {backupStatus === "error" && <p role="alert" className="mt-2 text-[0.68rem] font-bold text-[#FFD0C3]">Não foi possível criar o backup neste navegador.</p>}
               </div>
 
@@ -123,11 +136,12 @@ export default function AccessibilityPanel() {
                   <p className="mt-1 text-xs leading-relaxed text-[#8FA3AC]">{localDataCount ? `${localDataCount} registro${localDataCount === 1 ? "" : "s"} local${localDataCount === 1 ? "" : "is"} do Trajeto. Nada disso é enviado por esta ação.` : "Nenhum dado local do Trajeto está salvo neste aparelho."}</p>
                 </div>
               </div>
-              {clearStep === "idle" && localDataCount > 0 && <button type="button" onClick={()=>setClearStep("confirm")} className="mt-3 min-h-11 w-full rounded-xl border border-[#FFB5A1]/25 bg-[#FFB5A1]/[.05] px-4 text-xs font-extrabold text-[#FFD0C3]">Limpar dados do Trajeto neste aparelho</button>}
+              {(clearStep === "idle" || clearStep === "error") && <button type="button" onClick={()=>setClearStep("confirm")} className="mt-3 min-h-11 w-full rounded-xl border border-[#FFB5A1]/25 bg-[#FFB5A1]/[.05] px-4 text-xs font-extrabold text-[#FFD0C3]">Limpar dados do Trajeto neste aparelho</button>}
               {clearStep === "confirm" && <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <button type="button" onClick={()=>{clearLocalAppData();resetAccessibilityPreferences();setLocalDataCount(listLocalAppKeys().length);setPrefs(getAccessibilityPreferences());setClearStep("done");}} className="min-h-11 rounded-xl bg-[#FFB5A1] px-4 text-xs font-extrabold text-[#21110D]">Confirmar limpeza</button>
+                <button type="button" disabled={clearingData} onClick={()=>{void (async()=>{setClearingData(true);try {await clearLocalAppData();resetAccessibilityPreferences();setLocalDataCount(await countLocalAppData());setPrefs(getAccessibilityPreferences());setClearStep("done");} catch {setClearStep("error");} finally {setClearingData(false);}})()}} className="min-h-11 rounded-xl bg-[#FFB5A1] px-4 text-xs font-extrabold text-[#21110D] disabled:opacity-50">{clearingData ? "Limpando…" : "Confirmar limpeza"}</button>
                 <button type="button" onClick={()=>setClearStep("idle")} className="min-h-11 rounded-xl border border-white/10 px-4 text-xs font-bold text-white">Cancelar</button>
               </div>}
+              {clearStep === "error" && <p role="alert" className="mt-3 text-xs text-[#FFD0C3]">Não foi possível apagar todos os dados. O navegador bloqueou parte da limpeza. Tente novamente.</p>}
               {clearStep === "done" && <div role="status" className="mt-3 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.05] px-3 py-2 text-xs font-bold text-[#DFFF9A]">Dados locais removidos. O Trajeto voltou ao estado inicial neste aparelho.</div>}
             </div>
           </section>
