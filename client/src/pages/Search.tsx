@@ -271,15 +271,6 @@ export default function SearchPage() {
     event.preventDefault();
     search(input);
   };
-  const openExternal = (value: string) => {
-    if (online)
-      window.open(
-        "https://www.google.com/maps/search/?api=1&query=" +
-          encodeURIComponent(value),
-        "_blank",
-        "noopener,noreferrer"
-      );
-  };
   const openQuick = (action: (typeof quickActions)[number]) => {
     if (action.kind === "internal") {
       setLocation(appUrl("/postos") + "?q=postos");
@@ -322,7 +313,6 @@ export default function SearchPage() {
       setLocation(appUrl("/postos") + "?q=postos&perto=1");
       return;
     }
-    openExternal(action.query);
   };
   const openRoute = (destination: string) => {
     rememberSearch(destination);
