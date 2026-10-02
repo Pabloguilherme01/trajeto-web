@@ -1,4 +1,4 @@
-import { privateOriginForHistory } from "@/lib/locationPrivacy";
+import { isPreciseLocationText, privateOriginForHistory } from "@/lib/locationPrivacy";
 
 const ECONOMY_KEY = "trajeto-mobile-economy";
 const SEARCHES_KEY = "trajeto-recent-searches";
@@ -82,6 +82,7 @@ export function getRecentSearches(): string[] {
     if (!Array.isArray(value)) return [];
     const next = value
       .filter((item): item is string => typeof item === "string")
+      .filter(item => !isPreciseLocationText(item))
       .map(item => privateOriginForHistory(item))
       .slice(0, 5);
     if (next.some((item, index) => item !== value[index])) {
@@ -91,6 +92,7 @@ export function getRecentSearches(): string[] {
   } catch { return []; }
 }
 export function rememberSearch(query: string) {
+  if (isPreciseLocationText(query)) return;
   const normalized = privateOriginForHistory(query);
   if (normalized.length < 3) return;
   try {
