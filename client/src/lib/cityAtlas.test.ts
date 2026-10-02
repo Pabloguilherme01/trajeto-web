@@ -44,10 +44,12 @@ describe("city atlas", () => {
     expect(normalizeCityAtlasSnapshot(snapshot())?.city.ibgeCode).toBe("5200258");
   });
 
-  it("rejects malformed or unsafe coordinates", () => {
+  it("drops a record with unsafe coordinates without losing the city atlas", () => {
     const value = snapshot() as any;
     value.items[0].lat = 190;
-    expect(normalizeCityAtlasSnapshot(value)).toBeNull();
+    const normalized = normalizeCityAtlasSnapshot(value);
+    expect(normalized).not.toBeNull();
+    expect(normalized?.items).toHaveLength(0);
   });
 
   it("merges supplemental official data with the existing city catalog", () => {
