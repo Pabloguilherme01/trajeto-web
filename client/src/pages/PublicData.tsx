@@ -74,6 +74,28 @@ export default function PublicData() {
     };
   }, []);
 
+  useEffect(() => {
+    const targetId = selectedResource
+      ? "resource-" + selectedResource
+      : window.location.hash === "#transporte"
+        ? "transporte"
+        : "";
+    if (!targetId) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      target.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedResource, rawSearch]);
+
   const openSource = (url: string) => {
     if (!online) return;
     window.open(url, "_blank", "noopener,noreferrer");
@@ -160,7 +182,7 @@ export default function PublicData() {
           </div>
         </section>
 
-        <section id="transporte" className="mt-7" aria-labelledby="transport-title">
+        <section id="transporte" tabIndex={-1} className="mt-7 scroll-mt-20 outline-none" aria-labelledby="transport-title">
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-[.12em] text-[#C7FF3C]">
@@ -246,8 +268,10 @@ export default function PublicData() {
                 <article
                   key={item.id}
                   id={"resource-" + item.id}
+                  tabIndex={-1}
+                  aria-current={selected ? "true" : undefined}
                   className={
-                    "rounded-3xl border bg-[#121B22] p-4 transition " +
+                    "scroll-mt-20 rounded-3xl border bg-[#121B22] p-4 outline-none transition " +
                     (selected
                       ? "border-[#C7FF3C]/60 ring-1 ring-[#C7FF3C]/25"
                       : "border-white/10")
