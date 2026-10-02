@@ -206,15 +206,29 @@ export async function removeOfflineRoute(id: string) {
   return true;
 }
 
+function migratedOfflineRouteId(id: string) {
+  const separator = id.indexOf("::");
+  if (separator <= 0) return id;
+  const origin = id.slice(0, separator);
+  const destination = id.slice(separator + 2);
+  if (destination.trim().length < 2) return id;
+  const safeOrigin = privateOriginForHistory(origin);
+  return safeOrigin === origin.trim() ? id : offlineRouteId(safeOrigin, destination);
+}
+
 export async function getOfflineRoute(id: string): Promise<OfflineRoute | null> {
   if (!hasIndexedDb()) return null;
 
-  const route = await withStore<unknown>("readonly", store => store.get(id));
+  let route = await withStore<unknown>("readonly", store => store.get(id));
   if (!isValidRoute(route)) {
     if (isRecord(route) && typeof route.id === "string") {
       await removeOfflineRoute(route.id);
     }
-    return null;
+    const migratedId = migratedOfflineRouteId(id);
+    if (migratedId !== id) {
+      route = await withStore<unknown>("readonly", store => store.get(migratedId));
+    }
+    if (!isValidRoute(route)) return null;
   }
 
   const safeRoute = sanitizeOfflineRoute(route);
