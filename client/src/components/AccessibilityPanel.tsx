@@ -123,7 +123,7 @@ export default function AccessibilityPanel() {
                   <p className="mt-1 text-xs leading-relaxed text-[#8FA3AC]">{localDataCount ? `${localDataCount} registro${localDataCount === 1 ? "" : "s"} local${localDataCount === 1 ? "" : "is"} do Trajeto. Nada disso é enviado por esta ação.` : "Nenhum dado local do Trajeto está salvo neste aparelho."}</p>
                 </div>
               </div>
-              {clearStep === "idle" && localDataCount > 0 && <button type="button" onClick={()=>setClearStep("confirm")} className="mt-3 min-h-11 w-full rounded-xl border border-[#FFB5A1]/25 bg-[#FFB5A1]/[.05] px-4 text-xs font-extrabold text-[#FFD0C3]">Limpar dados do Trajeto neste aparelho</button>}
+              {clearStep === "idle" && <button type="button" onClick={()=>setClearStep("confirm")} className="mt-3 min-h-11 w-full rounded-xl border border-[#FFB5A1]/25 bg-[#FFB5A1]/[.05] px-4 text-xs font-extrabold text-[#FFD0C3]">Limpar dados do Trajeto neste aparelho</button>}
               {clearStep === "confirm" && <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <button type="button" onClick={()=>{clearLocalAppData();resetAccessibilityPreferences();setLocalDataCount(listLocalAppKeys().length);setPrefs(getAccessibilityPreferences());setClearStep("done");}} className="min-h-11 rounded-xl bg-[#FFB5A1] px-4 text-xs font-extrabold text-[#21110D]">Confirmar limpeza</button>
                 <button type="button" onClick={()=>setClearStep("idle")} className="min-h-11 rounded-xl border border-white/10 px-4 text-xs font-bold text-white">Cancelar</button>
