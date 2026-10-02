@@ -152,7 +152,12 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
       : [];
   });
   const sourceMap = new Map(sources.map(source => [source.id, source]));
+  if (
+    sourceMap.size !== sources.length ||
+    !sourceMap.has(city.profileSourceId)
+  ) return null;
 
+  const seenItemIds = new Set<string>();
   const items = input.items.flatMap(raw => {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
     const item = raw as Record<string, unknown>;
@@ -162,8 +167,13 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
       typeof item.detail !== "string" ||
       !isLayer(item.category) ||
       typeof item.sourceId !== "string" ||
-      !sourceMap.has(item.sourceId)
+      !sourceMap.has(item.sourceId) ||
+      seenItemIds.has(item.id) ||
+      (item.verifiedAt !== undefined &&
+        (typeof item.verifiedAt !== "string" ||
+          !Number.isFinite(Date.parse(item.verifiedAt))))
     ) return [];
+    seenItemIds.add(item.id);
     const hasLat = item.lat !== undefined;
     const hasLng = item.lng !== undefined;
     if (hasLat !== hasLng) return [];
