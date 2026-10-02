@@ -94,10 +94,12 @@ export default function OfflineReadiness() {
                     "Abra o site com internet ou toque em Preparar acesso offline."}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/70">
-            Busca, serviços públicos, contatos, postos e rotas já salvas ficam
-            disponíveis após a preparação, junto com as ruas da área urbana de Águas Lindas. Mapas externos, novas rotas viárias e
-            agendamentos precisam de internet; ligações precisam de rede
-            telefônica.
+            Busca, serviços públicos, contatos, postos, ruas locais e rotas salvas
+            ficam disponíveis após a preparação. O novo modo Offline também
+            reaproveita automaticamente a rota salva exata e pode gerar estimativas
+            locais para pontos já preparados. Mapas externos, trânsito atualizado e
+            destinos ainda não preparados continuam dependendo de conexão; ligações
+            precisam de rede telefônica.
           </p>
           <button
             type="button"
