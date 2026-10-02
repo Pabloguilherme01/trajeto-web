@@ -81,8 +81,9 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
     return keys;
   });
   expect(ids).toHaveLength(50);
-  expect(ids).not.toContain("seed-0");
-  expect(ids).toContain("seed-1");
+  expect(ids.some(id => String(id).startsWith("seed-"))).toBe(false);
+  expect(ids).not.toContain("origem 0::destino 0::driving");
+  expect(ids).toContain("origem 1::destino 1::driving");
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
