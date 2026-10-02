@@ -1,3 +1,4 @@
+import { consumePrivateLocationHandoff, setPrivateLocationHandoff } from "./locationPrivacy";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { clearLocalAppData, exportLocalAppData, listLocalAppKeys } from "./localData";
 
@@ -39,4 +40,30 @@ it("exports Trajeto-owned data as a browser download", () => {
   delete (URL as unknown as { createObjectURL?: unknown }).createObjectURL;
   delete (URL as unknown as { revokeObjectURL?: unknown }).revokeObjectURL;
   click.mockRestore();
+});
+
+it("clears session route caches and the pending GPS handoff", () => {
+  sessionStorage.clear();
+  sessionStorage.setItem("trajeto:public-routing:route:private", "GPS route");
+  sessionStorage.setItem("other-app-setting", "keep");
+  setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+  clearLocalAppData();
+  expect(sessionStorage.getItem("trajeto:public-routing:route:private")).toBeNull();
+  expect(sessionStorage.getItem("other-app-setting")).toBe("keep");
+  expect(consumePrivateLocationHandoff()).toBeNull();
+  sessionStorage.clear();
+});
+
+it("continues cleaning session data when local storage is blocked", () => {
+  sessionStorage.setItem("trajeto:public-routing:route:private", "GPS route");
+  const blocked = vi.spyOn(window, "localStorage", "get").mockImplementation(() => {
+    throw new DOMException("Storage blocked", "SecurityError");
+  });
+  try {
+    expect(clearLocalAppData()).toBe(1);
+    expect(sessionStorage.getItem("trajeto:public-routing:route:private")).toBeNull();
+  } finally {
+    blocked.mockRestore();
+    sessionStorage.clear();
+  }
 });
