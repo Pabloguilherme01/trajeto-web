@@ -83,3 +83,9 @@ it("offers direct mobile actions to open the large map and the planner", () => {
   fireEvent.click(screen.getByRole("button", { name: "Planejar rota" }));
   expect(navigate).toHaveBeenCalledWith(expect.stringContaining("/planejar"));
 });
+
+it("shows the map operating mode and the number of drawable points", () => {
+  render(<CityMap />);
+  expect(screen.getByText(/Mapa de ruas online|Mapa vetorial offline/)).toBeTruthy();
+  expect(screen.getByText(/pontos/)).toBeTruthy();
+});
