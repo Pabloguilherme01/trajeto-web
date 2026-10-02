@@ -166,6 +166,37 @@ function expandLocalQuery(value: string) {
   const normalized = normalizeSearch(value);
   if (!normalized || normalized.length < 3) return value;
 
+  const stationMatches = searchAguasLindasStations(value).filter(station => {
+    const names = [
+      station.displayName,
+      station.legalName,
+      ...station.aliases,
+    ].map(normalizeSearch).filter(Boolean);
+    return names.some(name =>
+      name === normalized ||
+      normalized.startsWith(name + " ") ||
+      normalized.includes(name + " ")
+    );
+  });
+  if (stationMatches.length === 1) {
+    const station = stationMatches[0];
+    if (
+      Number.isFinite(station.anp?.latitude) &&
+      Number.isFinite(station.anp?.longitude)
+    ) {
+      return String(station.anp?.latitude) + "," + String(station.anp?.longitude);
+    }
+    if (station.address) {
+      return [
+        station.address,
+        station.neighborhood,
+        "Águas Lindas de Goiás",
+        "GO",
+        "Brasil",
+      ].filter(Boolean).join(", ");
+    }
+  }
+
   const serviceMatches = PUBLIC_SERVICES.filter(service => {
     const name = normalizeSearch(service.name);
     const haystack = normalizeSearch(
