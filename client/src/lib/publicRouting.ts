@@ -677,13 +677,15 @@ function buildLocalEstimate(
   mode: PublicTravelMode
 ): PublicRoute {
   const directDistance = haversineMeters(origin, destination);
-  const distanceMeters = Math.max(200, directDistance * 1.18);
+  const routeFactor = mode === "walking" ? 1.12 : mode === "cycling" ? 1.16 : 1.18;
+  const minimumDistance = mode === "walking" ? 50 : mode === "cycling" ? 100 : 200;
+  const distanceMeters = Math.max(minimumDistance, directDistance * routeFactor);
   const directKm = directDistance / 1000;
   const speedKmh =
     mode === "walking"
-      ? 5
+      ? 4.8
       : mode === "cycling"
-        ? 17
+        ? 15
         : mode === "transit"
           ? 28
           : directKm <= 20
