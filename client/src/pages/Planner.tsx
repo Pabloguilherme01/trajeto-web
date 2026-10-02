@@ -135,7 +135,7 @@ export default function Planner() {
       void getOfflineRoute(routeId).then(route => {
         if (!active) return;
         if (!route) { setError("Esta rota não está salva neste aparelho."); return; }
-        if (route.id !== routeId) {
+        if (route.id && route.id !== routeId) {
           window.history.replaceState(window.history.state, "", buildSavedRoutePlannerUrl(route.id));
         }
         privateOriginRef.current = null;
