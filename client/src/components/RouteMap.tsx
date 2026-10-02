@@ -22,7 +22,7 @@ type RoutePreview = {
   id: string;
   polyline: string | null;
   selected?: boolean;
-  source?: "osrm" | "local-estimate";
+  source?: "mapbox" | "osrm" | "local-estimate";
   trafficIntervals?: TrafficInterval[];
   durationSeconds?: number | null;
   staticDurationSeconds?: number | null;
@@ -139,9 +139,11 @@ export function OfflineRoutePreview({
         <p>
           {selected?.source === "local-estimate"
             ? "Estimativa entre coordenadas, sem trajeto pelas ruas. Confirme o percurso no aplicativo de navegação."
-            : routePoints.length
-              ? "Geometria disponível neste aparelho. Ruas locais salvas de Águas Lindas; sem trânsito ao vivo."
-              : "Somente os pontos informados. Não há geometria de rota disponível; nenhuma ligação representa um caminho transitável."}
+            : selected?.source === "mapbox" && routePoints.length
+              ? "Geometria calculada pelo Mapbox. A linha fica disponível nesta prévia; no modo direção, o tempo pode considerar o trânsito disponível no momento do cálculo."
+              : routePoints.length
+                ? "Geometria disponível neste aparelho. Ruas locais salvas de Águas Lindas; sem trânsito ao vivo."
+                : "Somente os pontos informados. Não há geometria de rota disponível; nenhuma ligação representa um caminho transitável."}
         </p>
         {validStops.length > 0 && (
           <p>
@@ -427,7 +429,7 @@ export function RouteMap({
 
   if (
     isGitHubPagesRuntime() &&
-    selectedRoute?.source === "osrm" &&
+    (selectedRoute?.source === "mapbox" || selectedRoute?.source === "osrm") &&
     decodeMapPolyline(selectedRoute?.polyline ?? "").length > 1
   ) {
     const points = decodeMapPolyline(selectedRoute?.polyline ?? "");

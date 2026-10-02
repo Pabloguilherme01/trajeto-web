@@ -544,4 +544,20 @@ describe("public routing fallback", () => {
     expect(payload.route.polyline).toBe("encoded");
     expect(payload.traffic.label).toContain("não disponível");
   });
+
+  it("labels Mapbox driving routes as traffic-aware optional enrichment", () => {
+    const payload = buildPublicRoutePayload({
+      origin: { lat: -15.754, lng: -48.262 },
+      destination: { lat: -15.736, lng: -48.27 },
+      distanceMeters: 3769,
+      durationSeconds: 413,
+      polyline: "mapbox-route",
+      source: "mapbox",
+      mode: "driving",
+    });
+    expect(payload.route.source).toBe("mapbox");
+    expect(payload.route.summary).toMatch(/Mapbox/i);
+    expect(payload.traffic.label).toMatch(/trânsito Mapbox/i);
+    expect(payload.traffic.detail).toMatch(/driving-traffic/i);
+  });
 });

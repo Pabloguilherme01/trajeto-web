@@ -4,6 +4,7 @@ import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { groupAnpFuelRows } from "@shared/anpRevendedores";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
+import { requestOptionalMapboxRoute } from "@/lib/mapboxOptional";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -28,7 +29,7 @@ let geocoderUnavailableUntilFallback = 0;
 let routerUnavailableUntilFallback = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
-export type PublicRouteSource = "osrm" | "local-estimate";
+export type PublicRouteSource = "mapbox" | "osrm" | "local-estimate";
 export type PublicTravelMode = "driving" | "walking" | "cycling" | "transit";
 export type PublicRoute = {
   origin: PublicCoordinate;
@@ -331,7 +332,7 @@ function isPublicRoute(value: unknown): value is PublicRoute {
     route.durationSeconds > 0 &&
     typeof route.polyline === "string" &&
     route.polyline.length > 0 &&
-    ["osrm", "local-estimate"].includes(route.source) &&
+    ["mapbox", "osrm", "local-estimate"].includes(route.source) &&
     ["driving", "walking", "cycling", "transit"].includes(route.mode)
   );
 }
@@ -700,21 +701,49 @@ export async function calculatePublicRoute(
     Math.abs(cached.destination.lat - destination.lat) < 0.00002 &&
     Math.abs(cached.destination.lng - destination.lng) < 0.00002;
 
-  if (cachedMatches && (cached.source === "osrm" || offline)) return cached;
+  if (
+    cachedMatches &&
+    (cached.source === "mapbox" || cached.source === "osrm" || offline)
+  )
+    return cached;
   if (offline) return buildLocalEstimate(origin, destination, mode);
-
-  const now = Date.now();
-  if (getRouterUnavailableUntil() > now) {
-    if (cachedMatches) return cached;
-    const estimated = buildLocalEstimate(origin, destination, mode);
-    cacheSet(cacheKey, estimated);
-    return estimated;
-  }
 
   const existing = routerInFlight.get(coordinateKey);
   if (existing) return existing;
 
   const task = (async () => {
+    try {
+      const enhanced = await requestOptionalMapboxRoute(
+        origin,
+        destination,
+        mode
+      );
+      if (enhanced) {
+        const result: PublicRoute = {
+          origin,
+          destination,
+          distanceMeters: enhanced.distanceMeters,
+          durationSeconds: enhanced.durationSeconds,
+          polyline: enhanced.polyline,
+          source: "mapbox",
+          mode,
+        };
+        cacheSet(cacheKey, result);
+        return result;
+      }
+    } catch {
+      // Mapbox is optional. A provider failure must never remove the public
+      // OSRM/local fallback chain.
+    }
+
+    const now = Date.now();
+    if (getRouterUnavailableUntil() > now) {
+      if (cachedMatches) return cached;
+      const estimated = buildLocalEstimate(origin, destination, mode);
+      cacheSet(cacheKey, estimated);
+      return estimated;
+    }
+
     const profile =
       mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
     const routingBase = OSRM_URL.replace(
@@ -798,6 +827,7 @@ function publicDurationLabel(seconds: number) {
 
 export function buildPublicRoutePayload(result: PublicRoute) {
   const estimated = result.source === "local-estimate";
+  const mapbox = result.source === "mapbox";
   return {
     searchId: null,
     route: {
@@ -810,7 +840,11 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       polyline: result.polyline,
       summary: estimated
         ? "Estimativa local baseada nas coordenadas disponíveis para o modo selecionado."
-        : "Rota viária calculada com OpenStreetMap/OSRM.",
+        : mapbox
+          ? result.mode === "driving"
+            ? "Rota Mapbox calculada com perfil de direção sensível ao trânsito disponível."
+            : "Rota viária calculada com Mapbox."
+          : "Rota viária calculada com OpenStreetMap/OSRM.",
       source: result.source,
       mode: result.mode,
     },
@@ -818,10 +852,18 @@ export function buildPublicRoutePayload(result: PublicRoute) {
     priceCoverage: 0,
     anpReferences: [],
     traffic: {
-      label: estimated ? "Estimativa local" : "Trânsito ao vivo não disponível",
+      label: estimated
+        ? "Estimativa local"
+        : mapbox && result.mode === "driving"
+          ? "Tempo com trânsito Mapbox"
+          : "Trânsito ao vivo não disponível",
       detail: estimated
         ? "A rede viária pública não respondeu. Distância e tempo são uma estimativa e o navegador externo deve ser usado para navegação atualizada."
-        : "A rota informa distância e duração da rede viária pública; trânsito ao vivo fica para o navegador externo.",
+        : mapbox && result.mode === "driving"
+          ? "O tempo da rota usa o perfil driving-traffic do Mapbox quando essa camada opcional está configurada."
+          : mapbox
+            ? "A geometria foi calculada pelo Mapbox; o modo selecionado não usa trânsito ao vivo."
+            : "A rota informa distância e duração da rede viária pública; trânsito ao vivo fica para o navegador externo.",
     },
     economy: null,
     recommendation: null,
