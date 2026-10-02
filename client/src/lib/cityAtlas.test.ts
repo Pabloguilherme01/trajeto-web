@@ -52,6 +52,20 @@ describe("city atlas", () => {
     expect(normalized?.items).toHaveLength(0);
   });
 
+  it("rejects duplicate ids, invalid verification dates and missing profile sources", () => {
+    const duplicate = snapshot() as any;
+    duplicate.items.push({ ...duplicate.items[0] });
+    expect(normalizeCityAtlasSnapshot(duplicate)).toBeNull();
+
+    const invalidDate = snapshot() as any;
+    invalidDate.items[0].verifiedAt = "not-a-date";
+    expect(normalizeCityAtlasSnapshot(invalidDate)?.items).toHaveLength(0);
+
+    const missingProfileSource = snapshot() as any;
+    missingProfileSource.city.profileSourceId = "missing";
+    expect(normalizeCityAtlasSnapshot(missingProfileSource)).toBeNull();
+  });
+
   it("rejects coordinates without explicit official provenance", () => {
     const value = snapshot() as any;
     value.items[0].lat = -15.75;
