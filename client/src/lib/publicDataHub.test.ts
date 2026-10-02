@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   PUBLIC_DATA_RESOURCES,
   SEMIURBAN_FARES,
+  publicDataFreshnessLabel,
   searchPublicDataResources,
   searchSemiurbanFares,
 } from "./publicDataHub";
@@ -50,4 +51,18 @@ describe("public data hub", () => {
       effectiveFrom: "28/06/2026",
     });
   });
+
+  it("never leaves transport freshness implicit", () => {
+    const transport = PUBLIC_DATA_RESOURCES.filter(item => item.category === "transporte");
+    expect(transport.length).toBeGreaterThan(0);
+    for (const item of transport) {
+      expect(["catalog", "snapshot", "static", "realtime"]).toContain(item.freshness);
+      expect(publicDataFreshnessLabel(item).length).toBeGreaterThan(3);
+    }
+    expect(PUBLIC_DATA_RESOURCES.find(item => item.id === "stpc-df-gtfs")?.freshness).toBe("static");
+    expect(
+      PUBLIC_DATA_RESOURCES.some(item => item.category === "transporte" && item.freshness === "realtime")
+    ).toBe(false);
+  });
+
 });
