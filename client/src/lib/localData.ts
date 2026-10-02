@@ -1,27 +1,72 @@
+import { clearOfflineRoutes, countOfflineRoutes } from "@/lib/offlineStore";
+import { clearPrivateLocationHandoff } from "@/lib/locationPrivacy";
+
 const APP_PREFIXES = ["trajeto-", "trajeto:"];
 const LOCAL_DATA_EVENT = "trajeto-local-data-cleared";
+
+function listAppKeys(storage: Storage): string[] {
+  return Object.keys(storage)
+    .filter(key => APP_PREFIXES.some(prefix => key.startsWith(prefix)))
+    .sort();
+}
 
 export function listLocalAppKeys(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    return Object.keys(window.localStorage).filter(key => APP_PREFIXES.some(prefix => key.startsWith(prefix))).sort();
+    return listAppKeys(window.localStorage);
   } catch {
     return [];
   }
 }
 
-export function clearLocalAppData(): number {
-  if (typeof window === "undefined") return 0;
-  const keys = listLocalAppKeys();
+export function listSessionAppKeys(): string[] {
+  if (typeof window === "undefined") return [];
   try {
-    for (const key of keys) window.localStorage.removeItem(key);
+    return listAppKeys(window.sessionStorage);
+  } catch {
+    return [];
+  }
+}
+
+export async function countLocalAppData(): Promise<number> {
+  if (typeof window === "undefined") return 0;
+  const localCount = listLocalAppKeys().length;
+  const sessionCount = listSessionAppKeys().length;
+  let offlineCount = 0;
+  try {
+    offlineCount = await countOfflineRoutes();
+  } catch {}
+  return localCount + sessionCount + offlineCount;
+}
+
+export async function clearLocalAppData(): Promise<number> {
+  if (typeof window === "undefined") return 0;
+
+  let cleared = 0;
+  for (const [storage, keys] of [
+    [window.localStorage, listLocalAppKeys()],
+    [window.sessionStorage, listSessionAppKeys()],
+  ] as const) {
+    try {
+      for (const key of keys) {
+        storage.removeItem(key);
+        cleared += 1;
+      }
+    } catch {}
+  }
+
+  try {
+    cleared += await clearOfflineRoutes();
+  } catch {}
+  if (clearPrivateLocationHandoff()) cleared += 1;
+
+  try {
     window.dispatchEvent(new CustomEvent(LOCAL_DATA_EVENT));
   } catch {}
-  return keys.length;
+  return cleared;
 }
 
 export const localDataEvent = LOCAL_DATA_EVENT;
-
 
 export function exportLocalAppData(): boolean {
   if (typeof window === "undefined") return false;
