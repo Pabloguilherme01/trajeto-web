@@ -104,7 +104,8 @@ export function StationDirectoryCard({
     return Array.from(unique.values());
   }, [anp]);
 
-  const destination = coords ? coords.lat + "," + coords.lng : address;
+  const fallbackDestination = [stationName, local?.neighborhood || anp?.bairro, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
+  const destination = coords ? coords.lat + "," + coords.lng : (address || fallbackDestination);
   const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
   const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
   const appleUrl = buildAppleMapsDirectionsUrl(destination);
@@ -253,7 +254,7 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); openExternal(appleUrl, "Apple Maps"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
-      <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(address)} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
+      <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(destination)} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
