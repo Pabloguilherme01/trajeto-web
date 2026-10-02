@@ -362,17 +362,23 @@ export default function Planner() {
     } catch { setSavedMessage("Não foi possível excluir a rota. Tente novamente."); }
   };
 
+  const routeOriginIsPrivate = originPrivate || isCurrentLocationLabel(origin);
+
   const shareRoute = async () => {
     if (!planned) return;
     try {
-      const text = buildRouteShareText(origin, destination, planned.recommendation ? {
-        name: planned.recommendation.name,
-        price: planned.recommendation.price,
-        detourKm: planned.recommendation.detourKm,
-        detourSource: planned.recommendation.detourSource,
-      } : null);
+      const text = buildRouteShareText(
+        routeOriginIsPrivate ? PRIVATE_LOCATION_LABEL : origin,
+        destination,
+        planned.recommendation ? {
+          name: planned.recommendation.name,
+          price: planned.recommendation.price,
+          detourKm: planned.recommendation.detourKm,
+          detourSource: planned.recommendation.detourSource,
+        } : null
+      );
       const params = new URLSearchParams({ destino: destination.trim(), modo: mode });
-      if (!originPrivate) params.set("origem", origin.trim());
+      if (!routeOriginIsPrivate) params.set("origem", origin.trim());
       const url = window.location.origin + appUrl("/planejar") + "?" + params.toString();
       await shareText(text, url, "Trajeto · rota");
       setSavedMessage("Rota compartilhada.");
@@ -381,7 +387,9 @@ export default function Planner() {
 
   const openExternal = (provider: "google" | "waze" | "apple") => {
     const googleMode = mode === "walking" ? "walking" : mode === "cycling" ? "bicycling" : mode === "transit" ? "transit" : "driving";
-    const externalOrigin = originPrivate ? privateOriginForExternalNavigation(PRIVATE_LOCATION_LABEL) : origin;
+    const externalOrigin = routeOriginIsPrivate
+      ? privateOriginForExternalNavigation(PRIVATE_LOCATION_LABEL)
+      : origin;
     const target = provider === "google"
       ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
       : provider === "waze"
@@ -393,7 +401,11 @@ export default function Planner() {
 
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
     if (!stop) { setSavedMessage("Não há endereço disponível para esta parada."); return; }
-    window.open(buildGoogleMapsDirectionsUrl(originPrivate ? "" : origin, stop.address || stop.name, "driving", true), "_blank", "noopener,noreferrer");
+    window.open(
+      buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true),
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   const availableDestinations = useMemo(() => {
@@ -767,7 +779,7 @@ export default function Planner() {
                   <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
                 </div>
                 <div className="h-[min(68vh,520px)]">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={originPrivate} />
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} />
                 </div>
               </section>
             )}
