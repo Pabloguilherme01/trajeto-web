@@ -747,6 +747,19 @@ export default function Planner() {
                 </div>
               </div>
 
+              {(mode === "walking" || mode === "cycling") && (
+                <div className="mt-3 rounded-xl border border-white/8 bg-white/[.025] px-3 py-2.5" role="status">
+                  <p className="text-xs font-black text-white/70">
+                    {mode === "walking" ? "A pé · perfil pedestre" : "Bicicleta · perfil ciclável"}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-white/40">
+                    {mode === "walking"
+                      ? "Quando houver roteamento compatível, usa caminhos de pedestre e mostra conversões rua a rua. Sem essa cobertura, o Trajeto identifica claramente a rota como estimativa."
+                      : "Quando houver roteamento compatível, usa o perfil de bicicleta e mostra conversões rua a rua. O app não chama um trecho de ciclovia ou seguro sem dados que confirmem isso."}
+                  </p>
+                </div>
+              )}
+
               <button type="submit" aria-label="Calcular rota" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
                 <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
