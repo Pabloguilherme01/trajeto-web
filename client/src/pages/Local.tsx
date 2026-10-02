@@ -176,13 +176,17 @@ export default function Local() {
         <section className="mt-3 rounded-[1.35rem] border border-[#C7FF3C]/15 bg-[#121B22] p-4">
           <p className="text-[0.52rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Como chegar</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
-            <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">
-              <Navigation className="mr-1 inline size-3.5" /> Google Maps
+            <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1"} className="flex min-h-12 items-center justify-center rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014] sm:col-span-3">
+              <Navigation className="mr-1 inline size-3.5" /> Abrir mapa no Trajeto
+            </Link>
+            <button type="button" onClick={() => window.open(googleUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#C7FF3C]/20 text-xs font-black text-[#D9FF91]">
+              Google Maps
             </button>
             <button type="button" onClick={() => window.open(wazeUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#3DE3FF]/20 text-xs font-black text-[#C9F7FF]">Waze</button>
             <button type="button" onClick={() => window.open(appleUrl, "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/8 text-xs font-black text-white/70">Apple Maps</button>
           </div>
-          <p className="mt-3 text-[0.52rem] text-white/30">
+          <p className="mt-3 text-[0.52rem] leading-relaxed text-white/45">O Trajeto abre primeiro o mapa interno; Google Maps, Waze e Apple Maps ficam como opções externas de navegação.</p>
+          <p className="mt-2 text-[0.52rem] text-white/30">
             {entity.coordinates ? entity.coordinates.lat.toFixed(5) + ", " + entity.coordinates.lng.toFixed(5) : "Rota por endereço; coordenada não consolidada."}
           </p>
         </section>
