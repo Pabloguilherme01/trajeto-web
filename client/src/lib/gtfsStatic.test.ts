@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeGtfsStaticSnapshot } from "./gtfsStatic";
+import { gtfsSnapshotStatus, normalizeGtfsStaticSnapshot } from "./gtfsStatic";
 
 const feed = {
   schema: 1,
@@ -39,4 +39,21 @@ describe("GTFS static snapshot contract", () => {
       stops: [{ ...feed.stops[0], lat: 120 }],
     })).toBeNull();
   });
+
+  it("validates the feed validity window and exposes expiration", () => {
+    const dated = normalizeGtfsStaticSnapshot({
+      ...feed,
+      validFrom: "2026-10-01T00:00:00Z",
+      validUntil: "2026-10-31T23:59:59Z",
+    });
+    expect(dated).not.toBeNull();
+    expect(gtfsSnapshotStatus(dated!, new Date("2026-10-15T12:00:00Z"))).toBe("current");
+    expect(gtfsSnapshotStatus(dated!, new Date("2026-11-01T00:00:00Z"))).toBe("expired");
+    expect(normalizeGtfsStaticSnapshot({
+      ...feed,
+      validFrom: "2026-11-01T00:00:00Z",
+      validUntil: "2026-10-01T00:00:00Z",
+    })).toBeNull();
+  });
+
 });
