@@ -95,6 +95,7 @@ describe("service worker", () => {
       ["trajeto-%2Ftrajeto-web%2F-v22-static"],
       ["trajeto-%2Ftrajeto-web%2F-v22-map"],
       ["trajeto-%2Ftrajeto-web%2F-v23-static"],
+      ["trajeto-%2Ftrajeto-web%2F-v24-static"],
     ]);
   });
   it("does not announce readiness with a partial offline package", async () => {
