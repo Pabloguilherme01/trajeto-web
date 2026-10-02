@@ -2,6 +2,36 @@ export const pwaUpdateEvent = "trajeto:pwa-update";
 
 let currentRegistration: ServiceWorkerRegistration | null = null;
 
+export function hasWaitingAppUpdate() {
+  return Boolean(currentRegistration?.waiting);
+}
+
+export async function checkForAppUpdate(): Promise<"available" | "current" | "offline" | "unsupported" | "pending"> {
+  if (!("serviceWorker" in navigator)) return "unsupported";
+  if (!navigator.onLine) return "offline";
+  const registration = currentRegistration ?? await navigator.serviceWorker.getRegistration(import.meta.env.BASE_URL);
+  if (!registration) return "unsupported";
+  currentRegistration = registration;
+  await registration.update();
+  if (registration.installing) {
+    const worker = registration.installing;
+    await new Promise<void>(resolve => {
+      const finish = () => {
+        clearTimeout(timer);
+        worker.removeEventListener("statechange", changed);
+        resolve();
+      };
+      const changed = () => { if (worker.state === "installed" || worker.state === "redundant") finish(); };
+      const timer = setTimeout(finish, 15000);
+      worker.addEventListener("statechange", changed);
+      changed();
+    });
+    if (worker.state === "redundant") throw new Error("Não foi possível preparar a nova versão.");
+  }
+  announceUpdate(registration);
+  return registration.waiting ? "available" : registration.installing ? "pending" : "current";
+}
+
 function announceUpdate(registration: ServiceWorkerRegistration) {
   if (!registration.waiting) return;
   window.dispatchEvent(new Event(pwaUpdateEvent));
@@ -16,7 +46,6 @@ export function registerServiceWorker() {
       updateViaCache: "none",
     }).then(registration => {
       currentRegistration = registration;
-      void registration.update().catch(() => undefined);
       announceUpdate(registration);
 
       registration.addEventListener("updatefound", () => {
@@ -28,6 +57,7 @@ export function registerServiceWorker() {
           }
         });
       });
+      void registration.update().catch(() => undefined);
       const update = () => { void registration.update().catch(() => undefined); };
       window.addEventListener("online", update);
       document.addEventListener("visibilitychange", () => { if (!document.hidden) update(); });
@@ -38,28 +68,31 @@ export function registerServiceWorker() {
 }
 
 export async function applyServiceWorkerUpdate() {
-  if (!("serviceWorker" in navigator)) return;
+  if (!("serviceWorker" in navigator)) return false;
 
-  const registration = currentRegistration ?? await navigator.serviceWorker.ready;
+  const registration = currentRegistration ?? await navigator.serviceWorker.getRegistration(import.meta.env.BASE_URL);
+  if (!registration) return false;
   currentRegistration = registration;
 
   const waiting = registration.waiting;
-  if (!waiting) return;
+  if (!waiting) return false;
 
-  await new Promise<void>(resolve => {
+  return await new Promise<boolean>(resolve => {
     let finished = false;
-    const onControllerChange = () => finish();
-    const finish = () => {
+    const onControllerChange = () => finish(true);
+    const finish = (activated: boolean) => {
       if (finished) return;
       finished = true;
+      window.clearTimeout(timer);
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
-      resolve();
-      window.location.reload();
+      resolve(activated);
+      if (activated) window.location.reload();
     };
 
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange, { once: true });
-    window.setTimeout(finish, 5000);
-    waiting.postMessage({ type: "SKIP_WAITING" });
+    const timer = window.setTimeout(() => finish(false), 5000);
+    try { waiting.postMessage({ type: "SKIP_WAITING" }); }
+    catch { finish(false); }
   });
 }
 
