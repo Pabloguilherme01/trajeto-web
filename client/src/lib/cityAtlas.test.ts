@@ -1,0 +1,71 @@
+import { describe, expect, it } from "vitest";
+import {
+  buildCityAtlas,
+  cityAtlasCounts,
+  filterCityAtlas,
+  normalizeCityAtlasSnapshot,
+  type CityAtlasSnapshot,
+} from "./cityAtlas";
+
+function snapshot(): CityAtlasSnapshot {
+  return {
+    schema: 1,
+    updatedAt: "2026-10-02",
+    city: {
+      name: "Águas Lindas de Goiás",
+      state: "GO",
+      ibgeCode: "5200258",
+      areaKm2: 191.817,
+      populationCensus2022: 225693,
+      populationEstimate2026: 249978,
+      profileSourceId: "official",
+    },
+    sources: [
+      { id: "official", label: "Fonte oficial", url: "https://example.com" },
+    ],
+    items: [
+      {
+        id: "escola-teste",
+        name: "Escola Municipal Teste",
+        detail: "Rede municipal",
+        category: "educacao",
+        address: "Jardim Brasília, Águas Lindas de Goiás - GO",
+        destination: "Escola Municipal Teste, Jardim Brasília, Águas Lindas de Goiás - GO",
+        sourceId: "official",
+        verifiedAt: "2026-10-02",
+        keywords: ["escola"],
+      },
+    ],
+  };
+}
+
+describe("city atlas", () => {
+  it("validates a versioned official snapshot", () => {
+    expect(normalizeCityAtlasSnapshot(snapshot())?.city.ibgeCode).toBe("5200258");
+  });
+
+  it("rejects malformed or unsafe coordinates", () => {
+    const value = snapshot() as any;
+    value.items[0].lat = 190;
+    expect(normalizeCityAtlasSnapshot(value)).toBeNull();
+  });
+
+  it("merges supplemental official data with the existing city catalog", () => {
+    const items = buildCityAtlas(snapshot());
+    const school = items.find(item => item.name === "Escola Municipal Teste");
+    expect(school?.sourceLabel).toBe("Fonte oficial");
+    expect(school?.category).toBe("educacao");
+  });
+
+  it("searches accents, addresses and layers without changing the source data", () => {
+    const items = buildCityAtlas(snapshot());
+    expect(filterCityAtlas(items, "jardim brasilia", "educacao").some(item => item.name === "Escola Municipal Teste")).toBe(true);
+    expect(filterCityAtlas(items, "escola", "saude").some(item => item.name === "Escola Municipal Teste")).toBe(false);
+  });
+
+  it("counts layers for map controls", () => {
+    const counts = cityAtlasCounts(buildCityAtlas(snapshot()));
+    expect((counts.educacao ?? 0) > 0).toBe(true);
+    expect((counts.saude ?? 0) > 0).toBe(true);
+  });
+});
