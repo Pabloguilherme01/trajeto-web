@@ -108,3 +108,10 @@ it("does not send transit to an unsupported Mapbox directions profile", async ()
   ).toBeNull();
   expect(fetchMock).not.toHaveBeenCalled();
 });
+
+it.each(["walking", "cycling"] as const)("preserves the explicit Mapbox %s profile", async mode => {
+  const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ code: "Ok", routes: [{ distance: 2400, duration: 900, geometry: "valid" }] })));
+  vi.stubGlobal("fetch", fetchMock);
+  expect(await requestOptionalMapboxRoute({ lat: -15.754, lng: -48.262 }, { lat: -15.736, lng: -48.27 }, mode, testToken)).toMatchObject({ distanceMeters: 2400 });
+  expect(new URL(String(fetchMock.mock.calls[0][0])).pathname).toContain("/" + mode + "/");
+});
