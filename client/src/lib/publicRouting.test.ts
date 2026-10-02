@@ -265,12 +265,13 @@ describe("public routing fallback", () => {
     const first = calculatePublicRoute(...args);
     const second = calculatePublicRoute(...args);
 
-    await Promise.resolve();
-    expect(
-      fetchMock.mock.calls.filter(call =>
-        String(call[0]).includes("router.project-osrm.org")
-      )
-    ).toHaveLength(1);
+    await vi.waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(call =>
+          String(call[0]).includes("router.project-osrm.org")
+        )
+      ).toHaveLength(1)
+    );
 
     resolveRouter?.(
       new Response(
@@ -431,6 +432,9 @@ describe("public routing fallback", () => {
     vi.stubGlobal("fetch", fetchMock);
     const args = ["-15.7,-48.2", "-15.8,-48.3"] as const;
     expect((await calculatePublicRoute(...args)).source).toBe("local-estimate");
+    sessionStorage.removeItem(
+      "trajeto:public-routing:router-unavailable-until"
+    );
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
