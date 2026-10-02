@@ -293,6 +293,20 @@ describe("public routing fallback", () => {
   });
 
   it("reuses an address geocoded earlier when the device later needs an offline route", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: (index: number) => Array.from(saved.keys())[index] ?? null,
+      get length() {
+        return saved.size;
+      },
+    };
+    vi.stubGlobal("localStorage", storage);
+    vi.stubGlobal("sessionStorage", storage);
+
     const firstFetch = vi
       .fn()
       .mockResolvedValueOnce(
