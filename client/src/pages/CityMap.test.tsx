@@ -49,3 +49,20 @@ it("keeps the destination catalog usable offline without loading street maps", (
   fireEvent.click(screen.getByRole("button", { name: /UPA.*Planejar viagem/ }));
   expect(navigate).toHaveBeenCalled();
 });
+
+
+it("offers a large-map mode without changing the destination catalog", () => {
+  render(<CityMap />);
+  const expand = screen.getByRole("button", { name: "Mapa grande" });
+  fireEvent.click(expand);
+  expect(screen.getByRole("button", { name: "Mapa normal" })).toBeTruthy();
+  expect(screen.getByRole("textbox", { name: "Buscar destino no mapa" })).toBeTruthy();
+});
+
+it("keeps education as a first-class city layer", () => {
+  render(<CityMap />);
+  fireEvent.click(screen.getByRole("button", { name: "Educação" }));
+  expect(
+    screen.getByRole("button", { name: /Cora Coralina.*Planejar viagem/ })
+  ).toBeTruthy();
+});
