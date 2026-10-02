@@ -8,7 +8,10 @@ export type MapboxRouteResult = {
 };
 
 const DIRECTIONS_BASE = "https://api.mapbox.com/directions/v5/mapbox";
-const REQUEST_TIMEOUT_MS = 8_000;
+const REQUEST_TIMEOUT_MS = 6_000;
+const FAILURE_COOLDOWN_MS = 2 * 60_000;
+let unavailableUntil = 0;
+let inFlight = new Map<string, Promise<MapboxRouteResult | null>>();
 
 export function getOptionalMapboxToken() {
   return import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN?.trim() || "";
@@ -18,6 +21,16 @@ export function hasOptionalMapboxConfigured(
   token = getOptionalMapboxToken()
 ) {
   return token.startsWith("pk.") && token.length > 8;
+}
+
+export function resetOptionalMapboxTestState() {
+  if (import.meta.env.MODE !== "test") return;
+  unavailableUntil = 0;
+  inFlight.clear();
+}
+
+export function isOptionalMapboxCoolingDown(now = Date.now()) {
+  return unavailableUntil > now;
 }
 
 function profileFor(mode: MapboxTravelMode) {
@@ -76,8 +89,19 @@ export async function requestOptionalMapboxRoute(
   if (!hasOptionalMapboxConfigured(token)) return null;
 
   const profile = profileFor(mode);
-  if (!profile) return null;
+  if (!profile || isOptionalMapboxCoolingDown()) return null;
 
+  const requestKey = [
+    profile,
+    origin.lat.toFixed(5),
+    origin.lng.toFixed(5),
+    destination.lat.toFixed(5),
+    destination.lng.toFixed(5),
+  ].join(":");
+  const existing = inFlight.get(requestKey);
+  if (existing) return existing;
+
+  const task = (async () => {
   const coordinates =
     origin.lng +
     "," +
@@ -116,4 +140,15 @@ export async function requestOptionalMapboxRoute(
     durationSeconds: Number(route.duration),
     polyline: route.geometry as string,
   };
+  })().catch(error => {
+    unavailableUntil = Date.now() + FAILURE_COOLDOWN_MS;
+    throw error;
+  });
+
+  inFlight.set(requestKey, task);
+  const cleanup = () => {
+    if (inFlight.get(requestKey) === task) inFlight.delete(requestKey);
+  };
+  void task.then(cleanup, cleanup);
+  return task;
 }
