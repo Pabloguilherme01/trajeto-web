@@ -1,3 +1,5 @@
+import { clearPrivateLocationHandoff } from "./locationPrivacy";
+
 const APP_PREFIXES = ["trajeto-", "trajeto:"];
 const LOCAL_DATA_EVENT = "trajeto-local-data-cleared";
 
@@ -12,12 +14,30 @@ export function listLocalAppKeys(): string[] {
 
 export function clearLocalAppData(): number {
   if (typeof window === "undefined") return 0;
-  const keys = listLocalAppKeys();
-  try {
-    for (const key of keys) window.localStorage.removeItem(key);
-    window.dispatchEvent(new CustomEvent(LOCAL_DATA_EVENT));
-  } catch {}
-  return keys.length;
+  clearPrivateLocationHandoff();
+  let removed = 0;
+  for (const name of ["localStorage", "sessionStorage"] as const) {
+    try {
+      const storage = window[name];
+      const keys: string[] = [];
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = storage.key(index);
+        if (key && APP_PREFIXES.some(prefix => key.startsWith(prefix))) keys.push(key);
+      }
+      for (const key of keys) {
+        try {
+          storage.removeItem(key);
+          removed += 1;
+        } catch {
+          // A blocked entry must not prevent deletion of the remaining data.
+        }
+      }
+    } catch {
+      // Each storage area can be blocked independently by the browser.
+    }
+  }
+  window.dispatchEvent(new CustomEvent(LOCAL_DATA_EVENT));
+  return removed;
 }
 
 export const localDataEvent = LOCAL_DATA_EVENT;
