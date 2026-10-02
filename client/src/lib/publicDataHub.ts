@@ -26,9 +26,20 @@ export type PublicDataResource = {
   updateFrequency?: string;
   official: boolean;
   offlinePolicy: "metadata" | "snapshot";
+  freshness: "catalog" | "snapshot" | "static" | "realtime";
+  observedAt?: string;
   localPath?: string;
   keywords: string[];
 };
+
+export function publicDataFreshnessLabel(resource: PublicDataResource) {
+  if (resource.freshness === "realtime") return "Tempo real";
+  if (resource.freshness === "static") return "Dados estáticos";
+  if (resource.freshness === "snapshot") return resource.observedAt
+    ? `Snapshot · ${resource.observedAt}`
+    : "Snapshot";
+  return "Catálogo de fonte";
+}
 
 export type SemiurbanFare = {
   id: string;
@@ -107,6 +118,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
       "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos",
     official: true,
     offlinePolicy: "snapshot",
+    freshness: "snapshot",
     localPath: "/postos",
     keywords: [
       "anp",
@@ -133,6 +145,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Mensal",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados#transporte",
     keywords: [
       "antt",
@@ -163,6 +176,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Diária",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/servicos?categoria=saude",
     keywords: [
       "cnes",
@@ -189,6 +203,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Anual · Censo Escolar",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/servicos?categoria=educacao",
     keywords: [
       "inep",
@@ -214,6 +229,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Mensal",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/planejar",
     keywords: [
       "prf",
@@ -237,6 +253,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
       "https://servicodados.ibge.gov.br/api/docs/localidades",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/mapa",
     keywords: [
       "ibge",
@@ -260,6 +277,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     sourceUrl: "https://wiki.openstreetmap.org/wiki/Overpass_API",
     official: false,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/buscar",
     keywords: [
       "openstreetmap",
@@ -287,6 +305,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Diária",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados?recurso=inmet-alertas",
     keywords: [
       "inmet",
@@ -314,6 +333,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "21/07/2026",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados?recurso=defesa-civil-alertas",
     keywords: [
       "defesa civil",
@@ -342,6 +362,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "11/03/2026",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados?recurso=dnit-rodovias",
     keywords: [
       "dnit",
@@ -370,6 +391,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Periódica",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados?recurso=anatel-cobertura",
     keywords: [
       "anatel",
@@ -396,6 +418,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "24/12/2025",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "static",
     localPath: "/dados#transporte",
     keywords: [
       "gtfs",
@@ -425,6 +448,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Mensal",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados?recurso=bcb-correspondentes",
     keywords: [
       "banco",
@@ -451,6 +475,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "01/08/2025",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/servicos?categoria=assistencia",
     keywords: [
       "mds",
@@ -479,6 +504,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "21/06/2026",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/servicos?categoria=saude",
     keywords: [
       "samu",
@@ -504,6 +530,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "15/12/2025",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/dados?recurso=monitorar-ar",
     keywords: [
       "qualidade do ar",
@@ -530,6 +557,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updateFrequency: "Semanal",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/servicos?categoria=saude",
     keywords: [
       "vacina",
@@ -554,6 +582,7 @@ export const PUBLIC_DATA_RESOURCES: PublicDataResource[] = [
     updatedAt: "29/09/2026",
     official: true,
     offlinePolicy: "metadata",
+    freshness: "catalog",
     localPath: "/buscar?q=farmacia%20popular",
     keywords: [
       "farmacia popular",
