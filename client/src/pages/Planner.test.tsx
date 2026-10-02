@@ -424,4 +424,15 @@ describe("Planner travel state", () => {
     expect(screen.getByRole("button", { name: "Abrir rota" }).parentElement?.className).toContain("min-[360px]:grid-cols-2");
   });
 
+
+  it("keeps planner mode and travel-mode controls responsive below 360px", () => {
+    render(<Planner />);
+    const smart = screen.getByRole("button", { name: /Inteligente/i });
+    const walking = screen.getByRole("button", { name: /A pé/i });
+    expect(smart.parentElement?.className).toContain("grid-cols-1");
+    expect(smart.parentElement?.className).toContain("min-[360px]:grid-cols-2");
+    expect(walking.parentElement?.className).toContain("grid-cols-2");
+    expect(walking.parentElement?.className).toContain("min-[420px]:grid-cols-4");
+  });
+
 });
