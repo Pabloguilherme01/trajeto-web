@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { externalNavigationUrl, findOfflineRouteByDestination, findOfflineRouteByTrip, isOfflineRouteStale, offlineRouteId, offlineRouteShareText, offlineRouteShareUrl } from "./offlineStore";
+import { externalNavigationUrl, findBestOfflineRouteForTrip, findOfflineRouteByDestination, findOfflineRouteByTrip, isOfflineRouteStale, offlineRouteId, offlineRouteShareText, offlineRouteShareUrl } from "./offlineStore";
 
 describe("offlineStore helpers", () => {
   it("normalizes route ids consistently", () => {
@@ -13,6 +13,22 @@ describe("offlineStore helpers", () => {
     ];
 
     expect(findOfflineRouteByDestination(routes, " brasília ")?.id).toBe("1");
+  });
+
+  it("matches saved destinations across accents and repeated spaces", () => {
+    const routes = [
+      {
+        id: "1",
+        origin: "Águas Lindas",
+        destination: "Praça da Bíblia",
+        savedAt: new Date().toISOString(),
+        payload: {},
+      },
+    ];
+
+    expect(findOfflineRouteByDestination(routes, " praca   da biblia ")?.id).toBe(
+      "1"
+    );
   });
 
   it("finds an exact saved trip instead of a destination-only match", () => {
@@ -56,6 +72,45 @@ describe("offlineStore helpers", () => {
     expect(offlineRouteShareUrl(publicRoute)).toBe("/planejar?destino=Hospital&origem=Centro");
     expect(offlineRouteShareText(privateRoute)).toContain("Minha localização → Hospital");
   });
+
+  it("prefers a saved route with the requested travel mode and never auto-reuses private origins", () => {
+    const routes = [
+      {
+        id: "old-driving",
+        origin: "Casa",
+        destination: "Hospital",
+        savedAt: "2026-10-01T10:00:00.000Z",
+        payload: { route: { mode: "driving" } },
+      },
+      {
+        id: "new-walking",
+        origin: "Casa",
+        destination: "Hospital",
+        savedAt: "2026-10-02T10:00:00.000Z",
+        payload: { route: { mode: "walking" } },
+      },
+      {
+        id: "private",
+        origin: "Minha localização",
+        destination: "Hospital",
+        savedAt: "2026-10-02T11:00:00.000Z",
+        payload: { route: { mode: "walking" } },
+      },
+    ];
+
+    expect(
+      findBestOfflineRouteForTrip(routes as any, "Casa", "Hospital", "walking")?.id
+    ).toBe("new-walking");
+    expect(
+      findBestOfflineRouteForTrip(
+        routes as any,
+        "Minha localização",
+        "Hospital",
+        "walking"
+      )
+    ).toBeNull();
+  });
+
   it("builds a safe offline id after a private origin is normalized", () => {
     expect(offlineRouteId("Minha localização", "Hospital")).toBe("minha localização::hospital");
     expect(offlineRouteId("Minha localização", "Hospital")).not.toContain("-15.");

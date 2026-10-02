@@ -7,17 +7,17 @@ import { clearPrivateLocationHandoff, setPrivateLocationHandoff } from "@/lib/lo
 
 const state = vi.hoisted(() => ({
   path: "/planejar", search: "origem=Casa&destino=Trabalho", staticRuntime: false,
-  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(),
-  saveOffline: vi.fn(),
+  navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(), offlineRoute: vi.fn(),
+  saveOffline: vi.fn(), listOffline: vi.fn(),
 }));
 vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.staticRuntime, supportsLiveRouting: () => !state.staticRuntime }));
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
-vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
+vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, calculateOfflineRoute: state.offlineRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline, source: result.source, mode: result.mode }, stops: [], anpReferences: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
-vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: state.saveOffline, removeOfflineRoute: vi.fn() }));
+vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: state.listOffline, getOfflineRoute: state.lookup, offlineRouteId: vi.fn(() => "route-id"), saveOfflineRoute: state.saveOffline, removeOfflineRoute: vi.fn(), isOfflineRouteStale: vi.fn(() => false), findBestOfflineRouteForTrip: (routes: any[], origin: string, destination: string, mode: string) => routes.find(route => route.origin === origin && route.destination === destination && (route.payload?.route?.mode ?? "driving") === mode) ?? null }));
 vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map" /> }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
@@ -34,7 +34,9 @@ beforeEach(() => {
   const routeResult = { origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -47.88 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" };
   state.publicRoute.mockReset().mockResolvedValue(routeResult);
   state.privateRoute.mockReset().mockResolvedValue(routeResult);
+  state.offlineRoute.mockReset().mockResolvedValue({ ...routeResult, source: "local-estimate", mode: "driving" });
   state.saveOffline.mockReset().mockResolvedValue(undefined);
+  state.listOffline.mockReset().mockResolvedValue([]);
   state.lookup.mockReset();
   state.navigate.mockReset();
 });
@@ -224,6 +226,49 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(screen.queryByRole("button", { name: "Salvar offline" })).toBeNull();
+  });
+
+  it("reuses an exact saved route automatically in offline planner mode", async () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+    state.listOffline.mockResolvedValueOnce([
+      {
+        id: "saved-trip",
+        origin: "Casa",
+        destination: "Trabalho",
+        savedAt: "2026-10-02T12:00:00.000Z",
+        payload: {
+          ...payload,
+          route: { ...payload.route, mode: "driving", source: "osrm" },
+          anpReferences: [],
+        },
+      },
+    ]);
+
+    render(<Planner />);
+    await waitFor(() => expect(state.listOffline).toHaveBeenCalled());
+    submit();
+
+    expect(await screen.findByTestId("route-map")).toBeTruthy();
+    expect(state.offlineRoute).not.toHaveBeenCalled();
+    expect(state.publicRoute).not.toHaveBeenCalled();
+    expect(state.mutate).not.toHaveBeenCalled();
+    expect(screen.getByText(/usando a melhor rota já salva/i)).toBeTruthy();
+  });
+
+  it("uses local-only routing in offline planner mode when no exact saved route exists", async () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Hospital";
+    render(<Planner />);
+    submit();
+
+    await waitFor(() =>
+      expect(state.offlineRoute).toHaveBeenCalledWith(
+        "Casa",
+        "Hospital",
+        "driving"
+      )
+    );
+    expect(state.publicRoute).not.toHaveBeenCalled();
+    expect(state.mutate).not.toHaveBeenCalled();
   });
 
   it("opens a saved route by id and reports a missing route", async () => {

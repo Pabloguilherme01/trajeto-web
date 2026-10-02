@@ -1,4 +1,4 @@
-import { PRIVATE_LOCATION_LABEL, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { PRIVATE_LOCATION_LABEL, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -270,21 +270,66 @@ export function offlineRouteId(origin: string, destination: string) {
 }
 
 
+function normalizeOfflineMatchText(value: string) {
+  return value
+    .trim()
+    .toLocaleLowerCase("pt-BR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
 export function findOfflineRouteByDestination(routes: OfflineRoute[], destination: string) {
-  const target = destination.trim().toLocaleLowerCase("pt-BR");
+  const target = normalizeOfflineMatchText(destination);
   if (!target) return null;
-  return routes.find(route => route.destination.trim().toLocaleLowerCase("pt-BR") === target) ?? null;
+  return routes.find(route => normalizeOfflineMatchText(route.destination) === target) ?? null;
 }
 
 export function findOfflineRouteByTrip(routes: OfflineRoute[], origin: string, destination: string) {
-  const normalizedOrigin = origin.trim().toLocaleLowerCase("pt-BR");
-  const normalizedDestination = destination.trim().toLocaleLowerCase("pt-BR");
+  const normalizedOrigin = normalizeOfflineMatchText(origin);
+  const normalizedDestination = normalizeOfflineMatchText(destination);
   if (!normalizedOrigin || !normalizedDestination) return null;
 
   return routes.find(route =>
-    route.origin.trim().toLocaleLowerCase("pt-BR") === normalizedOrigin &&
-    route.destination.trim().toLocaleLowerCase("pt-BR") === normalizedDestination,
+    normalizeOfflineMatchText(route.origin) === normalizedOrigin &&
+    normalizeOfflineMatchText(route.destination) === normalizedDestination,
   ) ?? null;
+}
+
+export function offlineRouteTravelMode(route: OfflineRoute) {
+  if (!isRecord(route.payload) || !isRecord(route.payload.route)) return "driving";
+  const mode = route.payload.route.mode;
+  return mode === "walking" || mode === "cycling" || mode === "transit"
+    ? mode
+    : "driving";
+}
+
+export function findBestOfflineRouteForTrip(
+  routes: OfflineRoute[],
+  origin: string,
+  destination: string,
+  mode: "driving" | "walking" | "cycling" | "transit" = "driving"
+) {
+  const normalizedOrigin = normalizeOfflineMatchText(origin);
+  const normalizedDestination = normalizeOfflineMatchText(destination);
+  if (!normalizedOrigin || !normalizedDestination) return null;
+
+  return (
+    routes
+      .filter(route => !isPreciseLocationText(route.origin))
+      .filter(
+        route =>
+          normalizeOfflineMatchText(route.origin) === normalizedOrigin &&
+          normalizeOfflineMatchText(route.destination) === normalizedDestination
+      )
+      .sort((a, b) => {
+        const modeScore =
+          Number(offlineRouteTravelMode(b) === mode) -
+          Number(offlineRouteTravelMode(a) === mode);
+        if (modeScore) return modeScore;
+        return Date.parse(b.savedAt) - Date.parse(a.savedAt);
+      })[0] ?? null
+  );
 }
 
 export function isOfflineRouteStale(savedAt: string, now = Date.now(), maxAgeMs = STALE_ROUTE_MAX_AGE_MS) {

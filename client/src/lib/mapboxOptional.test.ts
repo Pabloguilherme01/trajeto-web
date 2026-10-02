@@ -55,11 +55,42 @@ it("uses the traffic-aware Mapbox driving profile with privacy-safe request opti
   const url = new URL(String(rawUrl));
   expect(url.pathname).toContain("/directions/v5/mapbox/driving-traffic/");
   expect(url.searchParams.get("geometries")).toBe("polyline");
+  expect(url.searchParams.get("alternatives")).toBe("true");
   expect(url.searchParams.get("access_token")).toBe(testToken);
   expect(options).toMatchObject({
     credentials: "omit",
     referrerPolicy: "origin",
     cache: "no-store",
+  });
+});
+
+it("selects the fastest valid Mapbox alternative instead of trusting provider order", async () => {
+  const fetchMock = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        code: "Ok",
+        routes: [
+          { distance: 3900, duration: 520, geometry: "slower" },
+          { distance: 4100, duration: 430, geometry: "faster" },
+          { distance: 100, duration: null, geometry: "invalid" },
+        ],
+      }),
+      { status: 200 }
+    )
+  );
+  vi.stubGlobal("fetch", fetchMock);
+
+  const result = await requestOptionalMapboxRoute(
+    { lat: -15.754, lng: -48.262 },
+    { lat: -15.736, lng: -48.27 },
+    "driving",
+    testToken
+  );
+
+  expect(result).toEqual({
+    distanceMeters: 4100,
+    durationSeconds: 430,
+    polyline: "faster",
   });
 });
 

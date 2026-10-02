@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs, resetPublicRoutingTestState } from "./publicRouting";
+import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs, resetPublicRoutingTestState } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
@@ -275,6 +275,87 @@ describe("public routing fallback", () => {
     expect(onlyUrl).not.toContain("-15.76123");
     expect(onlyUrl).not.toContain("-48.28123");
     expect(onlyUrl).not.toContain("router.project-osrm.org");
+  });
+
+  it("calculates a prepared city route in explicit offline mode without any network request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculateOfflineRoute(
+      "-15.7545,-48.2816",
+      "UPA Mansões Odisseia",
+      "driving"
+    );
+
+    expect(route.source).toBe("local-estimate");
+    expect(route.destination).toEqual({ lat: -15.77665, lng: -48.27935 });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("reuses an address geocoded earlier when the device later needs an offline route", async () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => saved.set(key, value),
+      removeItem: (key: string) => saved.delete(key),
+      clear: () => saved.clear(),
+      key: (index: number) => Array.from(saved.keys())[index] ?? null,
+      get length() {
+        return saved.size;
+      },
+    };
+    vi.stubGlobal("localStorage", storage);
+    vi.stubGlobal("sessionStorage", storage);
+
+    const firstFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ lat: "-15.79", lon: "-48.24" }]), {
+          status: 200,
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            code: "Ok",
+            routes: [{ distance: 6400, duration: 720, geometry: "cached-online" }],
+          }),
+          { status: 200 }
+        )
+      );
+    vi.stubGlobal("fetch", firstFetch);
+
+    await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "Rua Preparada 123, Águas Lindas de Goiás, GO"
+    );
+
+    const offlineFetch = vi.fn();
+    vi.stubGlobal("fetch", offlineFetch);
+    const route = await calculateOfflineRoute(
+      "-15.7545,-48.2816",
+      "Rua Preparada 123, Águas Lindas de Goiás, GO"
+    );
+
+    expect(route.source).toBe("osrm");
+    expect(route.polyline).toBe("cached-online");
+    expect(route.distanceMeters).toBe(6400);
+    expect(route.destination).toEqual({ lat: -15.79, lng: -48.24 });
+    expect(offlineFetch).not.toHaveBeenCalled();
+  });
+
+  it("fails closed in explicit offline mode when a place is not locally prepared", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculateOfflineRoute(
+        "-15.7545,-48.2816",
+        "Destino inexistente para teste offline",
+        "driving"
+      )
+    ).rejects.toThrow(/totalmente offline/i);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("does not call the public geocoder while the device is offline", async () => {

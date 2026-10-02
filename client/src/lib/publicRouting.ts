@@ -631,6 +631,72 @@ function buildLocalEstimate(
   };
 }
 
+export async function calculateOfflineRoute(
+  originText: string,
+  destinationText: string,
+  mode: PublicTravelMode = "driving"
+): Promise<PublicRoute> {
+  const parsedOrigin = parseCoordinateInput(originText);
+  const parsedDestination = parseCoordinateInput(destinationText);
+  const cachedOrigin = cacheGet<PublicCoordinate>(
+    geocodeCacheKey(normalizeText(originText))
+  );
+  const cachedDestination = cacheGet<PublicCoordinate>(
+    geocodeCacheKey(normalizeText(destinationText))
+  );
+  const originResolved =
+    parsedOrigin ??
+    localGeocode(originText) ??
+    (isCoordinate(cachedOrigin) ? cachedOrigin : null);
+  const destination =
+    parsedDestination ??
+    localGeocode(destinationText) ??
+    (isCoordinate(cachedDestination) ? cachedDestination : null);
+
+  if (!originResolved || !destination) {
+    throw new Error(
+      "Essa rota ainda não está preparada para cálculo totalmente offline. Use uma rota salva ou conecte-se uma vez para preparar os locais."
+    );
+  }
+
+  const origin = parsedOrigin
+    ? {
+        lat: Math.round(originResolved.lat * 1000) / 1000,
+        lng: Math.round(originResolved.lng * 1000) / 1000,
+      }
+    : originResolved;
+
+  const cachedRouteKey =
+    "route:" +
+    [
+      origin.lat.toFixed(5),
+      origin.lng.toFixed(5),
+      destination.lat.toFixed(5),
+      destination.lng.toFixed(5),
+    ].join(",") +
+    ":" +
+    mode;
+  const cachedRoute = cacheGet<PublicRoute>(cachedRouteKey);
+  if (
+    isPublicRoute(cachedRoute) &&
+    cachedRoute.mode === mode &&
+    Math.abs(cachedRoute.origin.lat - origin.lat) < 0.00002 &&
+    Math.abs(cachedRoute.origin.lng - origin.lng) < 0.00002 &&
+    Math.abs(cachedRoute.destination.lat - destination.lat) < 0.00002 &&
+    Math.abs(cachedRoute.destination.lng - destination.lng) < 0.00002
+  ) {
+    return cachedRoute;
+  }
+
+  if (haversineMeters(origin, destination) < 20) {
+    throw new Error(
+      "Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes."
+    );
+  }
+
+  return buildLocalEstimate(origin, destination, mode);
+}
+
 export async function calculatePrivateLocationRoute(
   originText: string,
   destinationText: string,
