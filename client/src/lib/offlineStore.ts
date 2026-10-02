@@ -206,6 +206,25 @@ export async function removeOfflineRoute(id: string) {
   return true;
 }
 
+export async function countOfflineRoutes() {
+  if (!hasIndexedDb()) return 0;
+  return (await listOfflineRoutes()).length;
+}
+
+export async function clearOfflineRoutes() {
+  if (!hasIndexedDb()) return 0;
+
+  const keys = await withStore<IDBValidKey[]>("readwrite", store => {
+    const request = store.getAllKeys();
+    request.addEventListener("success", () => {
+      store.clear();
+    });
+    return request;
+  });
+  if (keys.length > 0) notifyOfflineRouteChange();
+  return keys.length;
+}
+
 function migratedOfflineRouteId(id: string) {
   const separator = id.indexOf("::");
   if (separator <= 0) return id;
