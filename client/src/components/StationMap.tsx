@@ -8,6 +8,7 @@ import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
 import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
+import { localDataEvent } from "@/lib/localData";
 
 export type StationMapItem = {
   id?: string;
@@ -144,6 +145,29 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
+  }, []);
+
+  useEffect(() => {
+    const clearPrivateMapState = () => {
+      if (userMarker.current) {
+        userMarker.current.map = null;
+        userMarker.current = null;
+      }
+      setMapMessage(null);
+      const map = mapRef.current;
+      if (map) {
+        map.setCenter({ lat: -15.7545, lng: -48.2816 });
+        map.setZoom(12);
+      }
+    };
+    window.addEventListener(localDataEvent, clearPrivateMapState);
+    return () => {
+      window.removeEventListener(localDataEvent, clearPrivateMapState);
+      if (userMarker.current) {
+        userMarker.current.map = null;
+        userMarker.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
