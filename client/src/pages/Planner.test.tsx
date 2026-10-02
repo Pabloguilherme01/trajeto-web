@@ -17,7 +17,7 @@ vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTri
 vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline }, stops: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
 vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: async () => [], getOfflineRoute: state.lookup, offlineRouteId: vi.fn(), saveOfflineRoute: state.saveOffline, removeOfflineRoute: vi.fn() }));
-vi.mock("@/components/RouteMap", () => ({ RouteMap: () => null }));
+vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map" /> }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
 const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value } });
@@ -40,6 +40,18 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Planner travel state", () => {
+  it.each([false, true])("opens the map automatically after calculation (static=%s)", async staticRuntime => {
+    state.staticRuntime = staticRuntime;
+    render(<Planner />);
+    submit();
+    expect(await screen.findByTestId("route-map")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Ocultar mapa/ }));
+    expect(screen.queryByTestId("route-map")).toBeNull();
+    changeDestination("Hospital");
+    submit();
+    expect(await screen.findByTestId("route-map")).toBeTruthy();
+  });
+
   it("updates the destination when a favorite changes only the query string", () => {
     const view = render(<Planner />);
     state.search = "destino=Hospital";

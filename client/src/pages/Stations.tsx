@@ -912,6 +912,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
         {!showSavedOnly && broadAguasLindasQuery && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
+            <details>
+              <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-bold text-white">
+                Consultar dados oficiais e exportar cadastro
+                <span className="text-xs font-normal text-white/65">ANP</span>
+              </summary>
+
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Fonte oficial ANP</p>
@@ -923,7 +929,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             {anpLiveQuery.isLoading && !staticRuntime && <div className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/65">Consultando a base oficial da ANP…</div>}
             {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-11 rounded-xl border border-[#FFB86B]/20 px-3 font-black text-[#FFD09A]">Tentar novamente</button></div>}
-            {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">O snapshot oficial ainda não chegou ao GitHub Pages. A sincronização automática da ANP foi configurada e a base local continua disponível enquanto isso.</div>}
+            {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">Os dados oficiais não estão disponíveis nesta consulta. Use as fichas locais abaixo e tente atualizar quando estiver conectado.</div>}
 
             {(anpRows.length > 0 || mapStations.length > 0) && (
               <>
@@ -1008,6 +1014,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             )}
 
             <p className="mt-3 text-xs leading-relaxed text-white/65">Fonte: API de Revendedores da ANP. Cache de mapa: {offlineMapAge}. Última consulta oficial: {(anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) ? new Date((anpLiveQuery.data?.retrievedAt || staticAnpRetrievedAt) as string).toLocaleString("pt-BR") : "ainda não registrada"}.</p>
+            </details>
           </section>
         )}
 
