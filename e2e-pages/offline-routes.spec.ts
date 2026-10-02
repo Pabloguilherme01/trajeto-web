@@ -63,10 +63,10 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
   });
   await planRoute(page);
   await page
-    .getByRole("button", { name: "Salvar offline", exact: true })
+    .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
   await expect(
-    page.getByText("Cópia offline atualizada neste aparelho.")
+    page.getByText("Viagem preparada para uso offline neste aparelho.")
   ).toBeVisible();
   const ids = await page.evaluate(async () => {
     const open = indexedDB.open("trajeto-offline", 2);
@@ -120,13 +120,13 @@ test("Pages: an aborted IndexedDB transaction never announces a saved route", as
   });
   await planRoute(page);
   await page
-    .getByRole("button", { name: "Salvar offline", exact: true })
+    .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
   await expect(
-    page.getByText("Não foi possível salvar a rota neste aparelho.")
+    page.getByText("Não foi possível preparar esta viagem para uso offline.")
   ).toBeVisible();
   await expect(
-    page.getByText("Cópia offline atualizada neste aparelho.")
+    page.getByText("Viagem preparada para uso offline neste aparelho.")
   ).toHaveCount(0);
 });
 
