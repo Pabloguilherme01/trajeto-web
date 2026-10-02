@@ -246,33 +246,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   const mapStations = useMemo<StationMapItem[]>(() => {
     const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
-    const official: StationMapItem[] = anpStations
-      .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
-      .map(station => ({
-        id: "anp-" + station.cnpj,
-        name: station.razaoSocial || "Posto " + station.cnpj,
-        address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
-        lat: station.latitude as number,
-        lng: station.longitude as number,
-        cnpj: station.cnpj,
-        brand: station.distribuidora,
-        source: "ANP" as const,
-      }));
-
-    const local: StationMapItem[] = aguasLindasCatalog.map(station => ({
-      id: "local-" + station.cnpj,
-      name: station.displayName || station.legalName,
-      address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
-      ...(Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude)
-        ? { lat: Number(station.anp?.latitude), lng: Number(station.anp?.longitude) }
-        : {}),
-      cnpj: station.cnpj,
-      brand: station.brand || station.mapData?.observedBrand,
-      source: "local" as const,
-    }));
-
+    // The consolidated directory is the canonical map entity for stations with a
+    // CNPJ. It already merges ANP + local catalog data, so adding those sources
+    // separately would create duplicate representations of the same station.
     const directory: StationMapItem[] = directoryCards.map(item => ({
-      id: "directory-" + item.key,
+      id: "station-" + item.key,
       name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
       address: [
         item.anp?.endereco || item.local?.address,
@@ -288,7 +266,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           : {}),
       cnpj: item.anp?.cnpj || item.local?.cnpj || null,
       brand: item.anp?.distribuidora || item.local?.brand || item.local?.mapData?.observedBrand || null,
-      source: "local" as const,
+      source: item.anp ? "ANP" as const : "local" as const,
     }));
 
     const live: StationMapItem[] = liveStations
@@ -307,7 +285,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
     const seen = new Set<string>();
     const merged: StationMapItem[] = [];
-    for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
+    for (const station of [...directory, ...live, ...offlineMap]) {
       const key = station.cnpj
         ? "cnpj:" + station.cnpj
         : station.placeId
