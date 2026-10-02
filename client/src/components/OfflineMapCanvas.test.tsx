@@ -109,3 +109,17 @@ it("rejects an incompatible pack and allows a manual recovery", async () => {
     expect(screen.getByText(/Ruas locais disponíveis/)).toBeTruthy()
   );
 });
+
+it("rejects an empty street pack rather than claiming offline readiness", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({ ...pack, roads: [] })))
+  );
+  await setup();
+  await screen.findByText(/Ruas indisponíveis/);
+  expect(
+    screen.getByRole("button", { name: "Selecionar Origem" })
+  ).toBeTruthy();
+});

@@ -22,26 +22,26 @@ export function loadOfflineMapPack() {
         if (!response.ok) throw new Error("map unavailable");
         const data = (await response.json()) as MapPack;
         if (
-          data.schema !== 1 || !Number.isFinite(Date.parse(data.retrievedAt)) ||
+          data.schema !== 1 ||
+          !Number.isFinite(Date.parse(data.retrievedAt)) ||
           !Array.isArray(data.roads) ||
           data.roads.length > 12000
         )
           throw new Error("map invalid");
-        return {
-          ...data,
-          roads: data.roads.filter(
-            road =>
-              Number.isFinite(road.id) &&
-              typeof road.name === "string" &&
-              typeof road.kind === "string" &&
-              Array.isArray(road.points) &&
-              road.points.length >= 2 &&
-              road.points.length < 10000 &&
-              road.points.every(
-                p => Array.isArray(p) && isMapPoint({ lat: p[0], lng: p[1] })
-              )
-          ),
-        };
+        const roads = data.roads.filter(
+          road =>
+            Number.isFinite(road.id) &&
+            typeof road.name === "string" &&
+            typeof road.kind === "string" &&
+            Array.isArray(road.points) &&
+            road.points.length >= 2 &&
+            road.points.length < 10000 &&
+            road.points.every(
+              p => Array.isArray(p) && isMapPoint({ lat: p[0], lng: p[1] })
+            )
+        );
+        if (!roads.length) throw new Error("map empty");
+        return { ...data, roads };
       })
       .catch(error => {
         packPromise = undefined;
@@ -89,7 +89,13 @@ export default function OfflineMapCanvas({
   const validMarkers = markers.filter(isMapPoint);
   const validGeometry = routePoints.filter(isMapPoint);
   const stride = Math.max(1, Math.ceil(validGeometry.length / 6000));
-  const geometry = stride === 1 ? validGeometry : [...validGeometry.filter((_, i) => i % stride === 0), validGeometry[validGeometry.length - 1]];
+  const geometry =
+    stride === 1
+      ? validGeometry
+      : [
+          ...validGeometry.filter((_, i) => i % stride === 0),
+          validGeometry[validGeometry.length - 1],
+        ];
   const fingerprint =
     validMarkers.map(p => `${p.id}:${p.lat}:${p.lng}`).join("|") +
     geometry.length +
@@ -142,8 +148,16 @@ export default function OfflineMapCanvas({
   const camera = useMemo(() => {
     const points = [...validMarkers, ...geometry].map(world);
     if (!points.length) points.push(world({ lat: -15.7545, lng: -48.2816 }));
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    for (const point of points) { minX = Math.min(minX, point.x); maxX = Math.max(maxX, point.x); minY = Math.min(minY, point.y); maxY = Math.max(maxY, point.y); }
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
+    for (const point of points) {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+    }
     const scale = Math.min(
       (size.width - 70) / Math.max(maxX - minX, 0.00004),
       (size.height - 100) / Math.max(maxY - minY, 0.00004)
