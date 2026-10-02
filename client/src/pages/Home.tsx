@@ -130,18 +130,6 @@ export default function Home() {
     setLocation(buildNearbyStationsUrl(appUrl("/postos")));
   };
 
-  const openServiceSearch = (query: string) => {
-    rememberSearch(query);
-    rememberIntent("search");
-    const internalSearch = appUrl("/buscar") + "?q=" + encodeURIComponent(query);
-    if (!online) {
-      setLocation(internalSearch);
-      return;
-    }
-    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
-    if (!opened) setLocation(internalSearch);
-  };
-
   const shareHome = async () => {
     try {
       const url = window.location.origin + appUrl("/");
