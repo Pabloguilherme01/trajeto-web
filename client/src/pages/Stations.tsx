@@ -452,7 +452,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const target = decodeURIComponent(hash.slice("#posto-".length));
     if (!target) return;
     const timer = window.setTimeout(() => {
-      document.getElementById("posto-" + encodeURIComponent(target))?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const element = document.getElementById("posto-" + encodeURIComponent(target));
+      if (!element) return;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      element.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      element.focus({ preventScroll: true });
     }, 120);
     return () => window.clearTimeout(timer);
   }, [directoryCards.length, directorySearch, location]);
