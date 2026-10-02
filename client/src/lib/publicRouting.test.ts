@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPublicRoutePayload, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs, resetPublicRoutingTestState } from "./publicRouting";
+import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, publicGeocoderWaitMs, resetPublicRoutingTestState } from "./publicRouting";
 
 describe("public routing fallback", () => {
   beforeEach(() => {
@@ -275,6 +275,35 @@ describe("public routing fallback", () => {
     expect(onlyUrl).not.toContain("-15.76123");
     expect(onlyUrl).not.toContain("-48.28123");
     expect(onlyUrl).not.toContain("router.project-osrm.org");
+  });
+
+  it("calculates a prepared city route in explicit offline mode without any network request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculateOfflineRoute(
+      "-15.7545,-48.2816",
+      "UPA Mansões Odisseia",
+      "driving"
+    );
+
+    expect(route.source).toBe("local-estimate");
+    expect(route.destination).toEqual({ lat: -15.77665, lng: -48.27935 });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed in explicit offline mode when a place is not locally prepared", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculateOfflineRoute(
+        "-15.7545,-48.2816",
+        "Destino inexistente para teste offline",
+        "driving"
+      )
+    ).rejects.toThrow(/totalmente offline/i);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("does not call the public geocoder while the device is offline", async () => {
