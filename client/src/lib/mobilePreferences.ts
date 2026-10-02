@@ -181,6 +181,9 @@ export function getRouteUsage(origin: string, destination: string) {
   } catch { return 0; }
 }
 export function rememberTrip(origin: string, destination: string) {
+  // A trip that started from device GPS must not become durable behavioral
+  // history on a shared browser/profile. Keep that trip session-only.
+  if (isPreciseLocationText(origin)) return;
   const normalizedOrigin = privateOriginForHistory(origin);
   const normalizedDestination = destination.trim();
   if (normalizedOrigin.length < 3 || normalizedDestination.length < 3) return;
