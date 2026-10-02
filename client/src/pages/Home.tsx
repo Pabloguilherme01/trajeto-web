@@ -133,10 +133,13 @@ export default function Home() {
   const openServiceSearch = (query: string) => {
     rememberSearch(query);
     rememberIntent("search");
-    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
-    if (!opened) {
-      setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(query));
+    const internalSearch = appUrl("/buscar") + "?q=" + encodeURIComponent(query);
+    if (!online) {
+      setLocation(internalSearch);
+      return;
     }
+    const opened = window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer");
+    if (!opened) setLocation(internalSearch);
   };
 
   const shareHome = async () => {
