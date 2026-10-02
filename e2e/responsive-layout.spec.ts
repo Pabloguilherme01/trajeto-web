@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("public screens stay inside the viewport before and after scrolling and focusing inputs", async ({ page }) => {
   test.setTimeout(120_000);
-  for (const width of [320, 360, 390, 768]) {
+  for (const width of [280, 320, 360, 390, 768]) {
     await page.setViewportSize({ width, height: 740 });
     for (const path of ["/", "/planejar", "/servicos", "/mapa", "/ajuda"]) {
       await page.goto("." + path);

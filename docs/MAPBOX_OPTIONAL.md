@@ -9,9 +9,9 @@ Quando `VITE_MAPBOX_PUBLIC_TOKEN` está configurado:
 - rotas de carro usam o perfil `driving-traffic`;
 - caminhada e bicicleta podem usar a rede de rotas do Mapbox;
 - a geometria retornada continua sendo exibida pelos mapas já existentes do Trajeto;
-- se Mapbox falhar ou não estiver configurado, o app continua automaticamente com OSRM e, por último, estimativa local.
+- se Mapbox falhar ou não estiver configurado, carro continua com OSRM e, por último, estimativa local; caminhada e bicicleta usam estimativa local.
 
-O modo `transit` não é enviado ao Directions API do Mapbox nesta integração.
+O modo `transit` usa estimativa local, sem linhas, horários, espera ou conexões confirmados. Não é enviado ao Directions API do Mapbox nem ao grafo de carro do OSRM nesta integração.
 
 ## O que não muda
 
@@ -43,8 +43,10 @@ Para rota pública online:
 
 1. cache/local;
 2. Mapbox, se explicitamente configurado;
-3. OSRM público;
+3. OSRM público, apenas para carro;
 4. estimativa local.
+
+O perfil OSRM é definido na preparação do grafo; trocar o segmento da URL não cria um grafo de caminhada ou bicicleta. [Documentação oficial dos perfis OSRM](https://project-osrm.org/docs/v26.4.0/profiles).
 
 Para localização precisa do aparelho:
 

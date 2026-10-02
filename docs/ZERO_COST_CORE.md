@@ -42,7 +42,7 @@ O Mapbox pode enriquecer rotas online quando `VITE_MAPBOX_PUBLIC_TOKEN` estiver 
 
 - carro usa `driving-traffic`; caminhada e bicicleta usam seus perfis próprios;
 - alternativas válidas são comparadas e a de menor duração é escolhida;
-- falha, timeout ou ausência do token cai automaticamente para OSRM e estimativa local;
+- falha, timeout ou ausência do token cai para OSRM e estimativa local no carro; caminhada e bicicleta usam estimativa local;
 - falhas ativam um cooldown curto para evitar repetição de requisições;
 - requisições idênticas simultâneas são deduplicadas;
 - modo Offline nunca depende do Mapbox;

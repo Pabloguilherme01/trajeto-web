@@ -626,6 +626,24 @@ describe("public routing fallback", () => {
     expect(payload.traffic.label).toContain("não disponível");
   });
 
+  it.each(["walking", "cycling"] as const)("does not relabel the OSRM car graph as %s", async mode => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const route = await calculatePublicRoute("-15.7,-48.2", "-15.8,-48.3", mode);
+    expect(route).toMatchObject({ source: "local-estimate", mode });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps transit estimates local instead of presenting a car route as public transport", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ code: "Ok", routes: [{ distance: 5000, duration: 300, geometry: "car-route" }] })));
+    vi.stubGlobal("fetch", fetchMock);
+    const route = await calculatePublicRoute("-15.7,-48.2", "-15.8,-48.3", "transit");
+    expect(route.source).toBe("local-estimate");
+    expect(route.mode).toBe("transit");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(buildPublicRoutePayload(route).traffic.detail).toMatch(/horários|linhas/);
+  });
+
   it("labels Mapbox driving routes as traffic-aware optional enrichment", () => {
     const payload = buildPublicRoutePayload({
       origin: { lat: -15.754, lng: -48.262 },

@@ -15,6 +15,7 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   const map = page.locator("#aguas-lindas-map");
   const picker = map.getByRole("combobox", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
+  await expect.poll(() => picker.locator("option").count()).toBeGreaterThan(1);
   const options = await picker.locator("option").evaluateAll(items =>
     items.map(item => ({ value: (item as HTMLOptionElement).value, name: item.textContent! }))
   );

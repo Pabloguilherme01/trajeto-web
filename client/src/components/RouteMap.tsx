@@ -35,6 +35,7 @@ type RouteMapProps = {
   stops: Stop[];
   routes?: RoutePreview[];
   privateOrigin?: boolean;
+  forceOffline?: boolean;
 };
 
 export function OfflineRoutePreview({
@@ -43,6 +44,7 @@ export function OfflineRoutePreview({
   stops = [],
   routes = [],
   privateOrigin = false,
+  forceOffline = false,
 }: RouteMapProps) {
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
@@ -162,7 +164,7 @@ export function OfflineRoutePreview({
               : ""}
           </p>
         )}
-        {navigation && (
+        {navigation && !forceOffline && (
           <a
             href={navigation}
             target="_blank"
@@ -188,6 +190,7 @@ export function RouteMap({
   stops,
   routes = [],
   privateOrigin = false,
+  forceOffline = false,
 }: RouteMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -394,6 +397,14 @@ export function RouteMap({
     trafficImpactSeconds == null
       ? null
       : Math.max(0, Math.round(trafficImpactSeconds / 60));
+
+  if (forceOffline) {
+    return (
+      <section className="overflow-hidden rounded-2xl border border-white/10" aria-label="Mapa offline da viagem">
+        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} forceOffline />
+      </section>
+    );
+  }
 
   if (privateOrigin) {
     return (

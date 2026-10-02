@@ -679,6 +679,8 @@ export async function calculateOfflineRoute(
   const cachedRoute = cacheGet<PublicRoute>(cachedRouteKey);
   if (
     isPublicRoute(cachedRoute) &&
+    (cachedRoute.source !== "osrm" || mode === "driving") &&
+    mode !== "transit" &&
     cachedRoute.mode === mode &&
     Math.abs(cachedRoute.origin.lat - origin.lat) < 0.00002 &&
     Math.abs(cachedRoute.origin.lng - origin.lng) < 0.00002 &&
@@ -745,6 +747,9 @@ export async function calculatePublicRoute(
       }
     : resolvedOrigin;
 
+  // Transit needs timetables and line data; a car graph is not a transit route.
+  if (mode === "transit") return buildLocalEstimate(origin, destination, mode);
+
   const coordinateKey =
     [
       origin.lat.toFixed(5),
@@ -761,6 +766,7 @@ export async function calculatePublicRoute(
     typeof navigator !== "undefined" && navigator.onLine === false;
   const cachedMatches =
     isPublicRoute(cached) &&
+    (cached.source !== "osrm" || mode === "driving") &&
     cached.mode === mode &&
     Math.abs(cached.origin.lat - origin.lat) < 0.00002 &&
     Math.abs(cached.origin.lng - origin.lng) < 0.00002 &&
@@ -802,6 +808,11 @@ export async function calculatePublicRoute(
       // OSRM/local fallback chain.
     }
 
+    // OSRM profiles are fixed when its graph is prepared. Changing the URL to
+    // foot/bike cannot turn the configured car graph into a walking/cycle graph.
+    // Mapbox above has explicit profiles; otherwise keep these modes estimated.
+    if (mode !== "driving") return buildLocalEstimate(origin, destination, mode);
+
     const now = Date.now();
     if (getRouterUnavailableUntil() > now) {
       if (cachedMatches) return cached;
@@ -810,11 +821,9 @@ export async function calculatePublicRoute(
       return estimated;
     }
 
-    const profile =
-      mode === "walking" ? "foot" : mode === "cycling" ? "bike" : "driving";
     const routingBase = OSRM_URL.replace(
       /\/route\/v1\/[^/]+$/,
-      "/route/v1/" + profile
+      "/route/v1/driving"
     );
     const url =
       routingBase +
@@ -924,7 +933,9 @@ export function buildPublicRoutePayload(result: PublicRoute) {
           ? "Tempo com trânsito Mapbox"
           : "Trânsito ao vivo não disponível",
       detail: estimated
-        ? "A rede viária pública não respondeu. Distância e tempo são uma estimativa e o navegador externo deve ser usado para navegação atualizada."
+        ? result.mode === "transit"
+          ? "Estimativa de deslocamento sem linhas, horários, espera ou conexões confirmados. Consulte o operador de transporte antes de sair."
+          : "Distância e tempo são estimados a partir das coordenadas disponíveis; não confirmam ruas ou caminhos adequados ao modo selecionado. Use a navegação externa para conferir o trajeto atualizado."
         : mapbox && result.mode === "driving"
           ? "O tempo da rota usa o perfil driving-traffic do Mapbox quando essa camada opcional está configurada."
           : mapbox

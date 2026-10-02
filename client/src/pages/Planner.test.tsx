@@ -17,12 +17,12 @@ vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.
 vi.mock("@/lib/mobilePreferences", () => ({ getLastTrip: () => null, rememberTrip: vi.fn() }));
 vi.mock("@/lib/publicRouting", () => ({ calculatePublicRoute: state.publicRoute, calculatePrivateLocationRoute: state.privateRoute, calculateOfflineRoute: state.offlineRoute, buildPublicRoutePayload: vi.fn(result => ({ route: { origin: result.origin, destination: result.destination, distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds, polyline: result.polyline, source: result.source, mode: result.mode }, stops: [], anpReferences: [], recommendation: null, traffic: { label: "Trânsito ao vivo não disponível", detail: "teste" } })) }));
 vi.mock("@/lib/mobileStationStore", () => ({ listMobileStationFavorites: () => [], toggleMobileStationFavorite: vi.fn() }));
-vi.mock("@/lib/offlineStore", () => ({ listOfflineRoutes: state.listOffline, getOfflineRoute: state.lookup, offlineRouteId: vi.fn(() => "route-id"), saveOfflineRoute: state.saveOffline, removeOfflineRoute: vi.fn(), isOfflineRouteStale: vi.fn(() => false), findBestOfflineRouteForTrip: (routes: any[], origin: string, destination: string, mode: string) => routes.find(route => route.origin === origin && route.destination === destination && (route.payload?.route?.mode ?? "driving") === mode) ?? null }));
+vi.mock("@/lib/offlineStore", async importOriginal => { const actual = await importOriginal<typeof import("@/lib/offlineStore")>(); return { ...actual, listOfflineRoutes: state.listOffline, getOfflineRoute: state.lookup, offlineRouteId: vi.fn(() => "route-id"), saveOfflineRoute: state.saveOffline, removeOfflineRoute: vi.fn(), isOfflineRouteStale: vi.fn(() => false) }; });
 vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="route-map" /> }));
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
 const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value } });
-const submit = () => fireEvent.click(screen.getByRole("button", { name: "Calcular rota" }));
+const submit = () => fireEvent.click(screen.getByRole("button", { name: /Calcular rota|Encontrar melhor rota|Usar rota offline|Preparar condução|Planejar (transporte|caminhada|bicicleta)/ }));
 
 beforeEach(() => {
   vi.stubGlobal("React", React);
@@ -43,6 +43,29 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Planner travel state", () => {
+  it("shows whether the exact trip is prepared offline and how fresh it is", async () => {
+    state.listOffline.mockResolvedValueOnce([
+      {
+        id: "prepared",
+        origin: "Casa",
+        destination: "Trabalho",
+        savedAt: new Date().toISOString(),
+        payload: { ...payload, route: { ...payload.route, mode: "driving" } },
+      },
+    ]);
+    render(<Planner />);
+    await waitFor(() => expect(state.listOffline).toHaveBeenCalled());
+    expect(await screen.findByText("Pronta · recente")).toBeTruthy();
+    expect(screen.getByText(/Esta viagem pode ser recuperada no aparelho/i)).toBeTruthy();
+  });
+
+  it("changes the main action when explicit offline mode is selected", () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+    render(<Planner />);
+    expect(screen.getByRole("button", { name: "Calcular rota" }).textContent).toContain("Usar rota offline");
+    expect(screen.queryByRole("button", { name: "Abrir Google Maps agora" })).toBeNull();
+  });
+
   it("does not reopen a saved route whose read finishes after deletion", async () => {
     state.search = "rota=old-route";
     let finish!: (value: unknown) => void;
@@ -52,6 +75,18 @@ describe("Planner travel state", () => {
     await act(async () => finish({ id: "old-route", origin: "Casa antiga", destination: "Trabalho antigo", payload }));
     expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("");
     expect(screen.queryByTestId("route-map")).toBeNull();
+  });
+
+  it("keeps external navigation hidden after an offline result is calculated", async () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    for (const name of ["Google Maps", "Waze", "Apple Maps"]) {
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    }
+    expect(screen.getByRole("button", { name: "Compartilhar" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Salvar offline" })).toBeTruthy();
   });
   it("keeps a manually edited origin when an earlier GPS request finishes", () => {
     let gps!: PositionCallback;
@@ -269,6 +304,16 @@ describe("Planner travel state", () => {
     );
     expect(state.publicRoute).not.toHaveBeenCalled();
     expect(state.mutate).not.toHaveBeenCalled();
+  });
+
+  it("recalculates locally instead of reopening a saved car trip for walking", async () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Trabalho&modo=walking";
+    state.listOffline.mockResolvedValue([{ id: "car", origin: "Casa", destination: "Trabalho", savedAt: new Date().toISOString(), payload: { ...payload, route: { ...payload.route, mode: "driving", source: "osrm" } } }]);
+    render(<Planner />);
+    await waitFor(() => expect(state.listOffline).toHaveBeenCalled());
+    submit();
+    await waitFor(() => expect(state.offlineRoute).toHaveBeenCalledWith("Casa", "Trabalho", "walking"));
+    expect(screen.queryByText(/usando a melhor rota já salva/i)).toBeNull();
   });
 
   it("opens a saved route by id and reports a missing route", async () => {

@@ -20,6 +20,7 @@ import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocatio
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
+import { effectivePlannerMode, plannerActionLabel, routeFreshness, shouldAutoRefreshSavedRoute } from "@/lib/routeExperience";
 
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
@@ -251,9 +252,15 @@ export default function Planner() {
         setPlanned(saved.payload as PlannedRoute);
         setShowMap(true);
         setFallbackReady(false);
+        const freshness = routeFreshness(saved.savedAt);
         setSavedMessage(
           (offlineMode ? "Modo offline" : "Sem internet") +
-            ": usando a melhor rota já salva para esta viagem. Dados de trânsito podem estar desatualizados."
+            ": usando a melhor rota já salva para esta viagem. " +
+            (freshness === "fresh"
+              ? "Cópia recente neste aparelho."
+              : freshness === "aging"
+                ? "Cópia salva hoje; trânsito pode ter mudado."
+                : "Cópia antiga; recalcule quando a conexão voltar.")
         );
         rememberTrip(from, to);
         track("route_open", to);
@@ -532,6 +539,32 @@ export default function Planner() {
     );
   }, [savedRoutes, destination]);
 
+  const exactSavedRoute = useMemo(
+    () =>
+      originPrivate
+        ? null
+        : findBestOfflineRouteForTrip(
+            savedRoutes,
+            origin.trim(),
+            destination.trim(),
+            mode
+          ),
+    [savedRoutes, origin, destination, mode, originPrivate]
+  );
+  const activeExperienceMode = effectivePlannerMode(
+    experienceMode,
+    online,
+    Boolean(exactSavedRoute)
+  );
+  const exactSavedRouteFreshness = exactSavedRoute
+    ? routeFreshness(exactSavedRoute.savedAt)
+    : null;
+  const primaryActionLabel = plannerActionLabel(
+    activeExperienceMode,
+    mode,
+    online
+  );
+
   const publicRouteSource = planned
     ? (
         planned.route as typeof planned.route & {
@@ -685,11 +718,11 @@ export default function Planner() {
                 </div>
               </div>
 
-              <button type="submit" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
-                <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : "Calcular rota"}</span>
+              <button type="submit" aria-label="Calcular rota" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
+                <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
-              {destination.trim().length >= 3 && (
+              {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
                     Google
@@ -699,6 +732,16 @@ export default function Planner() {
                   </button>
                   <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
                     Apple
+                  </button>
+                </div>
+              )}
+              {destination.trim().length >= 3 && (!online || activeExperienceMode === "offline") && (
+                <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-[#FFB86B]/15 bg-[#FFB86B]/[.035] px-3 py-2">
+                  <p className="text-xs leading-relaxed text-white/55">
+                    Navegação externa oculta para evitar um atalho que depende de internet.
+                  </p>
+                  <button type="button" onClick={() => setLocation(appUrl("/salvos"))} className="min-h-10 shrink-0 rounded-xl border border-[#FFB86B]/20 px-3 text-xs font-black text-[#FFD59B]">
+                    Salvas
                   </button>
                 </div>
               )}
@@ -733,6 +776,56 @@ export default function Planner() {
                 )}
               </div>
             )}
+          </section>
+        )}
+
+        {!savedMode && (
+          <section className="mt-4 grid gap-2 sm:grid-cols-3" aria-label="Estado do planejamento">
+            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[11px] font-black uppercase tracking-[.12em] text-white/35">Modo efetivo</p>
+              <p className="mt-1 text-sm font-black text-white">
+                {PLANNER_EXPERIENCE_OPTIONS.find(item => item.id === activeExperienceMode)?.label}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-white/45">
+                {!online && experienceMode === "smart"
+                  ? "Inteligente mudou para offline automaticamente."
+                  : plannerExperienceDetail(activeExperienceMode)}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[11px] font-black uppercase tracking-[.12em] text-white/35">Cópia local</p>
+              <p className="mt-1 text-sm font-black text-white">
+                {exactSavedRoute
+                  ? exactSavedRouteFreshness === "fresh"
+                    ? "Pronta · recente"
+                    : exactSavedRouteFreshness === "aging"
+                      ? "Pronta · salva hoje"
+                      : "Pronta · antiga"
+                  : "Ainda não preparada"}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-white/45">
+                {exactSavedRoute
+                  ? exactSavedRouteFreshness === "stale"
+                    ? "Pode abrir sem rede; atualize quando estiver online."
+                    : "Esta viagem pode ser recuperada no aparelho."
+                  : "Calcule online uma vez para aumentar a cobertura offline."}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+              <p className="text-[11px] font-black uppercase tracking-[.12em] text-white/35">Rede</p>
+              <p className={"mt-1 text-sm font-black " + (online ? "text-[#C7FF3C]" : "text-[#FFB86B]")}>
+                {online ? "Conectado" : "Sem conexão"}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-white/45">
+                {online
+                  ? exactSavedRoute && exactSavedRouteFreshness && shouldAutoRefreshSavedRoute(experienceMode, online, exactSavedRouteFreshness)
+                    ? "Modo Inteligente vai preferir recalcular esta cópia antiga."
+                    : "Rotas e dados disponíveis podem ser atualizados."
+                  : exactSavedRoute
+                    ? "A rota local continua disponível."
+                    : "Use destinos preparados ou uma rota salva."}
+              </p>
+            </div>
           </section>
         )}
 
@@ -880,7 +973,7 @@ export default function Planner() {
           </section>
         )}
 
-        {fallbackReady && !planned && !savedMode && destination.trim() && (
+        {fallbackReady && !planned && !savedMode && destination.trim() && online && activeExperienceMode !== "offline" && (
           <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="navigation-fallback-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
@@ -930,9 +1023,11 @@ export default function Planner() {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
+                {online && activeExperienceMode !== "offline" && <>
                 <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Google Maps</button>
                 <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-xs font-black text-[#C9F7FF]">Waze</button>
                 <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70">Apple Maps</button>
+                </>}
                 <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
 
@@ -951,7 +1046,7 @@ export default function Planner() {
                   <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
                 </div>
                 <div className="h-[min(68vh,520px)]">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} />
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online} />
                 </div>
               </section>
             )}
