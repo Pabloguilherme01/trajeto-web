@@ -252,7 +252,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [stationPages.data]);
 
   const mapStations = useMemo<StationMapItem[]>(() => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
     // The consolidated directory is the canonical map entity for stations with a
     // CNPJ. It already merges ANP + local catalog data, so adding those sources
     // separately would create duplicate representations of the same station.
@@ -519,7 +518,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         setLocating(false);
         toast.error("Não foi possível obter sua localização.");
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 },
     );
   };
 
@@ -589,7 +588,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
     const saved = cacheOfflineMapStations(normalized);
     if (saved) setOfflineMap(getOfflineMapStations().stations);
-    toast.message(saved ? `Pontos salvos neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar os pontos locais.");
+    toast.message(saved ? `Pontos salvos neste aparelho · ${normalized.length} com coordenadas` : "Não foi possível gravar os pontos locais.");
   };
 
   const refreshStationData = async () => {
@@ -606,7 +605,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         setStaticAnpRetrievedAt(payload.retrievedAt ?? new Date().toISOString());
         cacheOfflineAnpSnapshot(rows, payload.retrievedAt ?? null);
       } else {
-        await anpLiveQuery.refetch();
+        const result = await anpLiveQuery.refetch();
+        if (result.error) throw result.error;
       }
       toast.message("Dados oficiais atualizados.");
     } catch {
