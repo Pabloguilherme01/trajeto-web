@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
 const navigate = vi.hoisted(() => vi.fn());
@@ -25,12 +25,11 @@ it("filters accent-insensitive destinations and carries the selected destination
     screen.getByRole("textbox", { name: "Buscar destino no mapa" }),
     { target: { value: "odisseia" } }
   );
-  const upaCard = screen.getByText("UPA").closest("article");
-  expect(upaCard).toBeTruthy();
-  const plannerLink = within(upaCard!).getByRole("link", { name: "Ir até aqui" });
-  expect(decodeURIComponent(plannerLink.getAttribute("href") || "")).toContain(
-    "destino=UPA Mansões Odisseia"
+  const plannerLink = screen.getAllByRole("link", { name: "Ir até aqui" }).find(link =>
+    decodeURIComponent((link.getAttribute("href") || "").replace(/\+/g, " "))
+      .includes("destino=UPA Mansões Odisseia")
   );
+  expect(plannerLink).toBeTruthy();
   fireEvent.click(
     screen.getByRole("button", { name: "Planejar ponto confirmado" })
   );
@@ -49,10 +48,9 @@ it("keeps the destination catalog usable offline without loading street maps", (
   render(<CityMap />);
   expect(screen.queryByText("Planejar ponto confirmado")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
-  const upaCard = screen.getByText("UPA").closest("article");
-  expect(upaCard).toBeTruthy();
-  const plannerLink = within(upaCard!).getByRole("link", { name: "Ir até aqui" });
-  expect(decodeURIComponent(plannerLink.getAttribute("href") || "")).toContain(
-    "destino=UPA Mansões Odisseia"
+  const plannerLink = screen.getAllByRole("link", { name: "Ir até aqui" }).find(link =>
+    decodeURIComponent((link.getAttribute("href") || "").replace(/\+/g, " "))
+      .includes("destino=UPA Mansões Odisseia")
   );
+  expect(plannerLink).toBeTruthy();
 });
