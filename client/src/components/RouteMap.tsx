@@ -104,6 +104,14 @@ export function OfflineRoutePreview({
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
+  const [following, setFollowing] = useState(false);
+  const [focusRequest, setFocusRequest] = useState<{ point: { lat: number; lng: number }; key: number } | null>(null);
+  const focus = (point: { lat: number; lng: number }) => {
+    setFollowing(false);
+    setZoom(v => Math.max(2, v));
+    setFocusRequest(previous => ({ point, key: (previous?.key ?? 0) + 1 }));
+  };
+  useEffect(() => { if (!livePosition) setFollowing(false); }, [livePosition]);
   const validOrigin = isMapPoint(origin) ? origin : undefined;
   const validDestination = isMapPoint(destination) ? destination : undefined;
   const validStops = stops.filter(isMapPoint);
@@ -175,6 +183,8 @@ export function OfflineRoutePreview({
         <button
           type="button"
           onClick={() => {
+            setFollowing(false);
+            setFocusRequest(null);
             setZoom(1);
             setResetKey(v => v + 1);
           }}
@@ -183,15 +193,23 @@ export function OfflineRoutePreview({
           Enquadrar
         </button>
       </div>
+      <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
+        {validOrigin && <button type="button" onClick={() => focus(validOrigin)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver origem</button>}
+        {validDestination && <button type="button" onClick={() => focus(validDestination)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver destino</button>}
+        {isMapPoint(livePosition) && <button type="button" aria-pressed={following} onClick={() => { setFocusRequest(null); setFollowing(v => !v); setZoom(v => Math.max(2, v)); }} className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white">Seguir GPS</button>}
+      </div>
       <OfflineMapCanvas
         markers={markers}
         routePoints={routePoints}
         zoom={zoom}
         onZoom={setZoom}
         resetKey={resetKey}
+        focusRequest={focusRequest}
+        followPoint={following ? livePosition : undefined}
+        onManualInteraction={() => setFollowing(false)}
         estimated={selected?.source === "local-estimate"}
         ariaLabel="Prévia offline da rota"
-        onSelect={marker => setSelectedPoint(marker.name)}
+        onSelect={marker => { setSelectedPoint(marker.name); focus(marker); }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
         {selectedPoint && <p className="font-black">{selectedPoint}</p>}

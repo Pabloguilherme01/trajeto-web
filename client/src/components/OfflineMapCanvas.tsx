@@ -65,6 +65,8 @@ export default function OfflineMapCanvas({
   onZoom,
   resetKey = 0,
   focusRequest,
+  followPoint,
+  onManualInteraction,
   ariaLabel = "Mapa vetorial offline",
   onSelect,
   className = "h-[360px]",
@@ -76,6 +78,8 @@ export default function OfflineMapCanvas({
   onZoom: (zoom: number) => void;
   resetKey?: number;
   focusRequest?: { point: MapPoint; key: number } | null;
+  followPoint?: MapPoint;
+  onManualInteraction?: () => void;
   ariaLabel?: string;
   onSelect?: (marker: OfflineMapMarker) => void;
   className?: string;
@@ -84,6 +88,7 @@ export default function OfflineMapCanvas({
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [dark, setDark] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 320, height: 360 });
   const viewport = useRef<HTMLDivElement>(null);
@@ -100,13 +105,10 @@ export default function OfflineMapCanvas({
           ...validGeometry.filter((_, i) => i % stride === 0),
           validGeometry[validGeometry.length - 1],
         ];
+  const anchors = validMarkers.filter(p => p.id !== "live-position" && p.id !== "device-location");
   const fingerprint =
-    validMarkers.map(p => `${p.id}:${p.lat}:${p.lng}`).join("|") +
-    geometry.length +
-    ":" +
-    geometry[0]?.lat +
-    ":" +
-    geometry.at(-1)?.lng;
+    (anchors.length || geometry.length ? anchors : validMarkers).map(p => `${p.id}:${p.lat}:${p.lng}`).join("|") +
+    ":" + geometry.map(p => `${p.lat}:${p.lng}`).join("|");
   useEffect(() => {
     setPan({ x: 0, y: 0 });
     pointers.current.clear();
@@ -150,7 +152,7 @@ export default function OfflineMapCanvas({
     };
   }, []);
   const camera = useMemo(() => {
-    const points = [...validMarkers, ...geometry].map(world);
+    const points = (anchors.length || geometry.length ? [...anchors, ...geometry] : validMarkers).map(world);
     if (!points.length) points.push(world({ lat: -15.7545, lng: -48.2816 }));
     let minX = Infinity,
       maxX = -Infinity,
@@ -167,7 +169,7 @@ export default function OfflineMapCanvas({
       (size.height - 100) / Math.max(maxY - minY, 0.00004)
     );
     return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, scale: scale * zoom };
-  }, [fingerprint, markers, routePoints, size.width, size.height, zoom]);
+  }, [fingerprint, size.width, size.height, zoom]);
   const lastFocusRequest = useRef<typeof focusRequest>(null);
   useEffect(() => {
     if (!focusRequest || lastFocusRequest.current === focusRequest) return;
@@ -175,6 +177,11 @@ export default function OfflineMapCanvas({
     const point = world(focusRequest.point);
     setPan({ x: -(point.x - camera.x) * camera.scale, y: -(point.y - camera.y) * camera.scale });
   }, [focusRequest, camera]);
+  useEffect(() => {
+    if (!isMapPoint(followPoint)) return;
+    const point = world(followPoint);
+    setPan({ x: -(point.x - camera.x) * camera.scale, y: -(point.y - camera.y) * camera.scale });
+  }, [followPoint?.lat, followPoint?.lng, camera]);
   const project = (point: MapPoint) => {
     const p = world(point);
     return {
@@ -280,7 +287,7 @@ export default function OfflineMapCanvas({
         ref={viewport}
         className={
           "relative touch-none overflow-hidden outline-offset-[-3px] " +
-          className
+          (expanded ? "h-[75dvh] min-h-[360px]" : className)
         }
         role="region"
         tabIndex={0}
@@ -306,11 +313,13 @@ export default function OfflineMapCanvas({
             onZoom(Math.min(6, zoom + 0.5));
           else if (event.key === "-") onZoom(Math.max(1, zoom - 0.5));
           else return;
+          onManualInteraction?.();
           event.preventDefault();
         }}
         onPointerDown={event => {
           if (event.target instanceof Element && event.target.closest("button"))
             return;
+          onManualInteraction?.();
           event.currentTarget.setPointerCapture?.(event.pointerId);
           pointers.current.set(event.pointerId, {
             x: event.clientX,
@@ -484,6 +493,7 @@ export default function OfflineMapCanvas({
         >
           {dark ? "Claro" : "Escuro"}
         </button>
+        <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className="absolute bottom-3 right-3 min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#27414b] shadow">{expanded ? "Reduzir" : "Ampliar"}</button>
         <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 p-2 text-xs font-bold text-[#27414b]">
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}

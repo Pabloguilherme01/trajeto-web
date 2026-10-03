@@ -772,7 +772,7 @@ export default function Planner() {
                     ["cycling", "Bicicleta", Bike],
                     ["transit", "Transporte", Bus],
                   ] as const).map(([value, label, Icon]) => (
-                    <button key={value} type="button" onClick={() => { resetResult(); setMode(value); }} className={"flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/45")}>
+                    <button key={value} type="button" aria-pressed={mode === value} onClick={() => { resetResult(); setMode(value); }} className={"flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/45")}>
                       <Icon className="size-3.5" />
                       {label}
                     </button>
@@ -782,7 +782,7 @@ export default function Planner() {
 
               <button type="submit" aria-label="Calcular rota" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
                 <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
-                {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
+                {planRoute.isPending || publicRoutePending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
@@ -1113,7 +1113,7 @@ export default function Planner() {
                 <div data-route-card className="min-w-0 rounded-2xl border border-[#FFB86B]/10 bg-[#FFB86B]/[.035] p-3"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Chegada</p><p className="mt-1 break-words text-base font-black">{formatArrival(liveTrip.active ? remaining?.durationSeconds : planned.route.durationSeconds)}</p></div>
               </div>
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="mt-3">
                 <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
                   <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Trânsito</p>
                   <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
