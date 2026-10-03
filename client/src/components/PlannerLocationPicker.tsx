@@ -33,7 +33,8 @@ export function dedupePlannerLocationItems(items: CityAtlasItem[]) {
   for (const item of items) {
     const businessId = item.business?.cnpj?.replace(/\D/g, "");
     const name = normalizeCatalogText(item.name);
-    const key = businessId ? "business:" + businessId : "place:" + (name || item.id);
+    const position = item.coordinateKind === "street-midpoint" ? "|" + item.lat + "|" + item.lng : "";
+    const key = businessId ? "business:" + businessId : "place:" + (name || item.id) + position;
     const current = merged.get(key);
     if (!current || pickerItemScore(item) > pickerItemScore(current)) merged.set(key, item);
   }
@@ -63,6 +64,8 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
         )
         .sort((a, b) => pickerItemScore(b) - pickerItemScore(a));
       if (strongMatches.length) {
+        const streets = strongMatches.filter(item => item.coordinateKind === "street-midpoint");
+        if (streets.length > 1) return streets;
         const exactBusinesses = strongMatches.filter(item => Boolean(item.business?.cnpj));
         return exactBusinesses.length > 1 ? exactBusinesses : [strongMatches[0]];
       }
@@ -114,7 +117,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
             <span className="block break-words text-sm font-bold text-white">{item.name}</span>
             <span className="mt-1 block break-words text-xs text-white/55">{item.address || item.detail}</span>
             {item.coordinateLabel && <span className="mt-1 block break-words text-xs text-[#FFD59B]">{item.coordinateLabel}</span>}
-            {item.coordinateKind === "street-midpoint" && <span className="mt-1 block break-words text-xs text-[#FFD59B]">Centro aproximado da via</span>}
+            {item.coordinateKind === "street-midpoint" && <span className="mt-1 block break-words text-xs text-[#FFD59B]">Centro aproximado do trecho · {item.lat?.toFixed(5)}, {item.lng?.toFixed(5)}</span>}
             {!Number.isFinite(item.lat) && !Number.isFinite(item.lng) && <span className="mt-1 block break-words text-xs text-[#FFD59B]">Bairro/setor sem coordenada verificada · cálculo por nome quando houver conexão</span>}
           </button>
         </li>)}

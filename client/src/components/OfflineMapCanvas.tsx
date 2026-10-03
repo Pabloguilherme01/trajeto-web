@@ -525,7 +525,7 @@ export default function OfflineMapCanvas({
       <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-xs text-[#536760]">
         <span role="status">
           {pack
-            ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} vias · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
+            ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} trechos viários · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
             : failed
               ? "Ruas indisponíveis neste aparelho; pontos e rota continuam disponíveis."
               : "Carregando ruas locais…"}

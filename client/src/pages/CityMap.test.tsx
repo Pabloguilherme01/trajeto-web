@@ -61,7 +61,7 @@ it("filters bundled streets offline and clears a street search", () => {
   render(<CityMap />);
   fireEvent.click(screen.getByRole("button", { name: "Ruas e avenidas" }));
   fireEvent.change(screen.getByRole("textbox"), { target: { value: "Avenida Brasília" } });
-  expect(screen.getByText("Avenida Brasília", { selector: "article p" })).toBeTruthy();
+  expect(screen.getAllByText("Avenida Brasília", { selector: "article p" }).length).toBeGreaterThan(1);
   expect(screen.getByText(/Centro aproximado da via: -15.73723, -48.28041/)).toBeTruthy();
   expect(screen.queryByText(/Nenhum destino encontrado/)).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Limpar busca do mapa" }));

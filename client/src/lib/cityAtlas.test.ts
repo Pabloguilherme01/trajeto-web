@@ -133,10 +133,10 @@ it("retains coordinate provenance when normalizing and revalidating the atlas", 
 
 it("keeps identically named streets at different positions ambiguous", () => {
   const value = snapshot();
-  Object.assign(value.items[0], { name: "Rua Um", address: "Rua Um", destination: "Rua Um", lat: -15.75, lng: -48.28, coordinateKind: "street-midpoint", coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02" });
+  Object.assign(value.items[0], { name: "Rua Homônima Teste", address: "Rua Homônima Teste", destination: "Rua Homônima Teste", lat: -15.75, lng: -48.28, coordinateKind: "street-midpoint", coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02" });
   value.items.push({ ...value.items[0], id: "second-street", lat: -15.78 });
-  expect(buildCityAtlas(value).filter(item => item.name === "Rua Um")).toHaveLength(2);
-  expect(resolveCityAtlasPoint(value, "Rua Um")).toBeNull();
+  expect(buildCityAtlas(value).filter(item => item.name === "Rua Homônima Teste")).toHaveLength(2);
+  expect(resolveCityAtlasPoint(value, "Rua Homônima Teste")).toBeNull();
 });
 
 
@@ -176,4 +176,27 @@ it("adds every named road available in the bundled offline map without replacing
   const roadNames = new Set(roads.map(item => item.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()));
   expect(roadNames.size).toBeGreaterThan(399);
   expect(filterCityAtlas(items, "DF-533", "referencia").some(item => item.name === "DF-533")).toBe(true);
+});
+
+
+it("retains disconnected Rua B locations instead of choosing one by name", async () => {
+  const { BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
+  const roads = buildCityAtlas(BUNDLED_CITY_ATLAS).filter(item => item.name === "Rua B" && item.coordinateKind === "street-midpoint");
+  expect(roads).toHaveLength(2);
+  expect(roads.some(item => item.lat! > -15.75)).toBe(true);
+  expect(roads.some(item => item.lat! < -15.75)).toBe(true);
+  expect(resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, "Rua B")).toBeNull();
+});
+
+
+it("covers every normalized offline street name and records the OSM way and date", async () => {
+  const { default: pack } = await import("../../public/data/aguas-lindas-offline-map.json");
+  const { BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
+  const { normalizeCatalogText } = await import("./catalogSearch");
+  const roads = buildCityAtlas(BUNDLED_CITY_ATLAS).filter(item => item.coordinateKind === "street-midpoint");
+  const names = new Set(roads.map(item => normalizeCatalogText(item.name)));
+  for (const road of pack.roads.filter(item => item.name.trim())) expect(names.has(normalizeCatalogText(road.name))).toBe(true);
+  const added = roads.find(item => item.id.startsWith("offline-road-"))!;
+  expect(added.sourceUrl).toMatch(/^https:\/\/www.openstreetmap.org\/way\/\d+$/);
+  expect(added.coordinateVerifiedAt).toBe(pack.retrievedAt);
 });
