@@ -239,6 +239,7 @@ export function RouteMap({
   routes = [],
   privateOrigin = false,
   forceOffline = false,
+  travelMode = "driving",
 }: RouteMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
