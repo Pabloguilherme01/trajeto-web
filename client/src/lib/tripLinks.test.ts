@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildDestinationPlannerUrl,
   buildReusableTripPlannerUrl,
   buildSavedRoutePlannerUrl,
+  plannerDestinationFromMapItem,
 } from "./tripLinks";
 
 describe("trip links", () => {
@@ -46,4 +48,22 @@ describe("trip links", () => {
     expect(url).not.toContain("auto=1");
   });
 
+  it("builds one canonical planner link for a selected destination", () => {
+    const url = buildDestinationPlannerUrl("  UPA Mansões Odisseia  ");
+    expect(url).toContain("destino=UPA+Mans%C3%B5es+Odisseia");
+    expect(url).not.toContain("origem=");
+  });
+
+  it("keeps ANP station name and address together when entering the planner", () => {
+    expect(plannerDestinationFromMapItem({
+      name: "Posto Exemplo",
+      address: "BR-070, Águas Lindas de Goiás",
+      source: "ANP",
+    })).toBe("Posto Exemplo, BR-070, Águas Lindas de Goiás");
+    expect(plannerDestinationFromMapItem({
+      name: "UPA",
+      address: "UPA Mansões Odisseia, Águas Lindas de Goiás",
+      source: "local",
+    })).toBe("UPA Mansões Odisseia, Águas Lindas de Goiás");
+  });
 });
