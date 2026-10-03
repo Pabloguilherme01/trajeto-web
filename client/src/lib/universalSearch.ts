@@ -36,7 +36,7 @@ export function getUniversalSearchResults(query: string) {
   });
   const transitFares = searchSemiurbanFares(value);
   const serviceIds = new Set(services.map(item => item.id));
-  const placeIds = new Set(places.map(item => "place-" + item.id));
+  const placeIds = new Set(places.flatMap(item => [item.id, "place-" + item.id]));
   const destinations = new Set(
     [
       ...services.map(item => item.mapQuery),
