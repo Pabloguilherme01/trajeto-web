@@ -277,6 +277,45 @@ describe("public routing fallback", () => {
     expect(onlyUrl).not.toContain("router.project-osrm.org");
   });
 
+  it("keeps street-by-street steps from OSRM in the public route payload", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "Ok",
+          routes: [{
+            distance: 4200,
+            duration: 480,
+            geometry: "road-shape",
+            legs: [{
+              steps: [
+                { distance: 120, duration: 30, name: "Avenida JK", maneuver: { type: "depart" } },
+                { distance: 900, duration: 100, name: "BR-070", maneuver: { type: "turn", modifier: "right" } },
+                { distance: 40, duration: 15, name: "", maneuver: { type: "arrive" } },
+              ],
+            }],
+          }],
+        }),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const route = await calculatePublicRoute(
+      "-15.7545,-48.2816",
+      "UPA Mansões Odisseia",
+      "driving"
+    );
+    const payload = buildPublicRoutePayload(route);
+
+    expect(String(fetchMock.mock.calls[0][0])).toContain("steps=true");
+    expect(route.steps?.map(step => step.instruction)).toEqual([
+      "Saia em Avenida JK",
+      "Vire à direita em BR-070",
+      "Chegue ao destino",
+    ]);
+    expect(payload.route.steps).toHaveLength(3);
+  });
+
   it("calculates a prepared city route in explicit offline mode without any network request", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

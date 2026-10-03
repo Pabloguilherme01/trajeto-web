@@ -4,7 +4,7 @@ import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { LocateFixed, Minus, Plus, Satellite, TrafficCone } from "lucide-react";
+import { ChevronDown, LocateFixed, Minus, Navigation2, Plus, Satellite, TrafficCone } from "lucide-react";
 
 type Stop = {
   placeId: string;
@@ -18,6 +18,13 @@ type TrafficInterval = {
   endPolylinePointIndex?: number;
   speed?: "NORMAL" | "SLOW" | "TRAFFIC_JAM";
 };
+type RouteStep = {
+  instruction: string;
+  name?: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  maneuver?: string;
+};
 type RoutePreview = {
   id: string;
   polyline: string | null;
@@ -28,6 +35,7 @@ type RoutePreview = {
   staticDurationSeconds?: number | null;
   distanceMeters?: number | null;
   toll?: { amount: number | null; currency?: string } | null;
+  steps?: RouteStep[];
 };
 type RouteMapProps = {
   origin?: { lat: number; lng: number };
@@ -164,6 +172,43 @@ export function OfflineRoutePreview({
               : ""}
           </p>
         )}
+        {selected?.steps?.length ? (
+          <details className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black">
+              <span className="flex items-center gap-2">
+                <Navigation2 className="size-4" />
+                Instruções pelas ruas · {selected.steps.length} passos
+              </span>
+              <ChevronDown className="size-4" />
+            </summary>
+            <ol className="mt-2 space-y-1.5">
+              {selected.steps.slice(0, 30).map((step, index) => (
+                <li key={index} className="flex items-start gap-3 rounded-lg bg-white px-3 py-2">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#163840] text-xs font-black text-white">{index + 1}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold">{step.instruction}</span>
+                    <span className="mt-0.5 block text-xs text-[#607169]">
+                      {step.distanceMeters >= 1000
+                        ? (step.distanceMeters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
+                        : Math.max(1, Math.round(step.distanceMeters)) + " m"}
+                      {step.durationSeconds > 0 ? " · " + Math.max(1, Math.round(step.durationSeconds / 60)) + " min" : ""}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {selected.steps.length > 30 && (
+              <p className="mt-2 text-xs text-[#607169]">
+                Mostrando os primeiros 30 passos. Abra no navegador para acompanhar a navegação completa em tempo real.
+              </p>
+            )}
+          </details>
+        ) : routePoints.length && selected?.source !== "local-estimate" ? (
+          <p className="rounded-xl border border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs text-[#607169]">
+            A rota foi calculada pelas ruas, mas este provedor não enviou instruções curva a curva nesta consulta.
+          </p>
+        ) : null}
+
         {navigation && !forceOffline && (
           <a
             href={navigation}
