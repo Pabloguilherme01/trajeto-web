@@ -1,4 +1,5 @@
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
+import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -15,6 +16,7 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
+import { mobileStationDestination } from "@/lib/unifiedDestination";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
@@ -621,7 +623,7 @@ export default function Planner() {
 
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
-                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {ALL_LOCAL_ROUTE_DESTINATIONS.length} destinos locais, lojas e referências, por categoria</span></span>
+                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {getLocalRoutePresets().length} destinos locais, lojas e referências, por categoria</span></span>
                   <ChevronDown className={"size-4 text-[#3DE3FF] transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
@@ -959,9 +961,16 @@ export default function Planner() {
                     </div>
                     <button type="button" onClick={() => { const result = toggleMobileStationFavorite(station); if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador."); else setSavedStations(result.stations); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir agora</button>
-                    <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(station.address || station.name))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Planejar</button>
+                  <div className="mt-3">
+                    <DestinationActions
+                      destination={mobileStationDestination(station)}
+                      saved
+                      onToggleSaved={() => {
+                        const result = toggleMobileStationFavorite(station);
+                        if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador.");
+                        else setSavedStations(result.stations);
+                      }}
+                    />
                   </div>
                 </article>
               ))}
