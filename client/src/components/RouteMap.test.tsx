@@ -248,8 +248,9 @@ it("shows live street guidance and route telemetry while following GPS", () => {
       }]}
     />
   );
-  expect(screen.getByText("Vire à direita na BR-070")).toBeTruthy();
-  expect(screen.getByText("Via: BR-070")).toBeTruthy();
+  const navigationPanel = screen.getByRole("region", { name: "Painel de navegação" });
+  expect(within(navigationPanel).getByText("Vire à direita na BR-070")).toBeTruthy();
+  expect(within(navigationPanel).getByText("Via: BR-070")).toBeTruthy();
   expect(screen.getByText("36 km/h")).toBeTruthy();
   expect(screen.getByText("±12 m")).toBeTruthy();
   expect(screen.getByText("OpenStreetMap/OSRM")).toBeTruthy();
@@ -260,7 +261,7 @@ it("shows live street guidance and route telemetry while following GPS", () => {
   expect(screen.getByText("GPS bom")).toBeTruthy();
   expect(screen.getByText("Guia completo")).toBeTruthy();
   expect(screen.getByText("Chegada estimada")).toBeTruthy();
-  expect(screen.getByRole("region", { name: "Painel de navegação" })).toBeTruthy();
+  expect(navigationPanel).toBeTruthy();
 });
 
 it("warns instead of showing misleading guidance when GPS is off route", () => {
