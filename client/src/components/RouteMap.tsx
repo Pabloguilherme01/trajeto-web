@@ -8,10 +8,32 @@ import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
-import { ChevronDown, LocateFixed, Minus, Navigation2, Plus, Satellite, TrafficCone, Gauge, Clock3, MapPin, AlertTriangle } from "lucide-react";
+import {
+  ChevronDown,
+  LocateFixed,
+  Minus,
+  Navigation2,
+  Plus,
+  Satellite,
+  TrafficCone,
+  Gauge,
+  Clock3,
+  MapPin,
+  AlertTriangle,
+  ArrowUp,
+  CornerUpLeft,
+  CornerUpRight,
+  ArrowUpLeft,
+  ArrowUpRight,
+  Undo2,
+  Flag,
+  RotateCw,
+} from "lucide-react";
 
-
-function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+function distanceMeters(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number }
+) {
   const toRad = (value: number) => (value * Math.PI) / 180;
   const earth = 6_371_000;
   const dLat = toRad(b.lat - a.lat);
@@ -29,16 +51,21 @@ export function nearbyRouteReferences(
   destination: { lat: number; lng: number } | undefined,
   routePoints: Array<{ lat: number; lng: number }>
 ) {
-  const anchors = routePoints.length > 1
-    ? routePoints.filter((_, index) => index % Math.max(1, Math.floor(routePoints.length / 24)) === 0)
-    : [origin, destination].filter((point): point is { lat: number; lng: number } => Boolean(point));
+  const anchors =
+    routePoints.length > 1
+      ? routePoints.filter(
+          (_, index) =>
+            index % Math.max(1, Math.floor(routePoints.length / 24)) === 0
+        )
+      : [origin, destination].filter(
+          (point): point is { lat: number; lng: number } => Boolean(point)
+        );
 
   if (!anchors.length) return [];
-  return LOCAL_GEOCODE_POINTS
-    .map(point => ({
-      point,
-      distance: Math.min(...anchors.map(anchor => distanceMeters(anchor, point))),
-    }))
+  return LOCAL_GEOCODE_POINTS.map(point => ({
+    point,
+    distance: Math.min(...anchors.map(anchor => distanceMeters(anchor, point))),
+  }))
     .filter(item => item.distance <= 3_000)
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 6)
@@ -52,13 +79,34 @@ export function nearbyRouteReferences(
     }));
 }
 
-export function nearbyBusinessReferences(items: CityAtlasItem[], destination?: { lat: number; lng: number }) {
+export function nearbyBusinessReferences(
+  items: CityAtlasItem[],
+  destination?: { lat: number; lng: number }
+) {
   if (!isMapPoint(destination)) return [];
-  return items.filter(item => typeof item.lat === "number" && typeof item.lng === "number" && Math.abs(item.lat - destination.lat) < 0.01 && Math.abs(item.lng - destination.lng) < 0.01)
-    .map(item => ({ item, distance: distanceMeters(destination, { lat: item.lat!, lng: item.lng! }) }))
+  return items
+    .filter(
+      item =>
+        typeof item.lat === "number" &&
+        typeof item.lng === "number" &&
+        Math.abs(item.lat - destination.lat) < 0.01 &&
+        Math.abs(item.lng - destination.lng) < 0.01
+    )
+    .map(item => ({
+      item,
+      distance: distanceMeters(destination, { lat: item.lat!, lng: item.lng! }),
+    }))
     .filter(entry => entry.distance <= 800)
-    .sort((a, b) => a.distance - b.distance).slice(0, 6)
-    .map(({ item }) => ({ id: item.id, name: item.name, lat: item.lat!, lng: item.lng!, label: "R", precision: item.coordinateLabel }));
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 6)
+    .map(({ item }) => ({
+      id: item.id,
+      name: item.name,
+      lat: item.lat!,
+      lng: item.lng!,
+      label: "R",
+      precision: item.coordinateLabel,
+    }));
 }
 
 type Stop = {
@@ -91,16 +139,28 @@ type LiveProgress = {
 export function currentRouteGuidance(
   steps: RouteStep[],
   totalDistanceMeters: number | null | undefined,
-  remainingDistanceMeters: number | null | undefined,
+  remainingDistanceMeters: number | null | undefined
 ) {
-  if (!steps.length || !Number.isFinite(totalDistanceMeters) || !Number.isFinite(remainingDistanceMeters) || Number(totalDistanceMeters) <= 0) return null;
-  const completed = Math.max(0, Math.min(Number(totalDistanceMeters), Number(totalDistanceMeters) - Number(remainingDistanceMeters)));
+  if (
+    !steps.length ||
+    !Number.isFinite(totalDistanceMeters) ||
+    !Number.isFinite(remainingDistanceMeters) ||
+    Number(totalDistanceMeters) <= 0
+  )
+    return null;
+  const completed = Math.max(
+    0,
+    Math.min(
+      Number(totalDistanceMeters),
+      Number(totalDistanceMeters) - Number(remainingDistanceMeters)
+    )
+  );
   let cursor = 0;
   for (let index = 0; index < steps.length; index++) {
     const step = steps[index];
     const length = Math.max(0, Number(step.distanceMeters) || 0);
     const end = cursor + length;
-    if (completed <= end || index === steps.length - 1) {
+    if (completed < end || index === steps.length - 1) {
       return {
         index,
         step,
@@ -113,11 +173,45 @@ export function currentRouteGuidance(
   return null;
 }
 
+export function maneuverSymbol(maneuver?: string) {
+  const [type, modifier] = (maneuver ?? "").toLowerCase().split(":");
+  if (type === "arrive") return "arrival";
+  if (modifier === "uturn") return "uturn";
+  if (type === "roundabout" || type === "rotary") return "roundabout";
+  if (modifier === "slight left") return "slight-left";
+  if (modifier === "slight right") return "slight-right";
+  if (modifier?.includes("left")) return "left";
+  if (modifier?.includes("right")) return "right";
+  return "straight";
+}
+
+function ManeuverIcon({
+  maneuver,
+  className = "size-7",
+}: {
+  maneuver?: string;
+  className?: string;
+}) {
+  const symbol = maneuverSymbol(maneuver);
+  const Icon = {
+    arrival: Flag,
+    uturn: Undo2,
+    roundabout: RotateCw,
+    left: CornerUpLeft,
+    right: CornerUpRight,
+    "slight-left": ArrowUpLeft,
+    "slight-right": ArrowUpRight,
+    straight: ArrowUp,
+  }[symbol];
+  return <Icon aria-hidden="true" className={className} />;
+}
+
 function compactDistance(meters: number | null | undefined) {
   if (!Number.isFinite(meters)) return "—";
   const value = Number(meters);
   return value >= 1000
-    ? (value / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
+    ? (value / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) +
+        " km"
     : Math.max(0, Math.round(value)).toLocaleString("pt-BR") + " m";
 }
 
@@ -134,7 +228,9 @@ function compactDuration(seconds: number | null | undefined) {
 
 function arrivalTime(seconds: number | null | undefined) {
   if (!Number.isFinite(seconds)) return "—";
-  return new Date(Date.now() + Math.max(0, Number(seconds)) * 1000).toLocaleTimeString("pt-BR", {
+  return new Date(
+    Date.now() + Math.max(0, Number(seconds)) * 1000
+  ).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -159,7 +255,12 @@ type RoutePreview = {
   steps?: RouteStep[];
 };
 type RouteMapProps = {
-  livePosition?: { lat: number; lng: number; accuracy?: number; timestamp?: number };
+  livePosition?: {
+    lat: number;
+    lng: number;
+    accuracy?: number;
+    timestamp?: number;
+  };
   origin?: { lat: number; lng: number };
   travelMode?: "driving" | "walking" | "cycling" | "transit";
   destination?: { lat: number; lng: number };
@@ -184,19 +285,27 @@ export function OfflineRoutePreview({
   liveSpeedMps,
 }: RouteMapProps) {
   const businesses = useBusinessCatalog();
-  const nearbyBusinesses = useMemo(() => nearbyBusinessReferences(businesses.items, destination), [businesses.items, destination?.lat, destination?.lng]);
+  const nearbyBusinesses = useMemo(
+    () => nearbyBusinessReferences(businesses.items, destination),
+    [businesses.items, destination?.lat, destination?.lng]
+  );
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
-  const [following, setFollowing] = useState(false);
+  const [following, setFollowing] = useState(Boolean(livePosition));
   const [instructionsOpen, setInstructionsOpen] = useState(false);
-  const [focusRequest, setFocusRequest] = useState<{ point: { lat: number; lng: number }; key: number } | null>(null);
+  const [focusRequest, setFocusRequest] = useState<{
+    point: { lat: number; lng: number };
+    key: number;
+  } | null>(null);
   const focus = (point: { lat: number; lng: number }) => {
     setFollowing(false);
     setZoom(v => Math.max(2, v));
     setFocusRequest(previous => ({ point, key: (previous?.key ?? 0) + 1 }));
   };
-  useEffect(() => { if (!livePosition) setFollowing(false); }, [livePosition]);
+  useEffect(() => {
+    if (!livePosition) setFollowing(false);
+  }, [livePosition]);
   const validOrigin = isMapPoint(origin) ? origin : undefined;
   const validDestination = isMapPoint(destination) ? destination : undefined;
   const validStops = stops.filter(isMapPoint);
@@ -206,13 +315,24 @@ export function OfflineRoutePreview({
   const guidance = currentRouteGuidance(
     selected?.steps ?? [],
     selected?.distanceMeters,
-    liveProgress?.distanceMeters,
+    liveProgress?.distanceMeters
   );
   const progressPercent =
     Number.isFinite(selected?.distanceMeters) &&
     Number(selected?.distanceMeters) > 0 &&
     Number.isFinite(liveProgress?.distanceMeters)
-      ? Math.max(0, Math.min(100, Math.round((1 - Number(liveProgress?.distanceMeters) / Number(selected?.distanceMeters)) * 100)))
+      ? Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(
+              (1 -
+                Number(liveProgress?.distanceMeters) /
+                  Number(selected?.distanceMeters)) *
+                100
+            )
+          )
+        )
       : null;
   const routeSourceLabel =
     selected?.source === "mapbox"
@@ -222,24 +342,46 @@ export function OfflineRoutePreview({
         : "Cálculo local";
   const routeReferences = useMemo(
     () => nearbyRouteReferences(validOrigin, validDestination, routePoints),
-    [validOrigin?.lat, validOrigin?.lng, validDestination?.lat, validDestination?.lng, routePoints],
+    [
+      validOrigin?.lat,
+      validOrigin?.lng,
+      validDestination?.lat,
+      validDestination?.lng,
+      routePoints,
+    ]
   );
   const nearbyNamedPlaces = [
     ...nearbyBusinesses.map(item => ({
       id: item.id,
       name: item.name,
-      detail: item.precision ? "Catálogo local · " + item.precision : "Empresa próxima ao destino",
+      detail: item.precision
+        ? "Catálogo local · " + item.precision
+        : "Empresa próxima ao destino",
     })),
     ...routeReferences.map(item => ({
       id: item.id,
       name: item.name,
       detail: item.address,
     })),
-  ].filter((item, index, list) => list.findIndex(candidate => candidate.id === item.id) === index).slice(0, 8);
+  ]
+    .filter(
+      (item, index, list) =>
+        list.findIndex(candidate => candidate.id === item.id) === index
+    )
+    .slice(0, 8);
   const markers = [
     ...nearbyBusinesses,
     ...routeReferences.map(point => ({ ...point, label: "R" })),
-    ...(isMapPoint(livePosition) ? [{ ...livePosition, id: "live-position", name: "Você agora", label: "GPS" }] : []),
+    ...(isMapPoint(livePosition)
+      ? [
+          {
+            ...livePosition,
+            id: "live-position",
+            name: "Você agora",
+            label: "GPS",
+          },
+        ]
+      : []),
     ...(validOrigin
       ? [{ ...validOrigin, id: "origin", name: "Origem", label: "A" }]
       : []),
@@ -260,7 +402,16 @@ export function OfflineRoutePreview({
         ]
       : []),
   ];
-  if (!markers.length && !routePoints.length) return <div className="p-6 text-center text-white"><p className="font-bold">Defina a origem e o destino</p><p className="mt-2 text-sm text-white/70">O mapa mostrará os pontos informados e a geometria da rota quando disponível.</p></div>;
+  if (!markers.length && !routePoints.length)
+    return (
+      <div className="p-6 text-center text-white">
+        <p className="font-bold">Defina a origem e o destino</p>
+        <p className="mt-2 text-sm text-white/70">
+          O mapa mostrará os pontos informados e a geometria da rota quando
+          disponível.
+        </p>
+      </div>
+    );
   const navigation = validDestination
     ? "https://www.google.com/maps/dir/?api=1" +
       (privateOrigin || !validOrigin
@@ -278,8 +429,11 @@ export function OfflineRoutePreview({
         : "")
     : null;
   return (
-    <div className="bg-[#eef2eb] text-[#163840]">
-      <div className="flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
+    <div
+      className="route-navigation bg-[#eef2eb] text-[#163840]"
+      data-live={Boolean(livePosition)}
+    >
+      <div className="route-map-toolbar flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
         <p className="min-w-0 flex-1 text-sm font-black">
           Mapa local da viagem
         </p>
@@ -316,106 +470,197 @@ export function OfflineRoutePreview({
       </div>
       <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs font-bold text-[#52675e]">
         <span className="rounded-full bg-[#163840] px-2.5 py-1 text-white">
-          {livePosition ? "GPS ao vivo neste aparelho" : selected?.source === "local-estimate" || forceOffline ? "Mapa local/offline" : "Rota pelas ruas"}
+          {livePosition
+            ? "GPS ao vivo neste aparelho"
+            : selected?.source === "local-estimate" || forceOffline
+              ? "Mapa local/offline"
+              : "Rota pelas ruas"}
         </span>
-        <span>{routePoints.length ? "Geometria da rota disponível" : "Sem geometria viária confirmada"}</span>
+        <span>
+          {routePoints.length
+            ? "Geometria da rota disponível"
+            : "Sem geometria viária confirmada"}
+        </span>
       </div>
       {livePosition && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-[#37e6df]/20 bg-[#10252d] px-3 py-2 text-xs text-[#d9ffff]" role="status">
+        <div
+          className="flex flex-wrap items-center gap-2 border-b border-[#37e6df]/20 bg-[#10252d] px-3 py-2 text-xs text-[#d9ffff]"
+          role="status"
+        >
           <span className="flex items-center gap-1.5 rounded-full bg-[#37e6df]/15 px-2.5 py-1 font-black text-[#37e6df]">
             <span className="size-2 animate-pulse rounded-full bg-[#37e6df]" />
             AO VIVO
           </span>
           <span>
             {livePosition.accuracy && Number.isFinite(livePosition.accuracy)
-              ? "Precisão aproximada: " + Math.round(livePosition.accuracy) + " m"
+              ? "Precisão aproximada: " +
+                Math.round(livePosition.accuracy) +
+                " m"
               : "Posição atualizada neste aparelho"}
           </span>
-          {livePosition.timestamp && Number.isFinite(livePosition.timestamp) && (
-            <span className="text-[#9fc4c8]">
-              {new Date(livePosition.timestamp).toLocaleTimeString("pt-BR")}
-            </span>
-          )}
+          {livePosition.timestamp &&
+            Number.isFinite(livePosition.timestamp) && (
+              <span className="text-[#9fc4c8]">
+                {new Date(livePosition.timestamp).toLocaleTimeString("pt-BR")}
+              </span>
+            )}
         </div>
       )}
       {livePosition && (
-        <section className="border-b border-black/10 bg-[#F7FAF7] p-3 sm:p-4" aria-label="Painel de navegação">
-          <div className="overflow-hidden rounded-[1.35rem] border border-[#163840]/15 bg-white shadow-[0_14px_34px_rgba(22,56,64,0.12)]">
+        <section
+          className="route-guidance-panel border-b border-black/10 bg-[#F7FAF7] p-3 sm:p-4"
+          aria-label="Painel de navegação"
+        >
+          <div className="route-guidance-content overflow-hidden rounded-[1.35rem] border border-[#163840]/15 bg-white shadow-[0_14px_34px_rgba(22,56,64,0.12)]">
             {liveProgress?.offRoute ? (
               <div className="flex min-w-0 items-start gap-3 bg-[#FFF3E8] p-4 text-[#70401D]">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#D98B4B]/15"><AlertTriangle className="size-6" /></span>
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#D98B4B]/15">
+                  <AlertTriangle className="size-6" />
+                </span>
                 <div className="min-w-0">
-                  <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#9A5B28]">Atenção</p>
-                  <p className="mt-1 text-lg font-black">Fora do trajeto calculado</p>
-                  <p className="mt-1 break-words text-xs leading-relaxed">O GPS está distante da geometria da rota. Recalcule antes de confiar na próxima rua.</p>
+                  <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#9A5B28]">
+                    Atenção
+                  </p>
+                  <p className="mt-1 text-lg font-black">
+                    Fora do trajeto calculado
+                  </p>
+                  <p className="mt-1 break-words text-xs leading-relaxed">
+                    O GPS está distante da geometria da rota. Recalcule antes de
+                    confiar na próxima rua.
+                  </p>
                 </div>
               </div>
-            ) : guidance ? (
-              <div className="bg-gradient-to-br from-[#163840] to-[#21535A] p-4 text-white sm:p-5">
+            ) : guidance && !liveProgress?.nearDestination ? (
+              <div className="route-turn-banner bg-gradient-to-br from-[#163840] to-[#21535A] p-4 text-white sm:p-5">
                 <div className="flex min-w-0 items-start gap-3">
-                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C] text-[#163840] shadow-lg"><Navigation2 className="size-7" /></span>
+                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C] text-[#163840] shadow-lg">
+                    <ManeuverIcon maneuver={guidance.step.maneuver} />
+                  </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Agora</span>
-                      <span className="text-xs font-bold text-white/65">{compactDistance(guidance.distanceToManeuver)}</span>
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">
+                        Agora
+                      </span>
+                      <span className="text-xs font-bold text-white/65">
+                        {compactDistance(guidance.distanceToManeuver)} neste
+                        trecho
+                      </span>
                     </div>
-                    <p className="mt-2 break-words text-[clamp(1.05rem,5vw,1.45rem)] font-black leading-tight">{guidance.step.instruction}</p>
-                    {guidance.step.name && <p className="mt-1 break-words text-sm font-bold text-[#DDF7F2]">Via: {guidance.step.name}</p>}
+                    <p className="mt-2 break-words text-[clamp(1.05rem,5vw,1.45rem)] font-black leading-tight">
+                      {guidance.step.instruction}
+                    </p>
+                    {guidance.step.name && (
+                      <p className="mt-1 break-words text-sm font-bold text-[#DDF7F2]">
+                        Via: {guidance.step.name}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {guidance.nextStep && (
                   <div className="mt-4 flex min-w-0 items-start gap-2 rounded-2xl border border-white/10 bg-white/[.07] px-3 py-2.5">
-                    <span className="shrink-0 rounded-full bg-white/10 px-2 py-1 text-[0.58rem] font-black uppercase tracking-[.12em] text-white/65">Depois</span>
-                    <p className="min-w-0 break-words text-xs font-bold leading-relaxed text-white/80">{guidance.nextStep.instruction}</p>
+                    <span className="shrink-0 rounded-full bg-white/10 px-2 py-1 text-[0.58rem] font-black uppercase tracking-[.12em] text-white/65">
+                      Depois
+                    </span>
+                    <ManeuverIcon
+                      maneuver={guidance.nextStep.maneuver}
+                      className="size-5 shrink-0"
+                    />
+                    <p className="min-w-0 break-words text-xs font-bold leading-relaxed text-white/80">
+                      {guidance.nextStep.instruction}
+                    </p>
                   </div>
                 )}
               </div>
             ) : liveProgress?.nearDestination ? (
               <div className="p-4">
-                <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#56766A]">Chegada</p>
-                <p className="mt-1 text-lg font-black text-[#163840]">Você está próximo ao destino</p>
-                <p className="mt-1 text-xs text-[#607169]">Confira a entrada correta do local antes de encerrar o acompanhamento.</p>
+                <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#56766A]">
+                  Chegada
+                </p>
+                <p className="mt-1 text-lg font-black text-[#163840]">
+                  Você está próximo ao destino
+                </p>
+                <p className="mt-1 text-xs text-[#607169]">
+                  Confira a entrada correta do local antes de encerrar o
+                  acompanhamento.
+                </p>
               </div>
             ) : (
               <div className="p-4 text-sm text-[#607169]">
-                <p className="font-black text-[#163840]">Acompanhamento sem instruções curva a curva</p>
-                <p className="mt-1 text-xs leading-relaxed">O mapa acompanha sua posição, mas não inventa nomes de ruas quando o provedor não forneceu passos confirmados.</p>
+                <p className="font-black text-[#163840]">
+                  Acompanhamento sem instruções curva a curva
+                </p>
+                <p className="mt-1 text-xs leading-relaxed">
+                  O mapa acompanha sua posição, mas não inventa nomes de ruas
+                  quando o provedor não forneceu passos confirmados.
+                </p>
               </div>
             )}
 
-            <div className="grid grid-cols-2 border-t border-black/10 sm:grid-cols-4">
+            <div className="route-telemetry grid grid-cols-2 border-t border-black/10 sm:grid-cols-4">
               <div className="min-w-0 border-b border-r border-black/10 p-3 sm:border-b-0">
                 <MapPin className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Restante</p>
-                <p className="mt-1 break-words text-base font-black text-[#163840]">{compactDistance(liveProgress?.distanceMeters)}</p>
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                  Restante
+                </p>
+                <p className="mt-1 break-words text-base font-black text-[#163840]">
+                  {compactDistance(liveProgress?.distanceMeters)}
+                </p>
               </div>
               <div className="min-w-0 border-b border-black/10 p-3 sm:border-b-0 sm:border-r">
                 <Clock3 className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Tempo</p>
-                <p className="mt-1 break-words text-base font-black text-[#163840]">{compactDuration(liveProgress?.durationSeconds)}</p>
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                  Tempo
+                </p>
+                <p className="mt-1 break-words text-base font-black text-[#163840]">
+                  {compactDuration(liveProgress?.durationSeconds)}
+                </p>
               </div>
               <div className="min-w-0 border-r border-black/10 p-3">
                 <Gauge className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Velocidade</p>
-                <p className="mt-1 break-words text-base font-black text-[#163840]">{Number.isFinite(liveSpeedMps) ? Math.round(Number(liveSpeedMps) * 3.6) + " km/h" : "—"}</p>
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                  Velocidade
+                </p>
+                <p className="mt-1 break-words text-base font-black text-[#163840]">
+                  {Number.isFinite(liveSpeedMps)
+                    ? Math.round(Number(liveSpeedMps) * 3.6) + " km/h"
+                    : "—"}
+                </p>
               </div>
               <div className="min-w-0 p-3">
                 <LocateFixed className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">GPS</p>
-                <p className="mt-1 break-words text-sm font-black text-[#163840]">{gpsQuality(livePosition.accuracy)}</p>
-                <p className="text-[0.65rem] text-[#607169]">{Number.isFinite(livePosition.accuracy) ? "±" + Math.round(Number(livePosition.accuracy)) + " m" : "posição ativa"}</p>
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                  GPS
+                </p>
+                <p className="mt-1 break-words text-sm font-black text-[#163840]">
+                  {gpsQuality(livePosition.accuracy)}
+                </p>
+                <p className="text-[0.65rem] text-[#607169]">
+                  {Number.isFinite(livePosition.accuracy)
+                    ? "±" + Math.round(Number(livePosition.accuracy)) + " m"
+                    : "posição ativa"}
+                </p>
               </div>
             </div>
 
-            <div className="border-t border-black/10 bg-[#F7F9F5] px-3 py-3">
+            <div className="route-arrival border-t border-black/10 bg-[#F7F9F5] px-3 py-3">
               <div className="flex min-w-0 items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Chegada estimada</p>
-                  <p className="mt-0.5 text-sm font-black text-[#163840]">{arrivalTime(liveProgress?.durationSeconds)}</p>
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                    Chegada estimada
+                  </p>
+                  <p className="mt-0.5 text-sm font-black text-[#163840]">
+                    {arrivalTime(liveProgress?.durationSeconds)}
+                  </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Guia</p>
-                  <p className="mt-0.5 text-xs font-black text-[#163840]">{selected?.steps?.length ? "Guia completo" : "Guia limitado"}</p>
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                    Guia
+                  </p>
+                  <p className="mt-0.5 text-xs font-black text-[#163840]">
+                    {selected?.steps?.length
+                      ? "Guia completo"
+                      : "Guia limitado"}
+                  </p>
                 </div>
               </div>
               {progressPercent !== null && (
@@ -424,8 +669,18 @@ export function OfflineRoutePreview({
                     <span>Progresso da viagem</span>
                     <span>{progressPercent}% concluído</span>
                   </div>
-                  <div role="progressbar" aria-label="Progresso da viagem" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressPercent} className="h-2 overflow-hidden rounded-full bg-[#DCE7DF]">
-                    <div className="h-full rounded-full bg-[#2D6A5C] transition-[width] duration-300" style={{ width: progressPercent + "%" }} />
+                  <div
+                    role="progressbar"
+                    aria-label="Progresso da viagem"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progressPercent}
+                    className="h-2 overflow-hidden rounded-full bg-[#DCE7DF]"
+                  >
+                    <div
+                      className="h-full rounded-full bg-[#2D6A5C] transition-[width] duration-300"
+                      style={{ width: progressPercent + "%" }}
+                    />
                   </div>
                 </div>
               )}
@@ -433,12 +688,43 @@ export function OfflineRoutePreview({
           </div>
         </section>
       )}
-      <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
-        {validOrigin && <button type="button" onClick={() => focus(validOrigin)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver origem</button>}
-        {validDestination && <button type="button" onClick={() => focus(validDestination)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver destino</button>}
-        {isMapPoint(livePosition) && <button type="button" aria-pressed={following} onClick={() => { setFocusRequest(null); setFollowing(v => !v); setZoom(v => Math.max(2, v)); }} className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white">Seguir GPS</button>}
+      <div className="route-map-actions flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
+        {validOrigin && (
+          <button
+            type="button"
+            onClick={() => focus(validOrigin)}
+            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
+          >
+            Ver origem
+          </button>
+        )}
+        {validDestination && (
+          <button
+            type="button"
+            onClick={() => focus(validDestination)}
+            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
+          >
+            Ver destino
+          </button>
+        )}
+        {isMapPoint(livePosition) && (
+          <button
+            type="button"
+            aria-pressed={following}
+            onClick={() => {
+              setFocusRequest(null);
+              setFollowing(v => !v);
+              setZoom(v => Math.max(2, v));
+            }}
+            className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white"
+          >
+            Seguir GPS
+          </button>
+        )}
       </div>
       <OfflineMapCanvas
+        initialDark={false}
+        className="h-[min(62dvh,560px)] min-h-[320px]"
         markers={markers}
         routePoints={routePoints}
         zoom={zoom}
@@ -449,37 +735,79 @@ export function OfflineRoutePreview({
         onManualInteraction={() => setFollowing(false)}
         estimated={selected?.source === "local-estimate"}
         ariaLabel="Prévia offline da rota"
-        onSelect={marker => { setSelectedPoint(marker.name + (nearbyBusinesses.find(item => item.id === marker.id)?.precision ? " · " + nearbyBusinesses.find(item => item.id === marker.id)?.precision : "")); focus(marker); }}
+        onSelect={marker => {
+          setSelectedPoint(
+            marker.name +
+              (nearbyBusinesses.find(item => item.id === marker.id)?.precision
+                ? " · " +
+                  nearbyBusinesses.find(item => item.id === marker.id)
+                    ?.precision
+                : "")
+          );
+          focus(marker);
+        }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
         {destinationReference && <p className="break-words rounded-xl bg-amber-50 p-3 text-xs text-amber-900">{destinationReference.name} · {destinationReference.precision} Fonte: {destinationReference.sourceLabel}</p>}
         <section className="grid grid-cols-2 gap-2" aria-label="Dados da rota">
           <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Fonte da rota</p>
-            <p className="mt-1 break-words text-xs font-black">{routeSourceLabel}</p>
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">
+              Fonte da rota
+            </p>
+            <p className="mt-1 break-words text-xs font-black">
+              {routeSourceLabel}
+            </p>
           </div>
           <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Guia</p>
-            <p className="mt-1 break-words text-xs font-black">{selected?.steps?.length ? selected.steps.length + " orientações" : "Sem passos confirmados"}</p>
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">
+              Guia
+            </p>
+            <p className="mt-1 break-words text-xs font-black">
+              {selected?.steps?.length
+                ? selected.steps.length + " orientações"
+                : "Sem passos confirmados"}
+            </p>
           </div>
         </section>
-                {nearbyNamedPlaces.length > 0 && (
-          <section className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3" aria-labelledby="nearby-places-title">
+        {nearbyNamedPlaces.length > 0 && (
+          <section
+            className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3"
+            aria-labelledby="nearby-places-title"
+          >
             <div className="flex items-center justify-between gap-3">
-              <p id="nearby-places-title" className="text-xs font-black uppercase tracking-[.12em] text-[#365E51]">Lugares próximos e referências</p>
-              <span className="rounded-full bg-white px-2 py-1 text-[0.65rem] font-black text-[#56766A]">{nearbyNamedPlaces.length}</span>
+              <p
+                id="nearby-places-title"
+                className="text-xs font-black uppercase tracking-[.12em] text-[#365E51]"
+              >
+                Lugares próximos e referências
+              </p>
+              <span className="rounded-full bg-white px-2 py-1 text-[0.65rem] font-black text-[#56766A]">
+                {nearbyNamedPlaces.length}
+              </span>
             </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {nearbyNamedPlaces.map(place => (
-                <div key={place.id} className="min-w-0 rounded-xl border border-[#D7E5D8] bg-white px-3 py-2">
-                  <p className="truncate text-xs font-black text-[#163840]">{place.name}</p>
-                  <p className="mt-0.5 break-words text-[0.68rem] text-[#607169]">{place.detail}</p>
+                <div
+                  key={place.id}
+                  className="min-w-0 rounded-xl border border-[#D7E5D8] bg-white px-3 py-2"
+                >
+                  <p className="truncate text-xs font-black text-[#163840]">
+                    {place.name}
+                  </p>
+                  <p className="mt-0.5 break-words text-[0.68rem] text-[#607169]">
+                    {place.detail}
+                  </p>
                 </div>
               ))}
             </div>
           </section>
         )}
-        {nearbyBusinesses.length > 0 && <p className="text-xs text-[#607169]">{nearbyBusinesses.length} empresas próximas ao destino · referências aproximadas do catálogo local</p>}
+        {nearbyBusinesses.length > 0 && (
+          <p className="text-xs text-[#607169]">
+            {nearbyBusinesses.length} empresas próximas ao destino · referências
+            aproximadas do catálogo local
+          </p>
+        )}
         {selectedPoint && <p className="font-black">{selectedPoint}</p>}
         <p>
           {selected?.source === "local-estimate"
@@ -497,39 +825,67 @@ export function OfflineRoutePreview({
           </p>
         )}
         {selected?.steps?.length ? (
-          <details open={instructionsOpen} className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3">
-            <summary aria-expanded={instructionsOpen} onClick={event => { event.preventDefault(); setInstructionsOpen(value => !value); }} className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black">
+          <details
+            open={instructionsOpen}
+            className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3"
+          >
+            <summary
+              aria-expanded={instructionsOpen}
+              onClick={event => {
+                event.preventDefault();
+                setInstructionsOpen(value => !value);
+              }}
+              className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black"
+            >
               <span className="flex items-center gap-2">
                 <Navigation2 className="size-4" />
                 Instruções pelas ruas · {selected.steps.length} passos
               </span>
               <ChevronDown className="size-4" />
             </summary>
-            {instructionsOpen && <ol className="mt-2 space-y-1.5">
-              {selected.steps.slice(0, 30).map((step, index) => (
-                <li key={index} className="flex items-start gap-3 rounded-lg bg-white px-3 py-2">
-                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#163840] text-xs font-black text-white">{index + 1}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-bold">{step.instruction}</span>
-                    <span className="mt-0.5 block text-xs text-[#607169]">
-                      {step.distanceMeters >= 1000
-                        ? (step.distanceMeters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
-                        : Math.max(1, Math.round(step.distanceMeters)) + " m"}
-                      {step.durationSeconds > 0 ? " · " + Math.max(1, Math.round(step.durationSeconds / 60)) + " min" : ""}
+            {instructionsOpen && (
+              <ol className="mt-2 space-y-1.5">
+                {selected.steps.map((step, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start gap-3 rounded-lg bg-white px-3 py-2"
+                  >
+                    <span
+                      className="grid size-9 shrink-0 place-items-center rounded-full bg-[#163840] text-xs font-black text-white"
+                      aria-label={"Passo " + (index + 1)}
+                    >
+                      <ManeuverIcon
+                        maneuver={step.maneuver}
+                        className="size-5"
+                      />
                     </span>
-                  </span>
-                </li>
-              ))}
-            </ol>}
-            {instructionsOpen && selected.steps.length > 30 && (
-              <p className="mt-2 text-xs text-[#607169]">
-                Mostrando os primeiros 30 passos. Abra no navegador para acompanhar a navegação completa em tempo real.
-              </p>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold">
+                        {step.instruction}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-[#607169]">
+                        {step.distanceMeters >= 1000
+                          ? (step.distanceMeters / 1000).toLocaleString(
+                              "pt-BR",
+                              { maximumFractionDigits: 1 }
+                            ) + " km"
+                          : Math.max(1, Math.round(step.distanceMeters)) + " m"}
+                        {step.durationSeconds > 0
+                          ? " · " +
+                            Math.max(1, Math.round(step.durationSeconds / 60)) +
+                            " min"
+                          : ""}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
             )}
           </details>
         ) : routePoints.length && selected?.source !== "local-estimate" ? (
           <p className="rounded-xl border border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs text-[#607169]">
-            A rota foi calculada pelas ruas, mas este provedor não enviou instruções curva a curva nesta consulta.
+            A rota foi calculada pelas ruas, mas este provedor não enviou
+            instruções curva a curva nesta consulta.
           </p>
         ) : null}
 
@@ -567,7 +923,10 @@ export function RouteMap({
   liveSpeedMps,
 }: RouteMapProps) {
   const businesses = useBusinessCatalog();
-  const businessReferences = useMemo(() => nearbyBusinessReferences(businesses.items, destination), [businesses.items, destination?.lat, destination?.lng]);
+  const businessReferences = useMemo(
+    () => nearbyBusinessReferences(businesses.items, destination),
+    [businesses.items, destination?.lat, destination?.lng]
+  );
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const polylinesRef = useRef<google.maps.Polyline[]>([]);
@@ -655,7 +1014,16 @@ export function RouteMap({
       return;
 
     const bounds = new maps.LatLngBounds();
-    [origin, destination, ...stops, ...nearbyRouteReferences(origin, destination, routes.flatMap(route => decodePolyline(route.polyline ?? "")))].forEach(point => bounds.extend(point));
+    [
+      origin,
+      destination,
+      ...stops,
+      ...nearbyRouteReferences(
+        origin,
+        destination,
+        routes.flatMap(route => decodePolyline(route.polyline ?? ""))
+      ),
+    ].forEach(point => bounds.extend(point));
     routes
       ?.filter(route => route.polyline)
       .forEach(route =>
@@ -684,8 +1052,13 @@ export function RouteMap({
     makeMarker(origin, "Origem", "#BA5B45");
     makeMarker(destination, "Destino", "#FFC928");
     stops.forEach(stop => makeMarker(stop, stop.name, "#E8EEE8"));
-    nearbyRouteReferences(origin, destination, routes.flatMap(route => decodePolyline(route.polyline ?? "")))
-      .forEach(reference => makeMarker(reference, "Referência · " + reference.name, "#3DE3FF"));
+    nearbyRouteReferences(
+      origin,
+      destination,
+      routes.flatMap(route => decodePolyline(route.polyline ?? ""))
+    ).forEach(reference =>
+      makeMarker(reference, "Referência · " + reference.name, "#3DE3FF")
+    );
     map.fitBounds(bounds, 56);
   }, [mapReady, origin, destination, stops, routes]);
 
@@ -733,7 +1106,9 @@ export function RouteMap({
   const fitRoute = () => {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
-    [origin, destination, ...stops, ...nearbyReferences].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops, ...nearbyReferences].forEach(point =>
+      bounds.extend(point)
+    );
     routes
       .filter(route => route.polyline)
       .forEach(route =>
@@ -757,7 +1132,16 @@ export function RouteMap({
   const selectedRoute = routes.find(route => route.selected) || routes[0];
   const selectedRoutePoints = decodeMapPolyline(selectedRoute?.polyline ?? "");
   const destinationReference = destination ? atlasDestinationReference(destination) : undefined;
-  const nearbyReferences = [...nearbyRouteReferences(origin, destination, selectedRoutePoints), ...businessReferences.map(item => ({ ...item, address: item.precision || "Referência aproximada do catálogo local", coordinateLabel: item.precision, coordinateKind: "area-reference" as const, source: "local" as const }))];
+  const nearbyReferences = [
+    ...nearbyRouteReferences(origin, destination, selectedRoutePoints),
+    ...businessReferences.map(item => ({
+      ...item,
+      address: item.precision || "Referência aproximada do catálogo local",
+      coordinateLabel: item.precision,
+      coordinateKind: "area-reference" as const,
+      source: "local" as const,
+    })),
+  ];
   const trafficCounts = (selectedRoute?.trafficIntervals || []).reduce(
     (acc, item) => {
       if (item.speed === "SLOW") acc.slow += 1;
@@ -781,8 +1165,22 @@ export function RouteMap({
 
   if (forceOffline || livePosition) {
     return (
-      <section className="overflow-hidden rounded-2xl border border-white/10" aria-label="Mapa offline da viagem">
-        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} livePosition={livePosition} liveProgress={liveProgress} liveSpeedMps={liveSpeedMps} forceOffline travelMode={travelMode} />
+      <section
+        className="overflow-hidden rounded-2xl border border-white/10"
+        aria-label="Mapa offline da viagem"
+      >
+        <OfflineRoutePreview
+          origin={origin}
+          destination={destination}
+          stops={stops}
+          routes={routes}
+          privateOrigin={privateOrigin}
+          livePosition={livePosition}
+          liveProgress={liveProgress}
+          liveSpeedMps={liveSpeedMps}
+          forceOffline
+          travelMode={travelMode}
+        />
       </section>
     );
   }
@@ -873,9 +1271,17 @@ export function RouteMap({
         />
         {destinationReference && <p className="break-words bg-[#10191F] px-3 py-2 text-xs text-amber-100">{destinationReference.name} · {destinationReference.precision} Fonte: {destinationReference.sourceLabel}</p>}
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
-          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />rota e pontos principais</span>
-          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#3DE3FF]" />referências próximas</span>
-          <span>{nearbyReferences.length} referência(s) verificada(s) no entorno</span>
+          <span>
+            <span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />
+            rota e pontos principais
+          </span>
+          <span>
+            <span className="mr-1 inline-block size-2 rounded-full bg-[#3DE3FF]" />
+            referências próximas
+          </span>
+          <span>
+            {nearbyReferences.length} referência(s) verificada(s) no entorno
+          </span>
         </div>
       </section>
     );
