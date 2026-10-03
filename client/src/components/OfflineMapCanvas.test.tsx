@@ -69,12 +69,12 @@ it("loads local streets with no coordinate or external request, and preserves da
   expect(marker.style.left).not.toBe(initial);
   fireEvent.keyDown(map, { key: "Home" });
   expect(marker.style.left).toBe(initial);
-  fireEvent.click(screen.getByRole("button", { name: "Usar mapa escuro" }));
+  fireEvent.click(screen.getByRole("button", { name: "Usar mapa claro" }));
   expect(
     screen
-      .getByRole("button", { name: "Usar mapa claro" })
+      .getByRole("button", { name: "Usar mapa escuro" })
       .getAttribute("aria-pressed")
-  ).toBe("true");
+  ).toBe("false");
 });
 it("keeps markers after pack failure and retries when connectivity returns", async () => {
   const fetchMock = vi
