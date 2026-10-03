@@ -58,11 +58,11 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
   await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
   await expect(page.getByText(/Rota preparada localmente sem usar provedores externos/)).toBeVisible();
-  await expect(page.getByRole("img", { name: /Mapa offline vetorial/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.reload();
   await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
-  await expect(page.getByRole("img", { name: /Mapa offline vetorial/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await context.setOffline(false);
   await expect(page.getByText("online", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
