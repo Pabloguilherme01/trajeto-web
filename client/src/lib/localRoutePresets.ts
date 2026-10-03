@@ -196,16 +196,12 @@ const readyEndpoints: Record<string, { label: string; destination: string; categ
 };
 const readyPairs = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
-  ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"],
-  ["centro", "atacadao-dia-a-dia"], ["centro", "parque-da-barragem"],
-  ["centro", "jardim-brasilia"], ["centro", "jardim-querencia"],
-  ["centro", "jardim-guaira"], ["centro", "camping-club"],
-  ["centro", "parque-aguas-bonitas"], ["prefeitura", "upa"],
-  ["upa", "heal"], ["prefeitura", "rodoviaria"], ["prefeitura", "camara-municipal"],
-  ["aguas-lindas-shopping", "rodoviaria"], ["upa", "aguas-lindas-shopping"],
-  ["heal", "aguas-lindas-shopping"], ["rodoviaria", "prefeitura"],
-  ["atacadao-dia-a-dia", "aguas-lindas-shopping"], ["jardim-brasilia", "hospital-bom-jesus"],
-  ["jardim-guaira", "posto-ponteio"], ["camping-club", "upa"],
+  ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
+  ["prefeitura", "upa"], ["prefeitura", "heal"], ["prefeitura", "rodoviaria"],
+  ["prefeitura", "aguas-lindas-shopping"], ["prefeitura", "hospital-bom-jesus"],
+  ["upa", "heal"], ["upa", "rodoviaria"], ["upa", "aguas-lindas-shopping"], ["upa", "hospital-bom-jesus"],
+  ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
+  ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
 ] as const;
 export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
   id: `${from}-to-${to}`,
