@@ -87,7 +87,7 @@ export default function OfflineMapCanvas({
   const [pack, setPack] = useState<MapPack | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 320, height: 360 });
@@ -454,7 +454,7 @@ export default function OfflineMapCanvas({
               <path
                 d={path(geometry)}
                 fill="none"
-                stroke={estimated ? "#667a80" : "#1278cc"}
+                stroke={estimated ? "#667a80" : dark ? "#37e6df" : "#1278cc"}
                 strokeWidth="5"
                 strokeDasharray={estimated ? "8 8" : undefined}
                 strokeLinecap="round"
@@ -475,13 +475,13 @@ export default function OfflineMapCanvas({
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
               style={{ left: p.x, top: p.y }}
             >
-              <span className="grid size-8 place-items-center rounded-full border-[3px] border-white bg-[#1278cc] text-xs font-black text-white shadow-lg">
+              <span className={"grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black text-white shadow-lg " + (marker.id === "destination" ? "bg-[#ff765e]" : marker.id === "live-position" ? "bg-[#37e6df] text-[#102028]" : "bg-[#5b7cff]")}>
                 {marker.label}
               </span>
             </button>
           );
         })}
-        <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/95 px-3 py-2 text-xs font-bold text-[#27414b] shadow">
+        <div className={"pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>
           N ↑ · mapa local
         </div>
         <button
@@ -489,12 +489,12 @@ export default function OfflineMapCanvas({
           aria-label={dark ? "Usar mapa claro" : "Usar mapa escuro"}
           aria-pressed={dark}
           onClick={() => setDark(v => !v)}
-          className="absolute right-3 top-3 min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#27414b] shadow"
+          className={"absolute right-3 top-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}
         >
           {dark ? "Claro" : "Escuro"}
         </button>
-        <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className="absolute bottom-3 right-3 min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#27414b] shadow">{expanded ? "Reduzir" : "Ampliar"}</button>
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 p-2 text-xs font-bold text-[#27414b]">
+        <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className={"absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>{expanded ? "Reduzir" : "Ampliar"}</button>
+        <div className={"pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " + (dark ? "bg-[#162733]/90 text-[#e9ffff]" : "bg-white/90 text-[#27414b"])}>
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
             className="border-x border-b border-[#27414b]"
