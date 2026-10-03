@@ -292,7 +292,8 @@ export function OfflineRoutePreview({
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
-  const [following, setFollowing] = useState(Boolean(livePosition));
+  const hasLivePosition = isMapPoint(livePosition);
+  const [following, setFollowing] = useState(hasLivePosition);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{
     point: { lat: number; lng: number };
@@ -304,14 +305,21 @@ export function OfflineRoutePreview({
     setFocusRequest(previous => ({ point, key: (previous?.key ?? 0) + 1 }));
   };
   useEffect(() => {
-    if (!livePosition) setFollowing(false);
-  }, [livePosition]);
+    // Start following once when GPS becomes available; updates must not undo a manual pan.
+    setFollowing(hasLivePosition);
+    if (hasLivePosition) {
+      setFocusRequest(null);
+      setZoom(value => Math.max(2, value));
+    }
+  }, [hasLivePosition]);
   const validOrigin = isMapPoint(origin) ? origin : undefined;
   const validDestination = isMapPoint(destination) ? destination : undefined;
   const validStops = stops.filter(isMapPoint);
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = decodeMapPolyline(selected?.polyline ?? "");
-  const destinationReference = validDestination ? atlasDestinationReference(validDestination) : undefined;
+  const destinationReference = validDestination
+    ? atlasDestinationReference(validDestination)
+    : undefined;
   const guidance = currentRouteGuidance(
     selected?.steps ?? [],
     selected?.distanceMeters,
@@ -370,8 +378,12 @@ export function OfflineRoutePreview({
     )
     .slice(0, 8);
   const markers = [
-    ...nearbyBusinesses,
-    ...routeReferences.map(point => ({ ...point, label: "R" })),
+    ...nearbyBusinesses.map(point => ({ ...point, isReference: true })),
+    ...routeReferences.map(point => ({
+      ...point,
+      label: "R",
+      isReference: true,
+    })),
     ...(isMapPoint(livePosition)
       ? [
           {
@@ -428,46 +440,69 @@ export function OfflineRoutePreview({
           encodeURIComponent(validStops.map(p => p.lat + "," + p.lng).join("|"))
         : "")
     : null;
-  return (
+  const mapControls = (
     <div
-      className="route-navigation bg-[#eef2eb] text-[#163840]"
-      data-live={Boolean(livePosition)}
+      className="pointer-events-none absolute inset-0 z-10"
+      role="group"
+      aria-label="Controles da viagem"
     >
-      <div className="route-map-toolbar flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
-        <p className="min-w-0 flex-1 text-sm font-black">
-          Mapa local da viagem
-        </p>
+      <div className="pointer-events-auto absolute right-3 top-[8rem] overflow-hidden rounded-full border border-black/10 bg-white shadow-md">
         <button
           type="button"
           aria-label="Diminuir zoom da prévia"
           disabled={zoom <= 1}
           onClick={() => setZoom(v => Math.max(1, v - 0.5))}
-          className="grid size-11 place-items-center rounded-xl bg-white shadow-sm disabled:opacity-40"
+          className="grid size-11 place-items-center rounded-t-full bg-white shadow-sm disabled:opacity-40"
         >
           <Minus className="size-5" />
-        </button>
+        </button>{" "}
         <button
           type="button"
           aria-label="Aumentar zoom da prévia"
           disabled={zoom >= 6}
           onClick={() => setZoom(v => Math.min(6, v + 0.5))}
-          className="grid size-11 place-items-center rounded-xl bg-white shadow-sm disabled:opacity-40"
+          className="grid size-11 place-items-center rounded-b-full bg-white shadow-sm disabled:opacity-40"
         >
           <Plus className="size-5" />
         </button>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          setFollowing(false);
+          setFocusRequest(null);
+          setZoom(1);
+          setResetKey(v => v + 1);
+        }}
+        className="pointer-events-auto absolute left-3 top-[4.25rem] min-h-11 rounded-full bg-white px-3 text-xs font-bold shadow-md"
+      >
+        Enquadrar
+      </button>
+      {hasLivePosition && (
         <button
           type="button"
+          aria-pressed={following}
           onClick={() => {
-            setFollowing(false);
             setFocusRequest(null);
-            setZoom(1);
-            setResetKey(v => v + 1);
+            setFollowing(value => !value);
+            setZoom(value => Math.max(2, value));
           }}
-          className="min-h-11 rounded-xl bg-white px-3 text-sm font-bold shadow-sm"
+          className={
+            "pointer-events-auto absolute left-3 top-[8rem] flex min-h-11 items-center gap-2 rounded-full px-3 text-xs font-bold shadow-md " +
+            (following ? "bg-[#1a73e8] text-white" : "bg-white text-[#163840]")
+          }
         >
-          Enquadrar
+          <LocateFixed className="size-4" aria-hidden="true" />
+          Seguir GPS
         </button>
-      </div>
+      )}
+    </div>
+  );
+  return (
+    <div
+      className="route-navigation bg-[#eef2eb] text-[#163840]"
+      data-live={Boolean(livePosition)}
+    >
       <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs font-bold text-[#52675e]">
         <span className="rounded-full bg-[#163840] px-2.5 py-1 text-white">
           {livePosition
@@ -688,41 +723,8 @@ export function OfflineRoutePreview({
           </div>
         </section>
       )}
-      <div className="route-map-actions flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
-        {validOrigin && (
-          <button
-            type="button"
-            onClick={() => focus(validOrigin)}
-            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
-          >
-            Ver origem
-          </button>
-        )}
-        {validDestination && (
-          <button
-            type="button"
-            onClick={() => focus(validDestination)}
-            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
-          >
-            Ver destino
-          </button>
-        )}
-        {isMapPoint(livePosition) && (
-          <button
-            type="button"
-            aria-pressed={following}
-            onClick={() => {
-              setFocusRequest(null);
-              setFollowing(v => !v);
-              setZoom(v => Math.max(2, v));
-            }}
-            className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white"
-          >
-            Seguir GPS
-          </button>
-        )}
-      </div>
       <OfflineMapCanvas
+        controls={mapControls}
         initialDark={false}
         className="h-[min(62dvh,560px)] min-h-[320px]"
         markers={markers}
@@ -747,8 +749,34 @@ export function OfflineRoutePreview({
           focus(marker);
         }}
       />
+      <div className="route-map-actions flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
+        {validOrigin && (
+          <button
+            type="button"
+            onClick={() => focus(validOrigin)}
+            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
+          >
+            Ver origem
+          </button>
+        )}
+        {validDestination && (
+          <button
+            type="button"
+            onClick={() => focus(validDestination)}
+            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
+          >
+            Ver destino
+          </button>
+        )}
+      </div>
+
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
-        {destinationReference && <p className="break-words rounded-xl bg-amber-50 p-3 text-xs text-amber-900">{destinationReference.name} · {destinationReference.precision} Fonte: {destinationReference.sourceLabel}</p>}
+        {destinationReference && (
+          <p className="break-words rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+            {destinationReference.name} · {destinationReference.precision}{" "}
+            Fonte: {destinationReference.sourceLabel}
+          </p>
+        )}
         <section className="grid grid-cols-2 gap-2" aria-label="Dados da rota">
           <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
             <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">
@@ -787,9 +815,20 @@ export function OfflineRoutePreview({
             </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {nearbyNamedPlaces.map(place => (
-                <div
+                <button
+                  type="button"
+                  aria-label={"Ver " + place.name + " no mapa"}
+                  onClick={() => {
+                    const point = markers.find(
+                      marker => marker.id === place.id
+                    );
+                    if (point) {
+                      setSelectedPoint(place.name + " · " + place.detail);
+                      focus(point);
+                    }
+                  }}
                   key={place.id}
-                  className="min-w-0 rounded-xl border border-[#D7E5D8] bg-white px-3 py-2"
+                  className="min-h-11 min-w-0 rounded-xl border border-[#D7E5D8] bg-white px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
                 >
                   <p className="truncate text-xs font-black text-[#163840]">
                     {place.name}
@@ -797,7 +836,7 @@ export function OfflineRoutePreview({
                   <p className="mt-0.5 break-words text-[0.68rem] text-[#607169]">
                     {place.detail}
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           </section>
@@ -1131,7 +1170,9 @@ export function RouteMap({
   };
   const selectedRoute = routes.find(route => route.selected) || routes[0];
   const selectedRoutePoints = decodeMapPolyline(selectedRoute?.polyline ?? "");
-  const destinationReference = destination ? atlasDestinationReference(destination) : undefined;
+  const destinationReference = destination
+    ? atlasDestinationReference(destination)
+    : undefined;
   const nearbyReferences = [
     ...nearbyRouteReferences(origin, destination, selectedRoutePoints),
     ...businessReferences.map(item => ({
@@ -1269,7 +1310,12 @@ export function RouteMap({
             </div>
           }
         />
-        {destinationReference && <p className="break-words bg-[#10191F] px-3 py-2 text-xs text-amber-100">{destinationReference.name} · {destinationReference.precision} Fonte: {destinationReference.sourceLabel}</p>}
+        {destinationReference && (
+          <p className="break-words bg-[#10191F] px-3 py-2 text-xs text-amber-100">
+            {destinationReference.name} · {destinationReference.precision}{" "}
+            Fonte: {destinationReference.sourceLabel}
+          </p>
+        )}
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
           <span>
             <span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />

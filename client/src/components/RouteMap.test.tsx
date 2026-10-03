@@ -471,3 +471,86 @@ describe("navigation completeness", () => {
     expect(screen.getByText("Instrução 65")).toBeTruthy();
   });
 });
+
+it("starts following when GPS arrives later and respects manual exploration until resumed", () => {
+  const trip = {
+    origin: { lat: -15.8, lng: -48 },
+    destination: { lat: -15.9, lng: -47.9 },
+    stops: [],
+  };
+  const { rerender } = render(<OfflineRoutePreview {...trip} />);
+  expect(screen.queryByRole("button", { name: "Seguir GPS" })).toBeNull();
+  rerender(
+    <OfflineRoutePreview
+      {...trip}
+      livePosition={{ lat: -15.81, lng: -47.99 }}
+    />
+  );
+  expect(
+    screen
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("true");
+  const map = screen.getByRole("region", { name: "Explorar mapa offline" });
+  fireEvent.keyDown(map, { key: "ArrowRight" });
+  expect(
+    screen
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("false");
+  rerender(
+    <OfflineRoutePreview
+      {...trip}
+      livePosition={{ lat: -15.82, lng: -47.98 }}
+    />
+  );
+  expect(
+    screen
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("false");
+  fireEvent.click(screen.getByRole("button", { name: "Seguir GPS" }));
+  expect(
+    screen
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("true");
+  rerender(<OfflineRoutePreview {...trip} />);
+  rerender(
+    <OfflineRoutePreview
+      {...trip}
+      livePosition={{ lat: -15.83, lng: -47.97 }}
+    />
+  );
+  expect(
+    screen
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("true");
+});
+
+it("keeps zoom and framing inside the map and does not pause following when zooming", () => {
+  render(
+    <OfflineRoutePreview
+      origin={{ lat: -15.8, lng: -48 }}
+      destination={{ lat: -15.9, lng: -47.9 }}
+      stops={[]}
+      livePosition={{ lat: -15.81, lng: -47.99 }}
+    />
+  );
+  const map = screen.getByRole("region", { name: "Explorar mapa offline" });
+  fireEvent.click(
+    within(map).getByRole("button", { name: "Aumentar zoom da prévia" })
+  );
+  expect(
+    within(map)
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("true");
+  fireEvent.click(within(map).getByRole("button", { name: "Enquadrar" }));
+  expect(
+    within(map)
+      .getByRole("button", { name: "Seguir GPS" })
+      .getAttribute("aria-pressed")
+  ).toBe("false");
+});

@@ -106,7 +106,7 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   await expect(page.getByText(/chegada estimada pela velocidade atual/)).toBeVisible();
 
   const follow = page.getByRole("button", { name: "Seguir GPS", exact: true });
-  await follow.click();
+  // The first GPS fix now starts camera follow automatically.
   await expect(follow).toHaveAttribute("aria-pressed", "true");
   const gps = page.getByRole("button", { name: "Selecionar Você agora", exact: true });
   await expect.poll(() => gps.evaluate(el => Math.abs(parseFloat((el as HTMLElement).style.left) - el.parentElement!.clientWidth / 2))).toBeLessThan(1);
@@ -120,9 +120,15 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   const panned = await origin.getAttribute("style");
   await page.evaluate(() => (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7391234, longitude: -48.2816, accuracy: 20 }, timestamp: Date.now() } as GeolocationPosition));
   await expect(origin).toHaveAttribute("style", panned!);
+  await expect(follow).toHaveAttribute("aria-pressed", "false");
+  await follow.click();
+  await expect(follow).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => gps.evaluate(el => Math.abs(parseFloat((el as HTMLElement).style.left) - el.parentElement!.clientWidth / 2))).toBeLessThan(1);
+  await expect.poll(() => gps.evaluate(el => Math.abs(parseFloat((el as HTMLElement).style.top) - el.parentElement!.clientHeight / 2))).toBeLessThan(1);
   await page.getByRole("button", { name: "Ampliar mapa", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reduzir mapa", exact: true })).toHaveAttribute("aria-pressed", "true");
-  expect(await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage }, url: location.href }))).not.toContain("-15.7431234");
+  const stored = await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage }, url: location.href }));
+  for (const latitude of ["-15.7431234", "-15.7401234", "-15.7391234"]) expect(stored).not.toContain(latitude);
   await page.getByRole("button", { name: "Parar acompanhamento", exact: true }).click();
   await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { stopped: number }).stopped)).toBe(44);

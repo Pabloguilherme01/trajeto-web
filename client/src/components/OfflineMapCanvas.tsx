@@ -6,6 +6,7 @@ export type OfflineMapMarker = MapPoint & {
   id: string;
   name: string;
   label: string;
+  isReference?: boolean;
 };
 type Road = {
   id: number;
@@ -62,6 +63,7 @@ export default function OfflineMapCanvas({
   routePoints = [],
   estimated = false,
   initialDark = true,
+  controls,
   zoom,
   onZoom,
   resetKey = 0,
@@ -76,6 +78,7 @@ export default function OfflineMapCanvas({
   routePoints?: MapPoint[];
   estimated?: boolean;
   initialDark?: boolean;
+  controls?: React.ReactNode;
   zoom: number;
   onZoom: (zoom: number) => void;
   resetKey?: number;
@@ -213,6 +216,22 @@ export default function OfflineMapCanvas({
       y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
     };
   };
+  // Only supporting references are suppressed; trip endpoints and GPS remain selectable.
+  const occupied = validMarkers
+    .filter(marker => !marker.isReference)
+    .map(project);
+  const displayedMarkers = validMarkers.filter(marker => {
+    if (!marker.isReference) return true;
+    const point = project(marker);
+    if (
+      occupied.some(
+        other => Math.hypot(point.x - other.x, point.y - other.y) < 44
+      )
+    )
+      return false;
+    occupied.push(point);
+    return true;
+  });
   const path = (points: MapPoint[]) =>
     points
       .map((point, i) => {
@@ -497,7 +516,7 @@ export default function OfflineMapCanvas({
             </>
           )}
         </svg>
-        {validMarkers.map(marker => {
+        {displayedMarkers.map(marker => {
           const p = project(marker);
           return (
             <button
@@ -507,7 +526,16 @@ export default function OfflineMapCanvas({
               onClick={() => onSelect?.(marker)}
               onPointerDown={e => e.stopPropagation()}
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
-              style={{ left: p.x, top: p.y }}
+              style={{
+                left: p.x,
+                top: p.y,
+                zIndex:
+                  marker.id === "live-position"
+                    ? 2
+                    : marker.isReference
+                      ? 0
+                      : 1,
+              }}
             >
               {marker.id === "live-position" && (
                 <span className="pointer-events-none absolute size-10 rounded-full bg-[#50F3EA]/30 motion-safe:animate-ping" />
@@ -555,6 +583,7 @@ export default function OfflineMapCanvas({
             </button>
           );
         })}
+        {controls}
         <div
           className={
             "pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " +
