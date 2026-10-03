@@ -585,6 +585,13 @@ export default function Planner() {
     ? (
         planned.route as typeof planned.route & {
           source?: "mapbox" | "osrm" | "local-estimate";
+          steps?: Array<{
+            instruction: string;
+            name?: string;
+            distanceMeters: number;
+            durationSeconds: number;
+            maneuver?: string;
+          }>;
         }
       ).source
     : undefined;
@@ -597,6 +604,17 @@ export default function Planner() {
     trafficIntervals: [],
     durationSeconds: planned.route.durationSeconds,
     distanceMeters: planned.route.distanceMeters,
+    steps: (
+      planned.route as typeof planned.route & {
+        steps?: Array<{
+          instruction: string;
+          name?: string;
+          distanceMeters: number;
+          durationSeconds: number;
+          maneuver?: string;
+        }>;
+      }
+    ).steps ?? [],
   }] : [];
 
   return (
