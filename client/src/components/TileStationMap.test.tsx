@@ -71,6 +71,22 @@ it("sends only the site origin as referrer for public OSM tiles", () => {
   expect(tile?.getAttribute("referrerpolicy")).toBe("origin");
 });
 
+it("uses the selected non-driving mode and hides car-only providers", () => {
+  render(
+    <TileStationMap
+      travelMode="walking"
+      stations={[
+        { id: "a", name: "Referência A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+      ]}
+    />
+  );
+  const google = screen.getByRole("button", { name: /Google/i });
+  fireEvent.click(google);
+  expect(window.open).toHaveBeenCalled;
+  expect(screen.queryByRole("button", { name: /Waze/i })).toBeNull();
+  expect(screen.queryByRole("button", { name: /Apple/i })).toBeNull();
+});
+
 it("keeps OSM attribution and correction links visible", () => {
   render(
     <TileStationMap
