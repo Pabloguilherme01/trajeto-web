@@ -21,7 +21,7 @@ function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: 
   return 2 * earth * Math.asin(Math.sqrt(h));
 }
 
-function nearbyRouteReferences(
+export function nearbyRouteReferences(
   origin: { lat: number; lng: number } | undefined,
   destination: { lat: number; lng: number } | undefined,
   routePoints: Array<{ lat: number; lng: number }>
