@@ -8,6 +8,7 @@ import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
+import { DestinationActions } from "@/components/DestinationActions";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -125,6 +126,14 @@ export function StationDirectoryCard({
   const webSearchUrl = "https://www.google.com/search?q=" + socialQuery;
   const status = local?.mapData?.operationalStatus;
   const statusLabel = status === "open" ? "Aberto em referência de mapa" : status === "closed" ? "Fechado em referência de mapa" : "Funcionamento não confirmado";
+  const sharedDestination = {
+    id: "station:" + (cnpj || local?.id || stationName),
+    kind: "station" as const,
+    name: stationName,
+    address,
+    coordinates: coords,
+    source: anp ? "ANP" : "catalog",
+  };
 
   const copy = async (value: string) => {
     try {
@@ -243,7 +252,9 @@ export function StationDirectoryCard({
         <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
       </div>
 
-      <Link href={appUrl("/planejar") + "?destino=" + encodeURIComponent(address)} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-sm font-bold text-white/80">Planejar viagem e comparar transporte</Link>
+      <div className="mt-3">
+        <DestinationActions destination={sharedDestination} saved={saved} onToggleSaved={onToggleSaved} />
+      </div>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
