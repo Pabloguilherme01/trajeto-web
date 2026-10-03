@@ -39,6 +39,7 @@ import {
   ALL_LOCAL_ROUTE_DESTINATIONS,
   getLocalRoutePresets,
 } from "@/lib/localRoutePresets";
+import { NAVIGATION_DESTINATIONS, searchNavigationDestinations } from "@/lib/navigationCatalog";
 import { localDataEvent } from "@/lib/localData";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
 
@@ -257,7 +258,7 @@ export default function SearchPage() {
   }, [params]);
 
   const results = useMemo(() => getUniversalSearchResults(query), [query]);
-  const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
+  const defaultRoutes = useMemo(() => NAVIGATION_DESTINATIONS.slice(0, 4), []);
   const search = (value: string) => {
     const next = value.trim();
     setInput(next);
@@ -764,7 +765,7 @@ export default function SearchPage() {
                 className="mt-3 min-h-12 w-full rounded-xl border border-[#3DE3FF]/25 px-3 py-2 text-sm font-bold text-[#C9F7FF]"
               >
                 Todos os destinos disponíveis ·{" "}
-                {ALL_LOCAL_ROUTE_DESTINATIONS.length} locais
+                {NAVIGATION_DESTINATIONS.length} destinos integrados
               </button>
             </section>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
