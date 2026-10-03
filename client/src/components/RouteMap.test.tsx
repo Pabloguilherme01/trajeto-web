@@ -102,6 +102,29 @@ describe("RouteMap", () => {
     expect(href).toContain("destination=");
   });
 
+  it("shows street-by-street instructions when the route provider supplies steps", () => {
+    render(
+      <OfflineRoutePreview
+        origin={{ lat: -15.8, lng: -48 }}
+        destination={{ lat: -15.9, lng: -47.9 }}
+        stops={[]}
+        routes={[{
+          id: "road",
+          source: "osrm",
+          polyline: "r`d_B~~teHbwFg_mA",
+          steps: [
+            { instruction: "Saia em Avenida JK", name: "Avenida JK", distanceMeters: 120, durationSeconds: 30 },
+            { instruction: "Vire à direita em BR-070", name: "BR-070", distanceMeters: 900, durationSeconds: 100 },
+          ],
+        }]}
+      />
+    );
+    expect(screen.getByText(/Instruções pelas ruas · 2 passos/)).toBeTruthy();
+    fireEvent.click(screen.getByText(/Instruções pelas ruas · 2 passos/));
+    expect(screen.getByText("Saia em Avenida JK")).toBeTruthy();
+    expect(screen.getByText("Vire à direita em BR-070")).toBeTruthy();
+  });
+
   it("oferece mapa grande, enquadramento, trânsito, satélite e zoom", () => {
     render(
       <RouteMap
