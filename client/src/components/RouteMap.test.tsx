@@ -1,7 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OfflineRoutePreview, RouteMap } from "./RouteMap";
+import { OfflineRoutePreview, RouteMap, nearbyRouteReferences } from "./RouteMap";
 
 afterEach(cleanup);
 
@@ -29,6 +29,23 @@ vi.mock("@/components/Map", () => ({
     return <div data-testid="map-view" />;
   },
 }));
+
+describe("nearbyRouteReferences", () => {
+  it("adds only verified city references near the route", () => {
+    const references = nearbyRouteReferences(
+      { lat: -15.7545, lng: -48.2816 },
+      { lat: -15.77665, lng: -48.27935 },
+      [
+        { lat: -15.7545, lng: -48.2816 },
+        { lat: -15.765, lng: -48.281 },
+        { lat: -15.77665, lng: -48.27935 },
+      ]
+    );
+    expect(references.length).toBeGreaterThan(0);
+    expect(references.some(item => item.name.includes("UPA Mansões Odisseia"))).toBe(true);
+    expect(references.every(item => item.source === "local")).toBe(true);
+  });
+});
 
 describe("RouteMap", () => {
   it("keeps saved road geometry local when explicit offline mode is requested", () => {
