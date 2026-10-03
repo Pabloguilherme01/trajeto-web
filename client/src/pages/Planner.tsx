@@ -113,6 +113,7 @@ export default function Planner() {
     requestVersion.current += 1;
     locationRequest.current += 1;
     setLocating(false);
+    setPublicRoutePending(false);
     setPlanned(null);
     setFallbackReady(false);
     setShowMap(false);
@@ -246,6 +247,27 @@ export default function Planner() {
     return () => window.clearTimeout(timer);
   }, [queryParams, savedMode, economyMode, staticRuntime, mode]);
 
+  const recoverSavedTrip = async (from: string, to: string, version: number) => {
+    if (originPrivate) return false;
+    let routes = savedRoutes;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      routes = await Promise.race([
+        listOfflineRoutes(),
+        new Promise<OfflineRoute[]>(resolve => { timer = setTimeout(() => resolve(savedRoutes), 1500); }),
+      ]);
+    } catch {} finally { if (timer) clearTimeout(timer); }
+    if (version !== requestVersion.current) return true;
+    const saved = findBestOfflineRouteForTrip(routes, from, to, mode);
+    if (!saved) return false;
+    setPlanned(saved.payload as PlannedRoute);
+    setShowMap(true);
+    setFallbackReady(false);
+    setError(null);
+    setSavedMessage("Usando a melhor rota já salva para esta viagem e modo de deslocamento. Distância e instruções são da cópia local; trânsito e horários podem estar desatualizados.");
+    return true;
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const from = origin.trim();
@@ -271,26 +293,16 @@ export default function Planner() {
     const version = requestVersion.current;
 
     if ((offlineMode || !online) && from.length >= 2 && !originPrivate) {
-      const saved = findBestOfflineRouteForTrip(savedRoutes, from, to, mode);
-      if (saved) {
-        setPlanned(saved.payload as PlannedRoute);
-        setShowMap(true);
-        setFallbackReady(false);
-        const freshness = routeFreshness(saved.savedAt);
-        setSavedMessage(
-          (offlineMode ? "Modo offline" : "Sem internet") +
-            ": usando a melhor rota já salva para esta viagem. " +
-            (freshness === "fresh"
-              ? "Cópia recente neste aparelho."
-              : freshness === "aging"
-                ? "Cópia salva hoje; trânsito pode ter mudado."
-                : "Cópia antiga; recalcule quando a conexão voltar.")
-        );
+      setPublicRoutePending(true);
+      if (await recoverSavedTrip(from, to, version)) {
+        if (version !== requestVersion.current) return;
+        setPublicRoutePending(false);
         rememberTrip(from, to);
         track("route_open", to);
         vibration(12);
         return;
       }
+      if (version !== requestVersion.current) return;
     }
 
     if (
@@ -364,6 +376,7 @@ export default function Planner() {
         return;
       } catch (routeError) {
         if (version !== requestVersion.current) return;
+        if (await recoverSavedTrip(from, to, version)) return;
         setSavedMessage(null);
         setFallbackReady(true);
         setError(routeError instanceof Error ? routeError.message : "Não foi possível calcular a rota pública.");
@@ -411,6 +424,7 @@ export default function Planner() {
         vibration(14);
       } catch {
         if (version !== requestVersion.current) return;
+        if (await recoverSavedTrip(from, to, version)) return;
         setError("Não foi possível calcular. Use uma rota salva ou informe locais conhecidos e tente novamente.");
         setFallbackReady(true);
         vibration(8);
