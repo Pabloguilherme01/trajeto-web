@@ -95,6 +95,6 @@ it("offers neighborhood and area references with an explicit approximate-locatio
   expect(getLocalRoutePresets("Parque da Barragem", "centro").some(item => item.id === "parque-da-barragem")).toBe(true);
   expect(getLocalRoutePresets("Jardim Brasília", "centro").some(item => item.id === "jardim-brasilia")).toBe(true);
   expect(getLocalRoutePresets("Mansões Centro-Oeste", "centro").some(item => item.id === "mansoes-centro-oeste")).toBe(true);
-  expect(getLocalRoutePresets("Mansões Centro-Oeste", "saude")).toEqual([]);
+  expect(getLocalRoutePresets("Mansões Centro-Oeste", "saude").some(item => item.id === "oftalmed-shopping")).toBe(true);
   expect(LOCAL_ROUTE_PRESETS.filter(item => item.id === "parque-da-barragem")[0]?.detail).toMatch(/aproximado/i);
 });
