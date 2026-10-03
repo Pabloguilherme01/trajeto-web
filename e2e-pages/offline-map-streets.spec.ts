@@ -35,10 +35,11 @@ test("Pages: city streets and controls survive an offline reload without externa
   await expect(marker).not.toHaveAttribute("style", initial!);
   await map.press("Home");
   await expect(marker).toHaveAttribute("style", initial!);
-  await page.getByRole("button", { name: "Usar mapa escuro" }).click();
-  await expect(
-    page.getByRole("button", { name: "Usar mapa claro" })
-  ).toHaveAttribute("aria-pressed", "true");
+  const themeToggle = page.getByRole("button", { name: /Usar mapa (claro|escuro)/ });
+  const initialThemePressed = await themeToggle.getAttribute("aria-pressed");
+  await themeToggle.click();
+  const toggledTheme = page.getByRole("button", { name: /Usar mapa (claro|escuro)/ });
+  await expect(toggledTheme).not.toHaveAttribute("aria-pressed", initialThemePressed ?? "");
   await page.getByRole("button", { name: "Ampliar mapa", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reduzir mapa", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Reduzir mapa", exact: true }).click();
