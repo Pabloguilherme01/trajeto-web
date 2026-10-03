@@ -165,7 +165,7 @@ describe("Planner travel state", () => {
     state.search = "destino=Hospital";
     render(<Planner />);
     submit();
-    await screen.findByRole("button", { name: "Abrir Google Maps · carro" });
+    await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(state.mutate).not.toHaveBeenCalled();
   });
 
@@ -259,7 +259,7 @@ describe("Planner travel state", () => {
     await screen.findByRole("button", { name: "Preparar para offline" });
     state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
     submit();
-    await screen.findByRole("button", { name: "Abrir Google Maps · carro" });
+    await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
 
