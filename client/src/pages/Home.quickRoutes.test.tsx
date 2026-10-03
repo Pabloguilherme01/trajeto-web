@@ -2,6 +2,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import Home from "./Home";
+import { LOCAL_READY_ROUTES } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
