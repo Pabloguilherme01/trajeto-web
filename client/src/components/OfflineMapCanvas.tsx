@@ -458,7 +458,7 @@ export default function OfflineMapCanvas({
                 fill="none"
                 stroke={estimated ? (dark ? "#819399" : "#718287") : dark ? "#50F3EA" : "#0D7186"}
                 strokeWidth="6"
-                strokeDasharray={estimated ? "9 8" : undefined}
+                strokeDasharray={estimated ? "8 8" : undefined}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
