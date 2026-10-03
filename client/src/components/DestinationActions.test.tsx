@@ -34,12 +34,19 @@ describe("DestinationActions", () => {
     );
   });
 
+  it("uses the ready-route origin for Ir daqui instead of the destination", () => {
+    render(<DestinationActions destination={{ ...destination, kind: "route", routeOrigin: "Centro de Águas Lindas" }} />);
+    const href = screen.getByRole("link", { name: /Ir daqui/i }).getAttribute("href") || "";
+    expect(decodeURIComponent(href)).toContain("Centro de Águas Lindas");
+    expect(decodeURIComponent(href)).not.toContain("origem=Prefeitura");
+  });
+
   it("synchronizes the saved state when another surface changes the same destination", async () => {
     render(<DestinationActions destination={destination} />);
-    expect(screen.getByRole("button", { name: /salvar offline/i }).getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByRole("button", { name: /salvar destino/i }).getAttribute("aria-pressed")).toBe("false");
     toggleGenericDestinationFavorite(destination);
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /salvo offline/i }).getAttribute("aria-pressed")).toBe("true");
+      expect(screen.getByRole("button", { name: /destino salvo/i }).getAttribute("aria-pressed")).toBe("true");
     });
   });
 });
