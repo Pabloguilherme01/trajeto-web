@@ -86,7 +86,7 @@ export function normalizeStationIdentity(value: string | null | undefined) {
 export function sameStationIdentity(first: StationIdentityInput, second: StationIdentityInput) {
   const firstCnpj = (first.cnpj ?? "").replace(/\D/g, "");
   const secondCnpj = (second.cnpj ?? "").replace(/\D/g, "");
-  if (firstCnpj && secondCnpj && firstCnpj === secondCnpj) return true;
+  if (firstCnpj && secondCnpj) return firstCnpj === secondCnpj;
 
   const firstAddress = normalizeStationIdentity(first.address);
   const secondAddress = normalizeStationIdentity(second.address);
