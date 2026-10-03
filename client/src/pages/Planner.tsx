@@ -14,7 +14,7 @@ import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
-import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
+import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
@@ -84,7 +84,7 @@ export default function Planner() {
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
   const [showAllDestinations, setShowAllDestinations] = useState(() => queryParams.get("destinos") === "1");
   const [destinationFilter, setDestinationFilter] = useState("");
-  const [destinationCategory, setDestinationCategory] = useState<"todos" | "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao">("todos");
+  const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
@@ -514,14 +514,10 @@ export default function Planner() {
     );
   };
 
-  const availableDestinations = useMemo(() => {
-    const query = destinationFilter.trim().toLocaleLowerCase("pt-BR");
-    return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => {
-      if (destinationCategory !== "todos" && item.category !== destinationCategory) return false;
-      if (!query) return true;
-      return (item.label + " " + item.detail + " " + item.destination).toLocaleLowerCase("pt-BR").includes(query);
-    });
-  }, [destinationFilter, destinationCategory]);
+  const availableDestinations = useMemo(
+    () => getLocalRoutePresets(destinationFilter, destinationCategory),
+    [destinationFilter, destinationCategory]
+  );
 
   const filteredSavedRoutes = useMemo(() => {
     const query = savedRouteQuery.trim().toLocaleLowerCase("pt-BR");
