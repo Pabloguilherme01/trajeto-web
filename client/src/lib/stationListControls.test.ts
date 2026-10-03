@@ -26,4 +26,11 @@ describe("station list controls", () => {
     expect(fuelFilterPriceKey("all")).toBe("gasolina-comum");
     expect(fuelFilterPriceKey("gnv")).toBe("gnv");
   });
+  it("identifica a mesma unidade por CNPJ, endereço ou coordenadas sem fundir vizinhos", () => {
+    expect(sameStationIdentity({ cnpj: "12.345.678/0001-90" }, { cnpj: "12345678000190" })).toBe(true);
+    expect(sameStationIdentity({ address: "BR-070, Quadra 10, Jardim Brasília" }, { address: "BR 070 Quadra 10 Jardim Brasilia" })).toBe(true);
+    expect(sameStationIdentity({ lat: -15.8, lng: -48.25 }, { lat: -15.8001, lng: -48.2501 })).toBe(true);
+    expect(sameStationIdentity({ address: "Rua A, Jardim Brasília" }, { address: "Rua B, Jardim Brasília" })).toBe(false);
+  });
+
 });
