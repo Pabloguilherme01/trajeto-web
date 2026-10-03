@@ -27,6 +27,8 @@ export function DestinationActions({
   onToggleSaved?: () => void;
   saveLocked?: boolean;
 }) {
+  const [saveError, setSaveError] = useState(false);
+  useEffect(() => { setSaveError(false); }, [destination.id]);
   const [genericSaved, setGenericSaved] = useState(() => isGenericDestinationFavorite(destination.id));
 
   useEffect(() => {
@@ -39,12 +41,14 @@ export function DestinationActions({
 
   const isSaved = saved ?? genericSaved;
   const toggleSaved = () => {
+    setSaveError(false);
     if (saveLocked) return;
     if (onToggleSaved) {
       onToggleSaved();
       return;
     }
     const result = toggleGenericDestinationFavorite(destination);
+    setSaveError(result.error);
     if (!result.error) setGenericSaved(result.saved);
   };
   const mapValue = destinationNavigationValue(destination);
@@ -77,6 +81,7 @@ export function DestinationActions({
       <button type="button" onClick={openPreferredMap} className="flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 text-center text-xs font-black text-[#C9F7FF]">
         <MapPinned className="size-3.5 shrink-0" />Abrir no mapa
       </button>
+      {saveError && <p role="alert" className="col-span-full break-words text-xs leading-relaxed text-[#FFD59B]">Não foi possível atualizar os salvos neste aparelho. Confira o espaço disponível ou as permissões de armazenamento e tente novamente.</p>}
     </div>
   );
 }
