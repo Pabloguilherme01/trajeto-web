@@ -75,3 +75,15 @@ it("falls back to the address for invalid destination coordinates", () => {
   const to = new URL(screen.getByRole("link", { name: /Ir até aqui/i }).getAttribute("href")!, "https://trajeto.local");
   expect(to.searchParams.get("destino")).toBe(destination.address);
 });
+
+it("reports blocked storage without claiming a save and clears the warning after retry", () => {
+  render(<DestinationActions destination={destination} />);
+  const write = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("quota"); });
+  fireEvent.click(screen.getByRole("button", { name: /salvar destino/i }));
+  expect(screen.getByRole("alert").textContent).toContain("Não foi possível");
+  expect(screen.getByRole("button", { name: /salvar destino/i }).getAttribute("aria-pressed")).toBe("false");
+  write.mockRestore();
+  fireEvent.click(screen.getByRole("button", { name: /salvar destino/i }));
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(screen.getByRole("button", { name: /destino salvo/i }).getAttribute("aria-pressed")).toBe("true");
+});
