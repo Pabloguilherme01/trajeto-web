@@ -104,6 +104,18 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "viveiro-municipal", label: "Viveiro Municipal", detail: "Serviço municipal · Jardim Querência", destination: "Viveiro Municipal de Águas Lindas de Goiás, Rua 21, Jardim Querência, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "posto-perimetral", label: "Posto Perimetral", detail: "Combustível · Parque da Barragem", destination: "Posto Perimetral, Avenida Águas Lindas, Parque da Barragem, Águas Lindas de Goiás, GO", category: "combustivel" },
   { id: "mercado-paraiso", label: "Mini Mercado Paraíso", detail: "Mercado · Residencial Jardim Paraíso", destination: "Mini Mercado Paraíso, Rua das Azaléias, 195, Residencial Jardim Paraíso, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "parque-da-barragem", label: "Parque da Barragem", detail: "Referência urbana · ponto aproximado", destination: "Parque da Barragem, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-brasilia", label: "Jardim Brasília", detail: "Bairro e eixo comercial · ponto aproximado", destination: "Jardim Brasília, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-querencia", label: "Jardim Querência", detail: "Bairro e serviços públicos · ponto aproximado", destination: "Jardim Querência, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "mansoes-centro-oeste", label: "Mansões Centro-Oeste", detail: "Bairro · shopping e comércio · ponto aproximado", destination: "Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-guaira", label: "Jardim Guaíra", detail: "Bairro e comércio · ponto aproximado", destination: "Jardim Guaíra, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "camping-club", label: "Camping Club", detail: "Bairro e serviços · ponto aproximado", destination: "Camping Club, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-barragem-iv", label: "Jardim da Barragem IV", detail: "Bairro · rodoviária e serviços · ponto aproximado", destination: "Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "parque-aguas-bonitas", label: "Parque Águas Bonitas", detail: "Bairro e serviços · ponto aproximado", destination: "Parque Águas Bonitas, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-aguas-lindas-ii", label: "Jardim Águas Lindas II", detail: "Bairro e comércio · ponto aproximado", destination: "Jardim Águas Lindas II, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "chacaras-coimbra", label: "Chácaras Coimbra", detail: "Área urbana · ponto aproximado", destination: "Chácaras Coimbra, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "setor-10", label: "Setor 10", detail: "Setor urbano · ponto aproximado", destination: "Setor 10, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "setor-09", label: "Setor 09", detail: "Setor urbano · ponto aproximado", destination: "Setor 09, Águas Lindas de Goiás, GO", category: "centro" },
 ];
 
 // A legacy shortcut must not recreate a route deliberately absent in the official catalog.
