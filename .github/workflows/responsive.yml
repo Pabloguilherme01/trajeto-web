@@ -1,12 +1,13 @@
 name: Responsive browsers
 on:
+  workflow_call:
   pull_request:
   push:
     branches: [main]
 permissions:
   contents: read
 concurrency:
-  group: responsive-${{ github.ref }}
+  group: responsive-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   responsive:

@@ -4,23 +4,32 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Sync ANP Águas Lindas"]
-    types: [completed]
-    branches: [main]
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  security-events: write
 
 concurrency:
   group: github-pages
   cancel-in-progress: true
 
 jobs:
+  quality-gate:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+  security-gate:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/security.yml
+  codeql-gate:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/codeql.yml
+  responsive-gate:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/responsive.yml
   build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    needs: [quality-gate, security-gate, codeql-gate, responsive-gate]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
