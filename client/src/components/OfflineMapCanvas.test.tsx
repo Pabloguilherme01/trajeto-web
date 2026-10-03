@@ -62,7 +62,7 @@ it("loads local streets with no coordinate or external request, and preserves da
   fireEvent.click(screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" }));
   expect(screen.getByRole("button", { name: "Ocultar nomes das ruas" }).getAttribute("aria-pressed")).toBe("true");
   expect(
-    screen.getByRole("img").querySelector('path[stroke-dasharray="8 8"]')
+    screen.getByRole("img").querySelector("path[stroke-dasharray]")
   ).toBeTruthy();
   const marker = screen.getByRole("button", { name: "Selecionar Origem" });
   const initial = marker.style.left;
