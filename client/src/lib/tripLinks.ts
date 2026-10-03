@@ -22,6 +22,13 @@ export function buildDestinationPlannerUrl(destination: string) {
   return appUrl("/planejar") + "?" + params.toString();
 }
 
+export function buildOriginPlannerUrl(origin: string) {
+  const safeOrigin = privateOriginForUrl(origin);
+  const params = new URLSearchParams();
+  if (safeOrigin) params.set("origem", safeOrigin);
+  return appUrl("/planejar") + (params.size ? "?" + params.toString() : "");
+}
+
 export function buildReusableTripPlannerUrl(
   trip: ReusableTrip,
   options: { auto?: boolean; drivingMode?: boolean } = {},
