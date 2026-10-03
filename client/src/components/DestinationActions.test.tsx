@@ -37,8 +37,9 @@ describe("DestinationActions", () => {
   it("uses the ready-route origin for Ir daqui instead of the destination", () => {
     render(<DestinationActions destination={{ ...destination, kind: "route", routeOrigin: "Centro de Águas Lindas" }} />);
     const href = screen.getByRole("link", { name: /Ir daqui/i }).getAttribute("href") || "";
-    expect(decodeURIComponent(href)).toContain("Centro de Águas Lindas");
-    expect(decodeURIComponent(href)).not.toContain("origem=Prefeitura");
+    const url = new URL(href, "https://trajeto.local");
+    expect(url.searchParams.get("origem")).toBe("Centro de Águas Lindas");
+    expect(url.searchParams.get("origem")).not.toBe("Prefeitura");
   });
 
   it("synchronizes the saved state when another surface changes the same destination", async () => {
