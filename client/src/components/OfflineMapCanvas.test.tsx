@@ -59,8 +59,10 @@ it("loads local streets with no coordinate or external request, and preserves da
   expect(fetchMock.mock.calls[0][0]).toBe(
     "/data/aguas-lindas-offline-map.json"
   );
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" }));
+  expect(screen.getByRole("button", { name: "Ocultar nomes das ruas" }).getAttribute("aria-pressed")).toBe("true");
   expect(
-    screen.getByRole("img").querySelector('path[stroke-dasharray="8 8"]')
+    screen.getByRole("img").querySelector("path[stroke-dasharray]")
   ).toBeTruthy();
   const marker = screen.getByRole("button", { name: "Selecionar Origem" });
   const initial = marker.style.left;
@@ -69,12 +71,12 @@ it("loads local streets with no coordinate or external request, and preserves da
   expect(marker.style.left).not.toBe(initial);
   fireEvent.keyDown(map, { key: "Home" });
   expect(marker.style.left).toBe(initial);
-  fireEvent.click(screen.getByRole("button", { name: "Usar mapa escuro" }));
+  fireEvent.click(screen.getByRole("button", { name: "Usar mapa claro" }));
   expect(
     screen
-      .getByRole("button", { name: "Usar mapa claro" })
+      .getByRole("button", { name: "Usar mapa escuro" })
       .getAttribute("aria-pressed")
-  ).toBe("true");
+  ).toBe("false");
 });
 it("keeps markers after pack failure and retries when connectivity returns", async () => {
   const fetchMock = vi

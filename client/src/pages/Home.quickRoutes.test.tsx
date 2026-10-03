@@ -2,6 +2,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import Home from "./Home";
+import { LOCAL_READY_ROUTES } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
@@ -23,7 +24,7 @@ it("puts the quick form before service cards and starts calculation in one submi
 });
 it("opens a ready trip with both endpoints", () => {
   render(<Home />);
-  fireEvent.click(screen.getByText("12 trajetos prontos pela cidade"));
+  fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
   fireEvent.click(screen.getByRole("button", { name: /Prefeitura → UPA/ }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("origem")).toMatch(/Prefeitura/);

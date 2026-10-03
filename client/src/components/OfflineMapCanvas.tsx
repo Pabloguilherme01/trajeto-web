@@ -87,7 +87,8 @@ export default function OfflineMapCanvas({
   const [pack, setPack] = useState<MapPack | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
+  const [showAllStreetNames, setShowAllStreetNames] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 320, height: 360 });
@@ -385,7 +386,7 @@ export default function OfflineMapCanvas({
             .filter(
               road =>
                 road.name &&
-                (zoom >= 2 ||
+                (showAllStreetNames || zoom >= 2 ||
                   [
                     "motorway",
                     "trunk",
@@ -415,7 +416,7 @@ export default function OfflineMapCanvas({
                     Math.abs(point.x - x) < width / 2 + 24
                   );
                 }) ||
-                labels.size >= 35 ||
+                labels.size >= (showAllStreetNames ? 140 : 60) ||
                 x < width / 2 + 8 ||
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
@@ -446,16 +447,17 @@ export default function OfflineMapCanvas({
               <path
                 d={path(geometry)}
                 fill="none"
-                stroke="white"
-                strokeWidth="9"
+                stroke={dark ? "#07191f" : "#ffffff"}
+                strokeWidth="11"
+                strokeOpacity="0.92"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               <path
                 d={path(geometry)}
                 fill="none"
-                stroke={estimated ? "#667a80" : "#1278cc"}
-                strokeWidth="5"
+                stroke={estimated ? (dark ? "#819399" : "#718287") : dark ? "#50F3EA" : "#0D7186"}
+                strokeWidth="6"
                 strokeDasharray={estimated ? "8 8" : undefined}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -475,13 +477,20 @@ export default function OfflineMapCanvas({
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
               style={{ left: p.x, top: p.y }}
             >
-              <span className="grid size-8 place-items-center rounded-full border-[3px] border-white bg-[#1278cc] text-xs font-black text-white shadow-lg">
+              {marker.id === "live-position" && <span className="pointer-events-none absolute size-10 rounded-full bg-[#50F3EA]/30 motion-safe:animate-ping" />}
+              <span className={"relative grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black shadow-lg " + (marker.id === "destination" ? "bg-[#ff765e] text-white" : marker.id === "live-position" ? "bg-[#50F3EA] text-[#102028]" : marker.id === "origin" ? "bg-[#C7FF3C] text-[#102028]" : "bg-[#5b7cff] text-white")}>
                 {marker.label}
               </span>
+              {(marker.id === "origin" || marker.id === "destination" || marker.id === "live-position" || zoom >= 2) && <span
+                className={"pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " + (dark ? "border-white/10 bg-[#101c24]/95 text-[#f2ffff]" : "border-black/5 bg-white/95 text-[#27414b]")}
+                title={marker.name}
+              >
+                {marker.name}
+              </span>}
             </button>
           );
         })}
-        <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/95 px-3 py-2 text-xs font-bold text-[#27414b] shadow">
+        <div className={"pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>
           N ↑ · mapa local
         </div>
         <button
@@ -489,12 +498,21 @@ export default function OfflineMapCanvas({
           aria-label={dark ? "Usar mapa claro" : "Usar mapa escuro"}
           aria-pressed={dark}
           onClick={() => setDark(v => !v)}
-          className="absolute right-3 top-3 min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#27414b] shadow"
+          className={"absolute right-3 top-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}
         >
           {dark ? "Claro" : "Escuro"}
         </button>
-        <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className="absolute bottom-3 right-3 min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#27414b] shadow">{expanded ? "Reduzir" : "Ampliar"}</button>
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 p-2 text-xs font-bold text-[#27414b]">
+        <button
+          type="button"
+          aria-label={showAllStreetNames ? "Ocultar nomes das ruas" : "Mostrar nomes de todas as ruas"}
+          aria-pressed={showAllStreetNames}
+          onClick={() => setShowAllStreetNames(value => !value)}
+          className={"absolute right-3 top-[4.25rem] min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (showAllStreetNames ? "bg-[#37e6df] text-[#102028]" : (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]"))}
+        >
+          {showAllStreetNames ? "Ruas: todas" : "Ruas"}
+        </button>
+        <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className={"absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>{expanded ? "Reduzir" : "Ampliar"}</button>
+        <div className={"pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " + (dark ? "bg-[#162733]/90 text-[#e9ffff]" : "bg-white/90 text-[#27414b]")}>
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
             className="border-x border-b border-[#27414b]"
@@ -507,7 +525,7 @@ export default function OfflineMapCanvas({
       <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-xs text-[#536760]">
         <span role="status">
           {pack
-            ? `Ruas locais disponíveis · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
+            ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} vias · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
             : failed
               ? "Ruas indisponíveis neste aparelho; pontos e rota continuam disponíveis."
               : "Carregando ruas locais…"}

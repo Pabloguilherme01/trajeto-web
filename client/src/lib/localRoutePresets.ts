@@ -71,6 +71,26 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "forum", label: "Fórum", detail: "Serviços da Justiça", destination: "Fórum de Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "rodoviaria", label: "Rodoviária", detail: "Terminal rodoviário · Jardim da Barragem IV", destination: "Rodoviária de Águas Lindas de Goiás, Rua 36, 5335, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "transporte" },
   { id: "aguas-lindas-shopping", label: "Águas Lindas Shopping", detail: "Compras e serviços · Mansões Centro-Oeste", destination: "Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "atacadao-dia-a-dia", label: "Atacadão Dia a Dia", detail: "Atacado e varejo · Mansões Centro-Oeste · mix de produtos", destination: "Atacadão Dia a Dia, Alameda Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "shopping-alimentacao", label: "Águas Lindas Shopping · Alimentação", detail: "Praça de alimentação · Piso 1 · confirme horários", destination: "Praça de alimentação, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "burger-king-shopping", label: "Burger King · Águas Lindas Shopping", detail: "Alimentação · unidade no shopping · confirme funcionamento", destination: "Burger King, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "cacau-show-shopping", label: "Cacau Show · Águas Lindas Shopping", detail: "Alimentação e presentes · unidade no shopping · confirme horário", destination: "Cacau Show, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "chocolates-brasil-cacau-shopping", label: "Chocolates Brasil Cacau · Shopping", detail: "Alimentação e presentes · referência de pesquisa", destination: "Chocolates Brasil Cacau, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "qg-shopping", label: "QG · Águas Lindas Shopping", detail: "Alimentação · unidade no shopping · confirme horário", destination: "QG, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "mango-shake-shopping", label: "Mango Shake · Águas Lindas Shopping", detail: "Bebidas e alimentação · unidade no shopping · confirme horário", destination: "Mango Shake, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "o-boticario-shopping", label: "O Boticário · Águas Lindas Shopping", detail: "Varejo e beleza · unidade no shopping · confirme horário", destination: "O Boticário, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "americanas-aguas-lindas", label: "Americanas · Águas Lindas", detail: "Varejo · confirme unidade e funcionamento antes de sair", destination: "Americanas, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "giraffas-shopping", label: "Giraffas · Águas Lindas Shopping", detail: "Alimentação · unidade no shopping · confirme horário", destination: "Giraffas, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "spoleto-shopping", label: "Spoleto · Águas Lindas Shopping", detail: "Alimentação · unidade no shopping · confirme horário", destination: "Spoleto, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "bobs-shopping", label: "Bob's · Águas Lindas Shopping", detail: "Alimentação · unidade no shopping · confirme horário", destination: "Bob's, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "riachuelo-shopping", label: "Riachuelo · Águas Lindas Shopping", detail: "Varejo e moda · unidade no shopping · confirme funcionamento", destination: "Riachuelo, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "bretas-shopping", label: "Bretas Supermercados · Shopping", detail: "Mercado · unidade no shopping · confirme funcionamento", destination: "Bretas Supermercados, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "loterica-shopping", label: "Lotérica · Águas Lindas Shopping", detail: "Serviço financeiro · unidade no shopping · confirme horário", destination: "Lotérica, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "caixa-shopping", label: "Caixa Econômica Federal · Shopping", detail: "Banco e atendimento · unidade no shopping · confirme funcionamento", destination: "Caixa Econômica Federal, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "oftalmed-shopping", label: "Oftalmed Hospital da Visão", detail: "Saúde · unidade no shopping · confirme atendimento", destination: "Oftalmed Hospital da Visão, Águas Lindas Shopping, Avenida Santa Luzia, Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "saude" },
+  { id: "drogaria-exclusiva", label: "Drogaria Exclusiva · Jardim Águas Lindas II", detail: "Farmácia · confirme horário", destination: "Drogaria Exclusiva, Quadra 14, Jardim Águas Lindas II, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "cabana-chopperia", label: "Cabana Chopperia", detail: "Alimentação · referência BR-070 · confirme funcionamento", destination: "Cabana Chopperia, BR-070, Águas Lindas de Goiás, GO", category: "alimentacao" },
+  { id: "supermercado-guaira", label: "Supermercado Guaíra", detail: "Mercado · Jardim Guaíra · confirme horário", destination: "Supermercado Guaíra, Rua Mato Grosso, Jardim Guaíra, Águas Lindas de Goiás, GO", category: "compras" },
   { id: "supermercado-jardim-guaira", label: "Supermercado · Jardim Guaíra", detail: "Mercado · Jardim Guaíra", destination: "Supermercado, Rua Tocantins, 38, Jardim Guaíra, Águas Lindas de Goiás, GO", category: "compras" },
   { id: "droga-shop-camping-club", label: "DrogaShop Camping Club", detail: "Farmácia · Camping Club", destination: "DrogaShop Camping Club, Quadra 07 Lote 60, Camping Clube Nacional, Águas Lindas de Goiás, GO", category: "compras" },
   { id: "farmacia-aguas-lindas", label: "Farmácia Águas Lindas", detail: "Farmácia · Parque da Barragem", destination: "Farmácia Águas Lindas, Rua 19, Parque da Barragem, Águas Lindas de Goiás, GO", category: "compras" },
@@ -84,6 +104,18 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "viveiro-municipal", label: "Viveiro Municipal", detail: "Serviço municipal · Jardim Querência", destination: "Viveiro Municipal de Águas Lindas de Goiás, Rua 21, Jardim Querência, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "posto-perimetral", label: "Posto Perimetral", detail: "Combustível · Parque da Barragem", destination: "Posto Perimetral, Avenida Águas Lindas, Parque da Barragem, Águas Lindas de Goiás, GO", category: "combustivel" },
   { id: "mercado-paraiso", label: "Mini Mercado Paraíso", detail: "Mercado · Residencial Jardim Paraíso", destination: "Mini Mercado Paraíso, Rua das Azaléias, 195, Residencial Jardim Paraíso, Águas Lindas de Goiás, GO", category: "compras" },
+  { id: "parque-da-barragem", label: "Parque da Barragem", detail: "Referência urbana · ponto aproximado", destination: "Parque da Barragem, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-brasilia", label: "Jardim Brasília", detail: "Bairro e eixo comercial · ponto aproximado", destination: "Jardim Brasília, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-querencia", label: "Jardim Querência", detail: "Bairro e serviços públicos · ponto aproximado", destination: "Jardim Querência, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "mansoes-centro-oeste", label: "Mansões Centro-Oeste", detail: "Bairro · shopping e comércio · ponto aproximado", destination: "Mansões Centro-Oeste, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-guaira", label: "Jardim Guaíra", detail: "Bairro e comércio · ponto aproximado", destination: "Jardim Guaíra, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "camping-club", label: "Camping Club", detail: "Bairro e serviços · ponto aproximado", destination: "Camping Club, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-barragem-iv", label: "Jardim da Barragem IV", detail: "Bairro · rodoviária e serviços · ponto aproximado", destination: "Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "parque-aguas-bonitas", label: "Parque Águas Bonitas", detail: "Bairro e serviços · ponto aproximado", destination: "Parque Águas Bonitas, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "jardim-aguas-lindas-ii", label: "Jardim Águas Lindas II", detail: "Bairro e comércio · ponto aproximado", destination: "Jardim Águas Lindas II, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "chacaras-coimbra", label: "Chácaras Coimbra", detail: "Área urbana · ponto aproximado", destination: "Chácaras Coimbra, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "setor-10", label: "Setor 10", detail: "Setor urbano · ponto aproximado", destination: "Setor 10, Águas Lindas de Goiás, GO", category: "centro" },
+  { id: "setor-09", label: "Setor 09", detail: "Setor urbano · ponto aproximado", destination: "Setor 09, Águas Lindas de Goiás, GO", category: "centro" },
 ];
 
 // A legacy shortcut must not recreate a route deliberately absent in the official catalog.
@@ -155,19 +187,21 @@ export function getLocalRoutePresets(
   );
 }
 
-export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string };
+export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string; category: RouteDestinationCategory };
 
 // Existing verified destinations; the city reference is approximate, not a street address.
-const readyEndpoints: Record<string, { label: string; destination: string }> = {
+const readyEndpoints: Record<string, { label: string; destination: string; category: RouteDestinationCategory }> = {
   ...Object.fromEntries(CITY_ROUTE_PRESETS.map(place => [place.id, place])),
-  centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO" },
+  centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO", category: "centro" },
 };
 const readyPairs = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
-  ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"],
-  ["prefeitura", "upa"], ["upa", "heal"], ["prefeitura", "rodoviaria"],
-  ["aguas-lindas-shopping", "rodoviaria"], ["upa", "aguas-lindas-shopping"],
-  ["heal", "aguas-lindas-shopping"], ["rodoviaria", "prefeitura"],
+  ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
+  ["prefeitura", "upa"], ["prefeitura", "heal"], ["prefeitura", "rodoviaria"],
+  ["prefeitura", "aguas-lindas-shopping"], ["prefeitura", "hospital-bom-jesus"],
+  ["upa", "heal"], ["upa", "rodoviaria"], ["upa", "aguas-lindas-shopping"], ["upa", "hospital-bom-jesus"],
+  ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
+  ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
 ] as const;
 export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
   id: `${from}-to-${to}`,
@@ -175,4 +209,5 @@ export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) 
   destination: readyEndpoints[to].destination,
   label: `${readyEndpoints[from].label} → ${readyEndpoints[to].label}`,
   detail: from === "centro" ? "Origem aproximada · ajuste seu endereço" : "Origem e destino preenchidos",
+  category: readyEndpoints[to].category,
 }));

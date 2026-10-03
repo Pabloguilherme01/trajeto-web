@@ -1,4 +1,5 @@
 import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
+import offlineMapData from "../../public/data/aguas-lindas-offline-map.json";
 import { appUrl } from "@/lib/appUrl";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
@@ -114,6 +115,39 @@ function categoryForRoute(item: (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number]): 
   if (item.category === "centro") return "referencia";
   return "servicos";
 }
+
+type BundledOfflineRoad = { id: number; kind: string; name: string; points: number[][] };
+
+function offlineRoadReferenceItems(): CityAtlasItem[] {
+  const roads = ((offlineMapData as { roads?: BundledOfflineRoad[] }).roads ?? []).filter(road => road.name.trim() && road.points.length > 0);
+  const bestByName = new Map<string, BundledOfflineRoad>();
+  for (const road of roads) {
+    const key = normalizeCatalogText(road.name);
+    const current = bestByName.get(key);
+    if (!current || road.points.length > current.points.length) bestByName.set(key, road);
+  }
+  return [...bestByName.values()].flatMap(road => {
+    const point = road.points[Math.floor((road.points.length - 1) / 2)];
+    if (!Array.isArray(point) || point.length < 2 || !finiteCoordinate(point[0], 90) || !finiteCoordinate(point[1], 180)) return [];
+    return [{
+      id: "offline-road-" + road.id,
+      name: road.name.trim(),
+      detail: "Via presente no mapa offline local · ponto central aproximado do trecho mapeado",
+      category: "referencia" as const,
+      address: road.name.trim() + ", Águas Lindas de Goiás - GO",
+      destination: road.name.trim() + ", Águas Lindas de Goiás - GO",
+      sourceLabel: "OpenStreetMap · referência aproximada do mapa offline",
+      sourceUrl: "https://www.openstreetmap.org/copyright",
+      keywords: ["rua", "avenida", "via", "logradouro", road.kind].filter(Boolean),
+      lat: point[0],
+      lng: point[1],
+      coordinateKind: "street-midpoint" as const,
+      coordinateLabel: "Centro aproximado da via no mapa offline",
+    }];
+  });
+}
+
+const OFFLINE_ROAD_ITEMS = offlineRoadReferenceItems();
 
 const BASE_ITEMS: CityAtlasItem[] = ALL_LOCAL_ROUTE_DESTINATIONS.map(item => ({
   id: "catalog-" + item.id,
@@ -285,6 +319,21 @@ export function buildCityAtlas(snapshot: CityAtlasSnapshot | null) {
   // The versioned atlas contains source/date metadata and therefore replaces
   // a matching legacy shortcut instead of duplicating it.
   for (const item of supplementalItems(snapshot)) merged.set(identity(item) || item.id, item);
+
+  // The offline map has more named roads than the searchable atlas snapshot.
+  // Add only missing road names so the planner can reach every named OSM road
+  // without duplicating the better, source-dated midpoint already in the atlas.
+  const knownRoadNames = new Set(
+    [...merged.values()]
+      .filter(item => item.coordinateKind === "street-midpoint")
+      .map(item => normalizeCatalogText(item.name)),
+  );
+  for (const item of OFFLINE_ROAD_ITEMS) {
+    const roadName = normalizeCatalogText(item.name);
+    if (knownRoadNames.has(roadName)) continue;
+    merged.set(identity(item) || item.id, item);
+    knownRoadNames.add(roadName);
+  }
   return [...merged.values()];
 }
 

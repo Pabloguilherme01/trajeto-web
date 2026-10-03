@@ -67,10 +67,34 @@ it("keeps hospital shortcuts consistent with the service attendance warning", ()
   expect(getLocalRoutePresets("Hospital Bom Jesus").some(item => item.id === hospital?.id)).toBe(true);
 });
 
+it("keeps commercial destinations in the correct shopping and food filters", () => {
+  expect(getLocalRoutePresets("Atacadão Dia a Dia", "compras").some(item => item.id === "atacadao-dia-a-dia")).toBe(true);
+  expect(getLocalRoutePresets("Burger King", "alimentacao").some(item => item.id === "burger-king-shopping")).toBe(true);
+  expect(getLocalRoutePresets("O Boticário", "compras").some(item => item.id === "o-boticario-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Cacau Show", "compras")).toEqual([]);
+  expect(getLocalRoutePresets("Cacau Show", "alimentacao").some(item => item.id === "cacau-show-shopping")).toBe(true);
+});
+
+it("surfaces additional nearby shopping, food, service, and health destinations", () => {
+  expect(getLocalRoutePresets("Spoleto", "alimentacao").some(item => item.id === "spoleto-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Riachuelo", "compras").some(item => item.id === "riachuelo-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Lotérica", "servicos").some(item => item.id === "loterica-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Oftalmed", "saude").some(item => item.id === "oftalmed-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Drogaria Exclusiva", "compras").some(item => item.id === "drogaria-exclusiva")).toBe(true);
+});
+
 it("offers education destinations in their own filter instead of general services", () => {
   const education = getLocalRoutePresets("", "educacao");
   expect(education.some(item => item.id === "cora-coralina")).toBe(true);
   expect(education.some(item => item.id === "cepi-jk")).toBe(true);
   expect(education.every(item => item.category === "educacao")).toBe(true);
   expect(getLocalRoutePresets("Cora Coralina", "servicos")).toEqual([]);
+});
+
+it("offers neighborhood and area references with an explicit approximate-location note", () => {
+  expect(getLocalRoutePresets("Parque da Barragem", "centro").some(item => item.id === "parque-da-barragem")).toBe(true);
+  expect(getLocalRoutePresets("Jardim Brasília", "centro").some(item => item.id === "jardim-brasilia")).toBe(true);
+  expect(getLocalRoutePresets("Mansões Centro-Oeste", "centro").some(item => item.id === "mansoes-centro-oeste")).toBe(true);
+  expect(getLocalRoutePresets("Mansões Centro-Oeste", "saude").some(item => item.id === "oftalmed-shopping")).toBe(true);
+  expect(LOCAL_ROUTE_PRESETS.filter(item => item.id === "parque-da-barragem")[0]?.detail).toMatch(/aproximado/i);
 });

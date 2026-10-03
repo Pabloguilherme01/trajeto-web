@@ -167,3 +167,13 @@ it("opens the bundled atlas offline without attempting a request", async () => {
     expect(fetcher).not.toHaveBeenCalled();
   } finally { fetcher.mockRestore(); vi.unstubAllGlobals(); }
 });
+
+
+it("adds every named road available in the bundled offline map without replacing sourced atlas roads", async () => {
+  const { BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
+  const items = buildCityAtlas(BUNDLED_CITY_ATLAS);
+  const roads = items.filter(item => item.coordinateKind === "street-midpoint");
+  const roadNames = new Set(roads.map(item => item.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()));
+  expect(roadNames.size).toBeGreaterThan(399);
+  expect(filterCityAtlas(items, "DF-533", "referencia").some(item => item.name === "DF-533")).toBe(true);
+});

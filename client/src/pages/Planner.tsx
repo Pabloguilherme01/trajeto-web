@@ -17,7 +17,7 @@ import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
-import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
+import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategory, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { mobileStationDestination } from "@/lib/unifiedDestination";
 import { listUnifiedDestinationFavorites, unifiedDestinationEvent } from "@/lib/unifiedDestinationStore";
 import { mobileDestinationEvent } from "@/lib/mobileDestinations";
@@ -53,6 +53,17 @@ function formatArrival(seconds: number | null | undefined) {
   if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
   return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
 }
+
+const destinationCategoryLabel: Record<RouteDestinationCategory, string> = {
+  saude: "Saúde",
+  educacao: "Educação",
+  servicos: "Serviços",
+  transporte: "Transporte",
+  compras: "Compras",
+  combustivel: "Combustível",
+  centro: "Cidade",
+  alimentacao: "Alimentação",
+};
 
 export default function Planner() {
   const [location, setLocation] = useLocation();
@@ -729,10 +740,16 @@ export default function Planner() {
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
-                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="flex min-h-[4.6rem] items-center gap-3 rounded-xl border border-white/8 bg-[#121B22] px-3 text-left">
-                          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
-                          <span className="min-w-0 flex-1"><span className="block truncate text-xs font-black">{item.label}</span><span className="mt-0.5 block truncate text-xs text-white/35">{item.detail}</span></span>
-                          <span className="text-xs font-black uppercase tracking-[.08em] text-[#C7FF3C]">Ir</span>
+                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-white/8 bg-gradient-to-br from-[#121F27] to-[#10171C] px-3 text-left shadow-[0_8px_24px_rgba(0,0,0,.12)] transition-colors hover:border-[#3DE3FF]/30 active:scale-[.99]">
+                          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF] transition-colors group-hover:bg-[#3DE3FF]/15"><RouteIcon className="size-4" /></span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center gap-1.5">
+                              <span className="min-w-0 break-words text-xs font-black leading-snug text-white">{item.label}</span>
+                              <span className="rounded-full border border-white/10 bg-white/[.04] px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-[.07em] text-[#C7FF3C]">{destinationCategoryLabel[item.category]}</span>
+                            </span>
+                            <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-white/45">{item.detail}</span>
+                          </span>
+                          <span className="shrink-0 rounded-full bg-[#C7FF3C]/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-[#DFFF9A]">Ir</span>
                         </button>
                       ))}
                       {availableDestinations.length === 0 && <p className="rounded-xl bg-white/[.025] p-4 text-xs text-white/40">Nenhum destino corresponde ao filtro.</p>}
@@ -1180,7 +1197,7 @@ export default function Planner() {
 
                 </div>
                 <div className="min-h-[430px] max-w-full">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online || liveTrip.active} travelMode={mode} livePosition={liveTrip.point ?? undefined} />
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online || liveTrip.active} travelMode={mode} livePosition={liveTrip.point ?? undefined} liveProgress={liveTrip.progress} liveSpeedMps={liveTrip.speed} />
                 </div>
               </section>
             )}
