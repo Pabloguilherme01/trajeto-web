@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BUNDLED_CITY_ATLAS, buildCityAtlas, filterCityAtlas, type CityAtlasItem } from "@/lib/cityAtlas";
 
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
@@ -29,6 +29,8 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   const allPoints = useMemo(() => [...points, ...businesses.items.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))], [businesses.items]);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(8);
+  useEffect(() => { setVisibleCount(8); }, [query, kind]);
   const [selected, setSelected] = useState<{ coordinate: string; label: string } | null>(null);
   const matches = useMemo(() => filterCityAtlas(allPoints, query, "todos"), [allPoints, query]);
   return <div className="mt-2 min-w-0">
@@ -42,7 +44,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
       {businesses.loading && <p role="status" className="mt-2 text-xs text-white/60">Carregando empresas locais…</p>}
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 text-xs text-[#FFD59B]">Tentar carregar empresas novamente</button>}
       <ul className="mt-2 grid gap-2" aria-label={"Pontos locais para " + kind}>
-        {matches.slice(0, 8).map(item => <li key={item.id}>
+        {matches.slice(0, visibleCount).map(item => <li key={item.id}>
           <button type="button" onClick={() => {
             const coordinate = kind === "origem" && item.business ? item.business.cnpj : item.lat + ", " + item.lng;
             setSelected({ coordinate, label: item.name + (item.coordinateKind === "street-midpoint" ? " · Centro aproximado da via; não identifica uma casa ou entrada." : " · " + (item.coordinateLabel || item.sourceLabel)) });
@@ -56,7 +58,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
           </button>
         </li>)}
       </ul>
-      {matches.length > 8 && <p className="mt-2 text-xs text-white/55">Mostrando 8 resultados. Refine a busca para encontrar o ponto desejado.</p>}
+      {matches.length > visibleCount && <button type="button" onClick={() => setVisibleCount(count => count + 8)} className="mt-2 min-h-11 w-full rounded-xl border border-white/15 px-3 text-xs font-bold text-white/75">Mostrar mais pontos ({visibleCount} de {matches.length})</button>}
       {!matches.length && <p className="mt-2 text-xs text-white/65">Nenhum ponto cadastrado com coordenadas. Use outro nome ou informe as coordenadas no campo principal.</p>}
     </div>}
   </div>;

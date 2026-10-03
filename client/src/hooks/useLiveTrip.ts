@@ -47,7 +47,7 @@ export function useLiveTrip(route: Route | null) {
         if (version !== generation.current) return;
         const point = { lat: position.coords.latitude, lng: position.coords.longitude };
         const accuracy = position.coords.accuracy;
-        if (!isMapPoint(point) || !Number.isFinite(accuracy) || accuracy < 0 || accuracy > 100 || Date.now() - position.timestamp > 15000 || position.timestamp > Date.now() + 5000) {
+        if (!Number.isFinite(position.timestamp) || !isMapPoint(point) || !Number.isFinite(accuracy) || accuracy < 0 || accuracy > 100 || Date.now() - position.timestamp > 15000 || position.timestamp > Date.now() + 5000) {
           setMessage("GPS impreciso ou antigo. Aguardando um sinal melhor."); return;
         }
         if (position.timestamp <= acceptedTimestamp.current) return;

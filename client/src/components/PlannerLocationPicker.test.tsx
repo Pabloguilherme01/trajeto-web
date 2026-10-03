@@ -51,3 +51,15 @@ it("uses the public CNPJ for company origins instead of treating their coordinat
   fireEvent.click(await screen.findByRole("button", { name: /AMAG/ }, { timeout: 5000 }));
   expect(choose).toHaveBeenCalledWith("42.115.689/0001-40");
 });
+
+it("reveals more local points and resets pagination when the search changes", () => {
+  render(<PlannerLocationPicker kind="destino" value="" onChoose={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  const list = screen.getByRole("list", { name: "Pontos locais para destino" });
+  expect(list.querySelectorAll("li")).toHaveLength(8);
+  fireEvent.click(screen.getByRole("button", { name: /Mostrar mais pontos/ }));
+  expect(list.querySelectorAll("li")).toHaveLength(16);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "HEAL" } });
+  expect(list.querySelectorAll("li").length).toBeLessThanOrEqual(8);
+  expect(screen.queryByRole("button", { name: /Mostrar mais pontos/ })).toBeNull();
+});

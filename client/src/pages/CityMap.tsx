@@ -91,7 +91,7 @@ export default function CityMap() {
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
     if (category === "todos") return "todos";
     if (category === "centro") return "referencia";
-    if (category === "saude" || category === "transporte" || category === "combustivel" || category === "compras" || category === "alimentacao") {
+    if (category === "educacao" || category === "saude" || category === "transporte" || category === "combustivel" || category === "compras" || category === "alimentacao") {
       return category;
     }
     return "servicos";

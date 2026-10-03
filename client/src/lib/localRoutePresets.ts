@@ -2,7 +2,7 @@ import { matchesCatalogText } from "./catalogSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 
-export type RouteDestinationCategory = "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
+export type RouteDestinationCategory = "saude" | "educacao" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
 export type RouteDestinationCategoryFilter = "todos" | RouteDestinationCategory;
 
 export type LocalRoutePreset = {
@@ -16,6 +16,7 @@ export type LocalRoutePreset = {
 export const ROUTE_DESTINATION_CATEGORIES: ReadonlyArray<{ value: RouteDestinationCategoryFilter; label: string }> = [
   { value: "todos", label: "Tudo" },
   { value: "saude", label: "Saúde" },
+  { value: "educacao", label: "Educação" },
   { value: "servicos", label: "Serviços" },
   { value: "compras", label: "Compras" },
   { value: "transporte", label: "Transporte" },
@@ -43,8 +44,8 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "saneago", label: "Saneago", detail: "Água e saneamento", destination: "Saneago, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "vapt-vupt", label: "Vapt Vupt", detail: "Serviços públicos", destination: "Vapt Vupt, Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "detran", label: "Detran-GO", detail: "Serviços de trânsito", destination: "Detran-GO, Águas Lindas de Goiás, GO", category: "transporte" },
-  { id: "cora-coralina", label: "Cora Coralina", detail: "Colégio estadual", destination: "Colégio Estadual Cora Coralina, Rua 38, Mansões Village, Águas Lindas de Goiás, GO", category: "servicos" },
-  { id: "cepi-jk", label: "CEPI JK", detail: "Educação estadual · Mansões Odisseia", destination: "CEPI Juscelino Kubitschek de Oliveira, Rua Mansões Odisseia, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "cora-coralina", label: "Cora Coralina", detail: "Colégio estadual", destination: "Colégio Estadual Cora Coralina, Rua 38, Mansões Village, Águas Lindas de Goiás, GO", category: "educacao" },
+  { id: "cepi-jk", label: "CEPI JK", detail: "Educação estadual · Mansões Odisseia", destination: "CEPI Juscelino Kubitschek de Oliveira, Rua Mansões Odisseia, Águas Lindas de Goiás, GO", category: "educacao" },
   { id: "ubs-barragem-ii", label: "UBS Barragem II", detail: "Saúde básica · Barragem II", destination: "UBS Barragem II, Quadra 58, Barragem II, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "esf-aguas-bonitas", label: "ESF Águas Bonitas", detail: "Saúde básica · Águas Bonitas", destination: "ESF Águas Bonitas, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "esf-aguas-lindas-ii", label: "ESF Águas Lindas II", detail: "Saúde básica · Águas Lindas II", destination: "ESF Águas Lindas II, Águas Lindas de Goiás, GO", category: "saude" },
@@ -63,9 +64,9 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "esf-setor-09", label: "ESF Setor 09", detail: "Saúde básica · Setor 09", destination: "ESF Setor 09, Águas Lindas de Goiás, GO", category: "saude" },
   { id: "drp-17", label: "17ª DRP", detail: "Polícia Civil · delegacia regional", destination: "17ª Delegacia Regional de Polícia, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "superintendencia-transito", label: "Superintendência de Trânsito", detail: "Atendimento de mobilidade urbana", destination: "Superintendência Municipal de Trânsito, Águas Lindas de Goiás, GO", category: "transporte" },
-  { id: "cepm-aguas-lindas", label: "CEPM Águas Lindas", detail: "Educação estadual · Colégio Militar", destination: "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas, GO", category: "servicos" },
-  { id: "paulo-freire", label: "Colégio Paulo Freire", detail: "Educação estadual", destination: "Colégio Estadual Paulo Freire, Águas Lindas de Goiás, GO", category: "servicos" },
-  { id: "secretaria-educacao", label: "Secretaria de Educação", detail: "Atendimento da educação municipal", destination: "Secretaria Municipal de Educação, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "cepm-aguas-lindas", label: "CEPM Águas Lindas", detail: "Educação estadual · Colégio Militar", destination: "Colégio Estadual da Polícia Militar de Goiás de Águas Lindas, GO", category: "educacao" },
+  { id: "paulo-freire", label: "Colégio Paulo Freire", detail: "Educação estadual", destination: "Colégio Estadual Paulo Freire, Águas Lindas de Goiás, GO", category: "educacao" },
+  { id: "secretaria-educacao", label: "Secretaria de Educação", detail: "Atendimento da educação municipal", destination: "Secretaria Municipal de Educação, Águas Lindas de Goiás, GO", category: "educacao" },
   { id: "camara-municipal", label: "Câmara Municipal", detail: "Atendimento legislativo", destination: "Câmara Municipal de Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "forum", label: "Fórum", detail: "Serviços da Justiça", destination: "Fórum de Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "rodoviaria", label: "Rodoviária", detail: "Terminal rodoviário · Jardim da Barragem IV", destination: "Rodoviária de Águas Lindas de Goiás, Rua 36, 5335, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "transporte" },
@@ -107,7 +108,7 @@ const representedServices = new Set([
   "coralina", "cepi-juscelino", "pm-go-aguas-lindas",
 ]);
 const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.mapQuery && !representedServices.has(service.id)).map(service => ({
-  id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: "servicos",
+  id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: service.category === "educacao" ? "educacao" : "servicos",
 }));
 function normalizeDestinationKey(value: string) {
   return value
