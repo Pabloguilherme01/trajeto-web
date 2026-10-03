@@ -18,7 +18,8 @@ export type StationMapItem = {
   lng?: number;
   cnpj?: string | null;
   brand?: string | null;
-  coordinateKind?: "mapped-point" | "street-midpoint";
+  coordinateKind?: "mapped-point" | "street-midpoint" | "area-reference";
+  coordinateLabel?: string;
   source?: "ANP" | "Google" | "local";
 };
 
@@ -110,6 +111,7 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
     <OfflineMapCanvas markers={markers} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
     <div className="border-t border-black/10 bg-white p-4">
       <p className="break-words text-base font-black">{selected?.name ?? "Nenhum ponto nesta categoria"}</p><p className="mt-1 break-words text-sm leading-relaxed text-[#607169]">{selected?.address}</p>
+      {selected?.coordinateLabel && <p className="mt-2 break-words text-xs text-[#765100]">{selected.coordinateLabel}</p>}
       {selected && <div className="mt-3 flex flex-wrap gap-2">
         {onPlanDestination && <button type="button" onClick={() => onPlanDestination(selected)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-black">Planejar até aqui</button>}
         <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + selected.lat + "," + selected.lng + "&travelmode=driving&dir_action=navigate", "_blank", "noopener,noreferrer")} className="grid size-11 place-items-center rounded-xl bg-[#163840] text-white" aria-label="Navegar pelo Google Maps"><Navigation className="size-4" /></button>

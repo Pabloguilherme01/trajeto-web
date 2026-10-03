@@ -92,3 +92,31 @@ test("Pages: selects both endpoints and calculates every travel mode from the of
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+test("Pages: imported companies reload offline and plan all modes from their actual catalog coordinates", async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("mapa");
+  await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
+  await page.getByRole("textbox", { name: "Buscar destino no mapa" }).fill("42.115.689/0001-40");
+  const card = page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) });
+  await expect(card).toHaveCount(1);
+  await expect(card.getByText(/Referência aproximada: Quadra/)).toBeVisible();
+  await card.getByRole("link", { name: "Ir até aqui", exact: true }).click();
+  await page.getByRole("button", { name: "Escolher origem no catálogo local", exact: true }).click();
+  await page.getByRole("textbox", { name: "Buscar origem local", exact: true }).fill("HEAL");
+  await page.getByRole("list", { name: "Pontos locais para origem", exact: true }).getByRole("button").first().click();
+  for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
+    await page.getByRole("button", { name: mode, exact: true }).click();
+    await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+    await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
+    await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await context.setOffline(false);
+  await expect(page.getByText("online", { exact: true }).first()).toBeVisible();
+});

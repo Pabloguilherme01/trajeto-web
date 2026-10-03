@@ -1,3 +1,4 @@
+import { loadBusinessCatalog, resolveBusinessPoint } from "./businessCatalog";
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
@@ -491,7 +492,7 @@ function localGeocode(value: string): PublicCoordinate | null {
   });
 
   const unique = exact.length === 1 ? exact[0] : null;
-  if (!unique) return null;
+  if (!unique) return resolveBusinessPoint(value);
 
   return {
     lat: Number(unique.anp?.latitude),
@@ -512,6 +513,11 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   if (local) {
     cacheSet(cacheKey, local);
     return local;
+  }
+  if (!local && ((typeof navigator !== "undefined" && navigator.onLine === false) || query.replace(/\D/g, "").length === 14)) {
+    await loadBusinessCatalog().catch(() => []);
+    const business = resolveBusinessPoint(query);
+    if (business) return business;
   }
   const cached = cacheGet<PublicCoordinate>(cacheKey);
   if (isCoordinate(cached)) return cached;
@@ -687,6 +693,7 @@ export async function calculateOfflineRoute(
   destinationText: string,
   mode: PublicTravelMode = "driving"
 ): Promise<PublicRoute> {
+  if (!parseCoordinateInput(originText) || !parseCoordinateInput(destinationText)) await loadBusinessCatalog().catch(() => []);
   const parsedOrigin = parseCoordinateInput(originText);
   const parsedDestination = parseCoordinateInput(destinationText);
   const cachedOrigin = cacheGet<PublicCoordinate>(

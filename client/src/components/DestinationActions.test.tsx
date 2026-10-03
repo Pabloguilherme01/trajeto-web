@@ -50,4 +50,12 @@ describe("DestinationActions", () => {
       expect(screen.getByRole("button", { name: /destino salvo/i }).getAttribute("aria-pressed")).toBe("true");
     });
   });
+  it("keeps a company origin identifiable without putting coordinates into the origin URL", () => {
+    render(<DestinationActions destination={{ ...destination, id: "business-42115689000140", source: "CSV fornecido" }} />);
+    const from = new URL(screen.getByRole("link", { name: /Ir daqui/i }).getAttribute("href")!, "https://trajeto.local");
+    const to = new URL(screen.getByRole("link", { name: /Ir até aqui/i }).getAttribute("href")!, "https://trajeto.local");
+    expect(from.searchParams.get("origem")).toBe("42115689000140");
+    expect(to.searchParams.get("destino")).toBe("-15.761,-48.281");
+  });
+
 });

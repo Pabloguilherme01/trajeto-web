@@ -1,3 +1,4 @@
+import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -33,7 +34,8 @@ export default function CityMap() {
   const [, navigate] = useLocation();
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
-  const [showAllAtlas, setShowAllAtlas] = useState(false);
+  const businesses = useBusinessCatalog();
+  const [visibleCount, setVisibleCount] = useState(24);
 
   useEffect(() => {
     let active = true;
@@ -84,7 +86,8 @@ export default function CityMap() {
     () => onlyStreets ? [] : getLocalRoutePresets(query, category),
     [query, category, onlyStreets]
   );
-  const atlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
+  const atlas = useMemo(() => [...buildCityAtlas(atlasSnapshot), ...businesses.items], [atlasSnapshot, businesses.items]);
+  useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
     if (category === "todos") return "todos";
     if (category === "centro") return "referencia";
@@ -105,7 +108,7 @@ export default function CityMap() {
     });
   }, [atlas, atlasLayer, destinations, query, onlyStreets]);
   const visibleAtlasDestinations =
-    query.trim() || showAllAtlas ? atlasDestinations : atlasDestinations.slice(0, 24);
+    atlasDestinations.slice(0, visibleCount);
   const markers = useMemo(() => {
     const publicPoints = destinations.flatMap(item => {
       const point = resolveLocalGeocodePoint(item.destination);
@@ -128,6 +131,7 @@ export default function CityMap() {
             address: item.destination ?? item.address ?? item.name,
             source: item.sourceLabel,
             coordinateKind: item.coordinateKind,
+            coordinateLabel: item.coordinateLabel,
             lat: item.lat,
             lng: item.lng,
           }]
@@ -167,7 +171,13 @@ export default function CityMap() {
         point,
       ])
     );
-    return [...unique.values()];
+    const all = [...unique.values()];
+    if (all.length <= 200) return all;
+    const companies = all.filter(item => item.id?.startsWith("business-"));
+    if (!companies.length) return all.slice(0, 200);
+    const landmarks = all.filter(item => !item.id?.startsWith("business-")).slice(0, 80);
+    const slots = Math.min(200 - landmarks.length, companies.length);
+    return [...landmarks, ...Array.from({ length: slots }, (_, index) => companies[Math.floor(index * companies.length / slots)])];
   }, [destinations, atlasDestinations, category, query, anpRows, onlyStreets]);
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
@@ -196,6 +206,8 @@ export default function CityMap() {
         Saúde, serviços, compras e paradas. Escolha um destino e veja sua rota
         no planejador.
       </p>
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-white/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo disponíveis por nome, CNPJ, atividade ou bairro · consulta local"}</p>
+      {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-white/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <div className="mt-5 flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15212a] px-4">
         <Search className="size-4 shrink-0 text-white/60" />
         <input
@@ -246,7 +258,7 @@ export default function CityMap() {
       </section>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white/65">
         <span>
-          {markers.length} posições cadastradas · {destinations.length + atlasDestinations.length} destinos
+          {markers.length} posições exibidas (até 200) · {destinations.length + atlasDestinations.length} destinos
           na lista
         </span>
         <Link
@@ -329,6 +341,8 @@ export default function CityMap() {
                     <div className="min-w-0">
                       <p className="break-words text-sm font-black">{item.name}</p>
                       <p className="mt-1 text-xs leading-relaxed text-white/60">{item.detail}</p>
+                      {item.business && <details className="mt-2 break-words text-xs text-white/60"><summary className="min-h-8 cursor-pointer font-bold">Dados da empresa</summary><p>Razão social: {item.business.legalName}</p><p>CNAE: {item.business.cnae} · Porte: {item.business.size}</p><p>Abertura: {item.business.opened} · Situação informada em: {item.business.statusDate}</p><p>MEI: {item.business.mei} · Simples: {item.business.simples}</p><p>{item.business.nature}</p></details>}
+                      {item.coordinateLabel && typeof item.lat !== "number" && <p className="mt-1 text-xs text-[#FFD59B]">{item.coordinateLabel} · confirme o endereço antes de viajar</p>}
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-white/40">{item.address}</p>}
                       <p className="mt-2 break-words text-xs leading-relaxed text-white/60">
                         {item.sourceUrl ? (
@@ -337,7 +351,7 @@ export default function CityMap() {
                       </p>
                       {typeof item.lat === "number" && typeof item.lng === "number" && (
                         <p className="mt-1 break-words text-xs text-white/60">
-                          {item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas"}: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
+                          {item.coordinateLabel || (item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas")}: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
                         </p>
                       )}
                     </div>
@@ -349,13 +363,13 @@ export default function CityMap() {
               );
             })}
           </div>
-          {!query.trim() && atlasDestinations.length > visibleAtlasDestinations.length && (
+          {atlasDestinations.length > visibleAtlasDestinations.length && (
             <button
               type="button"
-              onClick={() => setShowAllAtlas(true)}
+              onClick={() => setVisibleCount(v => v + 24)}
               className="mt-3 min-h-11 rounded-xl border border-white/10 px-4 text-xs font-black text-white/75"
             >
-              Ver todos os {atlasDestinations.length} itens do Atlas
+              Mostrar mais destinos ({visibleAtlasDestinations.length} de {atlasDestinations.length})
             </button>
           )}
         </section>

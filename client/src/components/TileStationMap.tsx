@@ -525,6 +525,7 @@ export default function TileStationMap({
               <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">
                 {selected.address || "Endereço não informado"}
               </p>
+              {selected.coordinateLabel && <p className="mt-2 break-words text-xs font-bold text-[#765100]">{selected.coordinateLabel}</p>}
               {selected.coordinateKind === "street-midpoint" && <p className="mt-2 text-xs font-bold text-[#765100]">Centro aproximado da via · confirme quadra, lote e entrada.</p>}
               <div className="mt-2 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
                 {onPlanDestination && (

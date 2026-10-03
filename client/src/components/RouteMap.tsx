@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
+import type { CityAtlasItem } from "@/lib/cityAtlas";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
 import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
@@ -47,6 +49,15 @@ export function nearbyRouteReferences(
       lng: point.lng,
       source: "local" as const,
     }));
+}
+
+export function nearbyBusinessReferences(items: CityAtlasItem[], destination?: { lat: number; lng: number }) {
+  if (!isMapPoint(destination)) return [];
+  return items.filter(item => typeof item.lat === "number" && typeof item.lng === "number" && Math.abs(item.lat - destination.lat) < 0.01 && Math.abs(item.lng - destination.lng) < 0.01)
+    .map(item => ({ item, distance: distanceMeters(destination, { lat: item.lat!, lng: item.lng! }) }))
+    .filter(entry => entry.distance <= 800)
+    .sort((a, b) => a.distance - b.distance).slice(0, 6)
+    .map(({ item }) => ({ id: item.id, name: item.name, lat: item.lat!, lng: item.lng!, label: "R", precision: item.coordinateLabel }));
 }
 
 type Stop = {
@@ -101,6 +112,8 @@ export function OfflineRoutePreview({
   travelMode = "driving",
   livePosition,
 }: RouteMapProps) {
+  const businesses = useBusinessCatalog();
+  const nearbyBusinesses = useMemo(() => nearbyBusinessReferences(businesses.items, destination), [businesses.items, destination?.lat, destination?.lng]);
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
@@ -118,6 +131,7 @@ export function OfflineRoutePreview({
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = decodeMapPolyline(selected?.polyline ?? "");
   const markers = [
+    ...nearbyBusinesses,
     ...(isMapPoint(livePosition) ? [{ ...livePosition, id: "live-position", name: "Você agora", label: "GPS" }] : []),
     ...(validOrigin
       ? [{ ...validOrigin, id: "origin", name: "Origem", label: "A" }]
@@ -209,9 +223,10 @@ export function OfflineRoutePreview({
         onManualInteraction={() => setFollowing(false)}
         estimated={selected?.source === "local-estimate"}
         ariaLabel="Prévia offline da rota"
-        onSelect={marker => { setSelectedPoint(marker.name); focus(marker); }}
+        onSelect={marker => { setSelectedPoint(marker.name + (nearbyBusinesses.find(item => item.id === marker.id)?.precision ? " · " + nearbyBusinesses.find(item => item.id === marker.id)?.precision : "")); focus(marker); }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
+        {nearbyBusinesses.length > 0 && <p className="text-xs text-[#607169]">{nearbyBusinesses.length} empresas próximas ao destino · referências aproximadas do catálogo local</p>}
         {selectedPoint && <p className="font-black">{selectedPoint}</p>}
         <p>
           {selected?.source === "local-estimate"
@@ -306,6 +321,8 @@ export function RouteMap({
   travelMode = "driving",
   livePosition,
 }: RouteMapProps) {
+  const businesses = useBusinessCatalog();
+  const businessReferences = useMemo(() => nearbyBusinessReferences(businesses.items, destination), [businesses.items, destination?.lat, destination?.lng]);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const polylinesRef = useRef<google.maps.Polyline[]>([]);
@@ -494,7 +511,7 @@ export function RouteMap({
   };
   const selectedRoute = routes.find(route => route.selected) || routes[0];
   const selectedRoutePoints = decodeMapPolyline(selectedRoute?.polyline ?? "");
-  const nearbyReferences = nearbyRouteReferences(origin, destination, selectedRoutePoints);
+  const nearbyReferences = [...nearbyRouteReferences(origin, destination, selectedRoutePoints), ...businessReferences.map(item => ({ ...item, address: item.precision || "Referência aproximada do catálogo local", coordinateLabel: item.precision, coordinateKind: "area-reference" as const, source: "local" as const }))];
   const trafficCounts = (selectedRoute?.trafficIntervals || []).reduce(
     (acc, item) => {
       if (item.speed === "SLOW") acc.slow += 1;

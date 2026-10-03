@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { decodeMapPolyline, isMapPoint, type MapPoint } from "@/lib/mapGeometry";
 import { tripProgress } from "@/lib/tripProgress";
 import { localDataEvent } from "@/lib/localData";
 
 type Route = { origin: MapPoint | null; destination: MapPoint | null; polyline?: string | null; distanceMeters?: number | null; durationSeconds?: number | null; source?: string };
 export function useLiveTrip(route: Route | null) {
+  const samples = useRef<number[]>([]);
+  const acceptedTimestamp = useRef(0);
+  const [speed, setSpeed] = useState<number | null>(null);
   const watch = useRef<number | null>(null);
   const generation = useRef(0);
   const [active, setActive] = useState(false);
@@ -15,6 +18,7 @@ export function useLiveTrip(route: Route | null) {
     generation.current++;
     if (watch.current !== null) navigator.geolocation?.clearWatch(watch.current);
     watch.current = null;
+    samples.current = []; acceptedTimestamp.current = 0; setSpeed(null);
     setActive(false); setFix(null);
   }, []);
   useEffect(() => {
@@ -46,6 +50,14 @@ export function useLiveTrip(route: Route | null) {
         if (!isMapPoint(point) || !Number.isFinite(accuracy) || accuracy < 0 || accuracy > 100 || Date.now() - position.timestamp > 15000 || position.timestamp > Date.now() + 5000) {
           setMessage("GPS impreciso ou antigo. Aguardando um sinal melhor."); return;
         }
+        if (position.timestamp <= acceptedTimestamp.current) return;
+        if (position.timestamp - acceptedTimestamp.current > 15000) samples.current = [];
+        acceptedTimestamp.current = position.timestamp;
+        const reportedSpeed = position.coords.speed;
+        if (accuracy <= 30 && typeof reportedSpeed === "number" && Number.isFinite(reportedSpeed) && reportedSpeed >= 0.5 && reportedSpeed <= 60) {
+          samples.current = [...samples.current, reportedSpeed].slice(-5);
+          setSpeed(samples.current.length >= 3 ? samples.current.reduce((sum, value) => sum + value, 0) / samples.current.length : null);
+        } else { samples.current = []; setSpeed(null); }
         setNow(Date.now()); setFix({ ...point, accuracy, timestamp: position.timestamp }); setMessage("");
       }, error => {
         if (version !== generation.current) return;
@@ -55,8 +67,10 @@ export function useLiveTrip(route: Route | null) {
     } catch { stop(); setMessage("Não foi possível iniciar o GPS neste aparelho."); }
   };
   const stale = Boolean(fix && now - fix.timestamp > 20000);
-  const decoded = decodeMapPolyline(route?.polyline ?? "");
+  const decoded = useMemo(() => decodeMapPolyline(route?.polyline ?? ""), [route?.polyline]);
   const points = decoded.length ? decoded : [route?.origin, route?.destination].filter(isMapPoint);
   const progress = fix && !stale && route ? tripProgress(fix, points, route.distanceMeters ?? NaN, route.durationSeconds ?? NaN, route.source === "local-estimate" || !decoded.length, fix.accuracy) : null;
-  return { active, point: fix && !stale ? fix : null, progress, start, stop, message: stale ? "Sinal de GPS antigo. Aguardando atualização; estimativas pausadas." : message };
+  const liveSpeed = progress && !progress.offRoute && !stale ? speed : null;
+  const adjustedProgress = progress && liveSpeed ? { ...progress, durationSeconds: progress.distanceMeters / liveSpeed } : progress;
+  return { speed: liveSpeed, active, point: fix && !stale ? fix : null, progress: adjustedProgress, start, stop, message: stale ? "Sinal de GPS antigo. Aguardando atualização; estimativas pausadas." : message };
 }

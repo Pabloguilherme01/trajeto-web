@@ -98,6 +98,14 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   });
   await expect(page.getByText("Distância restante", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toBeVisible();
+  for (let sample = 0; sample < 3; sample++) {
+    await page.evaluate(async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+      (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7431234, longitude: -48.2816, accuracy: 20, speed: 3 }, timestamp: Date.now() } as GeolocationPosition);
+    });
+  }
+  await expect(page.getByText(/chegada estimada pela velocidade atual/)).toBeVisible();
+
   const follow = page.getByRole("button", { name: "Seguir GPS", exact: true });
   await follow.click();
   await expect(follow).toHaveAttribute("aria-pressed", "true");
