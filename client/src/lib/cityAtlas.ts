@@ -118,6 +118,23 @@ function categoryForRoute(item: (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number]): 
 
 type BundledOfflineRoad = { id: number; kind: string; name: string; points: number[][] };
 
+const offlineRoadComponents = new Map<string, BundledOfflineRoad[]>();
+
+function pointTouchesRoad(point: CityAtlasItem, roads: BundledOfflineRoad[]) {
+  if (point.lat === undefined || point.lng === undefined) return false;
+  const scale = Math.cos(point.lat * Math.PI / 180);
+  return roads.some(road => road.points.some((a, index) => {
+    const b = road.points[index + 1] ?? a;
+    const x = (a[1] - point.lng!) * scale, y = a[0] - point.lat!;
+    const dx = (b[1] - a[1]) * scale, dy = b[0] - a[0];
+    const length = dx * dx + dy * dy;
+    const t = length ? Math.max(0, Math.min(1, -(x * dx + y * dy) / length)) : 0;
+    // Five metres accommodates coordinate rounding; this is duplicate
+    // detection on a known geometry, never a new geocoding coordinate.
+    return Math.hypot(x + t * dx, y + t * dy) * 111320 <= 5;
+  }));
+}
+
 function offlineRoadReferenceItems(): CityAtlasItem[] {
   const roads = ((offlineMapData as { roads?: BundledOfflineRoad[] }).roads ?? []).filter(road => road.name.trim() && road.points.length > 0);
   // Join only connected OSM segments of the same name. A shared street
@@ -145,7 +162,15 @@ function offlineRoadReferenceItems(): CityAtlasItem[] {
     const current = components.get(key);
     if (!current || road.points.length > current.points.length) components.set(key, road);
   });
-  return [...components.values()].flatMap(road => {
+  const members = new Map<number, BundledOfflineRoad[]>();
+  roads.forEach((road, index) => {
+    const key = root(index);
+    const group = members.get(key) ?? [];
+    group.push(road);
+    members.set(key, group);
+  });
+  return [...components.entries()].flatMap(([key, road]) => {
+    offlineRoadComponents.set("offline-road-" + road.id, members.get(key)!);
     const point = road.points[Math.floor((road.points.length - 1) / 2)];
     if (!Array.isArray(point) || point.length < 2 || !finiteCoordinate(point[0], 90) || !finiteCoordinate(point[1], 180)) return [];
     return [{
@@ -344,7 +369,22 @@ export function buildCityAtlas(snapshot: CityAtlasSnapshot | null) {
   // The offline map has more named roads than the searchable atlas snapshot.
   // Keep connected street references and sourced points at distinct positions;
   // homonymous streets must stay selectable instead of being merged by name.
+  const representedComponents = new Set<string>();
+  const roadGroups = new Map<string, CityAtlasItem[]>();
   for (const item of OFFLINE_ROAD_ITEMS) {
+    const name = normalizeCatalogText(item.name);
+    const group = roadGroups.get(name) ?? [];
+    group.push(item);
+    roadGroups.set(name, group);
+  }
+  for (const known of merged.values()) {
+    if (known.coordinateKind !== "street-midpoint") continue;
+    const matches = (roadGroups.get(normalizeCatalogText(known.name)) ?? [])
+      .filter(item => pointTouchesRoad(known, offlineRoadComponents.get(item.id) ?? []));
+    if (matches.length === 1) representedComponents.add(matches[0].id);
+  }
+  for (const item of OFFLINE_ROAD_ITEMS) {
+    if (representedComponents.has(item.id)) continue;
     // Preserve the sourced reference at the same name and position, while
     // retaining disconnected same-name streets as explicit alternatives.
     const key = identity(item) || item.id;

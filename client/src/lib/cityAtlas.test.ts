@@ -182,6 +182,7 @@ it("adds every named road available in the bundled offline map without replacing
 it("retains disconnected Rua B locations instead of choosing one by name", async () => {
   const { BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
   const roads = buildCityAtlas(BUNDLED_CITY_ATLAS).filter(item => item.name === "Rua B" && item.coordinateKind === "street-midpoint");
+  expect(roads).toHaveLength(2);
   expect(roads.some(item => item.lat! > -15.75)).toBe(true);
   expect(roads.some(item => item.lat! < -15.75)).toBe(true);
   expect(resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, "Rua B")).toBeNull();
