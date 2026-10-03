@@ -2,7 +2,7 @@ import { Apple, LocateFixed, Navigation, Minus, Plus } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildAppleMapsDirectionsUrl,
-  buildGoogleMapsDestinationUrl,
+  buildGoogleMapsDirectionsUrl,
   buildWazeNavigationUrl,
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
@@ -60,6 +60,7 @@ export default function TileStationMap({
   selectionLabel = "Escolher posto no mapa",
   routePoints = [],
   onPlanDestination,
+  travelMode = "driving",
 }: {
   stations: StationMapItem[];
   userCoords?: { lat: number; lng: number } | null;
@@ -69,6 +70,7 @@ export default function TileStationMap({
   selectionLabel?: string;
   routePoints?: Array<{ lat: number; lng: number }>;
   onPlanDestination?: (station: StationMapItem) => void;
+  travelMode?: "driving" | "walking" | "cycling" | "transit";
 }) {
   const drawable = useMemo(
     () =>
@@ -525,8 +527,10 @@ export default function TileStationMap({
                   type="button"
                   onClick={() =>
                     window.open(
-                      buildGoogleMapsDestinationUrl(
+                      buildGoogleMapsDirectionsUrl(
+                        "",
                         selected.lat + "," + selected.lng,
+                        travelMode === "cycling" ? "bicycling" : travelMode,
                         true
                       ),
                       "_blank",
@@ -537,37 +541,41 @@ export default function TileStationMap({
                 >
                   <Navigation className="size-3" /> Google
                 </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.open(
-                      buildWazeNavigationUrl(selected.address, {
-                        lat: selected.lat,
-                        lng: selected.lng,
-                      }),
-                      "_blank",
-                      "noopener,noreferrer"
-                    )
-                  }
-                  className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
-                >
-                  Waze
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.open(
-                      buildAppleMapsDirectionsUrl(
-                        selected.lat + "," + selected.lng
-                      ),
-                      "_blank",
-                      "noopener,noreferrer"
-                    )
-                  }
-                  className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-black/10 px-2.5 text-xs font-black text-[#163840]"
-                >
-                  <Apple className="size-3" /> Apple
-                </button>
+                {travelMode === "driving" && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.open(
+                          buildWazeNavigationUrl(selected.address, {
+                            lat: selected.lat,
+                            lng: selected.lng,
+                          }),
+                          "_blank",
+                          "noopener,noreferrer"
+                        )
+                      }
+                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
+                    >
+                      Waze
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.open(
+                          buildAppleMapsDirectionsUrl(
+                            selected.lat + "," + selected.lng
+                          ),
+                          "_blank",
+                          "noopener,noreferrer"
+                        )
+                      }
+                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
+                    >
+                      <Apple className="size-3" /> Apple
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

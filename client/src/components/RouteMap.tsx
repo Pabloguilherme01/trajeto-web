@@ -549,6 +549,7 @@ export function RouteMap({
         <TileStationMap
           selectionLabel="Escolher ponto da viagem"
           routePoints={points}
+          travelMode={travelMode}
           stations={[
             ...(isMapPoint(origin)
               ? [

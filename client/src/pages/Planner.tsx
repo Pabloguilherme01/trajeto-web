@@ -10,7 +10,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
-import { findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
+import { findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
@@ -308,7 +308,9 @@ export default function Planner() {
           setSavedMessage(
             offlineMode || !online
               ? "Para calcular sem internet, informe uma origem local já conhecida ou abra uma rota salva neste aparelho."
-              : "Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho."
+              : mode === "driving"
+                ? "Destino preparado. Abra Google Maps, Waze ou Apple Maps para iniciar a navegação com a localização atual do aparelho."
+                : "Destino preparado. Abra o Google Maps para iniciar a navegação no modo de deslocamento escolhido."
           );
           rememberTrip("", to);
           track("route_open", to);
@@ -758,16 +760,20 @@ export default function Planner() {
                 {planRoute.isPending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
-                    Google
+                    Google · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                   </button>
-                  <button type="button" onClick={() => openExternal("waze")} aria-label="Abrir Waze agora" className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 text-xs font-black text-[#C9F7FF]">
-                    Waze
-                  </button>
-                  <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
-                    Apple
-                  </button>
+                  {mode === "driving" && (
+                    <>
+                      <button type="button" onClick={() => openExternal("waze")} aria-label="Abrir Waze agora" className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 text-xs font-black text-[#C9F7FF]">
+                        Waze
+                      </button>
+                      <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75">
+                        Apple
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
               {destination.trim().length >= 3 && (!online || activeExperienceMode === "offline") && (
@@ -922,7 +928,7 @@ export default function Planner() {
                 <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
                   <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Para uma rota realmente disponível sem internet, calcule com origem e destino quando estiver conectado e prepare a viagem para uso offline.</p>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
                     <a href="tel:190" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
                     <a href="tel:192" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">SAMU · 192</a>
                     <a href="tel:193" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">Bombeiros · 193</a>
@@ -933,10 +939,10 @@ export default function Planner() {
                     <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Destinos prontos</p><h3 id="offline-ready-title" className="mt-1 text-lg font-black">Abra uma rota sem preencher tudo.</h3></div>
                     <span className="text-xs text-white/25">catálogo incorporado</span>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                     {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
                       <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left">
-                        <p className="truncate text-xs font-black">{route.label}</p>
+                        <p className="break-words text-xs font-black leading-snug">{route.label}</p>
                         <p className="mt-1 line-clamp-2 text-xs leading-snug text-white/35">{route.detail}</p>
                       </button>
                     ))}
@@ -956,16 +962,20 @@ export default function Planner() {
                       <article key={route.id} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-black">{route.origin} → {route.destination}</p>
+                            <p className="break-words text-xs font-black leading-snug">{route.origin} → {route.destination}</p>
                             <p className="mt-1 text-xs text-white/35">Salva em {new Date(route.savedAt).toLocaleString("pt-BR")}</p>
                           </div>
                           <span className={"shrink-0 rounded-full border px-2 py-1 text-xs font-black uppercase tracking-[.08em] " + (stale ? "border-amber-300/20 text-amber-200" : "border-[#C7FF3C]/15 text-[#C7FF3C]")}>
                             {stale ? "revisar" : "pronta"}
                           </span>
                         </div>
-                        <div className="mt-3 grid grid-cols-2 gap-2">
+                        <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                           <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
-                          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(route.origin, route.destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Navegar agora</button>
+                          <button type="button" onClick={() => {
+                            const savedMode = offlineRouteTravelMode(route);
+                            const googleMode = savedMode === "cycling" ? "bicycling" : savedMode;
+                            window.open(buildGoogleMapsDirectionsUrl(privateOriginForExternalNavigation(route.origin), route.destination, googleMode, true), "_blank", "noopener,noreferrer");
+                          }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Navegar agora · {offlineRouteTravelMode(route) === "walking" ? "a pé" : offlineRouteTravelMode(route) === "cycling" ? "bicicleta" : offlineRouteTravelMode(route) === "transit" ? "transporte" : "carro"}</button>
                         </div>
                         <button type="button" onClick={() => void removeSavedRoute(route)} aria-label={"Excluir rota salva " + route.destination} className="mt-2 min-h-10 w-full rounded-xl border border-[#FF7D6A]/20 text-xs font-black text-[#FFB7A9]"><Trash2 className="mr-1.5 inline size-3.5" />Excluir da biblioteca</button>
                       </article>
@@ -1092,11 +1102,19 @@ export default function Planner() {
               </div>
 
               <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                {online && activeExperienceMode !== "offline" && <>
-                <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Google Maps</button>
-                <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-xs font-black text-[#C9F7FF]">Waze</button>
-                <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70">Apple Maps</button>
-                </>}
+                {online && activeExperienceMode !== "offline" && (
+                  <>
+                    <button type="button" aria-label="Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">
+                      Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
+                    </button>
+                    {mode === "driving" && (
+                      <>
+                        <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-xs font-black text-[#C9F7FF]">Waze</button>
+                        <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70">Apple Maps</button>
+                      </>
+                    )}
+                  </>
+                )}
                 <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
 
