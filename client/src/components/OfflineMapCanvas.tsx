@@ -500,7 +500,7 @@ export default function OfflineMapCanvas({
           {dark ? "Claro" : "Escuro"}
         </button>
         <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className={"absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>{expanded ? "Reduzir" : "Ampliar"}</button>
-        <div className={"pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " + (dark ? "bg-[#162733]/90 text-[#e9ffff]" : "bg-white/90 text-[#27414b"])}>
+        <div className={"pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " + (dark ? "bg-[#162733]/90 text-[#e9ffff]" : "bg-white/90 text-[#27414b]")}>
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
             className="border-x border-b border-[#27414b]"
