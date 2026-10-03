@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BUNDLED_CITY_ATLAS, buildCityAtlas, filterCityAtlas, type CityAtlasItem } from "@/lib/cityAtlas";
+import { normalizeCatalogText } from "@/lib/catalogSearch";
 
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
@@ -18,13 +19,34 @@ const points: CityAtlasItem[] = [...buildCityAtlas(BUNDLED_CITY_ATLAS), ...LOCAL
   coordinateKind: "mapped-point" as const,
 }))];
 
+function pickerItemScore(item: CityAtlasItem) {
+  return (
+    (item.coordinateKind === "mapped-point" ? 40 : item.coordinateKind === "street-midpoint" ? 25 : 10) +
+    (Number.isFinite(item.lat) && Number.isFinite(item.lng) ? 20 : 0) +
+    (item.address ? 4 : 0) +
+    (item.verifiedAt ? 2 : 0)
+  );
+}
+
+export function dedupePlannerLocationItems(items: CityAtlasItem[]) {
+  const merged = new Map<string, CityAtlasItem>();
+  for (const item of items) {
+    const businessId = item.business?.cnpj?.replace(/\D/g, "");
+    const name = normalizeCatalogText(item.name);
+    const key = businessId ? "business:" + businessId : "place:" + (name || item.id);
+    const current = merged.get(key);
+    if (!current || pickerItemScore(item) > pickerItemScore(current)) merged.set(key, item);
+  }
+  return [...merged.values()];
+}
+
 export default function PlannerLocationPicker({ kind, value, onChoose }: {
   kind: "origem" | "destino";
   value: string;
   onChoose: (coordinate: string) => void;
 }) {
   const businesses = useBusinessCatalog();
-  const allPoints = useMemo(() => [...points, ...businesses.items.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))], [businesses.items]);
+  const allPoints = useMemo(() => dedupePlannerLocationItems([...points, ...businesses.items.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))]), [businesses.items]);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(8);
