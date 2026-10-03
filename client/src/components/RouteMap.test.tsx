@@ -84,6 +84,20 @@ describe("RouteMap", () => {
         .hasAttribute("disabled")
     ).toBe(true);
   });
+  it("keeps the selected travel mode in external navigation", () => {
+    render(
+      <OfflineRoutePreview
+        origin={{ lat: -15.8, lng: -48 }}
+        destination={{ lat: -15.9, lng: -47.9 }}
+        stops={[]}
+        travelMode="cycling"
+      />
+    );
+    const href = screen.getByRole("link", { name: "Abrir no Google Maps" }).getAttribute("href") || "";
+    expect(href).toContain("travelmode=bicycling");
+    expect(href).not.toContain("travelmode=driving");
+  });
+
   it("omits a private device origin from external map navigation", () => {
     render(
       <RouteMap

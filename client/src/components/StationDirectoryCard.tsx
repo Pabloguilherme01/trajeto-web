@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Navigation, Phone, Share2 } from "lucide-react";
+import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Phone, Share2 } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
 import { DestinationActions } from "@/components/DestinationActions";
 
@@ -70,6 +70,7 @@ export function StationDirectoryCard({
   catalogStatus?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [preferredProvider, setPreferredProviderState] = useState(() => getPreferredNavigationProvider());
   const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
@@ -104,12 +105,6 @@ export function StationDirectoryCard({
     return Array.from(unique.values());
   }, [anp]);
 
-  const destination = coords ? coords.lat + "," + coords.lng : address;
-  const googleUrl = buildGoogleMapsDestinationUrl(destination, true);
-  const wazeUrl = buildWazeNavigationUrl(address, coords || undefined);
-  const appleUrl = buildAppleMapsDirectionsUrl(destination);
-  const preferredProvider = getPreferredNavigationProvider();
-  const preferredUrl = preferredProvider === "waze" ? wazeUrl : preferredProvider === "apple" ? appleUrl : googleUrl;
   const anpUrl = "https://www.gov.br/anp/pt-br/assuntos/distribuicao-e-revenda/revendedor/consulta-posto-web";
   const anpComVcUrl = "https://anpcomvcpostos.anp.gov.br/";
   const shareUrl = typeof window !== "undefined"
@@ -244,17 +239,38 @@ export function StationDirectoryCard({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="col-span-2 sm:col-span-3 min-h-11 flex items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-xs font-black text-[#C9F7FF]">Abrir ficha completa</Link>}
-        <button type="button" onClick={() => window.open(preferredUrl, "_blank", "noopener,noreferrer")} className="col-span-2 min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-sm font-black text-[#0B1014] shadow-[0_8px_28px_rgba(199,255,60,.10)] transition-transform duration-200 active:scale-[.98] sm:col-span-1"><Navigation className="mr-1 inline size-3.5" />Ir agora · {preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("google"); window.open(googleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Google Maps</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("waze"); window.open(wazeUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF] transition-transform duration-200 active:scale-[.98]">Waze</button>
-        <button type="button" onClick={() => { setPreferredNavigationProvider("apple"); window.open(appleUrl, "_blank", "noopener,noreferrer"); }} className="min-h-11 rounded-xl border border-white/10 bg-white/[.04] px-2 text-xs font-black text-white/75 transition-transform duration-200 active:scale-[.98]">Apple Maps</button>
-      </div>
+      {local && (
+        <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-xs font-black text-[#C9F7FF]">
+          Abrir ficha completa
+        </Link>
+      )}
 
       <div className="mt-3">
         <DestinationActions destination={sharedDestination} saved={saved} onToggleSaved={onToggleSaved} />
       </div>
+
+      <details className="mt-2 rounded-xl border border-white/8 bg-white/[.02] px-3">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-black text-white/65">
+          <span>Navegação preferida</span>
+          <span className="text-[#C9F7FF]">{preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</span>
+        </summary>
+        <div className="grid grid-cols-3 gap-2 border-t border-white/8 py-3">
+          {(["google", "waze", "apple"] as const).map(provider => (
+            <button
+              key={provider}
+              type="button"
+              aria-pressed={preferredProvider === provider}
+              onClick={() => {
+                setPreferredNavigationProvider(provider);
+                setPreferredProviderState(provider);
+              }}
+              className={"min-h-11 rounded-xl border px-2 text-xs font-black " + (preferredProvider === provider ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/8 text-white/60")}
+            >
+              {provider === "google" ? "Google" : provider === "waze" ? "Waze" : "Apple"}
+            </button>
+          ))}
+        </div>
+      </details>
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
         <div className="flex items-center justify-between gap-2">
