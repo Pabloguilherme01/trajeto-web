@@ -324,6 +324,16 @@ export default function CityMap() {
                       <p className="break-words text-sm font-black">{item.name}</p>
                       <p className="mt-1 text-xs leading-relaxed text-white/60">{item.detail}</p>
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-white/40">{item.address}</p>}
+                      <p className="mt-2 break-words text-xs leading-relaxed text-white/60">
+                        {item.sourceUrl ? (
+                          <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{item.sourceLabel}</a>
+                        ) : item.sourceLabel}
+                      </p>
+                      {typeof item.lat === "number" && typeof item.lng === "number" && (
+                        <p className="mt-1 break-words text-xs text-white/60">
+                          Coordenadas: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="mt-3">
