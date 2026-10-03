@@ -31,6 +31,13 @@ let routerUnavailableUntilFallback = 0;
 export type PublicCoordinate = { lat: number; lng: number };
 export type PublicRouteSource = "mapbox" | "osrm" | "local-estimate";
 export type PublicTravelMode = "driving" | "walking" | "cycling" | "transit";
+export type PublicRouteStep = {
+  instruction: string;
+  name?: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  maneuver?: string;
+};
 export type PublicRoute = {
   origin: PublicCoordinate;
   destination: PublicCoordinate;
@@ -39,6 +46,7 @@ export type PublicRoute = {
   polyline: string;
   source: PublicRouteSource;
   mode: PublicTravelMode;
+  steps?: PublicRouteStep[];
 };
 
 type NominatimResult = {
@@ -53,6 +61,17 @@ type OsrmResponse = {
     distance?: number;
     duration?: number;
     geometry?: string;
+    legs?: Array<{
+      steps?: Array<{
+        distance?: number;
+        duration?: number;
+        name?: string;
+        maneuver?: {
+          type?: string;
+          modifier?: string;
+        };
+      }>;
+    }>;
   }>;
 };
 
@@ -595,6 +614,34 @@ function findLocalRouteStops(
     .map(({ corridorKm: _corridorKm, progress: _progress, ...stop }) => stop);
 }
 
+function osrmInstruction(step: NonNullable<NonNullable<NonNullable<OsrmResponse["routes"]>[number]["legs"]>[number]["steps"]>[number]) {
+  const type = step.maneuver?.type ?? "";
+  const modifier = step.maneuver?.modifier ?? "";
+  const street = step.name?.trim();
+  const streetSuffix = street ? " em " + street : "";
+  const direction =
+    modifier === "left" ? "à esquerda" :
+    modifier === "right" ? "à direita" :
+    modifier === "slight left" ? "levemente à esquerda" :
+    modifier === "slight right" ? "levemente à direita" :
+    modifier === "sharp left" ? "fortemente à esquerda" :
+    modifier === "sharp right" ? "fortemente à direita" :
+    modifier === "uturn" ? "faça o retorno" :
+    "em frente";
+
+  if (type === "depart") return "Saia" + streetSuffix;
+  if (type === "arrive") return "Chegue ao destino";
+  if (type === "roundabout" || type === "rotary") return "Entre na rotatória" + streetSuffix;
+  if (type === "merge") return "Entre na via " + direction + streetSuffix;
+  if (type === "fork") return "Mantenha-se " + direction + streetSuffix;
+  if (type === "on ramp") return "Pegue o acesso " + direction + streetSuffix;
+  if (type === "off ramp") return "Saia pelo acesso " + direction + streetSuffix;
+  if (type === "turn" || type === "end of road" || type === "continue") {
+    return (type === "continue" ? "Siga " : "Vire ") + direction + streetSuffix;
+  }
+  return street ? "Siga por " + street : "Continue no trajeto";
+}
+
 function buildLocalEstimate(
   origin: PublicCoordinate,
   destination: PublicCoordinate,
@@ -835,7 +882,7 @@ export async function calculatePublicRoute(
       destination.lng +
       "," +
       destination.lat +
-      "?alternatives=false&overview=full&geometries=polyline";
+      "?alternatives=false&overview=full&geometries=polyline&steps=true";
 
     try {
       const data = await fetchJson<OsrmResponse>(url);
@@ -843,6 +890,18 @@ export async function calculatePublicRoute(
       const distanceMeters = route?.distance;
       const durationSeconds = route?.duration;
       const polyline = route?.geometry;
+      const steps = (route?.legs ?? [])
+        .flatMap(leg => leg.steps ?? [])
+        .filter(step => Number.isFinite(Number(step.distance)) && Number.isFinite(Number(step.duration)))
+        .map(step => ({
+          instruction: osrmInstruction(step),
+          name: step.name?.trim() || undefined,
+          distanceMeters: Number(step.distance),
+          durationSeconds: Number(step.duration),
+          maneuver: [step.maneuver?.type, step.maneuver?.modifier].filter(Boolean).join(":") || undefined,
+        }))
+        .filter(step => step.distanceMeters > 0 || step.durationSeconds > 0)
+        .slice(0, 60);
 
       if (
         data.code === "Ok" &&
@@ -862,6 +921,7 @@ export async function calculatePublicRoute(
           polyline,
           source: "osrm",
           mode,
+          steps,
         };
         cacheSet(cacheKey, result);
         return result;
@@ -922,6 +982,7 @@ export function buildPublicRoutePayload(result: PublicRoute) {
           : "Rota viária calculada com OpenStreetMap/OSRM.",
       source: result.source,
       mode: result.mode,
+      steps: result.steps ?? [],
     },
     stops: findLocalRouteStops(result.origin, result.destination),
     priceCoverage: 0,
