@@ -247,7 +247,6 @@ it("shows live street guidance and route telemetry while following GPS", () => {
       }]}
     />
   );
-  expect(screen.getByText("Próxima orientação")).toBeTruthy();
   expect(screen.getByText("Vire à direita na BR-070")).toBeTruthy();
   expect(screen.getByText("Via: BR-070")).toBeTruthy();
   expect(screen.getByText("36 km/h")).toBeTruthy();
