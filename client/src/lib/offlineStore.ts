@@ -347,10 +347,11 @@ export function isOfflineRouteStale(savedAt: string, now = Date.now(), maxAgeMs 
   return now - savedTime > maxAgeMs;
 }
 
-export function externalNavigationUrl(route: Pick<OfflineRoute, "origin" | "destination">) {
+export function externalNavigationUrl(route: Pick<OfflineRoute, "origin" | "destination"> & Partial<Pick<OfflineRoute, "payload">>) {
+  const mode = "payload" in route ? offlineRouteTravelMode(route as OfflineRoute) : "driving";
   const params = new URLSearchParams({
     destination: route.destination.trim(),
-    travelmode: "driving",
+    travelmode: mode === "cycling" ? "bicycling" : mode,
   });
   const origin = privateOriginForExternalNavigation(route.origin);
   if (origin) params.set("origin", origin);
