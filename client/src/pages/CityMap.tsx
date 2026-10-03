@@ -1,11 +1,18 @@
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { MapPin, Search, ShieldCheck } from "lucide-react";
+import { Database, MapPin, Search, ShieldCheck } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
-import { routePresetDestination } from "@/lib/unifiedDestination";
+import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
+import {
+  buildCityAtlas,
+  filterCityAtlas,
+  loadCityAtlasSnapshot,
+  type CityAtlasLayer,
+  type CityAtlasSnapshot,
+} from "@/lib/cityAtlas";
 import {
   LOCAL_GEOCODE_POINTS,
   resolveLocalGeocodePoint,
@@ -18,12 +25,24 @@ import {
 } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { appUrl } from "@/lib/appUrl";
-import { matchesCatalogText } from "@/lib/catalogSearch";
+import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
 import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
 
 export default function CityMap() {
   const [, navigate] = useLocation();
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
+  const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(null);
+  const [showAllAtlas, setShowAllAtlas] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void loadCityAtlasSnapshot().then(snapshot => {
+      if (active) setAtlasSnapshot(snapshot);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     void fetch(appUrl("/data/aguas-lindas-anp.json"), {
@@ -63,6 +82,27 @@ export default function CityMap() {
     () => getLocalRoutePresets(query, category),
     [query, category]
   );
+  const atlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
+  const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
+    if (category === "todos") return "todos";
+    if (category === "centro") return "referencia";
+    if (category === "saude" || category === "transporte" || category === "combustivel" || category === "compras" || category === "alimentacao") {
+      return category;
+    }
+    return "servicos";
+  }, [category]);
+  const atlasDestinations = useMemo(() => {
+    const routeKeys = new Set(
+      destinations.map(item => normalizeCatalogText(item.destination))
+    );
+    return filterCityAtlas(atlas, query, atlasLayer).filter(item => {
+      const target = item.destination ?? item.address ?? "";
+      const key = normalizeCatalogText(target);
+      return Boolean(target) && (!key || !routeKeys.has(key));
+    });
+  }, [atlas, atlasLayer, destinations, query]);
+  const visibleAtlasDestinations =
+    query.trim() || showAllAtlas ? atlasDestinations : atlasDestinations.slice(0, 24);
   const markers = useMemo(() => {
     const publicPoints = destinations.flatMap(item => {
       const point = resolveLocalGeocodePoint(item.destination);
@@ -77,6 +117,18 @@ export default function CityMap() {
           ]
         : [];
     });
+    const atlasPoints = atlasDestinations.flatMap(item =>
+      typeof item.lat === "number" && typeof item.lng === "number"
+        ? [{
+            id: item.id,
+            name: item.name,
+            address: item.destination ?? item.address ?? item.name,
+            source: item.sourceLabel,
+            lat: item.lat,
+            lng: item.lng,
+          }]
+        : []
+    );
     const stations =
       category === "todos" || category === "combustivel"
         ? groupAnpFuelRows(anpRows).flatMap(station => {
@@ -102,7 +154,7 @@ export default function CityMap() {
           })
         : [];
     const unique = new Map(
-      [...publicPoints, ...stations].map(point => [
+      [...publicPoints, ...atlasPoints, ...stations].map(point => [
         point.name.toLocaleLowerCase("pt-BR") +
           "|" +
           point.lat +
@@ -112,7 +164,7 @@ export default function CityMap() {
       ])
     );
     return [...unique.values()];
-  }, [destinations, category, query, anpRows]);
+  }, [destinations, atlasDestinations, category, query, anpRows]);
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
   const emptyFallback = (
@@ -188,7 +240,7 @@ export default function CityMap() {
       </section>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white/65">
         <span>
-          {markers.length} posições cadastradas · {destinations.length} destinos
+          {markers.length} posições cadastradas · {destinations.length + atlasDestinations.length} destinos
           na lista
         </span>
         <Link
@@ -232,6 +284,67 @@ export default function CityMap() {
           </p>
         )}
       </section>
+
+      {atlasDestinations.length > 0 && (
+        <section aria-labelledby="city-atlas-destinations" className="mt-6">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Atlas oficial</p>
+              <h2 id="city-atlas-destinations" className="mt-1 text-lg font-black">
+                Mais lugares de Águas Lindas
+              </h2>
+            </div>
+            <span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black text-white/55">
+              {atlasDestinations.length}
+            </span>
+          </div>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-white/55">
+            Dados públicos versionados ampliam escolas, bairros, serviços e referências sem duplicar o catálogo principal.
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleAtlasDestinations.map(item => {
+              const target = item.destination ?? item.address;
+              const unified: UnifiedDestination = {
+                id: item.id,
+                kind: item.category === "combustivel" ? "station" : "place",
+                name: item.name,
+                address: target ?? item.name,
+                detail: item.detail,
+                coordinates:
+                  typeof item.lat === "number" && typeof item.lng === "number"
+                    ? { lat: item.lat, lng: item.lng }
+                    : null,
+                source: item.sourceLabel,
+              };
+              return (
+                <article key={item.id} className="min-w-0 rounded-2xl border border-white/10 bg-[#121B22] p-4">
+                  <div className="flex items-start gap-3">
+                    <Database className="mt-1 size-4 shrink-0 text-[#3DE3FF]" />
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-black">{item.name}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-white/60">{item.detail}</p>
+                      {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-white/40">{item.address}</p>}
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <DestinationActions destination={unified} compact />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          {!query.trim() && atlasDestinations.length > visibleAtlasDestinations.length && (
+            <button
+              type="button"
+              onClick={() => setShowAllAtlas(true)}
+              className="mt-3 min-h-11 rounded-xl border border-white/10 px-4 text-xs font-black text-white/75"
+            >
+              Ver todos os {atlasDestinations.length} itens do Atlas
+            </button>
+          )}
+        </section>
+      )}
+
       <details className="mt-6 rounded-2xl border border-white/10 p-4 text-xs text-white/65">
         <summary className="min-h-8 cursor-pointer font-bold">
           Fontes das posições no mapa
