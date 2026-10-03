@@ -67,6 +67,14 @@ it("keeps hospital shortcuts consistent with the service attendance warning", ()
   expect(getLocalRoutePresets("Hospital Bom Jesus").some(item => item.id === hospital?.id)).toBe(true);
 });
 
+it("keeps commercial destinations in the correct shopping and food filters", () => {
+  expect(getLocalRoutePresets("Atacadão Dia a Dia", "compras").some(item => item.id === "atacadao-dia-a-dia")).toBe(true);
+  expect(getLocalRoutePresets("Burger King", "alimentacao").some(item => item.id === "burger-king-shopping")).toBe(true);
+  expect(getLocalRoutePresets("O Boticário", "compras").some(item => item.id === "o-boticario-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Cacau Show", "compras")).toEqual([]);
+  expect(getLocalRoutePresets("Cacau Show", "alimentacao").some(item => item.id === "cacau-show-shopping")).toBe(true);
+});
+
 it("offers education destinations in their own filter instead of general services", () => {
   const education = getLocalRoutePresets("", "educacao");
   expect(education.some(item => item.id === "cora-coralina")).toBe(true);
