@@ -72,6 +72,7 @@ it("sends only the site origin as referrer for public OSM tiles", () => {
 });
 
 it("uses the selected non-driving mode and hides car-only providers", () => {
+  const open = vi.spyOn(window, "open").mockImplementation(() => null);
   render(
     <TileStationMap
       travelMode="walking"
@@ -82,7 +83,8 @@ it("uses the selected non-driving mode and hides car-only providers", () => {
   );
   const google = screen.getByRole("button", { name: /Google/i });
   fireEvent.click(google);
-  expect(window.open).toHaveBeenCalled;
+  expect(open).toHaveBeenCalledTimes(1);
+  expect(String(open.mock.calls[0][0])).toContain("travelmode=walking");
   expect(screen.queryByRole("button", { name: /Waze/i })).toBeNull();
   expect(screen.queryByRole("button", { name: /Apple/i })).toBeNull();
 });
