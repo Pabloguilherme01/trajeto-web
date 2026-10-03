@@ -59,8 +59,14 @@ it("loads local streets with no coordinate or external request, and preserves da
   expect(fetchMock.mock.calls[0][0]).toBe(
     "/data/aguas-lindas-offline-map.json"
   );
-  fireEvent.click(screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" }));
-  expect(screen.getByRole("button", { name: "Ocultar nomes das ruas" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(
+    screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" })
+  );
+  expect(
+    screen
+      .getByRole("button", { name: "Ocultar nomes das ruas" })
+      .getAttribute("aria-pressed")
+  ).toBe("true");
   expect(
     screen.getByRole("img").querySelector("path[stroke-dasharray]")
   ).toBeTruthy();
@@ -158,7 +164,10 @@ it("keeps the place beneath a pinch midpoint stable", async () => {
   expect(parseFloat(marker.style.left)).toBeCloseTo(250 + 3 * (initial - 150));
 });
 it("centers an explicitly selected destination and preserves subsequent panning", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
   const { default: Canvas } = await import("./OfflineMapCanvas");
   const markers = [
     { id: "a", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
@@ -167,48 +176,185 @@ it("centers an explicitly selected destination and preserves subsequent panning"
   const view = render(<Canvas markers={markers} zoom={2} onZoom={() => {}} />);
   await screen.findByText(/Ruas locais disponíveis/);
   const focusRequest = { point: markers[1], key: 1 };
-  view.rerender(<Canvas markers={markers} zoom={2} onZoom={() => {}} focusRequest={focusRequest} />);
+  view.rerender(
+    <Canvas
+      markers={markers}
+      zoom={2}
+      onZoom={() => {}}
+      focusRequest={focusRequest}
+    />
+  );
   const marker = screen.getByRole("button", { name: "Selecionar Destino" });
   expect(parseFloat(marker.style.left)).toBeCloseTo(160);
   expect(parseFloat(marker.style.top)).toBeCloseTo(180);
-  fireEvent.keyDown(screen.getByRole("region", { name: "Explorar mapa offline" }), { key: "ArrowRight" });
+  fireEvent.keyDown(
+    screen.getByRole("region", { name: "Explorar mapa offline" }),
+    { key: "ArrowRight" }
+  );
   const panned = marker.style.left;
   expect(parseFloat(panned)).not.toBe(160);
-  view.rerender(<Canvas markers={[...markers]} zoom={2} onZoom={() => {}} focusRequest={focusRequest} />);
+  view.rerender(
+    <Canvas
+      markers={[...markers]}
+      zoom={2}
+      onZoom={() => {}}
+      focusRequest={focusRequest}
+    />
+  );
   expect(marker.style.left).toBe(panned);
 });
 
-
 it("keeps manual pan and route scale stable when a live position moves", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
   const { default: Canvas } = await import("./OfflineMapCanvas");
-  const anchors = [{ id: "a", name: "Origem", label: "A", lat: -15.75, lng: -48.29 }, { id: "b", name: "Destino", label: "B", lat: -15.76, lng: -48.27 }];
-  const gps = { id: "live-position", name: "Você agora", label: "GPS", lat: -15.755, lng: -48.28 };
-  const view = render(<Canvas markers={[...anchors, gps]} zoom={2} onZoom={() => {}} />);
+  const anchors = [
+    { id: "a", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
+    { id: "b", name: "Destino", label: "B", lat: -15.76, lng: -48.27 },
+  ];
+  const gps = {
+    id: "live-position",
+    name: "Você agora",
+    label: "GPS",
+    lat: -15.755,
+    lng: -48.28,
+  };
+  const view = render(
+    <Canvas markers={[...anchors, gps]} zoom={2} onZoom={() => {}} />
+  );
   await screen.findByText(/Ruas locais disponíveis/);
-  fireEvent.keyDown(screen.getByRole("region", { name: "Explorar mapa offline" }), { key: "ArrowRight" });
+  fireEvent.keyDown(
+    screen.getByRole("region", { name: "Explorar mapa offline" }),
+    { key: "ArrowRight" }
+  );
   const marker = screen.getByRole("button", { name: "Selecionar Origem" });
   const initial = marker.getAttribute("style");
-  view.rerender(<Canvas markers={[...anchors, { ...gps, lat: -15.8, lng: -48.4 }]} zoom={2} onZoom={() => {}} />);
+  view.rerender(
+    <Canvas
+      markers={[...anchors, { ...gps, lat: -15.8, lng: -48.4 }]}
+      zoom={2}
+      onZoom={() => {}}
+    />
+  );
   expect(marker.getAttribute("style")).toBe(initial);
 });
 
 it("follows updated GPS points at the viewport center and reports manual exploration", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
   const { default: Canvas } = await import("./OfflineMapCanvas");
-  const anchors = [{ id: "a", name: "Origem", label: "A", lat: -15.75, lng: -48.29 }, { id: "b", name: "Destino", label: "B", lat: -15.76, lng: -48.27 }];
-  const gps = { id: "live-position", name: "Você agora", label: "GPS", lat: -15.755, lng: -48.28 };
+  const anchors = [
+    { id: "a", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
+    { id: "b", name: "Destino", label: "B", lat: -15.76, lng: -48.27 },
+  ];
+  const gps = {
+    id: "live-position",
+    name: "Você agora",
+    label: "GPS",
+    lat: -15.755,
+    lng: -48.28,
+  };
   const manual = vi.fn();
-  const view = render(<Canvas markers={[...anchors, gps]} zoom={2} onZoom={() => {}} followPoint={gps} onManualInteraction={manual} />);
+  const view = render(
+    <Canvas
+      markers={[...anchors, gps]}
+      zoom={2}
+      onZoom={() => {}}
+      followPoint={gps}
+      onManualInteraction={manual}
+    />
+  );
   const marker = screen.getByRole("button", { name: "Selecionar Você agora" });
   expect(parseFloat(marker.style.left)).toBeCloseTo(160);
   const next = { ...gps, lat: -15.77, lng: -48.3 };
-  view.rerender(<Canvas markers={[...anchors, next]} zoom={3} onZoom={() => {}} followPoint={next} onManualInteraction={manual} />);
+  view.rerender(
+    <Canvas
+      markers={[...anchors, next]}
+      zoom={3}
+      onZoom={() => {}}
+      followPoint={next}
+      onManualInteraction={manual}
+    />
+  );
   expect(parseFloat(marker.style.left)).toBeCloseTo(160);
   expect(parseFloat(marker.style.top)).toBeCloseTo(180);
-  fireEvent.keyDown(screen.getByRole("region", { name: "Explorar mapa offline" }), { key: "ArrowRight" });
+  fireEvent.keyDown(
+    screen.getByRole("region", { name: "Explorar mapa offline" }),
+    { key: "ArrowRight" }
+  );
   expect(manual).toHaveBeenCalledOnce();
   fireEvent.click(screen.getByRole("button", { name: "Ampliar mapa" }));
-  expect(screen.getByRole("button", { name: "Reduzir mapa" }).getAttribute("aria-pressed")).toBe("true");
-  expect(screen.getByRole("region", { name: "Explorar mapa offline" }).className).toContain("75dvh");
+  expect(
+    screen
+      .getByRole("button", { name: "Reduzir mapa" })
+      .getAttribute("aria-pressed")
+  ).toBe("true");
+  expect(
+    screen.getByRole("region", { name: "Explorar mapa offline" }).className
+  ).toContain("75dvh");
+});
+
+it("declutters supporting references without hiding endpoints or GPS", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  render(
+    <Canvas
+      markers={[
+        { id: "origin", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
+        {
+          id: "destination",
+          name: "Destino",
+          label: "B",
+          lat: -15.76,
+          lng: -48.27,
+        },
+        {
+          id: "live-position",
+          name: "Você",
+          label: "GPS",
+          lat: -15.75,
+          lng: -48.29,
+        },
+        {
+          id: "reference",
+          name: "Referência sobreposta",
+          label: "R",
+          lat: -15.75,
+          lng: -48.29,
+          isReference: true,
+        },
+        {
+          id: "other",
+          name: "Referência separada",
+          label: "R",
+          lat: -15.755,
+          lng: -48.28,
+          isReference: true,
+        },
+      ]}
+      zoom={1}
+      onZoom={vi.fn()}
+    />
+  );
+  expect(
+    screen.getByRole("button", { name: "Selecionar Origem" })
+  ).toBeTruthy();
+  expect(
+    screen.getByRole("button", { name: "Selecionar Destino" })
+  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Selecionar Você" })).toBeTruthy();
+  expect(
+    screen.queryByRole("button", { name: "Selecionar Referência sobreposta" })
+  ).toBeNull();
+  expect(
+    screen.getByRole("button", { name: "Selecionar Referência separada" })
+  ).toBeTruthy();
+  await screen.findByText(/Ruas locais disponíveis/);
 });
