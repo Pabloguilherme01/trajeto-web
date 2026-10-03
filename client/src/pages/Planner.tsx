@@ -1,4 +1,5 @@
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
+import InputQuickOptions, { type InputQuickOption } from "@/components/InputQuickOptions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -100,6 +101,7 @@ export default function Planner() {
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
+  const [focusedRouteField, setFocusedRouteField] = useState<"origin" | "destination" | null>(null);
   const [publicRoutePending, setPublicRoutePending] = useState(false);
   const [routePreviewAtlas, setRoutePreviewAtlas] = useState<CityAtlasSnapshot | null | undefined>(undefined);
   const [liveRemaining, setLiveRemaining] = useState<{ distanceMeters: number; durationSeconds: number } | null>(null);
@@ -606,6 +608,27 @@ export default function Planner() {
     }
   };
 
+  const keyboardDestinationOptions = useMemo<InputQuickOption[]>(() => {
+    const recent = getLastTrip();
+    const ready = LOCAL_ROUTE_PRESETS.slice(0, 5).map(item => ({
+      id: "preset-" + item.id,
+      label: item.label,
+      value: item.destination,
+    }));
+    return [
+      ...(recent?.destination ? [{ id: "last-destination", label: "Último destino", value: recent.destination }] : []),
+      ...ready,
+    ].slice(0, 6);
+  }, []);
+
+  const keyboardOriginOptions = useMemo<InputQuickOption[]>(() => {
+    const recent = getLastTrip();
+    return [
+      ...(recent?.origin ? [{ id: "last-origin", label: "Última origem", value: recent.origin }] : []),
+      { id: "city-center", label: "Centro", value: "Centro, Águas Lindas de Goiás, GO" },
+    ].slice(0, 4);
+  }, []);
+
   const availableDestinations = useMemo(() => {
     const query = destinationFilter.trim().toLocaleLowerCase("pt-BR");
     return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => {
@@ -705,9 +728,21 @@ export default function Planner() {
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                  <input value={origin} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
+                  <input value={origin} onFocus={() => setFocusedRouteField("origin")} onBlur={() => window.setTimeout(() => setFocusedRouteField(value => value === "origin" ? null : value), 80)} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" />
                   <button type="button" onClick={() => useCurrentLocation(false)} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
+                <InputQuickOptions
+                  visible={focusedRouteField === "origin"}
+                  label="Origem rápida"
+                  options={keyboardOriginOptions}
+                  onSelect={option => {
+                    resetResult();
+                    privateOriginRef.current = null;
+                    setOriginPrivate(false);
+                    setOrigin(option.value);
+                    setFocusedRouteField(null);
+                  }}
+                />
               </label>
 
               <div className="my-2 flex justify-end">
@@ -720,8 +755,18 @@ export default function Planner() {
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                  <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
+                  <input value={destination} onFocus={() => setFocusedRouteField("destination")} onBlur={() => window.setTimeout(() => setFocusedRouteField(value => value === "destination" ? null : value), 80)} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" />
                 </div>
+                <InputQuickOptions
+                  visible={focusedRouteField === "destination"}
+                  label="Destinos rápidos"
+                  options={keyboardDestinationOptions}
+                  onSelect={option => {
+                    resetResult();
+                    setDestination(option.value);
+                    setFocusedRouteField(null);
+                  }}
+                />
               </label>
 
               <div className="mt-3">
