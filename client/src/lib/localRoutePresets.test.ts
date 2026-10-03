@@ -75,6 +75,14 @@ it("keeps commercial destinations in the correct shopping and food filters", () 
   expect(getLocalRoutePresets("Cacau Show", "alimentacao").some(item => item.id === "cacau-show-shopping")).toBe(true);
 });
 
+it("surfaces additional nearby shopping, food, service, and health destinations", () => {
+  expect(getLocalRoutePresets("Spoleto", "alimentacao").some(item => item.id === "spoleto-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Riachuelo", "compras").some(item => item.id === "riachuelo-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Lotérica", "servicos").some(item => item.id === "loterica-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Oftalmed", "saude").some(item => item.id === "oftalmed-shopping")).toBe(true);
+  expect(getLocalRoutePresets("Drogaria Exclusiva", "compras").some(item => item.id === "drogaria-exclusiva")).toBe(true);
+});
+
 it("offers education destinations in their own filter instead of general services", () => {
   const education = getLocalRoutePresets("", "educacao");
   expect(education.some(item => item.id === "cora-coralina")).toBe(true);
