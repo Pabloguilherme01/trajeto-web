@@ -54,18 +54,29 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   const [selected, setSelected] = useState<{ coordinate: string; label: string } | null>(null);
   const matches = useMemo(() => {
     const normalizedQuery = normalizeCatalogText(query.trim());
-    return filterCityAtlas(allPoints, query, "todos")
+    const filtered = filterCityAtlas(allPoints, query, "todos");
+    if (normalizedQuery) {
+      const strongMatches = filtered
+        .filter(item =>
+          normalizeCatalogText(item.name) === normalizedQuery ||
+          (item.keywords ?? []).some(keyword => normalizeCatalogText(keyword) === normalizedQuery)
+        )
+        .sort((a, b) => pickerItemScore(b) - pickerItemScore(a));
+      if (strongMatches.length) {
+        const exactBusinesses = strongMatches.filter(item => Boolean(item.business?.cnpj));
+        return exactBusinesses.length > 1 ? exactBusinesses : [strongMatches[0]];
+      }
+    }
+    return filtered
       .map((item, index) => {
         const normalizedName = normalizeCatalogText(item.name);
         const relevance = !normalizedQuery
           ? 3
-          : normalizedName === normalizedQuery
-            ? 0
-            : normalizedName.startsWith(normalizedQuery)
-              ? 1
-              : normalizedName.includes(normalizedQuery)
-                ? 2
-                : 3;
+          : normalizedName.startsWith(normalizedQuery)
+            ? 1
+            : normalizedName.includes(normalizedQuery)
+              ? 2
+              : 3;
         return { item, relevance, index };
       })
       .sort((a, b) => a.relevance - b.relevance || pickerItemScore(b.item) - pickerItemScore(a.item) || a.index - b.index)
