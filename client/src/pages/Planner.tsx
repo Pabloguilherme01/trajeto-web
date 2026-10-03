@@ -928,7 +928,7 @@ export default function Planner() {
                 <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
                   <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Para uma rota realmente disponível sem internet, calcule com origem e destino quando estiver conectado e prepare a viagem para uso offline.</p>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
                     <a href="tel:190" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
                     <a href="tel:192" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">SAMU · 192</a>
                     <a href="tel:193" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">Bombeiros · 193</a>
@@ -939,7 +939,7 @@ export default function Planner() {
                     <div><p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Destinos prontos</p><h3 id="offline-ready-title" className="mt-1 text-lg font-black">Abra uma rota sem preencher tudo.</h3></div>
                     <span className="text-xs text-white/25">catálogo incorporado</span>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                     {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
                       <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-[#121B22] p-3 text-left">
                         <p className="break-words text-xs font-black leading-snug">{route.label}</p>
@@ -969,8 +969,8 @@ export default function Planner() {
                             {stale ? "revisar" : "pronta"}
                           </span>
                         </div>
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-                          <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
+                        <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                          <button type="button" onClick={() => openSavedRoute(route) className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
                           <button type="button" onClick={() => {
                             const savedMode = offlineRouteTravelMode(route);
                             const googleMode = savedMode === "cycling" ? "bicycling" : savedMode;
