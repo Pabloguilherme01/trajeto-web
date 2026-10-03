@@ -1,3 +1,4 @@
+import { useLiveTrip } from "@/hooks/useLiveTrip";
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
 import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
@@ -29,7 +30,8 @@ import { effectivePlannerMode, plannerActionLabel, routeFreshness, shouldAutoRef
 type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 
 function formatDuration(seconds: number | null | undefined) {
-  if (!seconds || seconds <= 0) return "—";
+  if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
+  if (seconds === 0) return "0 min";
   const total = Math.max(1, Math.round(seconds / 60));
   if (total >= 60) {
     const hours = Math.floor(total / 60);
@@ -47,7 +49,7 @@ function formatDistance(meters: number | null | undefined) {
 }
 
 function formatArrival(seconds: number | null | undefined) {
-  if (!seconds || seconds <= 0) return "—";
+  if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
   return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
 }
 
@@ -78,6 +80,8 @@ export default function Planner() {
     return value === "walking" || value === "cycling" || value === "transit" ? value : "driving";
   });
   const [planned, setPlanned] = useState<PlannedRoute | null>(null);
+  const liveTrip = useLiveTrip(planned?.route ?? null);
+  const remaining = liveTrip.active && liveTrip.progress && !liveTrip.progress.offRoute ? liveTrip.progress : null;
   const [error, setError] = useState<string | null>(null);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [locating, setLocating] = useState(false);
@@ -1083,9 +1087,9 @@ export default function Planner() {
               </div>
 
               <div className="mt-5 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
-                <div data-route-card className="min-w-0 rounded-2xl border border-[#3DE3FF]/10 bg-[#3DE3FF]/[.035] p-3"><RouteIcon className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Distância</p><p className="mt-1 break-words text-base font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
-                <div data-route-card className="min-w-0 rounded-2xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.035] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Tempo</p><p className="mt-1 break-words text-base font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
-                <div data-route-card className="min-w-0 rounded-2xl border border-[#FFB86B]/10 bg-[#FFB86B]/[.035] p-3"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Chegada</p><p className="mt-1 break-words text-base font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
+                <div data-route-card className="min-w-0 rounded-2xl border border-[#3DE3FF]/10 bg-[#3DE3FF]/[.035] p-3"><RouteIcon className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">{liveTrip.active ? "Distância restante" : "Distância"}</p><p className="mt-1 break-words text-base font-black">{formatDistance(liveTrip.active ? remaining?.distanceMeters : planned.route.distanceMeters)}</p></div>
+                <div data-route-card className="min-w-0 rounded-2xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.035] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">{liveTrip.active ? "Tempo restante estimado" : "Tempo"}</p><p className="mt-1 break-words text-base font-black">{formatDuration(liveTrip.active ? remaining?.durationSeconds : planned.route.durationSeconds)}</p></div>
+                <div data-route-card className="min-w-0 rounded-2xl border border-[#FFB86B]/10 bg-[#FFB86B]/[.035] p-3"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Chegada</p><p className="mt-1 break-words text-base font-black">{formatArrival(liveTrip.active ? remaining?.durationSeconds : planned.route.durationSeconds)}</p></div>
               </div>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -1094,11 +1098,7 @@ export default function Planner() {
                   <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/35">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
                 </div>
-                <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
-                  <p className="text-xs font-black uppercase tracking-[.1em] text-white/30">Pedágio</p>
-                  <p className="mt-1 text-xs font-black">Não informado</p>
-                  <p className="mt-1 text-xs text-white/35">o retorno básico da rota não fornece pedágio</p>
-                </div>
+
               </div>
 
               <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
@@ -1118,6 +1118,11 @@ export default function Planner() {
                 <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
 
+              <div className="mt-3 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3">
+                <button type="button" onClick={() => { if (liveTrip.active) liveTrip.stop(); else { liveTrip.start(); setShowMap(true); } }} className="min-h-11 w-full rounded-xl bg-[#3DE3FF] px-3 text-sm font-black text-[#102028]">{liveTrip.active ? "Parar acompanhamento" : "Iniciar acompanhamento"}</button>
+                <p className="mt-2 text-xs leading-relaxed text-white/65">GPS ao vivo neste aparelho. Posição temporária no mapa local; tempo restante estimado, sem trânsito ao vivo.</p>
+                <p role="status" className="mt-2 text-xs font-bold text-white/80">{liveTrip.message || (liveTrip.progress?.offRoute ? "Você está fora do trajeto. Pare o acompanhamento e confira ou recalcule a rota." : liveTrip.progress?.nearDestination ? "Você está próximo ao destino. Confirme a entrada do local." : liveTrip.point ? "Posição atualizada · precisão de " + Math.round(liveTrip.point.accuracy) + " m" : "Inicie para acompanhar sua viagem.")}</p>
+              </div>
               <div className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
@@ -1130,10 +1135,10 @@ export default function Planner() {
               <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22] shadow-[0_22px_60px_rgba(0,0,0,.28)]">
                 <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
                   <p className="text-xs font-black uppercase tracking-[.15em] text-white/35">Mapa da rota</p>
-                  <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
+
                 </div>
-                <div className="min-h-[430px] h-[min(72vh,620px)] max-w-full overflow-hidden">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online} travelMode={mode} />
+                <div className="min-h-[430px] max-w-full">
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online || liveTrip.active} travelMode={mode} livePosition={liveTrip.point ?? undefined} />
                 </div>
               </section>
             )}
