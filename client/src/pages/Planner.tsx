@@ -16,6 +16,7 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { ALL_LOCAL_ROUTE_DESTINATIONS, LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
+import { NAVIGATION_DESTINATIONS, searchNavigationDestinations } from "@/lib/navigationCatalog";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation } from "@/lib/locationPrivacy";
@@ -610,7 +611,7 @@ export default function Planner() {
 
   const keyboardDestinationOptions = useMemo<InputQuickOption[]>(() => {
     const recent = getLastTrip();
-    const ready = LOCAL_ROUTE_PRESETS.slice(0, 5).map(item => ({
+    const ready = NAVIGATION_DESTINATIONS.slice(0, 5).map(item => ({
       id: "preset-" + item.id,
       label: item.label,
       value: item.destination,
@@ -631,11 +632,8 @@ export default function Planner() {
 
   const availableDestinations = useMemo(() => {
     const query = destinationFilter.trim().toLocaleLowerCase("pt-BR");
-    return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => {
-      if (destinationCategory !== "todos" && item.category !== destinationCategory) return false;
-      if (!query) return true;
-      return (item.label + " " + item.detail + " " + item.destination).toLocaleLowerCase("pt-BR").includes(query);
-    });
+    const items = query ? searchNavigationDestinations(destinationFilter, NAVIGATION_DESTINATIONS.length) : NAVIGATION_DESTINATIONS;
+    return items.filter(item => destinationCategory === "todos" || item.category === destinationCategory);
   }, [destinationFilter, destinationCategory]);
 
   const filteredSavedRoutes = useMemo(() => {
@@ -771,7 +769,7 @@ export default function Planner() {
 
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
-                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {ALL_LOCAL_ROUTE_DESTINATIONS.length} destinos locais, lojas e referências, por categoria</span></span>
+                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {NAVIGATION_DESTINATIONS.length} destinos integrados, serviços e referências, por categoria</span></span>
                   <ChevronDown className={"size-4 text-[#3DE3FF] transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
