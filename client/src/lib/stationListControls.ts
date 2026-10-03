@@ -70,3 +70,31 @@ export function applyStationSearchPreferences(preferences: StationSearchPreferen
     visibleResultCount: resultsPerView,
   };
 }
+
+export type StationIdentityInput = {
+  cnpj?: string | null;
+  name?: string | null;
+  address?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+};
+
+export function normalizeStationIdentity(value: string | null | undefined) {
+  return (value ?? "").trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").replace(/\\s+/g, " ").trim();
+}
+
+export function sameStationIdentity(first: StationIdentityInput, second: StationIdentityInput) {
+  const firstCnpj = (first.cnpj ?? "").replace(/\\D/g, "");
+  const secondCnpj = (second.cnpj ?? "").replace(/\\D/g, "");
+  if (firstCnpj && secondCnpj && firstCnpj === secondCnpj) return true;
+
+  const firstAddress = normalizeStationIdentity(first.address);
+  const secondAddress = normalizeStationIdentity(second.address);
+  if (firstAddress.length >= 12 && firstAddress === secondAddress) return true;
+
+  if ([first.lat, first.lng, second.lat, second.lng].every(value => typeof value === "number" && Number.isFinite(value))) {
+    return Math.abs((first.lat as number) - (second.lat as number)) <= 0.00015 &&
+      Math.abs((first.lng as number) - (second.lng as number)) <= 0.00015;
+  }
+  return false;
+}
