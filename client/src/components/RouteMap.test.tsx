@@ -255,7 +255,7 @@ it("shows live street guidance and route telemetry while following GPS", () => {
   expect(screen.getByText("OpenStreetMap/OSRM")).toBeTruthy();
   expect(screen.getByText("Agora")).toBeTruthy();
   expect(screen.getByText("Depois")).toBeTruthy();
-  expect(screen.getByText(/58% concluído/)).toBeTruthy();
+  expect(screen.getByText(/42% concluído/)).toBeTruthy();
   expect(screen.getByRole("progressbar", { name: "Progresso da viagem" }).getAttribute("aria-valuenow")).toBe("42");
   expect(screen.getByText("GPS bom")).toBeTruthy();
   expect(screen.getByText("Guia completo")).toBeTruthy();
