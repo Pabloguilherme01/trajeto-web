@@ -81,6 +81,7 @@ type RoutePreview = {
   steps?: RouteStep[];
 };
 type RouteMapProps = {
+  livePosition?: { lat: number; lng: number };
   origin?: { lat: number; lng: number };
   travelMode?: "driving" | "walking" | "cycling" | "transit";
   destination?: { lat: number; lng: number };
@@ -98,6 +99,7 @@ export function OfflineRoutePreview({
   privateOrigin = false,
   forceOffline = false,
   travelMode = "driving",
+  livePosition,
 }: RouteMapProps) {
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
@@ -108,6 +110,7 @@ export function OfflineRoutePreview({
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = decodeMapPolyline(selected?.polyline ?? "");
   const markers = [
+    ...(isMapPoint(livePosition) ? [{ ...livePosition, id: "live-position", name: "Você agora", label: "GPS" }] : []),
     ...(validOrigin
       ? [{ ...validOrigin, id: "origin", name: "Origem", label: "A" }]
       : []),
@@ -207,7 +210,7 @@ export function OfflineRoutePreview({
             {validStops.map((p, i) => `${i + 1}. ${p.name}`).join(" · ")}
           </p>
         )}
-        {selected?.distanceMeters != null && (
+        {!livePosition && selected?.distanceMeters != null && (
           <p className="font-black">
             {(selected.distanceMeters / 1000).toLocaleString("pt-BR", {
               maximumFractionDigits: 1,
@@ -283,6 +286,7 @@ export function RouteMap({
   privateOrigin = false,
   forceOffline = false,
   travelMode = "driving",
+  livePosition,
 }: RouteMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -494,10 +498,10 @@ export function RouteMap({
       ? null
       : Math.max(0, Math.round(trafficImpactSeconds / 60));
 
-  if (forceOffline) {
+  if (forceOffline || livePosition) {
     return (
       <section className="overflow-hidden rounded-2xl border border-white/10" aria-label="Mapa offline da viagem">
-        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} forceOffline travelMode={travelMode} />
+        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} livePosition={livePosition} forceOffline travelMode={travelMode} />
       </section>
     );
   }

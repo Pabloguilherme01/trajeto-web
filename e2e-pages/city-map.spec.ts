@@ -79,3 +79,27 @@ test("street atlas: filters references and calculates a bundled destination offl
   await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
   await expect(page.getByText(/Estimativa local/).first()).toBeVisible();
 });
+
+test("live trip: updates the local map without storing GPS and stops explicitly", async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = window as unknown as { liveGps?: PositionCallback; lastGps?: PositionCallback; stopped?: number };
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: {
+      watchPosition: (success: PositionCallback) => { state.liveGps = success; state.lastGps = success; return 44; },
+      clearWatch: (id: number) => { state.stopped = id; state.liveGps = undefined; },
+    } });
+  });
+  await page.route("https://router.project-osrm.org/**", route => route.abort());
+  await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7345,-48.2816");
+  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).click();
+  await page.evaluate(() => {
+    (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7431234, longitude: -48.2816, accuracy: 20 }, timestamp: Date.now() } as GeolocationPosition);
+  });
+  await expect(page.getByText("Distância restante", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage }, url: location.href }))).not.toContain("-15.7431234");
+  await page.getByRole("button", { name: "Parar acompanhamento", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => (window as unknown as { stopped: number }).stopped)).toBe(44);
+});
