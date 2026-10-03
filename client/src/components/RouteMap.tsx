@@ -188,6 +188,7 @@ export function OfflineRoutePreview({
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
   const [following, setFollowing] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ point: { lat: number; lng: number }; key: number } | null>(null);
   const focus = (point: { lat: number; lng: number }) => {
     setFollowing(false);
@@ -512,7 +513,7 @@ export function OfflineRoutePreview({
           </p>
         )}
         {selected?.steps?.length ? (
-          <details className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3">
+          <details className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3" onToggle={event => setInstructionsOpen(event.currentTarget.open)}>
             <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black">
               <span className="flex items-center gap-2">
                 <Navigation2 className="size-4" />
@@ -520,7 +521,7 @@ export function OfflineRoutePreview({
               </span>
               <ChevronDown className="size-4" />
             </summary>
-            <ol className="mt-2 space-y-1.5">
+            {instructionsOpen && <ol className="mt-2 space-y-1.5">
               {selected.steps.slice(0, 30).map((step, index) => (
                 <li key={index} className="flex items-start gap-3 rounded-lg bg-white px-3 py-2">
                   <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#163840] text-xs font-black text-white">{index + 1}</span>
@@ -535,8 +536,8 @@ export function OfflineRoutePreview({
                   </span>
                 </li>
               ))}
-            </ol>
-            {selected.steps.length > 30 && (
+            </ol>}
+            {instructionsOpen && selected.steps.length > 30 && (
               <p className="mt-2 text-xs text-[#607169]">
                 Mostrando os primeiros 30 passos. Abra no navegador para acompanhar a navegação completa em tempo real.
               </p>
@@ -559,9 +560,10 @@ export function OfflineRoutePreview({
           </a>
         )}
         <p className="text-xs text-[#607169]">
-          Ruas offline cobrem a área urbana cadastrada. A prévia local não
-          oferece navegação curva a curva. O aplicativo externo pode exigir
-          internet.
+          Ruas offline cobrem a área urbana cadastrada. Quando a rota traz
+          passos confirmados, o guia pode acompanhá-los no aparelho; sem esses
+          passos, o Trajeto não inventa conversões. Navegação externa pode
+          exigir internet.
         </p>
       </div>
     </div>
