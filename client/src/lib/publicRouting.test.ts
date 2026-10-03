@@ -701,10 +701,10 @@ describe("public routing fallback", () => {
 });
 
 
-it("calculates an offline route to a bundled street midpoint without querying a provider", async () => {
+it("calculates an offline route to an explicitly selected bundled street midpoint without querying a provider", async () => {
   const fetch = vi.fn();
   vi.stubGlobal("fetch", fetch);
-  const route = await calculateOfflineRoute("-15.7545,-48.2816", "Avenida Brasília, Águas Lindas de Goiás - GO");
+  const route = await calculateOfflineRoute("-15.7545,-48.2816", "-15.7372345, -48.2804074");
   expect(route.destination).toEqual({ lat: -15.7372345, lng: -48.2804074 });
   expect(route.source).toBe("local-estimate");
   expect(fetch).not.toHaveBeenCalled();
@@ -712,4 +712,25 @@ it("calculates an offline route to a bundled street midpoint without querying a 
 
 it("does not turn a numbered street address into the bundled street midpoint", async () => {
   await expect(calculateOfflineRoute("-15.7545,-48.2816", "Avenida Brasília, 99999, Águas Lindas de Goiás - GO")).rejects.toThrow(/preparada/);
+});
+
+
+it("preserves approximate street provenance in the serializable offline payload", async () => {
+  const { BUNDLED_CITY_ATLAS, buildCityAtlas } = await import("./cityAtlas");
+  const street = buildCityAtlas(BUNDLED_CITY_ATLAS).find(item => item.coordinateKind === "street-midpoint")!;
+  const payload = buildPublicRoutePayload({ origin: { lat: -15.75, lng: -48.28 }, destination: { lat: street.lat!, lng: street.lng! }, distanceMeters: 1000, durationSeconds: 120, polyline: "test", source: "local-estimate", mode: "driving" });
+  const restored = JSON.parse(JSON.stringify(payload));
+  expect(restored.route.destinationReference.name).toBe(street.name);
+  expect(restored.route.destinationReference.precision).toMatch(/não identifica uma casa/);
+  expect(restored.route.destinationReference.sourceLabel).toBe(street.sourceLabel);
+});
+
+
+it("requires an explicit street choice online and offline without asking a provider to guess", async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal("fetch", fetcher);
+  await expect(calculatePublicRoute("-15.7545,-48.2816", "Rua B")).rejects.toThrow(/mais de um trecho/);
+  await expect(calculateOfflineRoute("-15.7545,-48.2816", "Rua B")).rejects.toThrow(/mais de um trecho/);
+  expect(fetcher).not.toHaveBeenCalled();
+  vi.unstubAllGlobals();
 });

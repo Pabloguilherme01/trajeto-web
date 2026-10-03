@@ -11,7 +11,7 @@ it("chooses a bundled point without a geocoder and marks approximate street loca
     const view = render(<PlannerLocationPicker kind="destino" value="" onChoose={choose} />);
     fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "Avenida Brasília" } });
-    fireEvent.click(screen.getByRole("button", { name: /Avenida Brasília/ }));
+    fireEvent.click(screen.getAllByRole("button", { name: /Avenida Brasília/ })[0]);
     expect(choose).toHaveBeenCalledOnce();
     expect(choose.mock.calls[0][0]).toMatch(/^-\d+\.\d+, -\d+\.\d+$/);
     view.rerender(<PlannerLocationPicker kind="destino" value={choose.mock.calls[0][0]} onChoose={choose} />);
@@ -84,4 +84,17 @@ it("allows choosing a neighborhood by its verified name without inventing coordi
   expect(choose).toHaveBeenCalledWith("Jardim Barragem II, Águas Lindas de Goiás - GO");
   view.rerender(<PlannerLocationPicker kind="destino" value="Jardim Barragem II, Águas Lindas de Goiás - GO" onChoose={choose} />);
   expect(screen.getByText(/precisa de conexão para calcular/)).toBeTruthy();
+});
+
+
+it("shows distinct same-name streets and waits for an explicit selection", () => {
+  const choose = vi.fn();
+  render(<PlannerLocationPicker kind="destino" value="" onChoose={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "Rua B" } });
+  const options = screen.getAllByRole("button", { name: "Selecionar Rua B" });
+  expect(options.length).toBeGreaterThan(1);
+  expect(choose).not.toHaveBeenCalled();
+  fireEvent.click(options[1]);
+  expect(choose).toHaveBeenCalledOnce();
 });

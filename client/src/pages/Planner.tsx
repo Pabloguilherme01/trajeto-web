@@ -28,7 +28,10 @@ import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tr
 import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
 import { effectivePlannerMode, plannerActionLabel, routeFreshness, shouldAutoRefreshSavedRoute } from "@/lib/routeExperience";
 
-type PlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
+type ServerPlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
+type PlannedRoute = Omit<ServerPlannedRoute, "route"> & {
+  route: ServerPlannedRoute["route"] & { destinationReference?: { name: string; sourceLabel: string; precision: string } };
+};
 
 function formatDuration(seconds: number | null | undefined) {
   if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
@@ -1189,6 +1192,10 @@ export default function Planner() {
 
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-[#C7FF3C]/[.05] px-3 py-2 text-xs font-bold text-[#D9FF91]">{savedMessage}</p>}
             </div>
+
+            {planned.route.destinationReference && <p className="mt-3 break-words rounded-xl border border-amber-300/20 bg-amber-300/5 p-3 text-xs leading-relaxed text-amber-100" role="note">
+              {planned.route.destinationReference.name} · {planned.route.destinationReference.precision} Fonte: {planned.route.destinationReference.sourceLabel}
+            </p>}
 
             {showMap && (
               <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22] shadow-[0_22px_60px_rgba(0,0,0,.28)]">
