@@ -19,6 +19,7 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
+import { stationNavigationDestination } from "@/lib/navigationCatalog";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -728,15 +729,20 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   };
 
   const navigateTo = (station: typeof stations[number]) => {
-    const destination = typeof station.lat === "number" && typeof station.lng === "number"
-      ? station.lat + "," + station.lng
-      : [station.name, station.address].filter(Boolean).join(", ");
-    if (!destination.trim()) {
+    const item = stationNavigationDestination({
+      id: station.id,
+      name: station.name,
+      address: station.address,
+      lat: station.lat,
+      lng: station.lng,
+      cnpj: station.cnpj,
+    });
+    if (!item.destination.trim()) {
       toast.message("Este posto ainda não possui destino suficiente para traçar a rota.");
       return;
     }
     rememberIntent("route");
-    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(destination) + "&auto=1");
+    setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1");
   };
 
   const shareCurrent = async () => {
