@@ -92,7 +92,7 @@ type RoutePreview = {
   steps?: RouteStep[];
 };
 type RouteMapProps = {
-  livePosition?: { lat: number; lng: number };
+  livePosition?: { lat: number; lng: number; accuracy?: number; timestamp?: number };
   origin?: { lat: number; lng: number };
   travelMode?: "driving" | "walking" | "cycling" | "transit";
   destination?: { lat: number; lng: number };
@@ -230,6 +230,24 @@ export function OfflineRoutePreview({
         </span>
         <span>{routePoints.length ? "Geometria da rota disponível" : "Sem geometria viária confirmada"}</span>
       </div>
+      {livePosition && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-[#37e6df]/20 bg-[#10252d] px-3 py-2 text-xs text-[#d9ffff]" role="status">
+          <span className="flex items-center gap-1.5 rounded-full bg-[#37e6df]/15 px-2.5 py-1 font-black text-[#37e6df]">
+            <span className="size-2 animate-pulse rounded-full bg-[#37e6df]" />
+            AO VIVO
+          </span>
+          <span>
+            {livePosition.accuracy && Number.isFinite(livePosition.accuracy)
+              ? "Precisão aproximada: " + Math.round(livePosition.accuracy) + " m"
+              : "Posição atualizada neste aparelho"}
+          </span>
+          {livePosition.timestamp && Number.isFinite(livePosition.timestamp) && (
+            <span className="text-[#9fc4c8]">
+              {new Date(livePosition.timestamp).toLocaleTimeString("pt-BR")}
+            </span>
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
         {validOrigin && <button type="button" onClick={() => focus(validOrigin)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver origem</button>}
         {validDestination && <button type="button" onClick={() => focus(validDestination)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver destino</button>}
