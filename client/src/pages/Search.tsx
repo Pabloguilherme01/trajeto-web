@@ -35,8 +35,6 @@ import {
   rememberSearch,
   mobilePreferenceEvent,
 } from "@/lib/mobilePreferences";
-import {
-} from "@/lib/localRoutePresets";
 import { NAVIGATION_DESTINATIONS } from "@/lib/navigationCatalog";
 import { localDataEvent } from "@/lib/localData";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
