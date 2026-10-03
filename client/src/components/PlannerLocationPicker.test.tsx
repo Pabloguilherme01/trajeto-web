@@ -63,3 +63,25 @@ it("reveals more local points and resets pagination when the search changes", ()
   expect(list.querySelectorAll("li").length).toBeLessThanOrEqual(8);
   expect(screen.queryByRole("button", { name: /Mostrar mais pontos/ })).toBeNull();
 });
+
+
+it("offers a named road that exists only in the bundled offline road network", () => {
+  const choose = vi.fn();
+  render(<PlannerLocationPicker kind="destino" value="" onChoose={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "DF-533" } });
+  fireEvent.click(screen.getByRole("button", { name: /DF-533/ }));
+  expect(choose).toHaveBeenCalledOnce();
+  expect(choose.mock.calls[0][0]).toMatch(/^-d+.d+, -d+.d+$/);
+});
+
+it("allows choosing a neighborhood by its verified name without inventing coordinates", () => {
+  const choose = vi.fn();
+  const view = render(<PlannerLocationPicker kind="destino" value="" onChoose={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "Jardim Barragem II" } });
+  fireEvent.click(screen.getByRole("button", { name: /Jardim Barragem II/ }));
+  expect(choose).toHaveBeenCalledWith("Jardim Barragem II, Águas Lindas de Goiás - GO");
+  view.rerender(<PlannerLocationPicker kind="destino" value="Jardim Barragem II, Águas Lindas de Goiás - GO" onChoose={choose} />);
+  expect(screen.getByText(/precisa de conexão para calcular/)).toBeTruthy();
+});
