@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "wouter";
 import { Bookmark, MapPinned, Navigation, Route } from "lucide-react";
 import { buildGoogleMapsDestinationUrl } from "@/lib/mobileTools";
 import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
@@ -34,12 +33,12 @@ export function DestinationActions({
 
   return (
     <div className={"grid gap-2 " + (compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4")} aria-label={"Ações para " + destination.name}>
-      <Link href={buildOriginPlannerUrl(destination.address)} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[.03] px-2 text-center text-xs font-black text-white/80">
+      <a href={buildOriginPlannerUrl(destination.address)} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[.03] px-2 text-center text-xs font-black text-white/80">
         <Route className="size-3.5" />Ir daqui
-      </Link>
-      <Link href={buildDestinationPlannerUrl(destination.address)} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[#C7FF3C] px-2 text-center text-xs font-black text-[#102028]">
+      </a>
+      <a href={buildDestinationPlannerUrl(destination.address)} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[#C7FF3C] px-2 text-center text-xs font-black text-[#102028]">
         <Navigation className="size-3.5" />Ir até aqui
-      </Link>
+      </a>
       <button type="button" onClick={toggleSaved} disabled={saveLocked} className={"flex min-h-11 items-center justify-center gap-1.5 rounded-xl border px-2 text-xs font-black disabled:cursor-default " + (isSaved ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/10 bg-white/[.03] text-white/75")} aria-pressed={isSaved}>
         <Bookmark className="size-3.5" fill={isSaved ? "currentColor" : "none"} />{saveLocked ? "Salvo no aparelho" : isSaved ? "Salvo offline" : "Salvar offline"}
       </button>
