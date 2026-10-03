@@ -513,8 +513,8 @@ export function OfflineRoutePreview({
           </p>
         )}
         {selected?.steps?.length ? (
-          <details open={instructionsOpen} className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3">
-            <summary aria-expanded={instructionsOpen} onClick={event => { event.preventDefault(); setInstructionsOpen(value => !value); }} className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black">
+          <details onToggle={event => setInstructionsOpen(event.currentTarget.open)} className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black">
               <span className="flex items-center gap-2">
                 <Navigation2 className="size-4" />
                 Instruções pelas ruas · {selected.steps.length} passos
