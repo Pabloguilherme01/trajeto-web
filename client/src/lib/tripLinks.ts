@@ -3,6 +3,25 @@ import { privateOriginForUrl } from "@/lib/locationPrivacy";
 
 export type ReusableTrip = { origin: string; destination: string };
 
+export type PlannerMapDestination = {
+  name?: string | null;
+  address: string;
+  source?: string | null;
+};
+
+export function plannerDestinationFromMapItem(item: PlannerMapDestination) {
+  const address = item.address.trim();
+  const name = item.name?.trim() ?? "";
+  return item.source === "ANP" && name
+    ? [name, address].filter(Boolean).join(", ")
+    : address || name;
+}
+
+export function buildDestinationPlannerUrl(destination: string) {
+  const params = new URLSearchParams({ destino: destination.trim() });
+  return appUrl("/planejar") + "?" + params.toString();
+}
+
 export function buildReusableTripPlannerUrl(
   trip: ReusableTrip,
   options: { auto?: boolean; drivingMode?: boolean } = {},

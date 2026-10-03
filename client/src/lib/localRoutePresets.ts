@@ -2,13 +2,27 @@ import { matchesCatalogText } from "./catalogSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 
+export type RouteDestinationCategory = "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
+export type RouteDestinationCategoryFilter = "todos" | RouteDestinationCategory;
+
 export type LocalRoutePreset = {
   id: string;
   label: string;
   detail: string;
   destination: string;
-  category: "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
+  category: RouteDestinationCategory;
 };
+
+export const ROUTE_DESTINATION_CATEGORIES: ReadonlyArray<{ value: RouteDestinationCategoryFilter; label: string }> = [
+  { value: "todos", label: "Tudo" },
+  { value: "saude", label: "Saúde" },
+  { value: "servicos", label: "Serviços" },
+  { value: "compras", label: "Compras" },
+  { value: "transporte", label: "Transporte" },
+  { value: "combustivel", label: "Postos" },
+  { value: "alimentacao", label: "Alimentação" },
+  { value: "centro", label: "Cidade" },
+];
 
 const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "upa", label: "UPA", detail: "Urgência e emergência · 24h", destination: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO", category: "saude" },
@@ -95,10 +109,49 @@ const representedServices = new Set([
 const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.mapQuery && !representedServices.has(service.id)).map(service => ({
   id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: "servicos",
 }));
-export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PLACE_DESTINATIONS, ...SUPPORT_DESTINATIONS];
+function normalizeDestinationKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\b(goias|go)\b/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-export function getLocalRoutePresets(query = "") {
-  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => matchesCatalogText(query, [item.label, item.detail, item.destination, item.category]));
+function mergeRouteDestinations(...groups: LocalRoutePreset[][]) {
+  const byId = new Set<string>();
+  const byDestination = new Set<string>();
+  const merged: LocalRoutePreset[] = [];
+
+  for (const item of groups.flat()) {
+    const destinationKey = normalizeDestinationKey(item.destination);
+    if (byId.has(item.id) || (destinationKey && byDestination.has(destinationKey))) continue;
+    byId.add(item.id);
+    if (destinationKey) byDestination.add(destinationKey);
+    merged.push(item);
+  }
+  return merged;
+}
+
+// One catalog feeds Planner, city shortcuts and destination search.
+// Curated presets win over derived place/service entries so the user sees one clear
+// destination instead of repeated cards pointing to the same route.
+export const ALL_LOCAL_ROUTE_DESTINATIONS = mergeRouteDestinations(
+  LOCAL_ROUTE_PRESETS,
+  LOCAL_PLACE_DESTINATIONS,
+  SUPPORT_DESTINATIONS,
+);
+
+export function getLocalRoutePresets(
+  query = "",
+  category: RouteDestinationCategoryFilter = "todos",
+) {
+  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item =>
+    (category === "todos" || item.category === category) &&
+    matchesCatalogText(query, [item.label, item.detail, item.destination, item.category])
+  );
 }
 
 export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string };

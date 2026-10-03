@@ -8,7 +8,7 @@ import {
   LOCAL_GEOCODE_POINTS,
   resolveLocalGeocodePoint,
 } from "@/lib/localGeocoding";
-import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
+import { getLocalRoutePresets, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import {
   groupAnpFuelRows,
   normalizeAnpFuelRow,
@@ -17,6 +17,7 @@ import {
 import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText } from "@/lib/catalogSearch";
+import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
 
 export default function CityMap() {
   const [, navigate] = useLocation();
@@ -45,7 +46,7 @@ export default function CityMap() {
     return () => controller.abort();
   }, []);
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("todos");
+  const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [online, setOnline] = useState(() => navigator.onLine);
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -57,12 +58,7 @@ export default function CityMap() {
     };
   }, []);
   const destinations = useMemo(
-    () =>
-      ALL_LOCAL_ROUTE_DESTINATIONS.filter(
-        item =>
-          (category === "todos" || item.category === category) &&
-          matchesCatalogText(query, [item.label, item.detail, item.destination])
-      ),
+    () => getLocalRoutePresets(query, category),
     [query, category]
   );
   const markers = useMemo(() => {
@@ -116,9 +112,7 @@ export default function CityMap() {
     return [...unique.values()];
   }, [destinations, category, query, anpRows]);
   const plan = (destination: string) =>
-    navigate(
-      appUrl("/planejar") + "?destino=" + encodeURIComponent(destination)
-    );
+    navigate(buildDestinationPlannerUrl(destination));
   const emptyFallback = (
     <div className="grid min-h-[320px] place-items-center rounded-2xl bg-[#17262d] p-6 text-center">
       <div>
@@ -131,7 +125,7 @@ export default function CityMap() {
       </div>
     </div>
   );
-  const fallback = markers.length ? <OfflineStationMap stations={markers} itemLabel="destino" onPlanDestination={item => plan(item.source === "ANP" ? item.name + ", " + item.address : item.address)} /> : emptyFallback;
+  const fallback = markers.length ? <OfflineStationMap stations={markers} itemLabel="destino" onPlanDestination={item => plan(plannerDestinationFromMapItem(item))} /> : emptyFallback;
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-white sm:px-6">
       <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">
@@ -158,14 +152,7 @@ export default function CityMap() {
         className="my-3 flex flex-wrap gap-2"
         aria-label="Categorias do mapa"
       >
-        {[
-          ["todos", "Tudo"],
-          ["saude", "Saúde"],
-          ["servicos", "Serviços"],
-          ["compras", "Compras"],
-          ["transporte", "Transporte"],
-          ["combustivel", "Postos"],
-        ].map(([value, label]) => (
+        {ROUTE_DESTINATION_CATEGORIES.map(({ value, label }) => (
           <button
             key={value}
             type="button"
@@ -190,7 +177,7 @@ export default function CityMap() {
           <TileStationMap
             stations={markers}
             selectionLabel="Escolher destino no mapa"
-            onPlanDestination={item => plan(item.source === "ANP" ? item.name + ", " + item.address : item.address)}
+            onPlanDestination={item => plan(plannerDestinationFromMapItem(item))}
             fallback={fallback}
           />
         ) : (
