@@ -73,3 +73,24 @@ it("pauses and discards GPS when the page is hidden", () => {
   expect(clear).toHaveBeenCalledWith(7);
   hidden.mockRestore();
 });
+
+it("uses stable precise GPS speed for arrival estimates and rejects out-of-order fixes", () => {
+  vi.useFakeTimers();
+  const { result } = renderHook(() => useLiveTrip(route));
+  act(() => result.current.start());
+  for (let i = 0; i < 3; i++) {
+    act(() => vi.advanceTimersByTime(1000));
+    act(() => update({ ...position(), coords: { ...position().coords, speed: 3 } } as GeolocationPosition));
+  }
+  expect(result.current.speed).toBe(3);
+  expect(result.current.progress?.durationSeconds).toBeCloseTo(200, 0);
+  const timestamp = result.current.point!.timestamp;
+  act(() => update({ ...position(-15.749), timestamp: timestamp - 1000 }));
+  expect(result.current.point?.timestamp).toBe(timestamp);
+  act(() => vi.advanceTimersByTime(1000));
+  act(() => update({ ...position(), coords: { ...position().coords, speed: 0 } } as GeolocationPosition));
+  expect(result.current.speed).toBeNull();
+  expect(result.current.progress?.durationSeconds).toBeCloseTo(300, 0);
+  act(() => result.current.stop());
+  expect(result.current.speed).toBeNull();
+});

@@ -7,9 +7,13 @@ export type PlannerMapDestination = {
   name?: string | null;
   address: string;
   source?: string | null;
+  coordinateKind?: string;
+  lat?: number;
+  lng?: number;
 };
 
 export function plannerDestinationFromMapItem(item: PlannerMapDestination) {
+  if (item.coordinateKind === "area-reference" && Number.isFinite(item.lat) && Number.isFinite(item.lng)) return item.lat + ", " + item.lng;
   const address = item.address.trim();
   const name = item.name?.trim() ?? "";
   return item.source === "ANP" && name

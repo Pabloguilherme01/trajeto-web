@@ -43,7 +43,7 @@ export function listUnifiedDestinationFavorites(): UnifiedDestination[] {
   ];
   const unique = new Map<string, UnifiedDestination>();
   for (const item of merged) {
-    const key = item.address
+    const key = /^business-\d{14}$/.test(item.id) ? item.id : item.address
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLocaleLowerCase("pt-BR")

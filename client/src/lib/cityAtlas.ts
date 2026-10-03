@@ -1,6 +1,6 @@
 import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
 import { appUrl } from "@/lib/appUrl";
-import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
+import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 
@@ -29,7 +29,9 @@ export type CityAtlasItem = {
   keywords?: string[];
   lat?: number;
   lng?: number;
-  coordinateKind?: "mapped-point" | "street-midpoint";
+  coordinateKind?: "mapped-point" | "street-midpoint" | "area-reference";
+  coordinateLabel?: string;
+  business?: { cnpj: string; legalName: string; tradeName: string; sector: string; cnae: string; opened: string; statusDate: string; size: string; mei: string; simples: string; nature: string };
   coordinateSourceId?: string;
   coordinateVerifiedAt?: string;
 };
@@ -321,22 +323,24 @@ export function resolveCityAtlasPoint(
     : null;
 }
 
+const searchIndex = new WeakMap<CityAtlasItem, string>();
+
 export function filterCityAtlas(
   items: CityAtlasItem[],
   query: string,
   category: "todos" | CityAtlasLayer,
 ) {
-  return items.filter(item =>
-    (category === "todos" || item.category === category) &&
-    matchesCatalogText(query, [
-      item.name,
-      item.detail,
-      item.address,
-      item.destination,
-      item.category,
-      ...(item.keywords ?? []),
-    ])
-  );
+  const terms = normalizeCatalogText(query).split(" ").filter(Boolean);
+  return items.filter(item => {
+    if (category !== "todos" && item.category !== category) return false;
+    if (!terms.length) return true;
+    let text = searchIndex.get(item);
+    if (text === undefined) {
+      text = normalizeCatalogText([item.name, item.detail, item.address, item.destination, item.category, ...(item.keywords ?? [])].filter(Boolean).join(" "));
+      searchIndex.set(item, text);
+    }
+    return terms.every(term => text.includes(term));
+  });
 }
 
 export function cityAtlasCounts(items: CityAtlasItem[]) {

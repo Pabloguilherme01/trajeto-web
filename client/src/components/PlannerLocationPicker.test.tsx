@@ -31,3 +31,23 @@ it("includes known geocoding references such as HEAL in the local selector", () 
   fireEvent.click(screen.getByRole("button", { name: /HEAL/ }));
   expect(choose).toHaveBeenCalledWith("-15.74637, -48.27584");
 });
+
+it("chooses an imported company by CNPJ and keeps its approximate precision visible", async () => {
+  const choose = vi.fn();
+  const view = render(<PlannerLocationPicker kind="destino" value="" onChoose={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "42.115.689/0001-40" } });
+  fireEvent.click(await screen.findByRole("button", { name: /AMAG/ }, { timeout: 5000 }));
+  expect(choose).toHaveBeenCalledWith("-15.782635, -48.294036");
+  view.rerender(<PlannerLocationPicker kind="destino" value="-15.782635, -48.294036" onChoose={choose} />);
+  expect(screen.getByText(/AMAG · Referência aproximada: Quadra/)).toBeTruthy();
+});
+
+it("uses the public CNPJ for company origins instead of treating their coordinates as device GPS", async () => {
+  const choose = vi.fn();
+  render(<PlannerLocationPicker kind="origem" value="" onChoose={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher origem no catálogo local" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar origem local" }), { target: { value: "42.115.689/0001-40" } });
+  fireEvent.click(await screen.findByRole("button", { name: /AMAG/ }, { timeout: 5000 }));
+  expect(choose).toHaveBeenCalledWith("42.115.689/0001-40");
+});
