@@ -1,5 +1,5 @@
 import { AlarmClock, CalendarClock, ChevronDown, Clock3 } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   calculateDepartureTime,
   defaultArrivalTarget,
