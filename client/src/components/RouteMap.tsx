@@ -7,7 +7,7 @@ import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
-import { ChevronDown, LocateFixed, Minus, Navigation2, Plus, Satellite, TrafficCone } from "lucide-react";
+import { ChevronDown, LocateFixed, Minus, Navigation2, Plus, Satellite, TrafficCone, Gauge, Clock3, MapPin, AlertTriangle } from "lucide-react";
 
 
 function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
@@ -79,6 +79,57 @@ type RouteStep = {
   durationSeconds: number;
   maneuver?: string;
 };
+
+type LiveProgress = {
+  distanceMeters: number;
+  durationSeconds: number;
+  offRoute: boolean;
+  nearDestination: boolean;
+};
+
+export function currentRouteGuidance(
+  steps: RouteStep[],
+  totalDistanceMeters: number | null | undefined,
+  remainingDistanceMeters: number | null | undefined,
+) {
+  if (!steps.length || !Number.isFinite(totalDistanceMeters) || !Number.isFinite(remainingDistanceMeters) || Number(totalDistanceMeters) <= 0) return null;
+  const completed = Math.max(0, Math.min(Number(totalDistanceMeters), Number(totalDistanceMeters) - Number(remainingDistanceMeters)));
+  let cursor = 0;
+  for (let index = 0; index < steps.length; index++) {
+    const step = steps[index];
+    const length = Math.max(0, Number(step.distanceMeters) || 0);
+    const end = cursor + length;
+    if (completed <= end || index === steps.length - 1) {
+      return {
+        index,
+        step,
+        distanceToManeuver: Math.max(0, end - completed),
+        nextStep: steps[index + 1] ?? null,
+      };
+    }
+    cursor = end;
+  }
+  return null;
+}
+
+function compactDistance(meters: number | null | undefined) {
+  if (!Number.isFinite(meters)) return "—";
+  const value = Number(meters);
+  return value >= 1000
+    ? (value / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
+    : Math.max(0, Math.round(value)).toLocaleString("pt-BR") + " m";
+}
+
+function compactDuration(seconds: number | null | undefined) {
+  if (!Number.isFinite(seconds)) return "—";
+  const minutes = Math.max(0, Math.round(Number(seconds) / 60));
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return rest ? hours + "h " + rest + "min" : hours + "h";
+  }
+  return minutes + " min";
+}
 type RoutePreview = {
   id: string;
   polyline: string | null;
@@ -100,6 +151,8 @@ type RouteMapProps = {
   routes?: RoutePreview[];
   privateOrigin?: boolean;
   forceOffline?: boolean;
+  liveProgress?: LiveProgress | null;
+  liveSpeedMps?: number | null;
 };
 
 export function OfflineRoutePreview({
@@ -111,6 +164,8 @@ export function OfflineRoutePreview({
   forceOffline = false,
   travelMode = "driving",
   livePosition,
+  liveProgress,
+  liveSpeedMps,
 }: RouteMapProps) {
   const businesses = useBusinessCatalog();
   const nearbyBusinesses = useMemo(() => nearbyBusinessReferences(businesses.items, destination), [businesses.items, destination?.lat, destination?.lng]);
@@ -130,6 +185,17 @@ export function OfflineRoutePreview({
   const validStops = stops.filter(isMapPoint);
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = decodeMapPolyline(selected?.polyline ?? "");
+  const guidance = currentRouteGuidance(
+    selected?.steps ?? [],
+    selected?.distanceMeters,
+    liveProgress?.distanceMeters,
+  );
+  const routeSourceLabel =
+    selected?.source === "mapbox"
+      ? "Mapbox"
+      : selected?.source === "osrm"
+        ? "OpenStreetMap/OSRM"
+        : "Estimativa local";
   const routeReferences = useMemo(
     () => nearbyRouteReferences(validOrigin, validDestination, routePoints),
     [validOrigin?.lat, validOrigin?.lng, validDestination?.lat, validDestination?.lng, routePoints],
@@ -248,7 +314,61 @@ export function OfflineRoutePreview({
           )}
         </div>
       )}
-      <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
+      {livePosition && (
+        <section className="border-b border-black/10 bg-white p-3" aria-label="Guia da rota em andamento">
+          {liveProgress?.offRoute ? (
+            <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-[#D98B4B]/30 bg-[#FFF3E8] p-3 text-[#70401D]">
+              <AlertTriangle className="mt-0.5 size-5 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-black">Fora do trajeto calculado</p>
+                <p className="mt-1 break-words text-xs">O GPS está distante da geometria da rota. Recalcule antes de confiar na próxima rua.</p>
+              </div>
+            </div>
+          ) : guidance ? (
+            <div className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#163840] text-white"><Navigation2 className="size-5" /></span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-[#56766A]">Próxima orientação</p>
+                  <p className="mt-1 break-words text-base font-black text-[#163840]">{guidance.step.instruction}</p>
+                  {guidance.step.name && <p className="mt-1 break-words text-xs font-bold text-[#365E51]">Via: {guidance.step.name}</p>}
+                  <p className="mt-1 text-xs text-[#607169]">Em aproximadamente {compactDistance(guidance.distanceToManeuver)}</p>
+                  {guidance.nextStep && <p className="mt-2 break-words text-xs text-[#607169]">Depois: {guidance.nextStep.instruction}</p>}
+                </div>
+              </div>
+            </div>
+          ) : liveProgress?.nearDestination ? (
+            <div className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3 font-black text-[#163840]">Você está próximo ao destino. Confira a entrada correta.</div>
+          ) : (
+            <div className="rounded-2xl border border-black/10 bg-[#F7F9F5] p-3 text-xs text-[#607169]">
+              Esta rota não trouxe passos curva a curva. O mapa acompanha sua posição, mas não inventa instruções de rua.
+            </div>
+          )}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
+              <MapPin className="size-4" />
+              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Restante</p>
+              <p className="mt-1 break-words text-sm font-black">{compactDistance(liveProgress?.distanceMeters)}</p>
+            </div>
+            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
+              <Clock3 className="size-4" />
+              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Tempo</p>
+              <p className="mt-1 break-words text-sm font-black">{compactDuration(liveProgress?.durationSeconds)}</p>
+            </div>
+            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
+              <Gauge className="size-4" />
+              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Velocidade</p>
+              <p className="mt-1 break-words text-sm font-black">{Number.isFinite(liveSpeedMps) ? Math.round(Number(liveSpeedMps) * 3.6) + " km/h" : "—"}</p>
+            </div>
+            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
+              <LocateFixed className="size-4" />
+              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">GPS</p>
+              <p className="mt-1 break-words text-sm font-black">{Number.isFinite(livePosition.accuracy) ? "±" + Math.round(Number(livePosition.accuracy)) + " m" : "Ativo"}</p>
+            </div>
+          </div>
+        </section>
+      )}
+            <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
         {validOrigin && <button type="button" onClick={() => focus(validOrigin)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver origem</button>}
         {validDestination && <button type="button" onClick={() => focus(validDestination)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver destino</button>}
         {isMapPoint(livePosition) && <button type="button" aria-pressed={following} onClick={() => { setFocusRequest(null); setFollowing(v => !v); setZoom(v => Math.max(2, v)); }} className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white">Seguir GPS</button>}
@@ -267,7 +387,25 @@ export function OfflineRoutePreview({
         onSelect={marker => { setSelectedPoint(marker.name + (nearbyBusinesses.find(item => item.id === marker.id)?.precision ? " · " + nearbyBusinesses.find(item => item.id === marker.id)?.precision : "")); focus(marker); }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
-        {nearbyNamedPlaces.length > 0 && (
+        <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Dados da rota">
+          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Fonte</p>
+            <p className="mt-1 break-words text-xs font-black">{routeSourceLabel}</p>
+          </div>
+          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Distância</p>
+            <p className="mt-1 break-words text-xs font-black">{compactDistance(selected?.distanceMeters)}</p>
+          </div>
+          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Tempo calculado</p>
+            <p className="mt-1 break-words text-xs font-black">{compactDuration(selected?.durationSeconds)}</p>
+          </div>
+          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Guia</p>
+            <p className="mt-1 break-words text-xs font-black">{selected?.steps?.length ? selected.steps.length + " orientações" : "Sem passos confirmados"}</p>
+          </div>
+        </section>
+                {nearbyNamedPlaces.length > 0 && (
           <section className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3" aria-labelledby="nearby-places-title">
             <div className="flex items-center justify-between gap-3">
               <p id="nearby-places-title" className="text-xs font-black uppercase tracking-[.12em] text-[#365E51]">Lugares próximos e referências</p>
@@ -377,6 +515,8 @@ export function RouteMap({
   forceOffline = false,
   travelMode = "driving",
   livePosition,
+  liveProgress,
+  liveSpeedMps,
 }: RouteMapProps) {
   const businesses = useBusinessCatalog();
   const businessReferences = useMemo(() => nearbyBusinessReferences(businesses.items, destination), [businesses.items, destination?.lat, destination?.lng]);
