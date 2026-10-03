@@ -61,7 +61,7 @@ test("planejar: mantém a rota utilizável quando o OSRM está indisponível", a
 
   await expect(page.getByText(/Estimativa local/)).toBeVisible();
   await expect(page.getByText(/km/).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Google Maps · carro", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Waze", exact: true })).toBeVisible();
 });
 
