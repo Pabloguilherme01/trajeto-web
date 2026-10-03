@@ -39,6 +39,7 @@ type RoutePreview = {
 };
 type RouteMapProps = {
   origin?: { lat: number; lng: number };
+  travelMode?: "driving" | "walking" | "cycling" | "transit";
   destination?: { lat: number; lng: number };
   stops: Stop[];
   routes?: RoutePreview[];
@@ -53,6 +54,7 @@ export function OfflineRoutePreview({
   routes = [],
   privateOrigin = false,
   forceOffline = false,
+  travelMode = "driving",
 }: RouteMapProps) {
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
@@ -93,7 +95,8 @@ export function OfflineRoutePreview({
       validDestination.lat +
       "," +
       validDestination.lng +
-      "&travelmode=driving" +
+      "&travelmode=" +
+      (travelMode === "cycling" ? "bicycling" : travelMode) +
       (validStops.length
         ? "&waypoints=" +
           encodeURIComponent(validStops.map(p => p.lat + "," + p.lng).join("|"))
@@ -446,7 +449,7 @@ export function RouteMap({
   if (forceOffline) {
     return (
       <section className="overflow-hidden rounded-2xl border border-white/10" aria-label="Mapa offline da viagem">
-        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} forceOffline />
+        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} forceOffline travelMode={travelMode} />
       </section>
     );
   }
@@ -463,6 +466,7 @@ export function RouteMap({
           routes={routes}
           stops={stops}
           privateOrigin
+          travelMode={travelMode}
         />
       </section>
     );
@@ -527,6 +531,7 @@ export function RouteMap({
                 destination={destination}
                 routes={routes}
                 stops={stops}
+                travelMode={travelMode}
               />
             </div>
           }
@@ -546,6 +551,7 @@ export function RouteMap({
           destination={destination}
           routes={routes}
           stops={stops}
+          travelMode={travelMode}
         />
       </section>
     );
@@ -566,6 +572,7 @@ export function RouteMap({
             destination={destination}
             routes={routes}
             stops={stops}
+            travelMode={travelMode}
           />
         }
         onMapReady={map => {
