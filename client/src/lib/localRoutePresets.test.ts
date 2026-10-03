@@ -28,6 +28,17 @@ describe("local route presets", () => {
     expect(
       new Set(ALL_LOCAL_ROUTE_DESTINATIONS.map(item => item.id)).size
     ).toBe(ALL_LOCAL_ROUTE_DESTINATIONS.length);
+    const normalizedDestinations = ALL_LOCAL_ROUTE_DESTINATIONS.map(item =>
+      item.destination
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase("pt-BR")
+        .replace(/\b(goias|go)\b/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    ).filter(Boolean);
+    expect(new Set(normalizedDestinations).size).toBe(normalizedDestinations.length);
     expect(
       getLocalRoutePresets("Giraffas").some(
         item => item.id === "place-giraffas-shopping"
