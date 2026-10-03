@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DestinationActions } from "./DestinationActions";
 import { setPreferredNavigationProvider } from "@/lib/mobileTools";
 import { toggleGenericDestinationFavorite } from "@/lib/unifiedDestinationStore";
@@ -34,10 +34,12 @@ describe("DestinationActions", () => {
     );
   });
 
-  it("synchronizes the saved state when another surface changes the same destination", () => {
+  it("synchronizes the saved state when another surface changes the same destination", async () => {
     render(<DestinationActions destination={destination} />);
     expect(screen.getByRole("button", { name: /salvar offline/i }).getAttribute("aria-pressed")).toBe("false");
     toggleGenericDestinationFavorite(destination);
-    expect(screen.getByRole("button", { name: /salvo offline/i }).getAttribute("aria-pressed")).toBe("true");
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /salvo offline/i }).getAttribute("aria-pressed")).toBe("true");
+    });
   });
 });
