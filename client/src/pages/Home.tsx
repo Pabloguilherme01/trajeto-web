@@ -11,6 +11,7 @@ import { useProductEvents } from "@/hooks/useProductEvents";
 import { PRIVATE_LOCATION_LABEL, clearPrivateLocationHandoff, isCurrentLocationLabel, setPrivateLocationHandoff } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import TripReadinessCard from "@/components/TripReadinessCard";
+import InputQuickOptions, { type InputQuickOption } from "@/components/InputQuickOptions";
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
 import DailyModeSelector from "@/components/DailyModeSelector";
 import { localDataEvent } from "@/lib/localData";
@@ -29,6 +30,7 @@ export default function Home() {
   const [originPrivate, setOriginPrivate] = useState(false);
   const [shareDone, setShareDone] = useState(false);
   const [formMessage, setFormMessage] = useState<string | null>(null);
+  const [focusedRouteField, setFocusedRouteField] = useState<"origin" | "destination" | null>(null);
   const locationRequest = useRef(0);
 
   useEffect(() => {
@@ -143,6 +145,23 @@ export default function Home() {
     setLocation(buildReusableTripPlannerUrl(lastTrip, { auto: true }));
   };
 
+  const homeDestinationOptions = useMemo<InputQuickOption[]>(() => {
+    const ready = LOCAL_ROUTE_PRESETS.slice(0, 5).map(item => ({
+      id: "home-" + item.id,
+      label: item.label,
+      value: item.destination,
+    }));
+    return [
+      ...destinations.slice(0, 2).map(item => ({ id: "saved-" + item.id, label: item.label, value: item.value })),
+      ...ready,
+    ].slice(0, 6);
+  }, [destinations]);
+
+  const homeOriginOptions = useMemo<InputQuickOption[]>(() => [
+    ...(lastTrip?.origin ? [{ id: "last-origin", label: "Última origem", value: lastTrip.origin }] : []),
+    { id: "center-origin", label: "Centro", value: "Centro, Águas Lindas de Goiás, GO" },
+  ], [lastTrip]);
+
   const findNearby = () => {
     rememberIntent("nearby");
     vibration(12);
@@ -219,19 +238,39 @@ export default function Home() {
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</span>
               <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#3DE3FF]" />
-                <input value={origin} onChange={event => { clearPrivateLocationHandoff(); setOriginPrivate(false); setOrigin(event.target.value); }} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
+                <input value={origin} onFocus={() => setFocusedRouteField("origin")} onBlur={() => window.setTimeout(() => setFocusedRouteField(value => value === "origin" ? null : value), 80)} onChange={event => { clearPrivateLocationHandoff(); setOriginPrivate(false); setOrigin(event.target.value); }} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
                 <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 place-items-center rounded-xl text-[#3DE3FF] disabled:opacity-30" aria-label="Usar minha localização como origem">
                   <LocateFixed className="size-4" />
                 </button>
               </div>
+              <InputQuickOptions
+                visible={focusedRouteField === "origin"}
+                label="Origem rápida"
+                options={homeOriginOptions}
+                onSelect={option => {
+                  clearPrivateLocationHandoff();
+                  setOriginPrivate(false);
+                  setOrigin(option.value);
+                  setFocusedRouteField(null);
+                }}
+              />
             </label>
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Destino</span>
               <div className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                 <div className="size-2.5 rounded-full bg-[#C7FF3C]" />
-                <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
+                <input value={destination} onFocus={() => setFocusedRouteField("destination")} onBlur={() => window.setTimeout(() => setFocusedRouteField(value => value === "destination" ? null : value), 80)} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
               </div>
+              <InputQuickOptions
+                visible={focusedRouteField === "destination"}
+                label="Destinos rápidos"
+                options={homeDestinationOptions}
+                onSelect={option => {
+                  setDestination(option.value);
+                  setFocusedRouteField(null);
+                }}
+              />
             </label>
 
             <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
