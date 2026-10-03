@@ -55,7 +55,7 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
   await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Calcular rota" }).click();
   await expect(page.getByText("12,3 km", { exact: true })).toBeVisible();
-  await expect(page.getByText("15 min", { exact: true })).toBeVisible();
+  await expect(page.getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
   const currentUrl = new URL(page.url());
   expect(currentUrl.pathname).toBe("/trajeto-web/planejar");
