@@ -70,8 +70,8 @@ it("filters bundled streets offline and clears a street search", () => {
 
 it("filters education routes without mixing health or shopping destinations", () => {
   render(<CityMap />);
-  fireEvent.click(screen.getByRole("button", { name: "Educação", exact: true }));
-  expect(screen.getByRole("button", { name: "Educação", exact: true }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Educação" }));
+  expect(screen.getByRole("button", { name: "Educação" }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByText("Cora Coralina", { exact: true })).toBeTruthy();
   expect(screen.queryByText("UPA", { exact: true })).toBeNull();
   expect(screen.queryByText("Supermercado Tatico", { exact: true })).toBeNull();
