@@ -1047,7 +1047,7 @@ export default function Planner() {
               </div>
             </div>
             <div className={"mt-4 grid grid-cols-1 gap-2 " + (mode === "driving" ? "sm:grid-cols-3" : "")}>
-              <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">
+              <button type="button" aria-label="Abrir Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">
                 Abrir Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
               </button>
               {mode === "driving" && (
