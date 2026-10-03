@@ -275,6 +275,10 @@ export function resolveCityAtlasPoint(
     const fields = [item.name, item.address, item.destination]
       .filter((field): field is string => Boolean(field))
       .map(normalizeCatalogText);
+    // A street midpoint cannot locate a specific house, quadra or lote.
+    if (item.sourceLabel.includes("referência aproximada")) {
+      return fields.some(field => field === query);
+    }
     return fields.some(field =>
       field === query ||
       field.includes(query) ||
@@ -282,12 +286,13 @@ export function resolveCityAtlasPoint(
     );
   });
 
-  const exact = candidates.find(item =>
+  const exactMatches = candidates.filter(item =>
     [item.name, item.address, item.destination]
       .filter((field): field is string => Boolean(field))
       .some(field => normalizeCatalogText(field) === query)
   );
-  const match = exact ?? (candidates.length === 1 ? candidates[0] : null);
+  const match = exactMatches.length === 1 ? exactMatches[0] :
+    exactMatches.length === 0 && candidates.length === 1 ? candidates[0] : null;
   return match && typeof match.lat === "number" && typeof match.lng === "number"
     ? { lat: match.lat, lng: match.lng }
     : null;

@@ -110,3 +110,12 @@ describe("city atlas", () => {
   });
 
 });
+
+
+it("does not mistake an approximate street midpoint for a numbered address", () => {
+  const value = snapshot();
+  value.sources[0].label = "OpenStreetMap · referência aproximada";
+  Object.assign(value.items[0], { name: "Rua Teste", address: "Rua Teste, Águas Lindas de Goiás - GO", destination: "Rua Teste, Águas Lindas de Goiás - GO", lat: -15.75, lng: -48.28, coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02" });
+  expect(resolveCityAtlasPoint(value, "Rua Teste")).toEqual({ lat: -15.75, lng: -48.28 });
+  expect(resolveCityAtlasPoint(value, "Rua Teste, 100, Águas Lindas de Goiás - GO")).toBeNull();
+});

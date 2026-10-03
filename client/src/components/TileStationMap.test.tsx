@@ -128,3 +128,14 @@ it("allows keyboard panning without intercepting keys in the station picker", ()
   fireEvent.keyDown(screen.getByRole("combobox", { name: "Escolher posto no mapa" }), { key: "ArrowRight" });
   expect(marker.style.left).toBe("80px");
 });
+
+
+it("preserves a manual pan when the same route geometry is recreated", () => {
+  const stations = [{ id: "a", name: "Destino", address: "Rua A", lat: -15.7545, lng: -48.2816 }];
+  const route = [{ lat: -15.7545, lng: -48.2816 }, { lat: -15.76, lng: -48.29 }];
+  const { rerender } = render(<TileStationMap stations={stations} routePoints={route} />);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
+  const left = screen.getByRole("button", { name: "Abrir Destino" }).style.left;
+  rerender(<TileStationMap stations={stations} routePoints={route.map(point => ({ ...point }))} />);
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).style.left).toBe(left);
+});

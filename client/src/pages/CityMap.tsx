@@ -289,7 +289,7 @@ export default function CityMap() {
         <section aria-labelledby="city-atlas-destinations" className="mt-6">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Atlas oficial</p>
+              <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Atlas da cidade</p>
               <h2 id="city-atlas-destinations" className="mt-1 text-lg font-black">
                 Mais lugares de Águas Lindas
               </h2>
@@ -299,7 +299,7 @@ export default function CityMap() {
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-white/55">
-            Dados públicos versionados ampliam escolas, bairros, serviços e referências sem duplicar o catálogo principal.
+            Escolas, bairros, ruas e serviços com a fonte indicada em cada ficha. Pontos centrais de vias são referências aproximadas; confirme a entrada do destino.
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {visibleAtlasDestinations.map(item => {
