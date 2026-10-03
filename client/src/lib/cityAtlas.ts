@@ -225,14 +225,20 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
 export const BUNDLED_CITY_ATLAS = normalizeCityAtlasSnapshot(cityAtlasData);
 
 export async function loadCityAtlasSnapshot(): Promise<CityAtlasSnapshot | null> {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return BUNDLED_CITY_ATLAS;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
   try {
     const response = await fetch(appUrl("/data/aguas-lindas-city-atlas.json"), {
       cache: "no-store",
+      signal: controller.signal,
     });
-    if (!response.ok) return null;
-    return normalizeCityAtlasSnapshot(await response.json());
+    if (!response.ok) return BUNDLED_CITY_ATLAS;
+    return normalizeCityAtlasSnapshot(await response.json()) ?? BUNDLED_CITY_ATLAS;
   } catch {
-    return null;
+    return BUNDLED_CITY_ATLAS;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

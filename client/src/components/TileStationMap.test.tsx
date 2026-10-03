@@ -139,3 +139,19 @@ it("preserves a manual pan when the same route geometry is recreated", () => {
   rerender(<TileStationMap stations={stations} routePoints={route.map(point => ({ ...point }))} />);
   expect(screen.getByRole("button", { name: "Abrir Destino" }).style.left).toBe(left);
 });
+
+
+it("returns from offline fallback when connectivity is restored", () => {
+  const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
+  const tile = document.querySelector("img")!;
+  for (let i = 0; i < 5; i++) fireEvent.error(tile);
+  expect(screen.getByText("Mapa local")).toBeTruthy();
+  online.mockReturnValue(false);
+  act(() => window.dispatchEvent(new Event("offline")));
+  expect(screen.getByText("Mapa local")).toBeTruthy();
+  online.mockReturnValue(true);
+  act(() => window.dispatchEvent(new Event("online")));
+  expect(screen.queryByText("Mapa local")).toBeNull();
+  expect(screen.getByRole("button", { name: "Aumentar zoom" })).toBeTruthy();
+});

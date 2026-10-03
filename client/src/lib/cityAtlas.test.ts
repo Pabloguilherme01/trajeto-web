@@ -138,3 +138,32 @@ it("keeps identically named streets at different positions ambiguous", () => {
   expect(buildCityAtlas(value).filter(item => item.name === "Rua Um")).toHaveLength(2);
   expect(resolveCityAtlasPoint(value, "Rua Um")).toBeNull();
 });
+
+
+it("keeps the bundled atlas when network loading fails or returns invalid data", async () => {
+  const { loadCityAtlasSnapshot, BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
+  const { vi } = await import("vitest");
+  vi.stubGlobal("navigator", { onLine: true });
+  const fetcher = vi.spyOn(globalThis, "fetch");
+  try {
+    fetcher.mockRejectedValueOnce(new Error("offline"));
+    expect(await loadCityAtlasSnapshot()).toBe(BUNDLED_CITY_ATLAS);
+    fetcher.mockResolvedValueOnce(new Response("{}"));
+    expect(await loadCityAtlasSnapshot()).toBe(BUNDLED_CITY_ATLAS);
+    fetcher.mockResolvedValueOnce(new Response("unavailable", { status: 503 }));
+    expect(await loadCityAtlasSnapshot()).toBe(BUNDLED_CITY_ATLAS);
+    expect(fetcher).toHaveBeenCalledTimes(3);
+  } finally { fetcher.mockRestore(); vi.unstubAllGlobals(); }
+});
+
+
+it("opens the bundled atlas offline without attempting a request", async () => {
+  const { loadCityAtlasSnapshot, BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
+  const { vi } = await import("vitest");
+  vi.stubGlobal("navigator", { onLine: false });
+  const fetcher = vi.spyOn(globalThis, "fetch");
+  try {
+    expect(await loadCityAtlasSnapshot()).toBe(BUNDLED_CITY_ATLAS);
+    expect(fetcher).not.toHaveBeenCalled();
+  } finally { fetcher.mockRestore(); vi.unstubAllGlobals(); }
+});

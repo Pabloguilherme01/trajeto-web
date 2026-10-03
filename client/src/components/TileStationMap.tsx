@@ -90,7 +90,7 @@ export default function TileStationMap({
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
   useEffect(() => {
-    const update = () => setOffline(!navigator.onLine);
+    const update = () => { setOffline(!navigator.onLine); if (navigator.onLine) setTileErrors(0); };
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     return () => {
@@ -143,7 +143,7 @@ export default function TileStationMap({
       observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [drawable.length, tileErrors >= 5]);
+  }, [drawable.length, tileErrors >= 5, offline]);
   const width = size.width;
   const height = size.height;
   const centerPx = project(center.lat, center.lng, zoom);
