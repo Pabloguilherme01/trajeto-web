@@ -30,6 +30,10 @@ describe("station list controls", () => {
     expect(sameStationIdentity({ cnpj: "12.345.678/0001-90" }, { cnpj: "12345678000190" })).toBe(true);
     expect(sameStationIdentity({ address: "BR-070, Quadra 10, Jardim Brasília" }, { address: "BR 070 Quadra 10 Jardim Brasilia" })).toBe(true);
     expect(sameStationIdentity({ lat: -15.8, lng: -48.25 }, { lat: -15.8001, lng: -48.2501 })).toBe(true);
+    expect(sameStationIdentity(
+      { cnpj: "12.345.678/0001-90", lat: -15.8, lng: -48.25 },
+      { cnpj: "98.765.432/0001-10", lat: -15.80001, lng: -48.25001 },
+    )).toBe(false);
     expect(sameStationIdentity({ address: "Rua A, Jardim Brasília" }, { address: "Rua B, Jardim Brasília" })).toBe(false);
   });
 
