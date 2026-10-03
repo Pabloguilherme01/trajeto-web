@@ -23,7 +23,7 @@ it("puts the quick form before service cards and starts calculation in one submi
 });
 it("opens a ready trip with both endpoints", () => {
   render(<Home />);
-  fireEvent.click(screen.getByText("12 trajetos prontos pela cidade"));
+  fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
   fireEvent.click(screen.getByRole("button", { name: /Prefeitura → UPA/ }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("origem")).toMatch(/Prefeitura/);
