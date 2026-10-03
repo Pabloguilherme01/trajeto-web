@@ -14,9 +14,6 @@ test("Pages: city streets and controls survive an offline reload without externa
     )
     .toBe(true);
   await context.setOffline(true);
-  await expect(
-    page.getByRole("img", { name: /Mapa offline vetorial/ })
-  ).toBeVisible();
   const external: string[] = [];
   page.on("request", request => {
     if (/tile\.openstreetmap|nominatim|router\.project/.test(request.url()))

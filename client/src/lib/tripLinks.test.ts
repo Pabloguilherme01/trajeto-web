@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildDestinationPlannerUrl,
+  buildOriginPlannerUrl,
   buildReusableTripPlannerUrl,
   buildSavedRoutePlannerUrl,
   plannerDestinationFromMapItem,
@@ -52,6 +53,18 @@ describe("trip links", () => {
     const url = buildDestinationPlannerUrl("  UPA Mansões Odisseia  ");
     expect(url).toContain("destino=UPA+Mans%C3%B5es+Odisseia");
     expect(url).not.toContain("origem=");
+  });
+
+  it("opens the planner with a reusable public origin for Ir daqui", () => {
+    const url = buildOriginPlannerUrl("Prefeitura de Águas Lindas");
+    expect(url).toContain("origem=Prefeitura+de+%C3%81guas+Lindas");
+    expect(url).not.toContain("destino=");
+  });
+
+  it("does not serialize a private coordinate as Ir daqui origin", () => {
+    const url = buildOriginPlannerUrl("-15.76123, -48.28123");
+    expect(url).not.toContain("origem=");
+    expect(url).not.toContain("-15.76123");
   });
 
   it("keeps ANP station name and address together when entering the planner", () => {

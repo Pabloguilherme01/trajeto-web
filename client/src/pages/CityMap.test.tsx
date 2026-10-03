@@ -25,15 +25,17 @@ it("filters accent-insensitive destinations and carries the selected destination
     screen.getByRole("textbox", { name: "Buscar destino no mapa" }),
     { target: { value: "odisseia" } }
   );
-  expect(
-    screen.getByRole("button", { name: /UPA.*Planejar viagem/ })
-  ).toBeTruthy();
+  const plannerLink = screen.getAllByRole("link", { name: "Ir até aqui" }).find(link =>
+    decodeURIComponent((link.getAttribute("href") || "").replace(/\+/g, " "))
+      .includes("destino=UPA Mansões Odisseia")
+  );
+  expect(plannerLink).toBeTruthy();
   fireEvent.click(
     screen.getByRole("button", { name: "Planejar ponto confirmado" })
   );
-  expect(decodeURIComponent(navigate.mock.calls[0][0])).toContain(
-    "destino=UPA Mansões Odisseia"
-  );
+  expect(
+    decodeURIComponent(String(navigate.mock.calls[0][0]).replace(/\+/g, " "))
+  ).toContain("destino=UPA Mansões Odisseia");
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "xxxxxxxxx" },
   });
@@ -46,6 +48,9 @@ it("keeps the destination catalog usable offline without loading street maps", (
   render(<CityMap />);
   expect(screen.queryByText("Planejar ponto confirmado")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
-  fireEvent.click(screen.getByRole("button", { name: /UPA.*Planejar viagem/ }));
-  expect(navigate).toHaveBeenCalled();
+  const plannerLink = screen.getAllByRole("link", { name: "Ir até aqui" }).find(link =>
+    decodeURIComponent((link.getAttribute("href") || "").replace(/\+/g, " "))
+      .includes("destino=UPA Mansões Odisseia")
+  );
+  expect(plannerLink).toBeTruthy();
 });

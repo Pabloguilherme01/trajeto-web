@@ -1,4 +1,5 @@
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
+import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -15,6 +16,9 @@ import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
+import { mobileStationDestination } from "@/lib/unifiedDestination";
+import { listUnifiedDestinationFavorites, unifiedDestinationEvent } from "@/lib/unifiedDestinationStore";
+import { mobileDestinationEvent } from "@/lib/mobileDestinations";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
@@ -86,6 +90,9 @@ export default function Planner() {
   const [destinationFilter, setDestinationFilter] = useState("");
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
+  const [favoriteDestinations, setFavoriteDestinations] = useState(() =>
+    listUnifiedDestinationFavorites().filter(item => item.kind !== "station")
+  );
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
   const [publicRoutePending, setPublicRoutePending] = useState(false);
@@ -144,6 +151,19 @@ export default function Planner() {
     return () => {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshFavorites = () =>
+      setFavoriteDestinations(
+        listUnifiedDestinationFavorites().filter(item => item.kind !== "station")
+      );
+    window.addEventListener(unifiedDestinationEvent, refreshFavorites);
+    window.addEventListener(mobileDestinationEvent, refreshFavorites);
+    return () => {
+      window.removeEventListener(unifiedDestinationEvent, refreshFavorites);
+      window.removeEventListener(mobileDestinationEvent, refreshFavorites);
     };
   }, []);
 
@@ -621,7 +641,7 @@ export default function Planner() {
 
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
-                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {ALL_LOCAL_ROUTE_DESTINATIONS.length} destinos locais, lojas e referências, por categoria</span></span>
+                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-white/75">Todos os {getLocalRoutePresets().length} destinos locais, lojas e referências, por categoria</span></span>
                   <ChevronDown className={"size-4 text-[#3DE3FF] transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
@@ -868,7 +888,7 @@ export default function Planner() {
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#BDA5FF]">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedRoutes.length + savedStations.length}</span>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedRoutes.length + savedStations.length + favoriteDestinations.length}</span>
             </div>
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70">{savedMessage}</p>}
             {savedRoutes.length > 0 && (
@@ -882,7 +902,7 @@ export default function Planner() {
                 />
               </label>
             )}
-            {savedRoutes.length === 0 && savedStations.length === 0 ? (
+            {savedRoutes.length === 0 && savedStations.length === 0 && favoriteDestinations.length === 0 ? (
               <>
                 <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
                   <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
@@ -942,6 +962,31 @@ export default function Planner() {
           </section>
         )}
 
+        {savedMode && favoriteDestinations.length > 0 && (
+          <section className="mt-5" aria-labelledby="saved-destinations-title">
+            <div className="flex items-end justify-between gap-3">
+              <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#BDA5FF]">Destinos favoritos</p><h2 id="saved-destinations-title" className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">Seus lugares.</h2></div>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{favoriteDestinations.length}</span>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {favoriteDestinations.map(item => (
+                <article key={item.id} className="min-w-0 rounded-2xl border border-white/8 bg-[#121B22] p-4">
+                  <p className="truncate text-sm font-black">{item.name}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{item.address}</p>
+                  <div className="mt-3">
+                    <DestinationActions
+                      destination={item}
+                      compact
+                      saved={item.kind === "personal" ? true : undefined}
+                      saveLocked={item.kind === "personal"}
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         {savedMode && savedStations.length > 0 && (
           <section className="mt-5" aria-labelledby="saved-stations-title">
             <div className="flex items-end justify-between gap-3">
@@ -959,9 +1004,16 @@ export default function Planner() {
                     </div>
                     <button type="button" onClick={() => { const result = toggleMobileStationFavorite(station); if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador."); else setSavedStations(result.stations); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-[#C7FF3C]" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl("", station.lat + "," + station.lng, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Ir agora</button>
-                    <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(station.address || station.name))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Planejar</button>
+                  <div className="mt-3">
+                    <DestinationActions
+                      destination={mobileStationDestination(station)}
+                      saved
+                      onToggleSaved={() => {
+                        const result = toggleMobileStationFavorite(station);
+                        if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador.");
+                        else setSavedStations(result.stations);
+                      }}
+                    />
                   </div>
                 </article>
               ))}

@@ -14,7 +14,7 @@ test("mobile home calculates directly and exposes 12 ready trips without overflo
   expect((await origin.boundingBox())!.y).toBeLessThan((await services.boundingBox())!.y);
   await page.getByText("12 trajetos prontos pela cidade", { exact: true }).click();
   const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: "12 trajetos prontos" }) });
-  await expect(shortcuts.getByRole("button")).toHaveCount(12);
+  await expect(shortcuts.locator("article")).toHaveCount(12);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await shortcuts.getByRole("button", { name: /Prefeitura → UPA/ }).click();
   await expect(page).toHaveURL(/auto=1/);

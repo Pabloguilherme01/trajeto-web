@@ -10,7 +10,7 @@ test("city map: filters destinations and opens planner with ride options at 320p
   await page
     .getByRole("textbox", { name: "Buscar destino no mapa" })
     .fill("odisseia");
-  await page.getByRole("button", { name: /UPA.*Planejar viagem/ }).click();
+  await page.locator("article").filter({ hasText: "UPA" }).getByRole("link", { name: "Ir até aqui", exact: true }).click();
   await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue(
     /UPA Mansões Odisseia/
   );
