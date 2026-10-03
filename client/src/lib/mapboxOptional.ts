@@ -1,10 +1,19 @@
 export type MapboxCoordinate = { lat: number; lng: number };
 export type MapboxTravelMode = "driving" | "walking" | "cycling" | "transit";
 
+export type MapboxRouteStep = {
+  instruction: string;
+  name?: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  maneuver?: string;
+};
+
 export type MapboxRouteResult = {
   distanceMeters: number;
   durationSeconds: number;
   polyline: string;
+  steps?: MapboxRouteStep[];
 };
 
 const DIRECTIONS_BASE = "https://api.mapbox.com/directions/v5/mapbox";
@@ -46,6 +55,18 @@ type MapboxDirectionsResponse = {
     distance?: number;
     duration?: number;
     geometry?: string;
+    legs?: Array<{
+      steps?: Array<{
+        distance?: number;
+        duration?: number;
+        name?: string;
+        maneuver?: {
+          instruction?: string;
+          type?: string;
+          modifier?: string;
+        };
+      }>;
+    }>;
   }>;
 };
 
@@ -116,7 +137,8 @@ export async function requestOptionalMapboxRoute(
   url.searchParams.set("alternatives", "true");
   url.searchParams.set("overview", "full");
   url.searchParams.set("geometries", "polyline");
-  url.searchParams.set("steps", "false");
+  url.searchParams.set("steps", "true");
+  url.searchParams.set("language", "pt-BR");
   url.searchParams.set("access_token", token);
 
   const data = await fetchMapboxJson<MapboxDirectionsResponse>(url.toString());
@@ -135,10 +157,28 @@ export async function requestOptionalMapboxRoute(
 
   if (data.code !== "Ok" || !route) return null;
 
+  const steps = (route.legs ?? [])
+    .flatMap(leg => leg.steps ?? [])
+    .filter(step =>
+      Number.isFinite(Number(step.distance)) &&
+      Number.isFinite(Number(step.duration)) &&
+      typeof step.maneuver?.instruction === "string" &&
+      step.maneuver.instruction.trim().length > 0
+    )
+    .map(step => ({
+      instruction: step.maneuver?.instruction?.trim() || "Continue no trajeto",
+      name: step.name?.trim() || undefined,
+      distanceMeters: Number(step.distance),
+      durationSeconds: Number(step.duration),
+      maneuver: [step.maneuver?.type, step.maneuver?.modifier].filter(Boolean).join(":") || undefined,
+    }))
+    .slice(0, 60);
+
   return {
     distanceMeters: Number(route.distance),
     durationSeconds: Number(route.duration),
     polyline: route.geometry as string,
+    steps,
   };
   })().catch(error => {
     unavailableUntil = Date.now() + FAILURE_COOLDOWN_MS;
