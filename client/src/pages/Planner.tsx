@@ -970,7 +970,7 @@ export default function Planner() {
                           </span>
                         </div>
                         <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                          <button type="button" onClick={() => openSavedRoute(route) className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
+                          <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir rota</button>
                           <button type="button" onClick={() => {
                             const savedMode = offlineRouteTravelMode(route);
                             const googleMode = savedMode === "cycling" ? "bicycling" : savedMode;
