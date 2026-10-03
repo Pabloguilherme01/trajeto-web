@@ -516,11 +516,12 @@ export default function Planner() {
     const externalOrigin = routeOriginIsPrivate
       ? privateOriginForExternalNavigation(PRIVATE_LOCATION_LABEL)
       : origin;
-    const target = provider === "google"
-      ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
-      : provider === "waze"
-        ? buildWazeNavigationUrl(destination)
-        : buildAppleMapsDirectionsUrl(destination, externalOrigin);
+    const target =
+      provider === "google" || mode !== "driving"
+        ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
+        : provider === "waze"
+          ? buildWazeNavigationUrl(destination)
+          : buildAppleMapsDirectionsUrl(destination, externalOrigin);
     window.open(target, "_blank", "noopener,noreferrer");
     track("route_open", destination || origin);
   };
@@ -797,11 +798,7 @@ export default function Planner() {
                   <button
                     type="button"
                     onClick={() =>
-                      window.open(
-                        buildGoogleMapsDirectionsUrl(origin, destination),
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
+                      openExternal("google")
                     }
                     className="mt-2 min-h-10 rounded-xl border border-[#FFB86B]/25 px-3 text-xs font-black text-[#FFD59B]"
                   >
@@ -1049,10 +1046,16 @@ export default function Planner() {
                 <p className="mt-2 text-xs leading-relaxed text-white/45">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir Google Maps</button>
-              <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
-              <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+            <div className={"mt-4 grid grid-cols-1 gap-2 " + (mode === "driving" ? "sm:grid-cols-3" : "")}>
+              <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">
+                Abrir Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
+              </button>
+              {mode === "driving" && (
+                <>
+                  <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.05] px-3 text-xs font-black text-[#FFD9AF]">Abrir Waze</button>
+                  <button type="button" onClick={() => openExternal("apple")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+                </>
+              )}
             </div>
             <p className="mt-3 text-center text-xs font-semibold text-white/30">Esse modo é compatível com hospedagem estática, como GitHub Pages.</p>
           </section>
@@ -1112,7 +1115,7 @@ export default function Planner() {
                   <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
                 </div>
                 <div className="h-[min(68vh,520px)]">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online} />
+                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online} travelMode={mode} />
                 </div>
               </section>
             )}
