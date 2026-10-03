@@ -286,7 +286,7 @@ export default function TileStationMap({
     drawable.find(item => stationKey(item) === selectedId) ?? null;
 
   return (
-    <div className={"overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
+    <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
       <div className={"relative " + heightClassName}>
         <div
           ref={viewport}
@@ -433,11 +433,11 @@ export default function TileStationMap({
           </div>
         </div>
 
-        <div className="absolute left-3 top-3 z-20 flex gap-1.5">
+        <div className="absolute left-3 right-3 top-3 z-20 grid grid-cols-4 gap-1.5">
           <button
             type="button"
             onClick={() => changeZoom(1)}
-            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            className="grid min-h-11 min-w-0 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Aumentar zoom"
           >
             <Plus className="size-4" />
@@ -461,13 +461,13 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={fitStations}
-            className="min-h-11 rounded-xl bg-white/92 px-3 text-xs font-bold text-[#163840] shadow-lg"
+            className="min-h-11 min-w-0 rounded-xl bg-white/92 px-1.5 text-[11px] font-black leading-tight text-[#163840] shadow-lg"
           >
             Ver todos
           </button>
         </div>
 
-        <label className="absolute left-3 right-3 top-[4.5rem] z-20">
+        <label className="absolute left-3 right-3 top-[4.6rem] z-20 min-w-0">
           <span className="sr-only">{selectionLabel}</span>
           <select
             className="min-h-11 w-full min-w-0 rounded-xl border border-black/10 bg-white/95 px-3 text-base text-[#163840] shadow-lg"
@@ -492,9 +492,9 @@ export default function TileStationMap({
         </label>
       </div>
 
-      <div className="relative border-t border-black/10 bg-white/95 p-4">
+      <div className="relative min-w-0 border-t border-black/10 bg-white/95 p-3.5 sm:p-4">
         {selected ? (
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">
               <span className="text-xs font-black">
                 {selected.source === "ANP"
@@ -511,12 +511,12 @@ export default function TileStationMap({
               <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">
                 {selected.address || "Endereço não informado"}
               </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
                 {onPlanDestination && (
                   <button
                     type="button"
                     onClick={() => onPlanDestination(selected)}
-                    className="min-h-11 rounded-lg bg-[#C7FF3C] px-3 text-xs font-black text-[#163840]"
+                    className="min-h-11 min-w-0 rounded-lg bg-[#C7FF3C] px-2 text-xs font-black text-[#163840]"
                   >
                     Planejar até aqui
                   </button>
@@ -533,7 +533,7 @@ export default function TileStationMap({
                       "noopener,noreferrer"
                     )
                   }
-                  className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-[#163840] px-2.5 text-xs font-black text-white"
+                  className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg bg-[#163840] px-2 text-xs font-black text-white"
                 >
                   <Navigation className="size-3" /> Google
                 </button>
@@ -549,7 +549,7 @@ export default function TileStationMap({
                       "noopener,noreferrer"
                     )
                   }
-                  className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-black/10 px-2.5 text-xs font-black text-[#163840]"
+                  className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
                 >
                   Waze
                 </button>

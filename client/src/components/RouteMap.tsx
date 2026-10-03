@@ -4,7 +4,50 @@ import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
 import { ChevronDown, LocateFixed, Minus, Navigation2, Plus, Satellite, TrafficCone } from "lucide-react";
+
+
+function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const earth = 6_371_000;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * earth * Math.asin(Math.sqrt(h));
+}
+
+export function nearbyRouteReferences(
+  origin: { lat: number; lng: number } | undefined,
+  destination: { lat: number; lng: number } | undefined,
+  routePoints: Array<{ lat: number; lng: number }>
+) {
+  const anchors = routePoints.length > 1
+    ? routePoints.filter((_, index) => index % Math.max(1, Math.floor(routePoints.length / 24)) === 0)
+    : [origin, destination].filter((point): point is { lat: number; lng: number } => Boolean(point));
+
+  if (!anchors.length) return [];
+  return LOCAL_GEOCODE_POINTS
+    .map(point => ({
+      point,
+      distance: Math.min(...anchors.map(anchor => distanceMeters(anchor, point))),
+    }))
+    .filter(item => item.distance <= 3_000)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 6)
+    .map(({ point }) => ({
+      id: "route-reference:" + point.id,
+      name: point.name,
+      address: "Referência próxima · " + point.sourceLabel,
+      lat: point.lat,
+      lng: point.lng,
+      source: "local" as const,
+    }));
+}
 
 type Stop = {
   placeId: string;
@@ -328,7 +371,7 @@ export function RouteMap({
       return;
 
     const bounds = new maps.LatLngBounds();
-    [origin, destination, ...stops].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops, ...nearbyRouteReferences(origin, destination, routes.flatMap(route => decodePolyline(route.polyline ?? "")))].forEach(point => bounds.extend(point));
     routes
       ?.filter(route => route.polyline)
       .forEach(route =>
@@ -357,6 +400,8 @@ export function RouteMap({
     makeMarker(origin, "Origem", "#BA5B45");
     makeMarker(destination, "Destino", "#FFC928");
     stops.forEach(stop => makeMarker(stop, stop.name, "#E8EEE8"));
+    nearbyRouteReferences(origin, destination, routes.flatMap(route => decodePolyline(route.polyline ?? "")))
+      .forEach(reference => makeMarker(reference, "Referência · " + reference.name, "#3DE3FF"));
     map.fitBounds(bounds, 56);
   }, [mapReady, origin, destination, stops, routes]);
 
@@ -404,7 +449,7 @@ export function RouteMap({
   const fitRoute = () => {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
-    [origin, destination, ...stops].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops, ...nearbyReferences].forEach(point => bounds.extend(point));
     routes
       .filter(route => route.polyline)
       .forEach(route =>
@@ -426,6 +471,8 @@ export function RouteMap({
       );
   };
   const selectedRoute = routes.find(route => route.selected) || routes[0];
+  const selectedRoutePoints = decodeMapPolyline(selectedRoute?.polyline ?? "");
+  const nearbyReferences = nearbyRouteReferences(origin, destination, selectedRoutePoints);
   const trafficCounts = (selectedRoute?.trafficIntervals || []).reduce(
     (acc, item) => {
       if (item.speed === "SLOW") acc.slow += 1;
@@ -524,6 +571,7 @@ export function RouteMap({
                 ]
               : []),
             ...stops,
+            ...nearbyReferences,
           ]}
           fallback={
             <div className="relative">
@@ -537,6 +585,11 @@ export function RouteMap({
             </div>
           }
         />
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
+          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />rota e pontos principais</span>
+          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#3DE3FF]" />referências próximas</span>
+          <span>{nearbyReferences.length} referência(s) verificada(s) no entorno</span>
+        </div>
       </section>
     );
   }
@@ -547,13 +600,15 @@ export function RouteMap({
         className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
         aria-label="Mapa independente da viagem"
       >
-        <OfflineRoutePreview
-          origin={origin}
-          destination={destination}
-          routes={routes}
-          stops={stops}
-          travelMode={travelMode}
-        />
+        <div className="planner-map-shell">
+          <OfflineRoutePreview
+            origin={origin}
+            destination={destination}
+            routes={routes}
+            stops={stops}
+            travelMode={travelMode}
+          />
+        </div>
       </section>
     );
   }
@@ -564,7 +619,7 @@ export function RouteMap({
       aria-label="Mapa interativo da viagem"
     >
       <MapView
-        className="h-[min(68vh,620px)] min-h-[420px] overflow-hidden"
+        className="h-[min(70vh,660px)] min-h-[420px] max-w-full overflow-hidden"
         initialCenter={{ lat: -15.7942, lng: -47.8822 }}
         initialZoom={11}
         fallback={
