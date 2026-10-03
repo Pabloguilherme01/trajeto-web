@@ -59,6 +59,8 @@ it("loads local streets with no coordinate or external request, and preserves da
   expect(fetchMock.mock.calls[0][0]).toBe(
     "/data/aguas-lindas-offline-map.json"
   );
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" }));
+  expect(screen.getByRole("button", { name: "Ocultar nomes das ruas" })).toHaveAttribute("aria-pressed", "true");
   expect(
     screen.getByRole("img").querySelector('path[stroke-dasharray="8 8"]')
   ).toBeTruthy();
