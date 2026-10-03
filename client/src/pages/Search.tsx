@@ -28,6 +28,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { appUrl } from "@/lib/appUrl";
+import InputQuickOptions, { type InputQuickOption } from "@/components/InputQuickOptions";
 import { AGUAS_LINDAS_STATIONS_COUNT } from "@/lib/aguasLindasStations";
 import {
   getRecentSearches,
@@ -267,6 +268,15 @@ export default function SearchPage() {
       appUrl("/buscar") + (next ? "?q=" + encodeURIComponent(next) : "")
     );
   };
+  const keyboardSearchOptions = useMemo<InputQuickOption[]>(() => [
+    { id: "search-cras", label: "CRAS", value: "CRAS" },
+    { id: "search-upa", label: "UPA", value: "UPA" },
+    { id: "search-postos", label: "Postos", value: "postos" },
+    { id: "search-onibus", label: "Ônibus", value: "ônibus" },
+    { id: "search-luz", label: "Falta de luz", value: "falta de luz" },
+    { id: "search-agua", label: "Falta de água", value: "falta de água" },
+  ], []);
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     search(input);
@@ -378,6 +388,8 @@ export default function SearchPage() {
           <input
             ref={inputRef}
             value={input}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => window.setTimeout(() => setSearchFocused(false), 80)}
             onChange={event => setInput(event.target.value)}
             placeholder="Ex.: CRAS, falta de luz, bairro"
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/70"
@@ -407,6 +419,15 @@ export default function SearchPage() {
             <ArrowRight className="size-5" />
           </button>
         </form>
+        <InputQuickOptions
+          visible={searchFocused}
+          label="Buscar rápido"
+          options={keyboardSearchOptions}
+          onSelect={option => {
+            setSearchFocused(false);
+            search(option.value);
+          }}
+        />
         {!online && (
           <p
             role="status"
