@@ -12,6 +12,7 @@ import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE,
 import { fuelFilterPriceKey, inferredBrand, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
+import InputQuickOptions, { type InputQuickOption } from "@/components/InputQuickOptions";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
@@ -54,6 +55,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const search = useSearch();
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const [input, setInput] = useState(getInitialQuery);
+  const [stationSearchFocused, setStationSearchFocused] = useState(false);
   const [query, setQuery] = useState(getInitialQuery);
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [nearby, setNearby] = useState(false);
@@ -466,6 +468,15 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     setLocalVisibleCount(12);
   };
 
+  const keyboardStationOptions = useMemo<InputQuickOption[]>(() => [
+    { id: "stations-all", label: "Todos os postos", value: "postos" },
+    { id: "stations-br070", label: "BR-070", value: "BR-070" },
+    { id: "stations-barragem", label: "Barragem", value: "Parque da Barragem" },
+    { id: "stations-centro", label: "Centro", value: "Centro" },
+    { id: "stations-shell", label: "Shell", value: "Shell" },
+    { id: "stations-ponteio", label: "Ponteio", value: "Ponteio" },
+  ], []);
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = input.trim();
@@ -767,12 +778,24 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Cidade, bairro ou posto</label>
               <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                 <Search className="size-4 shrink-0 text-[#3DE3FF]" />
-                <input id="station-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65" placeholder="Ex.: Águas Lindas de Goiás" />
+                <input id="station-search" value={input} onFocus={() => setStationSearchFocused(true)} onBlur={() => window.setTimeout(() => setStationSearchFocused(false), 80)} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65" placeholder="Ex.: Águas Lindas de Goiás" />
                 <button type="submit" className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar">
                   <ChevronRight className="size-5" />
                 </button>
               </div>
             </form>
+            <InputQuickOptions
+              visible={stationSearchFocused}
+              label="Postos rápidos"
+              options={keyboardStationOptions}
+              onSelect={option => {
+                setStationSearchFocused(false);
+                setInput(option.value);
+                setQuery(option.value);
+                rememberSearch(option.value);
+                setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(option.value));
+              }}
+            />
 
             <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1">
               <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#C7FF3C] px-3.5 text-sm font-black text-[#0B1014] disabled:opacity-40">
