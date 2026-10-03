@@ -1,3 +1,4 @@
+import PlannerLocationPicker from "@/components/PlannerLocationPicker";
 import { useLiveTrip } from "@/hooks/useLiveTrip";
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
 import { DestinationActions } from "@/components/DestinationActions";
@@ -685,6 +686,8 @@ export default function Planner() {
                 </div>
               </label>
 
+              <PlannerLocationPicker kind="origem" value={origin} onChoose={coordinate => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(coordinate); }} />
+
               <div className="my-2 flex justify-end">
                 <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-white/8 text-white/45 disabled:opacity-25" aria-label="Inverter origem e destino">
                   <ArrowLeftRight className="size-4" />
@@ -698,6 +701,8 @@ export default function Planner() {
                   <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
               </label>
+
+              <PlannerLocationPicker kind="destino" value={destination} onChoose={coordinate => { resetResult(); setDestination(coordinate); }} />
 
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-3 text-left">
