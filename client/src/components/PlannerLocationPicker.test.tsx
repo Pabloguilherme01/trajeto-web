@@ -21,3 +21,13 @@ it("chooses a bundled point without a geocoder and marks approximate street loca
     expect(fetcher).not.toHaveBeenCalled();
   } finally { fetcher.mockRestore(); }
 });
+
+
+it("includes known geocoding references such as HEAL in the local selector", () => {
+  const choose = vi.fn();
+  render(<PlannerLocationPicker kind="destino" value="" onChoose={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "HEAL" } });
+  fireEvent.click(screen.getByRole("button", { name: /HEAL/ }));
+  expect(choose).toHaveBeenCalledWith("-15.74637, -48.27584");
+});

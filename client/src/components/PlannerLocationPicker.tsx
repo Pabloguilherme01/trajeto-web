@@ -1,7 +1,21 @@
 import React, { useMemo, useState } from "react";
-import { BUNDLED_CITY_ATLAS, buildCityAtlas, filterCityAtlas } from "@/lib/cityAtlas";
+import { BUNDLED_CITY_ATLAS, buildCityAtlas, filterCityAtlas, type CityAtlasItem } from "@/lib/cityAtlas";
 
-const points = buildCityAtlas(BUNDLED_CITY_ATLAS).filter(item =>
+import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
+
+const points: CityAtlasItem[] = [...buildCityAtlas(BUNDLED_CITY_ATLAS), ...LOCAL_GEOCODE_POINTS.map(point => ({
+  id: "geocode-" + point.id,
+  name: point.name,
+  detail: "Referência cadastrada · " + point.sourceLabel,
+  category: "referencia" as const,
+  lat: point.lat,
+  lng: point.lng,
+  sourceLabel: point.sourceLabel,
+  sourceUrl: point.sourceUrl,
+  verifiedAt: point.verifiedAt,
+  keywords: point.aliases,
+  coordinateKind: "mapped-point" as const,
+}))].filter(item =>
   Number.isFinite(item.lat) && Number.isFinite(item.lng)
 );
 
