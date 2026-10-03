@@ -920,7 +920,7 @@ export function RouteMap({
     >
       <MapView
         className="h-[min(70vh,660px)] min-h-[420px] max-w-full overflow-hidden"
-        initialCenter={{ lat: -15.7942, lng: -47.8822 }}
+        initialCenter={{ lat: -15.7545, lng: -48.2816 }}
         initialZoom={11}
         fallback={
           <OfflineRoutePreview
