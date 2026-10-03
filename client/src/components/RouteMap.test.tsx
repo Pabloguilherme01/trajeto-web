@@ -1,7 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OfflineRoutePreview, RouteMap, nearbyRouteReferences } from "./RouteMap";
+import { OfflineRoutePreview, RouteMap, currentRouteGuidance, nearbyRouteReferences } from "./RouteMap";
 
 afterEach(cleanup);
 
@@ -200,4 +200,77 @@ it("focuses endpoints and pauses GPS following when the map is explored", () => 
   fireEvent.click(follow);
   fireEvent.click(screen.getByRole("button", { name: "Enquadrar" }));
   expect(follow.getAttribute("aria-pressed")).toBe("false");
+});
+
+
+describe("currentRouteGuidance", () => {
+  const steps = [
+    { instruction: "Siga pela Avenida JK", name: "Avenida JK", distanceMeters: 300, durationSeconds: 60 },
+    { instruction: "Vire à direita na BR-070", name: "BR-070", distanceMeters: 700, durationSeconds: 120 },
+    { instruction: "Chegue ao destino", distanceMeters: 200, durationSeconds: 30 },
+  ];
+
+  it("advances the active street instruction from remaining route distance", () => {
+    expect(currentRouteGuidance(steps, 1200, 1100)?.step.name).toBe("Avenida JK");
+    const guidance = currentRouteGuidance(steps, 1200, 700);
+    expect(guidance?.step.name).toBe("BR-070");
+    expect(guidance?.distanceToManeuver).toBe(500);
+    expect(guidance?.nextStep?.instruction).toBe("Chegue ao destino");
+  });
+
+  it("does not invent guidance without valid route metrics", () => {
+    expect(currentRouteGuidance([], 1200, 600)).toBeNull();
+    expect(currentRouteGuidance(steps, null, 600)).toBeNull();
+  });
+});
+
+it("shows live street guidance and route telemetry while following GPS", () => {
+  render(
+    <OfflineRoutePreview
+      origin={{ lat: -15.8, lng: -48 }}
+      destination={{ lat: -15.9, lng: -47.9 }}
+      livePosition={{ lat: -15.82, lng: -47.98, accuracy: 12, timestamp: Date.now() }}
+      liveProgress={{ distanceMeters: 700, durationSeconds: 420, offRoute: false, nearDestination: false }}
+      liveSpeedMps={10}
+      stops={[]}
+      routes={[{
+        id: "road",
+        source: "osrm",
+        polyline: "r`d_B~~teHbwFg_mA",
+        distanceMeters: 1200,
+        durationSeconds: 600,
+        steps: [
+          { instruction: "Siga pela Avenida JK", name: "Avenida JK", distanceMeters: 300, durationSeconds: 60 },
+          { instruction: "Vire à direita na BR-070", name: "BR-070", distanceMeters: 700, durationSeconds: 120 },
+          { instruction: "Chegue ao destino", distanceMeters: 200, durationSeconds: 30 },
+        ],
+      }]}
+    />
+  );
+  expect(screen.getByText("Próxima orientação")).toBeTruthy();
+  expect(screen.getByText("Vire à direita na BR-070")).toBeTruthy();
+  expect(screen.getByText("Via: BR-070")).toBeTruthy();
+  expect(screen.getByText("36 km/h")).toBeTruthy();
+  expect(screen.getByText("±12 m")).toBeTruthy();
+  expect(screen.getByText("OpenStreetMap/OSRM")).toBeTruthy();
+});
+
+it("warns instead of showing misleading guidance when GPS is off route", () => {
+  render(
+    <OfflineRoutePreview
+      origin={{ lat: -15.8, lng: -48 }}
+      destination={{ lat: -15.9, lng: -47.9 }}
+      livePosition={{ lat: -15.7, lng: -47.7, accuracy: 15, timestamp: Date.now() }}
+      liveProgress={{ distanceMeters: 700, durationSeconds: 420, offRoute: true, nearDestination: false }}
+      stops={[]}
+      routes={[{
+        id: "road",
+        source: "osrm",
+        polyline: "r`d_B~~teHbwFg_mA",
+        distanceMeters: 1200,
+        steps: [{ instruction: "Vire à direita na BR-070", name: "BR-070", distanceMeters: 1200, durationSeconds: 120 }],
+      }]}
+    />
+  );
+  expect(screen.getByText("Fora do trajeto calculado")).toBeTruthy();
 });
