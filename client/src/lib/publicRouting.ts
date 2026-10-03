@@ -846,6 +846,7 @@ export async function calculatePublicRoute(
           polyline: enhanced.polyline,
           source: "mapbox",
           mode,
+          steps: enhanced.steps ?? [],
         };
         cacheSet(cacheKey, result);
         return result;
