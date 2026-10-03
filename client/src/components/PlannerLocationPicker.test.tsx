@@ -72,7 +72,7 @@ it("offers a named road that exists only in the bundled offline road network", (
   fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino local" }), { target: { value: "DF-533" } });
   fireEvent.click(screen.getByRole("button", { name: /DF-533/ }));
   expect(choose).toHaveBeenCalledOnce();
-  expect(choose.mock.calls[0][0]).toMatch(/^-d+.d+, -d+.d+$/);
+  expect(choose.mock.calls[0][0]).toMatch(/^-\\d+\\.\\d+, -\\d+\\.\\d+$/);
 });
 
 it("allows choosing a neighborhood by its verified name without inventing coordinates", () => {
