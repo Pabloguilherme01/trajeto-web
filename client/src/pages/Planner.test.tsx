@@ -166,11 +166,11 @@ describe("Planner travel state", () => {
     state.staticRuntime = true;
     render(<Planner />);
     submit();
-    await screen.findByRole("button", { name: "Google Maps" });
+    await screen.findByRole("button", { name: "Google Maps · carro" });
     changeDestination("Hospital");
-    expect(screen.queryByRole("button", { name: "Google Maps" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Google Maps · carro" })).toBeNull();
     submit();
-    await screen.findByRole("button", { name: "Google Maps" });
+    await screen.findByRole("button", { name: "Google Maps · carro" });
     fireEvent.click(screen.getByRole("button", { name: "Limpar" }));
     expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
   });
