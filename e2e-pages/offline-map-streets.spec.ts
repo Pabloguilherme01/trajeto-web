@@ -49,3 +49,21 @@ test("Pages: city streets and controls survive an offline reload without externa
   ).toBeLessThanOrEqual(320);
   expect(external).toEqual([]);
 });
+
+test("Pages: calculate a new local trip after offline reload and resume online", async ({ page, context }) => {
+  await page.goto("mapa");
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await context.setOffline(true);
+  await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
+  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await expect(page.getByText(/Rota preparada localmente sem usar provedores externos/)).toBeVisible();
+  await expect(page.getByRole("img", { name: /Mapa offline vetorial/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await expect(page.getByRole("img", { name: /Mapa offline vetorial/ })).toBeVisible();
+  await context.setOffline(false);
+  await expect(page.getByText("online", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
+});

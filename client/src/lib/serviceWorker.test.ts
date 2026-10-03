@@ -183,3 +183,20 @@ it("includes the local street map in offline readiness and recovery", async () =
   expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
   expect(saved.has("./data/aguas-lindas-offline-map.json")).toBe(true);
 });
+
+
+it("serves installed snapshots immediately without a network request", async () => {
+  const cached = new Response('{"version":"installed"}');
+  const worker = loadWorker(cached);
+  expect(await worker.installedSnapshot("./data/aguas-lindas-city-atlas.json")).toBe(cached);
+  expect(worker.fetch).not.toHaveBeenCalled();
+});
+
+it("uses the installed snapshot for query URLs instead of mixing live data", async () => {
+  const worker = loadWorker(new Response('{"version":"installed"}'));
+  const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "fetch")[1];
+  let response!: Promise<Response>;
+  handler({ request: new Request("https://example.com/trajeto-web/data/aguas-lindas-city-atlas.json?v=new"), respondWith: (value: Promise<Response>) => { response = value; } });
+  expect(await (await response).text()).toContain("installed");
+  expect(worker.fetch).not.toHaveBeenCalled();
+});

@@ -274,6 +274,7 @@ describe("Planner travel state", () => {
     submit();
     await screen.findByRole("button", { name: "Preparar para offline" });
     state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+    state.publicRoute.mockRejectedValueOnce(new Error("Unavailable"));
     submit();
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
@@ -344,4 +345,28 @@ describe("Planner travel state", () => {
     await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("não está salva"));
     expect(screen.queryByRole("button", { name: "Preparar para offline" })).toBeNull();
   });
+});
+
+
+it("falls back to public routing and saves the result when the server fails", async () => {
+  state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+  render(<Planner />);
+  submit();
+  await screen.findByTestId("route-map");
+  expect(state.publicRoute).toHaveBeenCalledWith("Casa", "Trabalho", "driving");
+  await screen.findByText(/Servidor indisponível/);
+  expect(state.saveOffline).toHaveBeenCalled();
+});
+
+it("discards a fallback route that finishes after the destination changed", async () => {
+  state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+  let finish!: (value: unknown) => void;
+  state.publicRoute.mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+  render(<Planner />);
+  submit();
+  await waitFor(() => expect(state.publicRoute).toHaveBeenCalled());
+  changeDestination("Hospital");
+  await act(async () => finish({ origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -48.29 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" }));
+  expect(screen.queryByTestId("route-map")).toBeNull();
+  expect(state.saveOffline).not.toHaveBeenCalled();
 });
