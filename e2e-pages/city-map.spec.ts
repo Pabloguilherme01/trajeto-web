@@ -61,3 +61,21 @@ test("planner: draws provider geometry over public street tiles", async ({
     page.getByRole("combobox", { name: "Escolher ponto da viagem" })
   ).toBeVisible();
 });
+
+
+test("street atlas: filters references and calculates a bundled destination offline", async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("mapa");
+  await page.getByRole("button", { name: "Ruas e avenidas", exact: true }).click();
+  await page.getByRole("textbox", { name: "Buscar destino no mapa" }).fill("Avenida Brasília");
+  const card = page.locator("article").filter({ has: page.getByText("Avenida Brasília", { exact: true }) });
+  await expect(card.getByText(/Centro aproximado da via/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.getByRole("button", { name: "Limpar busca do mapa" }).click();
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("");
+  await page.goto("planejar?origem=-15.7545,-48.2816&destino=" + encodeURIComponent("Avenida Brasília, Águas Lindas de Goiás - GO"));
+  await expect(page.getByRole("button", { name: "Calcular rota", exact: true })).toBeVisible();
+  await context.setOffline(true);
+  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await expect(page.getByText(/Estimativa local/).first()).toBeVisible();
+});

@@ -86,6 +86,8 @@ export default function TileStationMap({
     [stations]
   );
 
+  const singlePointKey = drawable.length === 1 ? `${drawable[0].lat},${drawable[0].lng}` : "";
+
   const [offline, setOffline] = useState(() => !navigator.onLine);
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine);
@@ -244,6 +246,12 @@ export default function TileStationMap({
   useEffect(() => {
     if (routePoints.length > 1) fitStations();
   }, [routeGeometryKey]);
+
+  useEffect(() => {
+    if (singlePointKey && !routePoints.length) {
+      setCenter({ lat: drawable[0].lat, lng: drawable[0].lng });
+    }
+  }, [singlePointKey]);
 
   const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
 
@@ -410,7 +418,9 @@ export default function TileStationMap({
                       "grid size-8 place-items-center rounded-full border-2 border-white shadow-lg transition " +
                       (active
                         ? "scale-110 bg-[#C7FF3C] text-[#163840]"
-                        : station.source === "ANP"
+                        : station.coordinateKind === "street-midpoint"
+                          ? "bg-amber-300 text-[#163840]"
+                          : station.source === "ANP"
                           ? "bg-[#C7FF3C] text-[#163840]"
                           : "bg-[#3DE3FF] text-[#163840]")
                     }
@@ -515,6 +525,7 @@ export default function TileStationMap({
               <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">
                 {selected.address || "Endereço não informado"}
               </p>
+              {selected.coordinateKind === "street-midpoint" && <p className="mt-2 text-xs font-bold text-[#765100]">Centro aproximado da via · confirme quadra, lote e entrada.</p>}
               <div className="mt-2 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
                 {onPlanDestination && (
                   <button

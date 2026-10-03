@@ -1,12 +1,13 @@
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Database, MapPin, Search, ShieldCheck } from "lucide-react";
+import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
 import {
+  BUNDLED_CITY_ATLAS,
   buildCityAtlas,
   filterCityAtlas,
   loadCityAtlasSnapshot,
@@ -31,13 +32,13 @@ import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib
 export default function CityMap() {
   const [, navigate] = useLocation();
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
-  const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(null);
+  const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
   const [showAllAtlas, setShowAllAtlas] = useState(false);
 
   useEffect(() => {
     let active = true;
     void loadCityAtlasSnapshot().then(snapshot => {
-      if (active) setAtlasSnapshot(snapshot);
+      if (active && snapshot) setAtlasSnapshot(snapshot);
     });
     return () => {
       active = false;
@@ -66,6 +67,7 @@ export default function CityMap() {
       .catch(() => {});
     return () => controller.abort();
   }, []);
+  const [onlyStreets, setOnlyStreets] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [online, setOnline] = useState(() => navigator.onLine);
@@ -79,8 +81,8 @@ export default function CityMap() {
     };
   }, []);
   const destinations = useMemo(
-    () => getLocalRoutePresets(query, category),
-    [query, category]
+    () => onlyStreets ? [] : getLocalRoutePresets(query, category),
+    [query, category, onlyStreets]
   );
   const atlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
@@ -96,11 +98,12 @@ export default function CityMap() {
       destinations.map(item => normalizeCatalogText(item.destination))
     );
     return filterCityAtlas(atlas, query, atlasLayer).filter(item => {
+      if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
       const target = item.destination ?? item.address ?? "";
       const key = normalizeCatalogText(target);
       return Boolean(target) && (!key || !routeKeys.has(key));
     });
-  }, [atlas, atlasLayer, destinations, query]);
+  }, [atlas, atlasLayer, destinations, query, onlyStreets]);
   const visibleAtlasDestinations =
     query.trim() || showAllAtlas ? atlasDestinations : atlasDestinations.slice(0, 24);
   const markers = useMemo(() => {
@@ -124,13 +127,14 @@ export default function CityMap() {
             name: item.name,
             address: item.destination ?? item.address ?? item.name,
             source: item.sourceLabel,
+            coordinateKind: item.coordinateKind,
             lat: item.lat,
             lng: item.lng,
           }]
         : []
     );
     const stations =
-      category === "todos" || category === "combustivel"
+      !onlyStreets && (category === "todos" || category === "combustivel")
         ? groupAnpFuelRows(anpRows).flatMap(station => {
             const lat = station.latitude,
               lng = station.longitude;
@@ -164,7 +168,7 @@ export default function CityMap() {
       ])
     );
     return [...unique.values()];
-  }, [destinations, atlasDestinations, category, query, anpRows]);
+  }, [destinations, atlasDestinations, category, query, anpRows, onlyStreets]);
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
   const emptyFallback = (
@@ -201,6 +205,7 @@ export default function CityMap() {
           placeholder="Destino, bairro ou serviço"
           className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none"
         />
+        {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center"><X className="size-4" /></button>}
       </div>
       <div
         className="my-3 flex flex-wrap gap-2"
@@ -210,11 +215,11 @@ export default function CityMap() {
           <button
             key={value}
             type="button"
-            aria-pressed={category === value}
-            onClick={() => setCategory(value)}
+            aria-pressed={!onlyStreets && category === value}
+            onClick={() => { setOnlyStreets(false); setCategory(value); }}
             className={
               "min-h-11 rounded-full border px-4 text-sm font-bold " +
-              (category === value
+              (!onlyStreets && category === value
                 ? "border-[#C7FF3C] bg-[#C7FF3C] text-[#102028]"
                 : "border-white/15 bg-white/5 text-white/80")
             }
@@ -222,6 +227,7 @@ export default function CityMap() {
             {label}
           </button>
         ))}
+        <button type="button" aria-pressed={onlyStreets} onClick={() => { setCategory("todos"); setOnlyStreets(true); }} className={"min-h-11 rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-amber-300 bg-amber-300 text-[#102028]" : "border-white/15 bg-white/5 text-white/80")}>Ruas e avenidas</button>
       </div>
       <section
         aria-label="Mapa da cidade"
@@ -331,7 +337,7 @@ export default function CityMap() {
                       </p>
                       {typeof item.lat === "number" && typeof item.lng === "number" && (
                         <p className="mt-1 break-words text-xs text-white/60">
-                          Coordenadas: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
+                          {item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas"}: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
                         </p>
                       )}
                     </div>

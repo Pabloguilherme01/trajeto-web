@@ -2193,7 +2193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c1d703024625",
@@ -2212,7 +2213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0cc6bdb40396",
@@ -2231,7 +2233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0da29ee8ad6a",
@@ -2250,7 +2253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8cf6f5d74a90",
@@ -2269,7 +2273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b6e6f380e11e",
@@ -2288,7 +2293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c5c7393b6fbe",
@@ -2307,7 +2313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f8bf8ce76207",
@@ -2326,7 +2333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f8bd4e4d9135",
@@ -2345,7 +2353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-cb375331fc82",
@@ -2364,7 +2373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1185aeb9244b",
@@ -2383,7 +2393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9560d6343ac0",
@@ -2402,7 +2413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e344ae0306e8",
@@ -2421,7 +2433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fecdc2e789e7",
@@ -2440,7 +2453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-48dfee3ef6c0",
@@ -2459,7 +2473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9f0acf45f128",
@@ -2478,7 +2493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-60a4333d85ec",
@@ -2497,7 +2513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-36f11eef8dd8",
@@ -2516,7 +2533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d82b781e7ae3",
@@ -2535,7 +2553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1405855ba16d",
@@ -2554,7 +2573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-45c399843672",
@@ -2573,7 +2593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f85bd5a8b734",
@@ -2592,7 +2613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-2a62e4c0192b",
@@ -2611,7 +2633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e40b2b6a06c3",
@@ -2630,7 +2653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a5571ffd2353",
@@ -2649,7 +2673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b0b2b82f9e3d",
@@ -2668,7 +2693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0a8bca1e8c85",
@@ -2687,7 +2713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4d45902705f5",
@@ -2706,7 +2733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-34c36327b14f",
@@ -2725,7 +2753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-06dcf142b6ab",
@@ -2744,7 +2773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3d2084a71917",
@@ -2763,7 +2793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-12afdab9f311",
@@ -2782,7 +2813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-192c4b356e86",
@@ -2801,7 +2833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c300ff7a7cf2",
@@ -2820,7 +2853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f47ea416cef3",
@@ -2839,7 +2873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3c9ef51fe85e",
@@ -2858,7 +2893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-52f68aff98dd",
@@ -2877,7 +2913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-cca86b0a0643",
@@ -2896,7 +2933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-710fceaeb08d",
@@ -2915,7 +2953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7e136e13bb17",
@@ -2934,7 +2973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-833799815278",
@@ -2953,7 +2993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9e22a11dced7",
@@ -2972,7 +3013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-de5332cbc47c",
@@ -2991,7 +3033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4e9147602ed0",
@@ -3010,7 +3053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e04f4a6b272b",
@@ -3029,7 +3073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9815d1c3f0e6",
@@ -3048,7 +3093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-60111810877a",
@@ -3067,7 +3113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-12e110b78f31",
@@ -3086,7 +3133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b7759fa859d4",
@@ -3105,7 +3153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6ca3fb443b7f",
@@ -3124,7 +3173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-815c2281799f",
@@ -3143,7 +3193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8d0c26c50585",
@@ -3162,7 +3213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e426ec3a24f4",
@@ -3181,7 +3233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-33c301a32c62",
@@ -3200,7 +3253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1c13dcc48249",
@@ -3219,7 +3273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-16a03911db08",
@@ -3238,7 +3293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f2f3d0bf830f",
@@ -3257,7 +3313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-074950923a78",
@@ -3276,7 +3333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-98c856ff90e1",
@@ -3295,7 +3353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-32166808124e",
@@ -3314,7 +3373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-26660805dfbb",
@@ -3333,7 +3393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c01270850218",
@@ -3352,7 +3413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-37386062f8bb",
@@ -3371,7 +3433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-cccb86173d7a",
@@ -3390,7 +3453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b99b0aa598ff",
@@ -3409,7 +3473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7a5dfa8160e3",
@@ -3428,7 +3493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1b3c23706c3f",
@@ -3447,7 +3513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8f52158d203d",
@@ -3466,7 +3533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-53114796c32f",
@@ -3485,7 +3553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f9570495b354",
@@ -3504,7 +3573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6134bb44331b",
@@ -3523,7 +3593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a1e45b765284",
@@ -3542,7 +3613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1835c1358ce9",
@@ -3561,7 +3633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4e38cf1914ae",
@@ -3580,7 +3653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fd12be55c588",
@@ -3599,7 +3673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-150fff81d043",
@@ -3618,7 +3693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-413053133943",
@@ -3637,7 +3713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-556496d89d70",
@@ -3656,7 +3733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6e23664483de",
@@ -3675,7 +3753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-14cb924063ca",
@@ -3694,7 +3773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-14602b0e682e",
@@ -3713,7 +3793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ffb7c6c67bf6",
@@ -3732,7 +3813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6ea10253b689",
@@ -3751,7 +3833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7fed73c6f37b",
@@ -3770,7 +3853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e0e27c5f26fe",
@@ -3789,7 +3873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-47d742ff9552",
@@ -3808,7 +3893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-23c110d9ae1c",
@@ -3827,7 +3913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-48228d77208f",
@@ -3846,7 +3933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7d07157127bc",
@@ -3865,7 +3953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d6abc726a27f",
@@ -3884,7 +3973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e70378cf4f6f",
@@ -3903,7 +3993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-828e1c0752f5",
@@ -3922,7 +4013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0548a225b3c0",
@@ -3941,7 +4033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1f5bf5119f1f",
@@ -3960,7 +4053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-798b60bdce3e",
@@ -3979,7 +4073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5bdc5bd60a53",
@@ -3998,7 +4093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b52e56d04087",
@@ -4017,7 +4113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8efa27610fe8",
@@ -4036,7 +4133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b7900eb68814",
@@ -4055,7 +4153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d264f53fe876",
@@ -4074,7 +4173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f9264caccf7e",
@@ -4093,7 +4193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-92244244627c",
@@ -4112,7 +4213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1d7c58ecce72",
@@ -4131,7 +4233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f94d454f7f44",
@@ -4150,7 +4253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d316b46fed89",
@@ -4169,7 +4273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-bc1bf07fa55d",
@@ -4188,7 +4293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-2a8dc27ace32",
@@ -4207,7 +4313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3fce3e45b6e3",
@@ -4226,7 +4333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1e2ef8d93b07",
@@ -4245,7 +4353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3b84ecfa19b2",
@@ -4264,7 +4373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9c482578a9e2",
@@ -4283,7 +4393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8353521a341b",
@@ -4302,7 +4413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-183cf51ad0ed",
@@ -4321,7 +4433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1df90415e1a1",
@@ -4340,7 +4453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-485d6da364cd",
@@ -4359,7 +4473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3572341c43c4",
@@ -4378,7 +4493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-50b04cf4bcfd",
@@ -4397,7 +4513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-34bd963a3aea",
@@ -4416,7 +4533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fef80ed0ed75",
@@ -4435,7 +4553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4d719d28aa44",
@@ -4454,7 +4573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b2595fa500ab",
@@ -4473,7 +4593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9f737d2447e6",
@@ -4492,7 +4613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3897733eb7b0",
@@ -4511,7 +4633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1617366663e2",
@@ -4530,7 +4653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-adc9a40c7e3d",
@@ -4549,7 +4673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c56c80a4c6c9",
@@ -4568,7 +4693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d799e20ad66e",
@@ -4587,7 +4713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-bc6a9b9c2966",
@@ -4606,7 +4733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e833442a23a7",
@@ -4625,7 +4753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-49ecce2f7554",
@@ -4644,7 +4773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1fb8023ea46f",
@@ -4663,7 +4793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-61df2f9a7cfd",
@@ -4682,7 +4813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a530386dabc1",
@@ -4701,7 +4833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b39f159f2ad5",
@@ -4720,7 +4853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3b3d9eab8d33",
@@ -4739,7 +4873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e5c93b7f6307",
@@ -4758,7 +4893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-629c1b175f85",
@@ -4777,7 +4913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1008a397b0e6",
@@ -4796,7 +4933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-30a236dafb69",
@@ -4815,7 +4953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-38502314dca2",
@@ -4834,7 +4973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0fb605645acc",
@@ -4853,7 +4993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-75e79758a3fe",
@@ -4872,7 +5013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-50faf6a777d0",
@@ -4891,7 +5033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e7b1f1652e47",
@@ -4910,7 +5053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-08e17e97f041",
@@ -4929,7 +5073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-628033ff8ad6",
@@ -4948,7 +5093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-795c496126e3",
@@ -4967,7 +5113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7ae8b86c8de3",
@@ -4986,7 +5133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-31916eea26a3",
@@ -5005,7 +5153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1bf3a91cd591",
@@ -5024,7 +5173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d367d42adcae",
@@ -5043,7 +5193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ed3fed15f487",
@@ -5062,7 +5213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-daba8c7ca791",
@@ -5081,7 +5233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f0a38c627a0d",
@@ -5100,7 +5253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8f617be2ac66",
@@ -5119,7 +5273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-201dc96cb741",
@@ -5138,7 +5293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-09ff68c698b8",
@@ -5157,7 +5313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-65a7b643d0f6",
@@ -5176,7 +5333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7999cc375178",
@@ -5195,7 +5353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-2bd4f56b22bb",
@@ -5214,7 +5373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-153676830a09",
@@ -5233,7 +5393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-38e45c14ee1f",
@@ -5252,7 +5413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a206427d65fe",
@@ -5271,7 +5433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4dc89db0731f",
@@ -5290,7 +5453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5f137202c30a",
@@ -5309,7 +5473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1f508d3c5d3d",
@@ -5328,7 +5493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-db3442875413",
@@ -5347,7 +5513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-949c28dd6909",
@@ -5366,7 +5533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c285f79078bb",
@@ -5385,7 +5553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9ab2867c3ed5",
@@ -5404,7 +5573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8667d408b346",
@@ -5423,7 +5593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8ac477c817f1",
@@ -5442,7 +5613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-84c51d71ab4d",
@@ -5461,7 +5633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5d3e054c6861",
@@ -5480,7 +5653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6dd5f2a974f6",
@@ -5499,7 +5673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-58b5b47cd814",
@@ -5518,7 +5693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3087084a43bd",
@@ -5537,7 +5713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f4f290e2ff16",
@@ -5556,7 +5733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1140e9a0bf51",
@@ -5575,7 +5753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9876a8c875d8",
@@ -5594,7 +5773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-02610ef2559f",
@@ -5613,7 +5793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3b4d35256e60",
@@ -5632,7 +5813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-298d0d222422",
@@ -5651,7 +5833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-46aa526d6965",
@@ -5670,7 +5853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-79db34b9dbb2",
@@ -5689,7 +5873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-57f8b0f760dd",
@@ -5708,7 +5893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1cb7a445440f",
@@ -5727,7 +5913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-09a1c6268e75",
@@ -5746,7 +5933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a9d5a3b3c2ff",
@@ -5765,7 +5953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d58890997131",
@@ -5784,7 +5973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1d6287234d0f",
@@ -5803,7 +5993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6d3b04d10eaf",
@@ -5822,7 +6013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-bf36076004ae",
@@ -5841,7 +6033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-341284cccff6",
@@ -5860,7 +6053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4629e142c200",
@@ -5879,7 +6073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8965adc485b9",
@@ -5898,7 +6093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-24fb2d25123b",
@@ -5917,7 +6113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7439b41b6eaa",
@@ -5936,7 +6133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-64d229fa3580",
@@ -5955,7 +6153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6b8b8e8da756",
@@ -5974,7 +6173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c036b0c15f55",
@@ -5993,7 +6193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-65836c955602",
@@ -6012,7 +6213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-27917f5db71a",
@@ -6031,7 +6233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-153b9d590956",
@@ -6050,7 +6253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-aa9f74a66955",
@@ -6069,7 +6273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d9677710ff90",
@@ -6088,7 +6293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d74e68d4935b",
@@ -6107,7 +6313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8b7d2ba33e2f",
@@ -6126,7 +6333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-27555f0f4b8d",
@@ -6145,7 +6353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4b9bed2860cf",
@@ -6164,7 +6373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-52441ef68c82",
@@ -6183,7 +6393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d2997cd2b269",
@@ -6202,7 +6413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ff37b9927d86",
@@ -6221,7 +6433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d94f7f4b9d5e",
@@ -6240,7 +6453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9836c431239b",
@@ -6259,7 +6473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-03a0ca4fe039",
@@ -6278,7 +6493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-beb75d79d63d",
@@ -6297,7 +6513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-11082572d315",
@@ -6316,7 +6533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fd8d09b863c6",
@@ -6335,7 +6553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-79660ba53ce6",
@@ -6354,7 +6573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8cffe6378d2b",
@@ -6373,7 +6593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-eb75b18ae5c9",
@@ -6392,7 +6613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7c6402224776",
@@ -6411,7 +6633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7d3aabc819ea",
@@ -6430,7 +6653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-987425681856",
@@ -6449,7 +6673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a0430f5370b8",
@@ -6468,7 +6693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b866eabd714d",
@@ -6487,7 +6713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-982785e30fa7",
@@ -6506,7 +6733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1763c1296428",
@@ -6525,7 +6753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8a4b82da7a70",
@@ -6544,7 +6773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-715dc6a485c3",
@@ -6563,7 +6793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-dacc3b5e7a1d",
@@ -6582,7 +6813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-85d9a7ae2d35",
@@ -6601,7 +6833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-86f47ef2a76d",
@@ -6620,7 +6853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c6f8b83da190",
@@ -6639,7 +6873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-14aae1acebcd",
@@ -6658,7 +6893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-88379c61f427",
@@ -6677,7 +6913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d055087b32f4",
@@ -6696,7 +6933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-2ef631f3f4d4",
@@ -6715,7 +6953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b34d21405ac0",
@@ -6734,7 +6973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ccb127465293",
@@ -6753,7 +6993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b90bf92e955d",
@@ -6772,7 +7013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ef98b44f84ae",
@@ -6791,7 +7033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d23746ab631c",
@@ -6810,7 +7053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-21c3dc2440ae",
@@ -6829,7 +7073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-20363a68559f",
@@ -6848,7 +7093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0347cf800556",
@@ -6867,7 +7113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-dd2e7bd7d0e1",
@@ -6886,7 +7133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c1d87bd05e72",
@@ -6905,7 +7153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6de5b3b51d3f",
@@ -6924,7 +7173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d3f2cfe5366c",
@@ -6943,7 +7193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5c88996c2795",
@@ -6962,7 +7213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d2787cc74fb4",
@@ -6981,7 +7233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-77c1e6ca7e6f",
@@ -7000,7 +7253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ed999f393efc",
@@ -7019,7 +7273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-73b9cc46926e",
@@ -7038,7 +7293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4bd0ce1d4a8a",
@@ -7057,7 +7313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-31fb64b0fe6c",
@@ -7076,7 +7333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-574f44404fcb",
@@ -7095,7 +7353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-eaf41dad04f8",
@@ -7114,7 +7373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3c5a8220623f",
@@ -7133,7 +7393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e6dbcbdcac6b",
@@ -7152,7 +7413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-460a79195d76",
@@ -7171,7 +7433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-12f2e8edbe6c",
@@ -7190,7 +7453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a5c023768042",
@@ -7209,7 +7473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-06534ba7f5bc",
@@ -7228,7 +7493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5f0d1baa291a",
@@ -7247,7 +7513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c22cd6e4a985",
@@ -7266,7 +7533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-01bc01dad897",
@@ -7285,7 +7553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e5c26dc52175",
@@ -7304,7 +7573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-18a3bbc151d5",
@@ -7323,7 +7593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6f8c6f9abee7",
@@ -7342,7 +7613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ddbdbe4ff2a6",
@@ -7361,7 +7633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1c02edd237cd",
@@ -7380,7 +7653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c536299908d0",
@@ -7399,7 +7673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-44794d7277a6",
@@ -7418,7 +7693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-13442e207343",
@@ -7437,7 +7713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0ab54914cb2f",
@@ -7456,7 +7733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fda992dfbbb8",
@@ -7475,7 +7753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7b063ed8ce48",
@@ -7494,7 +7773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d103760b927d",
@@ -7513,7 +7793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9888dde1425f",
@@ -7532,7 +7813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-cd5178ca6510",
@@ -7551,7 +7833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-cc73342b6e6d",
@@ -7570,7 +7853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9bd864ba2bc5",
@@ -7589,7 +7873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-df810b91f09a",
@@ -7608,7 +7893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-22b611561cc7",
@@ -7627,7 +7913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-874da466a1e3",
@@ -7646,7 +7933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-dae2866a0adf",
@@ -7665,7 +7953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-df02e92f4d73",
@@ -7684,7 +7973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-618c0939efd8",
@@ -7703,7 +7993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0c7649761de2",
@@ -7722,7 +8013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-10ab87130e3a",
@@ -7741,7 +8033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1a6bc5c9b9b3",
@@ -7760,7 +8053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e2b9ad5b9c18",
@@ -7779,7 +8073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-aa340ccee00a",
@@ -7798,7 +8093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-54f263c03390",
@@ -7817,7 +8113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-12f070c43672",
@@ -7836,7 +8133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fd258cf54925",
@@ -7855,7 +8153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-894e375e3cf1",
@@ -7874,7 +8173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-accbd7708a8d",
@@ -7893,7 +8193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5abadd6dc3ba",
@@ -7912,7 +8213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-590218e2f0f6",
@@ -7931,7 +8233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4f72bc42951e",
@@ -7950,7 +8253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0a534796d0cc",
@@ -7969,7 +8273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-dbfa0fe20cb7",
@@ -7988,7 +8293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-20037461efef",
@@ -8007,7 +8313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f3b29e5f9d70",
@@ -8026,7 +8333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-10f85dad24f0",
@@ -8045,7 +8353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5b0e265b15f5",
@@ -8064,7 +8373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f7165aa76201",
@@ -8083,7 +8393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f26b15867902",
@@ -8102,7 +8413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e69cc4bdfd07",
@@ -8121,7 +8433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6012c3035498",
@@ -8140,7 +8453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-05a2e3d038c1",
@@ -8159,7 +8473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8164031c195e",
@@ -8178,7 +8493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-fc9b05d6f2c9",
@@ -8197,7 +8513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f42ed31966dd",
@@ -8216,7 +8533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-93e1454cd6d5",
@@ -8235,7 +8553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1abcb9f672c8",
@@ -8254,7 +8573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-59dd5eed85ff",
@@ -8273,7 +8593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c4d4c2ffa8a9",
@@ -8292,7 +8613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3753d9bb1188",
@@ -8311,7 +8633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-332db86f2c5e",
@@ -8330,7 +8653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-533028f45cae",
@@ -8349,7 +8673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d180935f5d7b",
@@ -8368,7 +8693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9e1ed97a08ea",
@@ -8387,7 +8713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a2ab8b07b14d",
@@ -8406,7 +8733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5a78f941c3ac",
@@ -8425,7 +8753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0b33aa597eb8",
@@ -8444,7 +8773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6ee9b7ea4d58",
@@ -8463,7 +8793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-9d2e33b6871c",
@@ -8482,7 +8813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1690e9bfdd91",
@@ -8501,7 +8833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6411f05f470b",
@@ -8520,7 +8853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d6779e4ec0f7",
@@ -8539,7 +8873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-447677848b32",
@@ -8558,7 +8893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5b38e46c92c1",
@@ -8577,7 +8913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e86d489bea6f",
@@ -8596,7 +8933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4e8db2ab1778",
@@ -8615,7 +8953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8bac95744b2e",
@@ -8634,7 +8973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d546d0400dcf",
@@ -8653,7 +8993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0aac8c8241ae",
@@ -8672,7 +9013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-cdea32fdd74b",
@@ -8691,7 +9033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1361d7e9acf6",
@@ -8710,7 +9053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-dcba44c1209d",
@@ -8729,7 +9073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-f2310242566f",
@@ -8748,7 +9093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-41efd7d0b43a",
@@ -8767,7 +9113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8f12d383437b",
@@ -8786,7 +9133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4736d7948e73",
@@ -8805,7 +9153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c9d5bd0ef687",
@@ -8824,7 +9173,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-675f781ce136",
@@ -8843,7 +9193,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0f313acce3fd",
@@ -8862,7 +9213,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a16c4720c9bd",
@@ -8881,7 +9233,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7ee94324d57e",
@@ -8900,7 +9253,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-23a3757cb713",
@@ -8919,7 +9273,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-989f5e1a514f",
@@ -8938,7 +9293,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5dc7042bf44a",
@@ -8957,7 +9313,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-546b949cf495",
@@ -8976,7 +9333,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-aca82d817cd2",
@@ -8995,7 +9353,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-574ffed93d51",
@@ -9014,7 +9373,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7f244fe26b4f",
@@ -9033,7 +9393,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7ac328749a02",
@@ -9052,7 +9413,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-2e062584fb53",
@@ -9071,7 +9433,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c5a2df0ad705",
@@ -9090,7 +9453,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-55cc7f79e0cc",
@@ -9109,7 +9473,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-a8fa6805b99b",
@@ -9128,7 +9493,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-1d6b7286779f",
@@ -9147,7 +9513,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4fc752d896fc",
@@ -9166,7 +9533,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b48187e64ef6",
@@ -9185,7 +9553,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-8bdce66ed407",
@@ -9204,7 +9573,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-53ad5793056c",
@@ -9223,7 +9593,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-52aa8990a442",
@@ -9242,7 +9613,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-c02fbb237f9c",
@@ -9261,7 +9633,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-53357bb3c726",
@@ -9280,7 +9653,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-0a8b3c7ee850",
@@ -9299,7 +9673,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-19797072bd4c",
@@ -9318,7 +9693,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-89857ca1de2c",
@@ -9337,7 +9713,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-587b9ce10827",
@@ -9356,7 +9733,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-461ee47cbdc5",
@@ -9375,7 +9753,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-4577bed7282f",
@@ -9394,7 +9773,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-34a6caf64aff",
@@ -9413,7 +9793,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-6afca0fdd0a0",
@@ -9432,7 +9813,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-3fc448414f74",
@@ -9451,7 +9833,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-b88e8edbbd20",
@@ -9470,7 +9853,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-532e4a4a9dba",
@@ -9489,7 +9873,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-7e0f76823cae",
@@ -9508,7 +9893,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e6fc6f326971",
@@ -9527,7 +9913,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ab72aee1b184",
@@ -9546,7 +9933,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-d67603d2759f",
@@ -9565,7 +9953,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e0894956ba58",
@@ -9584,7 +9973,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-29ccadf3a175",
@@ -9603,7 +9993,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-460b80ce0f68",
@@ -9622,7 +10013,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-22956cccee1a",
@@ -9641,7 +10033,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-13e3d7f98d59",
@@ -9660,7 +10053,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-78e45bb145ba",
@@ -9679,7 +10073,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-ee5620489478",
@@ -9698,7 +10093,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-5f7bbb59f4ea",
@@ -9717,7 +10113,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-e64d063872bd",
@@ -9736,7 +10133,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     },
     {
       "id": "via-osm-73a831359101",
@@ -9755,7 +10153,8 @@
         "avenida",
         "via",
         "logradouro"
-      ]
+      ],
+      "coordinateKind": "street-midpoint"
     }
   ]
 }
