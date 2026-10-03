@@ -44,7 +44,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
       <ul className="mt-2 grid gap-2" aria-label={"Pontos locais para " + kind}>
         {matches.slice(0, 8).map(item => <li key={item.id}>
           <button type="button" onClick={() => {
-            const coordinate = item.lat + ", " + item.lng;
+            const coordinate = kind === "origem" && item.business ? item.business.cnpj : item.lat + ", " + item.lng;
             setSelected({ coordinate, label: item.name + (item.coordinateKind === "street-midpoint" ? " · Centro aproximado da via; não identifica uma casa ou entrada." : " · " + (item.coordinateLabel || item.sourceLabel)) });
             onChoose(coordinate);
             setOpen(false);

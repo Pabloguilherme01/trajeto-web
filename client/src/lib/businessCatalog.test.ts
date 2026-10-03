@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { loadBusinessCatalog, normalizeBusinessRows, resolveBusinessPoint } from "./businessCatalog";
+import { calculateOfflineRoute } from "./publicRouting";
 import { filterCityAtlas } from "./cityAtlas";
 
 it("imports every unique CNPJ, preserves precision and keeps unlocated companies searchable", async () => {
@@ -25,4 +26,11 @@ it("rejects malformed rows and coordinates instead of inventing locations", () =
   expect(normalizeBusinessRows(null)).toEqual([]);
   expect(normalizeBusinessRows({ schema: 1, strings: [], rows: [[0]] })).toEqual([]);
   expect(normalizeBusinessRows({ schema: 2, strings: [], rows: [] })).toEqual([]);
+});
+
+it("routes a company origin by CNPJ without rounding its public catalog coordinates", async () => {
+  const route = await calculateOfflineRoute("42.115.689/0001-40", "HEAL", "driving");
+  expect(route.origin).toEqual({ lat: -15.782635, lng: -48.294036 });
+  expect(route.destination).toEqual({ lat: -15.74637, lng: -48.27584 });
+  expect(route.source).toBe("local-estimate");
 });

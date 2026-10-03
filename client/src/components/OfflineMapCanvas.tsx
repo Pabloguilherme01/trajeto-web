@@ -129,11 +129,11 @@ export default function OfflineMapCanvas({
   }, [attempt]);
   useEffect(() => {
     const recover = () => {
-      if (failed) setAttempt(v => v + 1);
+      if (!pack) setAttempt(v => v + 1);
     };
     window.addEventListener("online", recover);
     return () => window.removeEventListener("online", recover);
-  }, [failed]);
+  }, [pack]);
   useEffect(() => {
     const el = viewport.current;
     if (!el) return;
