@@ -147,7 +147,8 @@ export default function TileStationMap({
   const centerPx = project(center.lat, center.lng, zoom);
   const baseTileX = Math.floor(centerPx.x / TILE);
   const baseTileY = Math.floor(centerPx.y / TILE);
-  const radius = 2;
+  const radiusX = Math.ceil(width / (2 * TILE)) + 1;
+  const radiusY = Math.ceil(height / (2 * TILE)) + 1;
   const tiles: Array<{
     x: number;
     y: number;
@@ -156,16 +157,16 @@ export default function TileStationMap({
     top: number;
   }> = [];
 
-  for (let dy = -radius; dy <= radius; dy++) {
-    for (let dx = -radius; dx <= radius; dx++) {
+  for (let dy = -radiusY; dy <= radiusY; dy++) {
+    for (let dx = -radiusX; dx <= radiusX; dx++) {
       const rawX = baseTileX + dx;
       const y = baseTileY + dy;
       tiles.push({
         x: wrapTile(rawX, zoom),
         y,
         key: `${zoom}:${rawX}:${y}`,
-        left: (dx + radius) * TILE,
-        top: (dy + radius) * TILE,
+        left: (dx + radiusX) * TILE,
+        top: (dy + radiusY) * TILE,
       });
     }
   }
@@ -214,10 +215,9 @@ export default function TileStationMap({
   };
 
   const fitStations = () => {
-    if (!drawable.length) return;
+    if (!drawable.length && !routePoints.length) return;
     const points = [
-      ...drawable,
-      ...routePoints,
+      ...(routePoints.length > 1 ? routePoints : drawable),
       ...(userCoords ? [userCoords] : []),
     ];
     const minLat = Math.min(...points.map(p => p.lat)),
@@ -239,9 +239,11 @@ export default function TileStationMap({
     setZoom(next);
   };
 
+  // A new array with the same geometry must not undo a user pan or zoom.
+  const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
   useEffect(() => {
     if (routePoints.length > 1) fitStations();
-  }, [routePoints]);
+  }, [routeGeometryKey]);
 
   const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
 
@@ -331,10 +333,10 @@ export default function TileStationMap({
           <div
             className="absolute"
             style={{
-              width: TILE * (radius * 2 + 1),
-              height: TILE * (radius * 2 + 1),
-              left: width / 2 - radius * TILE - (centerPx.x - baseTileX * TILE),
-              top: height / 2 - radius * TILE - (centerPx.y - baseTileY * TILE),
+              width: TILE * (radiusX * 2 + 1),
+              height: TILE * (radiusY * 2 + 1),
+              left: width / 2 - radiusX * TILE - (centerPx.x - baseTileX * TILE),
+              top: height / 2 - radiusY * TILE - (centerPx.y - baseTileY * TILE),
               transformOrigin: "50% 50%",
             }}
           >

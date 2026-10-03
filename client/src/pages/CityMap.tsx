@@ -289,7 +289,7 @@ export default function CityMap() {
         <section aria-labelledby="city-atlas-destinations" className="mt-6">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Atlas oficial</p>
+              <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Atlas da cidade</p>
               <h2 id="city-atlas-destinations" className="mt-1 text-lg font-black">
                 Mais lugares de Águas Lindas
               </h2>
@@ -299,7 +299,7 @@ export default function CityMap() {
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-white/55">
-            Dados públicos versionados ampliam escolas, bairros, serviços e referências sem duplicar o catálogo principal.
+            Escolas, bairros, ruas e serviços com a fonte indicada em cada ficha. Pontos centrais de vias são referências aproximadas; confirme a entrada do destino.
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {visibleAtlasDestinations.map(item => {
@@ -324,6 +324,16 @@ export default function CityMap() {
                       <p className="break-words text-sm font-black">{item.name}</p>
                       <p className="mt-1 text-xs leading-relaxed text-white/60">{item.detail}</p>
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-white/40">{item.address}</p>}
+                      <p className="mt-2 break-words text-xs leading-relaxed text-white/60">
+                        {item.sourceUrl ? (
+                          <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{item.sourceLabel}</a>
+                        ) : item.sourceLabel}
+                      </p>
+                      {typeof item.lat === "number" && typeof item.lng === "number" && (
+                        <p className="mt-1 break-words text-xs text-white/60">
+                          Coordenadas: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="mt-3">
