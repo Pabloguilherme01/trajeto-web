@@ -95,7 +95,40 @@ const representedServices = new Set([
 const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.mapQuery && !representedServices.has(service.id)).map(service => ({
   id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: "servicos",
 }));
-export const ALL_LOCAL_ROUTE_DESTINATIONS = [...LOCAL_ROUTE_PRESETS, ...LOCAL_PLACE_DESTINATIONS, ...SUPPORT_DESTINATIONS];
+function normalizeDestinationKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\b(goias|go)\b/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function mergeRouteDestinations(...groups: LocalRoutePreset[][]) {
+  const byId = new Set<string>();
+  const byDestination = new Set<string>();
+  const merged: LocalRoutePreset[] = [];
+
+  for (const item of groups.flat()) {
+    const destinationKey = normalizeDestinationKey(item.destination);
+    if (byId.has(item.id) || (destinationKey && byDestination.has(destinationKey))) continue;
+    byId.add(item.id);
+    if (destinationKey) byDestination.add(destinationKey);
+    merged.push(item);
+  }
+  return merged;
+}
+
+// One catalog feeds Planner, city shortcuts and destination search.
+// Curated presets win over derived place/service entries so the user sees one clear
+// destination instead of repeated cards pointing to the same route.
+export const ALL_LOCAL_ROUTE_DESTINATIONS = mergeRouteDestinations(
+  LOCAL_ROUTE_PRESETS,
+  LOCAL_PLACE_DESTINATIONS,
+  SUPPORT_DESTINATIONS,
+);
 
 export function getLocalRoutePresets(query = "") {
   return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => matchesCatalogText(query, [item.label, item.detail, item.destination, item.category]));
