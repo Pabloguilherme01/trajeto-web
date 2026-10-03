@@ -6,6 +6,11 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePersistFn } from "@/hooks/usePersistFn";
 import { cn } from "@/lib/utils";
 
+export const AGUAS_LINDAS_CENTER: google.maps.LatLngLiteral = {
+  lat: -15.7545,
+  lng: -48.2816,
+};
+
 declare global {
   interface Window {
     google?: typeof google;
@@ -60,7 +65,7 @@ interface MapViewProps {
 
 export function MapView({
   className,
-  initialCenter = { lat: 37.7749, lng: -122.4194 },
+  initialCenter = AGUAS_LINDAS_CENTER,
   initialZoom = 12,
   onMapReady,
   onLoadError,
@@ -74,6 +79,7 @@ export function MapView({
   const map = useRef<google.maps.Map | null>(null);
   const [shouldLoad, setShouldLoad] = useState(!deferUntilVisible);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   const init = usePersistFn(async () => {
     try {
@@ -145,12 +151,12 @@ export function MapView({
   useEffect(() => {
     if (!shouldLoad) return;
     init();
-  }, [init, shouldLoad]);
+  }, [init, retryKey, shouldLoad]);
 
   return (
     <div ref={mapContainer} role="region" aria-label="Mapa da rota" className={cn("relative w-full " + heightClassName + " bg-[#EDF2EE]", className)}>
       {!shouldLoad && <div className="absolute inset-0 animate-pulse bg-[linear-gradient(110deg,#EDF2EE_35%,#F8FBF7_50%,#EDF2EE_65%)]" aria-label="Mapa será carregado quando estiver próximo" />}
-      {loadError && (fallback ? <div className="absolute inset-0">{fallback}</div> : <div role="alert" className="absolute inset-0 grid place-items-center bg-[#0B1014]/95 p-6 text-center text-sm font-bold text-white"><div><p>O mapa não pôde ser carregado agora.</p><p className="mt-2 text-xs font-normal text-[#A5B5BC]">Os resultados da consulta continuam disponíveis abaixo.</p></div></div>)}
+      {loadError && (fallback ? <div className="absolute inset-0">{fallback}</div> : <div role="alert" className="absolute inset-0 grid place-items-center bg-[#0B1014]/95 p-6 text-center text-sm font-bold text-white"><div><p>O mapa não pôde ser carregado agora.</p><p className="mt-2 text-xs font-normal text-[#A5B5BC]">Os resultados da consulta continuam disponíveis abaixo.</p><button type="button" onClick={() => { setLoadError(null); setRetryKey(value => value + 1); }} className="mt-4 min-h-11 rounded-xl bg-[#C7FF3C] px-4 py-2 text-sm font-extrabold text-[#0B1014]">Tentar novamente</button></div></div>)}
     </div>
   );
 }
