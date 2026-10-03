@@ -371,7 +371,7 @@ export function RouteMap({
       return;
 
     const bounds = new maps.LatLngBounds();
-    [origin, destination, ...stops].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops, ...nearbyRouteReferences(origin, destination, routes.flatMap(route => decodePolyline(route.polyline ?? "")))].forEach(point => bounds.extend(point));
     routes
       ?.filter(route => route.polyline)
       .forEach(route =>
@@ -400,6 +400,8 @@ export function RouteMap({
     makeMarker(origin, "Origem", "#BA5B45");
     makeMarker(destination, "Destino", "#FFC928");
     stops.forEach(stop => makeMarker(stop, stop.name, "#E8EEE8"));
+    nearbyRouteReferences(origin, destination, routes.flatMap(route => decodePolyline(route.polyline ?? "")))
+      .forEach(reference => makeMarker(reference, "Referência · " + reference.name, "#3DE3FF"));
     map.fitBounds(bounds, 56);
   }, [mapReady, origin, destination, stops, routes]);
 
@@ -447,7 +449,7 @@ export function RouteMap({
   const fitRoute = () => {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
-    [origin, destination, ...stops].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops, ...nearbyReferences].forEach(point => bounds.extend(point));
     routes
       .filter(route => route.polyline)
       .forEach(route =>
@@ -514,11 +516,6 @@ export function RouteMap({
           privateOrigin
           travelMode={travelMode}
         />
-        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2 text-[11px] font-bold text-white/55">
-          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />origem/destino</span>
-          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#3DE3FF]" />referências próximas</span>
-          <span>{nearbyReferences.length} referência(s) verificada(s) no entorno</span>
-        </div>
       </section>
     );
   }
@@ -588,6 +585,11 @@ export function RouteMap({
             </div>
           }
         />
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
+          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />rota e pontos principais</span>
+          <span><span className="mr-1 inline-block size-2 rounded-full bg-[#3DE3FF]" />referências próximas</span>
+          <span>{nearbyReferences.length} referência(s) verificada(s) no entorno</span>
+        </div>
       </section>
     );
   }
