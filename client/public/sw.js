@@ -132,7 +132,8 @@ self.addEventListener("fetch", event => {
   if (!url.href.startsWith(self.registration.scope)) return;
 
   if (url.pathname.includes("/data/")) {
-    event.respondWith(networkFirst(request, DATA_CACHE));
+    const snapshot = LOCAL_SNAPSHOTS.find(path => new URL(path, self.registration.scope).pathname === url.pathname);
+    event.respondWith(snapshot ? installedSnapshot(snapshot) : networkFirst(request, DATA_CACHE));
     return;
   }
 
@@ -277,4 +278,13 @@ async function safeCachePut(cache, request, response) {
   } catch {
     // A full or disabled cache must not break a successful network response.
   }
+}
+
+
+async function installedSnapshot(path) {
+  const cache = await caches.open(DATA_CACHE);
+  // Bundled data belongs to the installed build, just like its route chunks.
+  // Serve it immediately even on slow or captive networks, including query URLs.
+  const cached = await cache.match(path, { ignoreVary: true });
+  return cached || networkFirst(new Request(new URL(path, self.registration.scope)), DATA_CACHE);
 }

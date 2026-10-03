@@ -393,9 +393,30 @@ export default function Planner() {
       vibration(14);
     } catch {
       if (version !== requestVersion.current) return;
-      setError(null);
-      setFallbackReady(true);
-      vibration(8);
+      setPublicRoutePending(true);
+      try {
+        const route = navigator.onLine
+          ? await calculatePublicRoute(from, to, mode)
+          : await calculateOfflineRoute(from, to, mode);
+        if (version !== requestVersion.current) return;
+        const result = buildPublicRoutePayload(route) as unknown as PlannedRoute;
+        setPlanned(result);
+        setShowMap(true);
+        setFallbackReady(false);
+        const saved = await persistRouteLocally(result, from, to);
+        if (version !== requestVersion.current) return;
+        setSavedMessage("Servidor indisponível. " +
+          (route.source === "local-estimate" ? "Usando estimativa local, sem trânsito ao vivo." : "Usando rota da rede viária pública.") +
+          (saved ? " Cópia offline criada automaticamente." : ""));
+        vibration(14);
+      } catch {
+        if (version !== requestVersion.current) return;
+        setError("Não foi possível calcular. Use uma rota salva ou informe locais conhecidos e tente novamente.");
+        setFallbackReady(true);
+        vibration(8);
+      } finally {
+        if (version === requestVersion.current) setPublicRoutePending(false);
+      }
     }
   };
 

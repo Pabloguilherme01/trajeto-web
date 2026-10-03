@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { defineConfig } from "vite";
 
@@ -18,7 +18,19 @@ export default defineConfig({
       const manifest = readFileSync(path.join(output, "offline-assets.json"), "utf8");
       const worker = path.join(output, "sw.js");
       const source = readFileSync(worker, "utf8");
-      const revision = createHash("sha256").update(manifest).update(source).digest("hex").slice(0, 12);
+      const hash = createHash("sha256").update(manifest).update(source);
+      // Public snapshots are copied outside the Vite manifest. Data-only
+      // releases must also prepare a fresh, internally consistent offline build.
+      const include = (directory: string) => {
+        for (const entry of readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+          const file = path.join(directory, entry.name);
+          if (entry.isDirectory()) include(file);
+          else hash.update(path.relative(output, file)).update(readFileSync(file));
+        }
+      };
+      include(path.join(output, "data"));
+      hash.update(readFileSync(path.join(output, "index.html")));
+      const revision = hash.digest("hex").slice(0, 12);
       writeFileSync(worker, source.replace(/CACHE_PREFIX \+ "(v\d+)"/, (_match, version) => `CACHE_PREFIX + "${version}-${revision}"`));
     },
   }],
