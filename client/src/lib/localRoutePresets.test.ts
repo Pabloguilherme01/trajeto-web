@@ -89,12 +89,12 @@ it("offers education destinations in their own filter instead of general service
   expect(education.some(item => item.id === "cepi-jk")).toBe(true);
   expect(education.every(item => item.category === "educacao")).toBe(true);
   expect(getLocalRoutePresets("Cora Coralina", "servicos")).toEqual([]);
+});
+
 it("offers neighborhood and area references with an explicit approximate-location note", () => {
   expect(getLocalRoutePresets("Parque da Barragem", "centro").some(item => item.id === "parque-da-barragem")).toBe(true);
   expect(getLocalRoutePresets("Jardim Brasília", "centro").some(item => item.id === "jardim-brasilia")).toBe(true);
   expect(getLocalRoutePresets("Mansões Centro-Oeste", "centro").some(item => item.id === "mansoes-centro-oeste")).toBe(true);
   expect(getLocalRoutePresets("Mansões Centro-Oeste", "saude")).toEqual([]);
   expect(LOCAL_ROUTE_PRESETS.filter(item => item.id === "parque-da-barragem")[0]?.detail).toMatch(/aproximado/i);
-});
-
 });
