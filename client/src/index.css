@@ -242,3 +242,41 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
   /* A pressed map marker must keep its camera transform. */
   .offline-map button:active { transform: none; }
 }
+
+
+/* Proteção estrutural contra overflow em telas estreitas e texto ampliado. */
+@layer base {
+  html, body, #root { width: 100%; max-width: 100%; overflow-x: clip; }
+  main, section, article, header, footer, nav, form, fieldset { min-width: 0; max-width: 100%; }
+  img, svg, canvas, video { max-width: 100%; }
+}
+
+@media (max-width: 767px) {
+  main :is(.grid, .flex) > * { min-width: 0; }
+  main :is(h1, h2, h3, h4, p, span, a, button, label, summary) {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  main :is([class*="grid-cols-4"], [class*="grid-cols-3"]) {
+    min-width: 0;
+  }
+  .route-card,
+  .mobile-card,
+  [data-route-card] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  [data-route-card] :is(p, span, a, button) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .planner-map-shell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 1.5rem;
+  }
+}
