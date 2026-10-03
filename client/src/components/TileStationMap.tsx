@@ -2,7 +2,7 @@ import { Apple, LocateFixed, Navigation, Minus, Plus } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildAppleMapsDirectionsUrl,
-  buildGoogleMapsDestinationUrl,
+  buildGoogleMapsDirectionsUrl,
   buildWazeNavigationUrl,
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
@@ -60,6 +60,7 @@ export default function TileStationMap({
   selectionLabel = "Escolher posto no mapa",
   routePoints = [],
   onPlanDestination,
+  travelMode = "driving",
 }: {
   stations: StationMapItem[];
   userCoords?: { lat: number; lng: number } | null;
@@ -69,6 +70,7 @@ export default function TileStationMap({
   selectionLabel?: string;
   routePoints?: Array<{ lat: number; lng: number }>;
   onPlanDestination?: (station: StationMapItem) => void;
+  travelMode?: "driving" | "walking" | "cycling" | "transit";
 }) {
   const drawable = useMemo(
     () =>
@@ -525,8 +527,10 @@ export default function TileStationMap({
                   type="button"
                   onClick={() =>
                     window.open(
-                      buildGoogleMapsDestinationUrl(
+                      buildGoogleMapsDirectionsUrl(
+                        "",
                         selected.lat + "," + selected.lng,
+                        travelMode === "cycling" ? "bicycling" : travelMode,
                         true
                       ),
                       "_blank",
