@@ -94,3 +94,15 @@ it("uses stable precise GPS speed for arrival estimates and rejects out-of-order
   act(() => result.current.stop());
   expect(result.current.speed).toBeNull();
 });
+
+it("rejects invalid GPS timestamps and recovers on the next valid fix", () => {
+  const { result } = renderHook(() => useLiveTrip(route));
+  act(() => result.current.start());
+  for (const timestamp of [NaN, Infinity, -Infinity]) {
+    act(() => update({ ...position(), timestamp }));
+    expect(result.current.point).toBeNull();
+    expect(result.current.progress).toBeNull();
+  }
+  act(() => update(position()));
+  expect(result.current.point?.lat).toBe(-15.745);
+});

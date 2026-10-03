@@ -66,3 +66,11 @@ it("keeps hospital shortcuts consistent with the service attendance warning", ()
   expect(hospital?.detail).toMatch(/confirm/i);
   expect(getLocalRoutePresets("Hospital Bom Jesus").some(item => item.id === hospital?.id)).toBe(true);
 });
+
+it("offers education destinations in their own filter instead of general services", () => {
+  const education = getLocalRoutePresets("", "educacao");
+  expect(education.some(item => item.id === "cora-coralina")).toBe(true);
+  expect(education.some(item => item.id === "cepi-jk")).toBe(true);
+  expect(education.every(item => item.category === "educacao")).toBe(true);
+  expect(getLocalRoutePresets("Cora Coralina", "servicos")).toEqual([]);
+});

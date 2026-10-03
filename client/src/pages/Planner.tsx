@@ -716,6 +716,7 @@ export default function Planner() {
                         ["todos", "Todos"],
                         ["alimentacao", "Comer"],
                         ["saude", "Saúde"],
+                        ["educacao", "Educação"],
                         ["servicos", "Serviços"],
                         ["transporte", "Transporte"],
                         ["compras", "Compras"],

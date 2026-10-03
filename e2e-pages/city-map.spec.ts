@@ -128,3 +128,23 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { stopped: number }).stopped)).toBe(44);
 });
+
+test("education destinations and paginated local points remain usable at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Educação", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Educação", exact: true })).toHaveAttribute("aria-pressed", "true");
+  const school = page.getByRole("article").filter({ has: page.getByText("Cora Coralina", { exact: true }) });
+  await expect(school).toBeVisible();
+  await school.getByRole("link", { name: "Ir até aqui", exact: true }).click();
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue(/Colégio Estadual Cora Coralina/);
+  await page.getByRole("button", { name: "Escolher destino no catálogo local", exact: true }).click();
+  const list = page.getByRole("list", { name: "Pontos locais para destino", exact: true });
+  await expect(list.getByRole("listitem")).toHaveCount(8);
+  await page.getByRole("button", { name: /Mostrar mais pontos/ }).click();
+  await expect(list.getByRole("listitem")).toHaveCount(16);
+  await page.getByRole("textbox", { name: "Buscar destino local", exact: true }).fill("HEAL");
+  await expect(list.getByRole("button").first()).toContainText("HEAL");
+  await expect(page.getByRole("button", { name: /Mostrar mais pontos/ })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
