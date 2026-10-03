@@ -88,6 +88,7 @@ export default function OfflineMapCanvas({
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [dark, setDark] = useState(true);
+  const [showAllStreetNames, setShowAllStreetNames] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 320, height: 360 });
@@ -385,7 +386,7 @@ export default function OfflineMapCanvas({
             .filter(
               road =>
                 road.name &&
-                (zoom >= 2 ||
+                (showAllStreetNames || zoom >= 2 ||
                   [
                     "motorway",
                     "trunk",
@@ -415,7 +416,7 @@ export default function OfflineMapCanvas({
                     Math.abs(point.x - x) < width / 2 + 24
                   );
                 }) ||
-                labels.size >= 60 ||
+                labels.size >= (showAllStreetNames ? 140 : 60) ||
                 x < width / 2 + 8 ||
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
@@ -499,6 +500,15 @@ export default function OfflineMapCanvas({
         >
           {dark ? "Claro" : "Escuro"}
         </button>
+        <button
+          type="button"
+          aria-label={showAllStreetNames ? "Ocultar nomes das ruas" : "Mostrar nomes de todas as ruas"}
+          aria-pressed={showAllStreetNames}
+          onClick={() => setShowAllStreetNames(value => !value)}
+          className={"absolute right-3 top-[4.25rem] min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (showAllStreetNames ? "bg-[#37e6df] text-[#102028]" : (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]"))}
+        >
+          {showAllStreetNames ? "Ruas: todas" : "Ruas"}
+        </button>
         <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className={"absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>{expanded ? "Reduzir" : "Ampliar"}</button>
         <div className={"pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " + (dark ? "bg-[#162733]/90 text-[#e9ffff]" : "bg-white/90 text-[#27414b]")}>
           <div
@@ -513,7 +523,7 @@ export default function OfflineMapCanvas({
       <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-xs text-[#536760]">
         <span role="status">
           {pack
-            ? `Ruas locais disponíveis · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
+            ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} vias · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
             : failed
               ? "Ruas indisponíveis neste aparelho; pontos e rota continuam disponíveis."
               : "Carregando ruas locais…"}
