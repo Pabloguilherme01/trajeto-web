@@ -43,7 +43,7 @@ describe("unified destination model", () => {
       destination: "UPA Águas Lindas",
       label: "Centro → UPA",
       detail: "Origem preenchida",
-    })).toMatchObject({ id: "route:centro-to-upa", kind: "route", address: "UPA Águas Lindas" });
+    })).toMatchObject({ id: "route:centro-to-upa", kind: "route", address: "UPA Águas Lindas", routeOrigin: "Centro" });
   });
 
   it("aggregates old favorites and new favorites without duplicating an address", () => {
