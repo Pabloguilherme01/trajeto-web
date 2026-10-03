@@ -217,7 +217,7 @@ export function OfflineRoutePreview({
       ? "Mapbox"
       : selected?.source === "osrm"
         ? "OpenStreetMap/OSRM"
-        : "Estimativa local";
+        : "Cálculo local";
   const routeReferences = useMemo(
     () => nearbyRouteReferences(validOrigin, validDestination, routePoints),
     [validOrigin?.lat, validOrigin?.lng, validDestination?.lat, validDestination?.lng, routePoints],
@@ -499,17 +499,6 @@ export function OfflineRoutePreview({
           <p>
             Paradas:{" "}
             {validStops.map((p, i) => `${i + 1}. ${p.name}`).join(" · ")}
-          </p>
-        )}
-        {!livePosition && selected?.distanceMeters != null && (
-          <p className="font-black">
-            {(selected.distanceMeters / 1000).toLocaleString("pt-BR", {
-              maximumFractionDigits: 1,
-            })}{" "}
-            km
-            {selected.durationSeconds != null
-              ? ` · ${Math.ceil(selected.durationSeconds / 60)} min estimados`
-              : ""}
           </p>
         )}
         {selected?.steps?.length ? (
