@@ -733,7 +733,7 @@ export function RouteMap({
   if (forceOffline || livePosition) {
     return (
       <section className="overflow-hidden rounded-2xl border border-white/10" aria-label="Mapa offline da viagem">
-        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} livePosition={livePosition} forceOffline travelMode={travelMode} />
+        <OfflineRoutePreview origin={origin} destination={destination} stops={stops} routes={routes} privateOrigin={privateOrigin} livePosition={livePosition} liveProgress={liveProgress} liveSpeedMps={liveSpeedMps} forceOffline travelMode={travelMode} />
       </section>
     );
   }
