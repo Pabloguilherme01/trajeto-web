@@ -442,7 +442,7 @@ export function OfflineRoutePreview({
     : null;
   const mapControls = (
     <div
-      className="pointer-events-none absolute inset-0"
+      className="pointer-events-none absolute inset-0 z-10"
       role="group"
       aria-label="Controles da viagem"
     >
