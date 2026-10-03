@@ -447,17 +447,18 @@ export default function OfflineMapCanvas({
               <path
                 d={path(geometry)}
                 fill="none"
-                stroke="white"
-                strokeWidth="9"
+                stroke={dark ? "#07191f" : "#ffffff"}
+                strokeWidth="11"
+                strokeOpacity="0.92"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               <path
                 d={path(geometry)}
                 fill="none"
-                stroke={estimated ? "#667a80" : dark ? "#37e6df" : "#1278cc"}
-                strokeWidth="5"
-                strokeDasharray={estimated ? "8 8" : undefined}
+                stroke={estimated ? (dark ? "#819399" : "#718287") : dark ? "#50F3EA" : "#0D7186"}
+                strokeWidth="6"
+                strokeDasharray={estimated ? "9 8" : undefined}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -476,15 +477,16 @@ export default function OfflineMapCanvas({
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
               style={{ left: p.x, top: p.y }}
             >
-              <span className={"grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black text-white shadow-lg " + (marker.id === "destination" ? "bg-[#ff765e]" : marker.id === "live-position" ? "bg-[#37e6df] text-[#102028]" : "bg-[#5b7cff]")}>
+              {marker.id === "live-position" && <span className="pointer-events-none absolute size-10 rounded-full bg-[#50F3EA]/30 motion-safe:animate-ping" />}
+              <span className={"relative grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black shadow-lg " + (marker.id === "destination" ? "bg-[#ff765e] text-white" : marker.id === "live-position" ? "bg-[#50F3EA] text-[#102028]" : marker.id === "origin" ? "bg-[#C7FF3C] text-[#102028]" : "bg-[#5b7cff] text-white")}>
                 {marker.label}
               </span>
-              <span
-                className={"pointer-events-none absolute left-1/2 top-8 max-w-[11rem] -translate-x-1/2 truncate rounded-md px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " + (dark ? "bg-[#101c24]/90 text-[#f2ffff]" : "bg-white/95 text-[#27414b]")}
+              {(marker.id === "origin" || marker.id === "destination" || marker.id === "live-position" || zoom >= 2) && <span
+                className={"pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " + (dark ? "border-white/10 bg-[#101c24]/95 text-[#f2ffff]" : "border-black/5 bg-white/95 text-[#27414b]")}
                 title={marker.name}
               >
                 {marker.name}
-              </span>
+              </span>}
             </button>
           );
         })}
