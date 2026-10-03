@@ -196,3 +196,27 @@ test("Pages: legacy migration keeps the newest safe route for the same destinati
   expect(saved[0].savedAt).toBe("2026-10-01T10:00:00.000Z");
   expect(saved[0].payload.route.distanceMeters).toBe(2000);
 });
+
+test("Pages: recovers an exact saved trip when online geocoding fails", async ({ page }) => {
+  await page.goto("salvos");
+  await page.evaluate(async () => {
+    const open = indexedDB.open("trajeto-offline", 2);
+    open.onupgradeneeded = () => { if (!open.result.objectStoreNames.contains("routes")) open.result.createObjectStore("routes", { keyPath: "id" }); };
+    const db = await new Promise<IDBDatabase>((resolve, reject) => { open.onsuccess = () => resolve(open.result); open.onerror = () => reject(open.error); });
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("routes", "readwrite");
+      tx.objectStore("routes").put({ id: "saved-provider-failure", origin: "Origem apenas salva", destination: "Destino apenas salvo", savedAt: new Date().toISOString(), payload: {
+        route: { origin: { lat: -15.7545, lng: -48.2816 }, destination: { lat: -15.7645, lng: -48.2716 }, distanceLabel: "12 km", distanceMeters: 12000, durationSeconds: 900, polyline: "r`d_B~~teHbwFg_mA", mode: "driving", source: "osrm" },
+        stops: [], anpReferences: [], recommendation: null,
+      } });
+      tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  });
+  await page.route("https://nominatim.openstreetmap.org/**", route => route.abort());
+  await page.goto("planejar?origem=Origem%20apenas%20salva&destino=Destino%20apenas%20salvo");
+  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await expect(page.getByText(/Usando a melhor rota já salva/)).toBeVisible();
+  await expect(page.getByText(/trânsito e horários podem estar desatualizados/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
+});

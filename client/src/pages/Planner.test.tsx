@@ -282,7 +282,7 @@ describe("Planner travel state", () => {
 
   it("reuses an exact saved route automatically in offline planner mode", async () => {
     state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
-    state.listOffline.mockResolvedValueOnce([
+    state.listOffline.mockResolvedValue([
       {
         id: "saved-trip",
         origin: "Casa",
@@ -369,4 +369,60 @@ it("discards a fallback route that finishes after the destination changed", asyn
   await act(async () => finish({ origin: { lat: -15.76, lng: -48.28 }, destination: { lat: -15.79, lng: -48.29 }, distanceMeters: 12000, durationSeconds: 900, polyline: "encoded" }));
   expect(screen.queryByTestId("route-map")).toBeNull();
   expect(state.saveOffline).not.toHaveBeenCalled();
+});
+
+
+it("recovers a saved trip when server and public providers fail online", async () => {
+  state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+  state.publicRoute.mockRejectedValueOnce(new Error("Unavailable"));
+  state.listOffline.mockResolvedValue([{ id: "saved", origin: "Casa", destination: "Trabalho", savedAt: new Date().toISOString(), payload: { ...payload, route: { ...payload.route, mode: "driving" } } }]);
+  render(<Planner />);
+  submit();
+  await screen.findByTestId("route-map");
+  expect(screen.getByText(/trânsito e horários podem estar desatualizados/)).toBeTruthy();
+});
+
+it("waits for saved route storage before falling back to offline calculation", async () => {
+  state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+  let finish!: (value: unknown[]) => void;
+  state.listOffline.mockReturnValue(new Promise(resolve => { finish = resolve; }));
+  render(<Planner />);
+  submit();
+  expect(state.offlineRoute).not.toHaveBeenCalled();
+  await act(async () => finish([{ id: "saved", origin: "Casa", destination: "Trabalho", savedAt: new Date().toISOString(), payload: { ...payload, route: { ...payload.route, mode: "driving" } } }]));
+  await screen.findByTestId("route-map");
+  expect(state.offlineRoute).not.toHaveBeenCalled();
+});
+
+
+it("does not reopen a recovered trip after local data is deleted", async () => {
+  state.mutate.mockRejectedValueOnce(new Error("Unavailable"));
+  state.publicRoute.mockRejectedValueOnce(new Error("Unavailable"));
+  let finish!: (value: unknown[]) => void;
+  state.listOffline.mockResolvedValueOnce([]).mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+  render(<Planner />);
+  submit();
+  await waitFor(() => expect(state.listOffline).toHaveBeenCalledTimes(2));
+  act(() => window.dispatchEvent(new Event(localDataEvent)));
+  await act(async () => finish([{ id: "saved", origin: "Casa", destination: "Trabalho", savedAt: new Date().toISOString(), payload: { ...payload, route: { ...payload.route, mode: "driving" } } }]));
+  expect(screen.queryByTestId("route-map")).toBeNull();
+});
+
+it("unlocks calculation after editing while a public request is pending", async () => {
+  state.staticRuntime = true;
+  state.publicRoute.mockReturnValueOnce(new Promise(() => {}));
+  render(<Planner />);
+  submit();
+  await waitFor(() => expect(screen.getByRole("button", { name: "Calcular rota" }).hasAttribute("disabled")).toBe(true));
+  changeDestination("Hospital");
+  expect(screen.getByRole("button", { name: "Calcular rota" }).hasAttribute("disabled")).toBe(false);
+});
+
+it("continues local routing when saved route storage does not answer", async () => {
+  state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+  state.listOffline.mockReturnValue(new Promise(() => {}));
+  render(<Planner />);
+  submit();
+  await waitFor(() => expect(state.offlineRoute).toHaveBeenCalledWith("Casa", "Trabalho", "driving"), { timeout: 2500 });
+  await screen.findByTestId("route-map");
 });
