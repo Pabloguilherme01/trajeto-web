@@ -7,7 +7,7 @@ test("favorito: planejar preenche o novo destino sem carregar a viagem anterior"
   await page.goto("/salvos", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Aberto na consulta salva")).toBeVisible();
   await page.locator("article").filter({ hasText: "Posto salvo" }).getByRole("link", { name: "Ir até aqui", exact: true }).click();
-  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Rua de teste, Águas Lindas");
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("-15.76,-48.28");
   await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("");
 });
 

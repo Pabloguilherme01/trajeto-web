@@ -1,3 +1,4 @@
+import { isMapPoint } from "@/lib/mapGeometry";
 import type { LocalRoutePreset, ReadyCityRoute } from "@/lib/localRoutePresets";
 import type { MobileDestination } from "@/lib/mobileDestinations";
 import type { MobileStation } from "@/lib/mobileStationStore";
@@ -61,5 +62,5 @@ export function readyRouteDestination(route: ReadyCityRoute): UnifiedDestination
 
 export function destinationNavigationValue(destination: UnifiedDestination) {
   const point = destination.coordinates;
-  return point ? point.lat + "," + point.lng : destination.address;
+  return isMapPoint(point) ? point.lat + "," + point.lng : destination.address;
 }

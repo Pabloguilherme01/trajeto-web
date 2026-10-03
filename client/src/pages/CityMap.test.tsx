@@ -35,7 +35,7 @@ it("filters accent-insensitive destinations and carries the selected destination
   );
   expect(
     decodeURIComponent(String(navigate.mock.calls[0][0]).replace(/\+/g, " "))
-  ).toContain("destino=UPA Mansões Odisseia");
+  ).toContain("destino=-15.77665, -48.27935");
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "xxxxxxxxx" },
   });
