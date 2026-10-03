@@ -259,6 +259,8 @@ it("shows live street guidance and route telemetry while following GPS", () => {
   expect(screen.getByRole("progressbar", { name: "Progresso da viagem" }).getAttribute("aria-valuenow")).toBe("42");
   expect(screen.getByText("GPS bom")).toBeTruthy();
   expect(screen.getByText("Guia completo")).toBeTruthy();
+  expect(screen.getByText("Chegada estimada")).toBeTruthy();
+  expect(screen.getByRole("region", { name: "Painel de navegação" })).toBeTruthy();
 });
 
 it("warns instead of showing misleading guidance when GPS is off route", () => {
