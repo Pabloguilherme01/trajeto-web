@@ -17,6 +17,8 @@ import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { mobileStationDestination } from "@/lib/unifiedDestination";
+import { listUnifiedDestinationFavorites, unifiedDestinationEvent } from "@/lib/unifiedDestinationStore";
+import { mobileDestinationEvent } from "@/lib/mobileDestinations";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
@@ -88,6 +90,9 @@ export default function Planner() {
   const [destinationFilter, setDestinationFilter] = useState("");
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
+  const [favoriteDestinations, setFavoriteDestinations] = useState(() =>
+    listUnifiedDestinationFavorites().filter(item => item.kind !== "station")
+  );
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fallbackReady, setFallbackReady] = useState(false);
   const [publicRoutePending, setPublicRoutePending] = useState(false);
@@ -146,6 +151,19 @@ export default function Planner() {
     return () => {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshFavorites = () =>
+      setFavoriteDestinations(
+        listUnifiedDestinationFavorites().filter(item => item.kind !== "station")
+      );
+    window.addEventListener(unifiedDestinationEvent, refreshFavorites);
+    window.addEventListener(mobileDestinationEvent, refreshFavorites);
+    return () => {
+      window.removeEventListener(unifiedDestinationEvent, refreshFavorites);
+      window.removeEventListener(mobileDestinationEvent, refreshFavorites);
     };
   }, []);
 
@@ -870,7 +888,7 @@ export default function Planner() {
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#BDA5FF]">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedRoutes.length + savedStations.length}</span>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{savedRoutes.length + savedStations.length + favoriteDestinations.length}</span>
             </div>
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70">{savedMessage}</p>}
             {savedRoutes.length > 0 && (
@@ -884,7 +902,7 @@ export default function Planner() {
                 />
               </label>
             )}
-            {savedRoutes.length === 0 && savedStations.length === 0 ? (
+            {savedRoutes.length === 0 && savedStations.length === 0 && favoriteDestinations.length === 0 ? (
               <>
                 <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
                   <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
@@ -941,6 +959,31 @@ export default function Planner() {
                 </div>
               )
             )}
+          </section>
+        )}
+
+        {savedMode && favoriteDestinations.length > 0 && (
+          <section className="mt-5" aria-labelledby="saved-destinations-title">
+            <div className="flex items-end justify-between gap-3">
+              <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#BDA5FF]">Destinos favoritos</p><h2 id="saved-destinations-title" className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">Seus lugares.</h2></div>
+              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-white/35">{favoriteDestinations.length}</span>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {favoriteDestinations.map(item => (
+                <article key={item.id} className="min-w-0 rounded-2xl border border-white/8 bg-[#121B22] p-4">
+                  <p className="truncate text-sm font-black">{item.name}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{item.address}</p>
+                  <div className="mt-3">
+                    <DestinationActions
+                      destination={item}
+                      compact
+                      saved={item.kind === "personal" ? true : undefined}
+                      saveLocked={item.kind === "personal"}
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
           </section>
         )}
 
