@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: anp-aguas-lindas
@@ -19,31 +20,51 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Check pending snapshot PR
+        id: pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=$(gh pr list --base main --head automation/anp-snapshot --state open --json number --jq 'length')
+          echo "exists=$([ "$count" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node
+        if: steps.pending.outputs.exists != 'true'
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Instalar dependências
+        if: steps.pending.outputs.exists != 'true'
         run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
       - name: Sincronizar ANP cadastral
+        if: steps.pending.outputs.exists != 'true'
         run: node scripts/sync-anp-aguas-lindas.mjs
 
       - name: Sincronizar preços ANP por posto
+        if: steps.pending.outputs.exists != 'true'
         run: node scripts/sync-anp-prices-aguas-lindas.mjs
 
-      - name: Commit snapshot
+      - name: Open snapshot PR
+        if: steps.pending.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$(git status --porcelain -- client/public/data/aguas-lindas-anp.json client/public/data/aguas-lindas-anp-precos.json)" ]; then
             echo "ANP sem alterações semânticas."
             exit 0
           fi
+          git checkout -b automation/anp-snapshot
           git config user.name "trajeto-anp-sync"
           git config user.email "actions@users.noreply.github.com"
           git add client/public/data/aguas-lindas-anp.json client/public/data/aguas-lindas-anp-precos.json
           git commit -m "data: sync ANP Águas Lindas"
-          git push
+          git push --force-with-lease origin HEAD:refs/heads/automation/anp-snapshot
+          gh pr create --base main --head automation/anp-snapshot --title "Atualizar snapshots ANP de Águas Lindas" --body "Atualização dos dois snapshots oficiais ANP. Validar os checks do PR antes de squash merge; não há push direto nem merge automático na main."
