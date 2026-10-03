@@ -415,7 +415,7 @@ export default function OfflineMapCanvas({
                     Math.abs(point.x - x) < width / 2 + 24
                   );
                 }) ||
-                labels.size >= 35 ||
+                labels.size >= 60 ||
                 x < width / 2 + 8 ||
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
@@ -477,6 +477,12 @@ export default function OfflineMapCanvas({
             >
               <span className={"grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black text-white shadow-lg " + (marker.id === "destination" ? "bg-[#ff765e]" : marker.id === "live-position" ? "bg-[#37e6df] text-[#102028]" : "bg-[#5b7cff]")}>
                 {marker.label}
+              </span>
+              <span
+                className={"pointer-events-none absolute left-1/2 top-8 max-w-[11rem] -translate-x-1/2 truncate rounded-md px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " + (dark ? "bg-[#101c24]/90 text-[#f2ffff]" : "bg-white/95 text-[#27414b]")}
+                title={marker.name}
+              >
+                {marker.name}
               </span>
             </button>
           );
