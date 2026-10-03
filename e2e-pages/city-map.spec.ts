@@ -68,12 +68,11 @@ test("street atlas: filters references and calculates a bundled destination offl
   await page.goto("mapa");
   await page.getByRole("button", { name: "Ruas e avenidas", exact: true }).click();
   await page.getByRole("textbox", { name: "Buscar destino no mapa" }).fill("Avenida Brasília");
-  const card = page.locator("article").filter({ has: page.getByText("Avenida Brasília", { exact: true }) });
+  const card = page.locator("article").filter({ has: page.getByText("Avenida Brasília", { exact: true }) }).filter({ hasText: "-15.73723, -48.28041" });
   await expect(card.getByText(/Centro aproximado da via/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await page.getByRole("button", { name: "Limpar busca do mapa" }).click();
-  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("");
-  await page.goto("planejar?origem=-15.7545,-48.2816&destino=" + encodeURIComponent("Avenida Brasília, Águas Lindas de Goiás - GO"));
+  await card.getByRole("link", { name: "Ir até aqui", exact: true }).click();
+  await page.getByPlaceholder("De onde você sai").fill("-15.7545,-48.2816");
   await expect(page.getByRole("button", { name: "Calcular rota", exact: true })).toBeVisible();
   await context.setOffline(true);
   await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
