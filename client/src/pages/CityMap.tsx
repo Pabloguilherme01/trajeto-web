@@ -284,7 +284,7 @@ export default function CityMap() {
             </article>
           ))}
         </div>
-        {!destinations.length && (
+        {!destinations.length && !atlasDestinations.length && (
           <p role="status" className="mt-3 text-sm text-white/70">
             Nenhum destino encontrado. Tente outro nome ou categoria.
           </p>
