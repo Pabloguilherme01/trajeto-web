@@ -2,13 +2,27 @@ import { matchesCatalogText } from "./catalogSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 
+export type RouteDestinationCategory = "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
+export type RouteDestinationCategoryFilter = "todos" | RouteDestinationCategory;
+
 export type LocalRoutePreset = {
   id: string;
   label: string;
   detail: string;
   destination: string;
-  category: "saude" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
+  category: RouteDestinationCategory;
 };
+
+export const ROUTE_DESTINATION_CATEGORIES: ReadonlyArray<{ value: RouteDestinationCategoryFilter; label: string }> = [
+  { value: "todos", label: "Tudo" },
+  { value: "saude", label: "Saúde" },
+  { value: "servicos", label: "Serviços" },
+  { value: "compras", label: "Compras" },
+  { value: "transporte", label: "Transporte" },
+  { value: "combustivel", label: "Postos" },
+  { value: "alimentacao", label: "Alimentação" },
+  { value: "centro", label: "Cidade" },
+];
 
 const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "upa", label: "UPA", detail: "Urgência e emergência · 24h", destination: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO", category: "saude" },
@@ -130,8 +144,14 @@ export const ALL_LOCAL_ROUTE_DESTINATIONS = mergeRouteDestinations(
   SUPPORT_DESTINATIONS,
 );
 
-export function getLocalRoutePresets(query = "") {
-  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item => matchesCatalogText(query, [item.label, item.detail, item.destination, item.category]));
+export function getLocalRoutePresets(
+  query = "",
+  category: RouteDestinationCategoryFilter = "todos",
+) {
+  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item =>
+    (category === "todos" || item.category === category) &&
+    matchesCatalogText(query, [item.label, item.detail, item.destination, item.category])
+  );
 }
 
 export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string };
