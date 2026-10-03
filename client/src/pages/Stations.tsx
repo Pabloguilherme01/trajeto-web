@@ -9,7 +9,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { fuelFilterPriceKey, inferredBrand, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
+import { fuelFilterPriceKey, inferredBrand, sameStationIdentity, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
@@ -130,14 +130,27 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const directoryCards = useMemo(() => {
-    const localByCnpj = new Map(aguasLindasCatalog.map(station => [station.cnpj, station]));
     const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
       key: local.cnpj,
       local,
       anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
     }));
     for (const anp of anpStations) {
-      if (localByCnpj.has(anp.cnpj)) continue;
+      const alreadyRepresented = cards.some(item => sameStationIdentity(
+        {
+          cnpj: item.anp?.cnpj || item.local?.cnpj,
+          address: [item.anp?.endereco || item.local?.address, item.anp?.bairro || item.local?.neighborhood].filter(Boolean).join(" "),
+          lat: Number(item.anp?.latitude ?? item.local?.anp?.latitude),
+          lng: Number(item.anp?.longitude ?? item.local?.anp?.longitude),
+        },
+        {
+          cnpj: anp.cnpj,
+          address: [anp.endereco, anp.bairro].filter(Boolean).join(" "),
+          lat: Number(anp.latitude),
+          lng: Number(anp.longitude),
+        },
+      ));
+      if (alreadyRepresented) continue;
       cards.push({ key: anp.cnpj, local: null, anp });
     }
     return cards;
@@ -313,12 +326,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         : station.placeId
           ? "place:" + station.placeId
           : "address:" + normalize(station.address || station.name);
-      const coordinateKey = typeof station.lat === "number" && typeof station.lng === "number"
-        ? "coord:" + station.lat.toFixed(5) + "," + station.lng.toFixed(5)
-        : null;
-      if (seen.has(key) || (coordinateKey && seen.has(coordinateKey))) continue;
+      if (seen.has(key)) continue;
+      const duplicate = merged.some(existing => sameStationIdentity(
+        { cnpj: existing.cnpj, address: existing.address, lat: existing.lat, lng: existing.lng },
+        { cnpj: station.cnpj, address: station.address, lat: station.lat, lng: station.lng },
+      ));
+      if (duplicate) continue;
       seen.add(key);
-      if (coordinateKey) seen.add(coordinateKey);
       merged.push(station);
     }
     return merged;
