@@ -12,6 +12,7 @@ export type UnifiedDestination = {
   detail?: string | null;
   coordinates?: { lat: number; lng: number } | null;
   source?: string | null;
+  routeOrigin?: string | null;
 };
 
 export function routePresetDestination(item: LocalRoutePreset): UnifiedDestination {
@@ -54,6 +55,7 @@ export function readyRouteDestination(route: ReadyCityRoute): UnifiedDestination
     address: route.destination,
     detail: route.detail,
     source: "ready-route",
+    routeOrigin: route.origin,
   };
 }
 
