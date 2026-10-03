@@ -59,6 +59,21 @@ describe("Planner travel state", () => {
     expect(screen.getByText(/Esta viagem pode ser recuperada no aparelho/i)).toBeTruthy();
   });
 
+  it("hides car-only navigation providers when walking is selected", async () => {
+    state.search = "origem=Casa&destino=Trabalho&modo=walking";
+    state.staticRuntime = true;
+    render(<Planner />);
+    expect(screen.getByRole("button", { name: "Abrir Google Maps agora" }).textContent).toContain("a pé");
+    expect(screen.queryByRole("button", { name: "Abrir Waze agora" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Abrir Apple Maps agora" })).toBeNull();
+
+    submit();
+    await screen.findByTestId("route-map");
+    expect(screen.getByRole("button", { name: /Google Maps · a pé/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Waze" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Apple Maps" })).toBeNull();
+  });
+
   it("changes the main action when explicit offline mode is selected", () => {
     state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
     render(<Planner />);
