@@ -5,7 +5,7 @@ import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { groupAnpFuelRows } from "@shared/anpRevendedores";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
-import { BUNDLED_CITY_ATLAS, resolveCityAtlasPoint } from "@/lib/cityAtlas";
+import { BUNDLED_CITY_ATLAS, resolveCityAtlasPoint, atlasDestinationReference, isAmbiguousAtlasStreet } from "@/lib/cityAtlas";
 import { requestOptionalMapboxRoute } from "@/lib/mapboxOptional";
 
 const NOMINATIM_URL =
@@ -509,7 +509,14 @@ function localGeocode(value: string): PublicCoordinate | null {
   };
 }
 
+function requireUnambiguousStreet(value: string) {
+  if (isAmbiguousAtlasStreet(value)) {
+    throw new Error("Há mais de um trecho com esse nome. Escolha a rua no catálogo local e confira a posição no mapa.");
+  }
+}
+
 async function geocode(value: string): Promise<PublicCoordinate> {
+  requireUnambiguousStreet(value);
   const parsedCoordinate = parseCoordinateInput(value);
   if (parsedCoordinate) return parsedCoordinate;
 
@@ -721,6 +728,8 @@ export async function calculateOfflineRoute(
   destinationText: string,
   mode: PublicTravelMode = "driving"
 ): Promise<PublicRoute> {
+  requireUnambiguousStreet(originText);
+  requireUnambiguousStreet(destinationText);
   if (
     !parseCoordinateInput(originText) ||
     !parseCoordinateInput(destinationText)
@@ -1031,6 +1040,7 @@ export function buildPublicRoutePayload(result: PublicRoute) {
     route: {
       origin: result.origin,
       destination: result.destination,
+      destinationReference: atlasDestinationReference(result.destination),
       distanceMeters: result.distanceMeters,
       distanceLabel: publicDistanceLabel(result.distanceMeters),
       durationSeconds: result.durationSeconds,

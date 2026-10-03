@@ -1,3 +1,4 @@
+import { atlasDestinationReference } from "@/lib/cityAtlas";
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
@@ -310,6 +311,7 @@ export function OfflineRoutePreview({
   const validStops = stops.filter(isMapPoint);
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = decodeMapPolyline(selected?.polyline ?? "");
+  const destinationReference = validDestination ? atlasDestinationReference(validDestination) : undefined;
   const guidance = currentRouteGuidance(
     selected?.steps ?? [],
     selected?.distanceMeters,
@@ -746,6 +748,7 @@ export function OfflineRoutePreview({
         }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
+        {destinationReference && <p className="break-words rounded-xl bg-amber-50 p-3 text-xs text-amber-900">{destinationReference.name} · {destinationReference.precision} Fonte: {destinationReference.sourceLabel}</p>}
         <section className="grid grid-cols-2 gap-2" aria-label="Dados da rota">
           <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
             <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">
@@ -1128,6 +1131,7 @@ export function RouteMap({
   };
   const selectedRoute = routes.find(route => route.selected) || routes[0];
   const selectedRoutePoints = decodeMapPolyline(selectedRoute?.polyline ?? "");
+  const destinationReference = destination ? atlasDestinationReference(destination) : undefined;
   const nearbyReferences = [
     ...nearbyRouteReferences(origin, destination, selectedRoutePoints),
     ...businessReferences.map(item => ({
@@ -1265,6 +1269,7 @@ export function RouteMap({
             </div>
           }
         />
+        {destinationReference && <p className="break-words bg-[#10191F] px-3 py-2 text-xs text-amber-100">{destinationReference.name} · {destinationReference.precision} Fonte: {destinationReference.sourceLabel}</p>}
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
           <span>
             <span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />
