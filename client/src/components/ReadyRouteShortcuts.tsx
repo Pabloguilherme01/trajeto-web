@@ -22,7 +22,7 @@ export default function ReadyRouteShortcuts({ compact = false }: { compact?: boo
     <p className="mt-2 text-xs leading-relaxed text-white/70">Escolha um trajeto com origem e destino. Sem internet, distância e caminho são estimativas; confira as ruas antes de sair.</p>
     <div className="mt-3 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-3">
       {LOCAL_READY_ROUTES.map(route => <article key={route.id} className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#16232b] to-[#10181d] p-3 shadow-[0_12px_35px_rgba(0,0,0,.18)] transition-colors hover:border-[#3DE3FF]/30">
-        <button type="button" onClick={() => navigate(buildReusableTripPlannerUrl(route, { auto: true }))} className="min-h-24 w-full text-left active:scale-[.99]">
+        <button type="button" onClick={() => navigate(buildReusableTripPlannerUrl(route, { auto: true }))} className="min-h-24 min-w-0 w-full max-w-full overflow-hidden text-left active:scale-[.99]">
           <span className="flex items-start gap-2.5">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
@@ -39,8 +39,8 @@ export default function ReadyRouteShortcuts({ compact = false }: { compact?: boo
       </article>)}
     </div>
   </>;
-  return <details className="mt-4 rounded-2xl border border-white/10 bg-white/[.02] p-4" data-compact={compact || undefined}>
-    <summary className="min-h-11 cursor-pointer text-sm font-black text-[#3DE3FF]">12 trajetos prontos pela cidade</summary>
+  return <details className="mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[.02] p-4" data-compact={compact || undefined}>
+    <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-[#3DE3FF]">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
     {content}
   </details>;
 }
