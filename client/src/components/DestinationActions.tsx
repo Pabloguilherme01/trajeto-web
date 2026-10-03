@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Bookmark, MapPinned, Navigation, Route } from "lucide-react";
 import { buildGoogleMapsDestinationUrl } from "@/lib/mobileTools";
 import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
