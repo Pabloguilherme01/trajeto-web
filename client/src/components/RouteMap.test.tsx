@@ -185,3 +185,19 @@ describe("RouteMap", () => {
     ).toBe("true");
   });
 });
+
+
+it("focuses endpoints and pauses GPS following when the map is explored", () => {
+  render(<OfflineRoutePreview origin={{ lat: -15.75, lng: -48.29 }} destination={{ lat: -15.76, lng: -48.27 }} livePosition={{ lat: -15.755, lng: -48.28 }} stops={[]} />);
+  fireEvent.click(screen.getByRole("button", { name: "Ver destino" }));
+  expect(parseFloat(screen.getByRole("button", { name: "Selecionar Destino" }).style.left)).toBeCloseTo(160);
+  const follow = screen.getByRole("button", { name: "Seguir GPS" });
+  fireEvent.click(follow);
+  expect(follow.getAttribute("aria-pressed")).toBe("true");
+  expect(parseFloat(screen.getByRole("button", { name: "Selecionar Você agora" }).style.left)).toBeCloseTo(160);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Explorar mapa offline" }), { key: "ArrowRight" });
+  expect(follow.getAttribute("aria-pressed")).toBe("false");
+  fireEvent.click(follow);
+  fireEvent.click(screen.getByRole("button", { name: "Enquadrar" }));
+  expect(follow.getAttribute("aria-pressed")).toBe("false");
+});
