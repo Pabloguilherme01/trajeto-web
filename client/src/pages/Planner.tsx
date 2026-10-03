@@ -15,6 +15,7 @@ import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNav
 import { findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
+import ArrivalTimePlannerCard from "@/components/ArrivalTimePlannerCard";
 import RideOptions from "@/components/RideOptions";
 import DepartureAssistant from "@/components/DepartureAssistant";
 import { getLocalRoutePresets, LOCAL_ROUTE_PRESETS, type RouteDestinationCategory, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
@@ -1189,6 +1190,8 @@ export default function Planner() {
 
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-[#C7FF3C]/[.05] px-3 py-2 text-xs font-bold text-[#D9FF91]">{savedMessage}</p>}
             </div>
+
+            {!liveTrip.active && <ArrivalTimePlannerCard durationSeconds={planned.route.durationSeconds} />}
 
             {showMap && (
               <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22] shadow-[0_22px_60px_rgba(0,0,0,.28)]">
