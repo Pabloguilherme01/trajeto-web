@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { DestinationActions } from "./DestinationActions";
 import { setPreferredNavigationProvider } from "@/lib/mobileTools";
 import { toggleGenericDestinationFavorite } from "@/lib/unifiedDestinationStore";
@@ -15,6 +15,8 @@ const destination = {
 };
 
 describe("DestinationActions", () => {
+  afterEach(() => cleanup());
+
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
