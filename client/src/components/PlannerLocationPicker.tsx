@@ -52,7 +52,25 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   const [visibleCount, setVisibleCount] = useState(8);
   useEffect(() => { setVisibleCount(8); }, [query, kind]);
   const [selected, setSelected] = useState<{ coordinate: string; label: string } | null>(null);
-  const matches = useMemo(() => filterCityAtlas(allPoints, query, "todos"), [allPoints, query]);
+  const matches = useMemo(() => {
+    const normalizedQuery = normalizeCatalogText(query.trim());
+    return filterCityAtlas(allPoints, query, "todos")
+      .map((item, index) => {
+        const normalizedName = normalizeCatalogText(item.name);
+        const relevance = !normalizedQuery
+          ? 3
+          : normalizedName === normalizedQuery
+            ? 0
+            : normalizedName.startsWith(normalizedQuery)
+              ? 1
+              : normalizedName.includes(normalizedQuery)
+                ? 2
+                : 3;
+        return { item, relevance, index };
+      })
+      .sort((a, b) => a.relevance - b.relevance || pickerItemScore(b.item) - pickerItemScore(a.item) || a.index - b.index)
+      .map(entry => entry.item);
+  }, [allPoints, query]);
   const offlineReadyCount = useMemo(() => matches.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng)).length, [matches]);
   return <div className="mt-2 min-w-0 max-w-full overflow-hidden">
     <button type="button" aria-expanded={open} onClick={() => setOpen(v => !v)} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-left text-xs font-bold text-[#C9F7FF]">Escolher {kind} no catálogo local</button>
@@ -66,7 +84,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 text-xs text-[#FFD59B]">Tentar carregar empresas novamente</button>}
       <ul className="mt-2 grid gap-2" aria-label={"Pontos locais para " + kind}>
         {matches.slice(0, visibleCount).map(item => <li key={item.id}>
-          <button type="button" onClick={() => {
+          <button type="button" aria-label={"Selecionar " + item.name} onClick={() => {
             const hasCoordinates = Number.isFinite(item.lat) && Number.isFinite(item.lng);
             const coordinate = kind === "origem" && item.business
               ? item.business.cnpj
