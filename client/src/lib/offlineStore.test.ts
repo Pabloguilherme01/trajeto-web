@@ -64,6 +64,21 @@ describe("offlineStore helpers", () => {
     expect(privateLabel).toContain("destination=Hospital");
   });
 
+  it("keeps the saved travel mode in external Google Maps navigation", () => {
+    const walking = externalNavigationUrl({
+      origin: "Centro",
+      destination: "Hospital",
+      payload: { route: { mode: "walking" } },
+    } as any);
+    const cycling = externalNavigationUrl({
+      origin: "Centro",
+      destination: "Hospital",
+      payload: { route: { mode: "cycling" } },
+    } as any);
+    expect(walking).toContain("travelmode=walking");
+    expect(cycling).toContain("travelmode=bicycling");
+  });
+
   it("shares offline routes as portable planner links without exposing private origins", () => {
     const privateRoute = { origin: "Minha localização", destination: "Hospital" };
     const legacyCoordinateRoute = { origin: "-15.76123, -48.28123", destination: "Hospital" };
