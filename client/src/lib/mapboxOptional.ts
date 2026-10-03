@@ -26,9 +26,7 @@ export function getOptionalMapboxToken() {
   return import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN?.trim() || "";
 }
 
-export function hasOptionalMapboxConfigured(
-  token = getOptionalMapboxToken()
-) {
+export function hasOptionalMapboxConfigured(token = getOptionalMapboxToken()) {
   return token.startsWith("pk.") && token.length > 8;
 }
 
@@ -123,63 +121,67 @@ export async function requestOptionalMapboxRoute(
   if (existing) return existing;
 
   const task = (async () => {
-  const coordinates =
-    origin.lng +
-    "," +
-    origin.lat +
-    ";" +
-    destination.lng +
-    "," +
-    destination.lat;
-  const url = new URL(
-    DIRECTIONS_BASE + "/" + profile + "/" + coordinates
-  );
-  url.searchParams.set("alternatives", "true");
-  url.searchParams.set("overview", "full");
-  url.searchParams.set("geometries", "polyline");
-  url.searchParams.set("steps", "true");
-  url.searchParams.set("language", "pt-BR");
-  url.searchParams.set("access_token", token);
+    const coordinates =
+      origin.lng +
+      "," +
+      origin.lat +
+      ";" +
+      destination.lng +
+      "," +
+      destination.lat;
+    const url = new URL(DIRECTIONS_BASE + "/" + profile + "/" + coordinates);
+    url.searchParams.set("alternatives", "true");
+    url.searchParams.set("overview", "full");
+    url.searchParams.set("geometries", "polyline");
+    url.searchParams.set("steps", "true");
+    url.searchParams.set("language", "pt-BR");
+    url.searchParams.set("access_token", token);
 
-  const data = await fetchMapboxJson<MapboxDirectionsResponse>(url.toString());
-  const route =
-    data.routes
-      ?.filter(
-        item =>
-          Number.isFinite(Number(item.distance)) &&
-          Number(item.distance) > 0 &&
-          Number.isFinite(Number(item.duration)) &&
-          Number(item.duration) > 0 &&
-          typeof item.geometry === "string" &&
-          item.geometry.length > 0
+    const data = await fetchMapboxJson<MapboxDirectionsResponse>(
+      url.toString()
+    );
+    const route =
+      data.routes
+        ?.filter(
+          item =>
+            Number.isFinite(Number(item.distance)) &&
+            Number(item.distance) > 0 &&
+            Number.isFinite(Number(item.duration)) &&
+            Number(item.duration) > 0 &&
+            typeof item.geometry === "string" &&
+            item.geometry.length > 0
+        )
+        .sort((a, b) => Number(a.duration) - Number(b.duration))[0] ?? null;
+
+    if (data.code !== "Ok" || !route) return null;
+
+    const steps = (route.legs ?? [])
+      .flatMap(leg => leg.steps ?? [])
+      .filter(
+        step =>
+          Number.isFinite(Number(step.distance)) &&
+          Number.isFinite(Number(step.duration)) &&
+          typeof step.maneuver?.instruction === "string" &&
+          step.maneuver.instruction.trim().length > 0
       )
-      .sort((a, b) => Number(a.duration) - Number(b.duration))[0] ?? null;
+      .map(step => ({
+        instruction:
+          step.maneuver?.instruction?.trim() || "Continue no trajeto",
+        name: step.name?.trim() || undefined,
+        distanceMeters: Number(step.distance),
+        durationSeconds: Number(step.duration),
+        maneuver:
+          [step.maneuver?.type, step.maneuver?.modifier]
+            .filter(Boolean)
+            .join(":") || undefined,
+      }));
 
-  if (data.code !== "Ok" || !route) return null;
-
-  const steps = (route.legs ?? [])
-    .flatMap(leg => leg.steps ?? [])
-    .filter(step =>
-      Number.isFinite(Number(step.distance)) &&
-      Number.isFinite(Number(step.duration)) &&
-      typeof step.maneuver?.instruction === "string" &&
-      step.maneuver.instruction.trim().length > 0
-    )
-    .map(step => ({
-      instruction: step.maneuver?.instruction?.trim() || "Continue no trajeto",
-      name: step.name?.trim() || undefined,
-      distanceMeters: Number(step.distance),
-      durationSeconds: Number(step.duration),
-      maneuver: [step.maneuver?.type, step.maneuver?.modifier].filter(Boolean).join(":") || undefined,
-    }))
-    .slice(0, 60);
-
-  return {
-    distanceMeters: Number(route.distance),
-    durationSeconds: Number(route.duration),
-    polyline: route.geometry as string,
-    steps,
-  };
+    return {
+      distanceMeters: Number(route.distance),
+      durationSeconds: Number(route.duration),
+      polyline: route.geometry as string,
+      steps,
+    };
   })().catch(error => {
     unavailableUntil = Date.now() + FAILURE_COOLDOWN_MS;
     throw error;

@@ -61,6 +61,7 @@ export default function OfflineMapCanvas({
   markers,
   routePoints = [],
   estimated = false,
+  initialDark = true,
   zoom,
   onZoom,
   resetKey = 0,
@@ -74,6 +75,7 @@ export default function OfflineMapCanvas({
   markers: OfflineMapMarker[];
   routePoints?: MapPoint[];
   estimated?: boolean;
+  initialDark?: boolean;
   zoom: number;
   onZoom: (zoom: number) => void;
   resetKey?: number;
@@ -87,7 +89,7 @@ export default function OfflineMapCanvas({
   const [pack, setPack] = useState<MapPack | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(initialDark);
   const [showAllStreetNames, setShowAllStreetNames] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -106,10 +108,21 @@ export default function OfflineMapCanvas({
           ...validGeometry.filter((_, i) => i % stride === 0),
           validGeometry[validGeometry.length - 1],
         ];
-  const anchors = validMarkers.filter(p => p.id !== "live-position" && p.id !== "device-location");
+  // Nearby references must not zoom the trip out beyond its endpoints.
+  const tripMarkers = validMarkers.filter(
+    p => p.id === "origin" || p.id === "destination" || p.id.startsWith("stop-")
+  );
+  const anchors = tripMarkers.length
+    ? tripMarkers
+    : validMarkers.filter(
+        p => p.id !== "live-position" && p.id !== "device-location"
+      );
   const fingerprint =
-    (anchors.length || geometry.length ? anchors : validMarkers).map(p => `${p.id}:${p.lat}:${p.lng}`).join("|") +
-    ":" + geometry.map(p => `${p.lat}:${p.lng}`).join("|");
+    (anchors.length || geometry.length ? anchors : validMarkers)
+      .map(p => `${p.id}:${p.lat}:${p.lng}`)
+      .join("|") +
+    ":" +
+    geometry.map(p => `${p.lat}:${p.lng}`).join("|");
   useEffect(() => {
     setPan({ x: 0, y: 0 });
     pointers.current.clear();
@@ -153,7 +166,11 @@ export default function OfflineMapCanvas({
     };
   }, []);
   const camera = useMemo(() => {
-    const points = (anchors.length || geometry.length ? [...anchors, ...geometry] : validMarkers).map(world);
+    const points = (
+      anchors.length || geometry.length
+        ? [...anchors, ...geometry]
+        : validMarkers
+    ).map(world);
     if (!points.length) points.push(world({ lat: -15.7545, lng: -48.2816 }));
     let minX = Infinity,
       maxX = -Infinity,
@@ -176,12 +193,18 @@ export default function OfflineMapCanvas({
     if (!focusRequest || lastFocusRequest.current === focusRequest) return;
     lastFocusRequest.current = focusRequest;
     const point = world(focusRequest.point);
-    setPan({ x: -(point.x - camera.x) * camera.scale, y: -(point.y - camera.y) * camera.scale });
+    setPan({
+      x: -(point.x - camera.x) * camera.scale,
+      y: -(point.y - camera.y) * camera.scale,
+    });
   }, [focusRequest, camera]);
   useEffect(() => {
     if (!isMapPoint(followPoint)) return;
     const point = world(followPoint);
-    setPan({ x: -(point.x - camera.x) * camera.scale, y: -(point.y - camera.y) * camera.scale });
+    setPan({
+      x: -(point.x - camera.x) * camera.scale,
+      y: -(point.y - camera.y) * camera.scale,
+    });
   }, [followPoint?.lat, followPoint?.lng, camera]);
   const project = (point: MapPoint) => {
     const p = world(point);
@@ -386,7 +409,8 @@ export default function OfflineMapCanvas({
             .filter(
               road =>
                 road.name &&
-                (showAllStreetNames || zoom >= 2 ||
+                (showAllStreetNames ||
+                  zoom >= 2 ||
                   [
                     "motorway",
                     "trunk",
@@ -456,7 +480,15 @@ export default function OfflineMapCanvas({
               <path
                 d={path(geometry)}
                 fill="none"
-                stroke={estimated ? (dark ? "#819399" : "#718287") : dark ? "#50F3EA" : "#0D7186"}
+                stroke={
+                  estimated
+                    ? dark
+                      ? "#819399"
+                      : "#718287"
+                    : dark
+                      ? "#50F3EA"
+                      : "#1a73e8"
+                }
                 strokeWidth="6"
                 strokeDasharray={estimated ? "8 8" : undefined}
                 strokeLinecap="round"
@@ -477,20 +509,60 @@ export default function OfflineMapCanvas({
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
               style={{ left: p.x, top: p.y }}
             >
-              {marker.id === "live-position" && <span className="pointer-events-none absolute size-10 rounded-full bg-[#50F3EA]/30 motion-safe:animate-ping" />}
-              <span className={"relative grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black shadow-lg " + (marker.id === "destination" ? "bg-[#ff765e] text-white" : marker.id === "live-position" ? "bg-[#50F3EA] text-[#102028]" : marker.id === "origin" ? "bg-[#C7FF3C] text-[#102028]" : "bg-[#5b7cff] text-white")}>
-                {marker.label}
-              </span>
-              {(marker.id === "origin" || marker.id === "destination" || marker.id === "live-position" || zoom >= 2) && <span
-                className={"pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " + (dark ? "border-white/10 bg-[#101c24]/95 text-[#f2ffff]" : "border-black/5 bg-white/95 text-[#27414b]")}
-                title={marker.name}
+              {marker.id === "live-position" && (
+                <span className="pointer-events-none absolute size-10 rounded-full bg-[#50F3EA]/30 motion-safe:animate-ping" />
+              )}
+              <span
+                className={
+                  "relative grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black shadow-lg " +
+                  (marker.id === "destination"
+                    ? "bg-[#ff765e] text-white"
+                    : marker.id === "live-position"
+                      ? "bg-[#1a73e8] text-white"
+                      : marker.id === "origin"
+                        ? "bg-[#C7FF3C] text-[#102028]"
+                        : "bg-[#5b7cff] text-white")
+                }
               >
-                {marker.name}
-              </span>}
+                {marker.id === "live-position" ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 3 21 21 12 17 3 21Z" fill="currentColor" />
+                  </svg>
+                ) : (
+                  marker.label
+                )}
+              </span>
+              {(marker.id === "origin" ||
+                marker.id === "destination" ||
+                marker.id === "live-position" ||
+                zoom >= 2) && (
+                <span
+                  className={
+                    "pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " +
+                    (dark
+                      ? "border-white/10 bg-[#101c24]/95 text-[#f2ffff]"
+                      : "border-black/5 bg-white/95 text-[#27414b]")
+                  }
+                  title={marker.name}
+                >
+                  {marker.name}
+                </span>
+              )}
             </button>
           );
         })}
-        <div className={"pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>
+        <div
+          className={
+            "pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " +
+            (dark
+              ? "bg-[#162733]/95 text-[#e9ffff]"
+              : "bg-white/95 text-[#27414b]")
+          }
+        >
           N ↑ · mapa local
         </div>
         <button
@@ -498,21 +570,57 @@ export default function OfflineMapCanvas({
           aria-label={dark ? "Usar mapa claro" : "Usar mapa escuro"}
           aria-pressed={dark}
           onClick={() => setDark(v => !v)}
-          className={"absolute right-3 top-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}
+          className={
+            "absolute right-3 top-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " +
+            (dark
+              ? "bg-[#162733]/95 text-[#e9ffff]"
+              : "bg-white/95 text-[#27414b]")
+          }
         >
           {dark ? "Claro" : "Escuro"}
         </button>
         <button
           type="button"
-          aria-label={showAllStreetNames ? "Ocultar nomes das ruas" : "Mostrar nomes de todas as ruas"}
+          aria-label={
+            showAllStreetNames
+              ? "Ocultar nomes das ruas"
+              : "Mostrar nomes de todas as ruas"
+          }
           aria-pressed={showAllStreetNames}
           onClick={() => setShowAllStreetNames(value => !value)}
-          className={"absolute right-3 top-[4.25rem] min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (showAllStreetNames ? "bg-[#37e6df] text-[#102028]" : (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]"))}
+          className={
+            "absolute right-3 top-[4.25rem] min-h-11 rounded-xl px-3 text-xs font-bold shadow " +
+            (showAllStreetNames
+              ? "bg-[#37e6df] text-[#102028]"
+              : dark
+                ? "bg-[#162733]/95 text-[#e9ffff]"
+                : "bg-white/95 text-[#27414b]")
+          }
         >
           {showAllStreetNames ? "Ruas: todas" : "Ruas"}
         </button>
-        <button type="button" aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"} aria-pressed={expanded} onClick={() => setExpanded(v => !v)} className={"absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " + (dark ? "bg-[#162733]/95 text-[#e9ffff]" : "bg-white/95 text-[#27414b]")}>{expanded ? "Reduzir" : "Ampliar"}</button>
-        <div className={"pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " + (dark ? "bg-[#162733]/90 text-[#e9ffff]" : "bg-white/90 text-[#27414b]")}>
+        <button
+          type="button"
+          aria-label={expanded ? "Reduzir mapa" : "Ampliar mapa"}
+          aria-pressed={expanded}
+          onClick={() => setExpanded(v => !v)}
+          className={
+            "absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " +
+            (dark
+              ? "bg-[#162733]/95 text-[#e9ffff]"
+              : "bg-white/95 text-[#27414b]")
+          }
+        >
+          {expanded ? "Reduzir" : "Ampliar"}
+        </button>
+        <div
+          className={
+            "pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " +
+            (dark
+              ? "bg-[#162733]/90 text-[#e9ffff]"
+              : "bg-white/90 text-[#27414b]")
+          }
+        >
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
             className="border-x border-b border-[#27414b]"

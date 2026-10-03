@@ -22,7 +22,10 @@ const GEOCODER_FAILURE_COOLDOWN_MS = 120_000;
 const GEOCODER_COOLDOWN_KEY = CACHE_PREFIX + "geocoder-unavailable-until";
 const ROUTER_FAILURE_COOLDOWN_MS = 60_000;
 const ROUTER_COOLDOWN_KEY = CACHE_PREFIX + "router-unavailable-until";
-const geocoderInFlight = new Map<string, Promise<NominatimResult | undefined>>();
+const geocoderInFlight = new Map<
+  string,
+  Promise<NominatimResult | undefined>
+>();
 const routerInFlight = new Map<string, Promise<PublicRoute>>();
 const geocoderMissUntil = new Map<string, number>();
 let geocoderQueue: Promise<void> = Promise.resolve();
@@ -190,7 +193,12 @@ function expandLocalQuery(value: string) {
   const serviceMatches = PUBLIC_SERVICES.filter(service => {
     const name = normalizeSearch(service.name);
     const haystack = normalizeSearch(
-      [service.name, service.address, service.mapQuery, ...(service.keywords ?? [])]
+      [
+        service.name,
+        service.address,
+        service.mapQuery,
+        ...(service.keywords ?? []),
+      ]
         .filter(Boolean)
         .join(" ")
     );
@@ -292,7 +300,9 @@ async function requestPublicGeocoder(query: string) {
       GEOCODER_MIN_INTERVAL_MS
     );
     if (waitMs > 0) {
-      await new Promise<void>(resolve => globalThis.setTimeout(resolve, waitMs));
+      await new Promise<void>(resolve =>
+        globalThis.setTimeout(resolve, waitMs)
+      );
     }
     geocoderLastStartedAt = Date.now();
 
@@ -322,7 +332,10 @@ async function requestPublicGeocoder(query: string) {
   });
 
   geocoderInFlight.set(key, task);
-  geocoderQueue = task.then(() => undefined, () => undefined);
+  geocoderQueue = task.then(
+    () => undefined,
+    () => undefined
+  );
   const cleanup = () => {
     if (geocoderInFlight.get(key) === task) geocoderInFlight.delete(key);
   };
@@ -439,26 +452,22 @@ function localGeocode(value: string): PublicCoordinate | null {
     return { lat: -15.7545, lng: -48.2816 };
   }
 
-  const snapshotMatches = groupAnpFuelRows(getOfflineAnpSnapshot().rows).filter(row => {
-    if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
-      return false;
-    const rowText = normalizeSearch(
-      [
-        row.cnpj,
-        row.razaoSocial,
-        row.endereco,
-        row.bairro,
-        row.municipio,
-      ]
-        .filter(Boolean)
-        .join(" ")
-    );
-    return (
-      rowText === normalized ||
-      rowText.includes(normalized) ||
-      normalized.includes(normalizeSearch(row.razaoSocial || ""))
-    );
-  });
+  const snapshotMatches = groupAnpFuelRows(getOfflineAnpSnapshot().rows).filter(
+    row => {
+      if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
+        return false;
+      const rowText = normalizeSearch(
+        [row.cnpj, row.razaoSocial, row.endereco, row.bairro, row.municipio]
+          .filter(Boolean)
+          .join(" ")
+      );
+      return (
+        rowText === normalized ||
+        rowText.includes(normalized) ||
+        normalized.includes(normalizeSearch(row.razaoSocial || ""))
+      );
+    }
+  );
   if (snapshotMatches.length === 1) {
     return {
       lat: Number(snapshotMatches[0].latitude),
@@ -514,7 +523,11 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     cacheSet(cacheKey, local);
     return local;
   }
-  if (!local && ((typeof navigator !== "undefined" && navigator.onLine === false) || query.replace(/\D/g, "").length === 14)) {
+  if (
+    !local &&
+    ((typeof navigator !== "undefined" && navigator.onLine === false) ||
+      query.replace(/\D/g, "").length === 14)
+  ) {
     await loadBusinessCatalog().catch(() => []);
     const business = resolveBusinessPoint(query);
     if (business) return business;
@@ -624,28 +637,43 @@ function findLocalRouteStops(
     .map(({ corridorKm: _corridorKm, progress: _progress, ...stop }) => stop);
 }
 
-function osrmInstruction(step: NonNullable<NonNullable<NonNullable<OsrmResponse["routes"]>[number]["legs"]>[number]["steps"]>[number]) {
+function osrmInstruction(
+  step: NonNullable<
+    NonNullable<
+      NonNullable<OsrmResponse["routes"]>[number]["legs"]
+    >[number]["steps"]
+  >[number]
+) {
   const type = step.maneuver?.type ?? "";
   const modifier = step.maneuver?.modifier ?? "";
   const street = step.name?.trim();
   const streetSuffix = street ? " em " + street : "";
   const direction =
-    modifier === "left" ? "à esquerda" :
-    modifier === "right" ? "à direita" :
-    modifier === "slight left" ? "levemente à esquerda" :
-    modifier === "slight right" ? "levemente à direita" :
-    modifier === "sharp left" ? "fortemente à esquerda" :
-    modifier === "sharp right" ? "fortemente à direita" :
-    modifier === "uturn" ? "faça o retorno" :
-    "em frente";
+    modifier === "left"
+      ? "à esquerda"
+      : modifier === "right"
+        ? "à direita"
+        : modifier === "slight left"
+          ? "levemente à esquerda"
+          : modifier === "slight right"
+            ? "levemente à direita"
+            : modifier === "sharp left"
+              ? "fortemente à esquerda"
+              : modifier === "sharp right"
+                ? "fortemente à direita"
+                : modifier === "uturn"
+                  ? "faça o retorno"
+                  : "em frente";
 
   if (type === "depart") return "Saia" + streetSuffix;
   if (type === "arrive") return "Chegue ao destino";
-  if (type === "roundabout" || type === "rotary") return "Entre na rotatória" + streetSuffix;
+  if (type === "roundabout" || type === "rotary")
+    return "Entre na rotatória" + streetSuffix;
   if (type === "merge") return "Entre na via " + direction + streetSuffix;
   if (type === "fork") return "Mantenha-se " + direction + streetSuffix;
   if (type === "on ramp") return "Pegue o acesso " + direction + streetSuffix;
-  if (type === "off ramp") return "Saia pelo acesso " + direction + streetSuffix;
+  if (type === "off ramp")
+    return "Saia pelo acesso " + direction + streetSuffix;
   if (type === "turn" || type === "end of road" || type === "continue") {
     return (type === "continue" ? "Siga " : "Vire ") + direction + streetSuffix;
   }
@@ -693,7 +721,11 @@ export async function calculateOfflineRoute(
   destinationText: string,
   mode: PublicTravelMode = "driving"
 ): Promise<PublicRoute> {
-  if (!parseCoordinateInput(originText) || !parseCoordinateInput(destinationText)) await loadBusinessCatalog().catch(() => []);
+  if (
+    !parseCoordinateInput(originText) ||
+    !parseCoordinateInput(destinationText)
+  )
+    await loadBusinessCatalog().catch(() => []);
   const parsedOrigin = parseCoordinateInput(originText);
   const parsedDestination = parseCoordinateInput(destinationText);
   const cachedOrigin = cacheGet<PublicCoordinate>(
@@ -764,7 +796,9 @@ export async function calculatePrivateLocationRoute(
 ): Promise<PublicRoute> {
   const parsedOrigin = parseCoordinateInput(originText);
   if (!parsedOrigin) {
-    throw new Error("A origem privada precisa vir da localização deste aparelho.");
+    throw new Error(
+      "A origem privada precisa vir da localização deste aparelho."
+    );
   }
 
   // Keep the exact GPS fix in memory only. The value used by the local estimate
@@ -776,7 +810,9 @@ export async function calculatePrivateLocationRoute(
   const destination = await geocode(destinationText);
 
   if (haversineMeters(origin, destination) < 20) {
-    throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
+    throw new Error(
+      "Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes."
+    );
   }
 
   // Deliberately do not call OSRM here. Only the destination may need
@@ -792,7 +828,9 @@ export async function calculatePublicRoute(
   const resolvedOrigin = await geocode(originText);
   const destination = await geocode(destinationText);
   if (haversineMeters(resolvedOrigin, destination) < 20) {
-    throw new Error("Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes.");
+    throw new Error(
+      "Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes."
+    );
   }
 
   // Coordinates typed manually can still describe a private starting point.
@@ -870,7 +908,8 @@ export async function calculatePublicRoute(
     // OSRM profiles are fixed when its graph is prepared. Changing the URL to
     // foot/bike cannot turn the configured car graph into a walking/cycle graph.
     // Mapbox above has explicit profiles; otherwise keep these modes estimated.
-    if (mode !== "driving") return buildLocalEstimate(origin, destination, mode);
+    if (mode !== "driving")
+      return buildLocalEstimate(origin, destination, mode);
 
     const now = Date.now();
     if (getRouterUnavailableUntil() > now) {
@@ -904,16 +943,27 @@ export async function calculatePublicRoute(
       const polyline = route?.geometry;
       const steps = (route?.legs ?? [])
         .flatMap(leg => leg.steps ?? [])
-        .filter(step => Number.isFinite(Number(step.distance)) && Number.isFinite(Number(step.duration)))
+        .filter(
+          step =>
+            Number.isFinite(Number(step.distance)) &&
+            Number.isFinite(Number(step.duration))
+        )
         .map(step => ({
           instruction: osrmInstruction(step),
           name: step.name?.trim() || undefined,
           distanceMeters: Number(step.distance),
           durationSeconds: Number(step.duration),
-          maneuver: [step.maneuver?.type, step.maneuver?.modifier].filter(Boolean).join(":") || undefined,
+          maneuver:
+            [step.maneuver?.type, step.maneuver?.modifier]
+              .filter(Boolean)
+              .join(":") || undefined,
         }))
-        .filter(step => step.distanceMeters > 0 || step.durationSeconds > 0)
-        .slice(0, 60);
+        .filter(
+          step =>
+            step.distanceMeters > 0 ||
+            step.durationSeconds > 0 ||
+            step.maneuver?.startsWith("arrive")
+        );
 
       if (
         data.code === "Ok" &&
@@ -949,7 +999,8 @@ export async function calculatePublicRoute(
 
   routerInFlight.set(coordinateKey, task);
   const cleanup = () => {
-    if (routerInFlight.get(coordinateKey) === task) routerInFlight.delete(coordinateKey);
+    if (routerInFlight.get(coordinateKey) === task)
+      routerInFlight.delete(coordinateKey);
   };
   void task.then(cleanup, cleanup);
   return task;

@@ -280,3 +280,53 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     border-radius: 1.5rem;
   }
 }
+
+/* Navigation keeps the map between the turn banner and trip telemetry. */
+.route-navigation[data-live="true"] {
+  display: flex;
+  flex-direction: column;
+}
+.route-navigation[data-live="true"] .route-guidance-panel,
+.route-navigation[data-live="true"] .route-guidance-content {
+  display: contents;
+}
+.route-navigation[data-live="true"] .route-turn-banner {
+  order: 1;
+}
+.route-navigation[data-live="true"] > .offline-map {
+  order: 2;
+}
+.route-navigation[data-live="true"] .route-telemetry {
+  order: 3;
+  background: white;
+}
+.route-navigation[data-live="true"] .route-arrival {
+  order: 4;
+}
+.route-navigation[data-live="true"] .route-map-actions {
+  order: 5;
+  padding-top: 0.75rem;
+}
+.route-navigation[data-live="true"] > .route-map-toolbar {
+  order: 6;
+}
+.route-navigation[data-live="true"] > div:last-child {
+  order: 7;
+}
+.route-navigation .offline-map {
+  border-radius: 0;
+}
+@media (max-width: 640px) {
+  .route-navigation[data-live="true"] .route-telemetry {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .route-navigation[data-live="true"] .route-telemetry > div {
+    padding: 0.65rem 0.4rem;
+  }
+  .route-navigation[data-live="true"] .route-telemetry p {
+    font-size: 0.7rem;
+  }
+  .route-navigation[data-live="true"] .route-telemetry p:first-of-type {
+    font-size: 0.55rem;
+  }
+}
