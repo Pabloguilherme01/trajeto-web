@@ -206,7 +206,7 @@ test("Pages: recovers an exact saved trip when online geocoding fails", async ({
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction("routes", "readwrite");
       tx.objectStore("routes").put({ id: "saved-provider-failure", origin: "Origem apenas salva", destination: "Destino apenas salvo", savedAt: new Date().toISOString(), payload: {
-        route: { origin: { lat: -15.7545, lng: -48.2816 }, destination: { lat: -15.7645, lng: -48.2716 }, distanceMeters: 12000, durationSeconds: 900, polyline: "r`d_B~~teHbwFg_mA", mode: "driving", source: "osrm" },
+        route: { origin: { lat: -15.7545, lng: -48.2816 }, destination: { lat: -15.7645, lng: -48.2716 }, distanceLabel: "12 km", distanceMeters: 12000, durationSeconds: 900, polyline: "r`d_B~~teHbwFg_mA", mode: "driving", source: "osrm" },
         stops: [], anpReferences: [], recommendation: null,
       } });
       tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
