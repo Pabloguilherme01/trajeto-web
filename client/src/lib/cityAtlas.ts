@@ -116,7 +116,7 @@ function categoryForRoute(item: (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number]): 
   return "servicos";
 }
 
-type BundledOfflineRoad = { id: number; kind: string; name: string; points: Array<[number, number]> };
+type BundledOfflineRoad = { id: number; kind: string; name: string; points: number[][] };
 
 function offlineRoadReferenceItems(): CityAtlasItem[] {
   const roads = ((offlineMapData as { roads?: BundledOfflineRoad[] }).roads ?? []).filter(road => road.name.trim() && road.points.length > 0);
@@ -126,9 +126,10 @@ function offlineRoadReferenceItems(): CityAtlasItem[] {
     const current = bestByName.get(key);
     if (!current || road.points.length > current.points.length) bestByName.set(key, road);
   }
-  return [...bestByName.values()].map(road => {
+  return [...bestByName.values()].flatMap(road => {
     const point = road.points[Math.floor((road.points.length - 1) / 2)];
-    return {
+    if (!Array.isArray(point) || point.length < 2 || !finiteCoordinate(point[0], 90) || !finiteCoordinate(point[1], 180)) return [];
+    return [{
       id: "offline-road-" + road.id,
       name: road.name.trim(),
       detail: "Via presente no mapa offline local · ponto central aproximado do trecho mapeado",
@@ -142,7 +143,7 @@ function offlineRoadReferenceItems(): CityAtlasItem[] {
       lng: point[1],
       coordinateKind: "street-midpoint" as const,
       coordinateLabel: "Centro aproximado da via no mapa offline",
-    };
+    }];
   });
 }
 
