@@ -4,6 +4,8 @@ import { Link, useLocation } from "wouter";
 import { MapPin, Search, ShieldCheck } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
 import TileStationMap from "@/components/TileStationMap";
+import { DestinationActions } from "@/components/DestinationActions";
+import { routePresetDestination } from "@/lib/unifiedDestination";
 import {
   LOCAL_GEOCODE_POINTS,
   resolveLocalGeocodePoint,
@@ -207,25 +209,21 @@ export default function CityMap() {
         </h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {destinations.map(item => (
-            <button
+            <article
               key={item.id}
-              type="button"
-              onClick={() => plan(item.destination)}
-              className="flex min-h-24 items-start gap-3 rounded-2xl border border-white/10 bg-gradient-to-br from-[#182a33] to-[#10191f] p-4 text-left transition hover:border-[#C7FF3C]/50"
+              className="min-w-0 rounded-2xl border border-white/10 bg-gradient-to-br from-[#182a33] to-[#10191f] p-4"
             >
-              <MapPin className="mt-1 size-5 shrink-0 text-[#C7FF3C]" />
-              <span className="min-w-0">
-                <span className="block break-words text-sm font-black">
-                  {item.label}
-                </span>
-                <span className="mt-1 block text-xs leading-relaxed text-white/65">
-                  {item.detail}
-                </span>
-                <span className="mt-2 block text-xs font-bold text-[#C7FF3C]">
-                  Planejar viagem →
-                </span>
-              </span>
-            </button>
+              <div className="flex min-w-0 items-start gap-3">
+                <MapPin className="mt-1 size-5 shrink-0 text-[#C7FF3C]" />
+                <div className="min-w-0">
+                  <p className="break-words text-sm font-black">{item.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/65">{item.detail}</p>
+                </div>
+              </div>
+              <div className="mt-3">
+                <DestinationActions destination={routePresetDestination(item)} compact />
+              </div>
+            </article>
           ))}
         </div>
         {!destinations.length && (
