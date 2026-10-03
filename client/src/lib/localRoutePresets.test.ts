@@ -55,6 +55,8 @@ describe("local route presets", () => {
     expect(
       getLocalRoutePresets("UBS").some(item => item.id === "ubs-barragem-ii")
     ).toBe(true);
+    expect(getLocalRoutePresets("odisseia", "saude").some(item => item.id === "upa")).toBe(true);
+    expect(getLocalRoutePresets("odisseia", "compras").some(item => item.id === "upa")).toBe(false);
   });
 });
 
