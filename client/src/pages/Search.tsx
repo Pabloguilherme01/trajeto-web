@@ -36,10 +36,8 @@ import {
   mobilePreferenceEvent,
 } from "@/lib/mobilePreferences";
 import {
-  ALL_LOCAL_ROUTE_DESTINATIONS,
-  getLocalRoutePresets,
 } from "@/lib/localRoutePresets";
-import { NAVIGATION_DESTINATIONS, searchNavigationDestinations } from "@/lib/navigationCatalog";
+import { NAVIGATION_DESTINATIONS } from "@/lib/navigationCatalog";
 import { localDataEvent } from "@/lib/localData";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
 
