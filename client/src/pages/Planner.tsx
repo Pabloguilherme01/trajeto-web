@@ -1063,19 +1063,19 @@ export default function Planner() {
 
         {!savedMode && planned && (
           <section className="mt-5 animate-route-in">
-            <div className="rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[#10191F] p-4 shadow-[0_24px_60px_rgba(0,0,0,.3)] sm:p-5">
+            <div data-route-card className="route-card min-w-0 rounded-[1.6rem] border border-[#C7FF3C]/15 bg-[linear-gradient(145deg,#111C23,#0E171D)] p-4 shadow-[0_24px_60px_rgba(0,0,0,.3)] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[.16em] text-[#C7FF3C]">Rota calculada</p>
-                  <h2 className="mt-1 truncate text-xl font-black">{origin} → {destination}</h2>
+                  <h2 className="mt-1 break-words text-lg font-black leading-tight sm:text-xl">{origin} <span className="text-white/30">→</span> {destination}</h2>
                 </div>
                 <CheckCircle2 className="size-5 shrink-0 text-[#C7FF3C]" />
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-2xl bg-white/[.045] p-3"><RouteIcon className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Distância</p><p className="mt-1 text-sm font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><Navigation className="size-3.5 text-[#C7FF3C]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Tempo</p><p className="mt-1 text-sm font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
-                <div className="rounded-2xl bg-white/[.045] p-3"><RefreshCw className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs font-black uppercase tracking-[.1em] text-white/30">Chegada</p><p className="mt-1 text-sm font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
+              <div className="mt-5 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
+                <div data-route-card className="min-w-0 rounded-2xl border border-[#3DE3FF]/10 bg-[#3DE3FF]/[.035] p-3"><RouteIcon className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Distância</p><p className="mt-1 break-words text-base font-black">{formatDistance(planned.route.distanceMeters)}</p></div>
+                <div data-route-card className="min-w-0 rounded-2xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.035] p-3"><Navigation className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Tempo</p><p className="mt-1 break-words text-base font-black">{formatDuration(planned.route.durationSeconds)}</p></div>
+                <div data-route-card className="min-w-0 rounded-2xl border border-[#FFB86B]/10 bg-[#FFB86B]/[.035] p-3"><RefreshCw className="size-4 text-[#FFB86B]" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-white/40">Chegada</p><p className="mt-1 break-words text-base font-black">{formatArrival(planned.route.durationSeconds)}</p></div>
               </div>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -1091,7 +1091,7 @@ export default function Planner() {
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 {online && activeExperienceMode !== "offline" && <>
                 <button type="button" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Google Maps</button>
                 <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-[#3DE3FF]/30 bg-[#3DE3FF]/[.06] px-3 text-xs font-black text-[#C9F7FF]">Waze</button>
@@ -1100,7 +1100,7 @@ export default function Planner() {
                 <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-white/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
 
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-white/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
@@ -1109,12 +1109,12 @@ export default function Planner() {
             </div>
 
             {showMap && (
-              <section className="mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22]">
+              <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22] shadow-[0_22px_60px_rgba(0,0,0,.28)]">
                 <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
                   <p className="text-xs font-black uppercase tracking-[.15em] text-white/35">Mapa da rota</p>
                   <button type="button" onClick={() => setShowMap(false)} className="text-xs font-bold text-white/45">Fechar</button>
                 </div>
-                <div className="h-[min(68vh,520px)]">
+                <div className="min-h-[430px] h-[min(72vh,620px)] max-w-full overflow-hidden">
                   <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online} travelMode={mode} />
                 </div>
               </section>
@@ -1137,9 +1137,9 @@ export default function Planner() {
                 <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">{publicRouteSource ? "No caminho" : "Paradas encontradas"}</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-xs text-white/30">{publicRouteSource ? "catálogo local · posição estimada no corredor" : "dados desta consulta"}</span></div>
                 <div className="mt-3 space-y-2">
                   {planned.stops.slice(0, 6).map(stop => (
-                    <article key={stop.placeId} className="rounded-2xl border border-white/8 bg-[#121B22] p-4">
+                    <article key={stop.placeId} data-route-card className="min-w-0 rounded-2xl border border-white/8 bg-[linear-gradient(145deg,#121B22,#0E171D)] p-4 shadow-[0_12px_30px_rgba(0,0,0,.18)]">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0"><p className="truncate text-sm font-black">{stop.name}</p><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{stop.address}</p></div>
+                        <div className="min-w-0"><p className="break-words text-sm font-black leading-snug">{stop.name}</p><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/40">{stop.address}</p></div>
                         <Fuel className="size-4 shrink-0 text-[#3DE3FF]" />
                       </div>
                       {stop.priceReference && <p className="mt-2 text-xs font-bold text-[#D9FF91]">Referência ANP: {Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>}
