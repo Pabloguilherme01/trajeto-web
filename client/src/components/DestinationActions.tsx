@@ -49,8 +49,8 @@ export function DestinationActions({
   };
   const mapValue = destinationNavigationValue(destination);
   const isBusiness = /^business-\d{14}$/.test(destination.id);
-  const plannerValue = isBusiness && destination.coordinates ? mapValue : destination.address;
-  const plannerOriginValue = isBusiness && destination.coordinates ? destination.id.slice(9) : plannerValue;
+  const plannerValue = destination.kind !== "personal" ? mapValue : destination.address;
+  const plannerOriginValue = isBusiness && destination.coordinates ? destination.id.slice(9) : destination.address;
 
   const openPreferredMap = () => {
     const provider = getPreferredNavigationProvider();

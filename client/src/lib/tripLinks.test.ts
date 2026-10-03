@@ -80,3 +80,8 @@ describe("trip links", () => {
     })).toBe("UPA Mansões Odisseia, Águas Lindas de Goiás");
   });
 });
+
+it("preserves mapped station coordinates even on a shared street", () => {
+  expect(plannerDestinationFromMapItem({ name: "Posto", address: "BR-070", source: "ANP", lat: -15.76, lng: -48.28 })).toBe("-15.76, -48.28");
+  expect(plannerDestinationFromMapItem({ name: "Posto", address: "BR-070", source: "ANP", lat: 100, lng: -48.28 })).toBe("Posto, BR-070");
+});

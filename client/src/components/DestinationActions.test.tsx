@@ -59,3 +59,19 @@ describe("DestinationActions", () => {
   });
 
 });
+
+afterEach(() => cleanup());
+
+it("passes public place coordinates to the planner while preserving a named origin", () => {
+  render(<DestinationActions destination={destination} />);
+  const to = new URL(screen.getByRole("link", { name: /Ir até aqui/i }).getAttribute("href")!, "https://trajeto.local");
+  const from = new URL(screen.getByRole("link", { name: /Ir daqui/i }).getAttribute("href")!, "https://trajeto.local");
+  expect(to.searchParams.get("destino")).toBe("-15.761,-48.281");
+  expect(from.searchParams.get("origem")).toBe(destination.address);
+});
+
+it("falls back to the address for invalid destination coordinates", () => {
+  render(<DestinationActions destination={{ ...destination, coordinates: { lat: NaN, lng: -48 } }} />);
+  const to = new URL(screen.getByRole("link", { name: /Ir até aqui/i }).getAttribute("href")!, "https://trajeto.local");
+  expect(to.searchParams.get("destino")).toBe(destination.address);
+});

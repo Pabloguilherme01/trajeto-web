@@ -1,3 +1,4 @@
+import { isMapPoint } from "@/lib/mapGeometry";
 import { appUrl } from "@/lib/appUrl";
 import { privateOriginForUrl } from "@/lib/locationPrivacy";
 
@@ -13,7 +14,7 @@ export type PlannerMapDestination = {
 };
 
 export function plannerDestinationFromMapItem(item: PlannerMapDestination) {
-  if (item.coordinateKind === "area-reference" && Number.isFinite(item.lat) && Number.isFinite(item.lng)) return item.lat + ", " + item.lng;
+  if (isMapPoint({ lat: item.lat!, lng: item.lng! })) return item.lat + ", " + item.lng;
   const address = item.address.trim();
   const name = item.name?.trim() ?? "";
   return item.source === "ANP" && name
