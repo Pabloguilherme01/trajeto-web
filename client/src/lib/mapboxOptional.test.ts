@@ -33,7 +33,17 @@ it("uses the traffic-aware Mapbox driving profile with privacy-safe request opti
     new Response(
       JSON.stringify({
         code: "Ok",
-        routes: [{ distance: 3769, duration: 413, geometry: "mapbox-polyline" }],
+        routes: [{
+          distance: 3769,
+          duration: 413,
+          geometry: "mapbox-polyline",
+          legs: [{
+            steps: [
+              { distance: 120, duration: 25, name: "Avenida JK", maneuver: { instruction: "Siga pela Avenida JK", type: "depart" } },
+              { distance: 850, duration: 90, name: "BR-070", maneuver: { instruction: "Vire à direita na BR-070", type: "turn", modifier: "right" } },
+            ],
+          }],
+        }],
       }),
       { status: 200 }
     )
@@ -51,6 +61,10 @@ it("uses the traffic-aware Mapbox driving profile with privacy-safe request opti
     distanceMeters: 3769,
     durationSeconds: 413,
     polyline: "mapbox-polyline",
+    steps: [
+      { instruction: "Siga pela Avenida JK", name: "Avenida JK", distanceMeters: 120, durationSeconds: 25, maneuver: "depart" },
+      { instruction: "Vire à direita na BR-070", name: "BR-070", distanceMeters: 850, durationSeconds: 90, maneuver: "turn:right" },
+    ],
   });
 
   const [rawUrl, options] = fetchMock.mock.calls[0];
@@ -58,6 +72,8 @@ it("uses the traffic-aware Mapbox driving profile with privacy-safe request opti
   expect(url.pathname).toContain("/directions/v5/mapbox/driving-traffic/");
   expect(url.searchParams.get("geometries")).toBe("polyline");
   expect(url.searchParams.get("alternatives")).toBe("true");
+  expect(url.searchParams.get("steps")).toBe("true");
+  expect(url.searchParams.get("language")).toBe("pt-BR");
   expect(url.searchParams.get("access_token")).toBe(testToken);
   expect(options).toMatchObject({
     credentials: "omit",
@@ -93,6 +109,7 @@ it("selects the fastest valid Mapbox alternative instead of trusting provider or
     distanceMeters: 4100,
     durationSeconds: 430,
     polyline: "faster",
+    steps: [],
   });
 });
 
