@@ -34,8 +34,8 @@ describe("DestinationActions", () => {
 
   it("synchronizes the saved state when another surface changes the same destination", () => {
     render(<DestinationActions destination={destination} />);
-    expect(screen.getByRole("button", { name: /salvar offline/i })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: /salvar offline/i }).getAttribute("aria-pressed")).toBe("false");
     toggleGenericDestinationFavorite(destination);
-    expect(screen.getByRole("button", { name: /salvo offline/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /salvo offline/i }).getAttribute("aria-pressed")).toBe("true");
   });
 });
