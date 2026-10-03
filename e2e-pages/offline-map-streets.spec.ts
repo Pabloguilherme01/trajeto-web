@@ -70,3 +70,25 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await expect(page.getByText("online", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
 });
+
+test("Pages: selects both endpoints and calculates every travel mode from the offline catalog", async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("mapa");
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await context.setOffline(true);
+  await page.goto("planejar?experiencia=offline");
+  await page.getByRole("button", { name: "Escolher origem no catálogo local", exact: true }).click();
+  await page.getByRole("textbox", { name: "Buscar origem local", exact: true }).fill("Avenida Brasília");
+  await page.getByRole("list", { name: "Pontos locais para origem", exact: true }).getByRole("button").first().click();
+  await page.getByRole("button", { name: "Escolher destino no catálogo local", exact: true }).click();
+  await page.getByRole("textbox", { name: "Buscar destino local", exact: true }).fill("HEAL");
+  await page.getByRole("list", { name: "Pontos locais para destino", exact: true }).getByRole("button").first().click();
+  for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
+    await page.getByRole("button", { name: mode, exact: true }).click();
+    await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+    await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
+    await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
