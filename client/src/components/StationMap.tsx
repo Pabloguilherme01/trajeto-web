@@ -18,6 +18,7 @@ export type StationMapItem = {
   lng?: number;
   cnpj?: string | null;
   brand?: string | null;
+  coordinateKind?: "mapped-point" | "street-midpoint";
   source?: "ANP" | "Google" | "local";
 };
 

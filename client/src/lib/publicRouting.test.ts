@@ -699,3 +699,17 @@ describe("public routing fallback", () => {
     expect(payload.traffic.detail).toMatch(/driving-traffic/i);
   });
 });
+
+
+it("calculates an offline route to a bundled street midpoint without querying a provider", async () => {
+  const fetch = vi.fn();
+  vi.stubGlobal("fetch", fetch);
+  const route = await calculateOfflineRoute("-15.7545,-48.2816", "Avenida Brasília, Águas Lindas de Goiás - GO");
+  expect(route.destination).toEqual({ lat: -15.7372345, lng: -48.2804074 });
+  expect(route.source).toBe("local-estimate");
+  expect(fetch).not.toHaveBeenCalled();
+});
+
+it("does not turn a numbered street address into the bundled street midpoint", async () => {
+  await expect(calculateOfflineRoute("-15.7545,-48.2816", "Avenida Brasília, 99999, Águas Lindas de Goiás - GO")).rejects.toThrow(/preparada/);
+});

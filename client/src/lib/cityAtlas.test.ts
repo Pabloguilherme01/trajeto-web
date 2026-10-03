@@ -119,3 +119,22 @@ it("does not mistake an approximate street midpoint for a numbered address", () 
   expect(resolveCityAtlasPoint(value, "Rua Teste")).toEqual({ lat: -15.75, lng: -48.28 });
   expect(resolveCityAtlasPoint(value, "Rua Teste, 100, Águas Lindas de Goiás - GO")).toBeNull();
 });
+
+
+it("retains coordinate provenance when normalizing and revalidating the atlas", () => {
+  const value = snapshot();
+  Object.assign(value.items[0], { lat: -15.75, lng: -48.28, coordinateKind: "street-midpoint", coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02" });
+  const once = normalizeCityAtlasSnapshot(value)!;
+  const twice = normalizeCityAtlasSnapshot(once)!;
+  expect(twice.items).toHaveLength(1);
+  expect(twice.items[0].coordinateKind).toBe("street-midpoint");
+  expect(twice.items[0].coordinateSourceId).toBe("official");
+});
+
+it("keeps identically named streets at different positions ambiguous", () => {
+  const value = snapshot();
+  Object.assign(value.items[0], { name: "Rua Um", address: "Rua Um", destination: "Rua Um", lat: -15.75, lng: -48.28, coordinateKind: "street-midpoint", coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02" });
+  value.items.push({ ...value.items[0], id: "second-street", lat: -15.78 });
+  expect(buildCityAtlas(value).filter(item => item.name === "Rua Um")).toHaveLength(2);
+  expect(resolveCityAtlasPoint(value, "Rua Um")).toBeNull();
+});

@@ -1,3 +1,4 @@
+import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
@@ -28,6 +29,9 @@ export type CityAtlasItem = {
   keywords?: string[];
   lat?: number;
   lng?: number;
+  coordinateKind?: "mapped-point" | "street-midpoint";
+  coordinateSourceId?: string;
+  coordinateVerifiedAt?: string;
 };
 
 export type CityAtlasSnapshot = {
@@ -55,6 +59,7 @@ export type CityAtlasSnapshot = {
     keywords?: string[];
     lat?: number;
     lng?: number;
+    coordinateKind?: "mapped-point" | "street-midpoint";
     coordinateSourceId?: string;
     coordinateVerifiedAt?: string;
   }>;
@@ -189,6 +194,7 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
       typeof item.coordinateVerifiedAt !== "string" ||
       !Number.isFinite(Date.parse(item.coordinateVerifiedAt))
     )) return [];
+    if (item.coordinateKind !== undefined && !["mapped-point", "street-midpoint"].includes(String(item.coordinateKind))) return [];
     return [{
       id: item.id,
       name: item.name,
@@ -201,6 +207,9 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
       keywords: Array.isArray(item.keywords) ? item.keywords.filter((keyword): keyword is string => typeof keyword === "string").slice(0, 20) : undefined,
       lat: typeof item.lat === "number" ? item.lat : undefined,
       lng: typeof item.lng === "number" ? item.lng : undefined,
+      coordinateKind: item.coordinateKind as "mapped-point" | "street-midpoint" | undefined,
+      coordinateSourceId: typeof item.coordinateSourceId === "string" ? item.coordinateSourceId : undefined,
+      coordinateVerifiedAt: typeof item.coordinateVerifiedAt === "string" ? item.coordinateVerifiedAt : undefined,
     }];
   });
 
@@ -212,6 +221,8 @@ export function normalizeCityAtlasSnapshot(value: unknown): CityAtlasSnapshot | 
     items,
   };
 }
+
+export const BUNDLED_CITY_ATLAS = normalizeCityAtlasSnapshot(cityAtlasData);
 
 export async function loadCityAtlasSnapshot(): Promise<CityAtlasSnapshot | null> {
   try {
@@ -243,11 +254,17 @@ function supplementalItems(snapshot: CityAtlasSnapshot | null): CityAtlasItem[] 
       keywords: item.keywords,
       lat: item.lat,
       lng: item.lng,
+      coordinateKind: item.coordinateKind,
+      coordinateSourceId: item.coordinateSourceId,
+      coordinateVerifiedAt: item.coordinateVerifiedAt,
     };
   });
 }
 
 function identity(item: CityAtlasItem) {
+  if (item.coordinateKind === "street-midpoint") {
+    return normalizeCatalogText(item.name) + "|" + item.lat + "|" + item.lng;
+  }
   return normalizeCatalogText(item.name)
     .replace(/\b(escola municipal|colegio estadual|colegio|escola|creche municipal|creche)\b/g, "")
     .replace(/\s+/g, " ")
@@ -276,7 +293,7 @@ export function resolveCityAtlasPoint(
       .filter((field): field is string => Boolean(field))
       .map(normalizeCatalogText);
     // A street midpoint cannot locate a specific house, quadra or lote.
-    if (item.sourceLabel.includes("referência aproximada")) {
+    if (item.coordinateKind === "street-midpoint" || item.sourceLabel.includes("referência aproximada")) {
       return fields.some(field => field === query);
     }
     return fields.some(field =>

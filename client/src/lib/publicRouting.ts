@@ -4,6 +4,7 @@ import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { groupAnpFuelRows } from "@shared/anpRevendedores";
 import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
+import { BUNDLED_CITY_ATLAS, resolveCityAtlasPoint } from "@/lib/cityAtlas";
 import { requestOptionalMapboxRoute } from "@/lib/mapboxOptional";
 
 const NOMINATIM_URL =
@@ -421,6 +422,9 @@ function localGeocode(value: string): PublicCoordinate | null {
   const preparedPoint = resolveLocalGeocodePoint(value);
   if (preparedPoint) return preparedPoint;
 
+  const atlasPoint = resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, value);
+  if (atlasPoint) return atlasPoint;
+
   // A city-qualified street, hospital or station is never the city centre.
   const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
   if (
@@ -503,14 +507,14 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   if (!query) throw new Error("Origem ou destino vazio.");
 
   const cacheKey = geocodeCacheKey(query);
-  const cached = cacheGet<PublicCoordinate>(cacheKey);
-  if (isCoordinate(cached)) return cached;
-
+  // Versioned local coordinates take precedence over a stale provider cache.
   const local = localGeocode(query);
   if (local) {
     cacheSet(cacheKey, local);
     return local;
   }
+  const cached = cacheGet<PublicCoordinate>(cacheKey);
+  if (isCoordinate(cached)) return cached;
 
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
     throw new Error(
