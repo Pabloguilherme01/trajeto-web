@@ -130,8 +130,25 @@ export function OfflineRoutePreview({
   const validStops = stops.filter(isMapPoint);
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = decodeMapPolyline(selected?.polyline ?? "");
+  const routeReferences = useMemo(
+    () => nearbyRouteReferences(validOrigin, validDestination, routePoints),
+    [validOrigin?.lat, validOrigin?.lng, validDestination?.lat, validDestination?.lng, routePoints],
+  );
+  const nearbyNamedPlaces = [
+    ...nearbyBusinesses.map(item => ({
+      id: item.id,
+      name: item.name,
+      detail: item.precision ? "Catálogo local · " + item.precision : "Empresa próxima ao destino",
+    })),
+    ...routeReferences.map(item => ({
+      id: item.id,
+      name: item.name,
+      detail: item.address,
+    })),
+  ].filter((item, index, list) => list.findIndex(candidate => candidate.id === item.id) === index).slice(0, 8);
   const markers = [
     ...nearbyBusinesses,
+    ...routeReferences.map(point => ({ ...point, label: "R" })),
     ...(isMapPoint(livePosition) ? [{ ...livePosition, id: "live-position", name: "Você agora", label: "GPS" }] : []),
     ...(validOrigin
       ? [{ ...validOrigin, id: "origin", name: "Origem", label: "A" }]
@@ -207,6 +224,12 @@ export function OfflineRoutePreview({
           Enquadrar
         </button>
       </div>
+      <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs font-bold text-[#52675e]">
+        <span className="rounded-full bg-[#163840] px-2.5 py-1 text-white">
+          {livePosition ? "GPS ao vivo neste aparelho" : selected?.source === "local-estimate" || forceOffline ? "Mapa local/offline" : "Rota pelas ruas"}
+        </span>
+        <span>{routePoints.length ? "Geometria da rota disponível" : "Sem geometria viária confirmada"}</span>
+      </div>
       <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
         {validOrigin && <button type="button" onClick={() => focus(validOrigin)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver origem</button>}
         {validDestination && <button type="button" onClick={() => focus(validDestination)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver destino</button>}
@@ -226,6 +249,22 @@ export function OfflineRoutePreview({
         onSelect={marker => { setSelectedPoint(marker.name + (nearbyBusinesses.find(item => item.id === marker.id)?.precision ? " · " + nearbyBusinesses.find(item => item.id === marker.id)?.precision : "")); focus(marker); }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
+        {nearbyNamedPlaces.length > 0 && (
+          <section className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3" aria-labelledby="nearby-places-title">
+            <div className="flex items-center justify-between gap-3">
+              <p id="nearby-places-title" className="text-xs font-black uppercase tracking-[.12em] text-[#365E51]">Lugares próximos e referências</p>
+              <span className="rounded-full bg-white px-2 py-1 text-[0.65rem] font-black text-[#56766A]">{nearbyNamedPlaces.length}</span>
+            </div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {nearbyNamedPlaces.map(place => (
+                <div key={place.id} className="min-w-0 rounded-xl border border-[#D7E5D8] bg-white px-3 py-2">
+                  <p className="truncate text-xs font-black text-[#163840]">{place.name}</p>
+                  <p className="mt-0.5 break-words text-[0.68rem] text-[#607169]">{place.detail}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
         {nearbyBusinesses.length > 0 && <p className="text-xs text-[#607169]">{nearbyBusinesses.length} empresas próximas ao destino · referências aproximadas do catálogo local</p>}
         {selectedPoint && <p className="font-black">{selectedPoint}</p>}
         <p>
