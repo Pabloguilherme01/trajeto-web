@@ -450,18 +450,10 @@ export function OfflineRoutePreview({
         onSelect={marker => { setSelectedPoint(marker.name + (nearbyBusinesses.find(item => item.id === marker.id)?.precision ? " · " + nearbyBusinesses.find(item => item.id === marker.id)?.precision : "")); focus(marker); }}
       />
       <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
-        <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Dados da rota">
+        <section className="grid grid-cols-2 gap-2" aria-label="Dados da rota">
           <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Fonte</p>
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Fonte da rota</p>
             <p className="mt-1 break-words text-xs font-black">{routeSourceLabel}</p>
-          </div>
-          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Distância</p>
-            <p className="mt-1 break-words text-xs font-black">{compactDistance(selected?.distanceMeters)}</p>
-          </div>
-          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Tempo calculado</p>
-            <p className="mt-1 break-words text-xs font-black">{compactDuration(selected?.durationSeconds)}</p>
           </div>
           <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
             <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Guia</p>
