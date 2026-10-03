@@ -130,6 +130,21 @@ function compactDuration(seconds: number | null | undefined) {
   }
   return minutes + " min";
 }
+
+function arrivalTime(seconds: number | null | undefined) {
+  if (!Number.isFinite(seconds)) return "—";
+  return new Date(Date.now() + Math.max(0, Number(seconds)) * 1000).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function gpsQuality(accuracy: number | null | undefined) {
+  if (!Number.isFinite(accuracy)) return "GPS ativo";
+  if (Number(accuracy) <= 20) return "GPS bom";
+  if (Number(accuracy) <= 50) return "GPS moderado";
+  return "GPS impreciso";
+}
 type RoutePreview = {
   id: string;
   polyline: string | null;
@@ -190,6 +205,12 @@ export function OfflineRoutePreview({
     selected?.distanceMeters,
     liveProgress?.distanceMeters,
   );
+  const progressPercent =
+    Number.isFinite(selected?.distanceMeters) &&
+    Number(selected?.distanceMeters) > 0 &&
+    Number.isFinite(liveProgress?.distanceMeters)
+      ? Math.max(0, Math.min(100, Math.round((1 - Number(liveProgress?.distanceMeters) / Number(selected?.distanceMeters)) * 100)))
+      : null;
   const routeSourceLabel =
     selected?.source === "mapbox"
       ? "Mapbox"
@@ -315,60 +336,101 @@ export function OfflineRoutePreview({
         </div>
       )}
       {livePosition && (
-        <section className="border-b border-black/10 bg-white p-3" aria-label="Guia da rota em andamento">
-          {liveProgress?.offRoute ? (
-            <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-[#D98B4B]/30 bg-[#FFF3E8] p-3 text-[#70401D]">
-              <AlertTriangle className="mt-0.5 size-5 shrink-0" />
-              <div className="min-w-0">
-                <p className="font-black">Fora do trajeto calculado</p>
-                <p className="mt-1 break-words text-xs">O GPS está distante da geometria da rota. Recalcule antes de confiar na próxima rua.</p>
-              </div>
-            </div>
-          ) : guidance ? (
-            <div className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3">
-              <div className="flex min-w-0 items-start gap-3">
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#163840] text-white"><Navigation2 className="size-5" /></span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-[#56766A]">Próxima orientação</p>
-                  <p className="mt-1 break-words text-base font-black text-[#163840]">{guidance.step.instruction}</p>
-                  {guidance.step.name && <p className="mt-1 break-words text-xs font-bold text-[#365E51]">Via: {guidance.step.name}</p>}
-                  <p className="mt-1 text-xs text-[#607169]">Em aproximadamente {compactDistance(guidance.distanceToManeuver)}</p>
-                  {guidance.nextStep && <p className="mt-2 break-words text-xs text-[#607169]">Depois: {guidance.nextStep.instruction}</p>}
+        <section className="border-b border-black/10 bg-[#F7FAF7] p-3 sm:p-4" aria-label="Painel de navegação">
+          <div className="overflow-hidden rounded-[1.35rem] border border-[#163840]/15 bg-white shadow-[0_14px_34px_rgba(22,56,64,0.12)]">
+            {liveProgress?.offRoute ? (
+              <div className="flex min-w-0 items-start gap-3 bg-[#FFF3E8] p-4 text-[#70401D]">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#D98B4B]/15"><AlertTriangle className="size-6" /></span>
+                <div className="min-w-0">
+                  <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#9A5B28]">Atenção</p>
+                  <p className="mt-1 text-lg font-black">Fora do trajeto calculado</p>
+                  <p className="mt-1 break-words text-xs leading-relaxed">O GPS está distante da geometria da rota. Recalcule antes de confiar na próxima rua.</p>
                 </div>
               </div>
+            ) : guidance ? (
+              <div className="bg-gradient-to-br from-[#163840] to-[#21535A] p-4 text-white sm:p-5">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C] text-[#163840] shadow-lg"><Navigation2 className="size-7" /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Agora</span>
+                      <span className="text-xs font-bold text-white/65">{compactDistance(guidance.distanceToManeuver)}</span>
+                    </div>
+                    <p className="mt-2 break-words text-[clamp(1.05rem,5vw,1.45rem)] font-black leading-tight">{guidance.step.instruction}</p>
+                    {guidance.step.name && <p className="mt-1 break-words text-sm font-bold text-[#DDF7F2]">Via: {guidance.step.name}</p>}
+                  </div>
+                </div>
+                {guidance.nextStep && (
+                  <div className="mt-4 flex min-w-0 items-start gap-2 rounded-2xl border border-white/10 bg-white/[.07] px-3 py-2.5">
+                    <span className="shrink-0 rounded-full bg-white/10 px-2 py-1 text-[0.58rem] font-black uppercase tracking-[.12em] text-white/65">Depois</span>
+                    <p className="min-w-0 break-words text-xs font-bold leading-relaxed text-white/80">{guidance.nextStep.instruction}</p>
+                  </div>
+                )}
+              </div>
+            ) : liveProgress?.nearDestination ? (
+              <div className="p-4">
+                <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#56766A]">Chegada</p>
+                <p className="mt-1 text-lg font-black text-[#163840]">Você está próximo ao destino</p>
+                <p className="mt-1 text-xs text-[#607169]">Confira a entrada correta do local antes de encerrar o acompanhamento.</p>
+              </div>
+            ) : (
+              <div className="p-4 text-sm text-[#607169]">
+                <p className="font-black text-[#163840]">Acompanhamento sem instruções curva a curva</p>
+                <p className="mt-1 text-xs leading-relaxed">O mapa acompanha sua posição, mas não inventa nomes de ruas quando o provedor não forneceu passos confirmados.</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 border-t border-black/10 sm:grid-cols-4">
+              <div className="min-w-0 border-b border-r border-black/10 p-3 sm:border-b-0">
+                <MapPin className="size-4 text-[#2D6A5C]" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Restante</p>
+                <p className="mt-1 break-words text-base font-black text-[#163840]">{compactDistance(liveProgress?.distanceMeters)}</p>
+              </div>
+              <div className="min-w-0 border-b border-black/10 p-3 sm:border-b-0 sm:border-r">
+                <Clock3 className="size-4 text-[#2D6A5C]" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Tempo</p>
+                <p className="mt-1 break-words text-base font-black text-[#163840]">{compactDuration(liveProgress?.durationSeconds)}</p>
+              </div>
+              <div className="min-w-0 border-r border-black/10 p-3">
+                <Gauge className="size-4 text-[#2D6A5C]" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Velocidade</p>
+                <p className="mt-1 break-words text-base font-black text-[#163840]">{Number.isFinite(liveSpeedMps) ? Math.round(Number(liveSpeedMps) * 3.6) + " km/h" : "—"}</p>
+              </div>
+              <div className="min-w-0 p-3">
+                <LocateFixed className="size-4 text-[#2D6A5C]" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">GPS</p>
+                <p className="mt-1 break-words text-sm font-black text-[#163840]">{gpsQuality(livePosition.accuracy)}</p>
+                <p className="text-[0.65rem] text-[#607169]">{Number.isFinite(livePosition.accuracy) ? "±" + Math.round(Number(livePosition.accuracy)) + " m" : "posição ativa"}</p>
+              </div>
             </div>
-          ) : liveProgress?.nearDestination ? (
-            <div className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3 font-black text-[#163840]">Você está próximo ao destino. Confira a entrada correta.</div>
-          ) : (
-            <div className="rounded-2xl border border-black/10 bg-[#F7F9F5] p-3 text-xs text-[#607169]">
-              Esta rota não trouxe passos curva a curva. O mapa acompanha sua posição, mas não inventa instruções de rua.
-            </div>
-          )}
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
-              <MapPin className="size-4" />
-              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Restante</p>
-              <p className="mt-1 break-words text-sm font-black">{compactDistance(liveProgress?.distanceMeters)}</p>
-            </div>
-            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
-              <Clock3 className="size-4" />
-              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Tempo</p>
-              <p className="mt-1 break-words text-sm font-black">{compactDuration(liveProgress?.durationSeconds)}</p>
-            </div>
-            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
-              <Gauge className="size-4" />
-              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">Velocidade</p>
-              <p className="mt-1 break-words text-sm font-black">{Number.isFinite(liveSpeedMps) ? Math.round(Number(liveSpeedMps) * 3.6) + " km/h" : "—"}</p>
-            </div>
-            <div className="min-w-0 rounded-xl border border-black/10 bg-[#F7F9F5] p-2.5">
-              <LocateFixed className="size-4" />
-              <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">GPS</p>
-              <p className="mt-1 break-words text-sm font-black">{Number.isFinite(livePosition.accuracy) ? "±" + Math.round(Number(livePosition.accuracy)) + " m" : "Ativo"}</p>
+
+            <div className="border-t border-black/10 bg-[#F7F9F5] px-3 py-3">
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Chegada estimada</p>
+                  <p className="mt-0.5 text-sm font-black text-[#163840]">{arrivalTime(liveProgress?.durationSeconds)}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">Guia</p>
+                  <p className="mt-0.5 text-xs font-black text-[#163840]">{selected?.steps?.length ? "Guia completo" : "Guia limitado"}</p>
+                </div>
+              </div>
+              {progressPercent !== null && (
+                <div className="mt-3">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-[0.65rem] font-bold text-[#607169]">
+                    <span>Progresso da viagem</span>
+                    <span>{progressPercent}% concluído</span>
+                  </div>
+                  <div role="progressbar" aria-label="Progresso da viagem" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressPercent} className="h-2 overflow-hidden rounded-full bg-[#DCE7DF]">
+                    <div className="h-full rounded-full bg-[#2D6A5C] transition-[width] duration-300" style={{ width: progressPercent + "%" }} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
       )}
-            <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
         {validOrigin && <button type="button" onClick={() => focus(validOrigin)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver origem</button>}
         {validDestination && <button type="button" onClick={() => focus(validDestination)} className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold">Ver destino</button>}
         {isMapPoint(livePosition) && <button type="button" aria-pressed={following} onClick={() => { setFocusRequest(null); setFollowing(v => !v); setZoom(v => Math.max(2, v)); }} className="min-h-11 rounded-xl bg-[#163840] px-3 text-xs font-bold text-white">Seguir GPS</button>}
