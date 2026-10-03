@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, stationSupportsFuel } from "./stationListControls";
+import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, sameStationIdentity, stationSupportsFuel } from "./stationListControls";
 
 describe("station list controls", () => {
   const stations = [
