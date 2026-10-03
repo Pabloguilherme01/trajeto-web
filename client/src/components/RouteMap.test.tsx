@@ -17,7 +17,7 @@ Object.defineProperty(window, "google", {
 });
 
 vi.mock("@/components/Map", () => ({
-  MapView: ({ onMapReady }: { onMapReady: (map: any) => void }) => {
+  MapView: ({ onMapReady, initialCenter }: { onMapReady: (map: any) => void; initialCenter?: { lat: number; lng: number } }) => {
     const map = {
       fitBounds: vi.fn(),
       setMapTypeId: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock("@/components/Map", () => ({
       addListener: vi.fn(() => ({ remove: vi.fn() })),
     };
     React.useEffect(() => onMapReady(map), [onMapReady]);
-    return <div data-testid="map-view" />;
+    return <div data-testid="map-view" data-center={initialCenter ? initialCenter.lat + "," + initialCenter.lng : ""} />;
   },
 }));
 
@@ -167,6 +167,7 @@ describe("RouteMap", () => {
     expect(
       screen.getByRole("region", { name: "Mapa interativo da viagem" })
     ).toBeTruthy();
+    expect(screen.getByTestId("map-view").getAttribute("data-center")).toBe("-15.7545,-48.2816");
     expect(
       screen.getByRole("button", { name: "Enquadrar viagem" })
     ).toBeTruthy();
