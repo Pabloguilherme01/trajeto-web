@@ -152,9 +152,7 @@ describe("RouteMap", () => {
     );
     const summary = screen.getByText(/Instruções pelas ruas · 2 passos/);
     expect(summary).toBeTruthy();
-    const details = summary.closest("details") as HTMLDetailsElement;
-    details.open = true;
-    fireEvent(details, new Event("toggle"));
+    fireEvent.click(summary);
     expect(screen.getByText("Saia em Avenida JK")).toBeTruthy();
     expect(screen.getByText("Vire à direita em BR-070")).toBeTruthy();
   });
