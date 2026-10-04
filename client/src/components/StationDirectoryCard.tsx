@@ -10,6 +10,7 @@ import { getPreferredNavigationProvider, setPreferredNavigationProvider, shareTe
 import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
 import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
 import { destinationNavigationValue } from "@/lib/unifiedDestination";
+import { stationCoordinatePoint } from "@/lib/stationListControls";
 import { buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildAppleMapsDirectionsUrl } from "@/lib/mobileTools";
 
 function normalize(value: string) {
@@ -90,11 +91,8 @@ export function StationDirectoryCard({
     "Águas Lindas de Goiás",
     "GO",
   ].filter(Boolean).join(", ");
-  const coords = Number.isFinite(anp?.latitude) && Number.isFinite(anp?.longitude)
-    ? { lat: Number(anp?.latitude), lng: Number(anp?.longitude) }
-    : Number.isFinite(local?.anp?.latitude) && Number.isFinite(local?.anp?.longitude)
-      ? { lat: Number(local?.anp?.latitude), lng: Number(local?.anp?.longitude) }
-      : null;
+  const coords = stationCoordinatePoint(anp?.latitude, anp?.longitude)
+    ?? stationCoordinatePoint(local?.anp?.latitude, local?.anp?.longitude);
   const distributor = anp?.distribuidora || local?.brand || local?.mapData?.observedBrand || "Bandeira não consolidada";
   const primaryPrice = prices.find(item => item.productKey === "gasolina-comum") ?? prices[0] ?? null;
   const confidence = stationDataConfidence({ anp, local, price: primaryPrice });
