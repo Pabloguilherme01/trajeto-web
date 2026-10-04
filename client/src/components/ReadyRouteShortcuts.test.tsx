@@ -23,7 +23,7 @@ it("finds routes without accents, filters categories and recovers an empty searc
   expect(screen.queryAllByRole("article")).toHaveLength(0);
   fireEvent.click(screen.getByRole("button", { name: "Limpar filtros" }));
   fireEvent.click(screen.getByRole("button", { name: /Ver mais/ }));
-  expect(screen.getAllByRole("article")).toHaveLength(LOCAL_READY_ROUTES.length);
+  expect(screen.getAllByRole("article")).toHaveLength(18);
   fireEvent.click(screen.getByRole("button", { name: "Mostrar menos trajetos" }));
   expect(screen.getAllByRole("article")).toHaveLength(6);
 });
@@ -77,4 +77,15 @@ it("applies an intent without losing departure and calculates with the quick tra
   expect(url.searchParams.get("auto")).toBe("1");
   expect(url.searchParams.has("lat")).toBe(false);
   expect(url.searchParams.has("lng")).toBe(false);
+});
+it("forces offline calculation and preserves the return direction and travel mode", () => {
+  render(<ReadyRouteShortcuts initialMode="cycling" />); open();
+  fireEvent.click(screen.getByRole("button", { name: "Calcular offline" }));
+  expect(screen.getByRole("button", { name: "Calcular offline" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Calcular volta: UPA → Centro (referência)" }));
+  const url = new URL(navigate.mock.calls[0][0], "https://example.com");
+  expect(url.searchParams.get("experiencia")).toBe("offline");
+  expect(url.searchParams.get("modo")).toBe("cycling");
+  expect(url.searchParams.get("origem")).toContain("UPA");
+  expect(url.searchParams.get("auto")).toBe("1");
 });
