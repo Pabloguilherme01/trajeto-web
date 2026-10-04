@@ -191,6 +191,43 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
     return signals;
   }, [initialDistanceKm, savedVehicle, rememberedPrice]);
 
+  const essentialStatus = useMemo(() => {
+    const missing: string[] = [];
+    const automatic: string[] = [];
+    const routeDistanceAvailable = typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0;
+
+    if (!numberValue(distance)) {
+      missing.push("distância");
+      if (!distance.trim() && routeDistanceAvailable) automatic.push("distância da rota");
+    }
+    if (!numberValue(price)) {
+      missing.push("preço");
+      if (!price.trim() && numberValue(rememberedPrice)) automatic.push("último preço");
+    }
+    if (!numberValue(consumption)) {
+      missing.push("consumo");
+      if (!consumption.trim() && savedVehicle) automatic.push("consumo do veículo salvo");
+    }
+
+    return { missing, automatic };
+  }, [distance, price, consumption, initialDistanceKm, rememberedPrice, savedVehicle]);
+
+  const completeMissingEssentials = () => {
+    setRestoredDraft(false);
+    if (!distance.trim() && typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0) {
+      setDistance(String(Number(initialDistanceKm.toFixed(3))));
+    }
+    if (!price.trim() && numberValue(rememberedPrice)) {
+      setPrice(rememberedPrice);
+    }
+
+    const vehicle = getMobileVehicle();
+    if (vehicle) {
+      if (!consumption.trim()) setConsumption(String(vehicle.consumption));
+      if (!tank.trim()) setTank(String(vehicle.tank));
+    }
+  };
+
   const values = useMemo(() => {
     const oneWayDistanceKm = numberValue(distance);
     const pricePerLiter = numberValue(price);
@@ -245,6 +282,27 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
     };
   }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget, roundTrip, tripsPerWeek, recurring]);
 
+  const smartSummary = useMemo(() => {
+    if (!values) return "";
+
+    if (values.currentFuelInvalid || values.currentFuelAboveTank) {
+      return "Corrija o combustível atual para avaliar a necessidade de abastecimento.";
+    }
+
+    if (values.fuelStatus && !values.fuelStatus.canCompleteTrip) {
+      if (values.fuelStatus.tripFitsOneTank) {
+        return `Antes de sair, abasteça pelo menos ${values.fuelStatus.fuelNeededBeforeDeparture.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L. O custo mínimo estimado é ${values.fuelStatus.departureFuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}.`;
+      }
+      return `A viagem ultrapassa um tanque e pode exigir pelo menos ${values.fuelStatus.minimumRefuelStops} parada(s) para abastecer no caminho.`;
+    }
+
+    if (recurring) {
+      return `Neste modo, a projeção é ${values.projection.monthlyCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} por mês para ${tripsPerWeek} viagem(ns) por semana.`;
+    }
+
+    return `Estimativa para ${roundTrip ? "ida e volta" : "só ida"}: ${values.projection.costPerTrip.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}, usando cerca de ${values.fuelNeeded.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L.`;
+  }, [values, recurring, tripsPerWeek, roundTrip]);
+
   return (
     <section
       className={compact
@@ -284,13 +342,13 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[#356451]">1 · Escolha o jeito de usar</p>
-            <p className="mt-1 text-[0.68rem] text-[#71877E]">Os modos só ajustam ida/volta e frequência; seus preços não são inventados.</p>
+            <p className="mt-1 text-[0.68rem] text-[#71877E]">Os modos ajustam ida/volta e frequência. O automático reaproveita apenas dados locais já conhecidos.</p>
           </div>
           {activeMode === "personalizado" && (
             <span className="rounded-full bg-[#FFF7DF] px-2.5 py-1 text-[0.6rem] font-black text-[#6D5200]">Personalizado</span>
           )}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {TRIP_CALCULATOR_MODES.map(mode => {
             const selected = activeMode === mode.id;
             return (
@@ -307,11 +365,34 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
             );
           })}
         </div>
-        <p className="mt-3 rounded-xl bg-[#EAF4EC] px-3 py-2 text-[0.65rem] font-bold leading-relaxed text-[#426C4F]">
-          {autoSignals.length
-            ? "Automação disponível: " + autoSignals.join(" · ") + "."
-            : "Sem dados salvos ainda. Informe os 3 campos abaixo e o Trajeto passa a reaproveitar o que puder neste aparelho."}
-        </p>
+        <div className="mt-3 rounded-xl bg-[#EAF4EC] px-3 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.65rem] font-black text-[#356451]">
+                {essentialStatus.missing.length
+                  ? `Revise ${essentialStatus.missing.length} dado(s): ${essentialStatus.missing.join(", ")}.`
+                  : "Tudo pronto para calcular automaticamente."}
+              </p>
+              <p className="mt-1 text-[0.62rem] font-semibold leading-relaxed text-[#56766A]">
+                {essentialStatus.automatic.length
+                  ? "Posso completar agora: " + essentialStatus.automatic.join(" · ") + "."
+                  : autoSignals.length
+                    ? "Dados locais disponíveis: " + autoSignals.join(" · ") + "."
+                    : "Sem dados locais reaproveitáveis ainda; nada será inventado."}
+              </p>
+            </div>
+            {essentialStatus.automatic.length > 0 && (
+              <button
+                type="button"
+                onClick={completeMissingEssentials}
+                aria-label="Completar campos automaticamente"
+                className="min-h-10 shrink-0 rounded-xl bg-[#163840] px-3 text-[0.62rem] font-black text-white hover:bg-[#234A4A]"
+              >
+                Completar automático
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="mt-4">
@@ -388,6 +469,11 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
               <p className="mt-1 text-lg font-black text-[#163840]">{values.autonomyKm ? values.autonomyKm.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) + " km" : "Opcional"}</p>
               <p className="mt-1 text-[0.58rem] text-[#71877E]">informe o tanque nos ajustes</p>
             </div>
+          </div>
+
+          <div className="mt-3 rounded-xl border border-[#B7D8C1] bg-[#F0F8F2] px-4 py-3" role="status">
+            <p className="text-[0.58rem] font-black uppercase tracking-[0.12em] text-[#56766A]">Resumo inteligente</p>
+            <p className="mt-1 text-sm font-extrabold leading-relaxed text-[#163840]">{smartSummary}</p>
           </div>
 
           {values.fuelStatus && (
