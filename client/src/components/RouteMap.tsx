@@ -247,7 +247,7 @@ type RoutePreview = {
   id: string;
   polyline: string | null;
   selected?: boolean;
-  source?: "mapbox" | "osrm" | "local-estimate";
+  source?: "mapbox" | "osrm" | "offline-road" | "local-estimate";
   trafficIntervals?: TrafficInterval[];
   durationSeconds?: number | null;
   staticDurationSeconds?: number | null;
@@ -469,7 +469,9 @@ export function OfflineRoutePreview({
       ? "Mapbox"
       : selected?.source === "osrm"
         ? "OpenStreetMap/OSRM"
-        : "Cálculo local";
+        : selected?.source === "offline-road"
+          ? "Malha viária offline"
+          : "Cálculo local";
   const routeReferences = useMemo(
     () => nearbyRouteReferences(validOrigin, validDestination, routePoints),
     [
@@ -629,16 +631,20 @@ export function OfflineRoutePreview({
         <span className="rounded-full bg-[#163840] px-2.5 py-1 text-white">
           {livePosition
             ? "GPS ao vivo neste aparelho"
-            : selected?.source === "local-estimate" || forceOffline
-              ? "Mapa local/offline"
-              : "Rota pelas ruas"}
+            : selected?.source === "offline-road"
+              ? "Rota offline pelas ruas"
+              : selected?.source === "local-estimate" || forceOffline
+                ? "Mapa local/offline"
+                : "Rota pelas ruas"}
         </span>
         <span>
-          {selected?.source === "local-estimate"
-            ? "Estimativa em linha reta · sem curvas confirmadas"
-            : routePoints.length
-            ? "Geometria da rota disponível"
-            : "Sem geometria viária confirmada"}
+          {selected?.source === "offline-road"
+            ? "Trajeto calculado na malha salva · sem trânsito ao vivo"
+            : selected?.source === "local-estimate"
+              ? "Estimativa em linha reta · sem curvas confirmadas"
+              : routePoints.length
+                ? "Geometria da rota disponível"
+                : "Sem geometria viária confirmada"}
         </span>
       </div>
       {livePosition && (
@@ -979,7 +985,9 @@ export function OfflineRoutePreview({
         <p>
           {selected?.source === "local-estimate"
             ? "Estimativa entre coordenadas, sem trajeto pelas ruas. Confirme o percurso no aplicativo de navegação."
-            : selected?.source === "mapbox" && routePoints.length
+            : selected?.source === "offline-road" && routePoints.length
+              ? "Traçado calculado na malha viária salva no aparelho. Sentidos de via, bloqueios, obras e trânsito podem ter mudado; siga a sinalização local."
+              : selected?.source === "mapbox" && routePoints.length
               ? "Geometria calculada pelo Mapbox. A linha fica disponível nesta prévia; no modo direção, o tempo pode considerar o trânsito disponível no momento do cálculo."
               : routePoints.length
                 ? "Geometria disponível neste aparelho. Ruas locais salvas de Águas Lindas; sem trânsito ao vivo."
