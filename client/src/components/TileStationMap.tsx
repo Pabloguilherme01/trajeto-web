@@ -186,10 +186,12 @@ export default function TileStationMap({
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    setFollowing(false);
+    if (pointers.current.size >= 2) return;
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
     if (pointers.current.size === 2) {
+      setFollowing(false);
+      setDragging(true);
       const [a, b] = [...pointers.current.values()];
       const rect = event.currentTarget.getBoundingClientRect();
       pinch.current = {
@@ -207,7 +209,6 @@ export default function TileStationMap({
       cx: centerPx.x,
       cy: centerPx.y,
     };
-    setDragging(true);
   };
 
   const drag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -225,6 +226,9 @@ export default function TileStationMap({
     }
     const state = dragRef.current;
     if (!state || state.id !== event.pointerId) return;
+    if (!dragging && Math.hypot(event.clientX - state.x, event.clientY - state.y) < 6) return;
+    setFollowing(false);
+    setDragging(true);
     const next = unproject(
       state.cx - (event.clientX - state.x),
       state.cy - (event.clientY - state.y),
@@ -516,6 +520,7 @@ export default function TileStationMap({
             onClick={recenter}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Recentrar mapa"
+            aria-pressed={following}
           >
             <LocateFixed className="size-4" />
           </button>
@@ -540,6 +545,7 @@ export default function TileStationMap({
               if (!station) return;
               setSelectedId(stationKey(station));
               onSelectStation?.(station);
+              setFollowing(false);
               setCenter({ lat: station.lat, lng: station.lng });
               setZoom(value => Math.max(13, value));
             }}

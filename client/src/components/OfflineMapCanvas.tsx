@@ -100,6 +100,7 @@ export default function OfflineMapCanvas({
   const viewport = useRef<HTMLDivElement>(null);
   const gestureZoom = useRef(zoom);
   gestureZoom.current = zoom;
+  const gestureStarted = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const validMarkers = markers.filter(isMapPoint);
   const validGeometry = routePoints.filter(isMapPoint);
@@ -129,6 +130,7 @@ export default function OfflineMapCanvas({
   useEffect(() => {
     setPan({ x: 0, y: 0 });
     pointers.current.clear();
+    gestureStarted.current = false;
   }, [resetKey, fingerprint]);
   useEffect(() => {
     let cancelled = false;
@@ -282,6 +284,11 @@ export default function OfflineMapCanvas({
   const move = (event: React.PointerEvent<HTMLDivElement>) => {
     const previous = pointers.current.get(event.pointerId);
     if (!previous) return;
+    if (!gestureStarted.current) {
+      if (Math.hypot(event.clientX - previous.x, event.clientY - previous.y) < 6) return;
+      gestureStarted.current = true;
+      onManualInteraction?.();
+    }
     const other = [...pointers.current.entries()].find(
       ([id]) => id !== event.pointerId
     )?.[1];
@@ -317,8 +324,10 @@ export default function OfflineMapCanvas({
       y: event.clientY,
     });
   };
-  const end = (event: React.PointerEvent<HTMLDivElement>) =>
+  const end = (event: React.PointerEvent<HTMLDivElement>) => {
     pointers.current.delete(event.pointerId);
+    if (!pointers.current.size) gestureStarted.current = false;
+  };
   return (
     <div
       className={
@@ -360,14 +369,19 @@ export default function OfflineMapCanvas({
           event.preventDefault();
         }}
         onPointerDown={event => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          if (pointers.current.size >= 2) return;
           if (event.target instanceof Element && event.target.closest("button"))
             return;
-          onManualInteraction?.();
           event.currentTarget.setPointerCapture?.(event.pointerId);
           pointers.current.set(event.pointerId, {
             x: event.clientX,
             y: event.clientY,
           });
+          if (pointers.current.size === 2) {
+            gestureStarted.current = true;
+            onManualInteraction?.();
+          }
         }}
         onPointerMove={move}
         onPointerUp={end}

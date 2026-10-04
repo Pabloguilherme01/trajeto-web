@@ -358,3 +358,34 @@ it("declutters supporting references without hiding endpoints or GPS", async () 
   ).toBeTruthy();
   await screen.findByText(/Ruas locais disponíveis/);
 });
+
+it("does not suspend live following for a tap and ignores a third contact", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const manual = vi.fn();
+  render(<Canvas markers={[{ id: "origin", name: "Origem", label: "A", lat: -15.75, lng: -48.29 }]} zoom={2} onZoom={() => {}} onManualInteraction={manual} />);
+  await screen.findByText(/Ruas locais disponíveis/);
+  const map = screen.getByRole("region", { name: "Explorar mapa offline" });
+  const pointer = (type: string, id: number, x: number) => {
+    const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: 100 });
+    Object.defineProperties(event, { pointerId: { value: id }, pointerType: { value: "touch" } });
+    fireEvent(map, event);
+  };
+  pointer("pointerdown", 1, 100);
+  pointer("pointermove", 1, 102);
+  pointer("pointerup", 1, 102);
+  expect(manual).not.toHaveBeenCalled();
+  pointer("pointerdown", 1, 100);
+  pointer("pointermove", 1, 120);
+  expect(manual).toHaveBeenCalledTimes(1);
+  pointer("pointerdown", 2, 200);
+  const marker = screen.getByRole("button", { name: "Selecionar Origem" });
+  const before = marker.style.left;
+  pointer("pointerdown", 3, 300);
+  pointer("pointermove", 3, 400);
+  pointer("pointerup", 3, 400);
+  expect(marker.style.left).toBe(before);
+  pointer("lostpointercapture", 2, 200);
+  pointer("pointermove", 1, 140);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(parseFloat(before) + 20);
+});

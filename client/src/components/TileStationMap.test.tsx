@@ -198,3 +198,74 @@ it("returns from offline fallback when connectivity is restored", () => {
   expect(screen.queryByText("Mapa local")).toBeNull();
   expect(screen.getByRole("button", { name: "Aumentar zoom" })).toBeTruthy();
 });
+
+function sendPointer(map: HTMLElement, type: string, id: number, x: number, y = 260) {
+  const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: y });
+  Object.defineProperties(event, { pointerId: { value: id }, pointerType: { value: "touch" } });
+  fireEvent(map, event);
+}
+
+it("keeps following after a tap but pauses after a real drag", () => {
+  const stations = [{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }];
+  const view = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  sendPointer(map, "pointerdown", 1, 110);
+  sendPointer(map, "pointermove", 1, 112);
+  sendPointer(map, "pointerup", 1, 112);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = marker.style.left;
+  view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
+  expect(marker.style.left).not.toBe(before);
+  sendPointer(map, "pointerdown", 1, 110);
+  sendPointer(map, "pointermove", 1, 130);
+  sendPointer(map, "pointerup", 1, 130);
+  const panned = marker.style.left;
+  view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2814 }} />);
+  expect(marker.style.left).toBe(panned);
+  expect(screen.getByRole("button", { name: "Recentrar mapa" }).getAttribute("aria-pressed")).toBe("false");
+});
+
+it("ignores an extra finger and recovers from capture loss", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  sendPointer(map, "pointerdown", 1, 110);
+  sendPointer(map, "pointerdown", 2, 210);
+  sendPointer(map, "pointerdown", 3, 300);
+  sendPointer(map, "pointermove", 3, 310);
+  sendPointer(map, "pointerup", 3, 310);
+  sendPointer(map, "pointermove", 1, 60);
+  sendPointer(map, "pointermove", 2, 260);
+  expect(document.querySelector('img[src*="/14/"]')).toBeTruthy();
+  sendPointer(map, "lostpointercapture", 2, 260);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = parseFloat(marker.style.left);
+  sendPointer(map, "pointermove", 1, 80);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(before + 20);
+  sendPointer(map, "pointercancel", 1, 80);
+  const cancelled = marker.style.left;
+  sendPointer(map, "pointermove", 1, 100);
+  expect(marker.style.left).toBe(cancelled);
+});
+
+it("preserves an off-center anchor during double-click zoom", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  vi.spyOn(map, "getBoundingClientRect").mockReturnValue({ left: 40, top: 100 } as DOMRect);
+  fireEvent.doubleClick(map, { clientX: 140, clientY: 300 });
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(220);
+  expect(parseFloat(marker.style.top)).toBeCloseTo(320);
+});
+
+it("keeps an explicitly selected destination in view on GPS updates", () => {
+  const stations = [
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Posto B", address: "Rua B", lat: -15.81, lng: -48.34 },
+  ];
+  const view = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
+  fireEvent.change(screen.getByRole("combobox"), { target: { value: "b" } });
+  view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
+  expect(screen.getByRole("button", { name: "Abrir Posto B" }).style.left).toBe("160px");
+});
