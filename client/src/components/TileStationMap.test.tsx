@@ -283,3 +283,23 @@ it("scales street tiles continuously with the same pinch anchor as markers", () 
   expect(parseFloat((tile.parentElement!.style.transform.match(/scale\(([^)]+)/) ?? [])[1])).toBeCloseTo(1.4);
   expect(screen.getByLabelText("Escala do mapa")).toBeTruthy();
 });
+
+
+it("identifica os pontos A/B e centraliza o destino sem alterar a rota", () => {
+  const stations = [
+    { id: "origin", name: "Origem", address: "Partida", lat: -15.7545, lng: -48.2816 },
+    { id: "destination", name: "Destino", address: "Chegada", lat: -15.7555, lng: -48.2826 },
+  ];
+  render(<TileStationMap stations={stations} selectionLabel="Escolher ponto da viagem" routePoints={stations} />);
+  const framedOrigin = screen.getByRole("button", { name: "Abrir Origem" }).style.left;
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).textContent).toBe("A");
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).textContent).toBe("B");
+  fireEvent.click(screen.getByRole("button", { name: "Ver destino" }));
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).style.left).toBe("160px");
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("img", { name: "Trajeto pelas ruas" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Ver origem" }));
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe("160px");
+  fireEvent.click(screen.getByRole("button", { name: "Recentrar mapa" }));
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe(framedOrigin);
+});

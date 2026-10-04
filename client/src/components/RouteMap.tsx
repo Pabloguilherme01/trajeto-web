@@ -1,5 +1,5 @@
 import { atlasDestinationReference } from "@/lib/cityAtlas";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useId } from "react";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 import MapExplorerFrame from "@/components/MapExplorerFrame";
@@ -255,6 +255,122 @@ type RoutePreview = {
   toll?: { amount: number | null; currency?: string } | null;
   steps?: RouteStep[];
 };
+const travelModeLabels = {
+  driving: "Carro",
+  walking: "A pé",
+  cycling: "Bicicleta",
+  transit: "Transporte público",
+};
+
+function RouteOverview({
+  route,
+  travelMode = "driving",
+}: {
+  route?: RoutePreview;
+  travelMode?: keyof typeof travelModeLabels;
+}) {
+  if (!route) return null;
+  return (
+    <section
+      aria-label="Resumo do percurso no mapa"
+      className="grid min-w-0 grid-cols-3 gap-2 border-b border-black/10 bg-white px-3 py-3 text-[#163840]"
+    >
+      <div className="min-w-0">
+        <p className="text-xs font-semibold text-[#607169]">Distância</p>
+        <p className="mt-1 break-words text-base font-extrabold">
+          {compactDistance(route.distanceMeters)}
+        </p>
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold text-[#607169]">Duração</p>
+        <p className="mt-1 break-words text-base font-extrabold">
+          {compactDuration(route.durationSeconds)}
+        </p>
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold text-[#607169]">Modo</p>
+        <p className="mt-1 break-words text-sm font-bold">
+          {travelModeLabels[travelMode]}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function RouteInstructions({
+  steps,
+  currentIndex,
+}: {
+  steps: RouteStep[];
+  currentIndex?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const contentId = useId();
+  if (!steps.length) return null;
+  return (
+    <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-3 text-[#163840]">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={contentId}
+        onClick={() => setOpen(value => !value)}
+        className="flex min-h-11 w-full min-w-0 items-center justify-between gap-3 text-left text-sm font-bold focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+      >
+        <span className="flex min-w-0 items-center gap-2">
+          <Navigation2 aria-hidden="true" className="size-5 shrink-0" />
+          <span className="break-words">
+            Instruções pelas ruas · {steps.length} passos
+          </span>
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className={
+            "size-5 shrink-0 transition-transform " + (open ? "rotate-180" : "")
+          }
+        />
+      </button>
+      <ol id={contentId} hidden={!open} className="mt-2 space-y-2">
+        {open &&
+          steps.map((step, index) => (
+            <li
+              key={index}
+              aria-current={index === currentIndex ? "step" : undefined}
+              className={
+                "flex min-w-0 items-start gap-3 rounded-xl border px-3 py-3 " +
+                (index === currentIndex
+                  ? "border-[#1a73e8] bg-[#e8f0fe]"
+                  : "border-transparent bg-white")
+              }
+            >
+              <span
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-[#163840] text-white"
+                aria-label={"Passo " + (index + 1)}
+              >
+                <ManeuverIcon maneuver={step.maneuver} className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block break-words text-sm font-bold">
+                  {step.instruction}
+                </span>
+                {step.name && (
+                  <span className="mt-1 block break-words text-xs text-[#607169]">
+                    Via: {step.name}
+                  </span>
+                )}
+                <span className="mt-1 block text-xs text-[#607169]">
+                  {compactDistance(step.distanceMeters)}
+                  {step.durationSeconds > 0
+                    ? " · " + compactDuration(step.durationSeconds)
+                    : ""}
+                </span>
+              </span>
+            </li>
+          ))}
+      </ol>
+    </div>
+  );
+}
+
 type RouteMapProps = {
   livePosition?: {
     lat: number;
@@ -271,6 +387,7 @@ type RouteMapProps = {
   forceOffline?: boolean;
   liveProgress?: LiveProgress | null;
   liveSpeedMps?: number | null;
+  showRouteDetails?: boolean;
 };
 
 export function OfflineRoutePreview({
@@ -284,6 +401,7 @@ export function OfflineRoutePreview({
   livePosition,
   liveProgress,
   liveSpeedMps,
+  showRouteDetails = true,
 }: RouteMapProps) {
   const businesses = useBusinessCatalog();
   const nearbyBusinesses = useMemo(
@@ -295,7 +413,6 @@ export function OfflineRoutePreview({
   const [selectedPoint, setSelectedPoint] = useState("");
   const hasLivePosition = isMapPoint(livePosition);
   const [following, setFollowing] = useState(hasLivePosition);
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{
     point: { lat: number; lng: number };
     key: number;
@@ -317,7 +434,10 @@ export function OfflineRoutePreview({
   const validDestination = isMapPoint(destination) ? destination : undefined;
   const validStops = stops.filter(isMapPoint);
   const selected = routes.find(route => route.selected) ?? routes[0];
-  const routePoints = decodeMapPolyline(selected?.polyline ?? "");
+  const routePoints = useMemo(
+    () => decodeMapPolyline(selected?.polyline ?? ""),
+    [selected?.polyline]
+  );
   const destinationReference = validDestination
     ? atlasDestinationReference(validDestination)
     : undefined;
@@ -724,6 +844,9 @@ export function OfflineRoutePreview({
           </div>
         </section>
       )}
+      {showRouteDetails && !hasLivePosition && (
+        <RouteOverview route={selected} travelMode={travelMode} />
+      )}
       <OfflineMapCanvas
         controls={mapControls}
         initialDark={false}
@@ -864,70 +987,24 @@ export function OfflineRoutePreview({
             {validStops.map((p, i) => `${i + 1}. ${p.name}`).join(" · ")}
           </p>
         )}
-        {selected?.steps?.length ? (
-          <details
-            open={instructionsOpen}
-            className="rounded-xl border border-black/10 bg-[#f7f9f5] p-3"
-          >
-            <summary
-              aria-expanded={instructionsOpen}
-              onClick={event => {
-                event.preventDefault();
-                setInstructionsOpen(value => !value);
-              }}
-              className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-black"
-            >
-              <span className="flex items-center gap-2">
-                <Navigation2 className="size-4" />
-                Instruções pelas ruas · {selected.steps.length} passos
-              </span>
-              <ChevronDown className="size-4" />
-            </summary>
-            {instructionsOpen && (
-              <ol className="mt-2 space-y-1.5">
-                {selected.steps.map((step, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-3 rounded-lg bg-white px-3 py-2"
-                  >
-                    <span
-                      className="grid size-9 shrink-0 place-items-center rounded-full bg-[#163840] text-xs font-black text-white"
-                      aria-label={"Passo " + (index + 1)}
-                    >
-                      <ManeuverIcon
-                        maneuver={step.maneuver}
-                        className="size-5"
-                      />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-bold">
-                        {step.instruction}
-                      </span>
-                      <span className="mt-0.5 block text-xs text-[#607169]">
-                        {step.distanceMeters >= 1000
-                          ? (step.distanceMeters / 1000).toLocaleString(
-                              "pt-BR",
-                              { maximumFractionDigits: 1 }
-                            ) + " km"
-                          : Math.max(1, Math.round(step.distanceMeters)) + " m"}
-                        {step.durationSeconds > 0
-                          ? " · " +
-                            Math.max(1, Math.round(step.durationSeconds / 60)) +
-                            " min"
-                          : ""}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </details>
-        ) : routePoints.length && selected?.source !== "local-estimate" ? (
-          <p className="rounded-xl border border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs text-[#607169]">
-            A rota foi calculada pelas ruas, mas este provedor não enviou
-            instruções curva a curva nesta consulta.
-          </p>
-        ) : null}
+        {showRouteDetails &&
+          (selected?.steps?.length ? (
+            <RouteInstructions
+              steps={selected.steps}
+              currentIndex={
+                hasLivePosition &&
+                !liveProgress?.offRoute &&
+                !liveProgress?.nearDestination
+                  ? guidance?.index
+                  : undefined
+              }
+            />
+          ) : routePoints.length && selected?.source !== "local-estimate" ? (
+            <p className="rounded-xl border border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs text-[#607169]">
+              A rota foi calculada pelas ruas, mas este provedor não enviou
+              instruções curva a curva nesta consulta.
+            </p>
+          ) : null)}
 
         {navigation && !forceOffline && (
           <a
@@ -1271,6 +1348,7 @@ function RouteMapContent({
         className="overflow-hidden rounded-2xl border border-white/10"
         aria-label="Mapa independente da viagem"
       >
+        <RouteOverview route={selectedRoute} travelMode={travelMode} />
         <TileStationMap
           selectionLabel="Escolher ponto da viagem"
           routePoints={points}
@@ -1307,10 +1385,21 @@ function RouteMapContent({
                 routes={routes}
                 stops={stops}
                 travelMode={travelMode}
+                showRouteDetails={false}
               />
             </div>
           }
         />
+        <div className="min-w-0 bg-white p-3">
+          {selectedRoute?.steps?.length ? (
+            <RouteInstructions steps={selectedRoute.steps} />
+          ) : (
+            <p className="text-xs leading-relaxed text-[#607169]">
+              O provedor não enviou instruções curva a curva. Use a linha do
+              mapa como referência e confirme o caminho.
+            </p>
+          )}
+        </div>
         {destinationReference && (
           <p className="break-words bg-[#10191F] px-3 py-2 text-xs text-amber-100">
             {destinationReference.name} · {destinationReference.precision}{" "}
@@ -1535,5 +1624,9 @@ function RouteMapContent({
 }
 
 export function RouteMap(props: RouteMapProps) {
-  return <MapExplorerFrame label="Mapa da viagem"><RouteMapContent {...props} /></MapExplorerFrame>;
+  return (
+    <MapExplorerFrame label="Mapa da viagem">
+      <RouteMapContent {...props} />
+    </MapExplorerFrame>
+  );
 }

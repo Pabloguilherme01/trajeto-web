@@ -45,8 +45,8 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
   await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Calcular rota" }).click();
 
-  await expect(page.getByText("12,3 km", { exact: true })).toBeVisible();
-  await expect(page.getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
+  await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-route-card]").getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
   await expect(page.getByText(/Trânsito ao vivo não disponível|Estimativa local/)).toBeVisible();
   await page.getByText(/Precisa chegar em um horário/).click();
   await expect(page.getByLabel("Quero chegar às")).toBeVisible();
