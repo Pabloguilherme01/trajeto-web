@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { LOCAL_READY_ROUTES } from "./localRoutePresets";
+import { LOCAL_READY_ROUTES, READY_ROUTE_STREET_POINTS } from "./localRoutePresets";
 import { calculatePublicRoute, resetPublicRoutingTestState } from "./publicRouting";
 import { buildReusableTripPlannerUrl } from "./tripLinks";
 
@@ -9,7 +9,7 @@ it("opens and calculates every ready city route without internet", async () => {
   vi.stubGlobal("navigator", { onLine: false });
   const fetchMock = vi.fn(() => Promise.reject(new Error("offline")));
   vi.stubGlobal("fetch", fetchMock);
-  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(200);
+  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(650);\n  const streetLabels = new Set(READY_ROUTE_STREET_POINTS.map(point => point.label));\n  const streetPairs = LOCAL_READY_ROUTES.filter(route => streetLabels.has(route.originLabel) && streetLabels.has(route.destinationLabel));\n  expect(streetPairs).toHaveLength((READY_ROUTE_STREET_POINTS.length * (READY_ROUTE_STREET_POINTS.length - 1)) / 2);
   expect(new Set(LOCAL_READY_ROUTES.map(route => route.id)).size).toBe(LOCAL_READY_ROUTES.length);
   const trips = LOCAL_READY_ROUTES.flatMap(route => [route, { ...route, origin: route.destination, destination: route.origin }]);
   const unavailable: string[] = [];
