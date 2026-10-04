@@ -264,7 +264,7 @@ function shortestPath(graph: Graph, start: string, goal: string) {
   return { keys, routeEdges };
 }
 
-function groupSteps(edges: GraphEdge[], mode: OfflineRoadMode): OfflineRoadStep[] {
+function groupSteps(edges: GraphEdge[]): OfflineRoadStep[] {
   const grouped: Array<{ name: string; distanceMeters: number; durationSeconds: number }> = [];
   for (const edge of edges) {
     const name = edge.roadName || "via local mapeada";
@@ -331,7 +331,7 @@ export async function calculateOfflineRoadRoute(
       60,
       Math.round(networkDuration + connectorMeters / connectorSpeedMps)
     ),
-    steps: groupSteps(route.routeEdges, mode),
+    steps: groupSteps(route.routeEdges),
     snappedOriginMeters,
     snappedDestinationMeters,
   };
