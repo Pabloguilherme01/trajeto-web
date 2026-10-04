@@ -326,3 +326,20 @@ it("personalizes the route without resetting manual exploration and identifies w
   expect(screen.getByText("Bicicleta · linha tracejada")).toBeTruthy();
   expect(after.getAttribute("stroke-dasharray")).toBe("10 6");
 });
+
+
+it("uses segment images and reveals the selected place information on click", () => {
+  const onSelect = vi.fn();
+  render(<TileStationMap stations={[
+    { id: "health", name: "Unidade de saúde", address: "Rua da Saúde", category: "saude", lat: -15.7545, lng: -48.2816 },
+    { id: "shop", name: "Mercado", address: "Rua das Compras", category: "compras", lat: -15.7546, lng: -48.2817 },
+  ]} onSelectStation={onSelect} />);
+  expect(screen.getByRole("button", { name: "Abrir Unidade de saúde" }).querySelector('[data-map-segment="Saúde"]')).toBeTruthy();
+  const shop = screen.getByRole("button", { name: "Abrir Mercado" });
+  expect(shop.querySelector('[data-map-segment="Compras"]')).toBeTruthy();
+  expect(shop.textContent).not.toBe("2");
+  fireEvent.click(shop);
+  expect(shop.getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Rua das Compras")).toBeTruthy();
+  expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "shop" }));
+});

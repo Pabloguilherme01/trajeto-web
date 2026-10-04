@@ -1,3 +1,4 @@
+import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { isMapPoint, type MapPoint } from "@/lib/mapGeometry";
@@ -7,6 +8,9 @@ export type OfflineMapMarker = MapPoint & {
   name: string;
   label: string;
   isReference?: boolean;
+  category?: string;
+  source?: string;
+  coordinateKind?: string;
 };
 type Road = {
   id: number;
@@ -60,6 +64,7 @@ function world(point: MapPoint) {
 
 export default function OfflineMapCanvas({
   markers,
+  selectedMarkerId,
   routePoints = [],
   estimated = false,
   initialDark = true,
@@ -75,6 +80,7 @@ export default function OfflineMapCanvas({
   className = "h-[360px]",
 }: {
   markers: OfflineMapMarker[];
+  selectedMarkerId?: string | null;
   routePoints?: MapPoint[];
   estimated?: boolean;
   initialDark?: boolean;
@@ -538,6 +544,7 @@ export default function OfflineMapCanvas({
               key={marker.id}
               type="button"
               aria-label={"Selecionar " + marker.name}
+              aria-pressed={selectedMarkerId === marker.id}
               onClick={() => onSelect?.(marker)}
               onPointerDown={e => e.stopPropagation()}
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
@@ -557,7 +564,8 @@ export default function OfflineMapCanvas({
               )}
               <span
                 className={
-                  "relative grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black shadow-lg " +
+                  "relative grid size-9 place-items-center rounded-2xl border-[3px] border-white text-xs font-black shadow-lg " +
+                  (selectedMarkerId === marker.id ? "ring-4 ring-[#C7FF3C] " : "") +
                   (marker.id === "destination"
                     ? "bg-[#ff765e] text-white"
                     : marker.id === "live-position"
@@ -576,7 +584,8 @@ export default function OfflineMapCanvas({
                     <path d="M12 3 21 21 12 17 3 21Z" fill="currentColor" />
                   </svg>
                 ) : (
-                  marker.label
+                  marker.id === "origin" || marker.id === "destination" || marker.id === "device-location"
+                    ? marker.label : <MapPlaceIcon item={marker} />
                 )}
               </span>
               {(marker.id === "origin" ||

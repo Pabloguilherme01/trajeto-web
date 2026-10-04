@@ -7,6 +7,8 @@ import {
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
 
+import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
+
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
   blue: { label: "Azul", color: "#1d4ed8", width: 5 },
@@ -476,7 +478,7 @@ export default function TileStationMap({
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
-            {drawable.map((station, index) => {
+            {drawable.map(station => {
               const position = markerPosition(station);
               if (
                 position.left < -30 ||
@@ -499,10 +501,11 @@ export default function TileStationMap({
                   }}
                   aria-label={"Abrir " + station.name}
                   aria-pressed={active}
+                  title={station.name + " · " + mapPlaceSegment(station).label}
                 >
                   <span
                     className={
-                      "grid size-8 place-items-center rounded-full border-2 border-white shadow-lg transition " +
+                      "grid size-9 place-items-center rounded-2xl border-2 border-white shadow-lg motion-safe:transition-transform " +
                       (routePoints.length > 1 && station.id === "destination"
                         ? "bg-[#163840] text-white"
                         : routePoints.length > 1 && station.id === "origin"
@@ -516,7 +519,7 @@ export default function TileStationMap({
                           : "bg-[#3DE3FF] text-[#163840]")
                     }
                   >
-                    <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : index + 1}</span>
+                    <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}</span>
                   </span>
                 </button>
               );
