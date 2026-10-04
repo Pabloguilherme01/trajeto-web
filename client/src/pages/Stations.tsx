@@ -108,6 +108,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
   const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
+  const hasIndividualPrices = pricesByCnpj.size > 0;
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -944,12 +945,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </select>
               <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
-                <option value="price">Ordenar: menor preço ANP</option>
+                <option value="price" disabled={!hasIndividualPrices}>Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
+            {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-[#FFCF96]">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
