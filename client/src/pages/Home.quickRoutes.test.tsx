@@ -25,7 +25,8 @@ it("puts the quick form before service cards and starts calculation in one submi
 it("opens a ready trip with both endpoints", () => {
   render(<Home />);
   fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
-  fireEvent.click(screen.getByRole("button", { name: /Prefeitura → UPA/ }));
+  fireEvent.change(screen.getByRole("searchbox", { name: "Buscar trajeto" }), { target: { value: "Prefeitura UPA" } });
+  fireEvent.click(screen.getByRole("button", { name: /Calcular Prefeitura → UPA/ }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("origem")).toMatch(/Prefeitura/);
   expect(url.searchParams.get("destino")).toMatch(/UPA/);
