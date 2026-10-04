@@ -109,3 +109,29 @@ test("Pages: station search uses compact cards and resets an empty query", async
   await page.getByRole("button", { name: "Ver todos os postos", exact: true }).click();
   await expect(page.locator("article[id^='posto-']").first()).toBeVisible();
 });
+
+
+test("Pages: ANP identity enrichment survives formatted local CNPJ and fuel filters", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
+  const fuel = page.getByRole("combobox", { name: "Filtrar por combustível" });
+  await fuel.selectOption("etanol");
+  await expect(page.locator("article[id^='posto-']").first()).toBeVisible();
+  await expect(page.getByText("Nenhum posto encontrado com esses filtros.")).toHaveCount(0);
+  await fuel.selectOption("diesel-s10");
+  await expect(page.locator("article[id^='posto-']").first()).toBeVisible();
+  await page.getByRole("textbox", { name: "Filtrar diretório de postos" }).fill("Forquilha");
+  const card = page.locator("article[id^='posto-']").first();
+  await expect(card).toContainText(/Forquilha/i);
+  await expect(card).toContainText(/ANP/i);
+  await expect(card.getByRole("link", { name: "Traçar rota", exact: true })).toHaveAttribute("href", /-15\.6811689|-48\.2680336/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test("Pages: price ordering is disabled when the ANP price snapshot is empty", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
+  const sort = page.getByRole("combobox", { name: "Ordenar diretório de postos" });
+  await expect(sort.locator('option[value="price"]')).toBeDisabled();
+  await expect(page.getByText("Preço individual ANP indisponível nesta coleta.")).toBeVisible();
+});
