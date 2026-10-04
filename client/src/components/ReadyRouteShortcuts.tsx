@@ -32,7 +32,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode);
   };
-  return <details className="mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#13232d] via-[#101a22] to-[#0B1014] p-4 shadow-xl" data-compact={compact || undefined}>
+  return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#13232d] via-[#101a22] to-[#0B1014] p-4 shadow-xl" data-compact={compact || undefined}>
     <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-[#3DE3FF]">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
     <p className="mt-2 text-xs leading-relaxed text-white/70">Busque um lugar, escolha como ir e toque em Calcular. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
     <div className="mt-3" role="group" aria-label="O que você precisa fazer?">
@@ -89,7 +89,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
       {visible.map(route => {
         const from = route.originLabel, to = route.destinationLabel;
         const categoryLabel = ROUTE_DESTINATION_CATEGORIES.find(item => item.value === route.category)?.label;
-        return <article key={route.id} aria-label={route.label} className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101b23] p-4 shadow-lg transition-colors hover:border-[#3DE3FF]/35">
+        return <article key={route.id} aria-label={route.label} className="premium-route-card min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101b23] p-4 shadow-lg transition-colors hover:border-[#3DE3FF]/35">
           <div className="flex items-start gap-2.5">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
             <div className="min-w-0 flex-1">
