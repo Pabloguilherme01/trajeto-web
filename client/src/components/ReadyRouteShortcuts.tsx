@@ -22,7 +22,18 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const [mode, setMode] = useState(initialMode);
   const [visibleCount, setVisibleCount] = useState(6);
   const [offlineOnly, setOfflineOnly] = useState(false);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" ? true : navigator.onLine !== false);
   useEffect(() => setMode(initialMode), [initialMode]);
+  useEffect(() => {
+    const refreshConnection = () => setOnline(navigator.onLine !== false);
+    window.addEventListener("online", refreshConnection);
+    window.addEventListener("offline", refreshConnection);
+    return () => {
+      window.removeEventListener("online", refreshConnection);
+      window.removeEventListener("offline", refreshConnection);
+    };
+  }, []);
+  const offlineActive = offlineOnly || !online;
   const filtered = LOCAL_READY_ROUTES.filter(route =>
     (originId === "todos" || originId === route.originId) &&
     (category === "todos" || category === route.category) &&
@@ -31,7 +42,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const visible = filtered.slice(0, visibleCount);
   const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setVisibleCount(6); };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
-    navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineOnly || navigator.onLine === false ? "&experiencia=offline" : ""));
+    navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
   return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#13232d] via-[#101a22] to-[#0B1014] p-4 shadow-xl" data-compact={compact || undefined}>
     <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-[#3DE3FF]">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
@@ -60,11 +71,11 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         {item.label}
       </button>)}
     </div>
-    <button type="button" aria-pressed={offlineOnly} onClick={() => setOfflineOnly(value => !value)}
-      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineOnly ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 text-white/80"}`}>
-      Calcular offline
+    <button type="button" aria-pressed={offlineActive} disabled={!online} onClick={() => setOfflineOnly(value => !value)}
+      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 text-white/80"} disabled:cursor-default disabled:opacity-100`}>
+      {offlineActive ? "Offline ativo" : "Calcular offline"}
     </button>
-    <p className="mt-2 text-xs leading-relaxed text-white/65">Todos estes locais estão disponíveis offline. Para seguir pelas ruas, prepare a rota com internet antes de sair; sem um trajeto salvo, o cálculo é uma estimativa.</p>
+    <p className="mt-2 text-xs leading-relaxed text-white/65">Todos os trajetos deste catálogo abrem offline, incluindo conexões entre as vias mapeadas. Para seguir curva a curva pelas ruas, prepare a rota com internet antes de sair; sem geometria salva, o cálculo offline continua identificado como estimativa.</p>
     <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <label className="min-w-0 text-xs font-bold text-white/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
         <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />

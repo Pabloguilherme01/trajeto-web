@@ -590,15 +590,17 @@ export function OfflineRoutePreview({
       </div>
       <button
         type="button"
+        aria-label="Ver rota inteira"
         onClick={() => {
           setFollowing(false);
           setFocusRequest(null);
           setZoom(1);
           setResetKey(v => v + 1);
         }}
-        className="pointer-events-auto absolute left-3 top-[4.25rem] min-h-11 rounded-full bg-white px-3 text-xs font-bold shadow-md"
+        className="pointer-events-auto absolute left-3 top-[4.25rem] flex min-h-11 items-center gap-2 rounded-full bg-white px-3 text-xs font-bold shadow-md"
       >
-        Enquadrar
+        <Navigation2 className="size-4" aria-hidden="true" />
+        Rota inteira
       </button>
       {hasLivePosition && (
         <button
