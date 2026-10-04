@@ -11,7 +11,8 @@ it("opens and calculates every ready city route without internet", async () => {
   vi.stubGlobal("fetch", fetchMock);
   expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(10);
   expect(new Set(LOCAL_READY_ROUTES.map(route => route.id)).size).toBe(LOCAL_READY_ROUTES.length);
-  for (const route of LOCAL_READY_ROUTES) {
+  const trips = LOCAL_READY_ROUTES.flatMap(route => [route, { ...route, origin: route.destination, destination: route.origin }]);
+  for (const route of trips) {
     const url = new URL(buildReusableTripPlannerUrl(route, { auto: true }), "https://example.com");
     expect(url.searchParams.get("origem")).toBe(route.origin);
     expect(url.searchParams.get("destino")).toBe(route.destination);
