@@ -45,7 +45,7 @@ test("Pages: route preview controls and real geometry remain available offline a
   await expect(
     map.getByRole("button", { name: "Diminuir zoom da prévia" })
   ).toBeEnabled();
-  await map.getByRole("button", { name: "Enquadrar", exact: true }).click();
+  await map.getByRole("button", { name: "Ver rota inteira", exact: true }).click();
   await expect(
     map.getByRole("button", { name: "Diminuir zoom da prévia" })
   ).toBeDisabled();
