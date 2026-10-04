@@ -43,10 +43,12 @@ test("Pages: city streets and controls survive an offline reload without externa
   await page.getByRole("button", { name: "Ampliar mapa", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reduzir mapa", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Reduzir mapa", exact: true }).click();
-  const picker = page.getByRole("combobox", {
+  const picker = page.getByRole("button", {
     name: "Escolher destino no mapa offline",
   });
-  await picker.selectOption({ label: "HEAL" });
+  await picker.click();
+  await page.getByRole("combobox", { name: "Pesquisar lugares no mapa" }).fill("HEAL");
+  await page.getByRole("listbox", { name: "Resultados de lugares" }).getByRole("option", { name: /^HEAL ·/ }).click();
   await expect(page.getByText("HEAL", { exact: true }).last()).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)

@@ -62,12 +62,16 @@ test("planner: draws provider geometry over public street tiles", async ({
     page.getByRole("img", { name: "Trajeto pelas ruas" })
   ).toBeVisible();
   await expect(
-    page.getByRole("combobox", { name: "Escolher ponto da viagem" })
+    page.getByRole("button", { name: "Escolher ponto da viagem" })
   ).toBeVisible();
   const map = page.getByRole("region", { name: "Mapa independente da viagem" });
   await expect(map.getByRole("region", { name: "Resumo do percurso no mapa" })).toContainText("12,3 km");
   await map.getByRole("button", { name: "Ver destino", exact: true }).click();
-  await expect(map.getByRole("combobox", { name: "Escolher ponto da viagem" })).toHaveValue("destination");
+  await expect(map.getByRole("button", { name: "Escolher ponto da viagem" })).toHaveAttribute("data-selected-id", "destination");
+  await map.getByRole("button", { name: "Escolher ponto da viagem" }).click();
+  await page.getByRole("combobox", { name: "Pesquisar lugares no mapa" }).fill("inicio");
+  await page.getByRole("option", { name: "Origem · Início da viagem" }).click();
+  await expect(map.getByRole("button", { name: "Escolher ponto da viagem" })).toHaveAttribute("data-selected-id", "origin");
   await map.getByRole("button", { name: /Instruções pelas ruas/ }).click();
   await expect(map.locator("ol")).toContainText("Avenida JK");
   await expect(map.locator("ol")).toContainText("0 m");

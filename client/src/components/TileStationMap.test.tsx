@@ -155,9 +155,8 @@ it("selects and centers a distant station from the accessible list even without 
     { name: "Posto Centro", address: "Rua A", lat: -15.7545, lng: -48.2816 },
     { name: "Posto Distante", address: "Rua B", lat: -15.81, lng: -48.34 },
   ]} />);
-  const list = screen.getByRole("combobox", { name: "Escolher posto no mapa" });
-  const option = screen.getByRole("option", { name: "Posto Distante" }) as HTMLOptionElement;
-  fireEvent.change(list, { target: { value: option.value } });
+  fireEvent.click(screen.getByRole("button", { name: "Escolher posto no mapa" }));
+  fireEvent.click(screen.getByRole("option", { name: "Posto Distante · Rua B" }));
   expect(screen.getByText("Rua B")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Abrir Posto Distante" }).style.left).toBe("160px");
   expect(screen.getByRole("button", { name: "Abrir Posto Distante" }).getAttribute("aria-pressed")).toBe("true");
@@ -168,7 +167,7 @@ it("allows keyboard panning without intercepting keys in the station picker", ()
   const marker = screen.getByRole("button", { name: "Abrir Posto A" });
   fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
   expect(marker.style.left).toBe("80px");
-  fireEvent.keyDown(screen.getByRole("combobox", { name: "Escolher posto no mapa" }), { key: "ArrowRight" });
+  fireEvent.keyDown(screen.getByRole("button", { name: "Escolher posto no mapa" }), { key: "ArrowRight" });
   expect(marker.style.left).toBe("80px");
 });
 
@@ -265,7 +264,8 @@ it("keeps an explicitly selected destination in view on GPS updates", () => {
     { id: "b", name: "Posto B", address: "Rua B", lat: -15.81, lng: -48.34 },
   ];
   const view = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
-  fireEvent.change(screen.getByRole("combobox"), { target: { value: "b" } });
+  fireEvent.click(screen.getByRole("button", { name: "Escolher posto no mapa" }));
+  fireEvent.click(screen.getByRole("option", { name: "Posto B · Rua B" }));
   view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
   expect(screen.getByRole("button", { name: "Abrir Posto B" }).style.left).toBe("160px");
 });
