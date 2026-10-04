@@ -84,7 +84,7 @@ test("Pages: saved station map does not clip its navigation card", async ({ page
     body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64"),
   }));
   await page.goto("postos?salvos=1", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Mostrar mapa", exact: true }).click();
+  await page.getByRole("button", { name: "Abrir mapa", exact: true }).click();
   const picker = page.getByRole("button", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
   await page.getByRole("button", { name: "Google", exact: true }).click({ trial: true });
