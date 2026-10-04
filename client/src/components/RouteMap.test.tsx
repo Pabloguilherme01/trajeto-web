@@ -135,7 +135,7 @@ describe("RouteMap", () => {
         .getByRole("button", { name: "Diminuir zoom da prévia" })
         .hasAttribute("disabled")
     ).toBe(false);
-    fireEvent.click(screen.getByRole("button", { name: "Enquadrar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver rota inteira" }));
     expect(
       screen
         .getByRole("button", { name: "Diminuir zoom da prévia" })
@@ -278,7 +278,7 @@ it("focuses endpoints and pauses GPS following when the map is explored", () => 
   );
   expect(follow.getAttribute("aria-pressed")).toBe("false");
   fireEvent.click(follow);
-  fireEvent.click(screen.getByRole("button", { name: "Enquadrar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Ver rota inteira" }));
   expect(follow.getAttribute("aria-pressed")).toBe("false");
 });
 
@@ -549,7 +549,7 @@ it("keeps zoom and framing inside the map and does not pause following when zoom
       .getByRole("button", { name: "Seguir GPS" })
       .getAttribute("aria-pressed")
   ).toBe("true");
-  fireEvent.click(within(map).getByRole("button", { name: "Enquadrar" }));
+  fireEvent.click(within(map).getByRole("button", { name: "Ver rota inteira" }));
   expect(
     within(map)
       .getByRole("button", { name: "Seguir GPS" })
