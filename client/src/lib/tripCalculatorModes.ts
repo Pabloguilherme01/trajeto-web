@@ -1,4 +1,4 @@
-export type TripCalculatorModeId = "automatico" | "agora" | "trabalho" | "rotina" | "todo-dia";
+export type TripCalculatorModeId = "automatico" | "agora" | "bate-volta" | "trabalho" | "rotina" | "todo-dia";
 export type TripCalculatorModeSelection = TripCalculatorModeId | "personalizado";
 
 export type TripCalculatorMode = {
@@ -19,9 +19,17 @@ export const TRIP_CALCULATOR_MODES: TripCalculatorMode[] = [
   },
   {
     id: "agora",
-    label: "Só esta viagem",
+    label: "Só ida agora",
     detail: "Uma saída pontual, sem projeção mensal.",
     roundTrip: false,
+    tripsPerWeek: 1,
+    recurring: false,
+  },
+  {
+    id: "bate-volta",
+    label: "Ida e volta hoje",
+    detail: "Sai e volta uma vez, sem projeção mensal.",
+    roundTrip: true,
     tripsPerWeek: 1,
     recurring: false,
   },
