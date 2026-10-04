@@ -15,6 +15,7 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   const map = page.locator("#aguas-lindas-map");
   const picker = map.getByRole("button", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
+  await expect(map.getByText(/\d+ posicionados · \d+ sem coordenada/)).toBeVisible();
   await picker.click();
   const search = page.getByRole("combobox", { name: "Pesquisar lugares no mapa" });
   await expect(search).toBeFocused();
@@ -96,7 +97,9 @@ test("Pages: station search uses compact cards and resets an empty query", async
   const card = page.locator("article[id^='posto-']").first();
   await expect(card.getByRole("heading")).toContainText(/ponteio/i);
   await expect(card.getByRole("link", { name: "Traçar rota", exact: true })).toHaveAttribute("href", /planejar.*destino=/);
-  await expect(card.getByRole("button", { name: "Navegar", exact: true })).toBeVisible();
+  await expect(card.getByRole("link", { name: "Navegar", exact: true })).toBeVisible();
+  await card.getByText("Mais opções do posto").click();
+  await expect(card.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
   await expect(card.locator("details").filter({ hasText: "Todos os dados disponíveis" })).not.toHaveAttribute("open");
   await expect(page.locator("details").filter({ has: page.getByText("Fontes e referências adicionais", { exact: true }) })).not.toHaveAttribute("open");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
