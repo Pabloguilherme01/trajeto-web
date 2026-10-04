@@ -21,10 +21,12 @@ it("preserves the map instance, restores focus and unlocks scrolling on Escape",
   open.focus();
   fireEvent.click(open);
   expect(screen.getByRole("dialog").getAttribute("aria-modal")).toBe("true");
+  expect(screen.getByRole("dialog").parentNode).toBe(document.body);
   expect(document.body.style.overflow).toBe("hidden");
   expect(screen.getByText("Câmera 1")).toBeTruthy();
   fireEvent.keyDown(document, { key: "Escape" });
   expect(screen.queryByRole("dialog")).toBeNull();
+  expect(open.closest(".map-explorer-frame")?.parentNode).not.toBe(document.body);
   expect(document.activeElement).toBe(open);
   expect(document.body.style.overflow).toBe("auto");
   expect(mounted).toHaveBeenCalledTimes(1);

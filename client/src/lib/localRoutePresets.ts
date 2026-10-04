@@ -2,6 +2,8 @@ import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
 import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
+import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
+import anpSnapshot from "../../public/data/aguas-lindas-anp.json";
 
 export type RouteDestinationCategory = "saude" | "educacao" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
 export type RouteDestinationCategoryFilter = "todos" | RouteDestinationCategory;
@@ -220,12 +222,24 @@ export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetId
 /** An explicitly selected, sourced reference; bare homonymous street names stay ambiguous. */
 export function resolveReadyRouteStreetPoint(value: string) {
   const query = normalizeCatalogText(value);
-  const matches = READY_ROUTE_STREET_POINTS.filter(point => normalizeCatalogText(point.destination) === query);
+  const matches = [...READY_ROUTE_STREET_POINTS, ...READY_ROUTE_STATIONS].filter(point => normalizeCatalogText(point.destination) === query);
   return matches.length === 1 ? { lat: matches[0].lat, lng: matches[0].lng } : null;
 }
+export const READY_ROUTE_STATIONS = Array.from(new Map(anpSnapshot.data.filter(station =>
+  station.latitude != null && String(station.latitude).trim() !== "" && Number.isFinite(Number(station.latitude)) && Math.abs(Number(station.latitude)) <= 90 &&
+  station.longitude != null && String(station.longitude).trim() !== "" && Number.isFinite(Number(station.longitude)) && Math.abs(Number(station.longitude)) <= 180
+).map(station => [station.cnpj, station])).values()).map(station => ({
+  id: "ready-station-" + station.cnpj,
+  label: AGUAS_LINDAS_STATIONS.find(item => item.cnpj.replace(/\D/g, "") === station.cnpj)?.displayName ?? station.razaoSocial,
+  destination: `${station.razaoSocial} · CNPJ ${station.cnpj}, Águas Lindas de Goiás - GO`,
+  lat: Number(station.latitude),
+  lng: Number(station.longitude),
+  category: "combustivel" as const,
+}));
 const readyEndpoints: Record<string, { label: string; destination: string; category: RouteDestinationCategory }> = {
   ...Object.fromEntries(CITY_ROUTE_PRESETS.map(place => [place.id, place])),
   ...Object.fromEntries(READY_ROUTE_STREET_POINTS.map(place => [place.id, place])),
+  ...Object.fromEntries(READY_ROUTE_STATIONS.map(place => [place.id, place])),
   centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO", category: "centro" },
 };
 const readyPairs = [
@@ -237,6 +251,8 @@ const readyPairs = [
   ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
   ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
   ["rodoviaria", "prefeitura"], ["aguas-lindas-shopping", "upa"],
+  ...READY_ROUTE_STATIONS.flatMap(station =>
+    ["centro", "prefeitura", "rodoviaria"].map(origin => [origin, station.id] as const)),
   ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),
   ...READY_ROUTE_STREET_POINTS.flatMap(street =>
     ["upa", "heal", "prefeitura", "rodoviaria", "aguas-lindas-shopping", "hospital-bom-jesus"]
@@ -250,6 +266,6 @@ export const LOCAL_READY_ROUTES: ReadyCityRoute[] = Array.from(new Map(readyPair
   origin: readyEndpoints[from].destination,
   destination: readyEndpoints[to].destination,
   label: `${readyEndpoints[from].label} → ${readyEndpoints[to].label}`,
-  detail: [from, to].some(id => id === "centro" || readyEndpoints[id].category === "centro") ? "Referência aproximada · ajuste a partida ou chegada" : "Origem e destino preenchidos",
+  detail: to.startsWith("ready-station-") ? "Coordenadas do cadastro ANP · confira o acesso no mapa" : [from, to].some(id => id === "centro" || readyEndpoints[id].category === "centro") ? "Referência aproximada · ajuste a partida ou chegada" : "Origem e destino preenchidos",
   category: readyEndpoints[to].category,
 }));

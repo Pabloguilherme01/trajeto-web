@@ -1135,18 +1135,9 @@ function RouteMapContent({
       return;
 
     const bounds = new maps.LatLngBounds();
-    [
-      origin,
-      destination,
-      ...stops,
-      ...nearbyRouteReferences(
-        origin,
-        destination,
-        routes.flatMap(route => decodePolyline(route.polyline ?? ""))
-      ),
-    ].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops].forEach(point => bounds.extend(point));
     routes
-      ?.filter(route => route.polyline)
+      ?.filter(route => route.polyline && route === (routes.find(item => item.selected) ?? routes[0]))
       .forEach(route =>
         decodePolyline(route.polyline as string).forEach(point =>
           bounds.extend(point)
@@ -1227,11 +1218,11 @@ function RouteMapContent({
   const fitRoute = () => {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
-    [origin, destination, ...stops, ...nearbyReferences].forEach(point =>
+    [origin, destination, ...stops].forEach(point =>
       bounds.extend(point)
     );
     routes
-      .filter(route => route.polyline)
+      .filter(route => route.polyline && route === (routes.find(item => item.selected) ?? routes[0]))
       .forEach(route =>
         decodePolyline(route.polyline as string).forEach(point =>
           bounds.extend(point)

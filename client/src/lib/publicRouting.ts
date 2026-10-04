@@ -1,4 +1,4 @@
-import { listOfflineRoutes, resolvePreparedRoutePoint, type OfflineRoute } from "./offlineStore";
+import { listOfflineRoutes, findPreparedRouteByCoordinates, resolvePreparedRoutePoint, type OfflineRoute } from "./offlineStore";
 import { resolveReadyRouteStreetPoint } from "./localRoutePresets";
 import { loadBusinessCatalog, resolveBusinessPoint } from "./businessCatalog";
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
@@ -760,10 +760,10 @@ export async function calculateOfflineRoute(
   )
     await loadBusinessCatalog().catch(() => []);
   const parsedOrigin = parseCoordinateInput(originText);
+  const prepared = await readPreparedRoutes();
   let originResolved = resolveOfflineRoutePoint(originText);
   let destination = resolveOfflineRoutePoint(destinationText);
   if (!originResolved || !destination) {
-    const prepared = await readPreparedRoutes();
     originResolved = resolveOfflineRoutePoint(originText, prepared);
     destination = resolveOfflineRoutePoint(destinationText, prepared);
   }
@@ -780,6 +780,15 @@ export async function calculateOfflineRoute(
         lng: Math.round(originResolved.lng * 1000) / 1000,
       }
     : originResolved;
+
+  const saved = findPreparedRouteByCoordinates(
+    prepared.filter(item => {
+      const payload = item.payload as { stops?: unknown[] } | null;
+      return Array.isArray(payload?.stops) && payload.stops.length === 0;
+    }), origin, destination, mode
+  );
+  const savedRoute = (saved?.payload as { route?: unknown } | undefined)?.route;
+  if (isPublicRoute(savedRoute) && savedRoute.source !== "local-estimate") return savedRoute;
 
   const cachedRouteKey =
     "route:" +

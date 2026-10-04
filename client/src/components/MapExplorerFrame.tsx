@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 
 /** Keep the same map mounted when resizing so camera and GPS state survive. */
@@ -12,10 +12,15 @@ export default function MapExplorerFrame({
   const [expanded, setExpanded] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!expanded) return;
     const previousFocus = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
+    // Escape transformed layout ancestors without remounting the map or GPS.
+    const element = root.current;
+    const parent = element?.parentNode;
+    const nextSibling = element?.nextSibling;
+    if (element) document.body.appendChild(element);
     document.body.style.overflow = "hidden";
     toggle.current?.focus();
     const keydown = (event: KeyboardEvent) => {
@@ -61,6 +66,7 @@ export default function MapExplorerFrame({
     return () => {
       document.removeEventListener("keydown", keydown);
       document.body.style.overflow = previousOverflow;
+      if (element && parent) parent.insertBefore(element, nextSibling ?? null);
       if (previousFocus?.isConnected) previousFocus.focus();
     };
   }, [expanded]);
