@@ -118,6 +118,7 @@ export default function CityMap() {
             {
               id: item.id,
               name: item.label,
+              category: item.category,
               address: item.destination,
               ...point,
             },
@@ -129,8 +130,9 @@ export default function CityMap() {
         ? [{
             id: item.id,
             name: item.name,
+            category: item.category,
             address: item.destination ?? item.address ?? item.name,
-            source: item.sourceLabel,
+            source: "local" as const,
             coordinateKind: item.coordinateKind,
             coordinateLabel: item.coordinateLabel,
             lat: item.lat,
@@ -335,7 +337,7 @@ export default function CityMap() {
                   typeof item.lat === "number" && typeof item.lng === "number"
                     ? { lat: item.lat, lng: item.lng }
                     : null,
-                source: item.sourceLabel,
+                source: "local" as const,
               };
               return (
                 <article key={item.id} className="min-w-0 rounded-2xl border border-white/10 bg-[#121B22] p-4">
