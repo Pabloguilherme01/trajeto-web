@@ -952,7 +952,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </select>
               <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
-                <option value="price">Ordenar: menor preço ANP</option>
+                <option value="price" disabled={!hasIndividualPrices}>Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
