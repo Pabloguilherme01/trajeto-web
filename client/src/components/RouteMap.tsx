@@ -2,6 +2,7 @@ import { atlasDestinationReference } from "@/lib/cityAtlas";
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
+import MapExplorerFrame from "@/components/MapExplorerFrame";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
 import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
@@ -949,7 +950,7 @@ export function OfflineRoutePreview({
   );
 }
 
-export function RouteMap({
+function RouteMapContent({
   origin,
   destination,
   stops,
@@ -1531,4 +1532,8 @@ export function RouteMap({
       )}
     </section>
   );
+}
+
+export function RouteMap(props: RouteMapProps) {
+  return <MapExplorerFrame label="Mapa da viagem"><RouteMapContent {...props} /></MapExplorerFrame>;
 }

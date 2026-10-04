@@ -269,3 +269,17 @@ it("keeps an explicitly selected destination in view on GPS updates", () => {
   view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
   expect(screen.getByRole("button", { name: "Abrir Posto B" }).style.left).toBe("160px");
 });
+
+it("scales street tiles continuously with the same pinch anchor as markers", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  sendPointer(map, "pointerdown", 1, 60);
+  sendPointer(map, "pointerdown", 2, 160);
+  sendPointer(map, "pointermove", 2, 200);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(200);
+  const tile = document.querySelector('img[src*="/13/"]')!;
+  expect(parseFloat((tile.parentElement!.style.transform.match(/scale\(([^)]+)/) ?? [])[1])).toBeCloseTo(1.4);
+  expect(screen.getByLabelText("Escala do mapa")).toBeTruthy();
+});

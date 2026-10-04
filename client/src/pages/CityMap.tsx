@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
+import MapExplorerFrame from "@/components/MapExplorerFrame";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
@@ -245,6 +246,7 @@ export default function CityMap() {
         aria-label="Mapa da cidade"
         className="overflow-hidden rounded-3xl border border-white/15 shadow-2xl"
       >
+        <MapExplorerFrame label="Mapa da cidade">
         {online && markers.length ? (
           <TileStationMap
             stations={markers}
@@ -255,6 +257,7 @@ export default function CityMap() {
         ) : (
           fallback
         )}
+        </MapExplorerFrame>
       </section>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white/65">
         <span>

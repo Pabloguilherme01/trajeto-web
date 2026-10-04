@@ -330,3 +330,9 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     font-size: 0.55rem;
   }
 }
+
+.map-explorer-frame[data-expanded="true"] [data-map-surface] {
+  height: max(260px, calc(100dvh - 240px));
+  min-height: 260px;
+  max-height: none;
+}

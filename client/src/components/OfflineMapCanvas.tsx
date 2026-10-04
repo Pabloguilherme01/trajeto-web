@@ -337,6 +337,7 @@ export default function OfflineMapCanvas({
     >
       <div
         ref={viewport}
+        data-map-surface
         className={
           "relative touch-none overflow-hidden outline-offset-[-3px] " +
           (expanded ? "h-[75dvh] min-h-[360px]" : className)

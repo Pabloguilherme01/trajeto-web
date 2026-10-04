@@ -150,10 +150,15 @@ export default function TileStationMap({
   const width = size.width;
   const height = size.height;
   const centerPx = project(center.lat, center.lng, zoom);
-  const baseTileX = Math.floor(centerPx.x / TILE);
-  const baseTileY = Math.floor(centerPx.y / TILE);
-  const radiusX = Math.ceil(width / (2 * TILE)) + 1;
-  const radiusY = Math.ceil(height / (2 * TILE)) + 1;
+  const tileZoom = Math.floor(zoom);
+  const tileScale = 2 ** (zoom - tileZoom);
+  const tileCenter = project(center.lat, center.lng, tileZoom);
+  const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
+  const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
+  const baseTileX = Math.floor(tileCenter.x / TILE);
+  const baseTileY = Math.floor(tileCenter.y / TILE);
+  const radiusX = Math.ceil(width / (2 * TILE * tileScale)) + 1;
+  const radiusY = Math.ceil(height / (2 * TILE * tileScale)) + 1;
   const tiles: Array<{
     x: number;
     y: number;
@@ -167,9 +172,9 @@ export default function TileStationMap({
       const rawX = baseTileX + dx;
       const y = baseTileY + dy;
       tiles.push({
-        x: wrapTile(rawX, zoom),
+        x: wrapTile(rawX, tileZoom),
         y,
-        key: `${zoom}:${rawX}:${y}`,
+        key: `${tileZoom}:${rawX}:${y}`,
         left: (dx + radiusX) * TILE,
         top: (dy + radiusY) * TILE,
       });
@@ -217,7 +222,7 @@ export default function TileStationMap({
     if (pinch.current && pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
       const state = pinch.current;
-      const nextZoom = Math.max(8, Math.min(17, state.zoom + Math.round(Math.log2(Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / state.distance))));
+      const nextZoom = Math.max(8, Math.min(17, state.zoom + Math.log2(Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / state.distance)));
       const anchor = project(state.anchor.lat, state.anchor.lng, nextZoom);
       const rect = event.currentTarget.getBoundingClientRect();
       setZoom(nextZoom);
@@ -337,7 +342,11 @@ export default function TileStationMap({
 
   return (
     <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
-      <div className={"relative " + heightClassName}>
+      <div data-map-surface className={"relative " + heightClassName}>
+        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-9 left-3 z-20 rounded bg-white/90 px-2 py-1 text-xs font-semibold text-slate-900">
+          {scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`}
+          <div className="h-1 border-x-2 border-b-2 border-slate-900" style={{ width: scaleMeters / metersPerPixel }} />
+        </div>
         <div
           ref={viewport}
           role="region"
@@ -394,15 +403,16 @@ export default function TileStationMap({
             style={{
               width: TILE * (radiusX * 2 + 1),
               height: TILE * (radiusY * 2 + 1),
-              left: width / 2 - radiusX * TILE - (centerPx.x - baseTileX * TILE),
-              top: height / 2 - radiusY * TILE - (centerPx.y - baseTileY * TILE),
-              transformOrigin: "50% 50%",
+              left: width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale,
+              top: height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale,
+              transform: `scale(${tileScale})`,
+              transformOrigin: "0 0",
             }}
           >
             {tiles.map(tile => (
               <img
                 key={tile.key}
-                src={tileUrl(zoom, tile.x, tile.y)}
+                src={tileUrl(tileZoom, tile.x, tile.y)}
                 referrerPolicy="origin"
                 alt=""
                 onError={() =>
@@ -504,6 +514,7 @@ export default function TileStationMap({
             onClick={() => changeZoom(1)}
             className="grid min-h-11 min-w-0 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Aumentar zoom"
+            disabled={zoom >= 17}
           >
             <Plus className="size-4" />
           </button>
@@ -512,6 +523,7 @@ export default function TileStationMap({
             onClick={() => changeZoom(-1)}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Diminuir zoom"
+            disabled={zoom <= 8}
           >
             <Minus className="size-4" />
           </button>
