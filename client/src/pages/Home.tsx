@@ -1,4 +1,4 @@
-import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
+import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, Map, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
@@ -194,7 +194,8 @@ export default function Home() {
           </button>
         </section>
 
-        <section className="mt-6 sm:mt-8">
+        <section className="home-hero mt-6 sm:mt-8">
+          <div className="min-w-0">
           <p className="text-xs font-black uppercase tracking-[.14em] text-[#C7FF3C]">Águas Lindas na mão</p>
           <h1 className="mobile-title mt-2 max-w-3xl font-display text-[clamp(1.65rem,6.5vw,4.8rem)] font-semibold leading-[1.08] sm:leading-[.94] tracking-[-.065em]">
             Resolva na cidade.<br />
@@ -203,9 +204,16 @@ export default function Home() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 sm:mt-5 sm:text-base">
             Escolha seu destino. Encontre rotas e serviços em Águas Lindas.
           </p>
+          </div>
+          <button type="button" onClick={() => setLocation(appUrl("/mapa"))}
+            className="city-explore-card" aria-label="Explorar mapa da cidade">
+            <span className="city-explore-art" aria-hidden="true"><Map className="size-14" /><span className="city-explore-pin"><MapPin className="size-5" /></span></span>
+            <span className="min-w-0 flex-1"><span className="block text-xs font-bold uppercase tracking-widest text-[#3DE3FF]">Explore a cidade</span><span className="mt-1 block text-lg font-black text-white">Seu próximo destino</span><span className="mt-1 block text-sm leading-relaxed text-white/70">Veja lugares e trajetos no mapa.</span></span>
+            <ArrowRight className="size-5 shrink-0 text-[#3DE3FF]" aria-hidden="true" />
+          </button>
         </section>
 
-        <section className="mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
+        <section className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
           <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.16em] text-[#3DE3FF]">Rota rápida</p>
