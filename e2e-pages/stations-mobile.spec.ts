@@ -84,8 +84,28 @@ test("Pages: saved station map does not clip its navigation card", async ({ page
     body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64"),
   }));
   await page.goto("postos?salvos=1", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Mostrar mapa", exact: true }).click();
+  await page.getByRole("button", { name: "Abrir mapa", exact: true }).click();
   const picker = page.getByRole("button", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
   await page.getByRole("button", { name: "Google", exact: true }).click({ trial: true });
+});
+
+test("Pages: station search uses compact cards and resets an empty query", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("postos?q=ponteio", { waitUntil: "domcontentloaded" });
+  const card = page.locator("article[id^='posto-']").first();
+  await expect(card.getByRole("heading")).toContainText(/ponteio/i);
+  await expect(card.getByRole("link", { name: "Traçar rota", exact: true })).toHaveAttribute("href", /planejar.*destino=/);
+  await expect(card.getByRole("button", { name: "Navegar", exact: true })).toBeVisible();
+  await expect(card.locator("details").filter({ hasText: "Todos os dados disponíveis" })).not.toHaveAttribute("open");
+  await expect(page.locator("details").filter({ has: page.getByText("Fontes e referências adicionais", { exact: true }) })).not.toHaveAttribute("open");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.getByRole("button", { name: "Abrir mapa", exact: true }).click();
+  await expect(page.locator("#aguas-lindas-map")).toBeVisible();
+  await page.getByRole("button", { name: "Ocultar mapa", exact: true }).click();
+  await expect(page.locator("#aguas-lindas-map")).toHaveCount(0);
+  await page.goto("postos?q=zzzz-inexistente", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Nenhum posto encontrado com esses filtros.")).toBeVisible();
+  await page.getByRole("button", { name: "Ver todos os postos", exact: true }).click();
+  await expect(page.locator("article[id^='posto-']").first()).toBeVisible();
 });
