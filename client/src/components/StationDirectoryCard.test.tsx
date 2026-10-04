@@ -30,6 +30,7 @@ describe("StationDirectoryCard practical actions", () => {
     render(<StationDirectoryCard index={1} local={local} onToggleSaved={save} />);
     fireEvent.click(screen.getByRole("button", { name: "Navegar" }));
     expect(open).toHaveBeenCalledWith(expect.stringContaining("waze.com"), "_blank", "noopener,noreferrer");
+    expect(screen.getByRole("alert").textContent).toContain("bloqueou a abertura do mapa");
     expect(new URL(String(open.mock.calls[0][0])).searchParams.get("q")).toContain("Avenida Teste");
     fireEvent.click(screen.getByRole("button", { name: "Salvar posto neste aparelho" }));
     expect(save).toHaveBeenCalledTimes(1);
