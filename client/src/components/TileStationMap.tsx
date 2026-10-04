@@ -7,6 +7,7 @@ import {
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
 
+import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 
 const ROUTE_STYLES = {
@@ -596,30 +597,19 @@ export default function TileStationMap({
           </button>
         </div>
 
-        <label className="absolute left-3 right-3 top-[4.6rem] z-20 min-w-0">
-          <span className="sr-only">{selectionLabel}</span>
-          <select
-            className="min-h-11 w-full min-w-0 rounded-xl border border-black/10 bg-white/95 px-3 text-base text-[#163840] shadow-lg"
-            value={selectedId ?? ""}
-            onChange={event => {
-              const station = drawable.find(
-                item => stationKey(item) === event.target.value
-              );
+        <div className="absolute left-3 right-3 top-[4.6rem] z-20 min-w-0">
+          <MapDestinationPicker label={selectionLabel} value={selectedId}
+            items={drawable.map(station => ({ ...station, id: stationKey(station) }))}
+            onSelect={id => {
+              const station = drawable.find(item => stationKey(item) === id);
               if (!station) return;
-              setSelectedId(stationKey(station));
+              setSelectedId(id);
               onSelectStation?.(station);
               setFollowing(false);
               setCenter({ lat: station.lat, lng: station.lng });
               setZoom(value => Math.max(13, value));
-            }}
-          >
-            {drawable.map(station => (
-              <option key={stationKey(station)} value={stationKey(station)}>
-                {station.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            }} />
+        </div>
       </div>
 
       <div className="relative min-w-0 border-t border-black/10 bg-white/95 p-3.5 sm:p-4">

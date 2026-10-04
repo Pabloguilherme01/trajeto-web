@@ -13,15 +13,22 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   }));
   await page.goto("mapa/postos", { waitUntil: "domcontentloaded" });
   const map = page.locator("#aguas-lindas-map");
-  const picker = map.getByRole("combobox", { name: "Escolher posto no mapa" });
+  const picker = map.getByRole("button", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
-  await expect.poll(() => picker.locator("option").count()).toBeGreaterThan(1);
-  const options = await picker.locator("option").evaluateAll(items =>
-    items.map(item => ({ value: (item as HTMLOptionElement).value, name: item.textContent! }))
-  );
-  expect(options.length).toBeGreaterThan(1);
-  const station = options[options.length - 1];
-  await picker.selectOption(station.value);
+  await picker.click();
+  const search = page.getByRole("combobox", { name: "Pesquisar lugares no mapa" });
+  await expect(search).toBeFocused();
+  await expect.poll(() => page.getByRole("option").count()).toBeGreaterThan(1);
+  const option = page.getByRole("option").last();
+  const station = { name: (await option.locator(".font-bold").textContent())! };
+  await search.fill("zzzz-inexistente");
+  await expect(page.getByRole("option")).toHaveCount(0);
+  await search.fill("");
+  const panel = page.locator('[data-slot="popover-content"]');
+  expect((await panel.boundingBox())!.height).toBeLessThan(400);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.getByRole("option").last().click();
+  await expect(panel).toHaveCount(0);
   const marker = map.getByRole("button", { name: "Abrir " + station.name, exact: true });
   await expect(marker).toHaveAttribute("aria-pressed", "true");
   const box = await marker.boundingBox();
@@ -57,11 +64,12 @@ test("Pages: background failure keeps the offline picker and navigation touchabl
   await page.goto("mapa/postos", { waitUntil: "domcontentloaded" });
   const map = page.locator("#aguas-lindas-map");
   await expect(map.getByRole("img", { name: /Mapa offline vetorial/ })).toBeVisible();
-  const picker = map.getByRole("combobox", { name: "Escolher posto no mapa offline" });
-  await picker.click({ trial: true });
-  const option = await picker.locator("option").last().evaluate(el => ({ value: (el as HTMLOptionElement).value, name: el.textContent! }));
-  await picker.selectOption(option.value);
-  await expect(map.locator("p").filter({ hasText: option.name })).toBeVisible();
+  const picker = map.getByRole("button", { name: "Escolher posto no mapa offline" });
+  await picker.click();
+  const option = page.getByRole("option").last();
+  const name = (await option.locator(".font-bold").textContent())!;
+  await option.click();
+  await expect(map.locator("p").filter({ hasText: name })).toBeVisible();
   await map.getByRole("button", { name: "Navegar pelo Google Maps", exact: true }).click({ trial: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
@@ -77,7 +85,7 @@ test("Pages: saved station map does not clip its navigation card", async ({ page
   }));
   await page.goto("postos?salvos=1", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Mostrar mapa", exact: true }).click();
-  const picker = page.getByRole("combobox", { name: "Escolher posto no mapa" });
+  const picker = page.getByRole("button", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
   await page.getByRole("button", { name: "Google", exact: true }).click({ trial: true });
 });

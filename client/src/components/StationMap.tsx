@@ -1,4 +1,5 @@
 import React from "react";
+import MapDestinationPicker from "@/components/MapDestinationPicker";
 import { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
 import { MapView } from "@/components/Map";
@@ -108,7 +109,7 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
       <button type="button" onClick={() => setZoom(v => Math.max(1, v - .5))} disabled={zoom <= 1} className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
       <button type="button" onClick={() => { setFocusRequest(null); setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-xl bg-white" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       <span className="text-xs font-black">Disponível sem conexão</span>
-      <label className="w-full"><span className="sr-only">Escolher {itemLabel} no mapa offline</span><select className="min-h-11 min-w-0 w-full rounded-xl border border-black/10 bg-white px-3 text-base" value={selected ? offlineStationKey(selected) : ""} onChange={event => select(event.target.value)}>{stations.map(station => <option key={offlineStationKey(station)} value={offlineStationKey(station)}>{station.name}</option>)}</select></label>
+      <div className="w-full"><MapDestinationPicker label={`Escolher ${itemLabel} no mapa offline`} value={selected ? offlineStationKey(selected) : null} items={stations.map(station => ({ ...station, id: offlineStationKey(station) }))} onSelect={select} /></div>
     </div>
     <OfflineMapCanvas markers={markers} selectedMarkerId={selectedId} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
     <div className="border-t border-black/10 bg-white p-4">
