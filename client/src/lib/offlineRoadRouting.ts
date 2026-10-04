@@ -277,7 +277,7 @@ function groupSteps(edges: GraphEdge[]): OfflineRoadStep[] {
     }
   }
 
-  const steps = grouped.map((item, index) => ({
+  const steps: OfflineRoadStep[] = grouped.map((item, index) => ({
     instruction: index === 0 ? "Siga por " + item.name : "Continue por " + item.name,
     name: item.name,
     distanceMeters: Math.round(item.distanceMeters),
