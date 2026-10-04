@@ -81,7 +81,7 @@ it("applies an intent without losing departure and calculates with the quick tra
 it("forces offline calculation and preserves the return direction and travel mode", () => {
   render(<ReadyRouteShortcuts initialMode="cycling" />); open();
   fireEvent.click(screen.getByRole("button", { name: "Calcular offline" }));
-  expect(screen.getByRole("button", { name: "Calcular offline" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("button", { name: "Offline ativo" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Calcular volta: UPA → Centro (referência)" }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("experiencia")).toBe("offline");
