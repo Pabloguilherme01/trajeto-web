@@ -216,7 +216,7 @@ const readyEndpoints: Record<string, { label: string; destination: string; categ
   ...Object.fromEntries(READY_ROUTE_STREET_POINTS.map(place => [place.id, place])),
   centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO", category: "centro" },
 };
-const readyPairs = [
+const readyPairCandidates: Array<readonly [string, string]> = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
   ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
   ["prefeitura", "upa"], ["prefeitura", "heal"], ["prefeitura", "rodoviaria"],
@@ -225,12 +225,25 @@ const readyPairs = [
   ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
   ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
   ["rodoviaria", "prefeitura"], ["aguas-lindas-shopping", "upa"],
+  ...[
+    "vapt-vupt", "detran", "transito", "tatico", "atacadao-dia-a-dia",
+    "banco-brasil-4590", "caixa-jardim-brasilia", "praca-da-biblia",
+    "ubs-barragem-ii", "secretaria-educacao", "forum", "camara-municipal",
+    "posto-ponteio", "posto-shell", "supermercado-guaira", "drogaria-exclusiva",
+  ].map(destination => ["centro", destination] as const),
   ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),
-  ...READY_ROUTE_STREET_POINTS.slice(0, 6).flatMap(street => [
-    [street.id, "upa"] as const, [street.id, "aguas-lindas-shopping"] as const,
+  ...READY_ROUTE_STREET_POINTS.flatMap(street => [
+    [street.id, "upa"] as const,
+    [street.id, "heal"] as const,
+    [street.id, "prefeitura"] as const,
+    [street.id, "rodoviaria"] as const,
+    [street.id, "aguas-lindas-shopping"] as const,
   ]),
-  ["via-osm-c1d703024625", "prefeitura"], ["via-osm-0da29ee8ad6a", "prefeitura"],
-] as const;
+];
+const readyPairs = Array.from(
+  new Map(readyPairCandidates.map(pair => [pair.join(":"), pair])).values()
+);
+
 export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
   id: `${from}-to-${to}`,
   originId: from,
