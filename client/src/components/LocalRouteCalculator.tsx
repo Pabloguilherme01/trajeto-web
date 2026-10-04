@@ -89,6 +89,8 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
     const hasMeaningfulDraft = Boolean(
       (initialDistanceKm === undefined && distance.trim()) ||
       price.trim() ||
+      (consumption.trim() && consumption !== (savedVehicle ? String(savedVehicle.consumption) : "")) ||
+      (tank.trim() && tank !== (savedVehicle ? String(savedVehicle.tank) : "")) ||
       currentFuel.trim() ||
       toll.trim() ||
       parking.trim() ||
@@ -124,7 +126,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       alternativeConsumption,
       monthlyBudget,
     });
-  }, [initialDistanceKm, activeMode, recurring, distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
+  }, [initialDistanceKm, savedVehicle, activeMode, recurring, distance, price, consumption, tank, currentFuel, roundTrip, tripsPerWeek, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget]);
 
   useEffect(() => {
     const refreshVehicle = () => {
@@ -246,7 +248,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
     const autonomyKm = tankLiters ? tankLiters * kmPerLiter : 0;
     const fuelNeeded = projection.distanceKm / kmPerLiter;
     const estimatedRefuels = autonomyKm > 0 ? Math.max(0, Math.ceil(fuelNeeded / tankLiters) - 1) : null;
-    const fuelStatus = currentFuelProvided && currentFuelLiters !== null && tankLiters > 0
+    const fuelStatus = currentFuelProvided && currentFuelLiters !== null && !currentFuelAboveTank && tankLiters > 0
       ? calculateFuelStatus({ tankLiters, currentFuelLiters, pricePerLiter, kmPerLiter, tripDistanceKm: projection.distanceKm })
       : null;
     const comparison = compareTripScenarios({
@@ -524,7 +526,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
             </div>
           )}
 
-          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && !values.fuelStatus && (
+          {values.estimatedRefuels != null && values.estimatedRefuels > 0 && !values.fuelStatus && !values.currentFuelInvalid && !values.currentFuelAboveTank && (
             <p role="status" className="mt-3 rounded-xl border border-[#E5C98A] bg-[#FFF7DF] px-3 py-2 text-xs font-bold text-[#6D5200]">
               Pela autonomia de tanque informada, esta viagem pode exigir aproximadamente {values.estimatedRefuels} parada(s) adicional(is) para abastecer.
             </p>
@@ -572,7 +574,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
               </div>
             )}
             {values?.currentFuelInvalid && <p id="current-fuel-validation" role="alert" className="mt-1.5 text-[0.62rem] font-bold text-[#8A4434]">Informe um valor válido igual ou maior que zero.</p>}
-            {values?.currentFuelAboveTank && <p id="current-fuel-validation" role="status" className="mt-1.5 text-[0.62rem] font-bold text-[#8A4434]">O valor informado supera o tanque; o cálculo usa a capacidade máxima.</p>}
+            {values?.currentFuelAboveTank && <p id="current-fuel-validation" role="status" className="mt-1.5 text-[0.62rem] font-bold text-[#8A4434]">O valor informado supera o tanque; corrija para avaliar o abastecimento.</p>}
           </div>
         </div>
 
