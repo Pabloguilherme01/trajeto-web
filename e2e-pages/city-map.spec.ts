@@ -36,7 +36,10 @@ test("planner: draws provider geometry over public street tiles", async ({
       body: JSON.stringify({
         code: "Ok",
         routes: [
-          { distance: 12340, duration: 920, geometry: "r`d_B~~teHbwFg_mA" },
+          { distance: 12340, duration: 920, geometry: "r`d_B~~teHbwFg_mA", legs: [{ steps: [
+            { name: "Avenida JK", distance: 12340, duration: 920, maneuver: { type: "depart" } },
+            { name: "Destino", distance: 0, duration: 0, maneuver: { type: "arrive" } },
+          ] }] },
         ],
       }),
     })
@@ -48,6 +51,7 @@ test("planner: draws provider geometry over public street tiles", async ({
       body: '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#e2e9e4"/></svg>',
     })
   );
+  await page.setViewportSize({ width: 320, height: 568 });
   await page.goto(
     "planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822"
   );
@@ -58,8 +62,20 @@ test("planner: draws provider geometry over public street tiles", async ({
     page.getByRole("img", { name: "Trajeto pelas ruas" })
   ).toBeVisible();
   await expect(
-    page.getByRole("combobox", { name: "Escolher ponto da viagem" })
+    page.getByRole("button", { name: "Escolher ponto da viagem" })
   ).toBeVisible();
+  const map = page.getByRole("region", { name: "Mapa independente da viagem" });
+  await expect(map.getByRole("region", { name: "Resumo do percurso no mapa" })).toContainText("12,3 km");
+  await map.getByRole("button", { name: "Ver destino", exact: true }).click();
+  await expect(map.getByRole("button", { name: "Escolher ponto da viagem" })).toHaveAttribute("data-selected-id", "destination");
+  await map.getByRole("button", { name: "Escolher ponto da viagem" }).click();
+  await page.getByRole("combobox", { name: "Pesquisar lugares no mapa" }).fill("inicio");
+  await page.getByRole("option", { name: "Origem · Início da viagem" }).click();
+  await expect(map.getByRole("button", { name: "Escolher ponto da viagem" })).toHaveAttribute("data-selected-id", "origin");
+  await map.getByRole("button", { name: /Instruções pelas ruas/ }).click();
+  await expect(map.locator("ol")).toContainText("Avenida JK");
+  await expect(map.locator("ol")).toContainText("0 m");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
 
@@ -152,4 +168,23 @@ test("education destinations and paginated local points remain usable at 320px",
   await expect(list.getByRole("button").first()).toContainText("HEAL");
   await expect(page.getByRole("button", { name: /Mostrar mais pontos/ })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test("city map: fullscreen is usable at 320px and exits with keyboard focus restored", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  const open = page.getByRole("button", { name: "Abrir mapa em tela cheia" });
+  await open.click();
+  const dialog = page.getByRole("dialog", { name: "Mapa da cidade em tela cheia" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Sair da tela cheia" })).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.keyboard.press("Shift+Tab");
+  expect(await dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(open).toBeFocused();
+  await open.click();
+  await page.getByRole("button", { name: "Sair da tela cheia" }).click();
+  await expect(dialog).toHaveCount(0);
 });

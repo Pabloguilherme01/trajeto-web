@@ -265,3 +265,87 @@ it("clears the calculator draft and remembered price without recreating an empty
   cleanup();
   localStorage.clear();
 });
+
+
+it("completa somente o campo essencial que ficou vazio usando dados locais conhecidos", async () => {
+  cleanup();
+  localStorage.clear();
+  localStorage.setItem("trajeto-last-fuel-price", "5,99");
+  localStorage.setItem("trajeto-mobile-vehicle", JSON.stringify({
+    name: "Meu carro",
+    fuel: "gasolina",
+    consumption: 11.2,
+    tank: 45,
+  }));
+
+  render(<LocalRouteCalculator initialDistanceKm={12} />);
+
+  const priceInput = screen.getByPlaceholderText("5,89") as HTMLInputElement;
+  expect(priceInput.value).toBe("5,99");
+  fireEvent.change(priceInput, { target: { value: "" } });
+
+  expect(screen.getByText(/Revise 1 dado\(s\): preço/i)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Completar campos automaticamente" }));
+
+  await waitFor(() => {
+    expect(priceInput.value).toBe("5,99");
+  });
+  expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("12");
+  expect((screen.getByLabelText(/consumo do veículo/i) as HTMLInputElement).value).toBe("11.2");
+
+  cleanup();
+  localStorage.clear();
+});
+
+it("preserva valores inválidos digitados ao completar outro campo vazio", () => {
+  cleanup();
+  localStorage.clear();
+  localStorage.setItem("trajeto-last-fuel-price", "5,99");
+  localStorage.setItem("trajeto-mobile-vehicle", JSON.stringify({ name: "Meu carro", fuel: "gasolina", consumption: 11.2, tank: 45 }));
+  render(<LocalRouteCalculator initialDistanceKm={12} />);
+  const distance = screen.getByLabelText(/distância de ida/i) as HTMLInputElement;
+  const consumption = screen.getByLabelText(/consumo do veículo/i) as HTMLInputElement;
+  const price = screen.getByPlaceholderText("5,89") as HTMLInputElement;
+  fireEvent.change(distance, { target: { value: "0" } });
+  fireEvent.change(consumption, { target: { value: "-2" } });
+  fireEvent.change(price, { target: { value: "" } });
+  fireEvent.click(screen.getByRole("button", { name: "Completar campos automaticamente" }));
+  expect(price.value).toBe("5,99");
+  expect(distance.value).toBe("0");
+  expect(consumption.value).toBe("-2");
+  expect(screen.getByText(/Revise 2 dado/)).toBeTruthy();
+  cleanup();
+  localStorage.clear();
+});
+
+
+it("restaura consumo e tanque digitados antes dos demais campos", () => {
+  cleanup();
+  localStorage.clear();
+  render(<LocalRouteCalculator />);
+  fireEvent.change(screen.getByLabelText(/consumo do veículo/i), { target: { value: "12" } });
+  fireEvent.change(screen.getByLabelText(/^Tanque \(L\)/i), { target: { value: "45" } });
+  cleanup();
+  render(<LocalRouteCalculator />);
+  expect((screen.getByLabelText(/consumo do veículo/i) as HTMLInputElement).value).toBe("12");
+  expect((screen.getByLabelText(/^Tanque \(L\)/i) as HTMLInputElement).value).toBe("45");
+  cleanup();
+  localStorage.clear();
+});
+
+it("não recomenda abastecimento com combustível acima da capacidade do tanque", () => {
+  cleanup();
+  localStorage.clear();
+  render(<LocalRouteCalculator initialDistanceKm={20} />);
+  fireEvent.change(screen.getByPlaceholderText("5,89"), { target: { value: "6" } });
+  fireEvent.change(screen.getByLabelText(/consumo do veículo/i), { target: { value: "10" } });
+  fireEvent.change(screen.getByLabelText(/^Tanque \(L\)/i), { target: { value: "40" } });
+  fireEvent.change(screen.getByLabelText(/Combustível atual \(L\)/i), { target: { value: "55" } });
+  expect(screen.getByText(/Corrija o combustível atual/)).toBeTruthy();
+  expect(screen.queryByText(/Para encher o tanque/)).toBeNull();
+  expect(screen.queryByText(/Você consegue concluir/)).toBeNull();
+  fireEvent.change(screen.getByLabelText(/Combustível atual \(L\)/i), { target: { value: "5" } });
+  expect(screen.getByText(/Para encher o tanque/)).toBeTruthy();
+  cleanup();
+  localStorage.clear();
+});

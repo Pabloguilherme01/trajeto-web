@@ -1,3 +1,4 @@
+import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { isMapPoint, type MapPoint } from "@/lib/mapGeometry";
@@ -7,6 +8,9 @@ export type OfflineMapMarker = MapPoint & {
   name: string;
   label: string;
   isReference?: boolean;
+  category?: string;
+  source?: string;
+  coordinateKind?: string;
 };
 type Road = {
   id: number;
@@ -60,6 +64,7 @@ function world(point: MapPoint) {
 
 export default function OfflineMapCanvas({
   markers,
+  selectedMarkerId,
   routePoints = [],
   estimated = false,
   initialDark = true,
@@ -75,6 +80,7 @@ export default function OfflineMapCanvas({
   className = "h-[360px]",
 }: {
   markers: OfflineMapMarker[];
+  selectedMarkerId?: string | null;
   routePoints?: MapPoint[];
   estimated?: boolean;
   initialDark?: boolean;
@@ -100,6 +106,7 @@ export default function OfflineMapCanvas({
   const viewport = useRef<HTMLDivElement>(null);
   const gestureZoom = useRef(zoom);
   gestureZoom.current = zoom;
+  const gestureStarted = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const validMarkers = markers.filter(isMapPoint);
   const validGeometry = routePoints.filter(isMapPoint);
@@ -129,6 +136,7 @@ export default function OfflineMapCanvas({
   useEffect(() => {
     setPan({ x: 0, y: 0 });
     pointers.current.clear();
+    gestureStarted.current = false;
   }, [resetKey, fingerprint]);
   useEffect(() => {
     let cancelled = false;
@@ -282,6 +290,11 @@ export default function OfflineMapCanvas({
   const move = (event: React.PointerEvent<HTMLDivElement>) => {
     const previous = pointers.current.get(event.pointerId);
     if (!previous) return;
+    if (!gestureStarted.current) {
+      if (Math.hypot(event.clientX - previous.x, event.clientY - previous.y) < 6) return;
+      gestureStarted.current = true;
+      onManualInteraction?.();
+    }
     const other = [...pointers.current.entries()].find(
       ([id]) => id !== event.pointerId
     )?.[1];
@@ -317,8 +330,10 @@ export default function OfflineMapCanvas({
       y: event.clientY,
     });
   };
-  const end = (event: React.PointerEvent<HTMLDivElement>) =>
+  const end = (event: React.PointerEvent<HTMLDivElement>) => {
     pointers.current.delete(event.pointerId);
+    if (!pointers.current.size) gestureStarted.current = false;
+  };
   return (
     <div
       className={
@@ -328,6 +343,7 @@ export default function OfflineMapCanvas({
     >
       <div
         ref={viewport}
+        data-map-surface
         className={
           "relative touch-none overflow-hidden outline-offset-[-3px] " +
           (expanded ? "h-[75dvh] min-h-[360px]" : className)
@@ -360,14 +376,19 @@ export default function OfflineMapCanvas({
           event.preventDefault();
         }}
         onPointerDown={event => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          if (pointers.current.size >= 2) return;
           if (event.target instanceof Element && event.target.closest("button"))
             return;
-          onManualInteraction?.();
           event.currentTarget.setPointerCapture?.(event.pointerId);
           pointers.current.set(event.pointerId, {
             x: event.clientX,
             y: event.clientY,
           });
+          if (pointers.current.size === 2) {
+            gestureStarted.current = true;
+            onManualInteraction?.();
+          }
         }}
         onPointerMove={move}
         onPointerUp={end}
@@ -523,6 +544,7 @@ export default function OfflineMapCanvas({
               key={marker.id}
               type="button"
               aria-label={"Selecionar " + marker.name}
+              aria-pressed={selectedMarkerId === marker.id}
               onClick={() => onSelect?.(marker)}
               onPointerDown={e => e.stopPropagation()}
               className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
@@ -542,7 +564,8 @@ export default function OfflineMapCanvas({
               )}
               <span
                 className={
-                  "relative grid size-8 place-items-center rounded-full border-[3px] border-white text-xs font-black shadow-lg " +
+                  "relative grid size-9 place-items-center rounded-2xl border-[3px] border-white text-xs font-black shadow-lg " +
+                  (selectedMarkerId === marker.id ? "ring-4 ring-[#C7FF3C] " : "") +
                   (marker.id === "destination"
                     ? "bg-[#ff765e] text-white"
                     : marker.id === "live-position"
@@ -561,7 +584,8 @@ export default function OfflineMapCanvas({
                     <path d="M12 3 21 21 12 17 3 21Z" fill="currentColor" />
                   </svg>
                 ) : (
-                  marker.label
+                  marker.id === "origin" || marker.id === "destination" || marker.id === "device-location"
+                    ? marker.label : <MapPlaceIcon item={marker} />
                 )}
               </span>
               {(marker.id === "origin" ||

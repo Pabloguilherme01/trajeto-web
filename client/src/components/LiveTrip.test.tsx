@@ -14,6 +14,15 @@ beforeEach(() => {
   Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition: watch, clearWatch: clear } });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+it("keeps navigation active when the same route is recreated during a render", () => {
+  const { result, rerender } = renderHook(({ value }) => useLiveTrip(value), { initialProps: { value: route } });
+  act(() => result.current.start());
+  act(() => update(position()));
+  rerender({ value: { ...route, origin: { ...route.origin }, destination: { ...route.destination } } });
+  expect(result.current.active).toBe(true);
+  expect(result.current.progress?.distanceMeters).toBeCloseTo(600, 0);
+  expect(clear).not.toHaveBeenCalled();
+});
 it("requests GPS only after starting, updates locally and clears it when stopped", () => {
   const { result } = renderHook(() => useLiveTrip(route));
   expect(watch).not.toHaveBeenCalled();
@@ -105,4 +114,23 @@ it("rejects invalid GPS timestamps and recovers on the next valid fix", () => {
   }
   act(() => update(position()));
   expect(result.current.point?.lat).toBe(-15.745);
+});
+
+it.each(["destination", "geometry"])("stops on a real %s change and rejects the previous GPS callback", kind => {
+  const original = { ...route, polyline: "_p~iF~ps|U_ulLnnqC_mqNvxq`@" };
+  const { result, rerender } = renderHook(({ value }) => useLiveTrip(value), { initialProps: { value: original } });
+  act(() => result.current.start());
+  const oldUpdate = update;
+  rerender({ value: kind === "destination"
+    ? { ...original, destination: { lat: -15.73, lng: -48.28 } }
+    : { ...original, polyline: "" } });
+  expect(result.current.active).toBe(false);
+  expect(clear).toHaveBeenCalledWith(7);
+  act(() => oldUpdate(position()));
+  expect(result.current.point).toBeNull();
+  act(() => result.current.start());
+  act(() => oldUpdate(position()));
+  expect(result.current.point).toBeNull();
+  act(() => update(position()));
+  expect(result.current.point).not.toBeNull();
 });

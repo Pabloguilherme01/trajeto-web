@@ -1,14 +1,16 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check, Copy, ExternalLink, Fuel, Heart, MapPin, Phone, Share2 } from "lucide-react";
+import { Fuel, Heart, MapPin, Phone } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
 import { getPreferredNavigationProvider, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
-import { DestinationActions } from "@/components/DestinationActions";
+import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
+import { destinationNavigationValue } from "@/lib/unifiedDestination";
+import { buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildAppleMapsDirectionsUrl } from "@/lib/mobileTools";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -70,6 +72,7 @@ export function StationDirectoryCard({
   catalogStatus?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [actionError, setActionError] = useState("");
   const [preferredProvider, setPreferredProviderState] = useState(() => getPreferredNavigationProvider());
   const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
@@ -111,14 +114,7 @@ export function StationDirectoryCard({
     ? window.location.origin + window.location.pathname + "?q=" + encodeURIComponent(stationName) + (cnpj ? "#posto-" + encodeURIComponent(cnpj) : "")
     : address;
   const phone = local?.mapData?.phone;
-  const phoneDigits = (phone || "").replace(/\D/g, "");
-  const whatsappUrl = phoneDigits && !phoneDigits.startsWith("0800") && (phoneDigits.length === 10 || phoneDigits.length === 11)
-    ? "https://wa.me/55" + phoneDigits
-    : null;
-  const socialQuery = encodeURIComponent([stationName, address, "Águas Lindas de Goiás"].filter(Boolean).join(" "));
-  const instagramSearchUrl = "https://www.google.com/search?q=" + encodeURIComponent("site:instagram.com " + decodeURIComponent(socialQuery));
-  const facebookSearchUrl = "https://www.google.com/search?q=" + encodeURIComponent("site:facebook.com " + decodeURIComponent(socialQuery));
-  const webSearchUrl = "https://www.google.com/search?q=" + socialQuery;
+  const webSearchUrl = "https://www.google.com/search?q=" + encodeURIComponent(stationName + " " + address);
   const status = local?.mapData?.operationalStatus;
   const statusLabel = status === "open" ? "Aberto em referência de mapa" : status === "closed" ? "Fechado em referência de mapa" : "Funcionamento não confirmado";
   const sharedDestination = {
@@ -131,18 +127,20 @@ export function StationDirectoryCard({
   };
 
   const copy = async (value: string) => {
+    setActionError("");
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       vibration();
       window.setTimeout(() => setCopied(false), 1400);
-    } catch {}
+    } catch { setActionError("Não foi possível copiar. Confira as permissões do navegador."); }
   };
 
   const share = async () => {
+    setActionError("");
     try {
       await shareText(stationName + " · " + address + (cnpj ? " · CNPJ " + formatCnpj(cnpj) : ""), shareUrl, "Trajeto · posto");
-    } catch {}
+    } catch (error) { if (!(error instanceof Error && error.name === "AbortError")) setActionError("Não foi possível compartilhar este posto. Tente copiar o endereço."); }
   };
 
   return (
@@ -155,7 +153,7 @@ export function StationDirectoryCard({
       transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduceMotion ? undefined : { y: -3 }}
       whileTap={reduceMotion ? undefined : { scale: 0.997 }}
-      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:520px]"
+      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:320px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
@@ -165,46 +163,24 @@ export function StationDirectoryCard({
             <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
               <h3 className="mt-1 text-base font-black leading-tight text-white">{stationName}</h3>
-              <p className="mt-1 text-xs leading-relaxed text-white/65">{legalName}</p>
+              {legalName !== stationName && legalName !== "não informada" && <p className="mt-1 text-xs leading-relaxed text-white/65">{legalName}</p>}
             </div>
-            <button type="button" onClick={onToggleSaved} disabled={!onToggleSaved} className={"grid size-11 shrink-0 place-items-center rounded-xl border disabled:opacity-25 " + (saved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/10 text-[#FFB7A9]" : "border-white/8 text-white/65")} aria-label={saved ? "Remover posto dos salvos" : onToggleSaved ? "Salvar posto neste aparelho" : "Salvar indisponível sem coordenada"}>
-              <Heart className="size-4" fill={saved ? "currentColor" : "none"} />
-            </button>
+            {onToggleSaved && <button type="button" onClick={onToggleSaved} aria-pressed={!!saved} className={"flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border px-2 text-xs font-bold " + (saved ? "border-[#C7FF3C]/30 text-[#D9FF91]" : "border-white/10 text-white/75")} aria-label={saved ? "Remover posto dos salvos" : "Salvar posto neste aparelho"}>
+              <Heart className="size-4" fill={saved ? "currentColor" : "none"} />{saved ? "Salvo" : "Salvar"}
+            </button>}
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
             <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{catalogStatus}</span>
             {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-xs font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-xs font-black text-white/65">sem cruzamento ANP</span>}
             <span className="rounded-full border border-white/8 px-2 py-1 text-xs font-black text-white/65">{distributor}</span>
-            {anp?.products?.length ? <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">ANP enriquecida</span> : null}
-            {coords && <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">coordenada</span>}
             {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
             {status && <span className={"rounded-full border px-2 py-1 text-xs font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
           </div>
         </div>
       </div>
 
-      <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3" aria-label="Confiança e atualização dos dados">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[.13em] text-white/65">Confiança dos dados</p>
-            <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
-            <p className="text-xs font-bold text-white/65">qualidade/frescor</p>
-          </div>
-        </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
-        </div>
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/65">
-          <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
-          <span>Preço: {primaryPrice ? "ANP" : "não disponível"}</span>
-          <span>Localização: {coords ? "coordenada" : "não confirmada"}</span>
-        </div>
-      </section>
-
+      {primaryPrice ? <>
       <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -224,30 +200,37 @@ export function StationDirectoryCard({
         <p className="mt-2 text-xs leading-relaxed text-white/65">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
       </section>
 
+      </> : <p className="mt-3 text-xs leading-relaxed text-white/65">Preço individual indisponível · confirme no posto.</p>}
+
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#3DE3FF]" />
           <p className="text-sm leading-relaxed text-white/65">{address || "Endereço não consolidado"}</p>
         </div>
-        <div className="mt-2 grid gap-2 text-xs text-white/65 sm:grid-cols-2">
-          <span>CNPJ: {cnpj ? formatCnpj(cnpj) : "não informado"}</span>
-          <span>Bairro: {anp?.bairro || local?.neighborhood || "não informado"}</span>
-          <span>CEP: {anp?.cep || "não informado"}</span>
-          <span>Telefone: {phone || "não informado"}</span>
-          <span>Horário: {local?.mapData?.hours || "não informado"}</span>
-          <span>Avaliação: {local?.mapData?.rating != null ? local.mapData.rating.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " · " + (local.mapData.reviewCount ?? 0).toLocaleString("pt-BR") + " avaliações" : "não informado"}</span>
+        {local?.mapData?.hours && <p className="mt-2 text-xs text-white/65">Horário informado: {local.mapData.hours} · confirme antes de sair.</p>}
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2" aria-label={"Ações para " + stationName}>
+        <a href={buildDestinationPlannerUrl(destinationNavigationValue(sharedDestination))} className="flex min-h-11 items-center justify-center rounded-xl bg-[#C7FF3C] px-2 text-xs font-black text-[#102028]">Traçar rota</a>
+        <button type="button" onClick={() => {
+          const provider = getPreferredNavigationProvider();
+          const value = destinationNavigationValue(sharedDestination);
+          const url = provider === "waze" ? buildWazeNavigationUrl(address, coords ?? undefined) : provider === "apple" ? buildAppleMapsDirectionsUrl(value) : buildGoogleMapsDestinationUrl(value, true);
+          window.open(url, "_blank", "noopener,noreferrer");
+        }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF]">Navegar</button>
+        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 text-xs font-bold text-white/80"><Phone className="size-4" />Ligar para o posto</a>}
+      </div>
+      {actionError && <p role="alert" className="mt-2 text-xs text-[#FFD59B]">{actionError}</p>}
+      <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02] px-3">
+        <summary className="min-h-11 cursor-pointer py-3 text-xs font-bold text-white/75">Mais opções do posto</summary>
+        <div className="grid grid-cols-2 gap-2 border-t border-white/8 py-3">
+          <a href={buildOriginPlannerUrl(address)} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Sair deste posto</a>
+          <button type="button" onClick={() => void share()} className="min-h-11 rounded-xl border border-white/10 text-xs font-bold text-white/75">Compartilhar</button>
+          <button type="button" onClick={() => void copy(cnpj || address)} className="min-h-11 rounded-xl border border-white/10 px-2 text-xs font-bold text-white/75">{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
+          <a href={webSearchUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Buscar contato na web</a>
+          {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Ficha completa</Link>}
+          {local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-xs font-bold text-white/75">Site informado</a>}
+          {local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-xs font-bold text-white/75">Enviar e-mail</a>}
         </div>
-      </div>
-
-      {local && (
-        <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] text-xs font-black text-[#C9F7FF]">
-          Abrir ficha completa
-        </Link>
-      )}
-
-      <div className="mt-3">
-        <DestinationActions destination={sharedDestination} saved={saved} onToggleSaved={onToggleSaved} />
-      </div>
 
       <details className="mt-2 rounded-xl border border-white/8 bg-white/[.02] px-3">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-black text-white/65">
@@ -272,52 +255,37 @@ export function StationDirectoryCard({
         </div>
       </details>
 
-      <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3" aria-label="Contato e redes sociais">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Contato e redes</p>
-          <span className="text-xs font-bold text-white/65">sem login</span>
-        </div>
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <button type="button" onClick={() => window.open(instagramSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#E1306C]/20 bg-[#E1306C]/[.05] text-xs font-black text-white/70">Instagram</button>
-          <button type="button" onClick={() => window.open(facebookSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-[#1877F2]/20 bg-[#1877F2]/[.05] text-xs font-black text-white/70">Facebook</button>
-          {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-[#25D366]/20 bg-[#25D366]/[.05] text-xs font-black text-white/70">WhatsApp</a> : <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 text-xs font-black text-white/65">Buscar contato</button>}
-          <button type="button" onClick={() => window.open(webSearchUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/8 text-xs font-black text-white/65">Mais na web</button>
-        </div>
-        <p className="mt-2 text-xs leading-relaxed text-white/65">Instagram e Facebook usam busca pública pelo nome/endereço para evitar links inventados. WhatsApp aparece quando existe telefone público compatível.</p>
-        <div className="mt-2 grid gap-2 rounded-xl border border-white/8 bg-white/[.02] p-2.5">
-          <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Fontes oficiais complementares</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/acoes-de-fiscalizacao", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Fiscalização ANP</button>
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/pmqc-programa-de-monitoramento-da-qualidade-dos-combustiveis", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">PMQC</button>
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/multas-aplicadas-com-vencimento-a-partir-de-2016", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Multas ANP</button>
-            <button type="button" onClick={() => window.open("https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos", "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/65">Base cadastral</button>
-          </div>
-        </div><div className="mt-2 grid gap-2 text-xs text-white/65 sm:grid-cols-2">{local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="truncate underline decoration-white/10 underline-offset-2">{local.mapData.email}</a>}{local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="truncate underline decoration-white/10 underline-offset-2">Site oficial</a>}</div>
-      </div>
-
-      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65"><Phone className="size-3.5" />Ligar</a>}
-        <button type="button" onClick={() => void copy(cnpj || address)} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65">{copied ? <Check className="size-3.5 text-[#C7FF3C]" /> : <Copy className="size-3.5" />}{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
-        <button type="button" onClick={() => void share()} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-white/8 text-xs font-black text-white/65"><Share2 className="size-3.5" />Compartilhar</button>
-        <button type="button" onClick={() => window.open(anpComVcUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-[#C7FF3C]/20 bg-[#C7FF3C]/[.04] text-xs font-black text-[#D9FF91]"><ExternalLink className="size-3.5" />ANP com VC</button>
-        <button type="button" onClick={() => window.open(anpUrl, "_blank", "noopener,noreferrer")} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/15 text-xs font-black text-[#9FEFFF]"><ExternalLink className="size-3.5" />Consulta ANP</button>
-      </div>
-      <div className="mt-2 rounded-xl border border-[#3DE3FF]/12 bg-[#3DE3FF]/[.025] p-3">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-black uppercase tracking-[.12em] text-[#87DFF0]">ANP com VC · consulta complementar</p>
-          <span className="text-xs font-bold text-white/65">oficial</span>
-        </div>
-        <p className="mt-1 text-xs leading-relaxed text-white/38">A ANP informa que esta aplicação complementar mostra histórico de fiscalização dos últimos cinco anos, análises do PMQC, origem do combustível e classificação do posto. O acesso direto ao relatório individual depende da interface da própria ANP.</p>
-        <button type="button" onClick={async () => { if (cnpj) { try { await navigator.clipboard.writeText(cnpj); } catch {} } window.open("https://anpcomvcpostos.anp.gov.br/", "_blank", "noopener,noreferrer"); }} className="mt-2 inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF]"><ExternalLink className="size-3.5" />Abrir ANP com VC · CNPJ copiado</button>
-      </div>
-      <p className="mt-2 text-xs leading-relaxed text-white/65">A navegação é aberta no app/site escolhido. O Trajeto não exige conta.</p>
-
+      </details>
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-xs font-black text-white/65">
           <span>Todos os dados disponíveis</span>
           <Fuel className="size-4 text-white/65" />
         </summary>
         <div className="space-y-2 border-t border-white/8 px-3 py-3 text-xs leading-relaxed text-white/65">
+      <section className="mt-3 rounded-2xl border border-white/8 bg-white/[.025] p-3" aria-label="Confiança e atualização dos dados">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.13em] text-white/65">Confiança dos dados</p>
+            <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
+            <p className="text-xs font-bold text-white/65">qualidade/frescor</p>
+          </div>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
+          <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
+        </div>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/65">
+          <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
+          <span>Preço: {primaryPrice ? "ANP" : "não disponível"}</span>
+          <span>Localização: {coords ? "coordenada" : "não confirmada"}</span>
+        </div>
+      </section>
+
+          <p>Razão social: {legalName} · situação do catálogo: {catalogStatus}</p>
+          <div className="flex flex-wrap gap-3"><a href={anpUrl} target="_blank" rel="noopener noreferrer" className="underline">Consulta cadastral ANP</a><a href={anpComVcUrl} target="_blank" rel="noopener noreferrer" className="underline">ANP com VC</a></div>
+
           <p><strong className="text-white/65">Identidade:</strong> {local?.aliases?.join(" · ") || "sem aliases consolidados"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · identificação:</strong> código SIMP {anp?.codigoSimp || "—"} · autorização {anp?.autorizacao || "—"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · datas:</strong> publicação {formatDate(anp?.dataPublicacao)} · vinculação {formatDate(anp?.dataVinculacao)} · obtenção dos dados {formatDate(anp?.dataObtencao)}</p>

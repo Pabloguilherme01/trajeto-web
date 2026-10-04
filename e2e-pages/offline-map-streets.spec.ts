@@ -43,10 +43,12 @@ test("Pages: city streets and controls survive an offline reload without externa
   await page.getByRole("button", { name: "Ampliar mapa", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reduzir mapa", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Reduzir mapa", exact: true }).click();
-  const picker = page.getByRole("combobox", {
+  const picker = page.getByRole("button", {
     name: "Escolher destino no mapa offline",
   });
-  await picker.selectOption({ label: "HEAL" });
+  await picker.click();
+  await page.getByRole("combobox", { name: "Pesquisar lugares no mapa" }).fill("HEAL");
+  await page.getByRole("listbox", { name: "Resultados de lugares" }).getByRole("option", { name: /^HEAL ·/ }).click();
   await expect(page.getByText("HEAL", { exact: true }).last()).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
@@ -61,7 +63,7 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await context.setOffline(true);
   await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
   await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
-  await expect(page.getByText(/Rota preparada localmente sem usar provedores externos/)).toBeVisible();
+  await expect(page.getByText(/Estimativa offline entre os locais escolhidos/)).toBeVisible();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.reload();

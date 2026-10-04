@@ -20,7 +20,7 @@ async function planRoute(page: Page) {
   await page
     .getByRole("button", { name: "Calcular rota", exact: true })
     .click();
-  await expect(page.getByText("12,3 km", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
 }
 
 test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
@@ -97,7 +97,7 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
   await page
     .getByRole("button", { name: "Calcular rota", exact: true })
     .click();
-  await expect(page.getByText("12,3 km", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
 });
 
 test("Pages: an aborted IndexedDB transaction never announces a saved route", async ({
@@ -219,4 +219,52 @@ test("Pages: recovers an exact saved trip when online geocoding fails", async ({
   await expect(page.getByText(/Usando a melhor rota já salva/)).toBeVisible();
   await expect(page.getByText(/trânsito e horários podem estar desatualizados/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
+});
+
+test("Pages: prepared endpoints support new offline trips in every mode and coordinate-based route recovery", async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("planejar?experiencia=offline", { waitUntil: "domcontentloaded" });
+  await page.evaluate(async () => {
+    const open = indexedDB.open("trajeto-offline", 2);
+    open.onupgradeneeded = () => { if (!open.result.objectStoreNames.contains("routes")) open.result.createObjectStore("routes", { keyPath: "id" }); };
+    const db = await new Promise<IDBDatabase>((resolve, reject) => { open.onsuccess = () => resolve(open.result); open.onerror = () => reject(open.error); });
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("routes", "readwrite");
+      const a = { lat: -15.75123, lng: -48.27123 }, b = { lat: -15.76123, lng: -48.28123 }, c = { lat: -15.77123, lng: -48.29123 };
+      for (const [origin, destination, from, to] of [["Ponto preparado A", "Ponto preparado B", a, b], ["Ponto preparado B", "Ponto preparado C", b, c]] as const) {
+        tx.objectStore("routes").put({ id: origin + destination, origin, destination, savedAt: new Date().toISOString(), payload: {
+          route: { origin: from, destination: to, distanceLabel: "12 km", distanceMeters: 12000, durationSeconds: 900, polyline: "r`d_B~~teHbwFg_mA", mode: "driving", source: "osrm", steps: [{ instruction: "Siga pela via preparada", distanceMeters: 12000, durationSeconds: 900 }] }, stops: [], anpReferences: [], recommendation: null,
+        } });
+      }
+      tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+    for (const storage of [localStorage, sessionStorage]) {
+      Object.keys(storage).filter(key => key.startsWith("trajeto:public-routing:")).forEach(key => storage.removeItem(key));
+    }
+  });
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBeTruthy();
+  let external = 0;
+  page.on("request", request => { if (/nominatim|project-osrm|api.mapbox/.test(request.url())) external++; });
+  await context.setOffline(true);
+  await page.reload();
+  await page.getByPlaceholder("De onde você sai", { exact: true }).fill("Ponto preparado A");
+  await page.getByPlaceholder("Para onde você vai", { exact: true }).fill("Ponto preparado C");
+  for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
+    await page.getByRole("button", { name: mode, exact: true }).click();
+    await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+    await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
+    await expect(page.getByText("Estimativa em linha reta · sem curvas confirmadas")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  }
+  await page.getByRole("button", { name: "Ocultar referências", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Mostrar referências", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: "Carro", exact: true }).click();
+  await page.getByPlaceholder("De onde você sai", { exact: true }).fill("-15.75123,-48.27123");
+  await page.getByPlaceholder("Para onde você vai", { exact: true }).fill("Ponto preparado B");
+  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await expect(page.getByText(/Usando a melhor rota já salva/)).toBeVisible();
+  await page.getByRole("button", { name: /Instruções pelas ruas/ }).click();
+  await expect(page.getByText("Siga pela via preparada")).toBeVisible();
+  expect(external).toBe(0);
 });

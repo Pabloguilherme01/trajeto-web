@@ -9,6 +9,49 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+it("preserves manual exploration on GPS updates and resumes following on recenter", () => {
+  const stations = [{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }];
+  const { rerender } = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const left = marker.style.left;
+  rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
+  expect(marker.style.left).toBe(left);
+  fireEvent.click(screen.getByRole("button", { name: "Recentrar mapa" }));
+  expect(marker.style.left).not.toBe(left);
+  const recentered = marker.style.left;
+  rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2814 }} />);
+  expect(marker.style.left).not.toBe(recentered);
+});
+
+it("zooms around a double-clicked point without moving its marker", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  fireEvent.doubleClick(screen.getByRole("region", { name: "Mapa dos postos" }), { clientX: 160, clientY: 260 });
+  expect(screen.getByRole("button", { name: "Abrir Posto A" }).style.left).toBe("160px");
+  expect(document.querySelector('img[src*="/14/"]')).toBeTruthy();
+});
+
+it("zooms with two fingers and continues dragging when one is lifted", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  const pointer = (type: string, id: number, x: number) => {
+    const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: 260 });
+    Object.defineProperties(event, { pointerId: { value: id }, pointerType: { value: "touch" } });
+    fireEvent(map, event);
+  };
+  pointer("pointerdown", 1, 110);
+  pointer("pointerdown", 2, 210);
+  pointer("pointermove", 1, 60);
+  pointer("pointermove", 2, 260);
+  expect(document.querySelector('img[src*="/14/"]')).toBeTruthy();
+  pointer("pointerup", 2, 260);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = parseFloat(marker.style.left);
+  pointer("pointermove", 1, 80);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(before + 20);
+});
+
 it("tracks the actual viewport and keeps the selected station after catalog updates", () => {
   let resize = () => {};
   let width = 320;
@@ -112,9 +155,8 @@ it("selects and centers a distant station from the accessible list even without 
     { name: "Posto Centro", address: "Rua A", lat: -15.7545, lng: -48.2816 },
     { name: "Posto Distante", address: "Rua B", lat: -15.81, lng: -48.34 },
   ]} />);
-  const list = screen.getByRole("combobox", { name: "Escolher posto no mapa" });
-  const option = screen.getByRole("option", { name: "Posto Distante" }) as HTMLOptionElement;
-  fireEvent.change(list, { target: { value: option.value } });
+  fireEvent.click(screen.getByRole("button", { name: "Escolher posto no mapa" }));
+  fireEvent.click(screen.getByRole("option", { name: "Posto Distante · Rua B" }));
   expect(screen.getByText("Rua B")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Abrir Posto Distante" }).style.left).toBe("160px");
   expect(screen.getByRole("button", { name: "Abrir Posto Distante" }).getAttribute("aria-pressed")).toBe("true");
@@ -125,7 +167,7 @@ it("allows keyboard panning without intercepting keys in the station picker", ()
   const marker = screen.getByRole("button", { name: "Abrir Posto A" });
   fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
   expect(marker.style.left).toBe("80px");
-  fireEvent.keyDown(screen.getByRole("combobox", { name: "Escolher posto no mapa" }), { key: "ArrowRight" });
+  fireEvent.keyDown(screen.getByRole("button", { name: "Escolher posto no mapa" }), { key: "ArrowRight" });
   expect(marker.style.left).toBe("80px");
 });
 
@@ -154,4 +196,150 @@ it("returns from offline fallback when connectivity is restored", () => {
   act(() => window.dispatchEvent(new Event("online")));
   expect(screen.queryByText("Mapa local")).toBeNull();
   expect(screen.getByRole("button", { name: "Aumentar zoom" })).toBeTruthy();
+});
+
+function sendPointer(map: HTMLElement, type: string, id: number, x: number, y = 260) {
+  const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: y });
+  Object.defineProperties(event, { pointerId: { value: id }, pointerType: { value: "touch" } });
+  fireEvent(map, event);
+}
+
+it("keeps following after a tap but pauses after a real drag", () => {
+  const stations = [{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }];
+  const view = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  sendPointer(map, "pointerdown", 1, 110);
+  sendPointer(map, "pointermove", 1, 112);
+  sendPointer(map, "pointerup", 1, 112);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = marker.style.left;
+  view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
+  expect(marker.style.left).not.toBe(before);
+  sendPointer(map, "pointerdown", 1, 110);
+  sendPointer(map, "pointermove", 1, 130);
+  sendPointer(map, "pointerup", 1, 130);
+  const panned = marker.style.left;
+  view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2814 }} />);
+  expect(marker.style.left).toBe(panned);
+  expect(screen.getByRole("button", { name: "Recentrar mapa" }).getAttribute("aria-pressed")).toBe("false");
+});
+
+it("ignores an extra finger and recovers from capture loss", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  sendPointer(map, "pointerdown", 1, 110);
+  sendPointer(map, "pointerdown", 2, 210);
+  sendPointer(map, "pointerdown", 3, 300);
+  sendPointer(map, "pointermove", 3, 310);
+  sendPointer(map, "pointerup", 3, 310);
+  sendPointer(map, "pointermove", 1, 60);
+  sendPointer(map, "pointermove", 2, 260);
+  expect(document.querySelector('img[src*="/14/"]')).toBeTruthy();
+  sendPointer(map, "lostpointercapture", 2, 260);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = parseFloat(marker.style.left);
+  sendPointer(map, "pointermove", 1, 80);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(before + 20);
+  sendPointer(map, "pointercancel", 1, 80);
+  const cancelled = marker.style.left;
+  sendPointer(map, "pointermove", 1, 100);
+  expect(marker.style.left).toBe(cancelled);
+});
+
+it("preserves an off-center anchor during double-click zoom", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  vi.spyOn(map, "getBoundingClientRect").mockReturnValue({ left: 40, top: 100 } as DOMRect);
+  fireEvent.doubleClick(map, { clientX: 140, clientY: 300 });
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(220);
+  expect(parseFloat(marker.style.top)).toBeCloseTo(320);
+});
+
+it("keeps an explicitly selected destination in view on GPS updates", () => {
+  const stations = [
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Posto B", address: "Rua B", lat: -15.81, lng: -48.34 },
+  ];
+  const view = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher posto no mapa" }));
+  fireEvent.click(screen.getByRole("option", { name: "Posto B · Rua B" }));
+  view.rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
+  expect(screen.getByRole("button", { name: "Abrir Posto B" }).style.left).toBe("160px");
+});
+
+it("scales street tiles continuously with the same pinch anchor as markers", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  sendPointer(map, "pointerdown", 1, 60);
+  sendPointer(map, "pointerdown", 2, 160);
+  sendPointer(map, "pointermove", 2, 200);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  expect(parseFloat(marker.style.left)).toBeCloseTo(200);
+  const tile = document.querySelector('img[src*="/13/"]')!;
+  expect(parseFloat((tile.parentElement!.style.transform.match(/scale\(([^)]+)/) ?? [])[1])).toBeCloseTo(1.4);
+  expect(screen.getByLabelText("Escala do mapa")).toBeTruthy();
+});
+
+
+it("identifica os pontos A/B e centraliza o destino sem alterar a rota", () => {
+  const stations = [
+    { id: "origin", name: "Origem", address: "Partida", lat: -15.7545, lng: -48.2816 },
+    { id: "destination", name: "Destino", address: "Chegada", lat: -15.7555, lng: -48.2826 },
+  ];
+  render(<TileStationMap stations={stations} selectionLabel="Escolher ponto da viagem" routePoints={stations} />);
+  const framedOrigin = screen.getByRole("button", { name: "Abrir Origem" }).style.left;
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).textContent).toBe("A");
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).textContent).toBe("B");
+  fireEvent.click(screen.getByRole("button", { name: "Ver destino" }));
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).style.left).toBe("160px");
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("img", { name: "Trajeto pelas ruas" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Ver origem" }));
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe("160px");
+  fireEvent.click(screen.getByRole("button", { name: "Recentrar mapa" }));
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe(framedOrigin);
+});
+
+
+it("personalizes the route without resetting manual exploration and identifies walking/cycling", () => {
+  const stations = [
+    { id: "origin", name: "Origem", address: "Partida", lat: -15.7545, lng: -48.2816 },
+    { id: "destination", name: "Destino", address: "Chegada", lat: -15.7555, lng: -48.2826 },
+  ];
+  const view = render(<TileStationMap stations={stations} routePoints={stations} travelMode="walking" />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  fireEvent.keyDown(map, { key: "ArrowRight" });
+  const before = screen.getByRole("img", { name: "Trajeto pelas ruas" }).querySelectorAll("polyline")[1];
+  const points = before.getAttribute("points");
+  expect(before.getAttribute("stroke-dasharray")).toBe("2 9");
+  expect(screen.getByText("A pé · linha pontilhada")).toBeTruthy();
+  fireEvent.change(screen.getByRole("combobox", { name: "Cor do trajeto" }), { target: { value: "contrast" } });
+  const after = screen.getByRole("img", { name: "Trajeto pelas ruas" }).querySelectorAll("polyline")[1];
+  expect(after.getAttribute("stroke")).toBe("#111827");
+  expect(after.getAttribute("stroke-width")).toBe("7");
+  expect(after.getAttribute("points")).toBe(points);
+  view.rerender(<TileStationMap stations={stations} routePoints={stations} travelMode="cycling" />);
+  expect(screen.getByText("Bicicleta · linha tracejada")).toBeTruthy();
+  expect(after.getAttribute("stroke-dasharray")).toBe("10 6");
+});
+
+
+it("uses segment images and reveals the selected place information on click", () => {
+  const onSelect = vi.fn();
+  render(<TileStationMap stations={[
+    { id: "health", name: "Unidade de saúde", address: "Rua da Saúde", category: "saude", lat: -15.7545, lng: -48.2816 },
+    { id: "shop", name: "Mercado", address: "Rua das Compras", category: "compras", lat: -15.7546, lng: -48.2817 },
+  ]} onSelectStation={onSelect} />);
+  expect(screen.getByRole("button", { name: "Abrir Unidade de saúde" }).querySelector('[data-map-segment="Saúde"]')).toBeTruthy();
+  const shop = screen.getByRole("button", { name: "Abrir Mercado" });
+  expect(shop.querySelector('[data-map-segment="Compras"]')).toBeTruthy();
+  expect(shop.textContent).not.toBe("2");
+  fireEvent.click(shop);
+  expect(shop.getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Rua das Compras")).toBeTruthy();
+  expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "shop" }));
 });

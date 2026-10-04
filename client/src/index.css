@@ -330,3 +330,62 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
     font-size: 0.55rem;
   }
 }
+
+.map-explorer-frame[data-expanded="true"] [data-map-surface] {
+  height: max(260px, calc(100dvh - 100px));
+  min-height: 260px;
+  max-height: none;
+}
+
+.map-explorer-frame[data-expanded="true"] {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Shared surfaces: depth and feedback without changing map rendering. */
+.premium-panel {
+  border-color: rgba(255,255,255,.14);
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.premium-panel:focus-within { border-color: rgba(61,227,255,.5); }
+.premium-route-card {
+  background-image: linear-gradient(145deg, rgba(61,227,255,.05), transparent 65%);
+  box-shadow: 0 10px 24px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.premium-route-card:focus-within { border-color: #3DE3FF; }
+.home-hero { display: grid; gap: 1.25rem; align-items: center; }
+.city-explore-card {
+  display: flex; align-items: center; gap: 1rem; min-width: 0;
+  width: 100%; padding: 1.25rem; text-align: left; border-radius: 1.5rem;
+  border: 1px solid rgba(61,227,255,.24);
+  background: radial-gradient(circle at 10% 25%,rgba(61,227,255,.12),transparent 65%), #101b23;
+  box-shadow: 0 16px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.city-explore-art {
+  position: relative; display: grid; place-items: center; flex-shrink: 0;
+  width: 4.5rem; height: 4.5rem; border-radius: 1.25rem;
+  color: rgba(61,227,255,.65); background: rgba(61,227,255,.06);
+}
+.city-explore-pin {
+  position: absolute; right: -.25rem; bottom: -.25rem; display: grid;
+  place-items: center; width: 2rem; height: 2rem; border-radius: 50%;
+  background: #C7FF3C; color: #102028; border: 3px solid #101b23;
+}
+@media (min-width: 1024px) {
+  .home-hero { grid-template-columns: minmax(0,1.5fr) minmax(0,1fr); gap: 2rem; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .premium-route-card:hover, .city-explore-card:hover { border-color: rgba(61,227,255,.6); }
+  .mobile-card:hover { box-shadow: 0 18px 36px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .premium-route-card, .city-explore-card, .premium-panel, .mobile-card {
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  }
+  .city-explore-card:active { transform: scale(.985); }
+  @media (hover: hover) and (pointer: fine) {
+    .city-explore-card:hover, .premium-route-card:hover { transform: translateY(-2px); }
+  }
+}
+html.a11y-compact .premium-panel, html.a11y-compact .premium-route-card, html.a11y-compact .city-explore-card { box-shadow: none; }
+html.a11y-contrast .premium-panel, html.a11y-contrast .premium-route-card, html.a11y-contrast .city-explore-card { border-color: white; background: #000; }

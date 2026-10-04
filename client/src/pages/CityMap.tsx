@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
+import MapExplorerFrame from "@/components/MapExplorerFrame";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
@@ -117,6 +118,7 @@ export default function CityMap() {
             {
               id: item.id,
               name: item.label,
+              category: item.category,
               address: item.destination,
               ...point,
             },
@@ -128,8 +130,9 @@ export default function CityMap() {
         ? [{
             id: item.id,
             name: item.name,
+            category: item.category,
             address: item.destination ?? item.address ?? item.name,
-            source: item.sourceLabel,
+            source: "local" as const,
             coordinateKind: item.coordinateKind,
             coordinateLabel: item.coordinateLabel,
             lat: item.lat,
@@ -245,6 +248,7 @@ export default function CityMap() {
         aria-label="Mapa da cidade"
         className="overflow-hidden rounded-3xl border border-white/15 shadow-2xl"
       >
+        <MapExplorerFrame label="Mapa da cidade">
         {online && markers.length ? (
           <TileStationMap
             stations={markers}
@@ -255,6 +259,7 @@ export default function CityMap() {
         ) : (
           fallback
         )}
+        </MapExplorerFrame>
       </section>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white/65">
         <span>
@@ -332,7 +337,7 @@ export default function CityMap() {
                   typeof item.lat === "number" && typeof item.lng === "number"
                     ? { lat: item.lat, lng: item.lng }
                     : null,
-                source: item.sourceLabel,
+                source: "local" as const,
               };
               return (
                 <article key={item.id} className="min-w-0 rounded-2xl border border-white/10 bg-[#121B22] p-4">

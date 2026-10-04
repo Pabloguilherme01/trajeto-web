@@ -7,6 +7,15 @@ import {
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
 
+import MapDestinationPicker from "@/components/MapDestinationPicker";
+import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
+
+const ROUTE_STYLES = {
+  teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
+  blue: { label: "Azul", color: "#1d4ed8", width: 5 },
+  contrast: { label: "Alto contraste", color: "#111827", width: 7 },
+} as const;
+const TRAVEL_LABELS = { driving: "Carro", walking: "A pé", cycling: "Bicicleta", transit: "Transporte público" } as const;
 const TILE = 256;
 const DEFAULT_CENTER = { lat: -15.7545, lng: -48.2816 };
 const TILE_URL_TEMPLATE =
@@ -98,6 +107,8 @@ export default function TileStationMap({
       window.removeEventListener("offline", update);
     };
   }, []);
+  const [routeStyle, setRouteStyle] = useState<keyof typeof ROUTE_STYLES>("teal");
+  const appearance = ROUTE_STYLES[routeStyle];
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -107,6 +118,9 @@ export default function TileStationMap({
   const [tileErrors, setTileErrors] = useState(0);
   const [dragging, setDragging] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ distance: number; zoom: number; anchor: { lat: number; lng: number } } | null>(null);
+  const [following, setFollowing] = useState(true);
   const dragRef = useRef<{
     id: number;
     x: number;
@@ -116,8 +130,8 @@ export default function TileStationMap({
   } | null>(null);
 
   useEffect(() => {
-    if (userCoords) setCenter(userCoords);
-  }, [userCoords?.lat, userCoords?.lng]);
+    if (userCoords && following) setCenter(userCoords);
+  }, [userCoords?.lat, userCoords?.lng, following]);
 
   useEffect(() => {
     if (!drawable.some(item => stationKey(item) === selectedId))
@@ -147,10 +161,15 @@ export default function TileStationMap({
   const width = size.width;
   const height = size.height;
   const centerPx = project(center.lat, center.lng, zoom);
-  const baseTileX = Math.floor(centerPx.x / TILE);
-  const baseTileY = Math.floor(centerPx.y / TILE);
-  const radiusX = Math.ceil(width / (2 * TILE)) + 1;
-  const radiusY = Math.ceil(height / (2 * TILE)) + 1;
+  const tileZoom = Math.floor(zoom);
+  const tileScale = 2 ** (zoom - tileZoom);
+  const tileCenter = project(center.lat, center.lng, tileZoom);
+  const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
+  const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
+  const baseTileX = Math.floor(tileCenter.x / TILE);
+  const baseTileY = Math.floor(tileCenter.y / TILE);
+  const radiusX = Math.ceil(width / (2 * TILE * tileScale)) + 1;
+  const radiusY = Math.ceil(height / (2 * TILE * tileScale)) + 1;
   const tiles: Array<{
     x: number;
     y: number;
@@ -164,9 +183,9 @@ export default function TileStationMap({
       const rawX = baseTileX + dx;
       const y = baseTileY + dy;
       tiles.push({
-        x: wrapTile(rawX, zoom),
+        x: wrapTile(rawX, tileZoom),
         y,
-        key: `${zoom}:${rawX}:${y}`,
+        key: `${tileZoom}:${rawX}:${y}`,
         left: (dx + radiusX) * TILE,
         top: (dy + radiusY) * TILE,
       });
@@ -182,7 +201,23 @@ export default function TileStationMap({
   };
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (pointers.current.size >= 2) return;
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
+    if (pointers.current.size === 2) {
+      setFollowing(false);
+      setDragging(true);
+      const [a, b] = [...pointers.current.values()];
+      const rect = event.currentTarget.getBoundingClientRect();
+      pinch.current = {
+        distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+        zoom,
+        anchor: unproject(centerPx.x + (a.x + b.x) / 2 - rect.left - width / 2, centerPx.y + (a.y + b.y) / 2 - rect.top - height / 2, zoom),
+      };
+      dragRef.current = null;
+      return;
+    }
     dragRef.current = {
       id: event.pointerId,
       x: event.clientX,
@@ -190,12 +225,26 @@ export default function TileStationMap({
       cx: centerPx.x,
       cy: centerPx.y,
     };
-    setDragging(true);
   };
 
   const drag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointers.current.has(event.pointerId)) return;
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pinch.current && pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const state = pinch.current;
+      const nextZoom = Math.max(8, Math.min(17, state.zoom + Math.log2(Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / state.distance)));
+      const anchor = project(state.anchor.lat, state.anchor.lng, nextZoom);
+      const rect = event.currentTarget.getBoundingClientRect();
+      setZoom(nextZoom);
+      setCenter(unproject(anchor.x - ((a.x + b.x) / 2 - rect.left - width / 2), anchor.y - ((a.y + b.y) / 2 - rect.top - height / 2), nextZoom));
+      return;
+    }
     const state = dragRef.current;
     if (!state || state.id !== event.pointerId) return;
+    if (!dragging && Math.hypot(event.clientX - state.x, event.clientY - state.y) < 6) return;
+    setFollowing(false);
+    setDragging(true);
     const next = unproject(
       state.cx - (event.clientX - state.x),
       state.cy - (event.clientY - state.y),
@@ -205,12 +254,19 @@ export default function TileStationMap({
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (dragRef.current?.id !== event.pointerId) return;
-    dragRef.current = null;
-    setDragging(false);
+    if (!pointers.current.has(event.pointerId)) return;
+    pointers.current.delete(event.pointerId);
+    pinch.current = null;
+    const remaining = [...pointers.current.entries()][0];
+    dragRef.current = remaining ? { id: remaining[0], x: remaining[1].x, y: remaining[1].y, cx: centerPx.x, cy: centerPx.y } : null;
+    setDragging(Boolean(remaining));
   };
 
-  const recenter = () => setCenter(userCoords ?? DEFAULT_CENTER);
+  const recenter = () => {
+    if (!userCoords && routePoints.length > 1) { fitStations(); return; }
+    setFollowing(true);
+    setCenter(userCoords ?? DEFAULT_CENTER);
+  };
 
   const changeZoom = (delta: number) => {
     setZoom(value => Math.max(8, Math.min(17, value + delta)));
@@ -226,7 +282,7 @@ export default function TileStationMap({
       maxLat = Math.max(...points.map(p => p.lat));
     const minLng = Math.min(...points.map(p => p.lng)),
       maxLng = Math.max(...points.map(p => p.lng));
-    setCenter({ lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2 });
+    setFollowing(false);
     let next = 17;
     while (next > 8) {
       const a = project(minLat, minLng, next),
@@ -239,6 +295,8 @@ export default function TileStationMap({
       next--;
     }
     setZoom(next);
+    const a = project(minLat, minLng, next), b = project(maxLat, maxLng, next);
+    setCenter(unproject((a.x + b.x) / 2, (a.y + b.y) / 2, next));
   };
 
   // A new array with the same geometry must not undo a user pan or zoom.
@@ -252,6 +310,19 @@ export default function TileStationMap({
       setCenter({ lat: drawable[0].lat, lng: drawable[0].lng });
     }
   }, [singlePointKey]);
+
+  const routeEndpoints =
+    routePoints.length > 1
+      ? drawable.filter(
+          point => point.id === "origin" || point.id === "destination"
+        )
+      : [];
+  const focusEndpoint = (point: (typeof drawable)[number]) => {
+    setFollowing(false);
+    setSelectedId(stationKey(point));
+    setCenter({ lat: point.lat, lng: point.lng });
+    setZoom(value => Math.max(15, value));
+  };
 
   const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
 
@@ -299,7 +370,11 @@ export default function TileStationMap({
 
   return (
     <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
-      <div className={"relative " + heightClassName}>
+      <div data-map-surface className={"relative " + heightClassName}>
+        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-9 left-3 z-20 rounded bg-white/90 px-2 py-1 text-xs font-semibold text-slate-900">
+          {scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`}
+          <div className="h-1 border-x-2 border-b-2 border-slate-900" style={{ width: scaleMeters / metersPerPixel }} />
+        </div>
         <div
           ref={viewport}
           role="region"
@@ -319,10 +394,12 @@ export default function TileStationMap({
               ArrowUp: [0, -80],
             };
             const offset = offsets[event.key];
-            if (offset)
+            if (offset) {
+              setFollowing(false);
               setCenter(
                 unproject(centerPx.x + offset[0], centerPx.y + offset[1], zoom)
               );
+            }
             else if (event.key === "+" || event.key === "=") changeZoom(1);
             else if (event.key === "-") changeZoom(-1);
             else if (event.key === "Home") recenter();
@@ -337,21 +414,33 @@ export default function TileStationMap({
           onPointerMove={drag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
+          onLostPointerCapture={endDrag}
+          onDoubleClick={event => {
+            if (event.target instanceof Element && event.target.closest("button")) return;
+            setFollowing(false);
+            const rect = event.currentTarget.getBoundingClientRect();
+            const nextZoom = Math.min(17, zoom + 1);
+            const anchor = unproject(centerPx.x + event.clientX - rect.left - width / 2, centerPx.y + event.clientY - rect.top - height / 2, zoom);
+            const projected = project(anchor.lat, anchor.lng, nextZoom);
+            setZoom(nextZoom);
+            setCenter(unproject(projected.x - (event.clientX - rect.left - width / 2), projected.y - (event.clientY - rect.top - height / 2), nextZoom));
+          }}
         >
           <div
             className="absolute"
             style={{
               width: TILE * (radiusX * 2 + 1),
               height: TILE * (radiusY * 2 + 1),
-              left: width / 2 - radiusX * TILE - (centerPx.x - baseTileX * TILE),
-              top: height / 2 - radiusY * TILE - (centerPx.y - baseTileY * TILE),
-              transformOrigin: "50% 50%",
+              left: width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale,
+              top: height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale,
+              transform: `scale(${tileScale})`,
+              transformOrigin: "0 0",
             }}
           >
             {tiles.map(tile => (
               <img
                 key={tile.key}
-                src={tileUrl(zoom, tile.x, tile.y)}
+                src={tileUrl(tileZoom, tile.x, tile.y)}
                 referrerPolicy="origin"
                 alt=""
                 onError={() =>
@@ -370,12 +459,13 @@ export default function TileStationMap({
               aria-label="Trajeto pelas ruas"
               role="img"
             >
-              {["#ffffff", "#147b88"].map((color, index) => (
+              {["#ffffff", appearance.color].map((color, index) => (
                 <polyline
                   key={color}
                   fill="none"
                   stroke={color}
-                  strokeWidth={index ? 5 : 9}
+                  strokeWidth={index ? appearance.width : appearance.width + 4}
+                  strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={routePoints
@@ -389,7 +479,7 @@ export default function TileStationMap({
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
-            {drawable.map((station, index) => {
+            {drawable.map(station => {
               const position = markerPosition(station);
               if (
                 position.left < -30 ||
@@ -412,11 +502,16 @@ export default function TileStationMap({
                   }}
                   aria-label={"Abrir " + station.name}
                   aria-pressed={active}
+                  title={station.name + " · " + mapPlaceSegment(station).label}
                 >
                   <span
                     className={
-                      "grid size-8 place-items-center rounded-full border-2 border-white shadow-lg transition " +
-                      (active
+                      "grid size-9 place-items-center rounded-2xl border-2 border-white shadow-lg motion-safe:transition-transform " +
+                      (routePoints.length > 1 && station.id === "destination"
+                        ? "bg-[#163840] text-white"
+                        : routePoints.length > 1 && station.id === "origin"
+                          ? "bg-white text-[#163840]"
+                          : active
                         ? "scale-110 bg-[#C7FF3C] text-[#163840]"
                         : station.coordinateKind === "street-midpoint"
                           ? "bg-amber-300 text-[#163840]"
@@ -425,7 +520,7 @@ export default function TileStationMap({
                           : "bg-[#3DE3FF] text-[#163840]")
                     }
                   >
-                    <span className="text-xs font-black">{index + 1}</span>
+                    <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}</span>
                   </span>
                 </button>
               );
@@ -447,12 +542,31 @@ export default function TileStationMap({
           </div>
         </div>
 
+        {routeEndpoints.length > 0 && (
+          <div
+            role="group"
+            aria-label="Pontos do percurso"
+            className="absolute left-3 right-3 top-[8rem] z-20 flex flex-wrap gap-2"
+          >
+            {routeEndpoints.map(point => (
+              <button
+                key={stationKey(point)}
+                type="button"
+                onClick={() => focusEndpoint(point)}
+                className="min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#163840] shadow-md focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+              >
+                {point.id === "origin" ? "Ver origem" : "Ver destino"}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="absolute left-3 right-3 top-3 z-20 grid grid-cols-4 gap-1.5">
           <button
             type="button"
             onClick={() => changeZoom(1)}
             className="grid min-h-11 min-w-0 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Aumentar zoom"
+            disabled={zoom >= 17}
           >
             <Plus className="size-4" />
           </button>
@@ -461,6 +575,7 @@ export default function TileStationMap({
             onClick={() => changeZoom(-1)}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Diminuir zoom"
+            disabled={zoom <= 8}
           >
             <Minus className="size-4" />
           </button>
@@ -469,6 +584,7 @@ export default function TileStationMap({
             onClick={recenter}
             className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
             aria-label="Recentrar mapa"
+            aria-pressed={following}
           >
             <LocateFixed className="size-4" />
           </button>
@@ -481,32 +597,34 @@ export default function TileStationMap({
           </button>
         </div>
 
-        <label className="absolute left-3 right-3 top-[4.6rem] z-20 min-w-0">
-          <span className="sr-only">{selectionLabel}</span>
-          <select
-            className="min-h-11 w-full min-w-0 rounded-xl border border-black/10 bg-white/95 px-3 text-base text-[#163840] shadow-lg"
-            value={selectedId ?? ""}
-            onChange={event => {
-              const station = drawable.find(
-                item => stationKey(item) === event.target.value
-              );
+        <div className="absolute left-3 right-3 top-[4.6rem] z-20 min-w-0">
+          <MapDestinationPicker label={selectionLabel} value={selectedId}
+            items={drawable.map(station => ({ ...station, id: stationKey(station) }))}
+            onSelect={id => {
+              const station = drawable.find(item => stationKey(item) === id);
               if (!station) return;
-              setSelectedId(stationKey(station));
+              setSelectedId(id);
               onSelectStation?.(station);
+              setFollowing(false);
               setCenter({ lat: station.lat, lng: station.lng });
               setZoom(value => Math.max(13, value));
-            }}
-          >
-            {drawable.map(station => (
-              <option key={stationKey(station)} value={stationKey(station)}>
-                {station.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            }} />
+        </div>
       </div>
 
       <div className="relative min-w-0 border-t border-black/10 bg-white/95 p-3.5 sm:p-4">
+        {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold text-slate-700">{TRAVEL_LABELS[travelMode]} · {travelMode === "walking" ? "linha pontilhada" : travelMode === "cycling" ? "linha tracejada" : "linha contínua"}</p>
+            <label className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-bold text-slate-700">Cor do trajeto
+              <select value={routeStyle} onChange={event => setRouteStyle(event.target.value as keyof typeof ROUTE_STYLES)}
+                className="min-h-11 max-w-full rounded-lg border border-slate-300 bg-white px-2 text-base text-slate-900">
+                {Object.entries(ROUTE_STYLES).map(([value, style]) => <option key={value} value={value}>{style.label}</option>)}
+              </select>
+            </label>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-slate-600">Personalize o traçado sem alterar o caminho. A escolha vale enquanto este mapa estiver aberto.</p>
+        </div>}
         {selected ? (
           <div className="flex min-w-0 items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">

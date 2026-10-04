@@ -24,7 +24,7 @@ export function useLiveTrip(route: Route | null) {
   useEffect(() => {
     stop(); setMessage("");
     return stop;
-  }, [route, stop]);
+  }, [route?.origin?.lat, route?.origin?.lng, route?.destination?.lat, route?.destination?.lng, route?.polyline, route?.distanceMeters, route?.durationSeconds, route?.source, stop]);
   useEffect(() => {
     const hide = () => { if (document.hidden) { stop(); setMessage("Acompanhamento pausado ao sair da tela. Inicie novamente para continuar."); } };
     const clear = () => { stop(); setMessage(""); };

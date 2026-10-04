@@ -341,6 +341,58 @@ export function findBestOfflineRouteForTrip(
   );
 }
 
+type PreparedPoint = { lat: number; lng: number };
+
+function preparedPoint(value: unknown): PreparedPoint | null {
+  if (!isRecord(value) || typeof value.lat !== "number" || typeof value.lng !== "number" ||
+      !Number.isFinite(value.lat) || !Number.isFinite(value.lng) || Math.abs(value.lat) > 90 || Math.abs(value.lng) > 180) return null;
+  return { lat: value.lat, lng: value.lng };
+}
+
+function samePreparedPoint(a: PreparedPoint, b: PreparedPoint) {
+  return Math.abs(a.lat - b.lat) < 0.00002 && Math.abs(a.lng - b.lng) < 0.00002;
+}
+
+// Named endpoints remain usable even when the optional geocoder cache is gone.
+// Never turn a saved GPS label into a reusable public starting point.
+export function resolvePreparedRoutePoint(routes: OfflineRoute[], value: string): PreparedPoint | null {
+  if (isPreciseLocationText(value)) return null;
+  const target = normalizeOfflineMatchText(value);
+  if (!target) return null;
+  const matches: PreparedPoint[] = [];
+  for (const saved of routes) {
+    if (!isRecord(saved.payload) || !isRecord(saved.payload.route)) continue;
+    for (const endpoint of ["origin", "destination"] as const) {
+      const label = saved[endpoint];
+      if (isPreciseLocationText(label) || normalizeOfflineMatchText(label) !== target) continue;
+      const point = preparedPoint(saved.payload.route[endpoint]);
+      if (point) matches.push(point);
+    }
+  }
+  if (!matches.length || matches.some(point => !samePreparedPoint(point, matches[0]))) return null;
+  return matches[0];
+}
+
+export function findPreparedRouteByCoordinates(
+  routes: OfflineRoute[], origin: PreparedPoint | null, destination: PreparedPoint | null,
+  mode: "driving" | "walking" | "cycling" | "transit",
+): OfflineRoute | null {
+  if (!origin || !destination) return null;
+  return routes.filter(saved => {
+    if (isPreciseLocationText(saved.origin) || offlineRouteTravelMode(saved) !== mode ||
+        !isRecord(saved.payload) || !isRecord(saved.payload.route)) return false;
+    const route = saved.payload.route;
+    if (route.source === "osrm" && mode !== "driving") return false;
+    const from = preparedPoint(route.origin);
+    const to = preparedPoint(route.destination);
+    return !!from && !!to && samePreparedPoint(from, origin) && samePreparedPoint(to, destination);
+  }).sort((a, b) => {
+    const road = (saved: OfflineRoute) => isRecord(saved.payload) && isRecord(saved.payload.route) &&
+      saved.payload.route.source !== "local-estimate" && typeof saved.payload.route.polyline === "string" && saved.payload.route.polyline.length > 0 ? 1 : 0;
+    return road(b) - road(a) || Date.parse(b.savedAt) - Date.parse(a.savedAt);
+  })[0] ?? null;
+}
+
 export function isOfflineRouteStale(savedAt: string, now = Date.now(), maxAgeMs = STALE_ROUTE_MAX_AGE_MS) {
   const savedTime = Date.parse(savedAt);
   if (!Number.isFinite(savedTime) || !Number.isFinite(now) || maxAgeMs < 0) return true;

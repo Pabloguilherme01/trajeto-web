@@ -15,7 +15,9 @@ import {
   nearbyRouteReferences,
 } from "./RouteMap";
 
-afterEach(cleanup);
+vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: vi.fn(() => false) }));
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+afterEach(() => { cleanup(); vi.mocked(isGitHubPagesRuntime).mockReturnValue(false); });
 
 Object.defineProperty(window, "google", {
   value: {
@@ -75,54 +77,6 @@ describe("nearbyRouteReferences", () => {
 });
 
 describe("RouteMap", () => {
-  it("keeps trip information and the itinerary available in expanded offline view", () => {
-    const view = render(
-      <RouteMap
-        forceOffline
-        stops={[]}
-        origin={{ lat: -15.8, lng: -48 }}
-        destination={{ lat: -15.9, lng: -47.9 }}
-        routes={[
-          {
-            id: "trip",
-            polyline: null,
-            durationSeconds: 900,
-            distanceMeters: 12000,
-            steps: [
-              {
-                instruction: "Vire à direita na Rua A",
-                distanceMeters: 500,
-                durationSeconds: 60,
-                maneuver: "turn:right",
-              },
-            ],
-          },
-        ]}
-      />
-    );
-    const summary = screen.getByRole("region", {
-      name: "Resumo da viagem no mapa",
-    });
-    expect(within(summary).getByText("15 min")).toBeTruthy();
-    expect(within(summary).getByText("12 km")).toBeTruthy();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ver viagem em tela cheia" })
-    );
-    expect(document.body.style.overflow).toBe("hidden");
-    expect(
-      screen
-        .getByRole("button", { name: "Sair da tela cheia" })
-        .getAttribute("aria-expanded")
-    ).toBe("true");
-    fireEvent.click(screen.getByText(/Instruções pelas ruas · 1 passos/));
-    expect(screen.getByText("Vire à direita na Rua A")).toBeTruthy();
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(document.body.style.overflow).toBe("");
-    expect(
-      screen.getByRole("button", { name: "Ver viagem em tela cheia" })
-    ).toBeTruthy();
-    view.unmount();
-  });
   it("keeps saved road geometry local when explicit offline mode is requested", () => {
     render(
       <RouteMap
@@ -601,4 +555,34 @@ it("keeps zoom and framing inside the map and does not pause following when zoom
       .getByRole("button", { name: "Seguir GPS" })
       .getAttribute("aria-pressed")
   ).toBe("false");
+});
+
+
+it("mostra resumo e guia completo no mapa online do Pages sem duplicar no fallback", () => {
+  vi.mocked(isGitHubPagesRuntime).mockReturnValue(true);
+  render(<RouteMap origin={{ lat: -15.8, lng: -48 }} destination={{ lat: -15.9, lng: -47.9 }} stops={[]} routes={[{
+    id: "online", source: "osrm", polyline: "r`d_B~~teHbwFg_mA", distanceMeters: 12340, durationSeconds: 920,
+    steps: [{ instruction: "Siga pela Avenida JK", name: "Avenida JK", distanceMeters: 100, durationSeconds: 30 }, { instruction: "Chegue ao destino", distanceMeters: 0, durationSeconds: 0, maneuver: "arrive" }],
+  }]} />);
+  const summary = screen.getByRole("region", { name: "Resumo do percurso no mapa" });
+  expect(within(summary).getByText("12,3 km")).toBeTruthy();
+  expect(within(summary).getByText("15 min")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: /Instruções pelas ruas/ }));
+  expect(screen.getByText("Chegue ao destino")).toBeTruthy();
+  expect(screen.getByText("0 m")).toBeTruthy();
+  Array.from(document.querySelectorAll('img[src*="tile.openstreetmap.org"]')).slice(0, 5).forEach(tile => fireEvent.error(tile));
+  expect(screen.getAllByRole("region", { name: "Resumo do percurso no mapa" })).toHaveLength(1);
+  expect(screen.getAllByRole("button", { name: /Instruções pelas ruas/ })).toHaveLength(1);
+});
+
+it("lets the user declutter offline references and labels straight-line estimates explicitly", () => {
+  render(<OfflineRoutePreview origin={{ lat: -15.7545, lng: -48.2816 }} destination={{ lat: -15.74637, lng: -48.27584 }} stops={[]} forceOffline routes={[{ id: "estimate", source: "local-estimate", polyline: "r`d_B~~teHbwFg_mA" }]} />);
+  expect(screen.getByText("Estimativa em linha reta · sem curvas confirmadas")).toBeTruthy();
+  const button = screen.getByRole("button", { name: "Ocultar referências" });
+  expect(button.getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(button);
+  expect(screen.getByRole("button", { name: "Mostrar referências" }).getAttribute("aria-pressed")).toBe("false");
+  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver destino" })).toBeTruthy();
 });

@@ -1,4 +1,6 @@
 import React from "react";
+import MapDestinationPicker from "@/components/MapDestinationPicker";
+import { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
 import { MapView } from "@/components/Map";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -18,6 +20,7 @@ export type StationMapItem = {
   lng?: number;
   cnpj?: string | null;
   brand?: string | null;
+  category?: string;
   coordinateKind?: "mapped-point" | "street-midpoint" | "area-reference";
   coordinateLabel?: string;
   source?: "ANP" | "Google" | "local";
@@ -106,9 +109,9 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
       <button type="button" onClick={() => setZoom(v => Math.max(1, v - .5))} disabled={zoom <= 1} className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
       <button type="button" onClick={() => { setFocusRequest(null); setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-xl bg-white" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       <span className="text-xs font-black">Disponível sem conexão</span>
-      <label className="w-full"><span className="sr-only">Escolher {itemLabel} no mapa offline</span><select className="min-h-11 min-w-0 w-full rounded-xl border border-black/10 bg-white px-3 text-base" value={selected ? offlineStationKey(selected) : ""} onChange={event => select(event.target.value)}>{stations.map(station => <option key={offlineStationKey(station)} value={offlineStationKey(station)}>{station.name}</option>)}</select></label>
+      <div className="w-full"><MapDestinationPicker label={`Escolher ${itemLabel} no mapa offline`} value={selected ? offlineStationKey(selected) : null} items={stations.map(station => ({ ...station, id: offlineStationKey(station) }))} onSelect={select} /></div>
     </div>
-    <OfflineMapCanvas markers={markers} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
+    <OfflineMapCanvas markers={markers} selectedMarkerId={selectedId} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
     <div className="border-t border-black/10 bg-white p-4">
       <p className="break-words text-base font-black">{selected?.name ?? "Nenhum ponto nesta categoria"}</p><p className="mt-1 break-words text-sm leading-relaxed text-[#607169]">{selected?.address}</p>
       {selected?.coordinateLabel && <p className="mt-2 break-words text-xs text-[#765100]">{selected.coordinateLabel}</p>}
@@ -229,8 +232,8 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
       const position = { lat: station.lat, lng: station.lng };
       bounds.extend(position);
       const official = station.source === "ANP";
-      const pin = new window.google.maps.marker.PinElement({ background: official ? "#C7FF3C" : "#3DE3FF", borderColor: "#163840", glyphColor: "#163840", glyph: String(index + 1) });
-      const marker = new window.google.maps.marker.AdvancedMarkerElement({ map, position, title: String(index + 1) + ". " + station.name, content: pin.element });
+      const pin = new window.google.maps.marker.PinElement({ background: official ? "#C7FF3C" : "#3DE3FF", borderColor: "#163840", glyphColor: "#163840", glyph: mapPlaceSegment(station).glyph });
+      const marker = new window.google.maps.marker.AdvancedMarkerElement({ map, position, title: station.name, content: pin.element });
       marker.addListener("click", () => {
         const html = "<div style=\"min-width:220px;max-width:290px;padding:4px 2px;font-family:Arial,sans-serif\">" +
           "<strong style=\"display:block;font-size:14px;line-height:1.25\">" + String(index + 1) + ". " + escapeHtml(station.name) + "</strong>" +
