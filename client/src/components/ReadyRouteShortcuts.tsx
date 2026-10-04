@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { Route as RouteIcon, MapPin, ArrowUpRight, ArrowLeft, Search } from "lucide-react";
+import { MapPin, ArrowUpRight, ArrowLeft, Search, Stethoscope, ShoppingBag, Landmark, Bus, GraduationCap, Fuel, Utensils } from "lucide-react";
 import { LOCAL_READY_ROUTES, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
@@ -8,6 +8,7 @@ import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
 
 type TravelMode = "driving" | "walking" | "cycling" | "transit";
+const destinationIcons = { saude: Stethoscope, compras: ShoppingBag, servicos: Landmark, transporte: Bus, educacao: GraduationCap, combustivel: Fuel, alimentacao: Utensils, centro: MapPin };
 const modes: Array<{ value: TravelMode; label: string }> = [
   { value: "driving", label: "Carro" }, { value: "walking", label: "A pé" },
   { value: "cycling", label: "Bicicleta" }, { value: "transit", label: "Transporte público" },
@@ -105,10 +106,11 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     <div className="mt-3 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-3">
       {visible.map(route => {
         const from = route.originLabel, to = route.destinationLabel;
+        const DestinationIcon = destinationIcons[route.category];
         const categoryLabel = ROUTE_DESTINATION_CATEGORIES.find(item => item.value === route.category)?.label;
         return <article key={route.id} aria-label={route.label} className="premium-route-card min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101b23] p-4 shadow-lg transition-colors hover:border-[#3DE3FF]/35">
           <div className="flex items-start gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><DestinationIcon className="size-4" aria-hidden="true" /></span>
             <div className="min-w-0 flex-1">
               <p className="mb-1 text-xs font-bold text-[#3DE3FF]">{categoryLabel}</p>
               <h3 className="break-words text-base font-black leading-snug text-white">{to}</h3>
