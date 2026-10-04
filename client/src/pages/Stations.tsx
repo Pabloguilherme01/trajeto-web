@@ -20,6 +20,10 @@ import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices"
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
 
+function normalizeCnpj(value?: string | null) {
+  return (value ?? "").replace(/\D/g, "");
+}
+
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
   const earthKm = 6371;
@@ -107,7 +111,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const liveAnpRows = anpLiveQuery.data?.rows ?? [];
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
-  const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
+  const pricesByCnpj = useMemo(() => {
+    const indexed = indexAnpPricesByCnpj(priceSnapshot?.data ?? []);
+    return new Map(Array.from(indexed, ([cnpj, prices]) => [normalizeCnpj(cnpj), prices]));
+  }, [priceSnapshot]);
+  const hasIndividualPrices = pricesByCnpj.size > 0;
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -132,27 +140,27 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const directoryCards = useMemo(() => {
     const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
-      key: local.cnpj,
+      key: normalizeCnpj(local.cnpj),
       local,
-      anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
+      anp: anpStations.find(station => normalizeCnpj(station.cnpj) === normalizeCnpj(local.cnpj)) ?? null,
     }));
     for (const anp of anpStations) {
       const alreadyRepresented = cards.some(item => sameStationIdentity(
         {
-          cnpj: item.anp?.cnpj || item.local?.cnpj,
+          cnpj: normalizeCnpj(item.anp?.cnpj || item.local?.cnpj),
           address: [item.anp?.endereco || item.local?.address, item.anp?.bairro || item.local?.neighborhood].filter(Boolean).join(" "),
           lat: Number(item.anp?.latitude ?? item.local?.anp?.latitude),
           lng: Number(item.anp?.longitude ?? item.local?.anp?.longitude),
         },
         {
-          cnpj: anp.cnpj,
+          cnpj: normalizeCnpj(anp.cnpj),
           address: [anp.endereco, anp.bairro].filter(Boolean).join(" "),
           lat: Number(anp.latitude),
           lng: Number(anp.longitude),
         },
       ));
       if (alreadyRepresented) continue;
-      cards.push({ key: anp.cnpj, local: null, anp });
+      cards.push({ key: normalizeCnpj(anp.cnpj), local: null, anp });
     }
     return cards;
   }, [aguasLindasCatalog, anpStations]);
@@ -325,14 +333,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const merged: StationMapItem[] = [];
     for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
       const key = station.cnpj
-        ? "cnpj:" + station.cnpj
+        ? "cnpj:" + normalizeCnpj(station.cnpj)
         : station.placeId
           ? "place:" + station.placeId
           : "address:" + normalize(station.address || station.name);
       if (seen.has(key)) continue;
       const duplicate = merged.some(existing => sameStationIdentity(
-        { cnpj: existing.cnpj, address: existing.address, lat: existing.lat, lng: existing.lng },
-        { cnpj: station.cnpj, address: station.address, lat: station.lat, lng: station.lng },
+        { cnpj: normalizeCnpj(existing.cnpj), address: existing.address, lat: existing.lat, lng: existing.lng },
+        { cnpj: normalizeCnpj(station.cnpj), address: station.address, lat: station.lat, lng: station.lng },
       ));
       if (duplicate) continue;
       seen.add(key);
@@ -872,7 +880,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                       />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-xs text-white/65">
-                      <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
+                      <span>{mapStations.filter(station => Number.isFinite(station.lat) && Number.isFinite(station.lng)).length} posicionados · {mapStations.filter(station => !Number.isFinite(station.lat) || !Number.isFinite(station.lng)).length} sem coordenada · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
                       <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
                       <span>{anpWithoutCoordinates > 0 ? String(anpWithoutCoordinates) + " cadastro(s) ANP sem coordenada · ficha continua disponível" : "cobertura coordenada ANP completa nesta consulta"}</span>
                     </div>
@@ -948,6 +956,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
+                  {!hasIndividualPrices && <p className="col-span-full text-xs text-white/55">Preço individual ANP indisponível nesta coleta.</p>}
               <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65">
