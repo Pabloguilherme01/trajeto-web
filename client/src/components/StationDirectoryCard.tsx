@@ -215,7 +215,9 @@ export function StationDirectoryCard({
           const provider = getPreferredNavigationProvider();
           const value = destinationNavigationValue(sharedDestination);
           const url = provider === "waze" ? buildWazeNavigationUrl(address, coords ?? undefined) : provider === "apple" ? buildAppleMapsDirectionsUrl(value) : buildGoogleMapsDestinationUrl(value, true);
-          window.open(url, "_blank", "noopener,noreferrer");
+          const opened = window.open(url, "_blank", "noopener,noreferrer");
+          if (!opened) setActionError("O navegador bloqueou a abertura do mapa. Use “Traçar rota” ou permita novas abas e tente novamente.");
+          else setActionError(null);
         }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF]">Navegar</button>
         {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 text-xs font-bold text-white/80"><Phone className="size-4" />Ligar para o posto</a>}
       </div>
@@ -226,7 +228,7 @@ export function StationDirectoryCard({
           <a href={buildOriginPlannerUrl(address)} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Sair deste posto</a>
           <button type="button" onClick={() => void share()} className="min-h-11 rounded-xl border border-white/10 text-xs font-bold text-white/75">Compartilhar</button>
           <button type="button" onClick={() => void copy(cnpj || address)} className="min-h-11 rounded-xl border border-white/10 px-2 text-xs font-bold text-white/75">{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
-          <a href={webSearchUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Buscar contato na web</a>
+          <a href={webSearchUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Pesquisar este posto na web</a>
           {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Ficha completa</Link>}
           {local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-xs font-bold text-white/75">Site informado</a>}
           {local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-xs font-bold text-white/75">Enviar e-mail</a>}
