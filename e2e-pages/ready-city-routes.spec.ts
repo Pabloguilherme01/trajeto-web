@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { LOCAL_READY_ROUTES } from "../client/src/lib/localRoutePresets";
 
 // Service-worker requests can bypass page.route and defeat the simulated failures.
 test.use({ serviceWorkers: "block" });
@@ -17,7 +16,7 @@ test("mobile home calculates directly and exposes ready trips without overflow",
   await shortcuts.locator("summary").first().click();
   await expect(shortcuts.locator("article")).toHaveCount(6);
   await shortcuts.getByRole("button", { name: /Ver mais/ }).click();
-  await expect(shortcuts.locator("article")).toHaveCount(LOCAL_READY_ROUTES.length);
+  await expect(shortcuts.locator("article")).toHaveCount(48);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await shortcuts.getByRole("searchbox", { name: "Buscar trajeto" }).fill("prefeitura upa");
   await expect(shortcuts.locator("article")).toHaveCount(1);
