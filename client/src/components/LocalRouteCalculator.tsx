@@ -350,7 +350,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
             <span className="rounded-full bg-[#FFF7DF] px-2.5 py-1 text-[0.6rem] font-black text-[#6D5200]">Personalizado</span>
           )}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
           {TRIP_CALCULATOR_MODES.map(mode => {
             const selected = activeMode === mode.id;
             return (
