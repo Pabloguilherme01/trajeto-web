@@ -332,7 +332,12 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
 }
 
 .map-explorer-frame[data-expanded="true"] [data-map-surface] {
-  height: max(260px, calc(100dvh - 240px));
+  height: max(260px, calc(100dvh - 100px));
   min-height: 260px;
   max-height: none;
+}
+
+.map-explorer-frame[data-expanded="true"] {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
