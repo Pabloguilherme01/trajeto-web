@@ -815,7 +815,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 </button>
               )}
               <button type="button" onClick={() => void shareCurrent()} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 text-xs font-bold text-white/65"><Share2 className="mr-1 inline size-3.5" /> Compartilhar</button>
-              <button type="button" onClick={() => setShowMap(value => !value)} aria-pressed={showMap} aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"} className="min-h-11 rounded-full border border-white/15 bg-white/[.03] px-2 text-xs font-bold text-white/80"><MapIcon className="mr-1 inline size-3.5" />Mapa</button>
+              <button type="button" onClick={() => setShowMap(value => !value)} aria-pressed={showMap} aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"} className="min-h-11 rounded-full border border-white/15 bg-white/[.03] px-2 text-xs font-bold text-white/80"><MapIcon className="mr-1 inline size-3.5" />Mapa</button>
               <button type="button" onClick={openSaved} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 text-xs font-bold text-white/65"><Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}</button>
             </div>
 
@@ -849,7 +849,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
               <div className="flex shrink-0 flex-col items-end gap-2">
                 <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/65">{mapStations.length} referências</span>
-                <button type="button" onClick={() => setShowMap(false)} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-bold text-white/75">Ocultar mapa</button>
               </div>
             </div>
             <div className="relative">
@@ -1200,7 +1199,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <p className="mt-1 text-xs text-white/65">{usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Mostrar mapa"}><MapIcon className="size-4" /></button>
+                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"}><MapIcon className="size-4" /></button>
                 {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">{compareIds.length} comparar</button>}
               </div>
             </section>

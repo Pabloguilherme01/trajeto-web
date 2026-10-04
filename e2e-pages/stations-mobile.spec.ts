@@ -100,9 +100,9 @@ test("Pages: station search uses compact cards and resets an empty query", async
   await expect(card.locator("details").filter({ hasText: "Todos os dados disponíveis" })).not.toHaveAttribute("open");
   await expect(page.locator("details").filter({ has: page.getByText("Fontes e referências adicionais", { exact: true }) })).not.toHaveAttribute("open");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await page.getByRole("button", { name: "Mostrar mapa", exact: true }).click();
+  await page.getByRole("button", { name: "Abrir mapa", exact: true }).click();
   await expect(page.locator("#aguas-lindas-map")).toBeVisible();
-  await page.getByRole("button", { name: "Ocultar mapa", exact: true }).first().click();
+  await page.getByRole("button", { name: "Ocultar mapa", exact: true }).click();
   await expect(page.locator("#aguas-lindas-map")).toHaveCount(0);
   await page.goto("postos?q=zzzz-inexistente", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Nenhum posto encontrado com esses filtros.")).toBeVisible();
