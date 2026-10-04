@@ -1,5 +1,6 @@
 import { atlasDestinationReference } from "@/lib/cityAtlas";
 import React, { useEffect, useRef, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
@@ -28,6 +29,8 @@ import {
   Undo2,
   Flag,
   RotateCw,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 
 function distanceMeters(
@@ -949,7 +952,135 @@ export function OfflineRoutePreview({
   );
 }
 
-export function RouteMap({
+export function RouteMap(props: RouteMapProps) {
+  const [expanded, setExpanded] = useState(false);
+  const selected =
+    props.routes?.find(route => route.selected) ?? props.routes?.[0];
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    if (!expanded) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpanded(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", close);
+    };
+  }, [expanded]);
+  const duration =
+    props.liveProgress?.durationSeconds ?? selected?.durationSeconds;
+  const distance =
+    props.liveProgress?.distanceMeters ?? selected?.distanceMeters;
+  const arrival = Number.isFinite(duration)
+    ? new Date(now + Math.max(0, Number(duration)) * 1000).toLocaleTimeString(
+        "pt-BR",
+        { hour: "2-digit", minute: "2-digit" }
+      )
+    : "—";
+  const content = (
+    <div
+      className={
+        expanded
+          ? "fixed inset-0 z-[1000] overflow-y-auto bg-[#eef2eb] p-2 sm:p-4"
+          : "min-w-0"
+      }
+    >
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-2xl border border-black/10 bg-[#163840] p-3 text-white">
+          <div>
+            <p className="text-sm font-black">Sua viagem no mapa</p>
+            <p className="mt-1 text-xs text-white/75">
+              Explore o percurso e confira cada etapa
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => setExpanded(value => !value)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-[#163840]"
+          >
+            {expanded ? (
+              <Minimize2 className="size-4" />
+            ) : (
+              <Maximize2 className="size-4" />
+            )}
+            {expanded ? "Sair da tela cheia" : "Ver viagem em tela cheia"}
+          </button>
+        </div>
+        {selected && (
+          <section
+            aria-label="Resumo da viagem no mapa"
+            className="grid grid-cols-3 gap-2 border-x border-black/10 bg-white p-3 text-[#163840]"
+          >
+            {[
+              { label: "Tempo estimado", value: compactDuration(duration) },
+              { label: "Distância", value: compactDistance(distance) },
+              { label: "Chegada prevista", value: arrival },
+            ].map(item => (
+              <div
+                key={item.label}
+                className="min-w-0 rounded-xl bg-[#f2f6ef] p-2.5"
+              >
+                <p className="text-[10px] font-bold text-[#52675e]">
+                  {item.label}
+                </p>
+                <p className="mt-1 break-words text-sm font-black sm:text-lg">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </section>
+        )}
+        <RouteMapSurface {...props} />
+        {!!selected?.steps?.length &&
+          !props.livePosition &&
+          !props.forceOffline &&
+          !props.privateOrigin && (
+            <details className="mt-2 rounded-2xl border border-black/10 bg-white p-3 text-[#163840]">
+              <summary className="min-h-11 cursor-pointer py-3 text-sm font-black">
+                Conferir percurso · {selected.steps.length} etapas
+              </summary>
+              <ol
+                className="max-h-80 space-y-2 overflow-y-auto"
+                aria-label="Etapas do percurso"
+              >
+                {selected.steps.map((step, index) => (
+                  <li
+                    key={index}
+                    className="flex gap-3 rounded-xl bg-[#f2f6ef] p-3"
+                  >
+                    <ManeuverIcon
+                      maneuver={step.maneuver}
+                      className="size-5 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-bold">
+                        {index + 1}. {step.instruction}
+                      </p>
+                      <p className="mt-1 text-xs text-[#52675e]">
+                        {compactDistance(step.distanceMeters)} ·{" "}
+                        {compactDuration(step.durationSeconds)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
+      </div>
+    </div>
+  );
+  return expanded ? createPortal(content, document.body) : content;
+}
+
+function RouteMapSurface({
   origin,
   destination,
   stops,
@@ -1053,18 +1184,13 @@ export function RouteMap({
       return;
 
     const bounds = new maps.LatLngBounds();
-    [
-      origin,
-      destination,
-      ...stops,
-      ...nearbyRouteReferences(
-        origin,
-        destination,
-        routes.flatMap(route => decodePolyline(route.polyline ?? ""))
-      ),
-    ].forEach(point => bounds.extend(point));
+    [origin, destination, ...stops].forEach(point => bounds.extend(point));
     routes
-      ?.filter(route => route.polyline)
+      ?.filter(
+        route =>
+          route.polyline &&
+          route === (routes.find(item => item.selected) ?? routes[0])
+      )
       .forEach(route =>
         decodePolyline(route.polyline as string).forEach(point =>
           bounds.extend(point)
@@ -1145,11 +1271,13 @@ export function RouteMap({
   const fitRoute = () => {
     if (!mapRef.current || !origin || !destination) return;
     const bounds = new window.google.maps.LatLngBounds();
-    [origin, destination, ...stops, ...nearbyReferences].forEach(point =>
-      bounds.extend(point)
-    );
+    [origin, destination, ...stops].forEach(point => bounds.extend(point));
     routes
-      .filter(route => route.polyline)
+      .filter(
+        route =>
+          route.polyline &&
+          route === (routes.find(item => item.selected) ?? routes[0])
+      )
       .forEach(route =>
         decodePolyline(route.polyline as string).forEach(point =>
           bounds.extend(point)

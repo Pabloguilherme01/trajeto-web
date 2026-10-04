@@ -75,6 +75,54 @@ describe("nearbyRouteReferences", () => {
 });
 
 describe("RouteMap", () => {
+  it("keeps trip information and the itinerary available in expanded offline view", () => {
+    const view = render(
+      <RouteMap
+        forceOffline
+        stops={[]}
+        origin={{ lat: -15.8, lng: -48 }}
+        destination={{ lat: -15.9, lng: -47.9 }}
+        routes={[
+          {
+            id: "trip",
+            polyline: null,
+            durationSeconds: 900,
+            distanceMeters: 12000,
+            steps: [
+              {
+                instruction: "Vire à direita na Rua A",
+                distanceMeters: 500,
+                durationSeconds: 60,
+                maneuver: "turn:right",
+              },
+            ],
+          },
+        ]}
+      />
+    );
+    const summary = screen.getByRole("region", {
+      name: "Resumo da viagem no mapa",
+    });
+    expect(within(summary).getByText("15 min")).toBeTruthy();
+    expect(within(summary).getByText("12 km")).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ver viagem em tela cheia" })
+    );
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(
+      screen
+        .getByRole("button", { name: "Sair da tela cheia" })
+        .getAttribute("aria-expanded")
+    ).toBe("true");
+    fireEvent.click(screen.getByText(/Instruções pelas ruas · 1 passos/));
+    expect(screen.getByText("Vire à direita na Rua A")).toBeTruthy();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(document.body.style.overflow).toBe("");
+    expect(
+      screen.getByRole("button", { name: "Ver viagem em tela cheia" })
+    ).toBeTruthy();
+    view.unmount();
+  });
   it("keeps saved road geometry local when explicit offline mode is requested", () => {
     render(
       <RouteMap
