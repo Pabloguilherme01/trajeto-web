@@ -251,7 +251,11 @@ export default function TileStationMap({
     setDragging(Boolean(remaining));
   };
 
-  const recenter = () => { setFollowing(true); setCenter(userCoords ?? DEFAULT_CENTER); };
+  const recenter = () => {
+    if (!userCoords && routePoints.length > 1) { fitStations(); return; }
+    setFollowing(true);
+    setCenter(userCoords ?? DEFAULT_CENTER);
+  };
 
   const changeZoom = (delta: number) => {
     setZoom(value => Math.max(8, Math.min(17, value + delta)));
@@ -295,6 +299,19 @@ export default function TileStationMap({
       setCenter({ lat: drawable[0].lat, lng: drawable[0].lng });
     }
   }, [singlePointKey]);
+
+  const routeEndpoints =
+    routePoints.length > 1
+      ? drawable.filter(
+          point => point.id === "origin" || point.id === "destination"
+        )
+      : [];
+  const focusEndpoint = (point: (typeof drawable)[number]) => {
+    setFollowing(false);
+    setSelectedId(stationKey(point));
+    setCenter({ lat: point.lat, lng: point.lng });
+    setZoom(value => Math.max(15, value));
+  };
 
   const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
 
@@ -477,7 +494,11 @@ export default function TileStationMap({
                   <span
                     className={
                       "grid size-8 place-items-center rounded-full border-2 border-white shadow-lg transition " +
-                      (active
+                      (routePoints.length > 1 && station.id === "destination"
+                        ? "bg-[#163840] text-white"
+                        : routePoints.length > 1 && station.id === "origin"
+                          ? "bg-white text-[#163840]"
+                          : active
                         ? "scale-110 bg-[#C7FF3C] text-[#163840]"
                         : station.coordinateKind === "street-midpoint"
                           ? "bg-amber-300 text-[#163840]"
@@ -486,7 +507,7 @@ export default function TileStationMap({
                           : "bg-[#3DE3FF] text-[#163840]")
                     }
                   >
-                    <span className="text-xs font-black">{index + 1}</span>
+                    <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : index + 1}</span>
                   </span>
                 </button>
               );
@@ -508,6 +529,24 @@ export default function TileStationMap({
           </div>
         </div>
 
+        {routeEndpoints.length > 0 && (
+          <div
+            role="group"
+            aria-label="Pontos do percurso"
+            className="absolute left-3 right-3 top-[4.25rem] z-20 flex flex-wrap gap-2"
+          >
+            {routeEndpoints.map(point => (
+              <button
+                key={stationKey(point)}
+                type="button"
+                onClick={() => focusEndpoint(point)}
+                className="min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#163840] shadow-md focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+              >
+                {point.id === "origin" ? "Ver origem" : "Ver destino"}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="absolute left-3 right-3 top-3 z-20 grid grid-cols-4 gap-1.5">
           <button
             type="button"

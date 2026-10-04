@@ -36,7 +36,10 @@ test("planner: draws provider geometry over public street tiles", async ({
       body: JSON.stringify({
         code: "Ok",
         routes: [
-          { distance: 12340, duration: 920, geometry: "r`d_B~~teHbwFg_mA" },
+          { distance: 12340, duration: 920, geometry: "r`d_B~~teHbwFg_mA", legs: [{ steps: [
+            { name: "Avenida JK", distance: 12340, duration: 920, maneuver: { type: "depart" } },
+            { name: "Destino", distance: 0, duration: 0, maneuver: { type: "arrive" } },
+          ] }] },
         ],
       }),
     })
@@ -48,6 +51,7 @@ test("planner: draws provider geometry over public street tiles", async ({
       body: '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#e2e9e4"/></svg>',
     })
   );
+  await page.setViewportSize({ width: 320, height: 568 });
   await page.goto(
     "planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822"
   );
@@ -60,6 +64,14 @@ test("planner: draws provider geometry over public street tiles", async ({
   await expect(
     page.getByRole("combobox", { name: "Escolher ponto da viagem" })
   ).toBeVisible();
+  const map = page.getByRole("region", { name: "Mapa independente da viagem" });
+  await expect(map.getByRole("region", { name: "Resumo do percurso no mapa" })).toContainText("12,3 km");
+  await map.getByRole("button", { name: "Ver destino", exact: true }).click();
+  await expect(map.getByRole("combobox", { name: "Escolher ponto da viagem" })).toHaveValue("destination");
+  await map.getByRole("button", { name: /Instruções pelas ruas/ }).click();
+  await expect(map.locator("ol")).toContainText("Avenida JK");
+  await expect(map.locator("ol")).toContainText("0 m");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
 

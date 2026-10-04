@@ -15,7 +15,9 @@ import {
   nearbyRouteReferences,
 } from "./RouteMap";
 
-afterEach(cleanup);
+vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: vi.fn(() => false) }));
+import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+afterEach(() => { cleanup(); vi.mocked(isGitHubPagesRuntime).mockReturnValue(false); });
 
 Object.defineProperty(window, "google", {
   value: {
@@ -553,4 +555,23 @@ it("keeps zoom and framing inside the map and does not pause following when zoom
       .getByRole("button", { name: "Seguir GPS" })
       .getAttribute("aria-pressed")
   ).toBe("false");
+});
+
+
+it("mostra resumo e guia completo no mapa online do Pages sem duplicar no fallback", () => {
+  vi.mocked(isGitHubPagesRuntime).mockReturnValue(true);
+  render(<RouteMap origin={{ lat: -15.8, lng: -48 }} destination={{ lat: -15.9, lng: -47.9 }} stops={[]} routes={[{
+    id: "online", source: "osrm", polyline: "r`d_B~~teHbwFg_mA", distanceMeters: 12340, durationSeconds: 920,
+    steps: [{ instruction: "Siga pela Avenida JK", name: "Avenida JK", distanceMeters: 100, durationSeconds: 30 }, { instruction: "Chegue ao destino", distanceMeters: 0, durationSeconds: 0, maneuver: "arrive" }],
+  }]} />);
+  const summary = screen.getByRole("region", { name: "Resumo do percurso no mapa" });
+  expect(within(summary).getByText("12,3 km")).toBeTruthy();
+  expect(within(summary).getByText("15 min")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: /Instruções pelas ruas/ }));
+  expect(screen.getByText("Chegue ao destino")).toBeTruthy();
+  expect(screen.getByText("0 m")).toBeTruthy();
+  Array.from(document.querySelectorAll('img[src*="tile.openstreetmap.org"]')).slice(0, 5).forEach(tile => fireEvent.error(tile));
+  expect(screen.getAllByRole("region", { name: "Resumo do percurso no mapa" })).toHaveLength(1);
+  expect(screen.getAllByRole("button", { name: /Instruções pelas ruas/ })).toHaveLength(1);
 });
