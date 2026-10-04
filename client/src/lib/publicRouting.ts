@@ -1,3 +1,4 @@
+import { resolveReadyRouteStreetPoint } from "./localRoutePresets";
 import { loadBusinessCatalog, resolveBusinessPoint } from "./businessCatalog";
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
@@ -432,6 +433,9 @@ function encodePolyline(points: PublicCoordinate[]) {
 function localGeocode(value: string): PublicCoordinate | null {
   const normalized = normalizeSearch(value);
   if (!normalized) return null;
+
+  const streetReference = resolveReadyRouteStreetPoint(value);
+  if (streetReference) return streetReference;
 
   const preparedPoint = resolveLocalGeocodePoint(value);
   if (preparedPoint) return preparedPoint;

@@ -98,3 +98,12 @@ it("offers neighborhood and area references with an explicit approximate-locatio
   expect(getLocalRoutePresets("Mansões Centro-Oeste", "saude").some(item => item.id === "oftalmed-shopping")).toBe(true);
   expect(LOCAL_ROUTE_PRESETS.filter(item => item.id === "parque-da-barragem")[0]?.detail).toMatch(/aproximado/i);
 });
+
+
+it("resolves only explicit mapped references and preserves ambiguous bare streets", async () => {
+  const { READY_ROUTE_STREET_POINTS, resolveReadyRouteStreetPoint } = await import("./localRoutePresets");
+  const jk = READY_ROUTE_STREET_POINTS.find(point => point.label === "Avenida JK")!;
+  expect(resolveReadyRouteStreetPoint(jk.destination)).toEqual({ lat: jk.lat, lng: jk.lng });
+  expect(resolveReadyRouteStreetPoint("Avenida JK")).toBeNull();
+  expect(resolveReadyRouteStreetPoint("Avenida JK, casa 123")).toBeNull();
+});
