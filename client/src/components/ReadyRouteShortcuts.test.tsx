@@ -44,3 +44,18 @@ it("inherits changes to the planner travel mode without resetting search", () =>
   expect((screen.getByRole("combobox", { name: "Como você vai?" }) as HTMLSelectElement).value).toBe("cycling");
   expect((screen.getByRole("searchbox") as HTMLInputElement).value).toBe("HEAL");
 });
+
+it("filters departure points and resets them together with other filters", () => {
+  render(<ReadyRouteShortcuts />); open();
+  const departure = screen.getByRole("combobox", { name: "Saindo de" });
+  fireEvent.change(departure, { target: { value: "via-osm-0da29ee8ad6a" } });
+  const cards = screen.getAllByRole("article");
+  expect(cards.length).toBeGreaterThan(0);
+  expect(cards.every(card => card.getAttribute("aria-label")?.startsWith("Avenida JK →"))).toBe(true);
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: "UPA" } });
+  expect(screen.getAllByRole("article")).toHaveLength(1);
+  expect(screen.getByText(/Referência aproximada/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Limpar filtros" }));
+  expect((departure as HTMLSelectElement).value).toBe("todos");
+  expect(screen.getAllByRole("article")).toHaveLength(6);
+});

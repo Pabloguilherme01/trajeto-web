@@ -1,4 +1,5 @@
-import { matchesCatalogText } from "./catalogSearch";
+import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
+import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 
@@ -187,11 +188,32 @@ export function getLocalRoutePresets(
   );
 }
 
-export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string; category: RouteDestinationCategory };
+export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string; category: RouteDestinationCategory; originId: string; originLabel: string; destinationLabel: string };
 
 // Existing verified destinations; the city reference is approximate, not a street address.
+// Street routes use the existing OSM midpoint, never a made-up entrance.
+const streetEndpointIds = [
+  "via-osm-c1d703024625", "via-osm-0da29ee8ad6a", "via-osm-c5c7393b6fbe",
+  "via-osm-52f68aff98dd", "via-osm-12afdab9f311", "via-osm-0a8bca1e8c85",
+  "via-osm-e04f4a6b272b", "via-osm-a5571ffd2353", "via-osm-de5332cbc47c",
+  "via-osm-26660805dfbb", "via-osm-f2f3d0bf830f", "via-osm-1b3c23706c3f",
+];
+export const READY_ROUTE_STREET_POINTS = streetEndpointIds.map(id => {
+  const street = cityAtlasData.items.find(item => item.id === id);
+  if (!street || street.coordinateKind !== "street-midpoint" || !Number.isFinite(street.lat) || !Number.isFinite(street.lng)) {
+    throw new Error(`Ready route requires a mapped street midpoint: ${id}`);
+  }
+  return { id, label: street.name, destination: `${street.name} · referência no mapa, Águas Lindas de Goiás - GO`, lat: street.lat!, lng: street.lng!, category: "centro" as const };
+});
+/** An explicitly selected, sourced reference; bare homonymous street names stay ambiguous. */
+export function resolveReadyRouteStreetPoint(value: string) {
+  const query = normalizeCatalogText(value);
+  const matches = READY_ROUTE_STREET_POINTS.filter(point => normalizeCatalogText(point.destination) === query);
+  return matches.length === 1 ? { lat: matches[0].lat, lng: matches[0].lng } : null;
+}
 const readyEndpoints: Record<string, { label: string; destination: string; category: RouteDestinationCategory }> = {
   ...Object.fromEntries(CITY_ROUTE_PRESETS.map(place => [place.id, place])),
+  ...Object.fromEntries(READY_ROUTE_STREET_POINTS.map(place => [place.id, place])),
   centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO", category: "centro" },
 };
 const readyPairs = [
@@ -202,12 +224,21 @@ const readyPairs = [
   ["upa", "heal"], ["upa", "rodoviaria"], ["upa", "aguas-lindas-shopping"], ["upa", "hospital-bom-jesus"],
   ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
   ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
+  ["rodoviaria", "prefeitura"], ["aguas-lindas-shopping", "upa"],
+  ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),
+  ...READY_ROUTE_STREET_POINTS.slice(0, 6).flatMap(street => [
+    [street.id, "upa"] as const, [street.id, "aguas-lindas-shopping"] as const,
+  ]),
+  ["via-osm-c1d703024625", "prefeitura"], ["via-osm-0da29ee8ad6a", "prefeitura"],
 ] as const;
 export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
   id: `${from}-to-${to}`,
+  originId: from,
+  originLabel: readyEndpoints[from].label,
+  destinationLabel: readyEndpoints[to].label,
   origin: readyEndpoints[from].destination,
   destination: readyEndpoints[to].destination,
   label: `${readyEndpoints[from].label} → ${readyEndpoints[to].label}`,
-  detail: from === "centro" ? "Origem aproximada · ajuste seu endereço" : "Origem e destino preenchidos",
+  detail: [from, to].some(id => id === "centro" || readyEndpoints[id].category === "centro") ? "Referência aproximada · ajuste a partida ou chegada" : "Origem e destino preenchidos",
   category: readyEndpoints[to].category,
 }));
