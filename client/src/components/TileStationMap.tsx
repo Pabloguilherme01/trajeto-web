@@ -533,7 +533,7 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-3 top-[4.25rem] z-20 flex flex-wrap gap-2"
+            className="absolute left-3 right-3 top-[8rem] z-20 flex flex-wrap gap-2"
           >
             {routeEndpoints.map(point => (
               <button
