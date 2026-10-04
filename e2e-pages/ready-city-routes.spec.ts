@@ -44,6 +44,10 @@ test("quick home form submits an automatic calculation", async ({ page }) => {
 test("ready streets: selects a departure, calculates offline and keeps mobile cards within the screen", async ({ page, context }) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("");
+  // Prepare the planner module before disconnecting: this test blocks service workers.
+  await page.getByRole("button", { name: "Rotas", exact: true }).click();
+  await expect(page.getByPlaceholder("Para onde você vai")).toBeVisible();
+  await page.getByRole("button", { name: "Início", exact: true }).click();
   const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: /trajetos prontos pela cidade/ }) });
   await shortcuts.locator("summary").first().click();
   await shortcuts.getByRole("combobox", { name: "Saindo de" }).selectOption("via-osm-0da29ee8ad6a");
