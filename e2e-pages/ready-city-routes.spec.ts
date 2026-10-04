@@ -56,7 +56,8 @@ test("ready streets: selects a departure, calculates offline and keeps mobile ca
   await expect(shortcuts.locator("article")).toHaveCount(1);
   await expect(shortcuts.getByText(/Referência aproximada/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await context.setOffline(true);\n  await expect(shortcuts.getByRole("button", { name: "Offline ativo", exact: true })).toBeDisabled();
+  await context.setOffline(true);
+  await expect(shortcuts.getByRole("button", { name: "Offline ativo", exact: true })).toBeDisabled();
   await shortcuts.getByRole("button", { name: "Calcular Avenida JK → UPA", exact: true }).click();
   await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Avenida JK · referência no mapa, Águas Lindas de Goiás - GO");
   await expect(page.getByRole("region", { name: "Explorar mapa offline" })).toBeVisible();
