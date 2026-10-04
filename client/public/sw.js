@@ -60,13 +60,16 @@ function precacheFresh(cache, assets) {
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
+    Promise.all([
+      // Installation already prepared the complete package. Take control
+      // promptly; retiring old cache versions must not delay clients.claim().
+      self.clients.claim(),
+      caches.keys().then(keys => Promise.all(
         keys
           .filter(key => key.startsWith(CACHE_PREFIX) && key !== STATIC_CACHE && key !== DATA_CACHE && key !== MAP_CACHE)
           .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+      )),
+    ])
   );
 });
 
