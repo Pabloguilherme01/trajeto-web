@@ -275,8 +275,8 @@ export default function OfflineMapCanvas({
           bounds.minY = Math.min(bounds.minY, point.y);
           bounds.maxY = Math.max(bounds.maxY, point.y);
         }
-        return { ...road, world: points, bounds };
-      }) ?? [],
+        return { ...road, priority: roadPriority(road.kind), world: points, bounds };
+      }).sort((a, b) => a.priority - b.priority) ?? [],
     [pack]
   );
   const visible = roads.filter(({ bounds }) => {
@@ -289,8 +289,7 @@ export default function OfflineMapCanvas({
       bounds.minY * camera.scale + top < size.height + 80
     );
   });
-  const paintedRoads = [...visible].sort((a, b) => roadPriority(a.kind) - roadPriority(b.kind));
-  const namedRoads = [...visible].sort((a, b) => roadPriority(b.kind) - roadPriority(a.kind));
+  const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
   const metresPerPixel =
@@ -416,8 +415,8 @@ export default function OfflineMapCanvas({
           className="absolute inset-0"
         >
           <title>Ruas locais salvas e pontos da viagem</title>
-          {paintedRoads.map(road => {
-            const priority = roadPriority(road.kind);
+          {visible.map(road => {
+            const priority = road.priority;
             const major = priority >= 2;
             const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
             const d = road.world
@@ -489,7 +488,7 @@ export default function OfflineMapCanvas({
                 road.name &&
                 (showAllStreetNames ||
                   zoom >= 2 ||
-                  roadPriority(road.kind) >= 2)
+                  road.priority >= 2)
             )
             .map(road => {
               const p = road.world[Math.floor(road.world.length / 2)];
@@ -528,7 +527,7 @@ export default function OfflineMapCanvas({
                   y={y}
                   textAnchor="middle"
                   fontSize="12"
-                  fontWeight={roadPriority(road.kind) >= 4 ? "700" : "500"}
+                  fontWeight={road.priority >= 4 ? "700" : "500"}
                   fill={dark ? "#e3edec" : "#566760"}
                   paintOrder="stroke"
                   stroke={dark ? "#18272d" : "#eef2eb"}
