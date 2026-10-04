@@ -14,6 +14,15 @@ beforeEach(() => {
   Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition: watch, clearWatch: clear } });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+it("keeps navigation active when the same route is recreated during a render", () => {
+  const { result, rerender } = renderHook(({ value }) => useLiveTrip(value), { initialProps: { value: route } });
+  act(() => result.current.start());
+  act(() => update(position()));
+  rerender({ value: { ...route, origin: { ...route.origin }, destination: { ...route.destination } } });
+  expect(result.current.active).toBe(true);
+  expect(result.current.progress?.distanceMeters).toBeCloseTo(600, 0);
+  expect(clear).not.toHaveBeenCalled();
+});
 it("requests GPS only after starting, updates locally and clears it when stopped", () => {
   const { result } = renderHook(() => useLiveTrip(route));
   expect(watch).not.toHaveBeenCalled();

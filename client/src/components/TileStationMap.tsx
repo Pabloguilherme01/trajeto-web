@@ -107,6 +107,9 @@ export default function TileStationMap({
   const [tileErrors, setTileErrors] = useState(0);
   const [dragging, setDragging] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ distance: number; zoom: number; anchor: { lat: number; lng: number } } | null>(null);
+  const [following, setFollowing] = useState(true);
   const dragRef = useRef<{
     id: number;
     x: number;
@@ -116,8 +119,8 @@ export default function TileStationMap({
   } | null>(null);
 
   useEffect(() => {
-    if (userCoords) setCenter(userCoords);
-  }, [userCoords?.lat, userCoords?.lng]);
+    if (userCoords && following) setCenter(userCoords);
+  }, [userCoords?.lat, userCoords?.lng, following]);
 
   useEffect(() => {
     if (!drawable.some(item => stationKey(item) === selectedId))
@@ -182,7 +185,21 @@ export default function TileStationMap({
   };
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    setFollowing(false);
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const rect = event.currentTarget.getBoundingClientRect();
+      pinch.current = {
+        distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+        zoom,
+        anchor: unproject(centerPx.x + (a.x + b.x) / 2 - rect.left - width / 2, centerPx.y + (a.y + b.y) / 2 - rect.top - height / 2, zoom),
+      };
+      dragRef.current = null;
+      return;
+    }
     dragRef.current = {
       id: event.pointerId,
       x: event.clientX,
@@ -194,6 +211,18 @@ export default function TileStationMap({
   };
 
   const drag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointers.current.has(event.pointerId)) return;
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pinch.current && pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const state = pinch.current;
+      const nextZoom = Math.max(8, Math.min(17, state.zoom + Math.round(Math.log2(Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / state.distance))));
+      const anchor = project(state.anchor.lat, state.anchor.lng, nextZoom);
+      const rect = event.currentTarget.getBoundingClientRect();
+      setZoom(nextZoom);
+      setCenter(unproject(anchor.x - ((a.x + b.x) / 2 - rect.left - width / 2), anchor.y - ((a.y + b.y) / 2 - rect.top - height / 2), nextZoom));
+      return;
+    }
     const state = dragRef.current;
     if (!state || state.id !== event.pointerId) return;
     const next = unproject(
@@ -205,12 +234,15 @@ export default function TileStationMap({
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (dragRef.current?.id !== event.pointerId) return;
-    dragRef.current = null;
-    setDragging(false);
+    if (!pointers.current.has(event.pointerId)) return;
+    pointers.current.delete(event.pointerId);
+    pinch.current = null;
+    const remaining = [...pointers.current.entries()][0];
+    dragRef.current = remaining ? { id: remaining[0], x: remaining[1].x, y: remaining[1].y, cx: centerPx.x, cy: centerPx.y } : null;
+    setDragging(Boolean(remaining));
   };
 
-  const recenter = () => setCenter(userCoords ?? DEFAULT_CENTER);
+  const recenter = () => { setFollowing(true); setCenter(userCoords ?? DEFAULT_CENTER); };
 
   const changeZoom = (delta: number) => {
     setZoom(value => Math.max(8, Math.min(17, value + delta)));
@@ -226,7 +258,7 @@ export default function TileStationMap({
       maxLat = Math.max(...points.map(p => p.lat));
     const minLng = Math.min(...points.map(p => p.lng)),
       maxLng = Math.max(...points.map(p => p.lng));
-    setCenter({ lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2 });
+    setFollowing(false);
     let next = 17;
     while (next > 8) {
       const a = project(minLat, minLng, next),
@@ -239,6 +271,8 @@ export default function TileStationMap({
       next--;
     }
     setZoom(next);
+    const a = project(minLat, minLng, next), b = project(maxLat, maxLng, next);
+    setCenter(unproject((a.x + b.x) / 2, (a.y + b.y) / 2, next));
   };
 
   // A new array with the same geometry must not undo a user pan or zoom.
@@ -319,10 +353,12 @@ export default function TileStationMap({
               ArrowUp: [0, -80],
             };
             const offset = offsets[event.key];
-            if (offset)
+            if (offset) {
+              setFollowing(false);
               setCenter(
                 unproject(centerPx.x + offset[0], centerPx.y + offset[1], zoom)
               );
+            }
             else if (event.key === "+" || event.key === "=") changeZoom(1);
             else if (event.key === "-") changeZoom(-1);
             else if (event.key === "Home") recenter();
@@ -337,6 +373,17 @@ export default function TileStationMap({
           onPointerMove={drag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
+          onLostPointerCapture={endDrag}
+          onDoubleClick={event => {
+            if (event.target instanceof Element && event.target.closest("button")) return;
+            setFollowing(false);
+            const rect = event.currentTarget.getBoundingClientRect();
+            const nextZoom = Math.min(17, zoom + 1);
+            const anchor = unproject(centerPx.x + event.clientX - rect.left - width / 2, centerPx.y + event.clientY - rect.top - height / 2, zoom);
+            const projected = project(anchor.lat, anchor.lng, nextZoom);
+            setZoom(nextZoom);
+            setCenter(unproject(projected.x - (event.clientX - rect.left - width / 2), projected.y - (event.clientY - rect.top - height / 2), nextZoom));
+          }}
         >
           <div
             className="absolute"

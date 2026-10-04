@@ -9,6 +9,49 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+it("preserves manual exploration on GPS updates and resumes following on recenter", () => {
+  const stations = [{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }];
+  const { rerender } = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const left = marker.style.left;
+  rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2815 }} />);
+  expect(marker.style.left).toBe(left);
+  fireEvent.click(screen.getByRole("button", { name: "Recentrar mapa" }));
+  expect(marker.style.left).not.toBe(left);
+  const recentered = marker.style.left;
+  rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2814 }} />);
+  expect(marker.style.left).not.toBe(recentered);
+});
+
+it("zooms around a double-clicked point without moving its marker", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  fireEvent.doubleClick(screen.getByRole("region", { name: "Mapa dos postos" }), { clientX: 160, clientY: 260 });
+  expect(screen.getByRole("button", { name: "Abrir Posto A" }).style.left).toBe("160px");
+  expect(document.querySelector('img[src*="/14/"]')).toBeTruthy();
+});
+
+it("zooms with two fingers and continues dragging when one is lifted", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  const pointer = (type: string, id: number, x: number) => {
+    const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: 260 });
+    Object.defineProperties(event, { pointerId: { value: id }, pointerType: { value: "touch" } });
+    fireEvent(map, event);
+  };
+  pointer("pointerdown", 1, 110);
+  pointer("pointerdown", 2, 210);
+  pointer("pointermove", 1, 60);
+  pointer("pointermove", 2, 260);
+  expect(document.querySelector('img[src*="/14/"]')).toBeTruthy();
+  pointer("pointerup", 2, 260);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = parseFloat(marker.style.left);
+  pointer("pointermove", 1, 80);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(before + 20);
+});
+
 it("tracks the actual viewport and keeps the selected station after catalog updates", () => {
   let resize = () => {};
   let width = 320;
