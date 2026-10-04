@@ -16,12 +16,14 @@ test("mobile home calculates directly and exposes ready trips without overflow",
   await shortcuts.locator("summary").first().click();
   await expect(shortcuts.locator("article")).toHaveCount(6);
   await shortcuts.getByRole("button", { name: /Ver mais/ }).click();
-  await expect(shortcuts.locator("article")).toHaveCount(48);
+  await expect(shortcuts.locator("article")).toHaveCount(18);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await shortcuts.getByRole("searchbox", { name: "Buscar trajeto" }).fill("prefeitura upa");
   await expect(shortcuts.locator("article")).toHaveCount(1);
   await shortcuts.getByRole("combobox", { name: "Como você vai?" }).selectOption("walking");
+  await shortcuts.getByRole("button", { name: "Calcular offline", exact: true }).click();
   await shortcuts.getByRole("button", { name: /Calcular Prefeitura → UPA/ }).click();
+  await expect(page).toHaveURL(/experiencia=offline/);
   await expect(page).toHaveURL(/auto=1/);
   await expect(page).toHaveURL(/modo=walking/);
   await expect(page.getByPlaceholder("De onde você sai")).toHaveValue(/Prefeitura/);

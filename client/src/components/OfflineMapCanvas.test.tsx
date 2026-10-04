@@ -389,3 +389,18 @@ it("does not suspend live following for a tap and ignores a third contact", asyn
   pointer("pointermove", 1, 140);
   expect(parseFloat(marker.style.left)).toBeCloseTo(parseFloat(before) + 20);
 });
+it("fits the route without shrinking it to include distant suggested stations", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const markers = [
+    { id: "origin", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
+    { id: "destination", name: "Destino", label: "B", lat: -15.76, lng: -48.27 },
+  ];
+  const view = render(<Canvas markers={markers} routePoints={markers} zoom={1} onZoom={() => {}} />);
+  await screen.findByText(/Ruas locais disponíveis/);
+  const origin = screen.getByRole("button", { name: "Selecionar Origem" });
+  const initial = [origin.style.left, origin.style.top];
+  view.rerender(<Canvas markers={[...markers, { id: "stop-far", name: "Posto distante", label: "P", lat: -15.81, lng: -48.34 }]} routePoints={markers} zoom={1} onZoom={() => {}} />);
+  expect([origin.style.left, origin.style.top]).toEqual(initial);
+  expect(screen.getByRole("button", { name: "Selecionar Posto distante" })).toBeTruthy();
+});

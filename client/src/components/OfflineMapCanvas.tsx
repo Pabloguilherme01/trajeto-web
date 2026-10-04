@@ -120,7 +120,7 @@ export default function OfflineMapCanvas({
         ];
   // Nearby references must not zoom the trip out beyond its endpoints.
   const tripMarkers = validMarkers.filter(
-    p => p.id === "origin" || p.id === "destination" || p.id.startsWith("stop-")
+    p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
   );
   const anchors = tripMarkers.length
     ? tripMarkers
