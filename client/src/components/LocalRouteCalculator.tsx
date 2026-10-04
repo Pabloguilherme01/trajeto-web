@@ -198,15 +198,15 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
 
     if (!numberValue(distance)) {
       missing.push("distância");
-      if (routeDistanceAvailable) automatic.push("distância da rota");
+      if (!distance.trim() && routeDistanceAvailable) automatic.push("distância da rota");
     }
     if (!numberValue(price)) {
       missing.push("preço");
-      if (numberValue(rememberedPrice)) automatic.push("último preço");
+      if (!price.trim() && numberValue(rememberedPrice)) automatic.push("último preço");
     }
     if (!numberValue(consumption)) {
       missing.push("consumo");
-      if (savedVehicle) automatic.push("consumo do veículo salvo");
+      if (!consumption.trim() && savedVehicle) automatic.push("consumo do veículo salvo");
     }
 
     return { missing, automatic };
@@ -214,17 +214,17 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
 
   const completeMissingEssentials = () => {
     setRestoredDraft(false);
-    if (!numberValue(distance) && typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0) {
+    if (!distance.trim() && typeof initialDistanceKm === "number" && Number.isFinite(initialDistanceKm) && initialDistanceKm > 0) {
       setDistance(String(Number(initialDistanceKm.toFixed(3))));
     }
-    if (!numberValue(price) && numberValue(rememberedPrice)) {
+    if (!price.trim() && numberValue(rememberedPrice)) {
       setPrice(rememberedPrice);
     }
 
     const vehicle = getMobileVehicle();
     if (vehicle) {
-      if (!numberValue(consumption)) setConsumption(String(vehicle.consumption));
-      if (!numberValue(tank)) setTank(String(vehicle.tank));
+      if (!consumption.trim()) setConsumption(String(vehicle.consumption));
+      if (!tank.trim()) setTank(String(vehicle.tank));
     }
   };
 
@@ -284,6 +284,10 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
 
   const smartSummary = useMemo(() => {
     if (!values) return "";
+
+    if (values.currentFuelInvalid || values.currentFuelAboveTank) {
+      return "Corrija o combustível atual para avaliar a necessidade de abastecimento.";
+    }
 
     if (values.fuelStatus && !values.fuelStatus.canCompleteTrip) {
       if (values.fuelStatus.tripFitsOneTank) {
@@ -366,7 +370,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
             <div className="min-w-0 flex-1">
               <p className="text-[0.65rem] font-black text-[#356451]">
                 {essentialStatus.missing.length
-                  ? `Falta ${essentialStatus.missing.length} dado(s): ${essentialStatus.missing.join(", ")}.`
+                  ? `Revise ${essentialStatus.missing.length} dado(s): ${essentialStatus.missing.join(", ")}.`
                   : "Tudo pronto para calcular automaticamente."}
               </p>
               <p className="mt-1 text-[0.62rem] font-semibold leading-relaxed text-[#56766A]">

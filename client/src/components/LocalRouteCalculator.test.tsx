@@ -284,7 +284,7 @@ it("completa somente o campo essencial que ficou vazio usando dados locais conhe
   expect(priceInput.value).toBe("5,99");
   fireEvent.change(priceInput, { target: { value: "" } });
 
-  expect(screen.getByText(/Falta 1 dado\(s\): preço/i)).toBeTruthy();
+  expect(screen.getByText(/Revise 1 dado\(s\): preço/i)).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Completar campos automaticamente" }));
 
   await waitFor(() => {
@@ -293,6 +293,27 @@ it("completa somente o campo essencial que ficou vazio usando dados locais conhe
   expect((screen.getByLabelText(/distância de ida/i) as HTMLInputElement).value).toBe("12");
   expect((screen.getByLabelText(/consumo do veículo/i) as HTMLInputElement).value).toBe("11.2");
 
+  cleanup();
+  localStorage.clear();
+});
+
+it("preserva valores inválidos digitados ao completar outro campo vazio", () => {
+  cleanup();
+  localStorage.clear();
+  localStorage.setItem("trajeto-last-fuel-price", "5,99");
+  localStorage.setItem("trajeto-mobile-vehicle", JSON.stringify({ name: "Meu carro", fuel: "gasolina", consumption: 11.2, tank: 45 }));
+  render(<LocalRouteCalculator initialDistanceKm={12} />);
+  const distance = screen.getByLabelText(/distância de ida/i) as HTMLInputElement;
+  const consumption = screen.getByLabelText(/consumo do veículo/i) as HTMLInputElement;
+  const price = screen.getByPlaceholderText("5,89") as HTMLInputElement;
+  fireEvent.change(distance, { target: { value: "0" } });
+  fireEvent.change(consumption, { target: { value: "-2" } });
+  fireEvent.change(price, { target: { value: "" } });
+  fireEvent.click(screen.getByRole("button", { name: "Completar campos automaticamente" }));
+  expect(price.value).toBe("5,99");
+  expect(distance.value).toBe("0");
+  expect(consumption.value).toBe("-2");
+  expect(screen.getByText(/Revise 2 dado/)).toBeTruthy();
   cleanup();
   localStorage.clear();
 });
