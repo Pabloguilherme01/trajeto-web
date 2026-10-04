@@ -7,6 +7,12 @@ import {
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
 
+const ROUTE_STYLES = {
+  teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
+  blue: { label: "Azul", color: "#1d4ed8", width: 5 },
+  contrast: { label: "Alto contraste", color: "#111827", width: 7 },
+} as const;
+const TRAVEL_LABELS = { driving: "Carro", walking: "A pé", cycling: "Bicicleta", transit: "Transporte público" } as const;
 const TILE = 256;
 const DEFAULT_CENTER = { lat: -15.7545, lng: -48.2816 };
 const TILE_URL_TEMPLATE =
@@ -98,6 +104,8 @@ export default function TileStationMap({
       window.removeEventListener("offline", update);
     };
   }, []);
+  const [routeStyle, setRouteStyle] = useState<keyof typeof ROUTE_STYLES>("teal");
+  const appearance = ROUTE_STYLES[routeStyle];
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -448,12 +456,13 @@ export default function TileStationMap({
               aria-label="Trajeto pelas ruas"
               role="img"
             >
-              {["#ffffff", "#147b88"].map((color, index) => (
+              {["#ffffff", appearance.color].map((color, index) => (
                 <polyline
                   key={color}
                   fill="none"
                   stroke={color}
-                  strokeWidth={index ? 5 : 9}
+                  strokeWidth={index ? appearance.width : appearance.width + 4}
+                  strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   points={routePoints
@@ -611,6 +620,18 @@ export default function TileStationMap({
       </div>
 
       <div className="relative min-w-0 border-t border-black/10 bg-white/95 p-3.5 sm:p-4">
+        {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold text-slate-700">{TRAVEL_LABELS[travelMode]} · {travelMode === "walking" ? "linha pontilhada" : travelMode === "cycling" ? "linha tracejada" : "linha contínua"}</p>
+            <label className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-bold text-slate-700">Cor do trajeto
+              <select value={routeStyle} onChange={event => setRouteStyle(event.target.value as keyof typeof ROUTE_STYLES)}
+                className="min-h-11 max-w-full rounded-lg border border-slate-300 bg-white px-2 text-base text-slate-900">
+                {Object.entries(ROUTE_STYLES).map(([value, style]) => <option key={value} value={value}>{style.label}</option>)}
+              </select>
+            </label>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-slate-600">Personalize o traçado sem alterar o caminho. A escolha vale enquanto este mapa estiver aberto.</p>
+        </div>}
         {selected ? (
           <div className="flex min-w-0 items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">

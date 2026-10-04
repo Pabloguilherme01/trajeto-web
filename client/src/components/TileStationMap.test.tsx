@@ -303,3 +303,26 @@ it("identifica os pontos A/B e centraliza o destino sem alterar a rota", () => {
   fireEvent.click(screen.getByRole("button", { name: "Recentrar mapa" }));
   expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe(framedOrigin);
 });
+
+
+it("personalizes the route without resetting manual exploration and identifies walking/cycling", () => {
+  const stations = [
+    { id: "origin", name: "Origem", address: "Partida", lat: -15.7545, lng: -48.2816 },
+    { id: "destination", name: "Destino", address: "Chegada", lat: -15.7555, lng: -48.2826 },
+  ];
+  const view = render(<TileStationMap stations={stations} routePoints={stations} travelMode="walking" />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  fireEvent.keyDown(map, { key: "ArrowRight" });
+  const before = screen.getByRole("img", { name: "Trajeto pelas ruas" }).querySelectorAll("polyline")[1];
+  const points = before.getAttribute("points");
+  expect(before.getAttribute("stroke-dasharray")).toBe("2 9");
+  expect(screen.getByText("A pé · linha pontilhada")).toBeTruthy();
+  fireEvent.change(screen.getByRole("combobox", { name: "Cor do trajeto" }), { target: { value: "contrast" } });
+  const after = screen.getByRole("img", { name: "Trajeto pelas ruas" }).querySelectorAll("polyline")[1];
+  expect(after.getAttribute("stroke")).toBe("#111827");
+  expect(after.getAttribute("stroke-width")).toBe("7");
+  expect(after.getAttribute("points")).toBe(points);
+  view.rerender(<TileStationMap stations={stations} routePoints={stations} travelMode="cycling" />);
+  expect(screen.getByText("Bicicleta · linha tracejada")).toBeTruthy();
+  expect(after.getAttribute("stroke-dasharray")).toBe("10 6");
+});
