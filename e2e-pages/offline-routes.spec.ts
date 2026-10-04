@@ -20,7 +20,7 @@ async function planRoute(page: Page) {
   await page
     .getByRole("button", { name: "Calcular rota", exact: true })
     .click();
-  await expect(page.getByText("12,3 km", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
 }
 
 test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
@@ -97,7 +97,7 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
   await page
     .getByRole("button", { name: "Calcular rota", exact: true })
     .click();
-  await expect(page.getByText("12,3 km", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
 });
 
 test("Pages: an aborted IndexedDB transaction never announces a saved route", async ({
