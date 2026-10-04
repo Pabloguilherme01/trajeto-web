@@ -63,7 +63,7 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await context.setOffline(true);
   await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
   await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
-  await expect(page.getByText(/Rota preparada localmente sem usar provedores externos/)).toBeVisible();
+  await expect(page.getByText(/Estimativa offline entre os locais escolhidos/)).toBeVisible();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.reload();

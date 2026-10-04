@@ -408,6 +408,7 @@ export function OfflineRoutePreview({
     () => nearbyBusinessReferences(businesses.items, destination),
     [businesses.items, destination?.lat, destination?.lng]
   );
+  const [showReferences, setShowReferences] = useState(true);
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
@@ -633,7 +634,9 @@ export function OfflineRoutePreview({
               : "Rota pelas ruas"}
         </span>
         <span>
-          {routePoints.length
+          {selected?.source === "local-estimate"
+            ? "Estimativa em linha reta · sem curvas confirmadas"
+            : routePoints.length
             ? "Geometria da rota disponível"
             : "Sem geometria viária confirmada"}
         </span>
@@ -851,7 +854,7 @@ export function OfflineRoutePreview({
         controls={mapControls}
         initialDark={false}
         className="h-[min(62dvh,560px)] min-h-[320px]"
-        markers={markers}
+        markers={showReferences ? markers : markers.filter(marker => !("isReference" in marker && marker.isReference))}
         routePoints={routePoints}
         zoom={zoom}
         onZoom={setZoom}
@@ -874,6 +877,7 @@ export function OfflineRoutePreview({
         }}
       />
       <div className="route-map-actions flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
+        <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)} className="min-h-11 rounded-xl border border-black/15 bg-white px-3 text-xs font-bold">{showReferences ? "Ocultar referências" : "Mostrar referências"}</button>
         {validOrigin && (
           <button
             type="button"

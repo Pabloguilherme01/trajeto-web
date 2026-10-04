@@ -575,3 +575,14 @@ it("mostra resumo e guia completo no mapa online do Pages sem duplicar no fallba
   expect(screen.getAllByRole("region", { name: "Resumo do percurso no mapa" })).toHaveLength(1);
   expect(screen.getAllByRole("button", { name: /Instruções pelas ruas/ })).toHaveLength(1);
 });
+
+it("lets the user declutter offline references and labels straight-line estimates explicitly", () => {
+  render(<OfflineRoutePreview origin={{ lat: -15.7545, lng: -48.2816 }} destination={{ lat: -15.74637, lng: -48.27584 }} stops={[]} forceOffline routes={[{ id: "estimate", source: "local-estimate", polyline: "r`d_B~~teHbwFg_mA" }]} />);
+  expect(screen.getByText("Estimativa em linha reta · sem curvas confirmadas")).toBeTruthy();
+  const button = screen.getByRole("button", { name: "Ocultar referências" });
+  expect(button.getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(button);
+  expect(screen.getByRole("button", { name: "Mostrar referências" }).getAttribute("aria-pressed")).toBe("false");
+  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver destino" })).toBeTruthy();
+});
