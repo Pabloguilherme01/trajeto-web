@@ -59,3 +59,22 @@ it("filters departure points and resets them together with other filters", () =>
   expect((departure as HTMLSelectElement).value).toBe("todos");
   expect(screen.getAllByRole("article")).toHaveLength(6);
 });
+
+
+it("applies an intent without losing departure and calculates with the quick travel mode", () => {
+  render(<ReadyRouteShortcuts />); open();
+  fireEvent.change(screen.getByRole("combobox", { name: "Saindo de" }), { target: { value: "via-osm-0da29ee8ad6a" } });
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: "não existe" } });
+  fireEvent.click(screen.getByRole("button", { name: "Cuidar da saúde" }));
+  expect(screen.getByRole("button", { name: "Cuidar da saúde" }).getAttribute("aria-pressed")).toBe("true");
+  expect((screen.getByRole("searchbox") as HTMLInputElement).value).toBe("");
+  expect((screen.getByRole("combobox", { name: "Saindo de" }) as HTMLSelectElement).value).toBe("via-osm-0da29ee8ad6a");
+  expect(screen.getAllByRole("article").every(card => /UPA|HEAL|Hospital|UBS|ESF/.test(card.getAttribute("aria-label")!))).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "A pé" }));
+  fireEvent.click(screen.getAllByRole("button", { name: /^Calcular Avenida JK/ })[0]);
+  const url = new URL(navigate.mock.calls[0][0], "https://example.com");
+  expect(url.searchParams.get("modo")).toBe("walking");
+  expect(url.searchParams.get("auto")).toBe("1");
+  expect(url.searchParams.has("lat")).toBe(false);
+  expect(url.searchParams.has("lng")).toBe(false);
+});
