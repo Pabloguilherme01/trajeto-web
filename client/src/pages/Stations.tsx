@@ -840,7 +840,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           </section>
         )}
 
-        {mapFirst && showMap && !showSavedOnly && mapStations.length > 0 && (
+        {mapFirst && showMap && !showSavedOnly && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
           <section id="aguas-lindas-map" className="scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121B22] shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
             <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
               <div>
@@ -861,7 +861,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           </section>
         )}
 
-                {!showSavedOnly && !mapFirst && showMap && mapStations.length > 0 && (
+                {!showSavedOnly && !mapFirst && showMap && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="relative">
                       <StationMap
@@ -1093,7 +1093,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                     <p className="text-xs font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
                     <p className="mt-1 text-sm leading-relaxed text-white/65">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}. {mapSecondaryCount > 0 ? mapSecondaryCount + " referências secundárias também foram agregadas ao mapa." : ""}</p>
                   </div>
-                  {!mapFirst && <button type="button" onClick={() => setShowMap(current => !current)} disabled={mapStations.length === 0} className="min-h-11 shrink-0 rounded-xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-40">{showMap ? "Ocultar mapa" : `Ver ${mapStations.length} postos no mapa`}</button>}
                 </div>
 
 
@@ -1199,7 +1198,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <p className="mt-1 text-xs text-white/65">{usingCache ? "Salvos em " + cachedAt : searchedAt ? "Atualizado em " + searchedAt : "Favoritos locais"}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"}><MapIcon className="size-4" /></button>
+                {showSavedOnly && <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"}><MapIcon className="size-4" /></button>}
                 {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">{compareIds.length} comparar</button>}
               </div>
             </section>
