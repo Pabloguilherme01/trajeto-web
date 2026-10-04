@@ -23,17 +23,27 @@ describe("StationDirectoryCard practical actions", () => {
     expect(screen.getByText(/Preço individual indisponível/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Salvar/ })).toBeNull();
   });
-  it("uses the preferred external provider and exposes a working save callback", () => {
-    const open = vi.spyOn(window, "open").mockReturnValue(null);
+
+  it("uses a normal external navigation link for the preferred provider and exposes save", () => {
     const save = vi.fn();
     setPreferredNavigationProvider("waze");
     render(<StationDirectoryCard index={1} local={local} onToggleSaved={save} />);
-    fireEvent.click(screen.getByRole("button", { name: "Navegar" }));
-    expect(open).toHaveBeenCalledWith(expect.stringContaining("waze.com"), "_blank", "noopener,noreferrer");
-    expect(new URL(String(open.mock.calls[0][0])).searchParams.get("q")).toContain("Avenida Teste");
+    const navigate = screen.getByRole("link", { name: "Navegar" });
+    expect(navigate.getAttribute("target")).toBe("_blank");
+    expect(navigate.getAttribute("rel")).toContain("noopener");
+    expect(navigate.getAttribute("href")).toContain("waze.com");
+    expect(new URL(navigate.getAttribute("href")!).searchParams.get("q")).toContain("Avenida Teste");
     fireEvent.click(screen.getByRole("button", { name: "Salvar posto neste aparelho" }));
     expect(save).toHaveBeenCalledTimes(1);
   });
+
+  it("labels generic web search as research instead of a verified contact", () => {
+    render(<StationDirectoryCard index={1} local={local} />);
+    fireEvent.click(screen.getByText("Mais opções do posto"));
+    expect(screen.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Buscar contato na web" })).toBeNull();
+  });
+
   it("reports clipboard failure without announcing that a CNPJ was copied", async () => {
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: vi.fn().mockRejectedValue(new Error("denied")) } });
     render(<StationDirectoryCard index={1} local={local} />);
