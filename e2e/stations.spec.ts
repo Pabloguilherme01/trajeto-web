@@ -11,15 +11,20 @@ test("postos: abre, filtra e mantém a ficha navegável", async ({ page }) => {
   await expect(page.locator('article[id^="posto-"]').first()).toBeVisible();
 });
 
-test("postos: sincroniza busca da URL e expõe filtro de combustível", async ({ page }) => {
+test("postos: cruza ANP no diretório e mantém filtro de combustível útil", async ({ page }) => {
   await page.goto("/postos?q=postos", { waitUntil: "domcontentloaded" });
 
   const fuel = page.getByRole("combobox", { name: "Filtrar por combustível" });
   const sort = page.getByRole("combobox", { name: "Ordenar diretório de postos" });
   await expect(fuel).toBeVisible();
   await expect(sort.locator('option[value="distance"]')).toBeDisabled();
+  await expect(sort.locator('option[value="price"]')).toBeDisabled();
+  await expect(page.getByText(/ordenação por preço desativada/i)).toBeVisible();
+
   await fuel.selectOption("etanol");
   await expect(fuel).toHaveValue("etanol");
+  await expect(page.locator('article[id^="posto-"]').first()).toBeVisible();
+  await expect(page.getByText("Nenhum posto encontrado com esses filtros.")).toHaveCount(0);
 
   const search = page.getByRole("textbox", { name: "Cidade, bairro ou posto" });
   await search.fill("Ceilândia");
