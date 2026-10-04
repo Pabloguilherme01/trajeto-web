@@ -35,6 +35,30 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   return <details className="mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#13232d] via-[#101a22] to-[#0B1014] p-4 shadow-xl" data-compact={compact || undefined}>
     <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-[#3DE3FF]">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
     <p className="mt-2 text-xs leading-relaxed text-white/70">Busque um lugar, escolha como ir e toque em Calcular. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
+    <div className="mt-3" role="group" aria-label="O que você precisa fazer?">
+      <p className="mb-2 text-xs font-bold text-white/80">O que você precisa fazer?</p>
+      <div className="flex flex-wrap gap-2">
+        {[
+          { value: "saude", label: "Cuidar da saúde" },
+          { value: "compras", label: "Fazer compras" },
+          { value: "servicos", label: "Resolver documentos" },
+          { value: "educacao", label: "Ir estudar" },
+          { value: "combustivel", label: "Abastecer" },
+          { value: "transporte", label: "Pegar transporte" },
+        ].map(intent => <button key={intent.value} type="button" aria-pressed={category === intent.value}
+          onClick={() => { setCategory(intent.value as RouteDestinationCategoryFilter); setQuery(""); setExpanded(false); }}
+          className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 bg-white/5 text-white/80"}`}>
+          {intent.label}
+        </button>)}
+      </div>
+    </div>
+    <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Modo rápido de viagem">
+      {modes.map(item => <button key={item.value} type="button" aria-pressed={mode === item.value}
+        onClick={() => setMode(item.value)}
+        className={`min-h-11 rounded-xl border px-3 text-xs font-bold ${mode === item.value ? "border-[#3DE3FF] bg-[#3DE3FF]/10 text-[#3DE3FF]" : "border-white/15 text-white/70"}`}>
+        {item.label}
+      </button>)}
+    </div>
     <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <label className="min-w-0 text-xs font-bold text-white/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
         <input type="search" value={query} onChange={event => { setQuery(event.target.value); setExpanded(false); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />
