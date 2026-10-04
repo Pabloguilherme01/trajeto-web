@@ -12,7 +12,7 @@ import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
-import { findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
+import { findPreparedRouteByCoordinates, findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
 import ArrivalTimePlannerCard from "@/components/ArrivalTimePlannerCard";
@@ -23,7 +23,7 @@ import { mobileStationDestination } from "@/lib/unifiedDestination";
 import { listUnifiedDestinationFavorites, unifiedDestinationEvent } from "@/lib/unifiedDestinationStore";
 import { mobileDestinationEvent } from "@/lib/mobileDestinations";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
-import { buildPublicRoutePayload, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
+import { buildPublicRoutePayload, resolveOfflineRoutePoint, calculateOfflineRoute, calculatePrivateLocationRoute, calculatePublicRoute, type PublicTravelMode } from "@/lib/publicRouting";
 import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocationLabel, privateOriginForExternalNavigation, privateOriginForHistory } from "@/lib/locationPrivacy";
 import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
@@ -274,7 +274,12 @@ export default function Planner() {
       ]);
     } catch {} finally { if (timer) clearTimeout(timer); }
     if (version !== requestVersion.current) return true;
-    const saved = findBestOfflineRouteForTrip(routes, from, to, mode);
+    let saved = findBestOfflineRouteForTrip(routes, from, to, mode);
+    if (!saved) {
+      try {
+        saved = findPreparedRouteByCoordinates(routes, resolveOfflineRoutePoint(from, routes), resolveOfflineRoutePoint(to, routes), mode);
+      } catch { /* An ambiguous street still requires an explicit catalog choice. */ }
+    }
     if (!saved) return false;
     setPlanned(saved.payload as PlannedRoute);
     setShowMap(true);
@@ -372,7 +377,7 @@ export default function Planner() {
         const baseMessage =
           publicRoute.source === "local-estimate"
             ? offlineMode || !online
-              ? "Rota preparada localmente sem usar provedores externos. Quando a conexão voltar, recalcule para atualizar ruas e trânsito."
+              ? "Estimativa offline entre os locais escolhidos, em linha reta. Não fornece curvas pelas ruas; uma rota já preparada preserva o trajeto e as instruções."
               : "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
             : publicRoute.source === "mapbox"
               ? "Rota inteligente calculada com Mapbox; no carro, o tempo pode considerar o trânsito disponível."
@@ -993,7 +998,7 @@ export default function Planner() {
               <>
                 <div className="mt-4 rounded-3xl border border-[#FFB86B]/20 bg-[#121B22] p-4">
                   <p className="text-xs font-black text-white">Biblioteca vazia, mas o modo offline continua útil.</p>
-                  <p className="mt-1 text-xs leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Para uma rota realmente disponível sem internet, calcule com origem e destino quando estiver conectado e prepare a viagem para uso offline.</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/42">Os atalhos abaixo são destinos locais preparados no próprio app. Locais conhecidos permitem novas estimativas sem internet. Para guardar o trajeto pelas ruas e as instruções, calcule a viagem online uma vez; a cópia é salva automaticamente.</p>
                   <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
                     <a href="tel:190" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
                     <a href="tel:192" className="min-h-11 rounded-xl border border-white/8 bg-[#0B1014] px-2 py-2 text-center text-xs font-black">SAMU · 192</a>

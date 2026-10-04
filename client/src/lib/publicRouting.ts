@@ -1,3 +1,4 @@
+import { listOfflineRoutes, resolvePreparedRoutePoint, type OfflineRoute } from "./offlineStore";
 import { resolveReadyRouteStreetPoint } from "./localRoutePresets";
 import { loadBusinessCatalog, resolveBusinessPoint } from "./businessCatalog";
 import { searchAguasLindasStations } from "@/lib/aguasLindasStations";
@@ -513,6 +514,23 @@ function localGeocode(value: string): PublicCoordinate | null {
   };
 }
 
+async function readPreparedRoutes(): Promise<OfflineRoute[]> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      listOfflineRoutes(),
+      new Promise<OfflineRoute[]>(resolve => { timer = setTimeout(() => resolve([]), 1500); }),
+    ]);
+  } catch { return []; } finally { if (timer) clearTimeout(timer); }
+}
+
+export function resolveOfflineRoutePoint(value: string, prepared: OfflineRoute[] = []): PublicCoordinate | null {
+  requireUnambiguousStreet(value);
+  const cached = cacheGet<PublicCoordinate>(geocodeCacheKey(normalizeText(value)));
+  return parseCoordinateInput(value) ?? localGeocode(value) ?? resolvePreparedRoutePoint(prepared, value) ??
+    (isCoordinate(cached) ? cached : null);
+}
+
 function requireUnambiguousStreet(value: string) {
   if (isAmbiguousAtlasStreet(value)) {
     throw new Error("Há mais de um trecho com esse nome. Escolha a rua no catálogo local e confira a posição no mapa.");
@@ -547,6 +565,8 @@ async function geocode(value: string): Promise<PublicCoordinate> {
   if (isCoordinate(cached)) return cached;
 
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    const prepared = resolvePreparedRoutePoint(await readPreparedRoutes(), query);
+    if (prepared) return prepared;
     throw new Error(
       "Esse local ainda não está disponível offline. Conecte-se uma vez para preparar o endereço ou use um destino salvo."
     );
@@ -740,21 +760,13 @@ export async function calculateOfflineRoute(
   )
     await loadBusinessCatalog().catch(() => []);
   const parsedOrigin = parseCoordinateInput(originText);
-  const parsedDestination = parseCoordinateInput(destinationText);
-  const cachedOrigin = cacheGet<PublicCoordinate>(
-    geocodeCacheKey(normalizeText(originText))
-  );
-  const cachedDestination = cacheGet<PublicCoordinate>(
-    geocodeCacheKey(normalizeText(destinationText))
-  );
-  const originResolved =
-    parsedOrigin ??
-    localGeocode(originText) ??
-    (isCoordinate(cachedOrigin) ? cachedOrigin : null);
-  const destination =
-    parsedDestination ??
-    localGeocode(destinationText) ??
-    (isCoordinate(cachedDestination) ? cachedDestination : null);
+  let originResolved = resolveOfflineRoutePoint(originText);
+  let destination = resolveOfflineRoutePoint(destinationText);
+  if (!originResolved || !destination) {
+    const prepared = await readPreparedRoutes();
+    originResolved = resolveOfflineRoutePoint(originText, prepared);
+    destination = resolveOfflineRoutePoint(destinationText, prepared);
+  }
 
   if (!originResolved || !destination) {
     throw new Error(
