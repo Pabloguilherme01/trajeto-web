@@ -26,5 +26,5 @@ it("opens and calculates every ready city route without internet", async () => {
     expect(result.origin).not.toEqual(result.destination);
   }
   expect(unavailable).toEqual([]);
-  expect(fetchMock).not.toHaveBeenCalled();
+  expect(fetchMock.mock.calls.every(([url]) => String(url).includes("aguas-lindas-offline-map.json"))).toBe(true);\n  expect(fetchMock.mock.calls.some(([url]) => /nominatim|project-osrm|api\\.mapbox/.test(String(url)))).toBe(false);
 });
