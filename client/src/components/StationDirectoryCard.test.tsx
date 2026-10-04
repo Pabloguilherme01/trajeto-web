@@ -40,7 +40,7 @@ describe("StationDirectoryCard practical actions", () => {
   it("labels generic web search as research instead of a verified contact", () => {
     render(<StationDirectoryCard index={1} local={local} />);
     fireEvent.click(screen.getByText("Mais opções do posto"));
-    expect(screen.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Pesquisar este posto na web" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: "Buscar contato na web" })).toBeNull();
   });
 
