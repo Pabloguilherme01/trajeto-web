@@ -813,7 +813,7 @@ export default function Planner() {
                 }}
               />
 
-              <button type="submit" aria-label="Ir até aqui" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="planner-primary-action mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-primary px-4 text-sm font-black text-background disabled:opacity-35 active:scale-[.99]">
+              <button type="submit" data-testid="planner-primary-action" aria-busy={planRoute.isPending || publicRoutePending} disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="planner-primary-action mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-primary px-4 text-sm font-black text-background disabled:opacity-35 active:scale-[.99]">
                 <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending || publicRoutePending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>

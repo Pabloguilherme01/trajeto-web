@@ -43,7 +43,7 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
   }));
 
   await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Ir até aqui" }).click();
+  await page.getByTestId("planner-primary-action").click();
 
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
   await expect(page.locator("[data-route-card]").getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
@@ -60,7 +60,7 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
 test("planejar: mantém a rota utilizável quando o OSRM está indisponível", async ({ page }) => {
   await page.route("https://router.project-osrm.org/**", route => route.abort());
   await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Ir até aqui" }).click();
+  await page.getByTestId("planner-primary-action").click();
 
   await expect(page.getByText(/Estimativa local/)).toBeVisible();
   await expect(page.getByText(/km/).first()).toBeVisible();
@@ -71,7 +71,7 @@ test("planejar: mantém a rota utilizável quando o OSRM está indisponível", a
 
 test("planejar: aceita destino sem GPS e oferece navegação externa", async ({ page }) => {
   await page.goto("/planejar?destino=Águas%20Lindas%20de%20Goiás", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Ir até aqui" }).click();
+  await page.getByTestId("planner-primary-action").click();
 
   await expect(page.getByRole("heading", { name: /Navegação pronta/i })).toBeVisible();
   await expect(page.getByRole("button", { name: "Abrir Google Maps", exact: true })).toBeVisible();

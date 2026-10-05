@@ -22,13 +22,14 @@ describe("StationDirectoryCard practical actions", () => {
     expect(screen.getByText("Sobre os dados deste posto").closest("details")?.open).toBe(false);
     expect(screen.getByText(/Preço individual indisponível/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Salvar/ })).toBeNull();
+    expect(screen.getByText("Não conciliado")).toBeTruthy();
   });
 
   it("uses a normal external navigation link for the preferred provider and exposes save", () => {
     const save = vi.fn();
     setPreferredNavigationProvider("waze");
     render(<StationDirectoryCard index={1} local={local} onToggleSaved={save} />);
-    const navigate = screen.getByRole("link", { name: "Navegar" });
+    const navigate = screen.getByRole("link", { name: "Abrir no Waze" });
     expect(navigate.getAttribute("target")).toBe("_blank");
     expect(navigate.getAttribute("rel")).toContain("noopener");
     expect(navigate.getAttribute("href")).toContain("waze.com");

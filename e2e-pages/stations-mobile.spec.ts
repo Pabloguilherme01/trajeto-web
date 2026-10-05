@@ -99,7 +99,7 @@ test("Pages: station search uses compact cards and resets an empty query", async
   const card = page.locator("article[id^='posto-']").first();
   await expect(card.getByRole("heading")).toContainText(/ponteio/i);
   await expect(card.getByRole("link", { name: "Ir até aqui", exact: true })).toHaveAttribute("href", /planejar.*destino=/);
-  await expect(card.getByRole("link", { name: "Navegar", exact: true })).toBeVisible();
+  await expect(card.getByRole("link", { name: /Abrir no (Google Maps|Waze|Apple Maps)/ })).toBeVisible();
   await card.getByText("Mais opções do posto").click();
   await expect(card.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
   await expect(card.locator("details").filter({ hasText: "Sobre os dados deste posto" })).not.toHaveAttribute("open");

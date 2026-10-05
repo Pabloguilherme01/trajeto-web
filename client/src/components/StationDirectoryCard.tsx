@@ -61,7 +61,7 @@ export function StationDirectoryCard({
   distanceKm = null,
   onToggleSaved,
   prices = [],
-  catalogStatus = "unreconciled",
+  catalogStatus = "Não conciliado",
 }: {
   index: number;
   local?: LocalStationRecord | null;
@@ -129,6 +129,11 @@ export function StationDirectoryCard({
     : preferredProvider === "apple"
       ? buildAppleMapsDirectionsUrl(navigationValue)
       : buildGoogleMapsDestinationUrl(navigationValue, true);
+  const navigationProviderLabel = preferredProvider === "waze"
+    ? "Waze"
+    : preferredProvider === "apple"
+      ? "Apple Maps"
+      : "Google Maps";
 
   const copy = async (value: string) => {
     setActionError("");
@@ -218,7 +223,7 @@ export function StationDirectoryCard({
           <Route className="size-4" aria-hidden="true" />Ir até aqui
         </a>
         <a href={navigationUrl} target="_blank" rel="noopener noreferrer" className="task-action task-action-secondary gap-1.5">
-          <Navigation className="size-4 text-accent" aria-hidden="true" />Navegar
+          <Navigation className="size-4 text-accent" aria-hidden="true" />Abrir no {navigationProviderLabel}
         </a>
         {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="task-action task-action-secondary col-span-2"><Phone className="size-4" aria-hidden="true" />Ligar para o posto</a>}
       </div>
@@ -238,7 +243,7 @@ export function StationDirectoryCard({
       <details className="mt-2 rounded-xl border border-white/8 bg-white/[.02] px-3">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-black text-white/65">
           <span>Navegação preferida</span>
-          <span className="text-[#C9F7FF]">{preferredProvider === "waze" ? "Waze" : preferredProvider === "apple" ? "Apple Maps" : "Google Maps"}</span>
+          <span className="text-[#C9F7FF]">{navigationProviderLabel}</span>
         </summary>
         <div className="grid grid-cols-3 gap-2 border-t border-white/8 py-3">
           {(["google", "waze", "apple"] as const).map(provider => (
