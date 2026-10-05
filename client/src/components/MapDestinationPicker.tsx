@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import { COMMON_DESTINATION_QUICK_FILTERS } from "@/lib/quickFilterPresets";
 
 type Place = { id: string; name: string; address: string; category?: string; source?: string; coordinateKind?: string };
 export default function MapDestinationPicker({ items, value, label, onSelect }: {
@@ -16,14 +17,12 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
   const [active, setActive] = useState(0);
   const [category, setCategory] = useState("Todos");
   const categories = useMemo(() => [...new Set(items.map(item => mapPlaceSegment(item).label))].sort(), [items]);
-  const quickQueries = useMemo(() => [
-    { label: "UPA", value: "upa" },
-    { label: "Postos", value: "posto" },
-    { label: "Mercados", value: "mercado" },
-    { label: "Escolas", value: "escola" },
-    { label: "Prefeitura", value: "prefeitura" },
-    { label: "Shopping", value: "shopping" },
-  ].filter(option => items.some(item => matchesCatalogText(option.value, [item.name, item.address]))), [items]);
+  const quickQueries = useMemo(
+    () => COMMON_DESTINATION_QUICK_FILTERS.filter(option =>
+      items.some(item => matchesCatalogText(option.value, [item.name, item.address]))
+    ),
+    [items]
+  );
   const selected = items.find(item => item.id === value);
   const matches = useMemo(() => items.filter(item => (category === "Todos" || mapPlaceSegment(item).label === category) && matchesCatalogText(query, [item.name, item.address])), [items, query, category]);
   const visible = matches.slice(0, limit);

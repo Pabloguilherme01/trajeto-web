@@ -98,3 +98,18 @@ it("surfaces ready street-to-street trips from the offline atlas", () => {
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: destination.label } });
   expect(screen.getByRole("article", { name: origin.label + " → " + destination.label })).toBeTruthy();
 });
+
+
+it("aligns quick route filters with their destination category", () => {
+  render(<ReadyRouteShortcuts />); open();
+  const category = screen.getByRole("combobox", { name: "Tipo de destino" }) as HTMLSelectElement;
+  const search = screen.getByRole("searchbox") as HTMLInputElement;
+  fireEvent.click(screen.getByRole("button", { name: "Postos" }));
+  expect(search.value).toBe("posto");
+  expect(category.value).toBe("combustivel");
+  fireEvent.click(screen.getByRole("button", { name: "UPA" }));
+  expect(search.value).toBe("upa");
+  expect(category.value).toBe("saude");
+  fireEvent.change(category, { target: { value: "compras" } });
+  expect(search.value).toBe("");
+});
