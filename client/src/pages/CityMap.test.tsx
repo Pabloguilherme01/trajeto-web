@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
 const navigate = vi.hoisted(() => vi.fn());
@@ -81,12 +81,13 @@ it("filters education routes without mixing health or shopping destinations", ()
 it("keeps quick filters compatible when switching categories and street mode", () => {
   render(<CityMap />);
   const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
-  fireEvent.click(screen.getByRole("button", { name: "Postos" }));
+  const quickFilters = screen.getByRole("group", { name: "Filtros rápidos do mapa" });
+  fireEvent.click(within(quickFilters).getByRole("button", { name: "Postos" }));
   expect(search.value).toBe("posto");
   expect(screen.getByRole("button", { name: "Combustível" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
   expect(search.value).toBe("");
-  fireEvent.click(screen.getByRole("button", { name: "UPA" }));
+  fireEvent.click(within(quickFilters).getByRole("button", { name: "UPA" }));
   expect(search.value).toBe("upa");
   fireEvent.click(screen.getByRole("button", { name: "Ruas e avenidas" }));
   expect(search.value).toBe("");
