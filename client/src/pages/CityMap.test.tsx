@@ -39,9 +39,9 @@ it("filters accent-insensitive destinations and carries the selected destination
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "xxxxxxxxx" },
   });
-  expect(screen.getByRole("status").textContent).toContain(
-    "Nenhum destino encontrado"
-  );
+  expect(
+    screen.getByText("Nenhum destino encontrado. Tente outro nome ou categoria.")
+  ).toBeTruthy();
 });
 it("keeps the destination catalog usable offline without loading street maps", () => {
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
