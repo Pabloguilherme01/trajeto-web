@@ -685,7 +685,7 @@ export default function TileStationMap({
                 <button
                   key={stationKey(station)}
                   type="button"
-                  className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
+                  className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   style={{ left: position.left, top: position.top, zIndex: active ? 10 : 1 }}
                   onPointerDown={event => event.stopPropagation()}
                   onClick={() => {
@@ -842,7 +842,7 @@ export default function TileStationMap({
                   <button
                     type="button"
                     onClick={() => onPlanDestination(selected)}
-                    className="min-h-11 min-w-0 rounded-lg bg-primary px-2 text-xs font-black text-[#163840]"
+                    className="min-h-11 min-w-0 rounded-lg bg-primary px-2 text-xs font-black text-primary-foreground"
                   >
                     Planejar até aqui
                   </button>
