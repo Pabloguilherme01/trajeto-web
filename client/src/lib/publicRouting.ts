@@ -10,6 +10,7 @@ import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import { BUNDLED_CITY_ATLAS, resolveCityAtlasPoint, atlasDestinationReference, isAmbiguousAtlasStreet } from "@/lib/cityAtlas";
 import { requestOptionalMapboxRoute } from "@/lib/mapboxOptional";
 import { calculateOfflineRoadRoute } from "./offlineRoadRouting";
+import { isAguasLindasRoutePoint } from "./mapGeometry";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -460,7 +461,12 @@ function localGeocode(value: string): PublicCoordinate | null {
 
   const snapshotMatches = groupAnpFuelRows(getOfflineAnpSnapshot().rows).filter(
     row => {
-      if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
+      if (
+        !isAguasLindasRoutePoint({
+          lat: Number(row.latitude),
+          lng: Number(row.longitude),
+        })
+      )
         return false;
       const rowText = normalizeSearch(
         [row.cnpj, row.razaoSocial, row.endereco, row.bairro, row.municipio]
@@ -482,10 +488,11 @@ function localGeocode(value: string): PublicCoordinate | null {
   }
 
   const matches = searchAguasLindasStations(value);
-  const withCoordinates = matches.filter(
-    station =>
-      Number.isFinite(station.anp?.latitude) &&
-      Number.isFinite(station.anp?.longitude)
+  const withCoordinates = matches.filter(station =>
+    isAguasLindasRoutePoint({
+      lat: Number(station.anp?.latitude),
+      lng: Number(station.anp?.longitude),
+    })
   );
   const exact = withCoordinates.filter(station => {
     const stationText = normalizeSearch(
