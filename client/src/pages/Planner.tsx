@@ -1,6 +1,7 @@
 import PlannerLocationPicker from "@/components/PlannerLocationPicker";
 import { useLiveTrip } from "@/hooks/useLiveTrip";
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
+import QuickFilterChips from "@/components/QuickFilterChips";
 import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -58,6 +59,10 @@ function formatArrival(seconds: number | null | undefined) {
   if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
   return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
 }
+
+const PLANNER_QUICK_PLACES = LOCAL_ROUTE_PRESETS.filter(item =>
+  ["centro", "rodoviaria", "prefeitura", "upa", "heal", "aguas-lindas-shopping", "posto-ponteio"].includes(item.id)
+).map(item => ({ label: item.label, value: item.destination }));
 
 const destinationCategoryLabel: Record<RouteDestinationCategory, string> = {
   saude: "Saúde",
@@ -712,6 +717,13 @@ export default function Planner() {
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 shrink-0 place-items-center rounded-xl text-[#3DE3FF] hover:bg-[#3DE3FF]/10 focus-visible:outline-2 focus-visible:outline-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
+              <QuickFilterChips
+                label="Origens rápidas"
+                options={PLANNER_QUICK_PLACES}
+                value={origin}
+                onPick={value => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(value); }}
+                className="mt-2"
+              />
 
               <PlannerLocationPicker kind="origem" value={origin} onChoose={coordinate => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(coordinate); }} />
 
@@ -728,6 +740,13 @@ export default function Planner() {
                   <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
               </label>
+              <QuickFilterChips
+                label="Destinos rápidos"
+                options={PLANNER_QUICK_PLACES}
+                value={destination}
+                onPick={value => { resetResult(); setDestination(value); }}
+                className="mt-2"
+              />
 
               <PlannerLocationPicker kind="destino" value={destination} onChoose={coordinate => { resetResult(); setDestination(coordinate); }} />
 
