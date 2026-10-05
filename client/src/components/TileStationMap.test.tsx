@@ -113,6 +113,27 @@ it("tracks the actual viewport and keeps the selected station after catalog upda
   expect(screen.queryByRole("button", { name: "2D" })).toBeNull();
 });
 
+it("uses composited tile movement and asynchronous tile decoding", () => {
+  render(
+    <TileStationMap
+      stations={[
+        {
+          id: "a",
+          name: "Posto A",
+          address: "Rua A",
+          lat: -15.7545,
+          lng: -48.2816,
+        },
+      ]}
+    />
+  );
+  const layer = document.querySelector("[data-map-tile-layer]") as HTMLElement | null;
+  const tile = document.querySelector('img[src*="tile.openstreetmap.org"]') as HTMLImageElement | null;
+  expect(layer?.style.transform).toContain("translate3d");
+  expect(layer?.style.willChange).toBe("transform");
+  expect(tile?.getAttribute("decoding")).toBe("async");
+});
+
 it("sends only the site origin as referrer for public OSM tiles", () => {
   render(
     <TileStationMap
