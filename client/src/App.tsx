@@ -13,7 +13,6 @@ import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileBottomNav from "./components/MobileBottomNav";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import AccessibilityPanel from "./components/AccessibilityPanel";
-import SiteNavigation from "./components/SiteNavigation";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -103,7 +102,7 @@ export default function App() {
             <InstallAppPrompt />
             <PwaUpdatePrompt />
             <AccessibilityPanel />
-            <SiteNavigation />
+            <MobileBottomNav variant="desktop" />
             <MobileBottomNav />
             <AuthReturnHandler />
             <Router />
