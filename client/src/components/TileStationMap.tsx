@@ -232,18 +232,43 @@ export default function TileStationMap({
     return result;
   }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
 
-  const markerPositions = useMemo(() => {
-    const result = new Map<string, { left: number; top: number }>();
+  const markerWorldPixels = useMemo(() => {
+    const result = new Map<string, { x: number; y: number }>();
     for (const station of drawable) {
       const base = drawableWorld.get(stationKey(station));
       if (!base) continue;
       result.set(stationKey(station), {
-        left: width / 2 + base.x * zoomScale - centerPx.x,
-        top: height / 2 + base.y * zoomScale - centerPx.y,
+        x: base.x * zoomScale,
+        y: base.y * zoomScale,
       });
     }
     return result;
-  }, [drawable, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
+  }, [drawable, drawableWorld, zoomScale]);
+  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
+  const markerGroups = useMemo(
+    () =>
+      mapMarkerGroups(
+        drawable,
+        item => markerWorldPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
+        item =>
+          zoom >= 17 ||
+          stationKey(item) === selectedId ||
+          ["origin", "destination"].includes(item.id ?? "")
+      ),
+    [drawable, markerWorldPixels, selectedId, zoom]
+  );
+  const markerPositions = useMemo(() => {
+    const result = new Map<string, { left: number; top: number }>();
+    for (const station of markerGroups.singles) {
+      const world = markerWorldPixels.get(stationKey(station));
+      if (!world) continue;
+      result.set(stationKey(station), {
+        left: width / 2 + world.x - centerPx.x,
+        top: height / 2 + world.y - centerPx.y,
+      });
+    }
+    return result;
+  }, [markerGroups, markerWorldPixels, width, height, centerPx.x, centerPx.y]);
   const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
   const routeWorld = useMemo(
     () => routePoints.map(point => projectBase(point.lat, point.lng)),
@@ -385,23 +410,6 @@ export default function TileStationMap({
     setCenter({ lat: point.lat, lng: point.lng });
     setZoom(value => Math.max(15, value));
   };
-
-  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
-  const markerGroups = useMemo(
-    () =>
-      mapMarkerGroups(
-        drawable,
-        item => {
-          const p = markerPositions.get(stationKey(item));
-          return p ? { x: p.left, y: p.top } : { x: -100000, y: -100000 };
-        },
-        item =>
-          zoom >= 17 ||
-          stationKey(item) === selectedId ||
-          ["origin", "destination"].includes(item.id ?? "")
-      ),
-    [drawable, markerPositions, selectedId, zoom]
-  );
 
   const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= 5));
 
@@ -554,11 +562,16 @@ export default function TileStationMap({
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
-            {markerGroups.groups.filter(group => group.x >= -30 && group.x <= width + 30 && group.y >= -30 && group.y <= height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
-              setFollowing(false);
-              setCenter(unproject(centerPx.x + group.x - width / 2, centerPx.y + group.y - height / 2, zoom));
-              setZoom(value => Math.min(17, value + 2));
-            }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
+            {markerGroups.groups.map(group => {
+              const left = width / 2 + group.x - centerPx.x;
+              const top = height / 2 + group.y - centerPx.y;
+              if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
+              return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+                setFollowing(false);
+                setCenter(unproject(group.x, group.y, zoom));
+                setZoom(value => Math.min(17, value + 2));
+              }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left, top }}>{group.items.length}</button>;
+            })}
             {markerGroups.singles.map(station => {
               const position = markerPositions.get(stationKey(station));
               if (!position) return null;
