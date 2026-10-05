@@ -1,7 +1,9 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
 import QuickFilterChips from "./QuickFilterChips";
+
+afterEach(() => cleanup());
 
 it("renders accessible ready filters and returns the selected value", () => {
   const onPick = vi.fn();
