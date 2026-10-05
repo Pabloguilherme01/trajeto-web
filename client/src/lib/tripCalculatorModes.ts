@@ -1,4 +1,4 @@
-export type TripCalculatorModeId = "automatico" | "agora" | "bate-volta" | "trabalho" | "rotina" | "todo-dia";
+export type TripCalculatorModeId = "automatico" | "agora" | "bate-volta" | "rotina" | "tres-vezes" | "trabalho" | "trabalho-6x" | "todo-dia";
 export type TripCalculatorModeSelection = TripCalculatorModeId | "personalizado";
 
 export type TripCalculatorMode = {
@@ -34,11 +34,27 @@ export const TRIP_CALCULATOR_MODES: TripCalculatorMode[] = [
     recurring: false,
   },
   {
+    id: "tres-vezes",
+    label: "3x por semana",
+    detail: "Ida e volta, três vezes na semana.",
+    roundTrip: true,
+    tripsPerWeek: 3,
+    recurring: true,
+  },
+  {
     id: "trabalho",
     label: "Trabalho / estudo",
     detail: "Ida e volta, 5 vezes por semana.",
     roundTrip: true,
     tripsPerWeek: 5,
+    recurring: true,
+  },
+  {
+    id: "trabalho-6x",
+    label: "Trabalho 6x",
+    detail: "Ida e volta, seis vezes por semana.",
+    roundTrip: true,
+    tripsPerWeek: 6,
     recurring: true,
   },
   {

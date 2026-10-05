@@ -61,5 +61,5 @@ test("ready streets: selects a departure, calculates offline and keeps mobile ca
   await shortcuts.getByRole("button", { name: "Calcular Avenida JK → UPA", exact: true }).click();
   await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Avenida JK · referência no mapa, Águas Lindas de Goiás - GO");
   await expect(page.getByRole("region", { name: "Explorar mapa offline" })).toBeVisible();
-  await expect(page.getByText(/Estimativa local/).first()).toBeVisible();
+  await expect(page.getByText(/Rota viária offline|Estimativa local/).first()).toBeVisible();
 });

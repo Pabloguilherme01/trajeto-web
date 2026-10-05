@@ -316,8 +316,8 @@ describe("public routing fallback", () => {
     expect(payload.route.steps).toHaveLength(3);
   });
 
-  it("calculates a prepared city route in explicit offline mode without any network request", async () => {
-    const fetchMock = vi.fn();
+  it("calculates a prepared city route offline without external provider requests", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error("offline pack unavailable in unit test"));
     vi.stubGlobal("fetch", fetchMock);
 
     const route = await calculateOfflineRoute(
@@ -328,7 +328,7 @@ describe("public routing fallback", () => {
 
     expect(route.source).toBe("local-estimate");
     expect(route.destination).toEqual({ lat: -15.77665, lng: -48.27935 });
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock.mock.calls.every(([url]) => String(url).includes("aguas-lindas-offline-map.json"))).toBe(true);
   });
 
   it("reuses an address geocoded earlier when the device later needs an offline route", async () => {
@@ -701,13 +701,13 @@ describe("public routing fallback", () => {
 });
 
 
-it("calculates an offline route to an explicitly selected bundled street midpoint without querying a provider", async () => {
-  const fetch = vi.fn();
+it("calculates an offline route to an explicitly selected bundled street midpoint without querying an external provider", async () => {
+  const fetch = vi.fn().mockRejectedValue(new Error("offline pack unavailable in unit test"));
   vi.stubGlobal("fetch", fetch);
   const route = await calculateOfflineRoute("-15.7545,-48.2816", "-15.7372345, -48.2804074");
   expect(route.destination).toEqual({ lat: -15.7372345, lng: -48.2804074 });
   expect(route.source).toBe("local-estimate");
-  expect(fetch).not.toHaveBeenCalled();
+  expect(fetch.mock.calls.every(([url]) => String(url).includes("aguas-lindas-offline-map.json"))).toBe(true);
 });
 
 it("does not turn a numbered street address into the bundled street midpoint", async () => {

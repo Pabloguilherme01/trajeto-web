@@ -254,7 +254,7 @@ test("Pages: prepared endpoints support new offline trips in every mode and coor
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
-    await expect(page.getByText("Estimativa em linha reta · sem curvas confirmadas")).toBeVisible();
+    await expect(page.getByText(/Trajeto calculado na malha salva|Estimativa em linha reta/)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
   await page.getByRole("button", { name: "Ocultar referências", exact: true }).click();

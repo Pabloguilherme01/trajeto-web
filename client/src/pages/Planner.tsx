@@ -380,9 +380,11 @@ export default function Planner() {
             ? offlineMode || !online
               ? "Estimativa offline entre os locais escolhidos, em linha reta. Não fornece curvas pelas ruas; uma rota já preparada preserva o trajeto e as instruções."
               : "Rota estimada localmente. A navegação externa deve ser usada para o trajeto e trânsito atualizados."
-            : publicRoute.source === "mapbox"
-              ? "Rota inteligente calculada com Mapbox; no carro, o tempo pode considerar o trânsito disponível."
-              : "Rota calculada no próprio Trajeto com a rede viária pública.";
+            : publicRoute.source === "offline-road"
+              ? "Rota calculada no mapa viário offline salvo neste aparelho, sem depender de um roteador externo. Confirme a sinalização porque sentidos, bloqueios e obras podem mudar."
+              : publicRoute.source === "mapbox"
+                ? "Rota inteligente calculada com Mapbox; no carro, o tempo pode considerar o trânsito disponível."
+                : "Rota calculada no próprio Trajeto com a rede viária pública.";
         const autoSaved = originPrivate
           ? false
           : await persistRouteLocally(publicPayload, resolvedOrigin, to);
@@ -441,7 +443,11 @@ export default function Planner() {
         const saved = await persistRouteLocally(result, from, to);
         if (version !== requestVersion.current) return;
         setSavedMessage("Servidor indisponível. " +
-          (route.source === "local-estimate" ? "Usando estimativa local, sem trânsito ao vivo." : "Usando rota da rede viária pública.") +
+          (route.source === "local-estimate"
+            ? "Usando estimativa local, sem trânsito ao vivo."
+            : route.source === "offline-road"
+              ? "Usando a malha viária offline salva no aparelho."
+              : "Usando rota da rede viária pública.") +
           (saved ? " Cópia offline criada automaticamente." : ""));
         vibration(14);
       } catch {
@@ -648,7 +654,7 @@ export default function Planner() {
   const publicRouteSource = planned
     ? (
         planned.route as typeof planned.route & {
-          source?: "mapbox" | "osrm" | "local-estimate";
+          source?: "mapbox" | "osrm" | "offline-road" | "local-estimate";
           steps?: Array<{
             instruction: string;
             name?: string;
@@ -1254,9 +1260,11 @@ export default function Planner() {
                 <div className="mt-3 grid gap-2 text-xs leading-relaxed text-white/45">
                   <p>Fonte da rota: {publicRouteSource === "local-estimate"
                     ? "estimativa local baseada nas coordenadas"
-                    : staticRuntime
-                      ? "rede viária OpenStreetMap/OSRM, calculada no navegador"
-                      : "serviço de rota do Trajeto"}.</p>
+                    : publicRouteSource === "offline-road"
+                      ? "malha viária OpenStreetMap salva para uso offline"
+                      : staticRuntime
+                        ? "rede viária OpenStreetMap/OSRM, calculada no navegador"
+                        : "serviço de rota do Trajeto"}.</p>
                   <p>Referências de preço, quando presentes, são identificadas separadamente e têm data de coleta própria.</p>
                   <p>Tempo de chegada é uma estimativa calculada a partir da duração retornada; a navegação ao vivo fica sob responsabilidade do app externo escolhido.</p>
                 </div>

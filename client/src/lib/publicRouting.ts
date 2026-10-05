@@ -9,6 +9,7 @@ import { getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import { BUNDLED_CITY_ATLAS, resolveCityAtlasPoint, atlasDestinationReference, isAmbiguousAtlasStreet } from "@/lib/cityAtlas";
 import { requestOptionalMapboxRoute } from "@/lib/mapboxOptional";
+import { calculateOfflineRoadRoute } from "./offlineRoadRouting";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -36,7 +37,7 @@ let geocoderUnavailableUntilFallback = 0;
 let routerUnavailableUntilFallback = 0;
 
 export type PublicCoordinate = { lat: number; lng: number };
-export type PublicRouteSource = "mapbox" | "osrm" | "local-estimate";
+export type PublicRouteSource = "mapbox" | "osrm" | "offline-road" | "local-estimate";
 export type PublicTravelMode = "driving" | "walking" | "cycling" | "transit";
 export type PublicRouteStep = {
   instruction: string;
@@ -368,7 +369,7 @@ function isPublicRoute(value: unknown): value is PublicRoute {
     route.durationSeconds > 0 &&
     typeof route.polyline === "string" &&
     route.polyline.length > 0 &&
-    ["mapbox", "osrm", "local-estimate"].includes(route.source) &&
+    ["mapbox", "osrm", "offline-road", "local-estimate"].includes(route.source) &&
     ["driving", "walking", "cycling", "transit"].includes(route.mode)
   );
 }
@@ -711,6 +712,26 @@ function osrmInstruction(
   return street ? "Siga por " + street : "Continue no trajeto";
 }
 
+async function buildOfflineRoadResult(
+  origin: PublicCoordinate,
+  destination: PublicCoordinate,
+  mode: PublicTravelMode
+): Promise<PublicRoute | null> {
+  if (mode === "transit") return null;
+  const route = await calculateOfflineRoadRoute(origin, destination, mode).catch(() => null);
+  if (!route) return null;
+  return {
+    origin,
+    destination,
+    distanceMeters: route.distanceMeters,
+    durationSeconds: route.durationSeconds,
+    polyline: encodePolyline(route.points),
+    source: "offline-road",
+    mode,
+    steps: route.steps,
+  };
+}
+
 function buildLocalEstimate(
   origin: PublicCoordinate,
   destination: PublicCoordinate,
@@ -796,6 +817,7 @@ export async function calculateOfflineRoute(
     isPublicRoute(cachedRoute) &&
     (cachedRoute.source !== "osrm" || mode === "driving") &&
     mode !== "transit" &&
+    cachedRoute.source !== "local-estimate" &&
     cachedRoute.mode === mode &&
     Math.abs(cachedRoute.origin.lat - origin.lat) < 0.00002 &&
     Math.abs(cachedRoute.origin.lng - origin.lng) < 0.00002 &&
@@ -809,6 +831,12 @@ export async function calculateOfflineRoute(
     throw new Error(
       "Origem e destino parecem ser o mesmo ponto. Escolha locais diferentes."
     );
+  }
+
+  const offlineRoad = await buildOfflineRoadResult(origin, destination, mode);
+  if (offlineRoad) {
+    cacheSet(cachedRouteKey, offlineRoad);
+    return offlineRoad;
   }
 
   return buildLocalEstimate(origin, destination, mode);
@@ -899,7 +927,10 @@ export async function calculatePublicRoute(
     (cached.source === "mapbox" || cached.source === "osrm" || offline)
   )
     return cached;
-  if (offline) return buildLocalEstimate(origin, destination, mode);
+  if (offline) {
+    const offlineRoad = await buildOfflineRoadResult(origin, destination, mode);
+    return offlineRoad ?? buildLocalEstimate(origin, destination, mode);
+  }
 
   const existing = routerInFlight.get(coordinateKey);
   if (existing) return existing;
@@ -1050,6 +1081,7 @@ function publicDurationLabel(seconds: number) {
 
 export function buildPublicRoutePayload(result: PublicRoute) {
   const estimated = result.source === "local-estimate";
+  const offlineRoad = result.source === "offline-road";
   const mapbox = result.source === "mapbox";
   return {
     searchId: null,
@@ -1064,7 +1096,9 @@ export function buildPublicRoutePayload(result: PublicRoute) {
       polyline: result.polyline,
       summary: estimated
         ? "Estimativa local baseada nas coordenadas disponíveis para o modo selecionado."
-        : mapbox
+        : offlineRoad
+          ? "Rota calculada no mapa viário offline salvo neste aparelho."
+          : mapbox
           ? result.mode === "driving"
             ? "Rota Mapbox calculada com perfil de direção sensível ao trânsito disponível."
             : "Rota viária calculada com Mapbox."
@@ -1079,14 +1113,18 @@ export function buildPublicRoutePayload(result: PublicRoute) {
     traffic: {
       label: estimated
         ? "Estimativa local"
-        : mapbox && result.mode === "driving"
+        : offlineRoad
+          ? "Rota viária offline"
+          : mapbox && result.mode === "driving"
           ? "Tempo com trânsito Mapbox"
           : "Trânsito ao vivo não disponível",
       detail: estimated
         ? result.mode === "transit"
           ? "Estimativa de deslocamento sem linhas, horários, espera ou conexões confirmados. Consulte o operador de transporte antes de sair."
           : "Distância e tempo são estimados a partir das coordenadas disponíveis; não confirmam ruas ou caminhos adequados ao modo selecionado. Use a navegação externa para conferir o trajeto atualizado."
-        : mapbox && result.mode === "driving"
+        : offlineRoad
+          ? "Traçado calculado na malha viária OpenStreetMap salva no aparelho. Sentidos de via, bloqueios, obras e trânsito podem ter mudado; siga a sinalização local."
+          : mapbox && result.mode === "driving"
           ? "O tempo da rota usa o perfil driving-traffic do Mapbox quando essa camada opcional está configurada."
           : mapbox
             ? "A geometria foi calculada pelo Mapbox; o modo selecionado não usa trânsito ao vivo."
