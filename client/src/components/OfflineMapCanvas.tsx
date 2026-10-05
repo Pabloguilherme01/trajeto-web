@@ -119,31 +119,37 @@ export default function OfflineMapCanvas({
   gestureZoom.current = zoom;
   const gestureStarted = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
-  const validMarkers = markers.filter(isMapPoint);
-  const validGeometry = routePoints.filter(isMapPoint);
-  const stride = Math.max(1, Math.ceil(validGeometry.length / 6000));
-  const geometry =
-    stride === 1
+  const validMarkers = useMemo(() => markers.filter(isMapPoint), [markers]);
+  const validGeometry = useMemo(() => routePoints.filter(isMapPoint), [routePoints]);
+  const geometry = useMemo(() => {
+    const stride = Math.max(1, Math.ceil(validGeometry.length / 6000));
+    return stride === 1
       ? validGeometry
       : [
           ...validGeometry.filter((_, i) => i % stride === 0),
           validGeometry[validGeometry.length - 1],
         ];
+  }, [validGeometry]);
   // Nearby references must not zoom the trip out beyond its endpoints.
-  const tripMarkers = validMarkers.filter(
-    p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
+  const anchors = useMemo(() => {
+    const tripMarkers = validMarkers.filter(
+      p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
+    );
+    return tripMarkers.length
+      ? tripMarkers
+      : validMarkers.filter(
+          p => p.id !== "live-position" && p.id !== "device-location"
+        );
+  }, [validMarkers, geometry.length]);
+  const fingerprint = useMemo(
+    () =>
+      (anchors.length || geometry.length ? anchors : validMarkers)
+        .map(p => `${p.id}:${p.lat}:${p.lng}`)
+        .join("|") +
+      ":" +
+      geometry.map(p => `${p.lat}:${p.lng}`).join("|"),
+    [anchors, geometry, validMarkers]
   );
-  const anchors = tripMarkers.length
-    ? tripMarkers
-    : validMarkers.filter(
-        p => p.id !== "live-position" && p.id !== "device-location"
-      );
-  const fingerprint =
-    (anchors.length || geometry.length ? anchors : validMarkers)
-      .map(p => `${p.id}:${p.lat}:${p.lng}`)
-      .join("|") +
-    ":" +
-    geometry.map(p => `${p.lat}:${p.lng}`).join("|");
   useEffect(() => {
     setPan({ x: 0, y: 0 });
     pointers.current.clear();
@@ -173,8 +179,14 @@ export default function OfflineMapCanvas({
   useEffect(() => {
     const el = viewport.current;
     if (!el) return;
-    const measure = () =>
-      setSize({ width: el.clientWidth || 320, height: el.clientHeight || 360 });
+    const measure = () => {
+      const next = { width: el.clientWidth || 320, height: el.clientHeight || 360 };
+      setSize(current =>
+        current.width === next.width && current.height === next.height
+          ? current
+          : next
+      );
+    };
     measure();
     const observer =
       typeof ResizeObserver !== "undefined"
@@ -228,30 +240,57 @@ export default function OfflineMapCanvas({
       y: -(point.y - camera.y) * camera.scale,
     });
   }, [followPoint?.lat, followPoint?.lng, camera]);
+  const markerWorld = useMemo(() => {
+    const result = new Map<string, { x: number; y: number }>();
+    for (const marker of validMarkers) result.set(marker.id, world(marker));
+    return result;
+  }, [validMarkers]);
+  const baseProject = (point: OfflineMapMarker) => {
+    const p = markerWorld.get(point.id) ?? world(point);
+    return {
+      x: size.width / 2 + (p.x - camera.x) * camera.scale,
+      y: size.height / 2 + (p.y - camera.y) * camera.scale,
+    };
+  };
   const project = (point: MapPoint) => {
-    const p = world(point);
+    const p = "id" in point && typeof point.id === "string"
+      ? markerWorld.get(point.id) ?? world(point)
+      : world(point);
     return {
       x: size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
       y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
     };
   };
   // Only supporting references are suppressed; trip endpoints and GPS remain selectable.
-  const occupied = validMarkers
-    .filter(marker => !marker.isReference)
-    .map(project);
-  const displayedMarkers = validMarkers.filter(marker => {
-    if (!marker.isReference) return true;
-    const point = project(marker);
-    if (
-      occupied.some(
-        other => Math.hypot(point.x - other.x, point.y - other.y) < 44
+  const displayedMarkers = useMemo(() => {
+    const occupied = validMarkers
+      .filter(marker => !marker.isReference)
+      .map(baseProject);
+    return validMarkers.filter(marker => {
+      if (!marker.isReference) return true;
+      const point = baseProject(marker);
+      if (
+        occupied.some(
+          other => Math.hypot(point.x - other.x, point.y - other.y) < 44
+        )
       )
-    )
-      return false;
-    occupied.push(point);
-    return true;
-  });
-  const markerGroups = mapMarkerGroups(displayedMarkers, project, marker => zoom >= 6 || marker.id === selectedMarkerId || ["origin", "destination", "live-position", "device-location"].includes(marker.id));
+        return false;
+      occupied.push(point);
+      return true;
+    });
+  }, [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]);
+  const markerGroups = useMemo(
+    () =>
+      mapMarkerGroups(
+        displayedMarkers,
+        baseProject,
+        marker =>
+          zoom >= 6 ||
+          marker.id === selectedMarkerId ||
+          ["origin", "destination", "live-position", "device-location"].includes(marker.id)
+      ),
+    [displayedMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height, zoom, selectedMarkerId]
+  );
   const geometryPath = useMemo(
     () =>
       geometry
@@ -547,12 +586,12 @@ export default function OfflineMapCanvas({
             })}
 
         </svg>
-        {markerGroups.groups.filter(group => group.x >= -30 && group.x <= size.width + 30 && group.y >= -30 && group.y <= size.height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+        {markerGroups.groups.filter(group => group.x + pan.x >= -30 && group.x + pan.x <= size.width + 30 && group.y + pan.y >= -30 && group.y + pan.y <= size.height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
           onManualInteraction?.();
           const next = Math.min(6, zoom * 1.8);
-          setPan({ x: -(group.x - size.width / 2 - pan.x) * next / zoom, y: -(group.y - size.height / 2 - pan.y) * next / zoom });
+          setPan({ x: -(group.x - size.width / 2) * next / zoom, y: -(group.y - size.height / 2) * next / zoom });
           onZoom(next);
-        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
+        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x + pan.x, top: group.y + pan.y }}>{group.items.length}</button>)}
         {markerGroups.singles.map(marker => {
           const p = project(marker);
           return (
