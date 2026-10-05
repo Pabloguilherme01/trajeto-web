@@ -227,7 +227,7 @@ export default function PublicServices() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="premium-surface visual-shell min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -268,7 +268,7 @@ export default function PublicServices() {
         <section
           id="emergency-strip"
           tabIndex={-1}
-          className="mt-5 scroll-mt-20 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3 outline-none"
+          className="premium-card mt-5 scroll-mt-20 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3 outline-none"
           aria-labelledby="emergency-strip-title"
         >
           <div className="flex items-center justify-between gap-3">
@@ -309,14 +309,14 @@ export default function PublicServices() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
+        <section className="premium-card mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
           <form
             onSubmit={event => {
               event.preventDefault();
               applyFilters(query, category);
               inputRef.current?.blur();
             }}
-            className="flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3"
+            className="premium-search flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3"
           >
             <MapPinned className="size-4 shrink-0 text-[#C7FF3C]" />
             <input
@@ -412,7 +412,7 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="min-h-20 min-w-0 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/5 p-3 text-left"
+                    className="premium-card min-h-20 min-w-0 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/5 p-3 text-left"
                   >
                     <span className="block text-sm font-bold text-white">
                       {shortcut.label}
@@ -466,7 +466,7 @@ export default function PublicServices() {
                 id={"service-" + service.id}
                 tabIndex={-1}
                 aria-current={selectedService?.id === service.id ? "true" : undefined}
-                className="route-card scroll-mt-20 rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4 outline-none"
+                className="premium-card route-card scroll-mt-20 rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4 outline-none"
               >
                 <div className="flex items-start gap-3">
                   <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#3DE3FF]">
@@ -614,7 +614,7 @@ export default function PublicServices() {
         </section>
 
         {!results.length && (
-          <section className="mt-5 rounded-3xl border border-white/8 bg-[#121B22] p-6 text-center">
+          <section className="premium-card mt-5 rounded-3xl border border-white/8 bg-[#121B22] p-6 text-center">
             <p className="text-sm font-black">
               {savedOnly && !favoriteCount
                 ? "Nenhum serviço salvo ainda."
@@ -639,7 +639,7 @@ export default function PublicServices() {
           </section>
         )}
 
-        <section className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-4">
+        <section className="premium-card mt-5 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-4">
           <div className="flex items-start gap-3">
             {online ? (
               <Building2 className="mt-0.5 size-4 text-[#C7FF3C]" />
