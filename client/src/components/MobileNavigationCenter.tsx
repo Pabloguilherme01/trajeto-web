@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getNavigationPreferences, saveNavigationPreferences, type NavigationProvider } from "@/lib/navigationPreferences";
+import { getNavigationPreferences, saveNavigationPreferences, setNavigationPreference, type NavigationProvider } from "@/lib/navigationPreferences";
 import RouteIntelligenceCard from "./RouteIntelligenceCard";
 import { supportsLiveRouting } from "@/lib/runtimeCapabilities";
 import { CheckCircle2, Fuel, Navigation, RefreshCw, Route, Save, Share2, WifiOff, Map, Plus, X } from "lucide-react";
@@ -149,7 +149,7 @@ export default function MobileNavigationCenter({
           <p className="text-xs font-black text-white">Preferência da viagem</p>
           <p className="mt-1 text-[0.62rem] text-muted-foreground">O navegador escolhido calcula o trânsito e a rota atual.</p>
           <div className="mt-2 grid grid-cols-3 gap-1.5">
-            {(["default","avoid-tolls","avoid-highways"] as const).map(value => <button key={value} type="button" onClick={() => setRoutePreference(value)} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (routePreference === value ? "bg-primary text-background" : "bg-white/[.06] text-white/70")}>{value === "default" ? "Equilibrada" : value === "avoid-tolls" ? "Evitar pedágios" : "Evitar rodovias"}</button>)}
+            {(["default","avoid-tolls","avoid-highways"] as const).map(value => <button key={value} type="button" onClick={() => { setRoutePreference(value); setNavigationPreference(value); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (routePreference === value ? "bg-primary text-background" : "bg-white/[.06] text-white/70")}>{value === "default" ? "Equilibrada" : value === "avoid-tolls" ? "Evitar pedágios" : "Evitar rodovias"}</button>)}
           </div>
           <div className="mt-2 grid grid-cols-3 gap-1.5">
             {(["google","waze","apple"] as const).map(provider => <button key={provider} type="button" onClick={() => { setPreferredProvider(provider); saveNavigationPreferences({ provider, preference: routePreference }); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (preferredProvider === provider ? "bg-white text-background" : "bg-white/[.06] text-white/70")}>{provider === "google" ? "Google" : provider === "waze" ? "Waze" : "Apple"}</button>)}
