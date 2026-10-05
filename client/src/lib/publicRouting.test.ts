@@ -106,6 +106,29 @@ describe("public routing fallback", () => {
     ).toHaveLength(1);
   });
 
+  it("bounds explicitly local geocoding and rejects a provider result outside the city region", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify([{ lat: "-15.7942", lon: "-47.8822" }]),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      calculatePublicRoute(
+        "-15.7545,-48.2816",
+        "Rua inexistente, Águas Lindas de Goiás, GO"
+      )
+    ).rejects.toThrow(/não foi possível localizar/i);
+
+    const geocoderUrl = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(geocoderUrl.searchParams.get("bounded")).toBe("1");
+    expect(geocoderUrl.searchParams.get("viewbox")).toBe(
+      "-48.7,-15.3,-47.9,-16.1"
+    );
+  });
+
   it("uses at most one public geocoder request for an unknown destination", async () => {
     const fetchMock = vi
       .fn()
