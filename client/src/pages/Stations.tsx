@@ -4,7 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -1146,7 +1146,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                           {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
                         </div>
                         <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
-                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => openExternalUrl("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude)} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
+                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => openExternalUrl(buildGoogleMapsDirectionsUrl("", station.latitude + "," + station.longitude, "driving", true))} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
                         {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
                       </div>
                     </details>
