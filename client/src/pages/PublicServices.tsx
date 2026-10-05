@@ -242,25 +242,25 @@ export default function PublicServices() {
               Serviços e locais públicos essenciais já ficam incorporados ao
               app. O catálogo básico funciona sem depender de consulta online.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
-                {PUBLIC_SERVICES.length} registros públicos
+            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
+                {PUBLIC_SERVICES.length} serviços
               </span>
-              <span className="rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
-                6 categorias
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
+                {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
               </span>
-              <span className="rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
-                offline por padrão
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
+                funciona offline
               </span>
-              <span className="rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/65">
-                Confira contatos e horários na fonte oficial
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/65">
+                confirme na fonte oficial
               </span>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setLocation(appUrl("/"))}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-border/10 px-3 text-xs font-black text-foreground/70"
+            className="hidden min-h-11 shrink-0 items-center justify-center rounded-xl border border-border/10 px-3 text-xs font-black text-foreground/70 sm:inline-flex"
           >
             Início
           </button>
@@ -288,7 +288,7 @@ export default function PublicServices() {
               precisa de rede telefônica
             </span>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
             {[
               { label: "Polícia", number: "190" },
               { label: "SAMU", number: "192" },
@@ -298,7 +298,7 @@ export default function PublicServices() {
               <a
                 key={item.label}
                 href={phoneHref(item.number) ?? "#"}
-                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-sm font-bold text-foreground/80 transition hover:border-warning/30 hover:text-foreground"
+                className="inline-flex min-h-16 w-[8.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-sm font-bold text-foreground/80 transition hover:border-warning/30 hover:text-foreground sm:w-auto sm:shrink"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Phone className="size-3.5 shrink-0 text-warning" />
