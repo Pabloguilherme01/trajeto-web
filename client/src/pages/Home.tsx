@@ -206,7 +206,7 @@ export default function Home() {
           </p>
           </div>
           <button type="button" onClick={() => setLocation(appUrl("/mapa"))}
-            className="city-explore-card" aria-label="Explorar mapa da cidade">
+            className="city-explore-card" aria-label="Abrir mapa da cidade">
             <span className="city-explore-art" aria-hidden="true"><Map className="size-14" /><span className="city-explore-pin"><MapPin className="size-5" /></span></span>
             <span className="min-w-0 flex-1"><span className="block text-xs font-bold uppercase tracking-widest text-accent">Explore a cidade</span><span className="mt-1 block text-lg font-black text-white">Seu próximo destino</span><span className="mt-1 block text-sm leading-relaxed text-white/70">Veja lugares e trajetos no mapa.</span></span>
             <ArrowRight className="size-5 shrink-0 text-accent" aria-hidden="true" />
