@@ -291,6 +291,18 @@ export default function OfflineMapCanvas({
       ),
     [displayedMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height, zoom, selectedMarkerId]
   );
+  const markerCollisionPoints = useMemo(
+    () =>
+      validMarkers.flatMap(marker => {
+        const point = markerWorld.get(marker.id);
+        if (!point) return [];
+        return [{
+          x: size.width / 2 + (point.x - camera.x) * camera.scale,
+          y: size.height / 2 + (point.y - camera.y) * camera.scale,
+        }];
+      }),
+    [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
+  );
   const geometryPath = useMemo(
     () =>
       geometry
@@ -539,34 +551,32 @@ export default function OfflineMapCanvas({
             )
             .map(road => {
               const p = road.world[Math.floor(road.world.length / 2)];
-              const x =
-                  size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
-                y = size.height / 2 + (p.y - camera.y) * camera.scale + pan.y;
+              const baseX = size.width / 2 + (p.x - camera.x) * camera.scale;
+              const baseY = size.height / 2 + (p.y - camera.y) * camera.scale;
+              const x = baseX + pan.x;
+              const y = baseY + pan.y;
               const text = road.name.slice(0, 42);
               const width = text.length * 6.5 + 12;
               if (
                 labels.has(road.name) ||
-                labelBoxes.some(
-                  box =>
-                    Math.abs(box.y - y) < 22 &&
-                    Math.abs(box.x - x) < (box.width + width) / 2
-                ) ||
-                validMarkers.some(marker => {
-                  const point = project(marker);
-                  return (
-                    Math.abs(point.y - y) < 30 &&
-                    Math.abs(point.x - x) < width / 2 + 24
-                  );
-                }) ||
                 labels.size >= (showAllStreetNames ? 140 : 60) ||
                 x < width / 2 + 8 ||
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
-                y > size.height - 40
+                y > size.height - 40 ||
+                labelBoxes.some(
+                  box =>
+                    Math.abs(box.y - baseY) < 22 &&
+                    Math.abs(box.x - baseX) < (box.width + width) / 2
+                ) ||
+                markerCollisionPoints.some(point =>
+                  Math.abs(point.y - baseY) < 30 &&
+                  Math.abs(point.x - baseX) < width / 2 + 24
+                )
               )
                 return null;
               labels.add(road.name);
-              labelBoxes.push({ x, y, width });
+              labelBoxes.push({ x: baseX, y: baseY, width });
               return (
                 <text
                   key={road.id}
