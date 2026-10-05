@@ -34,6 +34,7 @@ it("clears a typed map search with one touch", () => {
   expect(input.value).toBe("odisseia");
   fireEvent.click(screen.getByRole("button", { name: "Limpar busca de lugares" }));
   expect(input.value).toBe("");
+  expect(document.activeElement).toBe(input);
   expect(screen.getAllByRole("option")).toHaveLength(3);
 });
 
