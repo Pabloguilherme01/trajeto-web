@@ -190,7 +190,7 @@ function ResultCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-20 min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30 active:scale-[.99]"
+      className="premium-card flex min-h-20 min-w-0 items-center gap-3 rounded-2xl p-3 text-left active:scale-[.99]"
     >
       <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
         <Icon className="size-5" />
@@ -340,7 +340,7 @@ export default function SearchPage() {
         type="button"
         aria-label={action.label}
         onClick={() => openQuick(action)}
-        className="flex min-h-20 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#121B22] p-3 text-left transition hover:border-[#C7FF3C]/30"
+        className="premium-card flex min-h-20 min-w-0 items-center gap-2 rounded-2xl p-3 text-left"
       >
         <Icon className="size-5 shrink-0 text-[#C7FF3C]" />
         <span className="min-w-0">
@@ -356,7 +356,7 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] w-full min-w-0 bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="premium-surface visual-shell min-h-[100dvh] w-full min-w-0 bg-[#0B1014] pb-28 text-white md:pb-12">
       <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pt-5 sm:px-8 sm:pt-8">
         <header>
           <p className="text-xs font-bold uppercase tracking-[.12em] text-[#C7FF3C]">
@@ -372,7 +372,7 @@ export default function SearchPage() {
         </header>
         <form
           onSubmit={submit}
-          className="mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#121B22] px-3"
+          className="premium-search mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#121B22] px-3"
         >
           <SearchIcon className="size-5 shrink-0 text-[#C7FF3C]" />
           <input
@@ -625,7 +625,7 @@ export default function SearchPage() {
               </button>
             )}
             <section
-              className="rounded-2xl border border-white/10 bg-[#121B22] p-4"
+              className="premium-card rounded-2xl border border-white/10 bg-[#121B22] p-4"
               aria-label="Ajuda para encontrar"
             >
               <p className="text-sm leading-relaxed text-white/80">
