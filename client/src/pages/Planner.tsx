@@ -309,8 +309,8 @@ export default function Planner() {
       setError("Para recalcular a partir da sua posição, toque em usar localização atual.");
       return;
     }
-    if (!staticRuntime && from.length < 3) {
-      setError("Preencha a origem com pelo menos 3 caracteres.");
+    if (from.length < 3 && (offlineMode || !online)) {
+      setError("Para calcular sem internet, informe uma origem local já conhecida ou abra uma rota salva neste aparelho.");
       return;
     }
     if (from && from.toLocaleLowerCase("pt-BR") === to.toLocaleLowerCase("pt-BR")) {
@@ -335,6 +335,7 @@ export default function Planner() {
 
     if (
       staticRuntime ||
+      from.length < 3 ||
       mode !== "driving" ||
       originPrivate ||
       offlineMode ||
@@ -1111,9 +1112,9 @@ export default function Planner() {
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent"><Navigation className="size-5" /></div>
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[.15em] text-accent">Navegação pronta</p>
-                <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">{staticRuntime ? "Sua rota está pronta para abrir." : "O serviço de cálculo não respondeu, mas sua viagem não ficou travada."}</h2>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{staticRuntime ? "O site público prepara a viagem sem fingir um cálculo próprio. Ao escolher o navegador, ele recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "Nenhuma distância, tempo ou pedágio foi inventado. Para manter a informação correta, o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-accent">Navegação externa</p>
+                <h2 id="navigation-fallback-title" className="mt-1 text-lg font-black">Navegação pronta.</h2>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{staticRuntime ? "Sua rota está pronta para abrir. O site público prepara a viagem sem fingir um cálculo próprio; o navegador escolhido recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "O cálculo interno não está disponível para esta partida, mas sua viagem não ficou travada. Nenhuma distância, tempo ou pedágio foi inventado; o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
             <div className={"mt-4 grid grid-cols-1 gap-2 " + (mode === "driving" ? "sm:grid-cols-3" : "")}>
