@@ -357,6 +357,7 @@ export default function PublicServices() {
           </form>
 
           <div
+            role="group"
             className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label="Categorias de serviços"
           >
