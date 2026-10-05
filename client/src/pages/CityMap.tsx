@@ -232,7 +232,7 @@ export default function CityMap() {
           <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
           <input
             id="city-map-search"
-            type="search"
+            type="text"
             aria-label="Buscar destino no mapa"
             aria-describedby="city-search-help"
             value={query}
