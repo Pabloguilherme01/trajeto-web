@@ -1,4 +1,6 @@
 import { privateOriginForExternalNavigation, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { getNavigationPreferences, setNavigationProvider, type NavigationPreference, type NavigationProvider } from "@/lib/navigationPreferences";
+export type { NavigationProvider } from "@/lib/navigationPreferences";
 
 export function isStandaloneApp() {
   if (typeof window === "undefined") return false;
@@ -121,7 +123,7 @@ export function buildWazeNavigationUrl(destination: string, coordinates?: { lat:
   return "https://waze.com/ul?" + params.toString();
 }
 
-export type RoutePreference = "default" | "avoid-tolls" | "avoid-highways";
+export type RoutePreference = NavigationPreference;
 
 export function buildAppleMapsDirectionsUrl(
   destination: string,
@@ -144,18 +146,12 @@ export function openExternalUrl(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-export type NavigationProvider = "google" | "waze" | "apple";
-
 export function setPreferredNavigationProvider(provider: NavigationProvider) {
-  try { localStorage.setItem("trajeto:navigation-provider", provider); } catch {}
+  setNavigationProvider(provider);
 }
 
 export function getPreferredNavigationProvider(): NavigationProvider {
-  try {
-    const value = localStorage.getItem("trajeto:navigation-provider");
-    if (value === "waze" || value === "apple" || value === "google") return value;
-  } catch {}
-  return "google";
+  return getNavigationPreferences().provider;
 }
 
 export function openNavigation(lat: number, lng: number, label?: string) {

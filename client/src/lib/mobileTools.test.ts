@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, openExternalUrl, shareText } from "./mobileTools";
+import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, openExternalUrl, setPreferredNavigationProvider, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -98,6 +98,21 @@ describe("mobile tools", () => {
 
   it("keeps 99 on its verified public entrypoint without inventing private destination parameters", () => {
     expect(build99MobilityUrl("Posto Exemplo, Águas Lindas de Goiás")).toBe("https://99app.com/");
+  });
+
+  it("keeps legacy provider helpers synchronized with shared preferences", () => {
+    const data = new Map<string, string>();
+    const localStorage = {
+      getItem: vi.fn((key: string) => data.get(key) ?? null),
+      setItem: vi.fn((key: string, value: string) => { data.set(key, value); }),
+    };
+    vi.stubGlobal("window", { localStorage });
+
+    setPreferredNavigationProvider("waze");
+
+    expect(getPreferredNavigationProvider()).toBe("waze");
+    expect(JSON.parse(data.get("trajeto-navigation-preferences") || "{}").provider).toBe("waze");
+    vi.unstubAllGlobals();
   });
 
   it("opens external URLs through one safe browser boundary", () => {
