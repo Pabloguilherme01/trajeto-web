@@ -10,3 +10,9 @@ it("renders accessible ready filters and returns the selected value", () => {
   fireEvent.click(screen.getByRole("button", { name: "Postos" }));
   expect(onPick).toHaveBeenCalledWith("posto");
 });
+
+
+it("marks equivalent accented text as the active quick filter", () => {
+  render(<QuickFilterChips options={[{ label: "Rodoviária", value: "rodoviaria" }]} value="Rodoviária" onPick={vi.fn()} />);
+  expect(screen.getByRole("button", { name: "Rodoviária" }).getAttribute("aria-pressed")).toBe("true");
+});
