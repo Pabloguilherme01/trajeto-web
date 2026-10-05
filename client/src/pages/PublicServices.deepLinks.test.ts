@@ -22,6 +22,14 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("shrink-0 snap-start");
   });
 
+  it("prioritizes route and the main contact while keeping secondary options compact", () => {
+    expect(source).toContain("const primaryContact = contacts[0]");
+    expect(source).toContain("const secondaryContacts = contacts.slice(1)");
+    expect(source).toContain("Mais opções");
+    expect(source).toContain("PUBLIC_SERVICE_SHORTCUTS.map");
+    expect(source).toContain("w-[min(74vw,18rem)]");
+  });
+
   it("uses shared semantic theme tokens instead of a page-specific palette", () => {
     expect(source).not.toMatch(/#0B1014|#121B22|#C7FF3C|#3DE3FF/);
     expect(source).toContain("bg-background");
