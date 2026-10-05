@@ -20,7 +20,7 @@ export default function MapExplorerFrame({
     const element = root.current;
     const parent = element?.parentNode;
     const nextSibling = element?.nextSibling;
-    if (element) document.body.appendChild(element);
+    if (element) (document.getElementById("root") ?? document.body).appendChild(element);
     document.body.style.overflow = "hidden";
     toggle.current?.focus();
     const keydown = (event: KeyboardEvent) => {
@@ -67,8 +67,12 @@ export default function MapExplorerFrame({
       document.removeEventListener("keydown", keydown);
       document.body.style.overflow = previousOverflow;
       if (element && parent) parent.insertBefore(element, nextSibling ?? null);
-      if (toggle.current?.isConnected) toggle.current.focus({ preventScroll: true });
-      else if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+      // React finishes the layout update after cleanup; restore focus afterward.
+      const opener = toggle.current;
+      queueMicrotask(() => {
+        if (opener?.isConnected) opener.focus({ preventScroll: true });
+        else if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+      });
     };
   }, [expanded]);
   return (
