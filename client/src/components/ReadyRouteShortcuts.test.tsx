@@ -17,7 +17,7 @@ it("finds routes without accents, filters categories and recovers an empty searc
   expect(routes.length).toBeGreaterThan(0);
   expect(routes.every(item => item.getAttribute("aria-label")?.includes("Rodoviária"))).toBe(true);
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "UPA" } });
-  fireEvent.change(screen.getByRole("combobox", { name: "Tipo de destino" }), { target: { value: "saude" } });
+  fireEvent.click(screen.getByRole("button", { name: "Cuidar da saúde" }));
   expect(screen.getAllByRole("article").every(item => /UPA|HEAL|Hospital/.test(item.getAttribute("aria-label")!))).toBe(true);
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "nao existe" } });
   expect(screen.queryAllByRole("article")).toHaveLength(0);
@@ -29,7 +29,7 @@ it("finds routes without accents, filters categories and recovers an empty searc
 });
 it("opens the return trip with swapped endpoints and the chosen travel mode", () => {
   render(<ReadyRouteShortcuts />); open();
-  fireEvent.change(screen.getByRole("combobox", { name: "Como você vai?" }), { target: { value: "walking" } });
+  fireEvent.click(screen.getByRole("button", { name: "A pé" }));
   fireEvent.click(screen.getByRole("button", { name: "Calcular volta: UPA → Centro (referência)" }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("origem")).toBe(LOCAL_READY_ROUTES[0].destination);
@@ -41,7 +41,7 @@ it("inherits changes to the planner travel mode without resetting search", () =>
   const view = render(<ReadyRouteShortcuts compact initialMode="walking" />); open();
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "HEAL" } });
   view.rerender(<ReadyRouteShortcuts compact initialMode="cycling" />);
-  expect((screen.getByRole("combobox", { name: "Como você vai?" }) as HTMLSelectElement).value).toBe("cycling");
+  expect(screen.getByRole("button", { name: "Bicicleta" }).getAttribute("aria-pressed")).toBe("true");
   expect((screen.getByRole("searchbox") as HTMLInputElement).value).toBe("HEAL");
 });
 
@@ -102,14 +102,13 @@ it("surfaces ready street-to-street trips from the offline atlas", () => {
 
 it("aligns quick route filters with their destination category", () => {
   render(<ReadyRouteShortcuts />); open();
-  const category = screen.getByRole("combobox", { name: "Tipo de destino" }) as HTMLSelectElement;
   const search = screen.getByRole("searchbox") as HTMLInputElement;
   fireEvent.click(screen.getByRole("button", { name: "Postos" }));
   expect(search.value).toBe("posto");
-  expect(category.value).toBe("combustivel");
+  expect(screen.getByRole("button", { name: "Abastecer" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "UPA" }));
   expect(search.value).toBe("upa");
-  expect(category.value).toBe("saude");
-  fireEvent.change(category, { target: { value: "compras" } });
+  expect(screen.getByRole("button", { name: "Cuidar da saúde" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Fazer compras" }));
   expect(search.value).toBe("");
 });
