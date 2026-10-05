@@ -14,22 +14,18 @@ test("Pages: cliques principais funcionam dentro da base hospedada", async ({ pa
   await expect(page).toHaveURL(/\/trajeto-web\/planejar$/);
   await expect(page.getByRole("heading", { name: /Sua próxima saída/i })).toBeVisible();
 
-  if (mobile) {
-    await page.getByRole("button", { name: "Explorar" }).click();
-    await page.getByRole("button", { name: "Encontrar postos" }).click();
-  } else await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Postos" }).click();
+  const primaryNav = page.getByRole("navigation", { name: mobile ? "Navegação móvel" : "Navegação principal" });
+  await primaryNav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await page.getByRole("dialog", { name: "Explorar o Trajeto" }).getByRole("button", { name: "Encontrar postos", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/postos/);
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
 
-  if (mobile) {
-    await page.getByRole("button", { name: "Explorar" }).click();
-    await page.getByRole("button", { name: "Salvos" }).click();
-  } else await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Salvos" }).click();
+  await primaryNav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await page.getByRole("dialog", { name: "Explorar o Trajeto" }).getByRole("button", { name: "Salvos", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/salvos$/);
   await expect(page.getByRole("heading", { name: /Rotas salvas/i })).toBeVisible();
 
-  if (mobile) await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Início" }).click();
-  else await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Início" }).click();
+  await primaryNav.getByRole("button", { name: "Início", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/$/);
 });
 
