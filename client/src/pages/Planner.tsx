@@ -13,7 +13,7 @@ import { localDataEvent } from "@/lib/localData";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
 import { findPreparedRouteByCoordinates, findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
@@ -602,17 +602,13 @@ export default function Planner() {
         : provider === "waze"
           ? buildWazeNavigationUrl(destination)
           : buildAppleMapsDirectionsUrl(destination, externalOrigin);
-    window.open(target, "_blank", "noopener,noreferrer");
+    openExternalUrl(target);
     track("route_open", destination || origin);
   };
 
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
     if (!stop) { setSavedMessage("Não há endereço disponível para esta parada."); return; }
-    window.open(
-      buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true),
-      "_blank",
-      "noopener,noreferrer"
-    );
+    openExternalUrl(buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true));
   };
 
   const availableDestinations = useMemo(
@@ -1036,7 +1032,7 @@ export default function Planner() {
                           <button type="button" onClick={() => {
                             const savedMode = offlineRouteTravelMode(route);
                             const googleMode = savedMode === "cycling" ? "bicycling" : savedMode;
-                            window.open(buildGoogleMapsDirectionsUrl(privateOriginForExternalNavigation(route.origin), route.destination, googleMode, true), "_blank", "noopener,noreferrer");
+                            openExternalUrl(buildGoogleMapsDirectionsUrl(privateOriginForExternalNavigation(route.origin), route.destination, googleMode, true));
                           }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-white/70">Navegar agora · {offlineRouteTravelMode(route) === "walking" ? "a pé" : offlineRouteTravelMode(route) === "cycling" ? "bicicleta" : offlineRouteTravelMode(route) === "transit" ? "transporte" : "carro"}</button>
                         </div>
                         <button type="button" onClick={() => void removeSavedRoute(route)} aria-label={"Excluir rota salva " + route.destination} className="mt-2 min-h-10 w-full rounded-xl border border-[#FF7D6A]/20 text-xs font-black text-[#FFB7A9]"><Trash2 className="mr-1.5 inline size-3.5" />Excluir da biblioteca</button>
