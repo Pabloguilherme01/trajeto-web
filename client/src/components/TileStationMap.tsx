@@ -232,13 +232,6 @@ export default function TileStationMap({
     return result;
   }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
 
-  const markerPosition = (station: { lat: number; lng: number }) => {
-    const base = projectBase(station.lat, station.lng);
-    return {
-      left: width / 2 + base.x * zoomScale - centerPx.x,
-      top: height / 2 + base.y * zoomScale - centerPx.y,
-    };
-  };
   const markerPositions = useMemo(() => {
     const result = new Map<string, { left: number; top: number }>();
     for (const station of drawable) {
