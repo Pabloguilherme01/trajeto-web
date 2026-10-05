@@ -744,21 +744,21 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   };
 
   return (
-    <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_15%_0%,rgba(61,227,255,.08),transparent_28%),radial-gradient(circle_at_90%_8%,rgba(199,255,60,.06),transparent_24%),#0B1014] pb-28 text-white md:pb-12">
+    <main className="visual-shell min-h-[100dvh] bg-background pb-28 text-white md:pb-12">
       <div className="container min-w-0 max-w-5xl overflow-x-clip pt-5 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.17em] text-accent">Postos</p>
             <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">{showSavedOnly ? "Seus salvos." : "Encontre uma parada."}</h1>
           </div>
-          <span className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
+          <span className={"status-pill " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
             {online ? "online" : "offline"}
           </span>
         </header>
 
         {!showSavedOnly && (
-          <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <section className="premium-card mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 sm:p-5">
             <form onSubmit={submit} role="search">
               <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Buscar postos</label>
               <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-background px-3">
@@ -836,7 +836,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {mapFirst && showMap && !showSavedOnly && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
-          <section id="aguas-lindas-map" className="scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-card shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
+          <section id="aguas-lindas-map" className="premium-card scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-card" aria-labelledby="map-first-title">
             <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Mapa principal</p>
@@ -877,7 +877,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
 
         {(broadAguasLindasQuery || staticRuntime) && !showSavedOnly && (
-          <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-primary/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
+          <section id="complete-stations" className="premium-card scroll-mt-24 mt-5 rounded-[1.6rem] border border-primary/20 bg-[#111A21] p-4 sm:p-5" aria-labelledby="complete-stations-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Diretório completo</p>
