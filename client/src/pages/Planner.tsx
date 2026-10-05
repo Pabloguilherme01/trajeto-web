@@ -695,26 +695,26 @@ export default function Planner() {
   }] : [];
 
   return (
-    <main className="planner-premium min-h-[100dvh] bg-background pb-28 text-white md:pb-12">
+    <main className="planner-premium visual-shell min-h-[100dvh] bg-background pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.17em] text-primary">Planejador</p>
             <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">Sua próxima saída.</h1>
           </div>
-          <span className={"inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
+          <span className={"status-pill " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
             {online ? "online" : "offline"}
           </span>
         </header>
 
         {!savedMode && (
-          <section className="premium-panel planner-trip-form mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <section className="premium-card premium-panel planner-trip-form mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form ref={plannerFormRef} onSubmit={submit}>
               <h2 className="mb-4 text-base font-bold text-foreground">1. Escolha seu destino</h2>
               <label className="block">
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/70">Destino</span>
-                <div className="mt-2 flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3">
+                <div className="premium-field mt-2 flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3">
                   <span className="size-2.5 rounded-full bg-primary" />
                   <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" placeholder="Para onde você vai" autoComplete="street-address" />
                 </div>
@@ -731,7 +731,7 @@ export default function Planner() {
 
               <label className="block">
                 <span className="text-xs font-black uppercase tracking-[.14em] text-white/70">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
-                <div className="planner-location-field mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
+                <div className="premium-field planner-location-field mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
                   <span className="size-2.5 rounded-full bg-accent" />
                   <input value={origin} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" placeholder="De onde você sai" autoComplete="street-address" />
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 shrink-0 place-items-center rounded-xl text-accent hover:bg-accent/10 focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
@@ -759,7 +759,7 @@ export default function Planner() {
                   <ChevronDown className={"size-4 text-accent transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
-                  <div id="all-destinations-panel" className="mt-2 rounded-2xl border border-white/8 bg-[#0E161C] p-3">
+                  <div id="all-destinations-panel" className="premium-card mt-2 rounded-2xl border border-white/8 bg-[#0E161C] p-3">
                     <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                       {([
                         ["todos", "Todos"],
@@ -778,7 +778,7 @@ export default function Planner() {
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-background px-3 text-base text-white outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
-                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-white/8 bg-gradient-to-br from-[#121F27] to-[#10171C] px-3 text-left shadow-[0_8px_24px_rgba(0,0,0,.12)] transition-colors hover:border-accent/30 active:scale-[.99]">
+                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-white/8 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
                           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent transition-colors group-hover:bg-accent/15"><RouteIcon className="size-4" /></span>
                           <span className="min-w-0 flex-1">
                             <span className="flex flex-wrap items-center gap-1.5">
@@ -879,7 +879,7 @@ export default function Planner() {
 
         {!savedMode && (
           <section className="mt-4 grid gap-2 sm:grid-cols-3" aria-label="Estado do planejamento">
-            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+            <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
               <p className="text-[11px] font-black uppercase tracking-[.12em] text-muted-foreground">Modo efetivo</p>
               <p className="mt-1 text-sm font-black text-white">
                 {PLANNER_EXPERIENCE_OPTIONS.find(item => item.id === activeExperienceMode)?.label}
@@ -890,7 +890,7 @@ export default function Planner() {
                   : plannerExperienceDetail(activeExperienceMode)}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+            <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
               <p className="text-[11px] font-black uppercase tracking-[.12em] text-muted-foreground">Cópia local</p>
               <p className="mt-1 text-sm font-black text-white">
                 {exactSavedRoute
@@ -909,7 +909,7 @@ export default function Planner() {
                   : "Calcule online uma vez para aumentar a cobertura offline."}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+            <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
               <p className="text-[11px] font-black uppercase tracking-[.12em] text-muted-foreground">Rede</p>
               <p className={"mt-1 text-sm font-black " + (online ? "text-primary" : "text-warning")}>
                 {online ? "Conectado" : "Sem conexão"}
@@ -940,7 +940,7 @@ export default function Planner() {
         {!savedMode && destination.trim().length >= 3 && <RideOptions destination={destination} online={online} />}
 
         {economyMode && !savedMode && !planned && (
-          <section className="mt-4 rounded-[1.6rem] border border-primary/15 bg-card p-4" aria-labelledby="economy-mode-title">
+          <section className="premium-card mt-4 rounded-[1.6rem] border border-primary/15 bg-card p-4" aria-labelledby="economy-mode-title">
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Fuel className="size-5" /></div>
               <div><p className="text-xs font-black uppercase tracking-[.15em] text-primary">Modo economia</p><h2 id="economy-mode-title" className="mt-1 text-lg font-black">Calculadora pronta.</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Informe distância, preço e consumo para calcular custo por viagem, mês e autonomia. Os valores ficam salvos neste aparelho.</p></div>
@@ -1020,7 +1020,7 @@ export default function Planner() {
                   {filteredSavedRoutes.map(route => {
                     const stale = isOfflineRouteStale(route.savedAt);
                     return (
-                      <article key={route.id} className="rounded-2xl border border-white/8 bg-card p-4">
+                      <article key={route.id} className="premium-card rounded-2xl border border-white/8 bg-card p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="break-words text-xs font-black leading-snug">{route.origin} → {route.destination}</p>
@@ -1056,7 +1056,7 @@ export default function Planner() {
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {favoriteDestinations.map(item => (
-                <article key={item.id} className="min-w-0 rounded-2xl border border-white/8 bg-card p-4">
+                <article key={item.id} className="premium-card min-w-0 rounded-2xl border border-white/8 bg-card p-4">
                   <p className="truncate text-sm font-black">{item.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.address}</p>
                   <div className="mt-3">
@@ -1081,7 +1081,7 @@ export default function Planner() {
             </div>
             <div className="mt-3 space-y-2">
               {savedStations.map(station => (
-                <article key={station.placeId} className="rounded-2xl border border-white/8 bg-card p-4">
+                <article key={station.placeId} className="premium-card rounded-2xl border border-white/8 bg-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-black">{station.name}</p>
@@ -1134,7 +1134,7 @@ export default function Planner() {
 
         {!savedMode && planned && (
           <section className="mt-5 animate-route-in">
-            <div data-route-card className="route-card min-w-0 rounded-[1.6rem] border border-primary/15 bg-[linear-gradient(145deg,#111C23,#0E171D)] p-4 shadow-[0_24px_60px_rgba(0,0,0,.3)] sm:p-5">
+            <div data-route-card className="premium-card route-card min-w-0 rounded-[1.6rem] border border-primary/15 bg-[linear-gradient(145deg,#111C23,#0E171D)] p-4 shadow-[0_24px_60px_rgba(0,0,0,.3)] sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[.16em] text-primary">Rota calculada</p>
@@ -1150,7 +1150,7 @@ export default function Planner() {
               </div>
 
               <div className="mt-3">
-                <div className="rounded-2xl border border-white/8 bg-white/[.025] p-3">
+                <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
                   <p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Trânsito</p>
                   <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
