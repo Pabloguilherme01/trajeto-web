@@ -22,6 +22,13 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("shrink-0 snap-start");
   });
 
+  it("keeps the service header and emergency actions compact on narrow screens", () => {
+    expect(source).toContain("PUBLIC_SERVICE_CATEGORIES.length - 1");
+    expect(source).toContain("sm:inline-flex");
+    expect(source).toContain('w-[8.5rem]');
+    expect(source).toContain("sm:grid sm:grid-cols-4");
+  });
+
   it("prioritizes route and the main contact while keeping secondary options compact", () => {
     expect(source).toContain("const primaryContact = contacts[0]");
     expect(source).toContain("const secondaryContacts = contacts.slice(1)");
