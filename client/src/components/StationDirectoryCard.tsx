@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { motion, useReducedMotion } from "framer-motion";
-import { Fuel, Heart, MapPin, Phone } from "lucide-react";
+import { Fuel, Heart, MapPin, Navigation, Phone, Route } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
@@ -214,9 +214,13 @@ export function StationDirectoryCard({
         {local?.mapData?.hours && <p className="mt-2 text-xs text-white/65">Horário informado: {local.mapData.hours} · confirme antes de sair.</p>}
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2" aria-label={"Ações para " + stationName}>
-        <a href={buildDestinationPlannerUrl(destinationNavigationValue(sharedDestination))} className="task-action task-action-primary">Ir até aqui</a>
-        <a href={navigationUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-accent/20 bg-accent/[.05] px-2 text-xs font-black text-[#C9F7FF]">Navegar</a>
-        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 text-xs font-bold text-white/80"><Phone className="size-4" />Ligar para o posto</a>}
+        <a href={buildDestinationPlannerUrl(destinationNavigationValue(sharedDestination))} className="task-action task-action-primary gap-1.5">
+          <Route className="size-4" aria-hidden="true" />Ir até aqui
+        </a>
+        <a href={navigationUrl} target="_blank" rel="noopener noreferrer" className="task-action task-action-secondary gap-1.5">
+          <Navigation className="size-4 text-accent" aria-hidden="true" />Navegar
+        </a>
+        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="task-action task-action-secondary col-span-2"><Phone className="size-4" aria-hidden="true" />Ligar para o posto</a>}
       </div>
       {actionError && <p role="alert" className="mt-2 text-xs text-[#FFD59B]">{actionError}</p>}
       <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02] px-3">
