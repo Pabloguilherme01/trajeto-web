@@ -73,7 +73,7 @@ test("planejar: aceita destino sem GPS e oferece navegação externa", async ({ 
   await page.goto("/planejar?destino=Águas%20Lindas%20de%20Goiás", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Ir até aqui" }).click();
 
-  await expect(page.getByRole("heading", { name: /Pronto para ir/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Navegação pronta/i })).toBeVisible();
   await expect(page.getByRole("button", { name: "Abrir Google Maps", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Abrir Waze", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Abrir Apple Maps", exact: true })).toBeVisible();
