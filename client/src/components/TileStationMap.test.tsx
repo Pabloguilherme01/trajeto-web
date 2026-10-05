@@ -72,9 +72,15 @@ it("keeps route endpoints in a single scrollable rail on narrow maps", () => {
     />
   );
   const rail = screen.getByRole("group", { name: "Pontos do percurso" });
+  const origin = screen.getByRole("button", { name: "Ver origem" });
+  const destination = screen.getByRole("button", { name: "Ver destino" });
   expect(rail.className).toContain("overflow-x-auto");
-  expect(screen.getByRole("button", { name: "Ver origem" }).className).toContain("shrink-0");
-  expect(screen.getByRole("button", { name: "Ver destino" }).className).toContain("snap-start");
+  expect(origin.className).toContain("shrink-0");
+  expect(origin.className).toContain("bg-card/95");
+  expect(origin.className).toContain("text-card-foreground");
+  expect(origin.className).toContain("focus-visible:outline-ring");
+  expect(destination.className).toContain("snap-start");
+  expect(screen.getByRole("button", { name: "Aumentar zoom" }).className).toContain("bg-card/95");
 });
 
 it("contains map layout and overscroll inside the interactive viewport", () => {
