@@ -173,10 +173,10 @@ function buildGraph(pack: PackedMap, mode: OfflineRoadMode): Graph {
             NODE_COORDINATE_TOLERANCE_METERS)
       )
         continue;
-      nodes.set(from, existingFrom ?? fromPoint);
-      nodes.set(to, existingTo ?? toPoint);
       const meters = distanceMeters(fromPoint, toPoint);
       if (!Number.isFinite(meters) || meters < 0.5 || meters > 2500) continue;
+      nodes.set(from, existingFrom ?? fromPoint);
+      nodes.set(to, existingTo ?? toPoint);
       const durationSeconds = meters / Math.max(1, speedMps);
       const edge = {
         to,
