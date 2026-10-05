@@ -5,6 +5,7 @@ import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import { PLANNER_LOCATION_QUICK_FILTERS } from "@/lib/quickFilterPresets";
 
 const points: CityAtlasItem[] = [...buildCityAtlas(BUNDLED_CITY_ATLAS), ...LOCAL_GEOCODE_POINTS.map(point => ({
   id: "geocode-" + point.id,
@@ -52,16 +53,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(8);
-  const quickQueries = [
-    { label: "UPA", value: "upa" },
-    { label: "Postos", value: "posto" },
-    { label: "Mercados", value: "mercado" },
-    { label: "Escolas", value: "escola" },
-    { label: "Prefeitura", value: "prefeitura" },
-    { label: "Shopping", value: "shopping" },
-    { label: "Rodoviária", value: "rodoviaria" },
-    { label: "Bairros", value: "jardim" },
-  ];
+  const quickQueries = PLANNER_LOCATION_QUICK_FILTERS;
   useEffect(() => { setVisibleCount(8); }, [query, kind]);
   const [selected, setSelected] = useState<{ coordinate: string; label: string } | null>(null);
   const matches = useMemo(() => {
