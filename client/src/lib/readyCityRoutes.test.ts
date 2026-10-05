@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { LOCAL_READY_ROUTES, READY_ROUTE_STATIONS } from "./localRoutePresets";
+import { LOCAL_READY_ROUTES, READY_ROUTE_STATIONS, READY_ROUTE_STREET_POINTS } from "./localRoutePresets";
 import { calculatePublicRoute, resetPublicRoutingTestState } from "./publicRouting";
 import { buildReusableTripPlannerUrl } from "./tripLinks";
 
@@ -12,6 +12,10 @@ it("opens and calculates every ready city route without internet", async () => {
   expect(LOCAL_READY_ROUTES.length).toBeGreaterThan(232);
   expect(READY_ROUTE_STATIONS.length).toBeGreaterThan(0);
   expect(LOCAL_READY_ROUTES.some(route => route.category === "combustivel")).toBe(true);
+  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(650);
+  const streetLabels = new Set(READY_ROUTE_STREET_POINTS.map(point => point.label));
+  const streetPairs = LOCAL_READY_ROUTES.filter(route => streetLabels.has(route.originLabel) && streetLabels.has(route.destinationLabel));
+  expect(streetPairs).toHaveLength((READY_ROUTE_STREET_POINTS.length * (READY_ROUTE_STREET_POINTS.length - 1)) / 2);
   expect(new Set(LOCAL_READY_ROUTES.map(route => route.id)).size).toBe(LOCAL_READY_ROUTES.length);
   const trips = LOCAL_READY_ROUTES.flatMap(route => [route, { ...route, origin: route.destination, destination: route.origin }]);
   const unavailable: string[] = [];
