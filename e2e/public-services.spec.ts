@@ -24,6 +24,7 @@ test("busca local oferece categorias prontas", async ({ page }) => {
 
 test("atalho público leva da home para serviços municipais", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: "Explore a cidade" }).click();
   await page.getByRole("button", { name: "Saúde", exact: true }).click();
   await expect(page).toHaveURL(/\/servicos\?categoria=saude/);
   await expect(page.getByRole("heading", { name: /UPA Mansões Odisseia/i })).toBeVisible();

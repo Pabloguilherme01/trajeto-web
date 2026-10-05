@@ -89,6 +89,7 @@ test("planejar: última rota privada reabre só o destino e não dispara cálcul
   });
 
   await page.goto("/planejar", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: "Destinos e atalhos" }).click();
   await page.getByRole("button", { name: "Última rota", exact: true }).click();
 
   await expect(page).toHaveURL(/\/planejar\?destino=Hospital$/);
