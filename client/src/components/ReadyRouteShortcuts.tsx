@@ -7,7 +7,7 @@ import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
 import QuickFilterChips from "@/components/QuickFilterChips";
-import { ROUTE_QUICK_FILTERS, isQuickFilterValue, quickFilterCategory, quickFilterMatchesCategory } from "@/lib/quickFilterPresets";
+import { ROUTE_QUICK_FILTERS, quickFilterCategory } from "@/lib/quickFilterPresets";
 
 type TravelMode = "driving" | "walking" | "cycling" | "transit";
 const destinationIcons = { saude: Stethoscope, compras: ShoppingBag, servicos: Landmark, transporte: Bus, educacao: GraduationCap, combustivel: Fuel, alimentacao: Utensils, centro: MapPin };
@@ -62,14 +62,6 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     [filtered, visibleCount]
   );
   const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setVisibleCount(6); };
-  const applyCategory = (next: RouteDestinationCategoryFilter) => {
-    setCategory(next);
-    if (
-      isQuickFilterValue(query, ROUTE_QUICK_FILTERS) &&
-      !quickFilterMatchesCategory(query, next)
-    ) setQuery("");
-    setVisibleCount(6);
-  };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
@@ -107,7 +99,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
       {offlineActive ? "Offline ativo" : "Calcular offline"}
     </button>
     <p className="mt-2 text-xs leading-relaxed text-white/65">Todos os trajetos deste catálogo abrem offline, incluindo conexões entre as vias mapeadas. Para seguir curva a curva pelas ruas, prepare a rota com internet antes de sair; sem geometria salva, o cálculo offline continua identificado como estimativa.</p>
-    <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,.65fr)]">
       <div className="min-w-0">
         <label className="text-xs font-bold text-white/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
           <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />
@@ -128,16 +120,6 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         <select value={originId} onChange={event => { setOriginId(event.target.value); setVisibleCount(6); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
           <option value="todos">Todas as partidas</option>
           {origins.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
-        </select>
-      </label>
-      <label className="min-w-0 text-xs font-bold text-white/80">Tipo de destino
-        <select value={category} onChange={event => applyCategory(event.target.value as RouteDestinationCategoryFilter)} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
-          {ROUTE_DESTINATION_CATEGORIES.filter(item => item.value === "todos" || LOCAL_READY_ROUTES.some(route => route.category === item.value)).map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
-        </select>
-      </label>
-      <label className="min-w-0 text-xs font-bold text-white/80">Como você vai?
-        <select value={mode} onChange={event => setMode(event.target.value as TravelMode)} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
-          {modes.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
       </label>
     </div>
