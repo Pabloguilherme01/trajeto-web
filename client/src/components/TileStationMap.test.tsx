@@ -19,6 +19,20 @@ it("keeps the selected marker above coincident catalogue points", () => {
   fireEvent.click(second);
   expect(Number(second.style.zIndex)).toBeGreaterThan(Number(first.style.zIndex));
 });
+it("keeps marker clusters stable while panning the camera", () => {
+  render(<TileStationMap stations={[
+    { id: "selected", name: "Selecionado", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Ponto B", address: "Rua B", lat: -15.75455, lng: -48.28165 },
+    { id: "c", name: "Ponto C", address: "Rua C", lat: -15.7546, lng: -48.2817 },
+  ]} />);
+  const cluster = screen.getByRole("button", { name: "Ampliar grupo de 2 lugares" });
+  const before = parseFloat(cluster.style.left);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
+  const after = screen.getByRole("button", { name: "Ampliar grupo de 2 lugares" });
+  expect(after).toBe(cluster);
+  expect(parseFloat(after.style.left)).toBeCloseTo(before - 80);
+});
+
 it("opens the local map on demand and returns to the tiled camera", () => {
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local disponível</p>} />);
   fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
