@@ -333,26 +333,82 @@ function shortestPath(graph: Graph, start: string, goal: string) {
   return { keys, routeEdges };
 }
 
-function groupSteps(edges: GraphEdge[]): OfflineRoadStep[] {
-  const grouped: Array<{ name: string; distanceMeters: number; durationSeconds: number }> = [];
-  for (const edge of edges) {
+function bearingDegrees(a: OfflineRoadPoint, b: OfflineRoadPoint) {
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  return (Math.atan2(y, x) * 180) / Math.PI;
+}
+
+function turnInstruction(
+  graph: Graph,
+  keys: string[],
+  edgeIndex: number,
+  roadName: string
+) {
+  if (edgeIndex <= 0 || edgeIndex + 1 >= keys.length)
+    return { instruction: "Continue por " + roadName, maneuver: "continue" };
+  const before = graph.nodes.get(keys[edgeIndex - 1]);
+  const pivot = graph.nodes.get(keys[edgeIndex]);
+  const after = graph.nodes.get(keys[edgeIndex + 1]);
+  if (!before || !pivot || !after)
+    return { instruction: "Continue por " + roadName, maneuver: "continue" };
+  const incoming = bearingDegrees(before, pivot);
+  const outgoing = bearingDegrees(pivot, after);
+  const delta = ((outgoing - incoming + 540) % 360) - 180;
+  if (Math.abs(delta) < 30)
+    return { instruction: "Continue por " + roadName, maneuver: "continue" };
+  if (Math.abs(delta) > 150)
+    return { instruction: "Faça o retorno para " + roadName, maneuver: "uturn" };
+  return delta > 0
+    ? { instruction: "Vire à direita em " + roadName, maneuver: "turn-right" }
+    : { instruction: "Vire à esquerda em " + roadName, maneuver: "turn-left" };
+}
+
+function groupSteps(
+  graph: Graph,
+  keys: string[],
+  edges: GraphEdge[]
+): OfflineRoadStep[] {
+  const grouped: Array<{
+    name: string;
+    distanceMeters: number;
+    durationSeconds: number;
+    startEdgeIndex: number;
+  }> = [];
+  edges.forEach((edge, edgeIndex) => {
     const name = edge.roadName || "via local mapeada";
     const current = grouped[grouped.length - 1];
     if (current && current.name === name) {
       current.distanceMeters += edge.distanceMeters;
       current.durationSeconds += edge.durationSeconds;
     } else {
-      grouped.push({ name, distanceMeters: edge.distanceMeters, durationSeconds: edge.durationSeconds });
+      grouped.push({
+        name,
+        distanceMeters: edge.distanceMeters,
+        durationSeconds: edge.durationSeconds,
+        startEdgeIndex: edgeIndex,
+      });
     }
-  }
+  });
 
-  const steps: OfflineRoadStep[] = grouped.map((item, index) => ({
-    instruction: index === 0 ? "Siga por " + item.name : "Continue por " + item.name,
-    name: item.name,
-    distanceMeters: Math.round(item.distanceMeters),
-    durationSeconds: Math.max(1, Math.round(item.durationSeconds)),
-    maneuver: "continue",
-  }));
+  const steps: OfflineRoadStep[] = grouped.map((item, index) => {
+    const maneuver =
+      index === 0
+        ? { instruction: "Siga por " + item.name, maneuver: "depart" }
+        : turnInstruction(graph, keys, item.startEdgeIndex, item.name);
+    return {
+      instruction: maneuver.instruction,
+      name: item.name,
+      distanceMeters: Math.round(item.distanceMeters),
+      durationSeconds: Math.max(1, Math.round(item.durationSeconds)),
+      maneuver: maneuver.maneuver,
+    };
+  });
   if (steps.length) {
     steps.push({
       instruction: "Chegue ao destino",
@@ -402,7 +458,7 @@ export async function calculateOfflineRoadRoute(
       60,
       Math.round(networkDuration + connectorMeters / connectorSpeedMps)
     ),
-    steps: groupSteps(route.routeEdges),
+    steps: groupSteps(graph, route.keys, route.routeEdges),
     snappedOriginMeters,
     snappedDestinationMeters,
   };
