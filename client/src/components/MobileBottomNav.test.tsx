@@ -72,6 +72,14 @@ describe("mobile navigation", () => {
     expect(state.navigate).toHaveBeenCalledWith("/ajuda");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
+  it("opens the city map directly from the compact Explore menu", async () => {
+    render(<MobileBottomNav />);
+    fireEvent.click(screen.getByRole("button", { name: "Explorar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Abrir mapa" }));
+    expect(state.navigate).toHaveBeenCalledWith("/mapa");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
   it("opens Saved routes from the More menu", async () => {
     render(<MobileBottomNav />);
     fireEvent.click(screen.getByRole("button", { name: "Explorar" }));

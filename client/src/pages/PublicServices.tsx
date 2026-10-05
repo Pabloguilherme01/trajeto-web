@@ -124,15 +124,16 @@ export default function PublicServices() {
     return () => window.removeEventListener("keydown", onKey);
   }, [category, savedOnly, setLocation]);
 
-  const results = useMemo(
-    () =>
-      selectedService
-        ? [selectedService]
-        : searchPublicServices(query, category).filter(
-            service => !savedOnly || favorites.includes(service.id)
-          ),
-    [query, category, selectedService, savedOnly, favorites]
-  );
+  const results = useMemo(() => {
+    if (selectedService) return [selectedService];
+    const matches = searchPublicServices(query, category).filter(
+      service => !savedOnly || favorites.includes(service.id)
+    );
+    return [...matches].sort(
+      (a, b) =>
+        Number(favorites.includes(b.id)) - Number(favorites.includes(a.id))
+    );
+  }, [query, category, selectedService, savedOnly, favorites]);
 
   useEffect(() => {
     const targetId = selectedService
@@ -227,39 +228,39 @@ export default function PublicServices() {
   };
 
   return (
-    <main className="premium-surface visual-shell min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="premium-surface visual-shell min-h-[100dvh] bg-background pb-28 text-foreground md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.17em] text-[#C7FF3C]">
+            <p className="text-xs font-black uppercase tracking-[.17em] text-primary">
               Central de serviços
             </p>
             <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">
               Águas Lindas em um só lugar.
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/70">
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-foreground/70">
               Serviços e locais públicos essenciais já ficam incorporados ao
               app. O catálogo básico funciona sem depender de consulta online.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/70">
-                {PUBLIC_SERVICES.length} registros públicos
+            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
+                {PUBLIC_SERVICES.length} serviços
               </span>
-              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/70">
-                6 categorias
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
+                {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
               </span>
-              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/70">
-                offline por padrão
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
+                funciona offline
               </span>
-              <span className="rounded-full border border-white/8 bg-white/[.025] px-2.5 py-1 text-xs font-bold text-white/65">
-                Confira contatos e horários na fonte oficial
+              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/65">
+                confirme na fonte oficial
               </span>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setLocation(appUrl("/"))}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/10 px-3 text-xs font-black text-white/70"
+            className="hidden min-h-11 shrink-0 items-center justify-center rounded-xl border border-border/10 px-3 text-xs font-black text-foreground/70 sm:inline-flex"
           >
             Início
           </button>
@@ -268,12 +269,12 @@ export default function PublicServices() {
         <section
           id="emergency-strip"
           tabIndex={-1}
-          className="premium-card mt-5 scroll-mt-20 rounded-[1.5rem] border border-[#FFB86B]/20 bg-[#FFB86B]/[.045] p-3 outline-none"
+          className="premium-card mt-5 scroll-mt-20 rounded-[1.5rem] border border-warning/20 bg-warning/5 p-3 outline-none"
           aria-labelledby="emergency-strip-title"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.14em] text-[#FFB86B]">
+              <p className="text-xs font-black uppercase tracking-[.14em] text-warning">
                 Utilidade imediata
               </p>
               <h2
@@ -283,11 +284,11 @@ export default function PublicServices() {
                 Canais de emergência
               </h2>
             </div>
-            <span className="text-xs font-bold text-white/65">
+            <span className="text-xs font-bold text-foreground/65">
               precisa de rede telefônica
             </span>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
             {[
               { label: "Polícia", number: "190" },
               { label: "SAMU", number: "192" },
@@ -297,34 +298,34 @@ export default function PublicServices() {
               <a
                 key={item.label}
                 href={phoneHref(item.number) ?? "#"}
-                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-[#0B1014] px-2 py-2 text-center text-sm font-bold text-white/80 transition hover:border-[#FFB86B]/30 hover:text-white"
+                className="inline-flex min-h-16 w-[8.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-sm font-bold text-foreground/80 transition hover:border-warning/30 hover:text-foreground sm:w-auto sm:shrink"
               >
                 <span className="inline-flex items-center gap-1.5">
-                  <Phone className="size-3.5 shrink-0 text-[#FFB86B]" />
+                  <Phone className="size-3.5 shrink-0 text-warning" />
                   {item.label}
                 </span>
-                <span className="text-xs text-white/70">{item.number}</span>
+                <span className="text-xs text-foreground/70">{item.number}</span>
               </a>
             ))}
           </div>
         </section>
 
-        <section className="premium-card mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-3 sm:p-4">
+        <section className="premium-card mt-5 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4">
           <form
             onSubmit={event => {
               event.preventDefault();
               applyFilters(query, category);
               inputRef.current?.blur();
             }}
-            className="premium-search flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3"
+            className="premium-search flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3"
           >
-            <MapPinned className="size-4 shrink-0 text-[#C7FF3C]" />
+            <MapPinned className="size-4 shrink-0 text-primary" />
             <input
               ref={inputRef}
               value={query}
               onChange={event => setQuery(event.target.value)}
               placeholder="Buscar saúde, escola, polícia, prefeitura..."
-              className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65"
+              className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/65"
               autoComplete="off"
               enterKeyHint="search"
               aria-label="Buscar serviços públicos"
@@ -337,7 +338,7 @@ export default function PublicServices() {
                   setQuery("");
                   applyFilters("", category, true);
                 }}
-                className="grid size-11 place-items-center rounded-xl text-white/70"
+                className="grid size-11 place-items-center rounded-xl text-foreground/70"
                 aria-label="Limpar busca"
               >
                 <X className="size-4" />
@@ -346,17 +347,18 @@ export default function PublicServices() {
             <button
               type="submit"
               aria-label="Pesquisar serviços"
-              className="grid size-11 shrink-0 place-items-center rounded-xl text-[#C7FF3C]"
+              className="grid size-11 shrink-0 place-items-center rounded-xl text-primary"
             >
               <ArrowRight className="size-5" />
             </button>
-            <kbd className="hidden rounded-lg border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/70 sm:inline">
+            <kbd className="hidden rounded-lg border border-border/8 bg-muted/[.03] px-2 py-1 text-xs font-black text-foreground/70 sm:inline">
               Ctrl K
             </kbd>
           </form>
 
           <div
-            className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7"
+            role="group"
+            className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -366,10 +368,10 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "min-h-11 rounded-xl border px-2 text-sm font-black transition " +
+                  "min-h-11 shrink-0 snap-start rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
-                    ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A] shadow-[0_8px_24px_rgba(199,255,60,.08)]"
-                    : "border-white/8 bg-white/[.025] text-white/75 hover:border-white/15 hover:text-white")
+                    ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
+                    : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
                 }
               >
                 {item.label}
@@ -381,7 +383,7 @@ export default function PublicServices() {
               type="button"
               aria-pressed={savedOnly}
               onClick={() => applyFilters(query, category, false, !savedOnly)}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
             >
               <Heart
                 className="size-4"
@@ -389,7 +391,7 @@ export default function PublicServices() {
               />
               Serviços salvos ({favoriteCount})
             </button>
-            <p className="text-xs text-white/65">
+            <p className="text-xs text-foreground/65">
               Toque no coração para criar seus atalhos offline.
             </p>
           </div>
@@ -403,7 +405,7 @@ export default function PublicServices() {
               <h2 id="citizen-shortcuts-title" className="text-base font-bold">
                 O que você precisa resolver?
               </h2>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
                 {PUBLIC_SERVICE_SHORTCUTS.map(shortcut => (
                   <button
                     key={shortcut.query}
@@ -412,12 +414,12 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="premium-card min-h-20 min-w-0 rounded-2xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/5 p-3 text-left"
+                    className="premium-card min-h-20 w-[min(74vw,18rem)] min-w-[14rem] shrink-0 snap-start rounded-2xl border border-accent/20 bg-accent/5 p-3 text-left sm:w-auto sm:min-w-0 sm:shrink"
                   >
-                    <span className="block text-sm font-bold text-white">
+                    <span className="block text-sm font-bold text-foreground">
                       {shortcut.label}
                     </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-white/70">
+                    <span className="mt-1 block text-xs leading-relaxed text-foreground/70">
                       {shortcut.hint}
                     </span>
                   </button>
@@ -434,13 +436,13 @@ export default function PublicServices() {
               setCategory("todos");
               applyFilters("", "todos", false, false);
             }}
-            className="mt-4 min-h-11 rounded-xl border border-white/15 px-3 text-sm font-bold"
+            className="mt-4 min-h-11 rounded-xl border border-border/15 px-3 text-sm font-bold"
           >
             Ver todos os serviços
           </button>
         )}
         {params.get("servico") && !selectedService && (
-          <p role="status" className="mt-4 text-sm text-white/75">
+          <p role="status" className="mt-4 text-sm text-foreground/75">
             Este serviço não está no catálogo atual. Consulte os serviços
             disponíveis abaixo.
           </p>
@@ -448,7 +450,7 @@ export default function PublicServices() {
         <p
           role="status"
           aria-live="polite"
-          className="mt-4 text-sm text-white/70"
+          className="mt-4 text-sm text-foreground/70"
         >
           {results.length} serviços encontrados
         </p>
@@ -459,6 +461,8 @@ export default function PublicServices() {
           {results.map(service => {
             const Icon = categoryIcons[service.category];
             const contacts = publicServiceContacts(service);
+            const primaryContact = contacts[0];
+            const secondaryContacts = contacts.slice(1);
             const saved = favorites.includes(service.id);
             return (
               <article
@@ -466,14 +470,14 @@ export default function PublicServices() {
                 id={"service-" + service.id}
                 tabIndex={-1}
                 aria-current={selectedService?.id === service.id ? "true" : undefined}
-                className="premium-card route-card scroll-mt-20 rounded-[1.4rem] border border-white/8 bg-[#121B22] p-4 outline-none"
+                className="premium-card route-card scroll-mt-20 rounded-[1.4rem] border border-border/8 bg-card p-4 outline-none"
               >
                 <div className="flex items-start gap-3">
-                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[.04] text-[#3DE3FF]">
+                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted/[.04] text-accent">
                     <Icon className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#3DE3FF]">
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-accent">
                       {
                         PUBLIC_SERVICE_CATEGORIES.find(
                           item => item.id === service.category
@@ -483,7 +487,7 @@ export default function PublicServices() {
                     <h2 className="mt-1 text-sm font-black leading-snug">
                       {service.name}
                     </h2>
-                    <p className="mt-1.5 text-sm leading-relaxed text-white/70">
+                    <p className="mt-1.5 text-sm leading-relaxed text-foreground/70">
                       {service.description}
                     </p>
                   </div>
@@ -495,7 +499,7 @@ export default function PublicServices() {
                       (saved ? "Remover dos salvos: " : "Salvar serviço: ") +
                       service.name
                     }
-                    className="grid size-11 shrink-0 place-items-center rounded-xl border border-white/15 text-[#FFB7A9]"
+                    className="grid size-11 shrink-0 place-items-center rounded-xl border border-border/15 text-destructive"
                   >
                     <Heart
                       className="size-4"
@@ -504,83 +508,103 @@ export default function PublicServices() {
                   </button>
                 </div>
                 {service.address && (
-                  <p className="mt-3 text-sm leading-relaxed text-white/65">
-                    <span className="font-black text-white/70">Endereço:</span>{" "}
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/65">
+                    <span className="font-black text-foreground/70">Endereço:</span>{" "}
                     {service.address}
                   </p>
                 )}
                 {service.hours && (
-                  <p className="mt-3 text-sm font-bold text-white/75">{service.hours}</p>
+                  <p className="mt-3 text-sm font-bold text-foreground/75">{service.hours}</p>
                 )}
                 {service.guidance && (
-                  <p className="mt-3 rounded-xl bg-white/5 p-3 text-sm leading-relaxed text-white/75">
+                  <p className="mt-3 rounded-xl bg-muted/5 p-3 text-sm leading-relaxed text-foreground/75">
                     {service.guidance}
                   </p>
-                )}
-                {service.actionUrl && (
-                  <a
-                    href={service.actionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#3DE3FF]/30 px-3 text-sm font-bold text-[#C9F7FF]"
-                  >
-                    <ExternalLink className="size-4" />
-                    {service.actionLabel} · online
-                  </a>
-                )}
-                {service.email && (
-                  <a
-                    href={"mailto:" + service.email}
-                    className="mt-2 flex min-h-11 items-center justify-center break-all rounded-xl border border-white/10 px-3 text-sm text-white/75"
-                  >
-                    {service.email}
-                  </a>
                 )}
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {service.mapQuery && (
                     <button
                       type="button"
                       onClick={() => openMaps(service)}
-                      className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-bold text-[#0B1014]"
+                      className="min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground"
                     >
                       <MapPinned className="mr-1.5 inline size-3.5" />
                       Rota
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => void shareService(service)}
-                    aria-label={"Compartilhar serviço: " + service.name}
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80"
-                  >
-                    <Share2 className="size-3.5" />
-                    Compartilhar
-                  </button>
+                  {primaryContact ? (
+                    <a
+                      href={primaryContact.href}
+                      target={primaryContact.channel === "whatsapp" ? "_blank" : undefined}
+                      rel={primaryContact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
+                      aria-label={
+                        (primaryContact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
+                        service.name +
+                        ": " +
+                        primaryContact.number
+                      }
+                      className={"inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " + (!service.mapQuery ? "col-span-2" : "")}
+                    >
+                      {primaryContact.channel === "whatsapp" ? (
+                        <MessageCircle className="size-3.5 shrink-0" />
+                      ) : (
+                        <Phone className="size-3.5 shrink-0" />
+                      )}
+                      <span className="min-w-0 truncate">
+                        {primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar"} · {primaryContact.number}
+                      </span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void shareService(service)}
+                      aria-label={"Compartilhar serviço: " + service.name}
+                      className={"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " + (!service.mapQuery ? "col-span-2" : "")}
+                    >
+                      <Share2 className="size-3.5" />
+                      Compartilhar
+                    </button>
+                  )}
                 </div>
-                {contacts.length > 0 && (
-                  <div className="mt-2 grid gap-2">
-                    {contacts.map((contact, index) => (
+                <details className="mobile-disclosure mt-2">
+                  <summary>
+                    Mais opções
+                    <ArrowRight className="size-4 shrink-0" />
+                  </summary>
+                  <div className="grid gap-2">
+                    {service.actionUrl && (
+                      <a
+                        href={service.actionUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
+                      >
+                        <ExternalLink className="size-4" />
+                        {service.actionLabel} · online
+                      </a>
+                    )}
+                    {service.email && (
+                      <a
+                        href={"mailto:" + service.email}
+                        className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
+                      >
+                        {service.email}
+                      </a>
+                    )}
+                    {secondaryContacts.map(contact => (
                       <a
                         key={contact.href}
                         href={contact.href}
-                        target={
-                          contact.channel === "whatsapp" ? "_blank" : undefined
-                        }
-                        rel={
-                          contact.channel === "whatsapp"
-                            ? "noopener noreferrer"
-                            : undefined
-                        }
+                        target={contact.channel === "whatsapp" ? "_blank" : undefined}
+                        rel={contact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
                         aria-label={
-                          (contact.channel === "whatsapp"
-                            ? "WhatsApp de "
-                            : "Ligar para ") +
+                          (contact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
                           service.name +
                           (contact.label ? " · " + contact.label : "") +
                           ": " +
                           contact.number
                         }
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-3 text-sm font-bold text-[#C9F7FF]"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-sm font-bold text-accent"
                       >
                         {contact.channel === "whatsapp" ? (
                           <MessageCircle className="size-3.5 shrink-0" />
@@ -588,20 +612,29 @@ export default function PublicServices() {
                           <Phone className="size-3.5 shrink-0" />
                         )}
                         <span className="break-words">
-                          {contact.label ||
-                            (index === 0 ? "Ligar" : "Alternativo")}{" "}
-                          · {contact.number}
+                          {contact.label || "Contato alternativo"} · {contact.number}
                           {contact.channel === "whatsapp" ? " · WhatsApp" : ""}
                         </span>
                       </a>
                     ))}
+                    {primaryContact && (
+                      <button
+                        type="button"
+                        onClick={() => void shareService(service)}
+                        aria-label={"Compartilhar serviço: " + service.name}
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                      >
+                        <Share2 className="size-3.5" />
+                        Compartilhar
+                      </button>
+                    )}
                   </div>
-                )}
+                </details>
                 <a
                   href={service.sourceUrl}
                   target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 flex min-h-11 items-center justify-center text-center text-sm font-bold text-white/75 hover:text-white"
+                  rel="noopener noreferrer"
+                  className="mt-2 flex min-h-10 items-center justify-center text-center text-xs font-bold text-foreground/65 hover:text-foreground"
                 >
                   Fonte: {service.sourceLabel}
                   {service.verifiedAt
@@ -614,13 +647,13 @@ export default function PublicServices() {
         </section>
 
         {!results.length && (
-          <section className="premium-card mt-5 rounded-3xl border border-white/8 bg-[#121B22] p-6 text-center">
+          <section className="premium-card mt-5 rounded-3xl border border-border/8 bg-card p-6 text-center">
             <p className="text-sm font-black">
               {savedOnly && !favoriteCount
                 ? "Nenhum serviço salvo ainda."
                 : "Nenhum serviço corresponde ao filtro."}
             </p>
-            <p className="mt-1 text-sm text-white/65">
+            <p className="mt-1 text-sm text-foreground/65">
               {savedOnly && !favoriteCount
                 ? "Veja o catálogo e toque no coração dos serviços que você mais usa."
                 : "Experimente outro termo ou veja todas as categorias."}
@@ -632,25 +665,25 @@ export default function PublicServices() {
                 setCategory("todos");
                 applyFilters("", "todos", false, false);
               }}
-              className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-sm font-bold text-[#0B1014]"
+              className="mt-3 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
             >
               Limpar filtros
             </button>
           </section>
         )}
 
-        <section className="premium-card mt-5 rounded-[1.4rem] border border-white/8 bg-white/[.025] p-4">
+        <section className="premium-card mt-5 rounded-[1.4rem] border border-border/8 bg-muted/[.025] p-4">
           <div className="flex items-start gap-3">
             {online ? (
-              <Building2 className="mt-0.5 size-4 text-[#C7FF3C]" />
+              <Building2 className="mt-0.5 size-4 text-primary" />
             ) : (
-              <WifiOff className="mt-0.5 size-4 text-[#FFB86B]" />
+              <WifiOff className="mt-0.5 size-4 text-warning" />
             )}
             <div>
               <p className="text-xs font-black">
                 {online ? "Catálogo local disponível" : "Modo offline ativo"}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-white/70">
+              <p className="mt-1 text-sm leading-relaxed text-foreground/70">
                 {online
                   ? "Endereços, contatos e fontes são apresentados como cadastro local; a navegação abre o mapa escolhido."
                   : "Este catálogo continua visível sem internet. Rotas, mapa externo e atualizações em tempo real podem exigir conexão."}

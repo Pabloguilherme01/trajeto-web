@@ -4,6 +4,7 @@ import {
   buildAppleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrl,
   buildWazeNavigationUrl,
+  openExternalUrl,
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
 
@@ -505,13 +506,13 @@ export default function TileStationMap({
   if (tileFallback)
     return (
       <div>
-        {localLayer && !offline && <button type="button" onClick={() => setLocalLayer(false)} className="m-3 flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-slate-800 shadow"><Layers className="size-4" />Voltar ao mapa de ruas</button>}
+        {localLayer && !offline && <button type="button" onClick={() => setLocalLayer(false)} className="m-3 flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-bold text-card-foreground shadow"><Layers className="size-4" />Voltar ao mapa de ruas</button>}
         {fallback}
         {!offline && !localLayer && (
           <button
             type="button"
             onClick={() => setTileErrors(0)}
-            className="m-3 min-h-11 rounded-xl border border-white/20 px-4 text-sm font-bold text-white"
+            className="m-3 min-h-11 rounded-xl border border-border bg-card px-4 text-sm font-bold text-card-foreground"
           >
             Tentar carregar mapa de ruas
           </button>
@@ -684,7 +685,7 @@ export default function TileStationMap({
                 <button
                   key={stationKey(station)}
                   type="button"
-                  className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
+                  className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   style={{ left: position.left, top: position.top, zIndex: active ? 10 : 1 }}
                   onPointerDown={event => event.stopPropagation()}
                   onClick={() => {
@@ -736,14 +737,14 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-16 top-20 z-20 flex flex-wrap gap-2"
+            className="absolute left-3 right-16 top-20 z-20 flex snap-x gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {routeEndpoints.map(point => (
               <button
                 key={stationKey(point)}
                 type="button"
                 onClick={() => focusEndpoint(point)}
-                className="min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#163840] shadow-md focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+                className="min-h-11 shrink-0 snap-start rounded-xl border border-border bg-card/95 px-3 text-xs font-bold text-card-foreground shadow-md backdrop-blur-md focus-visible:outline-2 focus-visible:outline-ring"
               >
                 {point.id === "origin" ? "Ver origem" : "Ver destino"}
               </button>
@@ -754,7 +755,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(1)}
-            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
+            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
             aria-label="Aumentar zoom"
             disabled={zoom >= 17}
           >
@@ -763,7 +764,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(-1)}
-            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
+            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
             aria-label="Diminuir zoom"
             disabled={zoom <= 8}
           >
@@ -772,7 +773,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={recenter}
-            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
+            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
             aria-label="Recentrar mapa"
             aria-pressed={following}
           >
@@ -781,7 +782,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={fitStations}
-            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
+            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
             aria-label="Ver todos"
             title={routePoints.length > 1 ? "Enquadrar percurso" : "Ver todos os lugares"}
           >
@@ -790,7 +791,7 @@ export default function TileStationMap({
 
         </div>
 
-        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"><Layers className="size-4" /></button>}
+        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"><Layers className="size-4" /></button>}
 
         <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
@@ -841,7 +842,7 @@ export default function TileStationMap({
                   <button
                     type="button"
                     onClick={() => onPlanDestination(selected)}
-                    className="min-h-11 min-w-0 rounded-lg bg-primary px-2 text-xs font-black text-[#163840]"
+                    className="min-h-11 min-w-0 rounded-lg bg-primary px-2 text-xs font-black text-primary-foreground"
                   >
                     Planejar até aqui
                   </button>
@@ -849,15 +850,13 @@ export default function TileStationMap({
                 <button
                   type="button"
                   onClick={() =>
-                    window.open(
+                    openExternalUrl(
                       buildGoogleMapsDirectionsUrl(
                         "",
                         selected.lat + "," + selected.lng,
                         travelMode === "cycling" ? "bicycling" : travelMode,
                         true
-                      ),
-                      "_blank",
-                      "noopener,noreferrer"
+                      )
                     )
                   }
                   className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg bg-[#163840] px-2 text-xs font-black text-white"
@@ -869,13 +868,11 @@ export default function TileStationMap({
                     <button
                       type="button"
                       onClick={() =>
-                        window.open(
+                        openExternalUrl(
                           buildWazeNavigationUrl(selected.address, {
                             lat: selected.lat,
                             lng: selected.lng,
-                          }),
-                          "_blank",
-                          "noopener,noreferrer"
+                          })
                         )
                       }
                       className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
@@ -885,12 +882,10 @@ export default function TileStationMap({
                     <button
                       type="button"
                       onClick={() =>
-                        window.open(
+                        openExternalUrl(
                           buildAppleMapsDirectionsUrl(
                             selected.lat + "," + selected.lng
-                          ),
-                          "_blank",
-                          "noopener,noreferrer"
+                          )
                         )
                       }
                       className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"

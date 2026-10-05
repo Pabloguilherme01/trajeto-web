@@ -204,7 +204,7 @@ export default function CityMap() {
       <div>
         <MapPin className="mx-auto size-8 text-primary" />
         <p className="mt-3 font-black">Destinos disponíveis neste aparelho</p>
-        <p className="mt-2 max-w-sm text-sm text-white/70">
+        <p className="mt-2 max-w-sm text-sm text-foreground/70">
           O mapa de ruas precisa de conexão. Use a lista abaixo para preparar
           sua viagem offline.
         </p>
@@ -213,22 +213,22 @@ export default function CityMap() {
   );
   const fallback = markers.length ? <OfflineStationMap stations={markers} itemLabel="destino" onPlanDestination={item => plan(plannerDestinationFromMapItem(item))} /> : emptyFallback;
   return (
-    <main className="visual-shell mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-white sm:px-6">
+    <main className="visual-shell mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-foreground sm:px-6">
       <p className="text-xs font-black uppercase tracking-[.16em] text-primary">
         Explore Águas Lindas
       </p>
       <h1 className="mt-2 text-3xl font-black tracking-[-.04em] sm:text-4xl">
         A cidade no seu caminho
       </h1>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
+      <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
         Saúde, serviços, compras e paradas. Escolha um destino e veja sua rota
         no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-white/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo disponíveis por nome, CNPJ, atividade ou bairro · consulta local"}</p>
-      {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-white/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo disponíveis por nome, CNPJ, atividade ou bairro · consulta local"}</p>
+      {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <section className="mt-5" aria-labelledby="city-search-label">
-        <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-white/65">Buscar na cidade</label>
-        <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-card px-3">
+        <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-foreground/65">Buscar na cidade</label>
+        <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-border/10 bg-card px-3">
           <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
           <input
             id="city-map-search"
@@ -240,11 +240,11 @@ export default function CityMap() {
             enterKeyHint="search"
             autoComplete="off"
             placeholder="Lugar, bairro, rua ou serviço"
-            className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/55"
+            className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/55"
           />
-          {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-white/65 hover:bg-white/[.04] hover:text-white"><X className="size-4" aria-hidden="true" /></button>}
+          {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
         </div>
-        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-white/60">A busca ignora acentos e combina nome, bairro, rua, serviço e dados cadastrados.</p>
+        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">A busca ignora acentos e combina nome, bairro, rua, serviço e dados cadastrados.</p>
       </section>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
@@ -259,12 +259,12 @@ export default function CityMap() {
         }}
         className="mt-3"
       />
-      <p className="mt-2 text-xs text-white/60" role="status" aria-live="polite">
+      <p className="mt-2 text-xs text-foreground/60" role="status" aria-live="polite">
         {query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
       <div
         role="group"
-        className="my-3 flex flex-wrap gap-2"
+        className="my-3 -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-label="Categorias do mapa"
       >
         {ROUTE_DESTINATION_CATEGORIES.map(({ value, label }) => (
@@ -274,20 +274,20 @@ export default function CityMap() {
             aria-pressed={!onlyStreets && category === value}
             onClick={() => applyCategory(value)}
             className={
-              "min-h-11 rounded-full border px-4 text-sm font-bold " +
+              "min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " +
               (!onlyStreets && category === value
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-white/15 bg-white/5 text-white/80")
+                : "border-border/15 bg-muted/5 text-foreground/80")
             }
           >
             {label}
           </button>
         ))}
-        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-amber-300 bg-amber-300 text-primary-foreground" : "border-white/15 bg-white/5 text-white/80")}>Ruas e avenidas</button>
+        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-warning bg-warning text-primary-foreground" : "border-border bg-muted/40 text-foreground/80")}>Ruas e avenidas</button>
       </div>
       <section
         aria-label="Mapa da cidade"
-        className="premium-card overflow-hidden rounded-3xl border border-white/15"
+        className="premium-card overflow-hidden rounded-3xl border border-border/15"
       >
         <MapExplorerFrame label="Mapa da cidade">
         {online && markers.length ? (
@@ -302,19 +302,19 @@ export default function CityMap() {
         )}
         </MapExplorerFrame>
       </section>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white/65">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-foreground/65">
         <span>
           {markers.length} posições exibidas (até 200) · {destinations.length + atlasDestinations.length} destinos
           na lista
         </span>
         <Link
           href={appUrl("/mapa/postos")}
-          className="flex min-h-11 items-center rounded-xl border border-white/15 px-3 font-bold"
+          className="flex min-h-11 items-center rounded-xl border border-border/15 px-3 font-bold"
         >
           Mapa e consulta de postos
         </Link>
       </div>
-      <p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-white/60">
+      <p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-foreground/60">
         <ShieldCheck className="size-4 shrink-0" />O mapa não solicita sua
         localização. Somente destinos com coordenadas cadastradas aparecem como
         marcadores; os demais continuam na lista.
@@ -333,7 +333,7 @@ export default function CityMap() {
                 <MapPin className="mt-1 size-5 shrink-0 text-primary" />
                 <div className="min-w-0">
                   <p className="break-words text-sm font-black">{item.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-white/65">{item.detail}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-foreground/65">{item.detail}</p>
                 </div>
               </div>
               <div className="mt-3">
@@ -344,11 +344,11 @@ export default function CityMap() {
         </div>
         {!destinations.length && !atlasDestinations.length && (
           markers.length ? (
-            <p role="status" className="mt-3 text-sm text-white/70">
+            <p role="status" className="mt-3 text-sm text-foreground/70">
               Os resultados encontrados estão no mapa acima. Toque em um ponto para planejar a rota.
             </p>
           ) : (
-            <p role="status" className="mt-3 text-sm text-white/70">
+            <p role="status" className="mt-3 text-sm text-foreground/70">
               Nenhum destino encontrado. Tente outro nome ou categoria.
             </p>
           )
@@ -364,11 +364,11 @@ export default function CityMap() {
                 Mais lugares de Águas Lindas
               </h2>
             </div>
-            <span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black text-white/55">
+            <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-foreground/55">
               {atlasDestinations.length}
             </span>
           </div>
-          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-white/55">
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-foreground/55">
             Escolas, bairros, ruas e serviços com a fonte indicada em cada ficha. Pontos centrais de vias são referências aproximadas; confirme a entrada do destino.
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -392,17 +392,17 @@ export default function CityMap() {
                     <Database className="mt-1 size-4 shrink-0 text-accent" />
                     <div className="min-w-0">
                       <p className="break-words text-sm font-black">{item.name}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-white/60">{item.detail}</p>
-                      {item.business && <details className="mt-2 break-words text-xs text-white/60"><summary className="min-h-8 cursor-pointer font-bold">Dados da empresa</summary><p>Razão social: {item.business.legalName}</p><p>CNAE: {item.business.cnae} · Porte: {item.business.size}</p><p>Abertura: {item.business.opened} · Situação informada em: {item.business.statusDate}</p><p>MEI: {item.business.mei} · Simples: {item.business.simples}</p><p>{item.business.nature}</p></details>}
+                      <p className="mt-1 text-xs leading-relaxed text-foreground/60">{item.detail}</p>
+                      {item.business && <details className="mt-2 break-words text-xs text-foreground/60"><summary className="min-h-8 cursor-pointer font-bold">Dados da empresa</summary><p>Razão social: {item.business.legalName}</p><p>CNAE: {item.business.cnae} · Porte: {item.business.size}</p><p>Abertura: {item.business.opened} · Situação informada em: {item.business.statusDate}</p><p>MEI: {item.business.mei} · Simples: {item.business.simples}</p><p>{item.business.nature}</p></details>}
                       {item.coordinateLabel && typeof item.lat !== "number" && <p className="mt-1 text-xs text-warning">{item.coordinateLabel} · confirme o endereço antes de viajar</p>}
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{item.address}</p>}
-                      <p className="mt-2 break-words text-xs leading-relaxed text-white/60">
+                      <p className="mt-2 break-words text-xs leading-relaxed text-foreground/60">
                         {item.sourceUrl ? (
                           <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{item.sourceLabel}</a>
                         ) : item.sourceLabel}
                       </p>
                       {typeof item.lat === "number" && typeof item.lng === "number" && (
-                        <p className="mt-1 break-words text-xs text-white/60">
+                        <p className="mt-1 break-words text-xs text-foreground/60">
                           {item.coordinateLabel || (item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas")}: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
                         </p>
                       )}
@@ -427,7 +427,7 @@ export default function CityMap() {
         </section>
       )}
 
-      <details className="mt-6 rounded-2xl border border-white/10 p-4 text-xs text-white/65">
+      <details className="mt-6 rounded-2xl border border-border/10 p-4 text-xs text-foreground/65">
         <summary className="min-h-8 cursor-pointer font-bold">
           Fontes das posições no mapa
         </summary>

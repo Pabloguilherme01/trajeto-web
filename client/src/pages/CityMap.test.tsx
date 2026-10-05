@@ -81,6 +81,13 @@ it("filters education routes without mixing health or shopping destinations", ()
 });
 
 
+it("keeps map categories in a compact horizontal rail on mobile", () => {
+  render(<CityMap />);
+  const categories = screen.getByRole("group", { name: "Categorias do mapa" });
+  expect(categories.className).toContain("overflow-x-auto");
+  expect(categories.className).toContain("snap-x");
+});
+
 it("keeps quick filters compatible when switching categories and street mode", () => {
   render(<CityMap />);
   const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;

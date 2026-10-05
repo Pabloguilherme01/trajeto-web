@@ -168,6 +168,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Unidades de Saúde do município",
     category: "saude",
     description: "Lista oficial com Hospital, ESF e UBS de Águas Lindas.",
+    keywords: ["vacina", "vacinacao", "posto de saude", "ubs", "esf", "consulta basica"],
     address: "Diversas unidades na cidade",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
@@ -591,6 +592,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Secretaria Municipal de Educação",
     category: "educacao",
     description: "Atendimento da rede municipal de educação.",
+    keywords: ["matricula", "matricula escolar", "vaga escola", "rede municipal", "transferencia escolar"],
     phone: "(61) 92002-3791 / (61) 92002-3483",
     extraPhone: "(61) 92002-3774",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -933,6 +935,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     category: "cidadania",
     description:
       "Unidade com atendimento de órgãos como Detran, INSS, Saneago e SINE.",
+    keywords: ["emprego", "sine", "trabalho", "vaga de emprego", "seguro desemprego"],
     address:
       "Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás - GO, 72910-000",
     hours: "Segunda a sexta, 8h–17h; sem atendimento aos sábados",
@@ -954,6 +957,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     category: "transito",
     description:
       "Canal local listado pela Prefeitura para atendimento do Detran.",
+    keywords: ["cnh", "habilitacao", "licenciamento", "veiculo", "detran go"],
     phone: "(61) 3613-4058",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
@@ -1037,6 +1041,26 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Reclamação municipal",
     query: "ouvidoria municipal",
     hint: "Ouvidoria e orientação",
+  },
+  {
+    label: "Vacina e UBS",
+    query: "vacina",
+    hint: "Rede municipal de saúde",
+  },
+  {
+    label: "Matrícula escolar",
+    query: "matricula",
+    hint: "Secretaria Municipal de Educação",
+  },
+  {
+    label: "Emprego e SINE",
+    query: "emprego",
+    hint: "Atendimento disponível no Vapt Vupt",
+  },
+  {
+    label: "CNH e veículo",
+    query: "cnh",
+    hint: "Detran-GO",
   },
 ] as const;
 
