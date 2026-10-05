@@ -9,7 +9,7 @@ test("mobile directory remains readable with enlarged text and closes after choo
   await page.evaluate(() =>
     document.documentElement.classList.add("a11y-large")
   );
-  await page.getByRole("button", { name: "Mais opções" }).click();
+  await page.getByRole("button", { name: "Explorar" }).click();
   const dialog = page.getByRole("dialog");
   for (const name of [
     "Buscar no Trajeto",
