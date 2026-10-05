@@ -67,7 +67,8 @@ export default function MapExplorerFrame({
       document.removeEventListener("keydown", keydown);
       document.body.style.overflow = previousOverflow;
       if (element && parent) parent.insertBefore(element, nextSibling ?? null);
-      if (previousFocus?.isConnected) previousFocus.focus();
+      if (toggle.current?.isConnected) toggle.current.focus({ preventScroll: true });
+      else if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [expanded]);
   return (
