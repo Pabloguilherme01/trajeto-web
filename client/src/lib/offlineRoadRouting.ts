@@ -41,16 +41,28 @@ type GraphEdge = {
 type Graph = {
   nodes: Map<string, OfflineRoadPoint>;
   edges: Map<string, GraphEdge[]>;
-  searchable: Array<{ key: string; point: OfflineRoadPoint }>;
+  spatial: Map<string, Array<{ key: string; point: OfflineRoadPoint }>>;
+  referenceLat: number;
   maxSpeedMps: number;
 };
 
 const GRAPH_CACHE = new Map<OfflineRoadMode, Promise<Graph>>();
 const MAP_URL = "/data/aguas-lindas-offline-map.json";
 const MAX_SNAP_METERS = 320;
+const SNAP_GRID_METERS = 200;
+const NODE_COORDINATE_TOLERANCE_METERS = 5;
 const MAX_VISITED_NODES = 65000;
 
 const toRad = (value: number) => (value * Math.PI) / 180;
+
+function isRoadPoint(point: OfflineRoadPoint) {
+  return (
+    Number.isFinite(point.lat) &&
+    Number.isFinite(point.lng) &&
+    Math.abs(point.lat) <= 90 &&
+    Math.abs(point.lng) <= 180
+  );
+}
 
 function distanceMeters(a: OfflineRoadPoint, b: OfflineRoadPoint) {
   const earthRadiusMeters = 6371000;
@@ -62,6 +74,22 @@ function distanceMeters(a: OfflineRoadPoint, b: OfflineRoadPoint) {
     Math.sin(dLat / 2) ** 2 +
     Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
   return earthRadiusMeters * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
+function metricPoint(point: OfflineRoadPoint, referenceLat: number) {
+  const cosLat = Math.max(0.01, Math.cos(toRad(referenceLat)));
+  return {
+    x: point.lng * 111_320 * cosLat,
+    y: point.lat * 110_574,
+  };
+}
+
+function spatialKey(point: { x: number; y: number }) {
+  return (
+    Math.floor(point.x / SNAP_GRID_METERS) +
+    ":" +
+    Math.floor(point.y / SNAP_GRID_METERS)
+  );
 }
 
 function speedKmh(mode: OfflineRoadMode, kind: string) {
@@ -128,14 +156,25 @@ function buildGraph(pack: PackedMap, mode: OfflineRoadMode): Graph {
     for (let index = 1; index < road.points.length; index += 1) {
       const [fromLat, fromLng] = road.points[index - 1];
       const [toLat, toLng] = road.points[index];
-      if (![fromLat, fromLng, toLat, toLng].every(Number.isFinite)) continue;
       const fromPoint = { lat: fromLat, lng: fromLng };
       const toPoint = { lat: toLat, lng: toLng };
+      if (!isRoadPoint(fromPoint) || !isRoadPoint(toPoint)) continue;
       const from = String(road.nodeIds[index - 1]);
       const to = String(road.nodeIds[index]);
       if (from === to) continue;
-      nodes.set(from, nodes.get(from) ?? fromPoint);
-      nodes.set(to, nodes.get(to) ?? toPoint);
+      const existingFrom = nodes.get(from);
+      const existingTo = nodes.get(to);
+      if (
+        (existingFrom &&
+          distanceMeters(existingFrom, fromPoint) >
+            NODE_COORDINATE_TOLERANCE_METERS) ||
+        (existingTo &&
+          distanceMeters(existingTo, toPoint) >
+            NODE_COORDINATE_TOLERANCE_METERS)
+      )
+        continue;
+      nodes.set(from, existingFrom ?? fromPoint);
+      nodes.set(to, existingTo ?? toPoint);
       const meters = distanceMeters(fromPoint, toPoint);
       if (!Number.isFinite(meters) || meters < 0.5 || meters > 2500) continue;
       const durationSeconds = meters / Math.max(1, speedMps);
@@ -153,10 +192,25 @@ function buildGraph(pack: PackedMap, mode: OfflineRoadMode): Graph {
   }
 
   if (nodes.size < 2 || edges.size < 1) throw new Error("Malha viária offline vazia");
+  const referenceLat =
+    Array.from(nodes.values()).reduce((sum, point) => sum + point.lat, 0) /
+    nodes.size;
+  const spatial = new Map<
+    string,
+    Array<{ key: string; point: OfflineRoadPoint }>
+  >();
+  for (const [key, point] of nodes) {
+    const bucketKey = spatialKey(metricPoint(point, referenceLat));
+    const bucket = spatial.get(bucketKey);
+    const entry = { key, point };
+    if (bucket) bucket.push(entry);
+    else spatial.set(bucketKey, [entry]);
+  }
   return {
     nodes,
     edges,
-    searchable: Array.from(nodes, ([key, point]) => ({ key, point })),
+    spatial,
+    referenceLat,
     maxSpeedMps: maxSpeed,
   };
 }
@@ -174,12 +228,23 @@ async function graphFor(mode: OfflineRoadMode) {
 }
 
 function nearestNode(graph: Graph, target: OfflineRoadPoint) {
-  let best: { key: string; point: OfflineRoadPoint; meters: number } | null = null;
-  for (const candidate of graph.searchable) {
-    const meters = distanceMeters(target, candidate.point);
-    if (!best || meters < best.meters) best = { ...candidate, meters };
+  if (!isRoadPoint(target)) return null;
+  const metric = metricPoint(target, graph.referenceLat);
+  const cellX = Math.floor(metric.x / SNAP_GRID_METERS);
+  const cellY = Math.floor(metric.y / SNAP_GRID_METERS);
+  const radius = Math.ceil(MAX_SNAP_METERS / SNAP_GRID_METERS) + 1;
+  let best: { key: string; point: OfflineRoadPoint; meters: number } | null =
+    null;
+  for (let x = cellX - radius; x <= cellX + radius; x++) {
+    for (let y = cellY - radius; y <= cellY + radius; y++) {
+      for (const candidate of graph.spatial.get(`${x}:${y}`) ?? []) {
+        const meters = distanceMeters(target, candidate.point);
+        if (meters <= MAX_SNAP_METERS && (!best || meters < best.meters))
+          best = { ...candidate, meters };
+      }
+    }
   }
-  return best && best.meters <= MAX_SNAP_METERS ? best : null;
+  return best;
 }
 
 class MinHeap {
@@ -304,7 +369,7 @@ export async function calculateOfflineRoadRoute(
   destination: OfflineRoadPoint,
   mode: OfflineRoadMode
 ): Promise<OfflineRoadRoute | null> {
-  if (![origin.lat, origin.lng, destination.lat, destination.lng].every(Number.isFinite)) return null;
+  if (!isRoadPoint(origin) || !isRoadPoint(destination)) return null;
   const graph = await graphFor(mode).catch(() => null);
   if (!graph) return null;
   const start = nearestNode(graph, origin);
