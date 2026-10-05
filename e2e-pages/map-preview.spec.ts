@@ -23,7 +23,7 @@ test("Pages: route preview controls and real geometry remain available offline a
     { waitUntil: "domcontentloaded" }
   );
   await page
-    .getByRole("button", { name: "Calcular rota", exact: true })
+    .getByRole("button", { name: "Ir até aqui", exact: true })
     .click();
   await expect(page.getByRole("button", { name: "Ocultar mapa", exact: true })).toBeVisible();
   const map = page.getByRole("region", { name: /Mapa (independente|offline) da viagem/ });
@@ -69,7 +69,7 @@ test("Pages: route preview controls and real geometry remain available offline a
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
   await page
-    .getByRole("button", { name: "Calcular rota", exact: true })
+    .getByRole("button", { name: "Ir até aqui", exact: true })
     .click();
   await expect(page.getByRole("button", { name: "Ocultar mapa", exact: true })).toBeVisible();
   await expect(
