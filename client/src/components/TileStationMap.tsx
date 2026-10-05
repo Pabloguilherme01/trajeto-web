@@ -4,6 +4,7 @@ import {
   buildAppleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrl,
   buildWazeNavigationUrl,
+  openExternalUrl,
 } from "@/lib/mobileTools";
 import type { StationMapItem } from "@/components/StationMap";
 
@@ -736,14 +737,14 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-16 top-20 z-20 flex flex-wrap gap-2"
+            className="absolute left-3 right-16 top-20 z-20 flex snap-x gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {routeEndpoints.map(point => (
               <button
                 key={stationKey(point)}
                 type="button"
                 onClick={() => focusEndpoint(point)}
-                className="min-h-11 rounded-xl bg-white/95 px-3 text-xs font-bold text-[#163840] shadow-md focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+                className="min-h-11 shrink-0 snap-start rounded-xl bg-white/95 px-3 text-xs font-bold text-[#163840] shadow-md focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
               >
                 {point.id === "origin" ? "Ver origem" : "Ver destino"}
               </button>
@@ -849,15 +850,13 @@ export default function TileStationMap({
                 <button
                   type="button"
                   onClick={() =>
-                    window.open(
+                    openExternalUrl(
                       buildGoogleMapsDirectionsUrl(
                         "",
                         selected.lat + "," + selected.lng,
                         travelMode === "cycling" ? "bicycling" : travelMode,
                         true
-                      ),
-                      "_blank",
-                      "noopener,noreferrer"
+                      )
                     )
                   }
                   className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg bg-[#163840] px-2 text-xs font-black text-white"
@@ -869,13 +868,11 @@ export default function TileStationMap({
                     <button
                       type="button"
                       onClick={() =>
-                        window.open(
+                        openExternalUrl(
                           buildWazeNavigationUrl(selected.address, {
                             lat: selected.lat,
                             lng: selected.lng,
-                          }),
-                          "_blank",
-                          "noopener,noreferrer"
+                          })
                         )
                       }
                       className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
@@ -885,12 +882,10 @@ export default function TileStationMap({
                     <button
                       type="button"
                       onClick={() =>
-                        window.open(
+                        openExternalUrl(
                           buildAppleMapsDirectionsUrl(
                             selected.lat + "," + selected.lng
-                          ),
-                          "_blank",
-                          "noopener,noreferrer"
+                          )
                         )
                       }
                       className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
