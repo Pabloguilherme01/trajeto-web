@@ -252,13 +252,14 @@ export default function OfflineMapCanvas({
     return true;
   });
   const markerGroups = mapMarkerGroups(displayedMarkers, project, marker => zoom >= 6 || marker.id === selectedMarkerId || ["origin", "destination", "live-position", "device-location"].includes(marker.id));
-  const path = (points: MapPoint[]) =>
-    points
-      .map((point, i) => {
-        const p = project(point);
-        return `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
-      })
-      .join(" ");
+  const geometryPath = useMemo(
+    () =>
+      geometry
+        .map(point => world(point))
+        .map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(8)} ${point.y.toFixed(8)}`)
+        .join(" "),
+    [fingerprint]
+  );
   // Project and bound each road once per pack, rather than walking every
   // coordinate on each gesture. Only visible roads become SVG paths.
   const roads = useMemo(
@@ -277,7 +278,10 @@ export default function OfflineMapCanvas({
           bounds.minY = Math.min(bounds.minY, point.y);
           bounds.maxY = Math.max(bounds.maxY, point.y);
         }
-        return { ...road, priority: roadPriority(road.kind), world: points, bounds };
+        const path = points
+          .map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(8)} ${point.y.toFixed(8)}`)
+          .join(" ");
+        return { ...road, priority: roadPriority(road.kind), world: points, bounds, path };
       }).sort((a, b) => a.priority - b.priority) ?? [],
     [pack]
   );
@@ -294,6 +298,7 @@ export default function OfflineMapCanvas({
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
+  const mapTransform = `translate(${size.width / 2 + pan.x - camera.x * camera.scale} ${size.height / 2 + pan.y - camera.y * camera.scale}) scale(${camera.scale})`;
   const metresPerPixel =
     groundMetresPerPixel(camera.y - pan.y / camera.scale, camera.scale);
   const scaleMetres =
@@ -417,73 +422,74 @@ export default function OfflineMapCanvas({
           className="absolute inset-0"
         >
           <title>Ruas locais salvas e pontos da viagem</title>
-          {visible.map(road => {
-            const priority = road.priority;
-            const major = priority >= 2;
-            const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
-            const d = road.world
-              .map(
-                (p, i) =>
-                  `${i ? "L" : "M"}${(size.width / 2 + (p.x - camera.x) * camera.scale + pan.x).toFixed(1)} ${(size.height / 2 + (p.y - camera.y) * camera.scale + pan.y).toFixed(1)}`
-              )
-              .join(" ");
-            return (
-              <g key={road.id}>
+          <g data-offline-world-layer transform={mapTransform}>
+            {visible.map(road => {
+              const priority = road.priority;
+              const major = priority >= 2;
+              const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
+              return (
+                <g key={road.id}>
+                  <path
+                    d={road.path}
+                    fill="none"
+                    stroke={dark ? "#263e48" : major ? "#d6c9a8" : "#d6ddd0"}
+                    strokeWidth={width + (major ? 2.5 : 1.5)}
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <path
+                    d={road.path}
+                    fill="none"
+                    stroke={
+                      dark
+                        ? major
+                          ? "#60777d"
+                          : "#40585e"
+                        : major
+                          ? "#ffe9b3"
+                          : "#ffffff"
+                    }
+                    strokeWidth={width}
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </g>
+              );
+            })}
+            {geometry.length > 1 && (
+              <>
                 <path
-                  d={d}
+                  data-offline-route-geometry
+                  d={geometryPath}
                   fill="none"
-                  stroke={dark ? "#263e48" : major ? "#d6c9a8" : "#d6ddd0"}
-                  strokeWidth={width + (major ? 2.5 : 1.5)}
+                  stroke={dark ? "#07191f" : "#ffffff"}
+                  strokeWidth="11"
+                  strokeOpacity="0.92"
                   strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
                 />
                 <path
-                  d={d}
+                  d={geometryPath}
                   fill="none"
                   stroke={
-                    dark
-                      ? major
-                        ? "#60777d"
-                        : "#40585e"
-                      : major
-                        ? "#ffe9b3"
-                        : "#ffffff"
+                    estimated
+                      ? dark
+                        ? "#819399"
+                        : "#718287"
+                      : dark
+                        ? "#50F3EA"
+                        : "#1a73e8"
                   }
-                  strokeWidth={width}
+                  strokeWidth="6"
+                  strokeDasharray={estimated ? "8 8" : undefined}
                   strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
                 />
-              </g>
-            );
-          })}
-          {geometry.length > 1 && (
-            <>
-              <path
-                d={path(geometry)}
-                fill="none"
-                stroke={dark ? "#07191f" : "#ffffff"}
-                strokeWidth="11"
-                strokeOpacity="0.92"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d={path(geometry)}
-                fill="none"
-                stroke={
-                  estimated
-                    ? dark
-                      ? "#819399"
-                      : "#718287"
-                    : dark
-                      ? "#50F3EA"
-                      : "#1a73e8"
-                }
-                strokeWidth="6"
-                strokeDasharray={estimated ? "8 8" : undefined}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </>
-          )}
+              </>
+            )}
+          </g>
           {namedRoads
             .filter(
               road =>
