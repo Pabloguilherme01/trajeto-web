@@ -232,43 +232,46 @@ export default function TileStationMap({
     return result;
   }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
 
-  const markerWorldPixels = useMemo(() => {
+  const clusterZoom = Math.min(17, Math.floor(zoom));
+  const clusterScale = 2 ** clusterZoom;
+  const clusterToCurrentScale = 2 ** (zoom - clusterZoom);
+  const markerClusterPixels = useMemo(() => {
     const result = new Map<string, { x: number; y: number }>();
     for (const station of drawable) {
       const base = drawableWorld.get(stationKey(station));
       if (!base) continue;
       result.set(stationKey(station), {
-        x: base.x * zoomScale,
-        y: base.y * zoomScale,
+        x: base.x * clusterScale,
+        y: base.y * clusterScale,
       });
     }
     return result;
-  }, [drawable, drawableWorld, zoomScale]);
+  }, [drawable, drawableWorld, clusterScale]);
   const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
   const markerGroups = useMemo(
     () =>
       mapMarkerGroups(
         drawable,
-        item => markerWorldPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
+        item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
         item =>
-          zoom >= 17 ||
+          clusterZoom >= 17 ||
           stationKey(item) === selectedId ||
           ["origin", "destination"].includes(item.id ?? "")
       ),
-    [drawable, markerWorldPixels, selectedId, zoom]
+    [drawable, markerClusterPixels, selectedId, clusterZoom]
   );
   const markerPositions = useMemo(() => {
     const result = new Map<string, { left: number; top: number }>();
     for (const station of markerGroups.singles) {
-      const world = markerWorldPixels.get(stationKey(station));
-      if (!world) continue;
+      const base = drawableWorld.get(stationKey(station));
+      if (!base) continue;
       result.set(stationKey(station), {
-        left: width / 2 + world.x - centerPx.x,
-        top: height / 2 + world.y - centerPx.y,
+        left: width / 2 + base.x * zoomScale - centerPx.x,
+        top: height / 2 + base.y * zoomScale - centerPx.y,
       });
     }
     return result;
-  }, [markerGroups, markerWorldPixels, width, height, centerPx.x, centerPx.y]);
+  }, [markerGroups, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
   const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
   const routeWorld = useMemo(
     () => routePoints.map(point => projectBase(point.lat, point.lng)),
@@ -567,12 +570,14 @@ export default function TileStationMap({
           )}
           <div className="pointer-events-none absolute inset-0">
             {markerGroups.groups.map(group => {
-              const left = width / 2 + group.x - centerPx.x;
-              const top = height / 2 + group.y - centerPx.y;
+              const worldX = group.x * clusterToCurrentScale;
+              const worldY = group.y * clusterToCurrentScale;
+              const left = width / 2 + worldX - centerPx.x;
+              const top = height / 2 + worldY - centerPx.y;
               if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
               return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
                 setFollowing(false);
-                setCenter(unproject(group.x, group.y, zoom));
+                setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
               }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left, top }}>{group.items.length}</button>;
             })}
