@@ -37,10 +37,10 @@ export default function QuickFilterChips({
               "min-h-11 shrink-0 rounded-full border px-3 text-xs font-black transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 " +
               (variant === "light"
                 ? active
-                  ? "border-accent/45 bg-accent/12 text-accent focus-visible:outline-ring"
-                  : "border-border bg-card/95 text-card-foreground hover:border-accent/35 focus-visible:outline-ring"
+                  ? "border-accent/40 bg-accent/10 text-accent focus-visible:outline-ring"
+                  : "border-border bg-card/95 text-card-foreground hover:border-accent/30 focus-visible:outline-ring"
                 : active
-                  ? "border-primary/55 bg-primary/15 text-primary focus-visible:outline-ring"
+                  ? "border-primary/50 bg-primary/10 text-primary focus-visible:outline-ring"
                   : "border-border/60 bg-muted/40 text-foreground/80 hover:border-accent/30 hover:text-foreground focus-visible:outline-ring")
             }
           >
