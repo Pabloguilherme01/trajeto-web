@@ -1,4 +1,5 @@
 import React from "react";
+import MapPlaceActions from "@/components/MapPlaceActions";
 import MapDestinationPicker from "@/components/MapDestinationPicker";
 import { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
@@ -121,6 +122,7 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
         <button type="button" onClick={() => window.open(buildWazeNavigationUrl(selected.address, { lat: selected.lat, lng: selected.lng }), "_blank", "noopener,noreferrer")} className="grid size-11 place-items-center rounded-xl border border-black/10" aria-label="Navegar pelo Waze"><span className="text-xs font-black">WZ</span></button>
         <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(selected.lat + "," + selected.lng), "_blank", "noopener,noreferrer")} className="grid size-11 place-items-center rounded-xl border border-black/10" aria-label="Navegar pelo Apple Maps"><Apple className="size-4" /></button>
       </div>}
+      {selected && <MapPlaceActions place={selected} />}
       <p className="mt-3 text-xs text-[#607169]">{stations.length} posições locais · ruas da área urbana cadastrada · sem trânsito ao vivo</p>
     </div>
   </div>;
