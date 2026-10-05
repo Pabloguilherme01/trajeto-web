@@ -101,10 +101,17 @@ describe("mobile tools", () => {
   });
 
   it("opens external URLs through one safe browser boundary", () => {
-    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    const open = vi.fn();
+    vi.stubGlobal("window", { open });
     openExternalUrl("https://example.com/destino");
     expect(open).toHaveBeenCalledWith("https://example.com/destino", "_blank", "noopener,noreferrer");
-    open.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it("does not try to open external URLs outside the browser", () => {
+    vi.stubGlobal("window", undefined);
+    expect(() => openExternalUrl("https://example.com/destino")).not.toThrow();
+    vi.unstubAllGlobals();
   });
 
   it("uses the native share API when available", async () => {
