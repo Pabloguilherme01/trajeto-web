@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, rememberIntent, rememberSearch, type RecentTrip } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
-import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { buildNearbyStationsUrl, shareText, vibration } from "@/lib/mobileTools";
 import { useProductEvents } from "@/hooks/useProductEvents";
@@ -305,33 +304,6 @@ export default function Home() {
             ))}
           </div>
           <p className="mt-2 text-xs leading-relaxed text-white/60">Os atalhos de emergência ficam disponíveis na interface sem depender do catálogo online.</p>
-        </section>
-
-        <section className="mt-5" aria-labelledby="local-routes-title">
-          <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-accent">Rotas locais</p>
-              <h2 id="local-routes-title" className="mt-1 text-xl font-black tracking-[-.035em]">Já deixe o destino pronto.</h2>
-            </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-black text-white/55">Ver catálogo</button>
-          </div>
-          <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
-            {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
-              <button
-                key={route.id}
-                type="button"
-                onClick={() => {
-                  rememberIntent("route");
-                  setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
-                }}
-                className="premium-card mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-card p-3 text-left transition hover:border-accent/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
-              >
-                <Route className="size-4 text-accent" aria-hidden="true" />
-                <span className="mt-2 block break-words text-sm font-black">{route.label}</span>
-                <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-white/65">{route.detail}</span>
-              </button>
-            ))}
-          </div>
         </section>
 
         <section className="mt-5" aria-labelledby="local-guide-home-title">
