@@ -26,7 +26,7 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
     if (item.key === "more")
       return (
         moreOpen ||
-        ["/mapa", "/buscar", "/postos", "/local", "/explorar", "/dados", "/ajuda"].some(
+        ["/mapa", "/buscar", "/postos", "/local", "/dados", "/ajuda"].some(
           matchesPath
         )
       );
