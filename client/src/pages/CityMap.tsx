@@ -8,6 +8,7 @@ import MapExplorerFrame from "@/components/MapExplorerFrame";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import { CITY_MAP_QUICK_FILTERS, isQuickFilterValue, quickFilterCategory, quickFilterMatchesCategory } from "@/lib/quickFilterPresets";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
 import {
   BUNDLED_CITY_ATLAS,
@@ -31,16 +32,6 @@ import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMap
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
 import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
-
-const CITY_MAP_QUICK_FILTERS = [
-  { label: "UPA", value: "upa", category: "saude" },
-  { label: "Postos", value: "posto", category: "combustivel" },
-  { label: "Mercados", value: "mercado", category: "compras" },
-  { label: "Escolas", value: "escola", category: "educacao" },
-  { label: "Prefeitura", value: "prefeitura", category: "servicos" },
-  { label: "Shopping", value: "shopping", category: "compras" },
-  { label: "Rodoviária", value: "rodoviaria", category: "transporte" },
-] as const;
 
 export default function CityMap() {
   const [, navigate] = useLocation();
@@ -84,6 +75,19 @@ export default function CityMap() {
   const [onlyStreets, setOnlyStreets] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
+  const applyCategory = (next: RouteDestinationCategoryFilter) => {
+    setOnlyStreets(false);
+    setCategory(next);
+    if (
+      isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) &&
+      !quickFilterMatchesCategory(query, next)
+    ) setQuery("");
+  };
+  const showOnlyStreets = () => {
+    setCategory("todos");
+    setOnlyStreets(true);
+    if (isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS)) setQuery("");
+  };
   const [online, setOnline] = useState(() => navigator.onLine);
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -239,7 +243,11 @@ export default function CityMap() {
           .filter(item => category === "todos" || item.category === category)
           .map(({ label, value }) => ({ label, value }))}
         value={query}
-        onPick={value => { setOnlyStreets(false); setQuery(value); }}
+        onPick={value => {
+          setOnlyStreets(false);
+          setQuery(value);
+          setCategory(quickFilterCategory(value) ?? "todos");
+        }}
         className="mt-3"
       />
       <div
@@ -251,7 +259,7 @@ export default function CityMap() {
             key={value}
             type="button"
             aria-pressed={!onlyStreets && category === value}
-            onClick={() => { setOnlyStreets(false); setCategory(value); }}
+            onClick={() => applyCategory(value)}
             className={
               "min-h-11 rounded-full border px-4 text-sm font-bold " +
               (!onlyStreets && category === value
@@ -262,7 +270,7 @@ export default function CityMap() {
             {label}
           </button>
         ))}
-        <button type="button" aria-pressed={onlyStreets} onClick={() => { setCategory("todos"); setOnlyStreets(true); }} className={"min-h-11 rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-amber-300 bg-amber-300 text-[#102028]" : "border-white/15 bg-white/5 text-white/80")}>Ruas e avenidas</button>
+        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-amber-300 bg-amber-300 text-[#102028]" : "border-white/15 bg-white/5 text-white/80")}>Ruas e avenidas</button>
       </div>
       <section
         aria-label="Mapa da cidade"
