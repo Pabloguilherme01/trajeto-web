@@ -22,6 +22,7 @@ type Road = {
   points: [number, number][];
 };
 type MapPack = { schema: number; retrievedAt: string; roads: Road[] };
+const ROAD_GRID = 4096;
 let packPromise: Promise<MapPack> | undefined;
 export function loadOfflineMapPack() {
   if (!packPromise)
@@ -336,16 +337,57 @@ export default function OfflineMapCanvas({
       }).sort((a, b) => a.priority - b.priority) ?? [],
     [pack]
   );
-  const visible = roads.filter(({ bounds }) => {
+  const roadGrid = useMemo(() => {
+    const buckets = new Map<string, number[]>();
+    roads.forEach((road, index) => {
+      const minX = Math.floor(road.bounds.minX * ROAD_GRID);
+      const maxX = Math.floor(road.bounds.maxX * ROAD_GRID);
+      const minY = Math.floor(road.bounds.minY * ROAD_GRID);
+      const maxY = Math.floor(road.bounds.maxY * ROAD_GRID);
+      for (let x = minX; x <= maxX; x++) {
+        for (let y = minY; y <= maxY; y++) {
+          const key = `${x}:${y}`;
+          const bucket = buckets.get(key);
+          if (bucket) bucket.push(index);
+          else buckets.set(key, [index]);
+        }
+      }
+    });
+    return buckets;
+  }, [roads]);
+  const visible = useMemo(() => {
     const left = size.width / 2 - camera.x * camera.scale + pan.x;
     const top = size.height / 2 - camera.y * camera.scale + pan.y;
-    return (
-      bounds.maxX * camera.scale + left > -80 &&
-      bounds.minX * camera.scale + left < size.width + 80 &&
-      bounds.maxY * camera.scale + top > -80 &&
-      bounds.minY * camera.scale + top < size.height + 80
-    );
-  });
+    const minWorldX = (-80 - left) / camera.scale;
+    const maxWorldX = (size.width + 80 - left) / camera.scale;
+    const minWorldY = (-80 - top) / camera.scale;
+    const maxWorldY = (size.height + 80 - top) / camera.scale;
+    const minCellX = Math.floor(minWorldX * ROAD_GRID);
+    const maxCellX = Math.floor(maxWorldX * ROAD_GRID);
+    const minCellY = Math.floor(minWorldY * ROAD_GRID);
+    const maxCellY = Math.floor(maxWorldY * ROAD_GRID);
+    const cellCount = (maxCellX - minCellX + 1) * (maxCellY - minCellY + 1);
+    const candidates = new Set<number>();
+    if (cellCount > 144) {
+      roads.forEach((_, index) => candidates.add(index));
+    } else {
+      for (let x = minCellX; x <= maxCellX; x++) {
+        for (let y = minCellY; y <= maxCellY; y++) {
+          for (const index of roadGrid.get(`${x}:${y}`) ?? [])
+            candidates.add(index);
+        }
+      }
+    }
+    return [...candidates]
+      .sort((a, b) => a - b)
+      .map(index => roads[index])
+      .filter(({ bounds }) =>
+        bounds.maxX >= minWorldX &&
+        bounds.minX <= maxWorldX &&
+        bounds.maxY >= minWorldY &&
+        bounds.minY <= maxWorldY
+      );
+  }, [roads, roadGrid, size.width, size.height, camera.x, camera.y, camera.scale, pan.x, pan.y]);
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
