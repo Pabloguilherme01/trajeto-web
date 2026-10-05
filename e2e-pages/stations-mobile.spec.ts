@@ -102,7 +102,7 @@ test("Pages: station search uses compact cards and resets an empty query", async
   await expect(card.getByRole("link", { name: "Navegar", exact: true })).toBeVisible();
   await card.getByText("Mais opções do posto").click();
   await expect(card.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
-  await expect(card.locator("details").filter({ hasText: "Todos os dados disponíveis" })).not.toHaveAttribute("open");
+  await expect(card.locator("details").filter({ hasText: "Sobre os dados deste posto" })).not.toHaveAttribute("open");
   await expect(page.locator("details").filter({ has: page.getByText("Fontes e referências adicionais", { exact: true }) })).not.toHaveAttribute("open");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.getByRole("button", { name: "Abrir mapa", exact: true }).click();
