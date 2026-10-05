@@ -67,7 +67,7 @@ export default function MobileNavigationCenter({
   const status = offline ? "Offline" : snapshot ? `Snapshot salvo${snapshotAge ? ` · ${snapshotAge}` : ""}` : "Dados atuais";
 
   return (
-    <section aria-labelledby="navigation-center-title" className="mt-6 overflow-hidden rounded-[1.5rem] border border-[#C7D4CA] bg-card text-white shadow-[0_22px_70px_rgba(0,0,0,.24)]">
+    <section aria-labelledby="navigation-center-title" className="mt-6 overflow-hidden rounded-[1.5rem] border border-border bg-card text-white shadow-[0_22px_70px_rgba(0,0,0,.24)]">
       <div className="border-b border-white/8 p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -116,7 +116,7 @@ export default function MobileNavigationCenter({
           </div>
         </div>
         {autonomyKm != null && (
-          <div className="mt-3 flex items-center gap-2 rounded-xl border border-primary/15 bg-primary/[.05] px-3 py-2.5 text-xs text-[#E4F9B5]">
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-primary/15 bg-primary/[.05] px-3 py-2.5 text-xs text-primary">
             <Fuel className="size-4 shrink-0" />
             Autonomia estimada: <strong>{autonomyKm.toLocaleString("pt-BR")} km</strong>
           </div>
@@ -142,8 +142,8 @@ export default function MobileNavigationCenter({
         <button type="button" onClick={() => void onSave()} disabled={saved || (offline && snapshot)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-black text-white disabled:cursor-default disabled:opacity-50">
           {saved ? <CheckCircle2 className="size-4 text-primary" /> : <Save className="size-4" />} {saved ? "Salva" : "Salvar"}
         </button>
-        {onGoogleMaps && <button type="button" onClick={onGoogleMaps} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-xs font-black text-[#BCEFFA] disabled:opacity-40"><Map className="size-4" /> Google Maps</button>}
-        {onWaze && <button type="button" onClick={onWaze} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-warning/20 bg-warning/[.05] px-3 text-xs font-black text-[#FFD9AF] disabled:opacity-40">Waze</button>}
+        {onGoogleMaps && <button type="button" onClick={onGoogleMaps} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-xs font-black text-accent disabled:opacity-40"><Map className="size-4" /> Google Maps</button>}
+        {onWaze && <button type="button" onClick={onWaze} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-warning/20 bg-warning/[.05] px-3 text-xs font-black text-warning disabled:opacity-40">Waze</button>}
         {onAppleMaps && <button type="button" onClick={onAppleMaps} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black text-white disabled:opacity-40">Apple Maps</button>}
         {(onGoogleMapsPreferred || onAppleMapsPreferred) && <div className="col-span-2 rounded-xl border border-white/8 bg-white/[.03] p-3 sm:col-span-4">
           <p className="text-xs font-black text-white">Preferência da viagem</p>
@@ -162,7 +162,7 @@ export default function MobileNavigationCenter({
         </div>}
         {onMultiStopNavigate && <div className="col-span-2 rounded-xl border border-white/8 bg-white/[.03] p-3 sm:col-span-4"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black text-white">Múltiplas paradas</p><p id="multi-stop-help" className="mt-1 text-[0.62rem] text-muted-foreground">{stops.length < 3 ? `Até 3 paradas · ${stops.length}/3 adicionadas.` : "Limite de 3 paradas atingido."}</p></div></div>{stops.map((stop, index) => <div key={stop + index} className="mt-2 flex items-center gap-2 rounded-lg bg-white/[.04] px-3 py-2 text-xs text-white"><span className="font-black text-primary">{index + 1}</span><span className="min-w-0 flex-1 truncate">{stop}</span><button type="button" aria-label={"Remover parada " + (index + 1)} onClick={() => removeStop(index)}><X className="size-3.5" /></button></div>)}{stops.length < 3 && <div className="mt-2 flex gap-2"><input value={stopDraft} onChange={event => setStopDraft(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); addStop(); } }} inputMode="text" enterKeyHint="done" placeholder="Ex.: posto, endereço ou cidade" className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[.04] px-3 py-3 text-xs text-white outline-none placeholder:text-muted-foreground" aria-label="Nova parada" aria-describedby="multi-stop-help" /><button type="button" onClick={addStop} className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-white/[.08] px-3 text-xs font-black"><Plus className="size-4" />Adicionar</button></div>}{stops.length > 0 && onMultiStopNavigate && <button type="button" onClick={() => onMultiStopNavigate(stops)} className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-xs font-black text-background"><Navigation className="size-4" />Navegar com {stops.length} {stops.length === 1 ? "parada" : "paradas"} no Google Maps</button>}</div>}
         {snapshot && onRefresh && !offline && (
-          <button type="button" onClick={onRefresh} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary/25 px-3 text-xs font-black text-[#DFFF9A]">
+          <button type="button" onClick={onRefresh} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary/25 px-3 text-xs font-black text-primary">
             <RefreshCw className="size-4" /> Atualizar
           </button>
         )}
