@@ -37,6 +37,15 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("w-[min(74vw,18rem)]");
   });
 
+  it("keeps every essential action visible when a service is opened directly", () => {
+    expect(source).toContain("const expandedActions = selectedService?.id === service.id");
+    expect(source).toContain("expandedActions && secondaryContacts.length > 0");
+    expect(source).toContain("expandedActions && service.actionUrl");
+    expect(source).toContain("expandedActions && service.email");
+    expect(source).toContain("expandedActions && primaryContact");
+    expect(source).toContain("!expandedActions && (");
+  });
+
   it("uses shared semantic theme tokens instead of a page-specific palette", () => {
     expect(source).not.toMatch(/#0B1014|#121B22|#C7FF3C|#3DE3FF/);
     expect(source).toContain("bg-background");

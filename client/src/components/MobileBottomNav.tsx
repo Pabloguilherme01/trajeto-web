@@ -62,7 +62,7 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
         <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-muted-foreground"><X className="size-5 shrink-0" /></DialogClose>
         <DialogTitle className="pr-10">Explorar o Trajeto</DialogTitle>
         <DialogDescription>Encontre lugares, abra o mapa ou acesse seus recursos salvos.</DialogDescription>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="mobile-explore-grid grid grid-cols-2 gap-2">
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Search className="size-5 shrink-0" /> Buscar no Trajeto</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/mapa")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><MapPinned className="size-5 shrink-0" /> Abrir mapa</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/servicos") + "?categoria=saude"); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><HeartPulse className="size-5 shrink-0" /> Saúde</button>

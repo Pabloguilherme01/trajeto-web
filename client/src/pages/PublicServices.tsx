@@ -463,6 +463,7 @@ export default function PublicServices() {
             const contacts = publicServiceContacts(service);
             const primaryContact = contacts[0];
             const secondaryContacts = contacts.slice(1);
+            const expandedActions = selectedService?.id === service.id;
             const saved = favorites.includes(service.id);
             return (
               <article
@@ -566,6 +567,66 @@ export default function PublicServices() {
                     </button>
                   )}
                 </div>
+                {expandedActions && secondaryContacts.length > 0 && (
+                  <div className="mt-2 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                    {secondaryContacts.map(contact => (
+                      <a
+                        key={contact.href}
+                        href={contact.href}
+                        target={contact.channel === "whatsapp" ? "_blank" : undefined}
+                        rel={contact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
+                        aria-label={
+                          (contact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
+                          service.name +
+                          (contact.label ? " · " + contact.label : "") +
+                          ": " +
+                          contact.number
+                        }
+                        className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-center text-sm font-bold text-accent"
+                      >
+                        {contact.channel === "whatsapp" ? (
+                          <MessageCircle className="size-3.5 shrink-0" />
+                        ) : (
+                          <Phone className="size-3.5 shrink-0" />
+                        )}
+                        <span className="min-w-0 break-words">
+                          {contact.label || (contact.channel === "whatsapp" ? "WhatsApp" : "Ligar")} · {contact.number}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {expandedActions && service.actionUrl && (
+                  <a
+                    href={service.actionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-center text-sm font-bold text-accent"
+                  >
+                    <ExternalLink className="size-4 shrink-0" />
+                    {service.actionLabel} · online
+                  </a>
+                )}
+                {expandedActions && service.email && (
+                  <a
+                    href={"mailto:" + service.email}
+                    className="mt-2 flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-center text-sm text-foreground/75"
+                  >
+                    {service.email}
+                  </a>
+                )}
+                {expandedActions && primaryContact && (
+                  <button
+                    type="button"
+                    onClick={() => void shareService(service)}
+                    aria-label={"Compartilhar serviço: " + service.name}
+                    className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                  >
+                    <Share2 className="size-3.5" />
+                    Compartilhar
+                  </button>
+                )}
+                {!expandedActions && (
                 <details className="mobile-disclosure mt-2">
                   <summary>
                     Mais opções
@@ -630,6 +691,7 @@ export default function PublicServices() {
                     )}
                   </div>
                 </details>
+                )}
                 <a
                   href={service.sourceUrl}
                   target="_blank"

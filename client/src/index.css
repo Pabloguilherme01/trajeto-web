@@ -258,6 +258,7 @@
 /* Preferências de acessibilidade persistentes */
 html.a11y-large { font-size: 112.5%; }
 html.a11y-large button, html.a11y-large a, html.a11y-large input, html.a11y-large select, html.a11y-large textarea { line-height: 1.35; }
+html.a11y-large .mobile-explore-grid { grid-template-columns: minmax(0, 1fr); }
 html.a11y-contrast :focus-visible { outline-width: 4px; outline-color: #FFFFFF; }
 html.a11y-contrast body { text-shadow: none; }
 html.a11y-contrast [class*="text-[#7"], html.a11y-contrast [class*="text-[#8"], html.a11y-contrast [class*="text-[#9"] { filter: brightness(1.22); }

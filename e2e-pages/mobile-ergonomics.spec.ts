@@ -13,7 +13,7 @@ test("mobile directory remains readable with enlarged text and closes after choo
   const dialog = page.getByRole("dialog");
   for (const name of [
     "Buscar no Trajeto",
-    "Mapa e locais",
+    "Abrir mapa",
     "Encontrar postos",
     "Ajuda e offline",
   ]) {
@@ -23,7 +23,7 @@ test("mobile directory remains readable with enlarged text and closes after choo
     expect(box!.width).toBeGreaterThan(200);
     expect(box!.height).toBeGreaterThanOrEqual(44);
   }
-  await dialog.getByRole("button", { name: "Mapa e locais" }).click();
+  await dialog.getByRole("button", { name: "Abrir mapa" }).click();
   await expect(dialog).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "A cidade no seu caminho" })
