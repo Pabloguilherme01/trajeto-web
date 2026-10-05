@@ -238,6 +238,28 @@ it("preserves a manual pan when the same route geometry is recreated", () => {
 });
 
 
+it("moves long route geometry by transform instead of rebuilding its points on pan", () => {
+  const route = [
+    { lat: -15.7545, lng: -48.2816 },
+    { lat: -15.755, lng: -48.282 },
+    { lat: -15.756, lng: -48.283 },
+  ];
+  render(
+    <TileStationMap
+      stations={[{ id: "a", name: "Destino", address: "Rua A", lat: -15.7545, lng: -48.2816 }]}
+      routePoints={route}
+    />
+  );
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  const geometry = document.querySelector("[data-route-geometry]") as SVGGElement;
+  const line = geometry.querySelectorAll("polyline")[1];
+  const points = line.getAttribute("points");
+  const transform = geometry.getAttribute("transform");
+  fireEvent.keyDown(map, { key: "ArrowRight" });
+  expect(line.getAttribute("points")).toBe(points);
+  expect(geometry.getAttribute("transform")).not.toBe(transform);
+});
+
 it("returns from offline fallback when connectivity is restored", () => {
   const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
