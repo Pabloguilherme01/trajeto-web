@@ -161,7 +161,7 @@ export default function Home() {
   };
 
   return (
-    <main className="premium-surface min-h-[100dvh] max-w-full overflow-x-clip bg-background pb-28 text-white md:pb-10">
+    <main className="premium-surface visual-shell min-h-[100dvh] max-w-full overflow-x-clip bg-background pb-28 text-white md:pb-10">
       <div className="container min-w-0 max-w-5xl overflow-x-clip pt-5 sm:pt-8 lg:pt-12">
         <header className="flex min-w-0 items-center justify-between gap-2">
           <div>
@@ -183,7 +183,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setLocation(appUrl("/buscar"))}
-            className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-white/10 bg-card px-4 text-left shadow-[0_12px_35px_rgba(0,0,0,.16)] active:scale-[.995]"
+            className="premium-search flex min-h-14 w-full items-center gap-3 px-4 text-left active:scale-[.995]"
           >
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><SearchIcon className="size-4" /></span>
             <span className="min-w-0 flex-1">
@@ -225,7 +225,7 @@ export default function Home() {
           <form onSubmit={submit} className="mt-4 space-y-2.5">
             <label className="block">
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</span>
-              <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
+              <div className="premium-field flex items-center gap-2 rounded-2xl border bg-background px-3">
                 <div className="size-2.5 rounded-full bg-accent" />
                 <input value={origin} onChange={event => { clearPrivateLocationHandoff(); setOriginPrivate(false); setOrigin(event.target.value); }} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
                 <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 place-items-center rounded-xl text-accent disabled:opacity-30" aria-label="Usar minha localização como origem">
@@ -236,7 +236,7 @@ export default function Home() {
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Destino</span>
-              <div className="flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3">
+              <div className="premium-field flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3">
                 <div className="size-2.5 rounded-full bg-primary" />
                 <input value={destination} onChange={event => setDestination(event.target.value)} placeholder="Para onde você vai" autoComplete="street-address" enterKeyHint="done" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
               </div>
@@ -258,7 +258,7 @@ export default function Home() {
 
         <section className="mt-5" aria-label="Ações principais">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-primary/25 bg-primary/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
+            <button type="button" onClick={() => lastTrip ? openLastTrip() : setLocation(appUrl("/planejar"))} className="premium-card mobile-card col-span-2 min-h-[5.75rem] rounded-[1.35rem] border border-primary/25 bg-primary/[.09] p-4 text-left active:scale-[.99] sm:col-span-1 sm:min-h-24">
               <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/12 text-primary"><Route className="size-4" /></span>
                 <ArrowRight className="size-4 shrink-0 text-primary/80" />
@@ -266,12 +266,12 @@ export default function Home() {
               <p className="mt-2 text-sm font-black">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota") : "Planejar uma rota"}</p>
               <p className="mt-1 text-xs leading-relaxed text-white/70">{lastTrip ? (isCurrentLocationLabel(lastTrip.origin) ? "Confirme sua localização para refazer a rota." : "Retome sua última viagem em um toque.") : "Origem, destino e rota sem cadastro."}</p>
             </button>
-            <button type="button" onClick={findNearby} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-accent/18 bg-accent/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+            <button type="button" onClick={findNearby} className="premium-card mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-accent/18 bg-accent/[.06] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Fuel className="size-4 text-accent" />
               <p className="mt-2.5 text-sm font-black">Postos</p>
               <p className="mt-1 text-xs leading-snug text-white/68">Perto de você</p>
             </button>
-            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-warning/18 bg-warning/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
+            <button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="premium-card mobile-card min-h-[6.2rem] rounded-[1.35rem] border border-warning/18 bg-warning/[.05] p-3.5 text-left active:scale-[.99] sm:min-h-24 sm:p-4">
               <Landmark className="size-4 text-warning" />
               <p className="mt-2.5 text-sm font-black">Serviços</p>
               <p className="mt-1 text-xs leading-snug text-white/68">Saúde e cidadania</p>
@@ -283,7 +283,7 @@ export default function Home() {
 
         <div className="mt-4 sm:mt-5"><DailyModeSelector /></div>
 
-        <section className="mt-4 rounded-[1.35rem] border border-warning/18 bg-warning/[.04] p-3" aria-labelledby="home-utility-title">
+        <section className="premium-card mt-4 rounded-[1.35rem] border border-warning/18 bg-warning/[.04] p-3" aria-labelledby="home-utility-title">
           <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.15em] text-warning">Utilidade imediata</p>
@@ -324,7 +324,7 @@ export default function Home() {
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
                 }}
-                className="mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-card p-3 text-left transition hover:border-accent/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
+                className="premium-card mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-card p-3 text-left transition hover:border-accent/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
               >
                 <Route className="size-4 text-accent" aria-hidden="true" />
                 <span className="mt-2 block break-words text-sm font-black">{route.label}</span>
