@@ -3,6 +3,7 @@ import { Check, ChevronDown, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
+import QuickFilterChips from "@/components/QuickFilterChips";
 
 type Place = { id: string; name: string; address: string; category?: string; source?: string; coordinateKind?: string };
 export default function MapDestinationPicker({ items, value, label, onSelect }: {
@@ -15,6 +16,14 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
   const [active, setActive] = useState(0);
   const [category, setCategory] = useState("Todos");
   const categories = useMemo(() => [...new Set(items.map(item => mapPlaceSegment(item).label))].sort(), [items]);
+  const quickQueries = useMemo(() => [
+    { label: "UPA", value: "upa" },
+    { label: "Postos", value: "posto" },
+    { label: "Mercados", value: "mercado" },
+    { label: "Escolas", value: "escola" },
+    { label: "Prefeitura", value: "prefeitura" },
+    { label: "Shopping", value: "shopping" },
+  ].filter(option => items.some(item => matchesCatalogText(option.value, [item.name, item.address]))), [items]);
   const selected = items.find(item => item.id === value);
   const matches = useMemo(() => items.filter(item => (category === "Todos" || mapPlaceSegment(item).label === category) && matchesCatalogText(query, [item.name, item.address])), [items, query, category]);
   const visible = matches.slice(0, limit);
@@ -44,6 +53,7 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
           placeholder="Nome, rua ou bairro" autoComplete="off" enterKeyHint="search"
           className="min-h-11 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-slate-500" />
       </label>
+      <QuickFilterChips label="Atalhos de busca no mapa" options={quickQueries} value={query} onPick={value => { setQuery(value); setLimit(40); setActive(0); }} variant="light" className="shrink-0 border-b border-slate-100 px-3 py-2" />
       {categories.length > 1 && <div role="group" aria-label="Categorias de lugares" className="flex shrink-0 gap-2 overflow-x-auto border-b border-slate-100 px-3 py-2">
         {["Todos", ...categories].map(label => <button key={label} type="button" aria-pressed={category === label} onClick={() => { setCategory(label); setActive(0); setLimit(40); }} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-bold " + (category === label ? "border-blue-200 bg-blue-50 text-blue-800" : "border-slate-200 bg-white text-slate-600")}>{label}</button>)}
       </div>}
