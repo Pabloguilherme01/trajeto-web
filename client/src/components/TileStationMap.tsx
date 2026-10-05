@@ -370,6 +370,23 @@ export default function TileStationMap({
     setZoom(value => Math.max(15, value));
   };
 
+  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
+  const markerGroups = useMemo(
+    () =>
+      mapMarkerGroups(
+        drawable,
+        item => {
+          const p = markerPositions.get(stationKey(item));
+          return p ? { x: p.left, y: p.top } : { x: -100000, y: -100000 };
+        },
+        item =>
+          zoom >= 17 ||
+          stationKey(item) === selectedId ||
+          ["origin", "destination"].includes(item.id ?? "")
+      ),
+    [drawable, markerPositions, selectedId, zoom]
+  );
+
   const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= 5));
 
   if (tileFallback)
@@ -411,23 +428,6 @@ export default function TileStationMap({
       </div>
     );
   }
-
-  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
-  const markerGroups = useMemo(
-    () =>
-      mapMarkerGroups(
-        drawable,
-        item => {
-          const p = markerPositions.get(stationKey(item));
-          return p ? { x: p.left, y: p.top } : { x: -100000, y: -100000 };
-        },
-        item =>
-          zoom >= 17 ||
-          stationKey(item) === selectedId ||
-          ["origin", "destination"].includes(item.id ?? "")
-      ),
-    [drawable, markerPositions, selectedId, zoom]
-  );
 
   return (
     <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
