@@ -759,15 +759,31 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
         {!showSavedOnly && (
           <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
-            <form onSubmit={submit}>
-              <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Cidade, bairro ou posto</label>
-              <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
-                <Search className="size-4 shrink-0 text-accent" />
-                <input id="station-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65" placeholder="Ex.: Águas Lindas de Goiás" />
-                <button type="submit" className="grid size-11 place-items-center rounded-xl bg-primary text-background" aria-label="Pesquisar">
-                  <ChevronRight className="size-5" />
+            <form onSubmit={submit} role="search">
+              <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Buscar postos</label>
+              <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-background px-3">
+                <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
+                <input
+                  id="station-search"
+                  type="search"
+                  value={input}
+                  onChange={event => setInput(event.target.value)}
+                  autoComplete="street-address"
+                  enterKeyHint="search"
+                  aria-describedby="station-search-hint"
+                  className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65"
+                  placeholder="Nome, bairro, endereço ou BR-070"
+                />
+                {input && (
+                  <button type="button" onClick={() => setInput("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-white/65 hover:bg-white/[.04] hover:text-white" aria-label="Limpar campo de busca">
+                    <X className="size-4" aria-hidden="true" />
+                  </button>
+                )}
+                <button type="submit" className="task-action task-action-primary min-h-11 shrink-0 px-3" aria-label="Buscar postos">
+                  <span className="hidden sm:inline">Buscar</span><ChevronRight className="size-4" aria-hidden="true" />
                 </button>
               </div>
+              <p id="station-search-hint" className="mt-2 text-xs leading-relaxed text-white/60">Pesquise por nome, bairro, endereço ou corredor. Os filtros abaixo refinam a lista sem apagar sua busca.</p>
             </form>
             <QuickFilterChips
               label="Bairros e eixos rápidos"
@@ -784,18 +800,18 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               className="mt-3"
             />
 
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-2 text-xs font-black text-background disabled:opacity-40">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Ações rápidas de postos">
+              <button type="button" onClick={useNearby} disabled={locating} className="task-action task-action-primary shrink-0 disabled:opacity-40">
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>
               {!staticRuntime && (
-                <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-accent px-2 text-xs font-black text-background" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-2 text-xs font-bold text-white/65"}>
+                <button type="button" onClick={() => setOnlyOpen(current => !current)} aria-pressed={onlyOpen} className={onlyOpen ? "task-action shrink-0 border border-accent/40 bg-accent/15 text-[#C9F7FF]" : "task-action task-action-secondary shrink-0"}>
                   <CircleCheck className="mr-1 inline size-3.5" /> Abertos agora
                 </button>
               )}
-              <button type="button" onClick={() => void shareCurrent()} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 text-xs font-bold text-white/65"><Share2 className="mr-1 inline size-3.5" /> Compartilhar</button>
-              <button type="button" onClick={() => setShowMap(value => !value)} aria-pressed={showMap} aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"} className="min-h-11 rounded-full border border-white/15 bg-white/[.03] px-2 text-xs font-bold text-white/80"><MapIcon className="mr-1 inline size-3.5" />Mapa</button>
-              <button type="button" onClick={openSaved} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 text-xs font-bold text-white/65"><Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}</button>
+              <button type="button" onClick={() => void shareCurrent()} className="task-action task-action-secondary shrink-0"><Share2 className="mr-1 inline size-3.5" /> Compartilhar</button>
+              <button type="button" onClick={() => setShowMap(value => !value)} aria-pressed={showMap} aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"} className="task-action task-action-secondary"><MapIcon className="mr-1 inline size-3.5" />Mapa</button>
+              <button type="button" onClick={openSaved} className="task-action task-action-secondary shrink-0"><Heart className="mr-1 inline size-3.5" /> Salvos {saved.length || ""}</button>
             </div>
 
             {recentSearches.length > 0 && (
@@ -908,10 +924,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             </details>
             <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
-              <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
-                <Search className="size-4 text-white/65" />
-                <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
-                {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 place-items-center rounded-lg text-white/65" aria-label="Limpar busca"><X className="size-3.5" /></button>}
+              <label className="premium-panel flex min-h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-background px-3">
+                <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
+                <input type="search" value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} enterKeyHint="search" placeholder="Filtrar por nome, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
+                {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 shrink-0 place-items-center rounded-lg text-white/65 hover:bg-white/[.04] hover:text-white" aria-label="Limpar filtro do diretório"><X className="size-3.5" aria-hidden="true" /></button>}
               </label>
               <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-background px-3 text-base font-black text-white/65">
                 <option value="all">Combustível: todos</option>
@@ -954,7 +970,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-primary/45 bg-primary/12 text-[#E6FFAB]" : "border-white/10 bg-white/[.03] text-white/70")}>{label}</button>)}
             </div>
             {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-warning">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
-            <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65">
+            <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65" role="status" aria-live="polite">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
             </div>
