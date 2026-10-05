@@ -247,6 +247,15 @@ const streetToStreetPairs = READY_ROUTE_STREET_POINTS.flatMap((origin, index) =>
     [origin.id, destination.id] as const
   )
 );
+const routeHubIds = ["centro", "prefeitura", "rodoviaria", "aguas-lindas-shopping", "upa", "heal"] as const;
+const hubToCityPairs = routeHubIds.flatMap(origin =>
+  CITY_ROUTE_PRESETS.filter(destination => destination.id !== origin)
+    .map(destination => [origin, destination.id] as const)
+);
+const stationToHubPairs = READY_ROUTE_STATIONS.flatMap(station =>
+  ["centro", "prefeitura", "rodoviaria", "aguas-lindas-shopping"]
+    .map(destination => [station.id, destination] as const)
+);
 const readyPairs = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
   ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
@@ -256,6 +265,8 @@ const readyPairs = [
   ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
   ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
   ["rodoviaria", "prefeitura"], ["aguas-lindas-shopping", "upa"],
+  ...hubToCityPairs,
+  ...stationToHubPairs,
   ...READY_ROUTE_STATIONS.flatMap(station =>
     ["centro", "prefeitura", "rodoviaria"].map(origin => [origin, station.id] as const)),
   ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),
