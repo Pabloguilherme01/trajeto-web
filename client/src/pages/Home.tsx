@@ -87,6 +87,10 @@ export default function Home() {
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (locating) {
+      setFormMessage("Aguarde a localização da origem terminar antes de iniciar a rota.");
+      return;
+    }
     const from = origin.trim();
     const to = destination.trim();
     if (to.length < 3) {
@@ -227,7 +231,7 @@ export default function Home() {
               <span className="mb-1.5 block text-xs font-black uppercase tracking-[.12em] text-white/65">Origem</span>
               <div className="premium-field flex items-center gap-2 rounded-2xl border bg-background px-3">
                 <div className="size-2.5 rounded-full bg-accent" />
-                <input value={origin} onChange={event => { clearPrivateLocationHandoff(); setOriginPrivate(false); setOrigin(event.target.value); }} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
+                <input value={origin} onChange={event => { locationRequest.current += 1; setLocating(false); clearPrivateLocationHandoff(); setOriginPrivate(false); setOrigin(event.target.value); }} placeholder="De onde você sai" autoComplete="street-address" enterKeyHint="next" className="min-h-12 min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/60" />
                 <button type="button" onClick={useLocationAsOrigin} disabled={locating} className="grid size-11 place-items-center rounded-xl text-accent disabled:opacity-30" aria-label="Usar minha localização como origem">
                   <LocateFixed className="size-4" />
                 </button>
@@ -242,8 +246,8 @@ export default function Home() {
               </div>
             </label>
 
-            <button type="submit" disabled={destination.trim().length < 3} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-primary px-4 text-sm font-black text-background disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
-              <span>{locating ? "Obtendo localização…" : "Ir até aqui"}</span>
+            <button type="submit" disabled={locating || destination.trim().length < 3} aria-busy={locating} className="mt-1 flex min-h-13 w-full items-center justify-between rounded-2xl bg-primary px-4 text-sm font-black text-background disabled:cursor-not-allowed disabled:opacity-35 active:scale-[.99]" aria-describedby={formMessage ? "home-form-message" : undefined}>
+              <span>{locating ? "Aguarde a localização…" : "Ir até aqui"}</span>
               <ArrowRight className="size-5" />
             </button>
           </form>
