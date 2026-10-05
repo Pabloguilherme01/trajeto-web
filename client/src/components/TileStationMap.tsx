@@ -308,7 +308,10 @@ export default function TileStationMap({
     }
     return result;
   }, [markerGroups, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
-  const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
+  const routeGeometryKey = useMemo(
+    () => routePoints.map(point => `${point.lat},${point.lng}`).join(";"),
+    [routePoints]
+  );
   const routeWorld = useMemo(
     () => routePoints.map(point => projectBase(point.lat, point.lng)),
     [routeGeometryKey]
