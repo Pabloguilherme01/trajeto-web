@@ -7,6 +7,7 @@ import { OfflineStationMap } from "@/components/StationMap";
 import MapExplorerFrame from "@/components/MapExplorerFrame";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
+import QuickFilterChips from "@/components/QuickFilterChips";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
 import {
   BUNDLED_CITY_ATLAS,
@@ -222,6 +223,21 @@ export default function CityMap() {
         />
         {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center"><X className="size-4" /></button>}
       </div>
+      <QuickFilterChips
+        label="Filtros rápidos do mapa"
+        options={[
+          { label: "UPA", value: "upa" },
+          { label: "Postos", value: "posto" },
+          { label: "Mercados", value: "mercado" },
+          { label: "Escolas", value: "escola" },
+          { label: "Prefeitura", value: "prefeitura" },
+          { label: "Shopping", value: "shopping" },
+          { label: "Rodoviária", value: "rodoviaria" },
+        ]}
+        value={query}
+        onPick={value => { setOnlyStreets(false); setCategory("todos"); setQuery(value); }}
+        className="mt-3"
+      />
       <div
         className="my-3 flex flex-wrap gap-2"
         aria-label="Categorias do mapa"
