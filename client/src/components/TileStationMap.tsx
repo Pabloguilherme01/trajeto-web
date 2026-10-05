@@ -496,6 +496,7 @@ export default function TileStationMap({
             "absolute inset-0 select-none touch-none overflow-hidden " +
             (dragging ? "cursor-grabbing" : "cursor-grab")
           }
+          style={{ contain: "layout paint", overscrollBehavior: "contain" }}
           onPointerDown={beginDrag}
           onPointerMove={drag}
           onPointerUp={endDrag}
