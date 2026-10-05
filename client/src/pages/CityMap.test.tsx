@@ -76,3 +76,19 @@ it("filters education routes without mixing health or shopping destinations", ()
   expect(screen.queryByText("UPA", { exact: true })).toBeNull();
   expect(screen.queryByText("Supermercado Tatico", { exact: true })).toBeNull();
 });
+
+
+it("keeps quick filters compatible when switching categories and street mode", () => {
+  render(<CityMap />);
+  const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
+  fireEvent.click(screen.getByRole("button", { name: "Postos" }));
+  expect(search.value).toBe("posto");
+  expect(screen.getByRole("button", { name: "Combustível" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
+  expect(search.value).toBe("");
+  fireEvent.click(screen.getByRole("button", { name: "UPA" }));
+  expect(search.value).toBe("upa");
+  fireEvent.click(screen.getByRole("button", { name: "Ruas e avenidas" }));
+  expect(search.value).toBe("");
+  expect(screen.getByRole("button", { name: "Ruas e avenidas" }).getAttribute("aria-pressed")).toBe("true");
+});
