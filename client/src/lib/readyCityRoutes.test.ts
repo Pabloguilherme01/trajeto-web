@@ -12,7 +12,9 @@ it("opens and calculates every ready city route without internet", async () => {
   expect(LOCAL_READY_ROUTES.length).toBeGreaterThan(232);
   expect(READY_ROUTE_STATIONS.length).toBeGreaterThan(0);
   expect(LOCAL_READY_ROUTES.some(route => route.category === "combustivel")).toBe(true);
-  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(650);
+  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(900);
+  expect(LOCAL_READY_ROUTES.some(route => route.originId === "rodoviaria" && route.destinationLabel === "Cora Coralina")).toBe(true);
+  expect(LOCAL_READY_ROUTES.some(route => route.originId.startsWith("ready-station-") && route.destinationLabel === "Centro (referência)")).toBe(true);
   const streetLabels = new Set(READY_ROUTE_STREET_POINTS.map(point => point.label));
   const streetPairs = LOCAL_READY_ROUTES.filter(route => streetLabels.has(route.originLabel) && streetLabels.has(route.destinationLabel));
   expect(streetPairs).toHaveLength((READY_ROUTE_STREET_POINTS.length * (READY_ROUTE_STREET_POINTS.length - 1)) / 2);
