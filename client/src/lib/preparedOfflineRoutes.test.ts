@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { findPreparedRouteByCoordinates, resolvePreparedRoutePoint, type OfflineRoute } from "./offlineStore";
+import { findBestOfflineRouteForTrip, findPreparedRouteByCoordinates, resolvePreparedRoutePoint, type OfflineRoute } from "./offlineStore";
 import { calculateOfflineRoute } from "./publicRouting";
 import { listOfflineRoutes } from "./offlineStore";
 
@@ -14,6 +14,29 @@ const saved = (origin = "Ponto preparado A", destination = "Ponto preparado B", 
 });
 
 describe("prepared offline endpoints", () => {
+  it("recovers prepared street geometry and instructions directly after the routing cache is lost", async () => {
+    const trip = saved();
+    const instruction = { instruction: "Vire à direita", distanceMeters: 100, durationSeconds: 20 };
+    trip.payload.route.steps = [instruction];
+    vi.mocked(listOfflineRoutes).mockResolvedValue([trip]);
+    vi.stubGlobal("navigator", { onLine: false });
+    const fetch = vi.fn().mockRejectedValue(new Error("offline"));
+    vi.stubGlobal("fetch", fetch);
+    const route = await calculateOfflineRoute(trip.origin, trip.destination);
+    expect(route.source).toBe("osrm");
+    expect(route.polyline).toBe(trip.payload.route.polyline);
+    expect(route.steps).toEqual([instruction]);
+    expect(fetch.mock.calls.some(([url]) => /nominatim|osrm|mapbox/.test(String(url)))).toBe(false);
+  });
+  it("does not reuse a prepared detour when the requested trip has no stops", async () => {
+    const trip = saved();
+    trip.payload.stops = [{ name: "Parada", lat: c.lat, lng: c.lng }];
+    vi.mocked(listOfflineRoutes).mockResolvedValue([trip]);
+    vi.stubGlobal("navigator", { onLine: false });
+    const route = await calculateOfflineRoute(trip.origin, trip.destination);
+    expect(route.source).toBe("local-estimate");
+    expect(route.steps).toBeUndefined();
+  });
   it("resolves named endpoints from either side of saved trips without geocoder storage", () => {
     expect(resolvePreparedRoutePoint([saved()], "ponto  preparado a")).toEqual(a);
     expect(resolvePreparedRoutePoint([saved()], "Ponto preparado B")).toEqual(b);
@@ -33,6 +56,8 @@ describe("prepared offline endpoints", () => {
   it("prefers saved street geometry over a newer estimate for the same endpoints", () => {
     const estimate = { ...saved("Alias A", "Alias B", a, b, "driving", "local-estimate"), savedAt: "2026-10-04T15:00:00Z" };
     expect(findPreparedRouteByCoordinates([estimate, saved()], a, b, "driving")?.origin).toBe("Ponto preparado A");
+    const sameLabels = { ...saved(), savedAt: estimate.savedAt, payload: estimate.payload };
+    expect(findBestOfflineRouteForTrip([sameLabels, saved()], "Ponto preparado A", "Ponto preparado B")?.savedAt).toBe(saved().savedAt);
   });
   it.each(["driving", "walking", "cycling", "transit"] as const)("calculates a new %s estimate between independently prepared places without external requests", async mode => {
     vi.mocked(listOfflineRoutes).mockResolvedValue([saved(), saved("Ponto preparado B", "Ponto preparado C", b, c)]);
