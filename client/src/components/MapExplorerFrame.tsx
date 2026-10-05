@@ -83,12 +83,12 @@ export default function MapExplorerFrame({
       role={expanded ? "dialog" : undefined}
       aria-modal={expanded ? true : undefined}
       aria-label={expanded ? `${label} em tela cheia` : undefined}
-      className={`map-explorer-frame min-w-0 overflow-hidden rounded-[1.6rem] border border-white/10 bg-background shadow-[0_28px_80px_rgba(0,0,0,.28)] ${expanded ? "fixed inset-0 z-[1000] flex flex-col rounded-none border-0 bg-background p-2" : "relative"}`}
+      className={`map-explorer-frame min-w-0 overflow-hidden rounded-[1.6rem] border border-border bg-background shadow-[0_28px_80px_rgba(0,0,0,.28)] ${expanded ? "fixed inset-0 z-[1000] flex flex-col rounded-none border-0 bg-background p-2" : "relative"}`}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/8 bg-[linear-gradient(110deg,#10202a,#0B1014_58%,#102a2b)] p-2.5 text-white">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border bg-card/95 p-2.5 text-foreground backdrop-blur">
         <div className="min-w-0">
           <span className="flex items-center gap-2 text-sm font-black"><MapPinned className="size-4 text-accent" />{label}</span>
-          <span className="mt-1 hidden items-center gap-1.5 text-[0.68rem] font-bold text-white/55 min-[360px]:flex"><Move className="size-3" />Arraste · pinça para zoom · toque nos pontos</span>
+          <span className="mt-1 hidden items-center gap-1.5 text-[0.68rem] font-bold text-muted-foreground min-[360px]:flex"><Move className="size-3" />Arraste · pinça para zoom · toque nos pontos</span>
         </div>
         <button
           ref={toggle}
@@ -97,7 +97,7 @@ export default function MapExplorerFrame({
           aria-label={
             expanded ? "Sair da tela cheia" : "Abrir mapa em tela cheia"
           }
-          className="flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-white/12 bg-white/[.05] px-3 text-xs font-black text-white shadow-lg backdrop-blur hover:border-accent/30"
+          className="flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-border bg-background/80 px-3 text-xs font-black text-foreground shadow-lg backdrop-blur hover:border-accent/30"
         >
           {expanded ? (
             <Minimize2 className="size-4" />
