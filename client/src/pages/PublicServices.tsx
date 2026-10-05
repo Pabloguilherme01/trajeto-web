@@ -405,7 +405,7 @@ export default function PublicServices() {
               <h2 id="citizen-shortcuts-title" className="text-base font-bold">
                 O que você precisa resolver?
               </h2>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
                 {PUBLIC_SERVICE_SHORTCUTS.map(shortcut => (
                   <button
                     key={shortcut.query}
@@ -414,7 +414,7 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="premium-card min-h-20 min-w-0 rounded-2xl border border-accent/20 bg-accent/5 p-3 text-left"
+                    className="premium-card min-h-20 w-[min(74vw,18rem)] min-w-[14rem] shrink-0 snap-start rounded-2xl border border-accent/20 bg-accent/5 p-3 text-left sm:w-auto sm:min-w-0 sm:shrink"
                   >
                     <span className="block text-sm font-bold text-foreground">
                       {shortcut.label}
@@ -461,6 +461,8 @@ export default function PublicServices() {
           {results.map(service => {
             const Icon = categoryIcons[service.category];
             const contacts = publicServiceContacts(service);
+            const primaryContact = contacts[0];
+            const secondaryContacts = contacts.slice(1);
             const saved = favorites.includes(service.id);
             return (
               <article
@@ -519,25 +521,6 @@ export default function PublicServices() {
                     {service.guidance}
                   </p>
                 )}
-                {service.actionUrl && (
-                  <a
-                    href={service.actionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
-                  >
-                    <ExternalLink className="size-4" />
-                    {service.actionLabel} · online
-                  </a>
-                )}
-                {service.email && (
-                  <a
-                    href={"mailto:" + service.email}
-                    className="mt-2 flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
-                  >
-                    {service.email}
-                  </a>
-                )}
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {service.mapQuery && (
                     <button
@@ -549,34 +532,73 @@ export default function PublicServices() {
                       Rota
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => void shareService(service)}
-                    aria-label={"Compartilhar serviço: " + service.name}
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
-                  >
-                    <Share2 className="size-3.5" />
-                    Compartilhar
-                  </button>
+                  {primaryContact ? (
+                    <a
+                      href={primaryContact.href}
+                      target={primaryContact.channel === "whatsapp" ? "_blank" : undefined}
+                      rel={primaryContact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
+                      aria-label={
+                        (primaryContact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
+                        service.name +
+                        ": " +
+                        primaryContact.number
+                      }
+                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent"
+                    >
+                      {primaryContact.channel === "whatsapp" ? (
+                        <MessageCircle className="size-3.5 shrink-0" />
+                      ) : (
+                        <Phone className="size-3.5 shrink-0" />
+                      )}
+                      <span className="min-w-0 truncate">
+                        {primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar"} · {primaryContact.number}
+                      </span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void shareService(service)}
+                      aria-label={"Compartilhar serviço: " + service.name}
+                      className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                    >
+                      <Share2 className="size-3.5" />
+                      Compartilhar
+                    </button>
+                  )}
                 </div>
-                {contacts.length > 0 && (
-                  <div className="mt-2 grid gap-2">
-                    {contacts.map((contact, index) => (
+                <details className="mobile-disclosure mt-2">
+                  <summary>
+                    Mais opções
+                    <ArrowRight className="size-4 shrink-0" />
+                  </summary>
+                  <div className="grid gap-2">
+                    {service.actionUrl && (
+                      <a
+                        href={service.actionUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
+                      >
+                        <ExternalLink className="size-4" />
+                        {service.actionLabel} · online
+                      </a>
+                    )}
+                    {service.email && (
+                      <a
+                        href={"mailto:" + service.email}
+                        className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
+                      >
+                        {service.email}
+                      </a>
+                    )}
+                    {secondaryContacts.map(contact => (
                       <a
                         key={contact.href}
                         href={contact.href}
-                        target={
-                          contact.channel === "whatsapp" ? "_blank" : undefined
-                        }
-                        rel={
-                          contact.channel === "whatsapp"
-                            ? "noopener noreferrer"
-                            : undefined
-                        }
+                        target={contact.channel === "whatsapp" ? "_blank" : undefined}
+                        rel={contact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
                         aria-label={
-                          (contact.channel === "whatsapp"
-                            ? "WhatsApp de "
-                            : "Ligar para ") +
+                          (contact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
                           service.name +
                           (contact.label ? " · " + contact.label : "") +
                           ": " +
@@ -590,20 +612,29 @@ export default function PublicServices() {
                           <Phone className="size-3.5 shrink-0" />
                         )}
                         <span className="break-words">
-                          {contact.label ||
-                            (index === 0 ? "Ligar" : "Alternativo")}{" "}
-                          · {contact.number}
+                          {contact.label || "Contato alternativo"} · {contact.number}
                           {contact.channel === "whatsapp" ? " · WhatsApp" : ""}
                         </span>
                       </a>
                     ))}
+                    {primaryContact && (
+                      <button
+                        type="button"
+                        onClick={() => void shareService(service)}
+                        aria-label={"Compartilhar serviço: " + service.name}
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                      >
+                        <Share2 className="size-3.5" />
+                        Compartilhar
+                      </button>
+                    )}
                   </div>
-                )}
+                </details>
                 <a
                   href={service.sourceUrl}
                   target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 flex min-h-11 items-center justify-center text-center text-sm font-bold text-foreground/75 hover:text-foreground"
+                  rel="noopener noreferrer"
+                  className="mt-2 flex min-h-10 items-center justify-center text-center text-xs font-bold text-foreground/65 hover:text-foreground"
                 >
                   Fonte: {service.sourceLabel}
                   {service.verifiedAt
