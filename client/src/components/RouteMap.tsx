@@ -210,7 +210,7 @@ function RouteInstructions({
               }
             >
               <span
-                className="grid size-9 shrink-0 place-items-center rounded-full bg-[#163840] text-white"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground"
                 aria-label={"Passo " + (index + 1)}
               >
                 <ManeuverIcon maneuver={step.maneuver} className="size-5" />
