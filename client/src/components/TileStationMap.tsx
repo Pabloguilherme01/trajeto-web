@@ -360,14 +360,20 @@ export default function TileStationMap({
       const anchorBase = projectBase(state.anchor.lat, state.anchor.lng);
       const nextScale = 2 ** nextZoom;
       const rect = event.currentTarget.getBoundingClientRect();
-      scheduleGesture({
+      const nextGesture = {
         zoom: nextZoom,
         center: unproject(
           anchorBase.x * nextScale - ((a.x + b.x) / 2 - rect.left - width / 2),
           anchorBase.y * nextScale - ((a.y + b.y) / 2 - rect.top - height / 2),
           nextZoom
         ),
-      });
+      };
+      if (Math.floor(nextZoom) !== Math.floor(zoom)) {
+        flushGesture();
+        applyGesture(nextGesture);
+      } else {
+        scheduleGesture(nextGesture);
+      }
       return;
     }
     const state = dragRef.current;
