@@ -187,16 +187,21 @@ export default function TileStationMap({
   }, [drawable.length, tileErrors >= 5, offline, localLayer]);
   const width = size.width;
   const height = size.height;
+  const zoomScale = 2 ** zoom;
+  const centerBase = useMemo(
+    () => projectBase(center.lat, center.lng),
+    [center.lat, center.lng]
+  );
   const centerPx = useMemo(
-    () => project(center.lat, center.lng, zoom),
-    [center.lat, center.lng, zoom]
+    () => ({ x: centerBase.x * zoomScale, y: centerBase.y * zoomScale }),
+    [centerBase, zoomScale]
   );
   const tileZoom = Math.floor(zoom);
   const tileScale = 2 ** (zoom - tileZoom);
-  const tileCenter = useMemo(
-    () => project(center.lat, center.lng, tileZoom),
-    [center.lat, center.lng, tileZoom]
-  );
+  const tileCenter = useMemo(() => {
+    const scale = 2 ** tileZoom;
+    return { x: centerBase.x * scale, y: centerBase.y * scale };
+  }, [centerBase, tileZoom]);
   const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
   const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
   const baseTileX = Math.floor(tileCenter.x / TILE);
@@ -227,7 +232,6 @@ export default function TileStationMap({
     return result;
   }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
 
-  const zoomScale = 2 ** zoom;
   const markerPosition = (station: { lat: number; lng: number }) => {
     const base = projectBase(station.lat, station.lng);
     return {
@@ -251,6 +255,10 @@ export default function TileStationMap({
   const routeWorld = useMemo(
     () => routePoints.map(point => projectBase(point.lat, point.lng)),
     [routeGeometryKey]
+  );
+  const userWorld = useMemo(
+    () => userCoords ? projectBase(userCoords.lat, userCoords.lng) : null,
+    [userCoords?.lat, userCoords?.lng]
   );
   const routePolylinePoints = useMemo(
     () => routeWorld.map(base =>
@@ -606,11 +614,10 @@ export default function TileStationMap({
               );
             })}
 
-            {userCoords &&
+            {userCoords && userWorld &&
               (() => {
-                const base = projectBase(userCoords.lat, userCoords.lng);
-                const left = width / 2 + base.x * zoomScale - centerPx.x;
-                const top = height / 2 + base.y * zoomScale - centerPx.y;
+                const left = width / 2 + userWorld.x * zoomScale - centerPx.x;
+                const top = height / 2 + userWorld.y * zoomScale - centerPx.y;
                 return (
                   <span
                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
