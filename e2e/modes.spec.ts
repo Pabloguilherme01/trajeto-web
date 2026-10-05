@@ -28,7 +28,7 @@ test("calculadora distingue viagem pontual de rotina e oferece atalhos do tanque
 test("modo condução prepara o planejador para navegação externa", async ({ page }) => {
   await page.goto("/planejar?conducao=1&destino=Águas%20Lindas%20de%20Goiás", { waitUntil: "domcontentloaded" });
   await expect(page.getByText("Modo condução ativo")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Calcular rota" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ir até aqui" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Abrir Google Maps agora" })).toBeVisible();
 });
 

@@ -13,13 +13,13 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 describe("StationDirectoryCard practical actions", () => {
   it("routes by address without inventing coordinates or WhatsApp and keeps technical data collapsed", () => {
     render(<StationDirectoryCard index={1} local={local} />);
-    const href = screen.getByRole("link", { name: "Traçar rota" }).getAttribute("href")!;
+    const href = screen.getByRole("link", { name: "Ir até aqui" }).getAttribute("href")!;
     expect(new URL(href, "https://example.test").searchParams.get("destino")).toContain("Avenida Teste, 42");
     expect(href).not.toContain("0%2C0");
     expect(screen.getByRole("link", { name: "Ligar para o posto" }).getAttribute("href")).toBe("tel:61999990000");
     expect(screen.queryByText("WhatsApp")).toBeNull();
     expect(screen.queryByText("Instagram")).toBeNull();
-    expect(screen.getByText("Todos os dados disponíveis").closest("details")?.open).toBe(false);
+    expect(screen.getByText("Sobre os dados deste posto").closest("details")?.open).toBe(false);
     expect(screen.getByText(/Preço individual indisponível/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Salvar/ })).toBeNull();
   });
@@ -39,7 +39,7 @@ describe("StationDirectoryCard practical actions", () => {
 
   it("rejects zero coordinates for routing and does not display an invented distance", () => {
     render(<StationDirectoryCard index={1} local={{ ...local, anp: { latitude: 0, longitude: 0 } } as LocalStationRecord} />);
-    const href = screen.getByRole("link", { name: "Traçar rota" }).getAttribute("href")!;
+    const href = screen.getByRole("link", { name: "Ir até aqui" }).getAttribute("href")!;
     expect(new URL(href, "https://example.test").searchParams.get("destino")).toContain("Avenida Teste");
     expect(screen.queryByText(/^[\d,.]+ km$/)).toBeNull();
   });

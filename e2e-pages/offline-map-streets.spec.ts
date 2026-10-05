@@ -62,12 +62,12 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
   await context.setOffline(true);
   await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
-  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
   await expect(page.getByText(/Estimativa offline entre os locais escolhidos/)).toBeVisible();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await context.setOffline(false);
   await expect(page.getByText("online", { exact: true }).first()).toBeVisible();
@@ -89,7 +89,7 @@ test("Pages: selects both endpoints and calculates every travel mode from the of
   await page.getByRole("list", { name: "Pontos locais para destino", exact: true }).getByRole("button").first().click();
   for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
     await page.getByRole("button", { name: mode, exact: true }).click();
-    await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+    await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
     await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
   }
@@ -115,7 +115,7 @@ test("Pages: imported companies reload offline and plan all modes from their act
   await page.getByRole("list", { name: "Pontos locais para origem", exact: true }).getByRole("button").first().click();
   for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
     await page.getByRole("button", { name: mode, exact: true }).click();
-    await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+    await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
     await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
   }

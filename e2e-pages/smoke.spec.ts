@@ -14,22 +14,18 @@ test("Pages: cliques principais funcionam dentro da base hospedada", async ({ pa
   await expect(page).toHaveURL(/\/trajeto-web\/planejar$/);
   await expect(page.getByRole("heading", { name: /Sua próxima saída/i })).toBeVisible();
 
-  if (mobile) {
-    await page.getByRole("button", { name: "Mais opções" }).click();
-    await page.getByRole("button", { name: "Encontrar postos" }).click();
-  } else await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Postos" }).click();
+  const primaryNav = page.getByRole("navigation", { name: mobile ? "Navegação móvel" : "Navegação principal" });
+  await primaryNav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await page.getByRole("dialog", { name: "Explorar o Trajeto" }).getByRole("button", { name: "Encontrar postos", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/postos/);
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
 
-  if (mobile) {
-    await page.getByRole("button", { name: "Mais opções" }).click();
-    await page.getByRole("button", { name: "Salvos" }).click();
-  } else await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Salvos" }).click();
+  await primaryNav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await page.getByRole("dialog", { name: "Explorar o Trajeto" }).getByRole("button", { name: "Salvos", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/salvos$/);
   await expect(page.getByRole("heading", { name: /Rotas salvas/i })).toBeVisible();
 
-  if (mobile) await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Início" }).click();
-  else await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Início" }).click();
+  await primaryNav.getByRole("button", { name: "Início", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/$/);
 });
 
@@ -53,7 +49,7 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
     body: JSON.stringify({ code: "Ok", routes: [{ distance: 12340, duration: 920, geometry: "r`d_B~~teHbwFg_mA" }] }),
   }));
   await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Calcular rota" }).click();
+  await page.getByRole("button", { name: "Ir até aqui" }).click();
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
   await expect(page.locator("[data-route-card]").getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
@@ -105,7 +101,7 @@ test("Pages: modos de rota ficam disponíveis sem backend", async ({ page }) => 
   await expect(page.getByRole("button", { name: /Bicicleta/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /Transporte/i })).toBeVisible();
   await page.getByRole("button", { name: /A pé/i }).click();
-  await page.getByRole("button", { name: "Calcular rota" }).click();
+  await page.getByRole("button", { name: "Ir até aqui" }).click();
   // The configured OSRM graph is for cars; walking must use the local estimate.
   await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/não confirmam ruas ou caminhos adequados/)).toBeVisible();
@@ -152,7 +148,7 @@ test("Pages: More stays usable on a small mobile viewport", async ({ page }, tes
   test.skip(testInfo.project.name !== "pages-mobile", "Mobile drawer ergonomics");
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Mais opções" }).click();
+  await page.getByRole("button", { name: "Explorar" }).click();
   const dialog = page.getByRole("dialog");
   const box = await dialog.boundingBox();
   expect(box!.y).toBeGreaterThanOrEqual(0);

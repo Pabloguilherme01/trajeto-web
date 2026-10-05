@@ -18,7 +18,7 @@ async function planRoute(page: Page) {
     { waitUntil: "domcontentloaded" }
   );
   await page
-    .getByRole("button", { name: "Calcular rota", exact: true })
+    .getByRole("button", { name: "Ir até aqui", exact: true })
     .click();
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
 }
@@ -95,7 +95,7 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
   await page
-    .getByRole("button", { name: "Calcular rota", exact: true })
+    .getByRole("button", { name: "Ir até aqui", exact: true })
     .click();
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
 });
@@ -215,7 +215,7 @@ test("Pages: recovers an exact saved trip when online geocoding fails", async ({
   });
   await page.route("https://nominatim.openstreetmap.org/**", route => route.abort());
   await page.goto("planejar?origem=Origem%20apenas%20salva&destino=Destino%20apenas%20salvo");
-  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
   await expect(page.getByText(/Usando a melhor rota já salva/)).toBeVisible();
   await expect(page.getByText(/trânsito e horários podem estar desatualizados/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
@@ -252,7 +252,7 @@ test("Pages: prepared endpoints support new offline trips in every mode and coor
   await page.getByPlaceholder("Para onde você vai", { exact: true }).fill("Ponto preparado C");
   for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
     await page.getByRole("button", { name: mode, exact: true }).click();
-    await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+    await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
     await expect(page.getByText(/Trajeto calculado na malha salva|Estimativa em linha reta/)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
@@ -262,7 +262,7 @@ test("Pages: prepared endpoints support new offline trips in every mode and coor
   await page.getByRole("button", { name: "Carro", exact: true }).click();
   await page.getByPlaceholder("De onde você sai", { exact: true }).fill("-15.75123,-48.27123");
   await page.getByPlaceholder("Para onde você vai", { exact: true }).fill("Ponto preparado B");
-  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
   await expect(page.getByText(/Usando a melhor rota já salva/)).toBeVisible();
   await page.getByRole("button", { name: /Instruções pelas ruas/ }).click();
   await expect(page.getByText("Siga pela via preparada")).toBeVisible();

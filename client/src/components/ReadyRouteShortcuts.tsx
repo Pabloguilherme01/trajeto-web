@@ -74,7 +74,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
   return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#13232d] via-[#101a22] to-[#0B1014] p-4 shadow-xl" data-compact={compact || undefined}>
-    <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-[#3DE3FF]">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
+    <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-accent">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
     <p className="mt-2 text-xs leading-relaxed text-white/70">Busque um lugar, escolha como ir e toque em Calcular. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
     <div className="mt-3" role="group" aria-label="O que você precisa fazer?">
       <p className="mb-2 text-xs font-bold text-white/80">O que você precisa fazer?</p>
@@ -90,7 +90,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
           { value: "centro", label: "Ir para um bairro" },
         ].map(intent => <button key={intent.value} type="button" aria-pressed={category === intent.value}
           onClick={() => { setCategory(intent.value as RouteDestinationCategoryFilter); setQuery(""); setVisibleCount(6); }}
-          className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 bg-white/5 text-white/80"}`}>
+          className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-primary bg-primary/15 text-primary" : "border-white/15 bg-white/5 text-white/80"}`}>
           {intent.label}
         </button>)}
       </div>
@@ -98,12 +98,12 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Modo rápido de viagem">
       {modes.map(item => <button key={item.value} type="button" aria-pressed={mode === item.value}
         onClick={() => setMode(item.value)}
-        className={`min-h-11 rounded-xl border px-3 text-xs font-bold ${mode === item.value ? "border-[#3DE3FF] bg-[#3DE3FF]/10 text-[#3DE3FF]" : "border-white/15 text-white/70"}`}>
+        className={`min-h-11 rounded-xl border px-3 text-xs font-bold ${mode === item.value ? "border-accent bg-accent/10 text-accent" : "border-white/15 text-white/70"}`}>
         {item.label}
       </button>)}
     </div>
     <button type="button" aria-pressed={offlineActive} disabled={!online} onClick={() => setOfflineOnly(value => !value)}
-      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 text-white/80"} disabled:cursor-default disabled:opacity-100`}>
+      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-primary bg-primary/15 text-primary" : "border-white/15 text-white/80"} disabled:cursor-default disabled:opacity-100`}>
       {offlineActive ? "Offline ativo" : "Calcular offline"}
     </button>
     <p className="mt-2 text-xs leading-relaxed text-white/65">Todos os trajetos deste catálogo abrem offline, incluindo conexões entre as vias mapeadas. Para seguir curva a curva pelas ruas, prepare a rota com internet antes de sair; sem geometria salva, o cálculo offline continua identificado como estimativa.</p>
@@ -151,18 +151,18 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         const from = route.originLabel, to = route.destinationLabel;
         const DestinationIcon = destinationIcons[route.category];
         const categoryLabel = ROUTE_DESTINATION_CATEGORIES.find(item => item.value === route.category)?.label;
-        return <article key={route.id} aria-label={route.label} className="premium-route-card min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101b23] p-4 shadow-lg transition-colors hover:border-[#3DE3FF]/35">
+        return <article key={route.id} aria-label={route.label} className="premium-route-card min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101b23] p-4 shadow-lg transition-colors hover:border-accent/35">
           <div className="flex items-start gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><DestinationIcon className="size-4" aria-hidden="true" /></span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent"><DestinationIcon className="size-4" aria-hidden="true" /></span>
             <div className="min-w-0 flex-1">
-              <p className="mb-1 text-xs font-bold text-[#3DE3FF]">{categoryLabel}</p>
+              <p className="mb-1 text-xs font-bold text-accent">{categoryLabel}</p>
               <h3 className="break-words text-base font-black leading-snug text-white">{to}</h3>
               <p className="mt-2 flex items-start gap-1.5 text-xs text-white/85"><MapPin className="mt-0.5 size-3.5 shrink-0" /><span>Saída: {from}</span></p>
               <p className="mt-1 break-words text-xs text-white/65">{route.detail}</p>
             </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => openRoute(route)} aria-label={"Calcular " + route.label} className="min-h-11 min-w-0 break-words rounded-xl bg-[#C7FF3C] px-2 text-xs font-black text-[#102028]"><span className="inline-flex items-center justify-center gap-1">Calcular rota<ArrowUpRight className="size-3.5 shrink-0" /></span></button>
+            <button type="button" onClick={() => openRoute(route)} aria-label={"Calcular " + route.label} className="min-h-11 min-w-0 break-words rounded-xl bg-primary px-2 text-xs font-black text-primary-foreground"><span className="inline-flex items-center justify-center gap-1">Ir até aqui<ArrowUpRight className="size-3.5 shrink-0" /></span></button>
             <button type="button" onClick={() => openRoute(route, true)} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-white/15 px-2 text-xs font-bold text-white"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
           </div>
           <details className="mt-2 border-t border-white/10 pt-2">
@@ -174,7 +174,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
       })}
     </div>
     <div className="mt-3 flex flex-wrap gap-2">
-      {visible.length < filtered.length && <button type="button" onClick={() => setVisibleCount(value => value + 12)} className="min-h-11 flex-1 rounded-xl border border-[#3DE3FF]/25 px-3 text-sm font-bold text-[#3DE3FF]">Ver mais {Math.min(12, filtered.length - visible.length)} trajetos</button>}
+      {visible.length < filtered.length && <button type="button" onClick={() => setVisibleCount(value => value + 12)} className="min-h-11 flex-1 rounded-xl border border-accent/25 px-3 text-sm font-bold text-accent">Ver mais {Math.min(12, filtered.length - visible.length)} trajetos</button>}
       {visibleCount > 6 && <button type="button" onClick={() => setVisibleCount(6)} className="min-h-11 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80">Mostrar menos trajetos</button>}
     </div>
     <p className="mt-3 text-xs leading-relaxed text-white/55">Sem internet, o caminho e a distância podem ser estimativas. Transporte público não informa horários em tempo real.</p>

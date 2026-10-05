@@ -22,7 +22,7 @@ vi.mock("@/components/RouteMap", () => ({ RouteMap: () => <div data-testid="rout
 
 const payload = { route: { origin: "Casa", destination: "Trabalho", distanceMeters: 12000, durationSeconds: 600 }, stops: [], recommendation: null };
 const changeDestination = (value: string) => fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value } });
-const submit = () => fireEvent.click(screen.getByRole("button", { name: /Calcular rota|Encontrar melhor rota|Usar rota offline|Preparar condução|Planejar (transporte|caminhada|bicicleta)/ }));
+const submit = () => fireEvent.click(screen.getByRole("button", { name: /Ir até aqui|Encontrar melhor rota|Usar rota offline|Preparar condução|Planejar (transporte|caminhada|bicicleta)/ }));
 
 beforeEach(() => {
   vi.stubGlobal("React", React);
@@ -78,7 +78,7 @@ describe("Planner travel state", () => {
   it("changes the main action when explicit offline mode is selected", () => {
     state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
     render(<Planner />);
-    expect(screen.getByRole("button", { name: "Calcular rota" }).textContent).toContain("Usar rota offline");
+    expect(screen.getByRole("button", { name: "Ir até aqui" }).textContent).toContain("Usar rota offline");
     expect(screen.queryByRole("button", { name: "Abrir Google Maps agora" })).toBeNull();
   });
 
@@ -176,11 +176,12 @@ describe("Planner travel state", () => {
     expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
   });
 
-  it("offers external navigation with the current position as an optional origin", async () => {
-    state.staticRuntime = true;
+  it.each([false, true])("offers external navigation with the current position as an optional origin (static=%s)", async staticRuntime => {
+    state.staticRuntime = staticRuntime;
     state.search = "destino=Hospital";
     render(<Planner />);
     submit();
+    await screen.findByRole("heading", { name: /Navegação pronta/i });
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(state.mutate).not.toHaveBeenCalled();
   });
@@ -413,9 +414,9 @@ it("unlocks calculation after editing while a public request is pending", async 
   state.publicRoute.mockReturnValueOnce(new Promise(() => {}));
   render(<Planner />);
   submit();
-  await waitFor(() => expect(screen.getByRole("button", { name: "Calcular rota" }).hasAttribute("disabled")).toBe(true));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Ir até aqui" }).hasAttribute("disabled")).toBe(true));
   changeDestination("Hospital");
-  expect(screen.getByRole("button", { name: "Calcular rota" }).hasAttribute("disabled")).toBe(false);
+  expect(screen.getByRole("button", { name: "Ir até aqui" }).hasAttribute("disabled")).toBe(false);
 });
 
 it("continues local routing when saved route storage does not answer", async () => {

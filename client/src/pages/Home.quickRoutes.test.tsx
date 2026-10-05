@@ -16,7 +16,7 @@ it("puts the quick form before service cards and starts calculation in one submi
   expect(origin.compareDocumentPosition(screen.getByRole("button", { name: /Planejar uma rota/ })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   fireEvent.change(origin, { target: { value: "Prefeitura de Águas Lindas de Goiás" } });
   fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value: "UPA Mansões Odisseia" } });
-  fireEvent.click(screen.getByRole("button", { name: "Calcular rota" }));
+  fireEvent.click(screen.getByRole("button", { name: "Ir até aqui" }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("origem")).toBe("Prefeitura de Águas Lindas de Goiás");
   expect(url.searchParams.get("destino")).toBe("UPA Mansões Odisseia");

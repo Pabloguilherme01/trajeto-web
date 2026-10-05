@@ -37,7 +37,7 @@ test("quick home form submits an automatic calculation", async ({ page }) => {
   await page.goto("");
   await page.getByPlaceholder("De onde você sai").fill("Prefeitura de Águas Lindas de Goiás");
   await page.getByPlaceholder("Para onde você vai").fill("UPA Mansões Odisseia");
-  await page.getByRole("button", { name: "Calcular rota", exact: true }).click();
+  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
   await expect(page).toHaveURL(/auto=1/);
   await expect(page.getByRole("region", { name: "Explorar mapa offline" })).toBeVisible();
 });

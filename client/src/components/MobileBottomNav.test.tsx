@@ -49,14 +49,14 @@ describe("mobile navigation", () => {
     render(<MobileBottomNav />);
     expect(
       screen
-        .getByRole("button", { name: "Mais opções" })
+        .getByRole("button", { name: "Explorar" })
         .getAttribute("aria-current")
     ).toBe("page");
   });
 
   it("opens More, hides unavailable accounts, navigates to help and closes the dialog", async () => {
     render(<MobileBottomNav />);
-    fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
+    fireEvent.click(screen.getByRole("button", { name: "Explorar" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Minha conta" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Ajuda e offline" }));
@@ -65,7 +65,7 @@ describe("mobile navigation", () => {
   });
   it("opens Saved routes from the More menu", async () => {
     render(<MobileBottomNav />);
-    fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
+    fireEvent.click(screen.getByRole("button", { name: "Explorar" }));
     fireEvent.click(screen.getByRole("button", { name: "Salvos" }));
     expect(state.navigate).toHaveBeenCalledWith("/salvos");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
@@ -74,18 +74,18 @@ describe("mobile navigation", () => {
 
 it("keeps Health and Emergency inside the local public directory", async () => {
   render(<MobileBottomNav />);
-  fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
+  fireEvent.click(screen.getByRole("button", { name: "Explorar" }));
   fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
   expect(state.navigate).toHaveBeenCalledWith("/servicos?categoria=saude");
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-  fireEvent.click(screen.getByRole("button", { name: "Mais opções" }));
+  fireEvent.click(screen.getByRole("button", { name: "Explorar" }));
   fireEvent.click(screen.getByRole("button", { name: "Emergência" }));
   expect(state.navigate).toHaveBeenCalledWith("/servicos?emergencia=1#emergency-strip-title");
 });
 
 it("returns focus to More after dismissing the menu", async () => {
   render(<MobileBottomNav />);
-  const more = screen.getByRole("button", { name: "Mais opções" });
+  const more = screen.getByRole("button", { name: "Explorar" });
   fireEvent.click(more);
   fireEvent.click(screen.getByRole("button", { name: "Fechar menu" }));
   await waitFor(() => expect(document.activeElement).toBe(more));

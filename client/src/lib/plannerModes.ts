@@ -12,22 +12,22 @@ export const PLANNER_EXPERIENCE_OPTIONS: Array<{
   {
     id: "smart",
     label: "Inteligente",
-    detail: "Escolhe a melhor camada disponível e salva a rota quando for seguro.",
+    detail: "Encontra o caminho disponível e salva a rota neste aparelho.",
   },
   {
     id: "offline",
     label: "Offline",
-    detail: "Evita provedores externos e prioriza rotas salvas e cálculo local.",
+    detail: "Usa caminhos preparados ou salvos neste aparelho, sem internet.",
   },
   {
     id: "economy",
     label: "Economia",
-    detail: "Mantém o planejamento de carro junto da calculadora de custo e autonomia.",
+    detail: "Veja o custo estimado de combustível e a autonomia para viajar de carro.",
   },
   {
     id: "driving",
     label: "Condução",
-    detail: "Foco em dirigir, mapa da viagem e atalhos de navegação.",
+    detail: "Acompanhe o mapa e as orientações durante a viagem de carro.",
   },
 ];
 

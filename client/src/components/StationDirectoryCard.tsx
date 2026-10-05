@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { motion, useReducedMotion } from "framer-motion";
-import { Fuel, Heart, MapPin, Phone } from "lucide-react";
+import { Fuel, Heart, MapPin, Navigation, Phone, Route } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
 import type { LocalStationRecord } from "@/lib/aguasLindasStations";
@@ -24,12 +24,12 @@ function brandConfig(local?: LocalStationRecord | null, anp?: AnpStation | null)
   if (key.includes("petrobras") || key.includes("petrobr")) return { label: "BR", className: "bg-[#1A8B4D] text-white border-white/10" };
   if (key === "br" || key.includes("posto br")) return { label: "BR", className: "bg-[#163F8C] text-white border-white/10" };
   if (key.includes("ale")) return { label: "ALE", className: "bg-[#6F43B7] text-white border-white/10" };
-  if (key.includes("zm")) return { label: "ZM", className: "bg-[#3DE3FF] text-[#12353F] border-[#12353F]/10" };
+  if (key.includes("zm")) return { label: "ZM", className: "bg-accent text-[#12353F] border-[#12353F]/10" };
   if (key.includes("formula")) return { label: "F1", className: "bg-[#F24822] text-white border-white/10" };
-  if (key.includes("ponteio")) return { label: "P", className: "bg-[#C7FF3C] text-[#163840] border-[#163840]/10" };
+  if (key.includes("ponteio")) return { label: "P", className: "bg-primary text-[#163840] border-[#163840]/10" };
   if (key.includes("premium")) return { label: "PREM", className: "bg-[#D8DDE3] text-[#2E3740] border-black/10" };
-  if (local?.mapData?.observedBrand) return { label: "MAPA", className: "bg-[#3DE3FF]/10 text-[#9FEFFF] border-[#3DE3FF]/15" };
-  return { label: "POSTO", className: "bg-[#C7FF3C]/10 text-[#D9FF91] border-[#C7FF3C]/15" };
+  if (local?.mapData?.observedBrand) return { label: "MAPA", className: "bg-accent/10 text-[#9FEFFF] border-accent/15" };
+  return { label: "POSTO", className: "bg-primary/10 text-[#D9FF91] border-primary/15" };
 }
 
 function BrandMark({ local, anp }: { local?: LocalStationRecord | null; anp?: AnpStation | null }) {
@@ -157,35 +157,35 @@ export function StationDirectoryCard({
       transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduceMotion ? undefined : { y: -3 }}
       whileTap={reduceMotion ? undefined : { scale: 0.997 }}
-      className="group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-[#3DE3FF]/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:320px]"
+      className="task-surface group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-accent/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:320px]"
     >
-      <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-[#3DE3FF]/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-accent/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
         <BrandMark local={local} anp={anp} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[.14em] text-[#3DE3FF]">Posto {String(index).padStart(2, "0")}</p>
+              <p className="text-xs font-black uppercase tracking-[.14em] text-accent">Posto {String(index).padStart(2, "0")}</p>
               <h3 className="mt-1 text-base font-black leading-tight text-white">{stationName}</h3>
-              {legalName !== stationName && legalName !== "não informada" && <p className="mt-1 text-xs leading-relaxed text-white/65">{legalName}</p>}
+
             </div>
-            {onToggleSaved && <button type="button" onClick={onToggleSaved} aria-pressed={!!saved} className={"flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border px-2 text-xs font-bold " + (saved ? "border-[#C7FF3C]/30 text-[#D9FF91]" : "border-white/10 text-white/75")} aria-label={saved ? "Remover posto dos salvos" : "Salvar posto neste aparelho"}>
+            {onToggleSaved && <button type="button" onClick={onToggleSaved} aria-pressed={!!saved} className={"flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border px-2 text-xs font-bold " + (saved ? "border-primary/30 text-[#D9FF91]" : "border-white/10 text-white/75")} aria-label={saved ? "Remover posto dos salvos" : "Salvar posto neste aparelho"}>
               <Heart className="size-4" fill={saved ? "currentColor" : "none"} />{saved ? "Salvo" : "Salvar"}
             </button>}
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{catalogStatus}</span>
-            {anp ? <span className="rounded-full border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] px-2 py-1 text-xs font-black text-[#9FEFFF]">ANP</span> : <span className="rounded-full border border-white/8 px-2 py-1 text-xs font-black text-white/65">sem cruzamento ANP</span>}
+            <span className="rounded-full border border-primary/15 bg-primary/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{catalogStatus}</span>
+
             <span className="rounded-full border border-white/8 px-2 py-1 text-xs font-black text-white/65">{distributor}</span>
             {Number.isFinite(distanceKm) && <span className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/65">{Number(distanceKm).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</span>}
-            {status && <span className={"rounded-full border px-2 py-1 text-xs font-black " + (status === "closed" ? "border-[#FFB86B]/25 text-[#FFCF96]" : "border-[#C7FF3C]/15 text-[#D9FF91]")}>{statusLabel}</span>}
+            {status && <span className={"rounded-full border px-2 py-1 text-xs font-black " + (status === "closed" ? "border-warning/25 text-warning" : "border-primary/15 text-[#D9FF91]")}>{statusLabel}</span>}
           </div>
         </div>
       </div>
 
       {primaryPrice ? <>
-      <section className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3" aria-label="Preço ANP">
+      <section className="mt-3 rounded-2xl border border-primary/15 bg-primary/[.035] p-3" aria-label="Preço ANP">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[.13em] text-[#D9FF91]">Preço pesquisado pela ANP</p>
@@ -201,32 +201,36 @@ export function StationDirectoryCard({
           </div>
         </div>
         {prices.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{prices.slice(0, 5).map(price => <span key={price.productKey + price.salePrice} className="rounded-full border border-white/8 bg-white/[.03] px-2 py-1 text-xs font-black text-white/65">{price.produto}: {price.salePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/{price.unit}</span>)}</div>}
-        <p className="mt-2 text-xs leading-relaxed text-white/65">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. Não representa preço em tempo real.</p>
+        <p className="mt-2 text-xs leading-relaxed text-white/65">Fonte ANP · {primaryPrice ? freshnessLabel(primaryPrice.collectionDate) : "sem preço individual disponível"}. O preço pode ter mudado — confirme no posto.</p>
       </section>
 
       </> : <p className="mt-3 text-xs leading-relaxed text-white/65">Preço individual indisponível · confirme no posto.</p>}
 
       <div className="mt-3 rounded-2xl border border-white/8 bg-white/[.02] p-3">
         <div className="flex items-start gap-2">
-          <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#3DE3FF]" />
+          <MapPin className="mt-0.5 size-3.5 shrink-0 text-accent" />
           <p className="text-sm leading-relaxed text-white/65">{address || "Endereço não consolidado"}</p>
         </div>
         {local?.mapData?.hours && <p className="mt-2 text-xs text-white/65">Horário informado: {local.mapData.hours} · confirme antes de sair.</p>}
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2" aria-label={"Ações para " + stationName}>
-        <a href={buildDestinationPlannerUrl(destinationNavigationValue(sharedDestination))} className="flex min-h-11 items-center justify-center rounded-xl bg-[#C7FF3C] px-2 text-xs font-black text-[#102028]">Traçar rota</a>
-        <a href={navigationUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF]">Navegar</a>
-        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 text-xs font-bold text-white/80"><Phone className="size-4" />Ligar para o posto</a>}
+        <a href={buildDestinationPlannerUrl(destinationNavigationValue(sharedDestination))} className="task-action task-action-primary gap-1.5">
+          <Route className="size-4" aria-hidden="true" />Ir até aqui
+        </a>
+        <a href={navigationUrl} target="_blank" rel="noopener noreferrer" className="task-action task-action-secondary gap-1.5">
+          <Navigation className="size-4 text-accent" aria-hidden="true" />Navegar
+        </a>
+        {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="task-action task-action-secondary col-span-2"><Phone className="size-4" aria-hidden="true" />Ligar para o posto</a>}
       </div>
       {actionError && <p role="alert" className="mt-2 text-xs text-[#FFD59B]">{actionError}</p>}
       <details className="mt-3 rounded-xl border border-white/8 bg-white/[.02] px-3">
         <summary className="min-h-11 cursor-pointer py-3 text-xs font-bold text-white/75">Mais opções do posto</summary>
         <div className="grid grid-cols-2 gap-2 border-t border-white/8 py-3">
-          <a href={buildOriginPlannerUrl(address)} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Sair deste posto</a>
+          <a href={buildOriginPlannerUrl(address)} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Usar como partida</a>
           <button type="button" onClick={() => void share()} className="min-h-11 rounded-xl border border-white/10 text-xs font-bold text-white/75">Compartilhar</button>
           <button type="button" onClick={() => void copy(cnpj || address)} className="min-h-11 rounded-xl border border-white/10 px-2 text-xs font-bold text-white/75">{copied ? "Copiado" : cnpj ? "Copiar CNPJ" : "Copiar endereço"}</button>
           <a href={webSearchUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Pesquisar este posto na web</a>
-          {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Ficha completa</Link>}
+          {local && <Link href={appUrl("/local/" + encodeURIComponent(local.id))} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-2 text-center text-xs font-bold text-white/75">Ver detalhes</Link>}
           {local?.mapData?.website && <a href={local.mapData.website} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-xs font-bold text-white/75">Site informado</a>}
           {local?.mapData?.email && <a href={"mailto:" + local.mapData.email} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 text-xs font-bold text-white/75">Enviar e-mail</a>}
         </div>
@@ -246,7 +250,7 @@ export function StationDirectoryCard({
                 setPreferredNavigationProvider(provider);
                 setPreferredProviderState(provider);
               }}
-              className={"min-h-11 rounded-xl border px-2 text-xs font-black " + (preferredProvider === provider ? "border-[#C7FF3C]/25 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/8 text-white/60")}
+              className={"min-h-11 rounded-xl border px-2 text-xs font-black " + (preferredProvider === provider ? "border-primary/25 bg-primary/10 text-[#D9FF91]" : "border-white/8 text-white/60")}
             >
               {provider === "google" ? "Google" : provider === "waze" ? "Waze" : "Apple"}
             </button>
@@ -257,7 +261,7 @@ export function StationDirectoryCard({
       </details>
       <details className="mt-3 rounded-2xl border border-white/8 bg-white/[.02]">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-xs font-black text-white/65">
-          <span>Todos os dados disponíveis</span>
+          <span>Sobre os dados deste posto</span>
           <Fuel className="size-4 text-white/65" />
         </summary>
         <div className="space-y-2 border-t border-white/8 px-3 py-3 text-xs leading-relaxed text-white/65">
@@ -268,12 +272,12 @@ export function StationDirectoryCard({
             <p className="mt-1 text-xs font-black text-white">{confidence >= 90 ? "Alta" : confidence >= 70 ? "Boa" : confidence >= 50 ? "Parcial" : "Baixa"}</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-black text-[#C7FF3C]">{confidence}%</p>
+            <p className="text-lg font-black text-primary">{confidence}%</p>
             <p className="text-xs font-bold text-white/65">qualidade/frescor</p>
           </div>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full bg-[#C7FF3C] transition-all duration-500" style={{ width: confidence + "%" }} />
+          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: confidence + "%" }} />
         </div>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/65">
           <span>Cadastro: {anp ? "ANP" : "catálogo local"}</span>
@@ -289,30 +293,25 @@ export function StationDirectoryCard({
           <p><strong className="text-white/65">ANP · identificação:</strong> código SIMP {anp?.codigoSimp || "—"} · autorização {anp?.autorizacao || "—"} · CNPJ {cnpj ? formatCnpj(cnpj) : "—"}</p>
           <p><strong className="text-white/65">ANP · datas:</strong> publicação {formatDate(anp?.dataPublicacao)} · vinculação {formatDate(anp?.dataVinculacao)} · obtenção dos dados {formatDate(anp?.dataObtencao)}</p>
           <p><strong className="text-white/65">ANP · distribuição:</strong> {anp?.distribuidora || "não informada"} · situação constatada {anp?.situacaoConstatada || "não informada"} · SIGAF {anp?.statusSigaf || "não informado"}</p>
-          <p><strong className="text-white/65">Produtos ANP:</strong> {products.length ? products.map(item => [item.produto || "produto não informado", item.classe || null, item.tancagem != null ? "tancagem " + item.tancagem.toLocaleString("pt-BR") + " " + (item.unidadeMedidaTancagem || "") : null, item.quantidadeBicos != null ? "bicos " + item.quantidadeBicos : null].filter(Boolean).join(" · ")).join(" | ") : "nenhum registro de produto disponível no snapshot atual"}</p>
           <p><strong className="text-white/65">ANP · localização:</strong> {anp?.endereco || local?.address || "—"} · complemento {anp?.complemento || "—"} · bairro {anp?.bairro || local?.neighborhood || "—"} · CEP {anp?.cep || "—"} · município/UF {anp?.municipio || "—"}/{anp?.uf || "—"}</p>
           <p><strong className="text-white/65">ANP · georreferenciamento:</strong> {anp?.latitude != null && anp?.longitude != null ? anp.latitude + ", " + anp.longitude : "coordenada principal não informada"} · ANP 4C {anp?.latitudeAnp4c != null && anp?.longitudeAnp4c != null ? anp.latitudeAnp4c + ", " + anp.longitudeAnp4c : "não informado"} · validação {anp?.validacao || "não informada"} · acurácia estimada {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM + " m" : "não informada"} · SRID {anp?.srid || "não informado"} · sistema {anp?.sistemaReferenciaCoordenadas || "não informado"}</p>
           <p><strong className="text-white/65">ANP · origem:</strong> {anp?.origemInformacao || "não informada"}{anp?.observacao ? " · observação: " + anp.observacao : ""}</p>
-          <p><strong className="text-white/65">Município/UF:</strong> {anp?.municipio || "Águas Lindas de Goiás"} / {anp?.uf || "GO"}</p>
-          <p><strong className="text-white/65">Situação ANP/SIGAF:</strong> {anp?.situacaoConstatada || "não informada"} · {anp?.statusSigaf || "sem ocorrência informada"}</p>
           <p><strong className="text-white/65">Origem cadastral API:</strong> {anp?.src || "não informada"}</p>
           <p><strong className="text-white/65">PMQC retornado pela API:</strong> {anp?.inadimplenciaPMQC?.length ? JSON.stringify(anp.inadimplenciaPMQC) : "nenhum registro adicional retornado"}</p>
-          <p><strong className="text-white/65">Origem:</strong> {anp?.origemInformacao || "não informada"} · obtido em {formatDate(anp?.dataObtencao)}</p>
-          <p><strong className="text-white/65">Geografia:</strong> {coords ? coords.lat.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + coords.lng.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas consolidadas"} · validação {anp?.validacao || "—"} · acurácia {anp?.estimativaAcuraciaM != null ? anp.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : "—"} · SRID {anp?.srid || "—"}</p>
           <div className="rounded-xl border border-white/8 bg-black/10 p-2.5">
             <p className="font-black uppercase tracking-[.11em] text-xs text-[#87DFF0]">Produtos / tancagem / bicos</p>
             {products.length ? products.map((item, productIndex) => (
               <p key={productIndex} className="mt-1">{item.produto || "produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem || ""} · bicos {item.quantidadeBicos ?? "—"} · classe {item.classe || "—"}</p>
             )) : <p className="mt-1">Nenhum produto ANP materializado nesta consulta.</p>}
           </div>
-          <div className="rounded-xl border border-[#C7FF3C]/10 bg-[#C7FF3C]/[.025] p-2.5">
+          <div className="rounded-xl border border-primary/10 bg-primary/[.025] p-2.5">
             <p className="font-black uppercase tracking-[.11em] text-xs text-[#D9FF91]">Referência secundária de mapas</p>
             <p className="mt-1">Telefone {phone || "—"} · nota {local?.mapData?.rating ?? "—"} · avaliações {local?.mapData?.reviewCount ?? "—"} · horário {local?.mapData?.hours || "—"} · bandeira observada {local?.mapData?.observedBrand || "—"}</p>
             <p className="mt-1">Status observado: {statusLabel} · coletado em {formatDate(local?.mapData?.observedAt)}</p>
           </div>
           <p><strong className="text-white/65">Qualidade:</strong> {local?.dataQuality || (anp ? "ANP" : "catálogo")} · {local?.sourceNote || "Cadastro consolidado de fontes públicas."}</p>
           {anp?.observacao && <p><strong className="text-white/65">Observação ANP:</strong> {anp.observacao}</p>}
-          {coords && <p className="text-white/65">A rota é calculada pelo provedor escolhido; o Trajeto não inventa distância ou duração quando não há um motor de roteamento configurado.</p>}
+          {coords && <p className="text-white/65">Abra a rota no aplicativo escolhido para ver o caminho e o trânsito atual.</p>}
         </div>
       </details>
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/6 pt-3 text-xs text-white/65">

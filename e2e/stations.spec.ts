@@ -26,9 +26,9 @@ test("postos: cruza ANP no diretório e mantém filtro de combustível útil", a
   await expect(page.locator('article[id^="posto-"]').first()).toBeVisible();
   await expect(page.getByText("Nenhum posto encontrado com esses filtros.")).toHaveCount(0);
 
-  const search = page.getByRole("textbox", { name: "Cidade, bairro ou posto" });
+  const search = page.getByRole("textbox", { name: "Buscar postos" });
   await search.fill("Ceilândia");
-  await page.getByRole("button", { name: "Pesquisar", exact: true }).click();
+  await page.getByRole("button", { name: "Buscar postos", exact: true }).click();
   await expect(page).toHaveURL(/[?&]q=Ceil%C3%A2ndia/);
 
   await page.goBack();
