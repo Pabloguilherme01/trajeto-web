@@ -13,7 +13,7 @@ test("mobile directory remains readable with enlarged text and closes after choo
   const dialog = page.getByRole("dialog");
   for (const name of [
     "Buscar no Trajeto",
-    "Mapa e locais",
+    "Abrir mapa",
     "Encontrar postos",
     "Ajuda e offline",
   ]) {
