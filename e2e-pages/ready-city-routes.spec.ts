@@ -10,9 +10,9 @@ test("mobile home calculates directly and exposes ready trips without overflow",
   await page.route("https://tile.openstreetmap.org/**", route => route.abort());
   await page.goto("");
   const origin = page.getByPlaceholder("De onde você sai");
-  const services = page.getByRole("button", { name: /Saúde e cidadania/ });
+  const services = page.getByRole("region", { name: "Ações principais" }).getByRole("button", { name: "Serviços", exact: true });
   expect((await origin.boundingBox())!.y).toBeLessThan((await services.boundingBox())!.y);
-  const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: /trajetos prontos pela cidade/ }) });
+  const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: /^Rotas prontas$/ }) });
   await shortcuts.locator("summary").first().click();
   await expect(shortcuts.locator("article")).toHaveCount(6);
   await shortcuts.getByRole("button", { name: /Ver mais/ }).click();
@@ -49,7 +49,7 @@ test("ready streets: selects a departure, calculates offline and keeps mobile ca
   await page.getByRole("button", { name: "Rotas", exact: true }).click();
   await expect(page.getByPlaceholder("Para onde você vai")).toBeVisible();
   await page.getByRole("button", { name: "Início", exact: true }).click();
-  const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: /trajetos prontos pela cidade/ }) });
+  const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: /^Rotas prontas$/ }) });
   await shortcuts.locator("summary").first().click();
   await shortcuts.getByRole("combobox", { name: "Saindo de" }).selectOption("via-osm-0da29ee8ad6a");
   await shortcuts.getByRole("searchbox", { name: "Buscar trajeto" }).fill("UPA");

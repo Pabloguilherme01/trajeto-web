@@ -10,8 +10,9 @@ test("Pages: home remains readable and touch-friendly at 320px", async ({ page }
     ),
   );
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Resolva na cidade/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Para onde você vai/i })).toBeVisible();
 
+  await page.locator("summary").filter({ hasText: "Explore a cidade" }).click();
   await page.getByRole("button", { name: "Trocar modo", exact: true }).click();
   await expect(page.locator("#daily-modes-options")).toBeVisible();
   await page.locator("summary").filter({ hasText: "Recursos do aparelho" }).click();
@@ -36,7 +37,7 @@ test("Pages: home remains readable and touch-friendly at 320px", async ({ page }
 
   for (const control of [
     page.getByRole("button", { name: "Compartilhar Trajeto" }),
-    page.getByRole("button", { name: "Central completa" }),
+    page.getByRole("button", { name: "Abrir mapa da cidade" }),
     page.getByRole("button", { name: "Ver catálogo" }),
     page.getByRole("button", { name: "Abrir guia" }),
     page.getByRole("button", { name: "Ver tudo" }),

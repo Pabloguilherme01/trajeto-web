@@ -251,6 +251,7 @@ test("Pages: prepared endpoints support new offline trips in every mode and coor
   await page.getByPlaceholder("De onde você sai", { exact: true }).fill("Ponto preparado A");
   await page.getByPlaceholder("Para onde você vai", { exact: true }).fill("Ponto preparado C");
   for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
+    if (!await page.getByRole("button", { name: mode, exact: true }).isVisible()) await page.locator("summary").filter({ hasText: "Alterar viagem" }).click();
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
@@ -259,6 +260,7 @@ test("Pages: prepared endpoints support new offline trips in every mode and coor
   }
   await page.getByRole("button", { name: "Ocultar referências", exact: true }).click();
   await expect(page.getByRole("button", { name: "Mostrar referências", exact: true })).toHaveAttribute("aria-pressed", "false");
+  if (!await page.getByRole("button", { name: "Carro", exact: true }).isVisible()) await page.locator("summary").filter({ hasText: "Alterar viagem" }).click();
   await page.getByRole("button", { name: "Carro", exact: true }).click();
   await page.getByPlaceholder("De onde você sai", { exact: true }).fill("-15.75123,-48.27123");
   await page.getByPlaceholder("Para onde você vai", { exact: true }).fill("Ponto preparado B");

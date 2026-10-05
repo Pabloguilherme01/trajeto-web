@@ -2,6 +2,78 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Shared mobile controls: one readable surface, comfortable touch targets. */
+.mobile-disclosure {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--card-foreground);
+  padding: .75rem 1rem;
+}
+.mobile-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  min-height: 2rem;
+  cursor: pointer;
+  font-size: .875rem;
+  font-weight: 700;
+  list-style: none;
+}
+.mobile-disclosure > summary::-webkit-details-marker { display: none; }
+.mobile-disclosure[open] > summary { margin-bottom: .75rem; }
+.mobile-disclosure[open] > summary > svg { transform: rotate(90deg); }
+.home-utility-action {
+  display: flex;
+  min-height: 5.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: .875rem;
+  font-weight: 700;
+}
+.planner-location-options > summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+}
+.planner-form-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2.75rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: .875rem;
+  font-weight: 700;
+}
+.planner-form-summary::-webkit-details-marker { display: none; }
+.planner-trip-form[open] > summary { margin-bottom: 1rem; }
+.planner-trip-form[open] > summary > svg { transform: rotate(180deg); }
+@media (max-width: 767px) {
+  .visual-shell { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+  .home-mobile-heading { margin-top: 1.5rem; }
+  .planner-trip-form { border-radius: 1rem; box-shadow: none; }
+  .planner-choice { min-height: 3rem; }
+  .planner-primary-action { min-height: 3.25rem; }
+  .premium-field:focus-within { border-color: var(--accent); }
+  input, textarea, select { scroll-margin-block: 5rem; }
+  .mobile-disclosure { scroll-margin-top: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -509,16 +581,11 @@ html.a11y-compact .planner-primary-action { box-shadow: none; }
     position: relative;
     transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
   }
-  .app-dock-item[data-active="true"]:not([data-primary="true"]) {
-    background: color-mix(in srgb, var(--accent) 8%, white 3%);
-    color: var(--foreground);
+  .app-dock-item[data-active="true"] {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
   }
-  .app-dock-item[data-primary="true"] {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 90%, white 10%), var(--primary));
-    color: var(--primary-foreground);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 16%, transparent);
-  }
-  .app-dock-item[data-active="false"]:not([data-primary="true"]) {
+  .app-dock-item[data-active="false"] {
     color: var(--muted-foreground);
   }
   .section-heading {

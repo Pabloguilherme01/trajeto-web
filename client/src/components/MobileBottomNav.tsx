@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { appUrl } from "@/lib/appUrl";
+import { OPEN_ACCESSIBILITY_EVENT } from "@/components/DailyCommandCenter";
 
 const baseItems = [
   { key: "home", href: "/", label: "Início", short: "Início", icon: Home },
@@ -57,8 +58,8 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
       </div>
     </nav>
     <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
-      <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="premium-card max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border-white/10 bg-card text-white">
-        <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-white/70"><X className="size-5 shrink-0" /></DialogClose>
+      <DialogContent showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); moreButton.current?.focus(); }} className="premium-card max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border-border bg-card text-card-foreground">
+        <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-muted-foreground"><X className="size-5 shrink-0" /></DialogClose>
         <DialogTitle className="pr-10">Explorar o Trajeto</DialogTitle>
         <DialogDescription>Encontre lugares, abra o mapa ou acesse seus recursos salvos.</DialogDescription>
         <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2">
@@ -73,6 +74,7 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/dados")); }} className="task-action task-action-secondary min-h-14 justify-start break-words rounded-xl px-4 text-left"><Database className="size-5 shrink-0" /> Dados da cidade</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="task-action task-action-secondary min-h-14 justify-start break-words rounded-xl px-4 text-left"><Bookmark className="size-5 shrink-0" /> Salvos</button>
           <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="task-action task-action-secondary min-h-14 justify-start break-words rounded-xl px-4 text-left"><HelpCircle className="size-5 shrink-0" /> Ajuda e offline</button>
+          <button type="button" onClick={() => { setMoreOpen(false); window.requestAnimationFrame(() => window.dispatchEvent(new Event(OPEN_ACCESSIBILITY_EVENT))); }} className="task-action task-action-secondary min-h-14 justify-start break-words rounded-xl px-4 text-left" aria-label="Abrir acessibilidade"><UserRound className="size-5 shrink-0" /> Acessibilidade e aparelho</button>
         </div>
         {!isGitHubPagesRuntime() && <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/minha-conta")); }} className="task-action task-action-secondary min-h-14 justify-start break-words rounded-xl px-4 text-left"><UserRound className="size-5 shrink-0" /> Minha conta</button>}
       </DialogContent>

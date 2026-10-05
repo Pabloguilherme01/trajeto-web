@@ -480,12 +480,21 @@ export function atlasDestinationReference(point: { lat: number; lng: number }): 
 }
 
 
+let bundledStreetQueryPositions: Map<string, Set<string>> | undefined;
 export function isAmbiguousAtlasStreet(value: string) {
   const query = normalizeCatalogText(value);
   if (!query) return false;
-  const positions = new Set(getBundledStreetReferences()
-    .filter(item => item.coordinateKind === "street-midpoint" &&
-      [item.name, item.address, item.destination].some(field => field && normalizeCatalogText(field) === query))
-    .map(item => item.lat + "," + item.lng));
-  return positions.size > 1;
+  if (!bundledStreetQueryPositions) {
+    bundledStreetQueryPositions = new Map();
+    for (const item of getBundledStreetReferences()) {
+      for (const field of [item.name, item.address, item.destination]) {
+        if (!field) continue;
+        const key = normalizeCatalogText(field);
+        const positions = bundledStreetQueryPositions.get(key) ?? new Set<string>();
+        positions.add(item.lat + "," + item.lng);
+        bundledStreetQueryPositions.set(key, positions);
+      }
+    }
+  }
+  return (bundledStreetQueryPositions.get(query)?.size ?? 0) > 1;
 }

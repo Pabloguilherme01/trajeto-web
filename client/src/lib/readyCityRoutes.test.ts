@@ -18,7 +18,11 @@ it("opens every ready city route offline and samples calculations by category", 
       isAguasLindasRoutePoint(point)
     )
   ).toBe(true);
-  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(1100);
+  expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(2500);
+  expect(READY_ROUTE_STREET_POINTS.length).toBe(50);
+  for (const hospital of ["upa", "heal", "hospital-bom-jesus"]) {
+    expect(READY_ROUTE_STATIONS.every(station => LOCAL_READY_ROUTES.some(route => route.id === `${hospital}-to-${station.id}`))).toBe(true);
+  }
   expect(LOCAL_READY_ROUTES.some(route => route.category === "combustivel")).toBe(true);
   expect(
     LOCAL_READY_ROUTES.some(

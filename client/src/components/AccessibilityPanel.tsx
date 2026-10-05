@@ -111,9 +111,6 @@ export default function AccessibilityPanel() {
       <button type="button" onClick={openPanel} aria-label="Abrir acessibilidade" className="fixed right-3 top-1/2 z-50 hidden -translate-y-1/2 rounded-full border border-white/15 bg-card/95 p-3 text-primary shadow-xl backdrop-blur md:grid place-items-center">
         <Accessibility className="size-5"/>
       </button>
-      <button type="button" onClick={openPanel} aria-label="Abrir acessibilidade" className="fixed bottom-[calc(5.9rem+env(safe-area-inset-bottom))] right-3 z-50 grid size-11 place-items-center rounded-full border border-white/15 bg-card/95 text-primary shadow-xl backdrop-blur md:hidden">
-        <Accessibility className="size-5"/>
-      </button>
       {open && (
         <div className="fixed inset-0 z-[70] bg-black/70 p-3 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="accessibility-title" onMouseDown={e=>{if(e.target===e.currentTarget)closePanel()}}>
           <section ref={panelRef} className="mx-auto mt-auto max-h-[90vh] max-w-lg overflow-auto rounded-3xl border border-white/15 bg-card p-4 shadow-2xl sm:mt-10 sm:p-6">

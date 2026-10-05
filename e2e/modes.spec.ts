@@ -34,6 +34,7 @@ test("modo condução prepara o planejador para navegação externa", async ({ p
 
 test("home mostra modos rápidos e ação automática", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: "Explore a cidade" }).click();
   await expect(page.getByRole("heading", { name: /Escolha como quer usar o Trajeto hoje/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /Automático:/i })).toBeVisible();
   await page.getByRole("button", { name: "Trocar modo" }).click();

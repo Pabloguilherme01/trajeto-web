@@ -76,6 +76,7 @@ test("Pages: planner excludes unverified utility routes but keeps the official c
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("planejar", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: "Destinos e atalhos" }).click();
   await page.getByRole("button", { name: /Destinos disponíveis/ }).click();
   await page
     .getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" })

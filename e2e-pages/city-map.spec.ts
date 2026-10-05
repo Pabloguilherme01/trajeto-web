@@ -14,6 +14,7 @@ test("city map: filters destinations and opens planner with ride options at 320p
   await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue(
     /UPA Mansões Odisseia/
   );
+  await page.locator("summary").filter({ hasText: "Mais recursos da viagem" }).click();
   await expect(page.getByRole("link", { name: "Abrir Uber" })).toHaveAttribute(
     "href",
     /m\.uber\.com/
@@ -159,6 +160,7 @@ test("education destinations and paginated local points remain usable at 320px",
   await expect(school).toBeVisible();
   await school.getByRole("link", { name: "Ir até aqui", exact: true }).click();
   await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue(/Colégio Estadual Cora Coralina/);
+  await page.locator("summary").filter({ hasText: "Escolher destino no catálogo" }).click();
   await page.getByRole("button", { name: "Escolher destino no catálogo local", exact: true }).click();
   const list = page.getByRole("list", { name: "Pontos locais para destino", exact: true });
   await expect(list.getByRole("listitem")).toHaveCount(8);
