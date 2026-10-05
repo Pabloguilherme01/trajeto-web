@@ -215,8 +215,12 @@ const extraStreetIds = cityAtlasData.items.filter(item =>
 ).slice(0, 30 - streetEndpointIds.length).map(item => item.id);
 export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetIds].map(id => {
   const street = cityAtlasData.items.find(item => item.id === id);
-  if (!street || street.coordinateKind !== "street-midpoint" || !Number.isFinite(street.lat) || !Number.isFinite(street.lng)) {
-    throw new Error(`Ready route requires a mapped street midpoint: ${id}`);
+  if (
+    !street ||
+    street.coordinateKind !== "street-midpoint" ||
+    !isAguasLindasRoutePoint({ lat: Number(street.lat), lng: Number(street.lng) })
+  ) {
+    throw new Error(`Ready route requires a mapped local street midpoint: ${id}`);
   }
   return { id, label: street.name, destination: `${street.name} · referência no mapa, Águas Lindas de Goiás - GO`, lat: street.lat!, lng: street.lng!, category: "centro" as const };
 });
