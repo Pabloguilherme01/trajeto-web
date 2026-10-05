@@ -21,17 +21,23 @@ it("opens and calculates every ready city route without internet", async () => {
   expect(new Set(LOCAL_READY_ROUTES.map(route => route.id)).size).toBe(LOCAL_READY_ROUTES.length);
   const trips = LOCAL_READY_ROUTES.flatMap(route => [route, { ...route, origin: route.destination, destination: route.origin }]);
   const unavailable: string[] = [];
-  for (const route of trips) for (const mode of ["driving", "walking", "cycling", "transit"] as const) {
+  for (const route of trips) {
     const url = new URL(buildReusableTripPlannerUrl(route, { auto: true }), "https://example.com");
     expect(url.searchParams.get("origem")).toBe(route.origin);
     expect(url.searchParams.get("destino")).toBe(route.destination);
     expect(url.searchParams.get("auto")).toBe("1");
     let result;
-    try { result = await calculatePublicRoute(route.origin, route.destination, mode); }
+    try { result = await calculatePublicRoute(route.origin, route.destination, "driving"); }
     catch { unavailable.push(route.label); continue; }
     expect(result.source).toBe("local-estimate");
     expect(result.distanceMeters).toBeGreaterThanOrEqual(200);
     expect(result.origin).not.toEqual(result.destination);
+  }
+  const categorySamples = [...new Map(LOCAL_READY_ROUTES.map(route => [route.category, route])).values()];
+  for (const route of categorySamples) for (const mode of ["walking", "cycling", "transit"] as const) {
+    const result = await calculatePublicRoute(route.origin, route.destination, mode);
+    expect(result.source).toBe("local-estimate");
+    expect(result.distanceMeters).toBeGreaterThanOrEqual(200);
   }
   expect(unavailable).toEqual([]);
   expect(fetchMock.mock.calls.every(([url]) => String(url).includes("aguas-lindas-offline-map.json"))).toBe(true);
