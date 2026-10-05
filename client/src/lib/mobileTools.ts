@@ -139,6 +139,11 @@ export function buildAppleMapsDirectionsUrl(
   return "https://maps.apple.com/directions?" + params.toString();
 }
 
+export function openExternalUrl(url: string) {
+  if (typeof window === "undefined") return;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 export type NavigationProvider = "google" | "waze" | "apple";
 
 export function setPreferredNavigationProvider(provider: NavigationProvider) {
