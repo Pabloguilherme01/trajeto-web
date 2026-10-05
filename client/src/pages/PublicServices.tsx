@@ -543,7 +543,7 @@ export default function PublicServices() {
                         ": " +
                         primaryContact.number
                       }
-                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent"
+                      className={"inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " + (!service.mapQuery ? "col-span-2" : "")}
                     >
                       {primaryContact.channel === "whatsapp" ? (
                         <MessageCircle className="size-3.5 shrink-0" />
@@ -559,7 +559,7 @@ export default function PublicServices() {
                       type="button"
                       onClick={() => void shareService(service)}
                       aria-label={"Compartilhar serviço: " + service.name}
-                      className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                      className={"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " + (!service.mapQuery ? "col-span-2" : "")}
                     >
                       <Share2 className="size-3.5" />
                       Compartilhar
