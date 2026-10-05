@@ -524,9 +524,10 @@ export default function TileStationMap({
   }
 
   return (
-    <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
-      <div data-map-surface className={"relative " + heightClassName}>
-        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-9 left-3 z-20 rounded bg-white/90 px-2 py-1 text-xs font-semibold text-slate-900">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-white/80 bg-[#dfe9e2] shadow-[0_24px_70px_rgba(15,35,45,.24)]">
+      <div data-map-surface className={"relative isolate " + heightClassName}>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#0e3842]/20 via-[#0e3842]/5 to-transparent" />
+        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border border-white/80 bg-white/92 px-2.5 py-1.5 text-[0.68rem] font-black text-slate-800 shadow-lg backdrop-blur-md">
           {scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`}
           <div className="h-1 border-x-2 border-b-2 border-slate-900" style={{ width: scaleMeters / metersPerPixel }} />
         </div>
@@ -734,7 +735,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(1)}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg disabled:opacity-40"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
             aria-label="Aumentar zoom"
             disabled={zoom >= 17}
           >
@@ -743,7 +744,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(-1)}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg disabled:opacity-40"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
             aria-label="Diminuir zoom"
             disabled={zoom <= 8}
           >
@@ -752,7 +753,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={recenter}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
             aria-label="Recentrar mapa"
             aria-pressed={following}
           >
@@ -761,7 +762,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={fitStations}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
             aria-label="Ver todos"
             title={routePoints.length > 1 ? "Enquadrar percurso" : "Ver todos os lugares"}
           >
@@ -770,7 +771,7 @@ export default function TileStationMap({
 
         </div>
 
-        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"><Layers className="size-4" /></button>}
+        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"><Layers className="size-4" /></button>}
 
         <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
@@ -787,7 +788,7 @@ export default function TileStationMap({
         </div>
       </div>
 
-      <div className="relative min-w-0 border-t border-black/10 bg-white/95 p-3.5 sm:p-4">
+      <div className="relative min-w-0 border-t border-black/10 bg-[linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,250,248,.98))] p-3.5 sm:p-4">
         {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-bold text-slate-700">{TRAVEL_LABELS[travelMode]} · {travelMode === "walking" ? "linha pontilhada" : travelMode === "cycling" ? "linha tracejada" : "linha contínua"}</p>
