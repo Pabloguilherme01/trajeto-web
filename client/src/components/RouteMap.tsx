@@ -140,22 +140,22 @@ function RouteOverview({
   return (
     <section
       aria-label="Resumo do percurso no mapa"
-      className="grid min-w-0 grid-cols-3 gap-2 border-b border-black/10 bg-white px-3 py-3 text-[#163840]"
+      className="grid min-w-0 grid-cols-3 gap-2 border-b border-border bg-card px-3 py-3 text-card-foreground"
     >
       <div className="min-w-0">
-        <p className="text-xs font-semibold text-[#607169]">Distância</p>
+        <p className="text-xs font-semibold text-muted-foreground">Distância</p>
         <p className="mt-1 break-words text-base font-extrabold">
           {compactDistance(route.distanceMeters)}
         </p>
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold text-[#607169]">Duração</p>
+        <p className="text-xs font-semibold text-muted-foreground">Duração</p>
         <p className="mt-1 break-words text-base font-extrabold">
           {compactDuration(route.durationSeconds)}
         </p>
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold text-[#607169]">Modo</p>
+        <p className="text-xs font-semibold text-muted-foreground">Modo</p>
         <p className="mt-1 break-words text-sm font-bold">
           {travelModeLabels[travelMode]}
         </p>
@@ -175,13 +175,13 @@ function RouteInstructions({
   const contentId = useId();
   if (!steps.length) return null;
   return (
-    <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-3 text-[#163840]">
+    <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-card-foreground">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={contentId}
         onClick={() => setOpen(value => !value)}
-        className="flex min-h-11 w-full min-w-0 items-center justify-between gap-3 text-left text-sm font-bold focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+        className="flex min-h-11 w-full min-w-0 items-center justify-between gap-3 text-left text-sm font-bold focus-visible:outline-2 focus-visible:outline-ring"
       >
         <span className="flex min-w-0 items-center gap-2">
           <Navigation2 aria-hidden="true" className="size-5 shrink-0" />
@@ -205,12 +205,12 @@ function RouteInstructions({
               className={
                 "flex min-w-0 items-start gap-3 rounded-xl border px-3 py-3 " +
                 (index === currentIndex
-                  ? "border-[#1a73e8] bg-[#e8f0fe]"
-                  : "border-transparent bg-white")
+                  ? "border-accent bg-accent/10"
+                  : "border-transparent bg-card")
               }
             >
               <span
-                className="grid size-9 shrink-0 place-items-center rounded-full bg-[#163840] text-white"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground"
                 aria-label={"Passo " + (index + 1)}
               >
                 <ManeuverIcon maneuver={step.maneuver} className="size-5" />
@@ -220,11 +220,11 @@ function RouteInstructions({
                   {step.instruction}
                 </span>
                 {step.name && (
-                  <span className="mt-1 block break-words text-xs text-[#607169]">
+                  <span className="mt-1 block break-words text-xs text-muted-foreground">
                     Via: {step.name}
                   </span>
                 )}
-                <span className="mt-1 block text-xs text-[#607169]">
+                <span className="mt-1 block text-xs text-muted-foreground">
                   {compactDistance(step.distanceMeters)}
                   {step.durationSeconds > 0
                     ? " · " + compactDuration(step.durationSeconds)
@@ -437,13 +437,13 @@ export function OfflineRoutePreview({
       role="group"
       aria-label="Controles da viagem"
     >
-      <div className="pointer-events-auto absolute right-3 top-[8rem] overflow-hidden rounded-full border border-black/10 bg-white shadow-md">
+      <div className="pointer-events-auto absolute right-3 top-[8rem] overflow-hidden rounded-full border border-border bg-card shadow-md">
         <button
           type="button"
           aria-label="Diminuir zoom da prévia"
           disabled={zoom <= 1}
           onClick={() => setZoom(v => Math.max(1, v - 0.5))}
-          className="grid size-11 place-items-center rounded-t-full bg-white shadow-sm disabled:opacity-40"
+          className="grid size-11 place-items-center rounded-t-full bg-card shadow-sm disabled:opacity-40"
         >
           <Minus className="size-5" />
         </button>{" "}
@@ -452,7 +452,7 @@ export function OfflineRoutePreview({
           aria-label="Aumentar zoom da prévia"
           disabled={zoom >= 6}
           onClick={() => setZoom(v => Math.min(6, v + 0.5))}
-          className="grid size-11 place-items-center rounded-b-full bg-white shadow-sm disabled:opacity-40"
+          className="grid size-11 place-items-center rounded-b-full bg-card shadow-sm disabled:opacity-40"
         >
           <Plus className="size-5" />
         </button>
@@ -466,7 +466,7 @@ export function OfflineRoutePreview({
           setZoom(1);
           setResetKey(v => v + 1);
         }}
-        className="pointer-events-auto absolute left-3 top-[4.25rem] flex min-h-11 items-center gap-2 rounded-full bg-white px-3 text-xs font-bold shadow-md"
+        className="pointer-events-auto absolute left-3 top-[4.25rem] flex min-h-11 items-center gap-2 rounded-full bg-card px-3 text-xs font-bold shadow-md"
       >
         <Navigation2 className="size-4" aria-hidden="true" />
         Rota inteira
@@ -482,7 +482,7 @@ export function OfflineRoutePreview({
           }}
           className={
             "pointer-events-auto absolute left-3 top-[8rem] flex min-h-11 items-center gap-2 rounded-full px-3 text-xs font-bold shadow-md " +
-            (following ? "bg-[#1a73e8] text-white" : "bg-white text-[#163840]")
+            (following ? "bg-accent text-accent-foreground" : "bg-card text-card-foreground")
           }
         >
           <LocateFixed className="size-4" aria-hidden="true" />
@@ -493,11 +493,11 @@ export function OfflineRoutePreview({
   );
   return (
     <div
-      className="route-navigation bg-[#eef2eb] text-[#163840]"
+      className="route-navigation bg-background text-card-foreground"
       data-live={Boolean(livePosition)}
     >
-      <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs font-bold text-[#52675e]">
-        <span className="rounded-full bg-[#163840] px-2.5 py-1 text-white">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 text-xs font-bold text-muted-foreground">
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
           {livePosition
             ? "GPS ao vivo neste aparelho"
             : selected?.source === "offline-road"
@@ -518,11 +518,11 @@ export function OfflineRoutePreview({
       </div>
       {livePosition && (
         <div
-          className="flex flex-wrap items-center gap-2 border-b border-[#37e6df]/20 bg-[#10252d] px-3 py-2 text-xs text-[#d9ffff]"
+          className="flex flex-wrap items-center gap-2 border-b border-accent/20 bg-secondary px-3 py-2 text-xs text-secondary-foreground"
           role="status"
         >
-          <span className="flex items-center gap-1.5 rounded-full bg-[#37e6df]/15 px-2.5 py-1 font-black text-[#37e6df]">
-            <span className="size-2 animate-pulse rounded-full bg-[#37e6df]" />
+          <span className="flex items-center gap-1.5 rounded-full bg-accent/15 px-2.5 py-1 font-black text-accent">
+            <span className="size-2 animate-pulse rounded-full bg-accent" />
             AO VIVO
           </span>
           <span>
@@ -534,7 +534,7 @@ export function OfflineRoutePreview({
           </span>
           {livePosition.timestamp &&
             Number.isFinite(livePosition.timestamp) && (
-              <span className="text-[#9fc4c8]">
+              <span className="text-muted-foreground">
                 {new Date(livePosition.timestamp).toLocaleTimeString("pt-BR")}
               </span>
             )}
@@ -542,17 +542,17 @@ export function OfflineRoutePreview({
       )}
       {livePosition && (
         <section
-          className="route-guidance-panel border-b border-black/10 bg-[#F7FAF7] p-3 sm:p-4"
+          className="route-guidance-panel border-b border-border bg-background p-3 sm:p-4"
           aria-label="Painel de navegação"
         >
-          <div className="route-guidance-content overflow-hidden rounded-[1.35rem] border border-[#163840]/15 bg-white shadow-[0_14px_34px_rgba(22,56,64,0.12)]">
+          <div className="route-guidance-content overflow-hidden rounded-[1.35rem] border border-border bg-card shadow-[0_14px_34px_rgba(22,56,64,0.12)]">
             {liveProgress?.offRoute ? (
-              <div className="flex min-w-0 items-start gap-3 bg-[#FFF3E8] p-4 text-[#70401D]">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#D98B4B]/15">
+              <div className="flex min-w-0 items-start gap-3 bg-warning/10 p-4 text-warning">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-warning/15">
                   <AlertTriangle className="size-6" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#9A5B28]">
+                  <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-warning">
                     Atenção
                   </p>
                   <p className="mt-1 text-lg font-black">
@@ -565,9 +565,9 @@ export function OfflineRoutePreview({
                 </div>
               </div>
             ) : guidance && !liveProgress?.nearDestination ? (
-              <div className="route-turn-banner bg-gradient-to-br from-[#163840] to-[#21535A] p-4 text-white sm:p-5">
+              <div className="route-turn-banner bg-gradient-to-br from-secondary to-card p-4 text-white sm:p-5">
                 <div className="flex min-w-0 items-start gap-3">
-                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary text-[#163840] shadow-lg">
+                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary text-card-foreground shadow-lg">
                     <ManeuverIcon maneuver={guidance.step.maneuver} />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -584,7 +584,7 @@ export function OfflineRoutePreview({
                       {guidance.step.instruction}
                     </p>
                     {guidance.step.name && (
-                      <p className="mt-1 break-words text-sm font-bold text-[#DDF7F2]">
+                      <p className="mt-1 break-words text-sm font-bold text-secondary-foreground/80">
                         Via: {guidance.step.name}
                       </p>
                     )}
@@ -607,20 +607,20 @@ export function OfflineRoutePreview({
               </div>
             ) : liveProgress?.nearDestination ? (
               <div className="p-4">
-                <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-[#56766A]">
+                <p className="text-[0.65rem] font-black uppercase tracking-[.14em] text-muted-foreground">
                   Chegada
                 </p>
-                <p className="mt-1 text-lg font-black text-[#163840]">
+                <p className="mt-1 text-lg font-black text-card-foreground">
                   Você está próximo ao destino
                 </p>
-                <p className="mt-1 text-xs text-[#607169]">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Confira a entrada correta do local antes de encerrar o
                   acompanhamento.
                 </p>
               </div>
             ) : (
-              <div className="p-4 text-sm text-[#607169]">
-                <p className="font-black text-[#163840]">
+              <div className="p-4 text-sm text-muted-foreground">
+                <p className="font-black text-card-foreground">
                   Acompanhamento sem instruções curva a curva
                 </p>
                 <p className="mt-1 text-xs leading-relaxed">
@@ -630,45 +630,45 @@ export function OfflineRoutePreview({
               </div>
             )}
 
-            <div className="route-telemetry grid grid-cols-2 border-t border-black/10 sm:grid-cols-4">
-              <div className="min-w-0 border-b border-r border-black/10 p-3 sm:border-b-0">
-                <MapPin className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+            <div className="route-telemetry grid grid-cols-2 border-t border-border sm:grid-cols-4">
+              <div className="min-w-0 border-b border-r border-border p-3 sm:border-b-0">
+                <MapPin className="size-4 text-accent" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-muted-foreground">
                   Restante
                 </p>
-                <p className="mt-1 break-words text-base font-black text-[#163840]">
+                <p className="mt-1 break-words text-base font-black text-card-foreground">
                   {compactDistance(liveProgress?.distanceMeters)}
                 </p>
               </div>
-              <div className="min-w-0 border-b border-black/10 p-3 sm:border-b-0 sm:border-r">
-                <Clock3 className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+              <div className="min-w-0 border-b border-border p-3 sm:border-b-0 sm:border-r">
+                <Clock3 className="size-4 text-accent" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-muted-foreground">
                   Tempo
                 </p>
-                <p className="mt-1 break-words text-base font-black text-[#163840]">
+                <p className="mt-1 break-words text-base font-black text-card-foreground">
                   {compactDuration(liveProgress?.durationSeconds)}
                 </p>
               </div>
-              <div className="min-w-0 border-r border-black/10 p-3">
-                <Gauge className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+              <div className="min-w-0 border-r border-border p-3">
+                <Gauge className="size-4 text-accent" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-muted-foreground">
                   Velocidade
                 </p>
-                <p className="mt-1 break-words text-base font-black text-[#163840]">
+                <p className="mt-1 break-words text-base font-black text-card-foreground">
                   {Number.isFinite(liveSpeedMps)
                     ? Math.round(Number(liveSpeedMps) * 3.6) + " km/h"
                     : "—"}
                 </p>
               </div>
               <div className="min-w-0 p-3">
-                <LocateFixed className="size-4 text-[#2D6A5C]" />
-                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                <LocateFixed className="size-4 text-accent" />
+                <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[.1em] text-muted-foreground">
                   GPS
                 </p>
-                <p className="mt-1 break-words text-sm font-black text-[#163840]">
+                <p className="mt-1 break-words text-sm font-black text-card-foreground">
                   {gpsQuality(livePosition.accuracy)}
                 </p>
-                <p className="text-[0.65rem] text-[#607169]">
+                <p className="text-[0.65rem] text-muted-foreground">
                   {Number.isFinite(livePosition.accuracy)
                     ? "±" + Math.round(Number(livePosition.accuracy)) + " m"
                     : "posição ativa"}
@@ -676,21 +676,21 @@ export function OfflineRoutePreview({
               </div>
             </div>
 
-            <div className="route-arrival border-t border-black/10 bg-[#F7F9F5] px-3 py-3">
+            <div className="route-arrival border-t border-border bg-background px-3 py-3">
               <div className="flex min-w-0 items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-muted-foreground">
                     Chegada estimada
                   </p>
-                  <p className="mt-0.5 text-sm font-black text-[#163840]">
+                  <p className="mt-0.5 text-sm font-black text-card-foreground">
                     {arrivalTime(liveProgress?.durationSeconds)}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-[#607169]">
+                  <p className="text-[0.58rem] font-black uppercase tracking-[.1em] text-muted-foreground">
                     Guia
                   </p>
-                  <p className="mt-0.5 text-xs font-black text-[#163840]">
+                  <p className="mt-0.5 text-xs font-black text-card-foreground">
                     {selected?.steps?.length
                       ? "Guia completo"
                       : "Guia limitado"}
@@ -699,7 +699,7 @@ export function OfflineRoutePreview({
               </div>
               {progressPercent !== null && (
                 <div className="mt-3">
-                  <div className="mb-1.5 flex items-center justify-between gap-2 text-[0.65rem] font-bold text-[#607169]">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-[0.65rem] font-bold text-muted-foreground">
                     <span>Progresso da viagem</span>
                     <span>{progressPercent}% concluído</span>
                   </div>
@@ -709,10 +709,10 @@ export function OfflineRoutePreview({
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={progressPercent}
-                    className="h-2 overflow-hidden rounded-full bg-[#DCE7DF]"
+                    className="h-2 overflow-hidden rounded-full bg-muted"
                   >
                     <div
-                      className="h-full rounded-full bg-[#2D6A5C] transition-[width] duration-300"
+                      className="h-full rounded-full bg-accent transition-[width] duration-300"
                       style={{ width: progressPercent + "%" }}
                     />
                   </div>
@@ -751,13 +751,13 @@ export function OfflineRoutePreview({
           focus(marker);
         }}
       />
-      <div className="route-map-actions flex flex-wrap gap-2 border-b border-black/10 px-3 pb-3">
-        <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)} className="min-h-11 rounded-xl border border-black/15 bg-white px-3 text-xs font-bold">{showReferences ? "Ocultar referências" : "Mostrar referências"}</button>
+      <div className="route-map-actions flex flex-wrap gap-2 border-b border-border px-3 pb-3">
+        <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)} className="min-h-11 rounded-xl border border-black/15 bg-card px-3 text-xs font-bold">{showReferences ? "Ocultar referências" : "Mostrar referências"}</button>
         {validOrigin && (
           <button
             type="button"
             onClick={() => focus(validOrigin)}
-            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
+            className="min-h-11 rounded-xl bg-card px-3 text-xs font-bold"
           >
             Ver origem
           </button>
@@ -766,14 +766,14 @@ export function OfflineRoutePreview({
           <button
             type="button"
             onClick={() => focus(validDestination)}
-            className="min-h-11 rounded-xl bg-white px-3 text-xs font-bold"
+            className="min-h-11 rounded-xl bg-card px-3 text-xs font-bold"
           >
             Ver destino
           </button>
         )}
       </div>
 
-      <div className="space-y-2 border-t border-black/10 bg-white p-4 text-sm">
+      <div className="space-y-2 border-t border-border bg-card p-4 text-sm">
         {destinationReference && (
           <p className="break-words rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
             {destinationReference.name} · {destinationReference.precision}{" "}
@@ -781,16 +781,16 @@ export function OfflineRoutePreview({
           </p>
         )}
         <section className="grid grid-cols-2 gap-2" aria-label="Dados da rota">
-          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">
+          <div className="min-w-0 rounded-xl border border-border bg-background p-2.5">
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-muted-foreground">
               Fonte da rota
             </p>
             <p className="mt-1 break-words text-xs font-black">
               {routeSourceLabel}
             </p>
           </div>
-          <div className="min-w-0 rounded-xl border border-black/10 bg-[#f7f9f5] p-2.5">
-            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-[#607169]">
+          <div className="min-w-0 rounded-xl border border-border bg-background p-2.5">
+            <p className="text-[0.62rem] font-black uppercase tracking-[.08em] text-muted-foreground">
               Guia
             </p>
             <p className="mt-1 break-words text-xs font-black">
@@ -802,17 +802,17 @@ export function OfflineRoutePreview({
         </section>
         {nearbyNamedPlaces.length > 0 && (
           <section
-            className="rounded-2xl border border-[#B7D8C1] bg-[#F2F8F1] p-3"
+            className="rounded-2xl border border-accent/20 bg-accent/5 p-3"
             aria-labelledby="nearby-places-title"
           >
             <div className="flex items-center justify-between gap-3">
               <p
                 id="nearby-places-title"
-                className="text-xs font-black uppercase tracking-[.12em] text-[#365E51]"
+                className="text-xs font-black uppercase tracking-[.12em] text-accent"
               >
                 Lugares próximos e referências
               </p>
-              <span className="rounded-full bg-white px-2 py-1 text-[0.65rem] font-black text-[#56766A]">
+              <span className="rounded-full bg-card px-2 py-1 text-[0.65rem] font-black text-muted-foreground">
                 {nearbyNamedPlaces.length}
               </span>
             </div>
@@ -831,12 +831,12 @@ export function OfflineRoutePreview({
                     }
                   }}
                   key={place.id}
-                  className="min-h-11 min-w-0 rounded-xl border border-[#D7E5D8] bg-white px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-[#1a73e8]"
+                  className="min-h-11 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-ring"
                 >
-                  <p className="truncate text-xs font-black text-[#163840]">
+                  <p className="truncate text-xs font-black text-card-foreground">
                     {place.name}
                   </p>
-                  <p className="mt-0.5 break-words text-[0.68rem] text-[#607169]">
+                  <p className="mt-0.5 break-words text-[0.68rem] text-muted-foreground">
                     {place.detail}
                   </p>
                 </button>
@@ -845,7 +845,7 @@ export function OfflineRoutePreview({
           </section>
         )}
         {nearbyBusinesses.length > 0 && (
-          <p className="text-xs text-[#607169]">
+          <p className="text-xs text-muted-foreground">
             {nearbyBusinesses.length} empresas próximas ao destino · referências
             aproximadas do catálogo local
           </p>
@@ -881,7 +881,7 @@ export function OfflineRoutePreview({
               }
             />
           ) : routePoints.length && selected?.source !== "local-estimate" ? (
-            <p className="rounded-xl border border-black/10 bg-[#f7f9f5] px-3 py-2 text-xs text-[#607169]">
+            <p className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
               A rota foi calculada pelas ruas, mas este provedor não enviou
               instruções curva a curva nesta consulta.
             </p>
@@ -892,12 +892,12 @@ export function OfflineRoutePreview({
             href={navigation}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 items-center justify-center rounded-xl bg-[#163840] px-3 font-bold text-white"
+            className="flex min-h-11 items-center justify-center rounded-xl bg-primary px-3 font-bold text-primary-foreground"
           >
             Abrir no Google Maps
           </a>
         )}
-        <p className="text-xs text-[#607169]">
+        <p className="text-xs text-muted-foreground">
           Ruas offline cobrem a área urbana cadastrada. Quando a rota traz
           passos confirmados, o guia pode acompanhá-los no aparelho; sem esses
           passos, o Trajeto não inventa conversões. Navegação externa pode
@@ -1179,7 +1179,7 @@ function RouteMapContent({
   if (privateOrigin) {
     return (
       <section
-        className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-background"
         aria-label="Prévia privada da viagem"
       >
         <OfflineRoutePreview
@@ -1262,23 +1262,23 @@ function RouteMapContent({
             </div>
           }
         />
-        <div className="min-w-0 bg-white p-3">
+        <div className="min-w-0 bg-card p-3">
           {selectedRoute?.steps?.length ? (
             <RouteInstructions steps={selectedRoute.steps} />
           ) : (
-            <p className="text-xs leading-relaxed text-[#607169]">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               O provedor não enviou instruções curva a curva. Use a linha do
               mapa como referência e confirme o caminho.
             </p>
           )}
         </div>
         {destinationReference && (
-          <p className="break-words bg-[#10191F] px-3 py-2 text-xs text-amber-100">
+          <p className="break-words bg-card px-3 py-2 text-xs text-amber-100">
             {destinationReference.name} · {destinationReference.precision}{" "}
             Fonte: {destinationReference.sourceLabel}
           </p>
         )}
-        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-card px-3 py-2.5 text-[11px] font-bold text-white/55">
           <span>
             <span className="mr-1 inline-block size-2 rounded-full bg-primary" />
             rota e pontos principais
@@ -1298,7 +1298,7 @@ function RouteMapContent({
   if (isGitHubPagesRuntime()) {
     return (
       <section
-        className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-background"
         aria-label="Mapa independente da viagem"
       >
         <div className="planner-map-shell">
@@ -1316,7 +1316,7 @@ function RouteMapContent({
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0D151B]"
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-background"
       aria-label="Mapa interativo da viagem"
     >
       <MapView
@@ -1379,7 +1379,7 @@ function RouteMapContent({
               className={
                 "inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " +
                 (satellite
-                  ? "bg-white text-background"
+                  ? "bg-foreground text-background"
                   : "bg-background/90 text-white")
               }
             >
