@@ -59,6 +59,31 @@ describe("prepared offline endpoints", () => {
     const sameLabels = { ...saved(), savedAt: estimate.savedAt, payload: estimate.payload };
     expect(findBestOfflineRouteForTrip([sameLabels, saved()], "Ponto preparado A", "Ponto preparado B")?.savedAt).toBe(saved().savedAt);
   });
+  it("prefers an older offline-road geometry over a newer straight estimate", () => {
+    const road = {
+      ...saved("Ponto preparado A", "Ponto preparado B", a, b, "driving", "offline-road"),
+      savedAt: "2026-10-04T11:00:00Z",
+    };
+    road.payload.route.steps = [
+      { instruction: "Siga por Rua A", distanceMeters: 300, durationSeconds: 40 },
+    ];
+    const estimate = {
+      ...saved("Ponto preparado A", "Ponto preparado B", a, b, "driving", "local-estimate"),
+      savedAt: "2026-10-04T15:00:00Z",
+    };
+    expect(
+      findPreparedRouteByCoordinates([estimate, road], a, b, "driving")
+        ?.payload.route.source
+    ).toBe("offline-road");
+    expect(
+      findBestOfflineRouteForTrip(
+        [estimate, road],
+        "Ponto preparado A",
+        "Ponto preparado B"
+      )?.payload.route.source
+    ).toBe("offline-road");
+  });
+
   it.each(["driving", "walking", "cycling", "transit"] as const)("calculates a new %s estimate between independently prepared places without external requests", async mode => {
     vi.mocked(listOfflineRoutes).mockResolvedValue([saved(), saved("Ponto preparado B", "Ponto preparado C", b, c)]);
     const fetch = vi.fn().mockRejectedValue(new Error("offline"));
