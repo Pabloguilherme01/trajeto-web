@@ -42,13 +42,17 @@ function stationKey(station: StationMapItem) {
 function clampLat(lat: number) {
   return Math.max(-85.05112878, Math.min(85.05112878, lat));
 }
-function project(lat: number, lng: number, zoom: number) {
-  const scale = TILE * 2 ** zoom;
+function projectBase(lat: number, lng: number) {
   const sin = Math.sin((clampLat(lat) * Math.PI) / 180);
   return {
-    x: ((lng + 180) / 360) * scale,
-    y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * scale,
+    x: ((lng + 180) / 360) * TILE,
+    y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * TILE,
   };
+}
+function project(lat: number, lng: number, zoom: number) {
+  const base = projectBase(lat, lng);
+  const scale = 2 ** zoom;
+  return { x: base.x * scale, y: base.y * scale };
 }
 function unproject(x: number, y: number, zoom: number) {
   const scale = TILE * 2 ** zoom;
@@ -106,6 +110,12 @@ export default function TileStationMap({
     () => drawable.map(station => ({ ...station, id: stationKey(station) })),
     [drawable]
   );
+  const drawableWorld = useMemo(() => {
+    const result = new Map<string, { x: number; y: number }>();
+    for (const station of drawable)
+      result.set(stationKey(station), projectBase(station.lat, station.lng));
+    return result;
+  }, [drawable]);
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
   useEffect(() => {
@@ -217,31 +227,36 @@ export default function TileStationMap({
     return result;
   }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
 
+  const zoomScale = 2 ** zoom;
   const markerPosition = (station: { lat: number; lng: number }) => {
-    const p = project(station.lat, station.lng, zoom);
+    const base = projectBase(station.lat, station.lng);
     return {
-      left: width / 2 + p.x - centerPx.x,
-      top: height / 2 + p.y - centerPx.y,
+      left: width / 2 + base.x * zoomScale - centerPx.x,
+      top: height / 2 + base.y * zoomScale - centerPx.y,
     };
   };
   const markerPositions = useMemo(() => {
     const result = new Map<string, { left: number; top: number }>();
     for (const station of drawable) {
-      const p = project(station.lat, station.lng, zoom);
+      const base = drawableWorld.get(stationKey(station));
+      if (!base) continue;
       result.set(stationKey(station), {
-        left: width / 2 + p.x - centerPx.x,
-        top: height / 2 + p.y - centerPx.y,
+        left: width / 2 + base.x * zoomScale - centerPx.x,
+        top: height / 2 + base.y * zoomScale - centerPx.y,
       });
     }
     return result;
-  }, [drawable, width, height, centerPx.x, centerPx.y, zoom]);
+  }, [drawable, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
   const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
+  const routeWorld = useMemo(
+    () => routePoints.map(point => projectBase(point.lat, point.lng)),
+    [routeGeometryKey]
+  );
   const routePolylinePoints = useMemo(
-    () => routePoints.map(point => {
-      const p = markerPosition(point);
-      return `${p.left},${p.top}`;
-    }).join(" "),
-    [routeGeometryKey, width, height, centerPx.x, centerPx.y, zoom]
+    () => routeWorld.map(base =>
+      `${width / 2 + base.x * zoomScale - centerPx.x},${height / 2 + base.y * zoomScale - centerPx.y}`
+    ).join(" "),
+    [routeWorld, width, height, centerPx.x, centerPx.y, zoomScale]
   );
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -593,9 +608,9 @@ export default function TileStationMap({
 
             {userCoords &&
               (() => {
-                const p = project(userCoords.lat, userCoords.lng, zoom);
-                const left = width / 2 + p.x - centerPx.x;
-                const top = height / 2 + p.y - centerPx.y;
+                const base = projectBase(userCoords.lat, userCoords.lng);
+                const left = width / 2 + base.x * zoomScale - centerPx.x;
+                const top = height / 2 + base.y * zoomScale - centerPx.y;
                 return (
                   <span
                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
