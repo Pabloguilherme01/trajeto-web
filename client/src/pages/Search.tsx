@@ -192,7 +192,7 @@ function ResultCard({
       onClick={onClick}
       className="premium-card flex min-h-20 min-w-0 items-center gap-3 rounded-2xl p-3 text-left active:scale-[.99]"
     >
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
         <Icon className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
@@ -342,7 +342,7 @@ export default function SearchPage() {
         onClick={() => openQuick(action)}
         className="premium-card flex min-h-20 min-w-0 items-center gap-2 rounded-2xl p-3 text-left"
       >
-        <Icon className="size-5 shrink-0 text-[#C7FF3C]" />
+        <Icon className="size-5 shrink-0 text-primary" />
         <span className="min-w-0">
           <span className="block break-words text-sm font-bold">
             {action.label}
@@ -356,10 +356,10 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="premium-surface visual-shell min-h-[100dvh] w-full min-w-0 bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="premium-surface visual-shell min-h-[100dvh] w-full min-w-0 bg-background pb-28 text-white md:pb-12">
       <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pt-5 sm:px-8 sm:pt-8">
         <header>
-          <p className="text-xs font-bold uppercase tracking-[.12em] text-[#C7FF3C]">
+          <p className="text-xs font-bold uppercase tracking-[.12em] text-primary">
             Águas Lindas de Goiás
             <span className="hidden sm:inline"> · Ctrl/⌘ K</span>
           </p>
@@ -372,9 +372,9 @@ export default function SearchPage() {
         </header>
         <form
           onSubmit={submit}
-          className="premium-search mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-[#C7FF3C]/25 bg-[#121B22] px-3"
+          className="premium-search mt-4 flex min-h-14 w-full min-w-0 items-center gap-2 rounded-2xl border border-primary/25 bg-card px-3"
         >
-          <SearchIcon className="size-5 shrink-0 text-[#C7FF3C]" />
+          <SearchIcon className="size-5 shrink-0 text-primary" />
           <input
             ref={inputRef}
             value={input}
@@ -401,7 +401,7 @@ export default function SearchPage() {
           )}
           <button
             type="submit"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]"
+            className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"
             aria-label="Pesquisar"
           >
             <ArrowRight className="size-5" />
@@ -410,7 +410,7 @@ export default function SearchPage() {
         {!online && (
           <p
             role="status"
-            className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[#DFFF9D]"
+            className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-primary"
           >
             <WifiOff className="mt-0.5 size-4 shrink-0" />
             Você está offline. A busca usa os dados salvos neste aparelho.
@@ -444,7 +444,7 @@ export default function SearchPage() {
                         appUrl("/servicos") + "?q=" + encodeURIComponent(query)
                       )
                     }
-                    className="mt-3 min-h-11 w-full rounded-xl border border-[#C7FF3C]/30 px-3 py-2 text-sm font-bold"
+                    className="mt-3 min-h-11 w-full rounded-xl border border-primary/30 px-3 py-2 text-sm font-bold"
                   >
                     Ver todos os {results.services.length} serviços encontrados
                   </button>
@@ -625,7 +625,7 @@ export default function SearchPage() {
               </button>
             )}
             <section
-              className="premium-card rounded-2xl border border-white/10 bg-[#121B22] p-4"
+              className="premium-card rounded-2xl border border-white/10 bg-card p-4"
               aria-label="Ajuda para encontrar"
             >
               <p className="text-sm leading-relaxed text-white/80">
@@ -708,7 +708,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => search(item)}
-                      className="min-h-11 max-w-full break-words rounded-2xl border border-white/15 bg-[#121B22] px-3 py-2 text-left text-sm text-white/85"
+                      className="min-h-11 max-w-full break-words rounded-2xl border border-white/15 bg-card px-3 py-2 text-left text-sm text-white/85"
                     >
                       {item}
                     </button>
@@ -740,7 +740,7 @@ export default function SearchPage() {
               <button
                 type="button"
                 onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")}
-                className="mt-3 min-h-12 w-full rounded-xl border border-[#3DE3FF]/25 px-3 py-2 text-sm font-bold text-[#C9F7FF]"
+                className="mt-3 min-h-12 w-full rounded-xl border border-accent/25 px-3 py-2 text-sm font-bold text-accent"
               >
                 Todos os destinos disponíveis ·{" "}
                 {ALL_LOCAL_ROUTE_DESTINATIONS.length} locais
@@ -751,14 +751,14 @@ export default function SearchPage() {
                 href={appUrl("/servicos") + "?salvos=1"}
                 className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
               >
-                <Bookmark className="size-4 text-[#C7FF3C]" />
+                <Bookmark className="size-4 text-primary" />
                 Meus serviços salvos
               </Link>
               <Link
                 href={appUrl("/ajuda") + "#offline-readiness-title"}
                 className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
               >
-                <WifiOff className="size-4 text-[#3DE3FF]" />
+                <WifiOff className="size-4 text-accent" />
                 Preparar acesso offline
               </Link>
             </div>

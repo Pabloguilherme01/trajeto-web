@@ -200,7 +200,7 @@ export default function CityMap() {
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
   const emptyFallback = (
-    <div className="grid min-h-[320px] place-items-center rounded-2xl bg-[#17262d] p-6 text-center">
+    <div className="grid min-h-[320px] place-items-center rounded-2xl bg-muted p-6 text-center">
       <div>
         <MapPin className="mx-auto size-8 text-primary" />
         <p className="mt-3 font-black">Destinos disponíveis neste aparelho</p>
@@ -228,7 +228,7 @@ export default function CityMap() {
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-white/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <section className="mt-5" aria-labelledby="city-search-label">
         <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-white/65">Buscar na cidade</label>
-        <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#15212a] px-3">
+        <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-card px-3">
           <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
           <input
             id="city-map-search"
@@ -260,7 +260,7 @@ export default function CityMap() {
         className="mt-3"
       />
       <p className="mt-2 text-xs text-white/60" role="status" aria-live="polite">
-        {query ? `${destinations.length + atlasDestinations.length} resultado(s) para “${query}”` : `${destinations.length + atlasDestinations.length} destinos disponíveis`}
+        {query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
       <div
         role="group"
@@ -343,9 +343,15 @@ export default function CityMap() {
           ))}
         </div>
         {!destinations.length && !atlasDestinations.length && (
-          <p role="status" className="mt-3 text-sm text-white/70">
-            Nenhum destino encontrado. Tente outro nome ou categoria.
-          </p>
+          markers.length ? (
+            <p role="status" className="mt-3 text-sm text-white/70">
+              Os resultados encontrados estão no mapa acima. Toque em um ponto para planejar a rota.
+            </p>
+          ) : (
+            <p role="status" className="mt-3 text-sm text-white/70">
+              Nenhum destino encontrado. Tente outro nome ou categoria.
+            </p>
+          )
         )}
       </section>
 
@@ -388,7 +394,7 @@ export default function CityMap() {
                       <p className="break-words text-sm font-black">{item.name}</p>
                       <p className="mt-1 text-xs leading-relaxed text-white/60">{item.detail}</p>
                       {item.business && <details className="mt-2 break-words text-xs text-white/60"><summary className="min-h-8 cursor-pointer font-bold">Dados da empresa</summary><p>Razão social: {item.business.legalName}</p><p>CNAE: {item.business.cnae} · Porte: {item.business.size}</p><p>Abertura: {item.business.opened} · Situação informada em: {item.business.statusDate}</p><p>MEI: {item.business.mei} · Simples: {item.business.simples}</p><p>{item.business.nature}</p></details>}
-                      {item.coordinateLabel && typeof item.lat !== "number" && <p className="mt-1 text-xs text-[#FFD59B]">{item.coordinateLabel} · confirme o endereço antes de viajar</p>}
+                      {item.coordinateLabel && typeof item.lat !== "number" && <p className="mt-1 text-xs text-warning">{item.coordinateLabel} · confirme o endereço antes de viajar</p>}
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{item.address}</p>}
                       <p className="mt-2 break-words text-xs leading-relaxed text-white/60">
                         {item.sourceUrl ? (

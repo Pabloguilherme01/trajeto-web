@@ -25,6 +25,9 @@ it("filters accent-insensitive destinations and carries the selected destination
     screen.getByRole("textbox", { name: "Buscar destino no mapa" }),
     { target: { value: "odisseia" } }
   );
+  expect(
+    screen.getByText(/destino\(s\) na lista · \d+ posição\(ões\) no mapa para “odisseia”/)
+  ).toBeTruthy();
   const plannerLink = screen.getAllByRole("link", { name: "Ir até aqui" }).find(link =>
     decodeURIComponent((link.getAttribute("href") || "").replace(/\+/g, " "))
       .includes("destino=UPA Mansões Odisseia")

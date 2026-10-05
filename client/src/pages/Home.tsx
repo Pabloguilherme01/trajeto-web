@@ -165,7 +165,7 @@ export default function Home() {
       <div className="container min-w-0 max-w-5xl overflow-x-clip pt-5 sm:pt-8 lg:pt-12">
         <header className="flex min-w-0 items-center justify-between gap-2">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.18em] text-[#71818A]">{greeting}</p>
+            <p className="text-xs font-black uppercase tracking-[.18em] text-muted-foreground/70">{greeting}</p>
             <p className="mt-1 brand-wordmark text-[1.2rem] text-white">trajeto</p>
           </div>
           <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2">
@@ -248,7 +248,7 @@ export default function Home() {
             </button>
           </form>
           {formMessage && (
-            <p id="home-form-message" className="mt-3 rounded-2xl border border-warning/20 bg-warning/[.05] px-3 py-2.5 text-xs font-bold text-[#FFD59B]" role="status" aria-live="polite">
+            <p id="home-form-message" className="mt-3 rounded-2xl border border-warning/20 bg-warning/[.05] px-3 py-2.5 text-xs font-bold text-warning" role="status" aria-live="polite">
               {formMessage}
             </p>
           )}
@@ -391,7 +391,7 @@ export default function Home() {
           </div>
         </section>
 
-        <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-[#10191F] p-4">
+        <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-card p-4">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm font-black">
             <span>Recursos do aparelho</span>
             <span className="text-xs font-bold uppercase tracking-[.12em] text-white/60">opcional</span>
