@@ -23,7 +23,7 @@ const pack = {
     },
   ],
 };
-beforeEach(() => vi.resetModules());
+beforeEach(() => { vi.resetModules(); localStorage.clear(); });
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -388,4 +388,32 @@ it("does not suspend live following for a tap and ignores a third contact", asyn
   pointer("lostpointercapture", 2, 200);
   pointer("pointermove", 1, 140);
   expect(parseFloat(marker.style.left)).toBeCloseTo(parseFloat(before) + 20);
+});
+it("fits the route without shrinking it to include distant suggested stations", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const markers = [
+    { id: "origin", name: "Origem", label: "A", lat: -15.75, lng: -48.29 },
+    { id: "destination", name: "Destino", label: "B", lat: -15.76, lng: -48.27 },
+  ];
+  const view = render(<Canvas markers={markers} routePoints={markers} zoom={1} onZoom={() => {}} />);
+  await screen.findByText(/Ruas locais disponíveis/);
+  const origin = screen.getByRole("button", { name: "Selecionar Origem" });
+  const initial = [origin.style.left, origin.style.top];
+  view.rerender(<Canvas markers={[...markers, { id: "stop-far", name: "Posto distante", label: "P", lat: -15.81, lng: -48.34 }]} routePoints={markers} zoom={1} onZoom={() => {}} />);
+  expect([origin.style.left, origin.style.top]).toEqual(initial);
+  expect(screen.getByRole("button", { name: "Selecionar Posto distante" })).toBeTruthy();
+});
+
+it("remembers the chosen map theme without saving location", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const props = { markers: [], zoom: 1, onZoom: () => {} };
+  const view = render(<Canvas {...props} />);
+  fireEvent.click(screen.getByRole("button", { name: "Usar mapa claro" }));
+  expect(localStorage.getItem("trajeto-map-theme")).toBe("light");
+  expect(localStorage.length).toBe(1);
+  view.unmount();
+  render(<Canvas {...props} />);
+  expect(screen.getByRole("button", { name: "Usar mapa escuro" })).toBeTruthy();
 });

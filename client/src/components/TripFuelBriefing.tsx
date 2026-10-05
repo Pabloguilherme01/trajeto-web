@@ -1,5 +1,5 @@
 import { Fuel, Gauge, Route, Wallet } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/mobileVehicle";
 import { fuelLogEvent, listFuelLog } from "@/lib/fuelLog";
 
@@ -45,16 +45,16 @@ export default function TripFuelBriefing({ distanceKm, durationSeconds, roundTri
 
   return (
     <section className="mt-3 rounded-3xl border border-white/8 bg-[#10191F] p-4 text-white">
-      <div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-4" /></div><div><p className="text-[0.55rem] font-black uppercase tracking-[.15em] text-[#C7FF3C]">Combustível</p><h3 className="mt-1 text-base font-black">Estimativa do seu veículo.</h3></div></div>
+      <div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Fuel className="size-4" /></div><div><p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Combustível</p><h3 className="mt-1 text-base font-black">Estimativa do seu veículo.</h3></div></div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button type="button" aria-pressed={!roundTripMode} onClick={() => setRoundTripMode(false)} className={"min-h-11 rounded-2xl border px-3 text-xs font-black " + (!roundTripMode ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/8 bg-white/[.025] text-white/55")}><Route className="mr-1.5 inline size-3.5" />Só ida</button>
         <button type="button" aria-pressed={roundTripMode} onClick={() => setRoundTripMode(true)} className={"min-h-11 rounded-2xl border px-3 text-xs font-black " + (roundTripMode ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/8 bg-white/[.025] text-white/55")}><Route className="mr-1.5 inline size-3.5" />Ida e volta</button>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <div className="rounded-2xl bg-white/[.035] p-3"><Gauge className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-[0.5rem] uppercase tracking-[.1em] text-white/30">Litros</p><p className="mt-1 text-sm font-black">{stats.liters.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L</p></div>
-        <div className="rounded-2xl bg-white/[.035] p-3"><Wallet className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-[0.5rem] uppercase tracking-[.1em] text-white/30">Custo</p><p className="mt-1 text-sm font-black">{stats.cost == null ? "—" : stats.cost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p></div>
+        <div className="rounded-2xl bg-white/[.035] p-3"><Gauge className="size-3.5 text-[#3DE3FF]" /><p className="mt-2 text-xs uppercase tracking-[.1em] text-white/65">Litros</p><p className="mt-1 text-sm font-black">{stats.liters.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} L</p></div>
+        <div className="rounded-2xl bg-white/[.035] p-3"><Wallet className="size-3.5 text-[#FFB86B]" /><p className="mt-2 text-xs uppercase tracking-[.1em] text-white/65">Custo</p><p className="mt-1 text-sm font-black">{stats.cost == null ? "—" : stats.cost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p></div>
       </div>
-      <p className="mt-3 text-[0.58rem] leading-relaxed text-white/35">{roundTripMode ? "Calculado para ida e volta." : "Calculado para uma perna da viagem."}{durationSeconds && durationSeconds > 0 ? " Duração estimada: " + Math.max(1, Math.round(durationSeconds / 60)) + " min." : ""} {price > 0 ? "O preço vem do último abastecimento registrado neste aparelho." : "Registre um abastecimento para estimar custo."}</p>
+      <p className="mt-3 text-xs leading-relaxed text-white/65">{roundTripMode ? "Calculado para ida e volta." : "Calculado para uma perna da viagem."}{durationSeconds && durationSeconds > 0 ? " Duração estimada: " + Math.max(1, Math.round(durationSeconds / 60)) + " min." : ""} {price > 0 ? "O preço vem do último abastecimento registrado neste aparelho." : "Registre um abastecimento para estimar custo."}</p>
     </section>
   );
 }

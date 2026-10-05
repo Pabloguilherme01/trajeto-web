@@ -682,7 +682,7 @@ export default function Planner() {
   }] : [];
 
   return (
-    <main className="min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
+    <main className="planner-premium min-h-[100dvh] bg-[#0B1014] pb-28 text-white md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
           <div>
@@ -696,14 +696,14 @@ export default function Planner() {
         </header>
 
         {!savedMode && (
-          <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <section className="premium-panel planner-trip-form mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form ref={plannerFormRef} onSubmit={submit}>
               <label className="block">
-                <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
-                <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
+                <span className="text-xs font-black uppercase tracking-[.14em] text-white/70">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
+                <div className="planner-location-field mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#3DE3FF]" />
                   <input value={origin} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="De onde você sai" autoComplete="street-address" />
-                  <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-10 place-items-center text-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
+                  <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 shrink-0 place-items-center rounded-xl text-[#3DE3FF] hover:bg-[#3DE3FF]/10 focus-visible:outline-2 focus-visible:outline-[#3DE3FF] disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
                 </div>
               </label>
 
@@ -716,7 +716,7 @@ export default function Planner() {
               </div>
 
               <label className="block">
-                <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Destino</span>
+                <span className="text-xs font-black uppercase tracking-[.14em] text-white/70">Destino</span>
                 <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#C7FF3C]/18 bg-[#0B1014] px-3">
                   <span className="size-2.5 rounded-full bg-[#C7FF3C]" />
                   <input value={destination} onChange={event => { resetResult(); setDestination(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/25" placeholder="Para onde você vai" autoComplete="street-address" />
@@ -747,7 +747,7 @@ export default function Planner() {
                         <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-10 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-[#C7FF3C]/35 bg-[#C7FF3C]/10 text-[#DFFF9A]" : "border-white/8 bg-white/[.02] text-white/50")}>{label}</button>
                       ))}
                     </div>
-                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-sm text-white outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" />
+                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-[#0B1014] px-3 text-base text-white outline-none placeholder:text-white/25" autoComplete="off" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-white/8 bg-gradient-to-br from-[#121F27] to-[#10171C] px-3 text-left shadow-[0_8px_24px_rgba(0,0,0,.12)] transition-colors hover:border-[#3DE3FF]/30 active:scale-[.99]">
@@ -776,7 +776,7 @@ export default function Planner() {
 
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Como planejar</span>
+                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/70">Como planejar</span>
                   <span className="text-xs font-bold text-[#C7FF3C]">{PLANNER_EXPERIENCE_OPTIONS.find(item => item.id === experienceMode)?.label}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
@@ -792,7 +792,7 @@ export default function Planner() {
                           setMode("driving");
                       }}
                       className={
-                        "min-h-11 rounded-xl border px-2 text-xs font-black " +
+                        "planner-choice min-h-11 rounded-xl border px-2 text-xs font-black " +
                         (experienceMode === item.id
                           ? "border-[#3DE3FF]/35 bg-[#3DE3FF]/10 text-[#C9F7FF]"
                           : "border-white/8 bg-white/[.02] text-white/45")
@@ -809,7 +809,7 @@ export default function Planner() {
 
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/35">Deslocamento</span>
+                  <span className="text-xs font-black uppercase tracking-[.14em] text-white/70">Deslocamento</span>
                   <span className="text-xs font-bold text-white/25">{mode === "driving" ? "carro" : mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : "transporte"}</span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
@@ -819,7 +819,7 @@ export default function Planner() {
                     ["cycling", "Bicicleta", Bike],
                     ["transit", "Transporte", Bus],
                   ] as const).map(([value, label, Icon]) => (
-                    <button key={value} type="button" aria-pressed={mode === value} onClick={() => { resetResult(); setMode(value); }} className={"flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/45")}>
+                    <button key={value} type="button" aria-pressed={mode === value} onClick={() => { resetResult(); setMode(value); }} className={"planner-choice flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-black " + (mode === value ? "border-[#C7FF3C]/30 bg-[#C7FF3C]/10 text-[#C7FF3C]" : "border-white/8 bg-white/[.02] text-white/45")}>
                       <Icon className="size-3.5" />
                       {label}
                     </button>
@@ -827,7 +827,7 @@ export default function Planner() {
                 </div>
               </div>
 
-              <button type="submit" aria-label="Calcular rota" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
+              <button type="submit" aria-label="Calcular rota" disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="planner-primary-action mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-[#C7FF3C] px-4 text-sm font-black text-[#0B1014] disabled:opacity-35 active:scale-[.99]">
                 <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending || publicRoutePending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
@@ -1204,7 +1204,7 @@ export default function Planner() {
               {planned.route.destinationReference.name} · {planned.route.destinationReference.precision} Fonte: {planned.route.destinationReference.sourceLabel}
             </p>}
             {!liveTrip.active && <ArrivalTimePlannerCard durationSeconds={planned.route.durationSeconds} />}
-            <TripFuelBriefing distanceKm={(planned.route.distanceMeters ?? 0) / 1000} durationSeconds={planned.route.durationSeconds ?? undefined} />
+            {mode === "driving" && <TripFuelBriefing distanceKm={(planned.route.distanceMeters ?? 0) / 1000} durationSeconds={planned.route.durationSeconds ?? undefined} />}
 
             {showMap && (
               <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[#121B22] shadow-[0_22px_60px_rgba(0,0,0,.28)]">

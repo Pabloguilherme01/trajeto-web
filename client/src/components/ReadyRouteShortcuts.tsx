@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { Route as RouteIcon, MapPin, ArrowUpRight, ArrowLeft, Search } from "lucide-react";
+import { MapPin, ArrowUpRight, ArrowLeft, Search, Stethoscope, ShoppingBag, Landmark, Bus, GraduationCap, Fuel, Utensils } from "lucide-react";
 import { LOCAL_READY_ROUTES, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
@@ -8,6 +8,7 @@ import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
 
 type TravelMode = "driving" | "walking" | "cycling" | "transit";
+const destinationIcons = { saude: Stethoscope, compras: ShoppingBag, servicos: Landmark, transporte: Bus, educacao: GraduationCap, combustivel: Fuel, alimentacao: Utensils, centro: MapPin };
 const modes: Array<{ value: TravelMode; label: string }> = [
   { value: "driving", label: "Carro" }, { value: "walking", label: "A pé" },
   { value: "cycling", label: "Bicicleta" }, { value: "transit", label: "Transporte público" },
@@ -20,17 +21,29 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const [originId, setOriginId] = useState("todos");
   const origins = Array.from(new Map(LOCAL_READY_ROUTES.map(route => [route.originId, route.originLabel])).entries());
   const [mode, setMode] = useState(initialMode);
-  const [expanded, setExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [offlineOnly, setOfflineOnly] = useState(false);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" ? true : navigator.onLine !== false);
   useEffect(() => setMode(initialMode), [initialMode]);
+  useEffect(() => {
+    const refreshConnection = () => setOnline(navigator.onLine !== false);
+    window.addEventListener("online", refreshConnection);
+    window.addEventListener("offline", refreshConnection);
+    return () => {
+      window.removeEventListener("online", refreshConnection);
+      window.removeEventListener("offline", refreshConnection);
+    };
+  }, []);
+  const offlineActive = offlineOnly || !online;
   const filtered = LOCAL_READY_ROUTES.filter(route =>
     (originId === "todos" || originId === route.originId) &&
     (category === "todos" || category === route.category) &&
     matchesCatalogText(query, [route.label, route.origin, route.destination, route.detail])
   );
-  const visible = expanded ? filtered : filtered.slice(0, 6);
-  const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setExpanded(false); };
+  const visible = filtered.slice(0, visibleCount);
+  const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setVisibleCount(6); };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
-    navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode);
+    navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
   return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#13232d] via-[#101a22] to-[#0B1014] p-4 shadow-xl" data-compact={compact || undefined}>
     <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-[#3DE3FF]">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
@@ -46,7 +59,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
           { value: "combustivel", label: "Abastecer" },
           { value: "transporte", label: "Pegar transporte" },
         ].map(intent => <button key={intent.value} type="button" aria-pressed={category === intent.value}
-          onClick={() => { setCategory(intent.value as RouteDestinationCategoryFilter); setQuery(""); setExpanded(false); }}
+          onClick={() => { setCategory(intent.value as RouteDestinationCategoryFilter); setQuery(""); setVisibleCount(6); }}
           className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 bg-white/5 text-white/80"}`}>
           {intent.label}
         </button>)}
@@ -59,18 +72,23 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         {item.label}
       </button>)}
     </div>
+    <button type="button" aria-pressed={offlineActive} disabled={!online} onClick={() => setOfflineOnly(value => !value)}
+      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 text-white/80"} disabled:cursor-default disabled:opacity-100`}>
+      {offlineActive ? "Offline ativo" : "Calcular offline"}
+    </button>
+    <p className="mt-2 text-xs leading-relaxed text-white/65">Todos os trajetos deste catálogo abrem offline, incluindo conexões entre as vias mapeadas. Para seguir curva a curva pelas ruas, prepare a rota com internet antes de sair; sem geometria salva, o cálculo offline continua identificado como estimativa.</p>
     <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <label className="min-w-0 text-xs font-bold text-white/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
-        <input type="search" value={query} onChange={event => { setQuery(event.target.value); setExpanded(false); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />
+        <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />
       </label>
       <label className="min-w-0 text-xs font-bold text-white/80">Saindo de
-        <select value={originId} onChange={event => { setOriginId(event.target.value); setExpanded(false); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
+        <select value={originId} onChange={event => { setOriginId(event.target.value); setVisibleCount(6); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
           <option value="todos">Todas as partidas</option>
           {origins.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
         </select>
       </label>
       <label className="min-w-0 text-xs font-bold text-white/80">Tipo de destino
-        <select value={category} onChange={event => { setCategory(event.target.value as RouteDestinationCategoryFilter); setExpanded(false); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
+        <select value={category} onChange={event => { setCategory(event.target.value as RouteDestinationCategoryFilter); setVisibleCount(6); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
           {ROUTE_DESTINATION_CATEGORIES.filter(item => item.value === "todos" || LOCAL_READY_ROUTES.some(route => route.category === item.value)).map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
       </label>
@@ -88,10 +106,11 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     <div className="mt-3 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-3">
       {visible.map(route => {
         const from = route.originLabel, to = route.destinationLabel;
+        const DestinationIcon = destinationIcons[route.category];
         const categoryLabel = ROUTE_DESTINATION_CATEGORIES.find(item => item.value === route.category)?.label;
         return <article key={route.id} aria-label={route.label} className="premium-route-card min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101b23] p-4 shadow-lg transition-colors hover:border-[#3DE3FF]/35">
           <div className="flex items-start gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><RouteIcon className="size-4" /></span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><DestinationIcon className="size-4" aria-hidden="true" /></span>
             <div className="min-w-0 flex-1">
               <p className="mb-1 text-xs font-bold text-[#3DE3FF]">{categoryLabel}</p>
               <h3 className="break-words text-base font-black leading-snug text-white">{to}</h3>
@@ -111,7 +130,10 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         </article>;
       })}
     </div>
-    {filtered.length > 6 && <button type="button" onClick={() => setExpanded(value => !value)} aria-expanded={expanded} className="mt-3 min-h-11 w-full rounded-xl border border-[#3DE3FF]/25 px-3 text-sm font-bold text-[#3DE3FF]">{expanded ? "Mostrar menos trajetos" : `Ver mais ${filtered.length - 6} trajetos`}</button>}
+    <div className="mt-3 flex flex-wrap gap-2">
+      {visible.length < filtered.length && <button type="button" onClick={() => setVisibleCount(value => value + 12)} className="min-h-11 flex-1 rounded-xl border border-[#3DE3FF]/25 px-3 text-sm font-bold text-[#3DE3FF]">Ver mais {Math.min(12, filtered.length - visible.length)} trajetos</button>}
+      {visibleCount > 6 && <button type="button" onClick={() => setVisibleCount(6)} className="min-h-11 rounded-xl border border-white/15 px-3 text-sm font-bold text-white/80">Mostrar menos trajetos</button>}
+    </div>
     <p className="mt-3 text-xs leading-relaxed text-white/55">Sem internet, o caminho e a distância podem ser estimativas. Transporte público não informa horários em tempo real.</p>
   </details>;
 }

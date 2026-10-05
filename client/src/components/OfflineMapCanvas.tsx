@@ -1,3 +1,5 @@
+import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
+import { groundMetresPerPixel, roadPriority } from "@/lib/mapPresentation";
 import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
@@ -98,7 +100,15 @@ export default function OfflineMapCanvas({
   const [pack, setPack] = useState<MapPack | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [dark, setDark] = useState(initialDark);
+  const [dark, setDark] = useState(() => {
+    try {
+      const saved = localStorage.getItem("trajeto-map-theme");
+      return saved === "dark" ? true : saved === "light" ? false : initialDark;
+    } catch { return initialDark; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("trajeto-map-theme", dark ? "dark" : "light"); } catch { /* Map stays usable when storage is unavailable. */ }
+  }, [dark]);
   const [showAllStreetNames, setShowAllStreetNames] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -120,7 +130,7 @@ export default function OfflineMapCanvas({
         ];
   // Nearby references must not zoom the trip out beyond its endpoints.
   const tripMarkers = validMarkers.filter(
-    p => p.id === "origin" || p.id === "destination" || p.id.startsWith("stop-")
+    p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
   );
   const anchors = tripMarkers.length
     ? tripMarkers
@@ -265,8 +275,8 @@ export default function OfflineMapCanvas({
           bounds.minY = Math.min(bounds.minY, point.y);
           bounds.maxY = Math.max(bounds.maxY, point.y);
         }
-        return { ...road, world: points, bounds };
-      }) ?? [],
+        return { ...road, priority: roadPriority(road.kind), world: points, bounds };
+      }).sort((a, b) => a.priority - b.priority) ?? [],
     [pack]
   );
   const visible = roads.filter(({ bounds }) => {
@@ -279,10 +289,11 @@ export default function OfflineMapCanvas({
       bounds.minY * camera.scale + top < size.height + 80
     );
   });
+  const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
   const metresPerPixel =
-    (40075016.686 * Math.cos((15.75 * Math.PI) / 180)) / camera.scale;
+    groundMetresPerPixel(camera.y - pan.y / camera.scale, camera.scale);
   const scaleMetres =
     [10, 20, 50, 100, 200, 500, 1000, 2000, 5000].find(
       m => m / metresPerPixel >= 45
@@ -405,13 +416,9 @@ export default function OfflineMapCanvas({
         >
           <title>Ruas locais salvas e pontos da viagem</title>
           {visible.map(road => {
-            const major = [
-              "motorway",
-              "trunk",
-              "primary",
-              "secondary",
-              "tertiary",
-            ].includes(road.kind);
+            const priority = road.priority;
+            const major = priority >= 2;
+            const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
             const d = road.world
               .map(
                 (p, i) =>
@@ -423,8 +430,8 @@ export default function OfflineMapCanvas({
                 <path
                   d={d}
                   fill="none"
-                  stroke={dark ? "#334b53" : "#d6ddd0"}
-                  strokeWidth={major ? 7 : 3}
+                  stroke={dark ? "#263e48" : major ? "#d6c9a8" : "#d6ddd0"}
+                  strokeWidth={width + (major ? 2.5 : 1.5)}
                   strokeLinecap="round"
                 />
                 <path
@@ -439,25 +446,49 @@ export default function OfflineMapCanvas({
                         ? "#ffe9b3"
                         : "#ffffff"
                   }
-                  strokeWidth={major ? 4 : 1.5}
+                  strokeWidth={width}
                   strokeLinecap="round"
                 />
               </g>
             );
           })}
-          {visible
+          {geometry.length > 1 && (
+            <>
+              <path
+                d={path(geometry)}
+                fill="none"
+                stroke={dark ? "#07191f" : "#ffffff"}
+                strokeWidth="11"
+                strokeOpacity="0.92"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d={path(geometry)}
+                fill="none"
+                stroke={
+                  estimated
+                    ? dark
+                      ? "#819399"
+                      : "#718287"
+                    : dark
+                      ? "#50F3EA"
+                      : "#1a73e8"
+                }
+                strokeWidth="6"
+                strokeDasharray={estimated ? "8 8" : undefined}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </>
+          )}
+          {namedRoads
             .filter(
               road =>
                 road.name &&
                 (showAllStreetNames ||
                   zoom >= 2 ||
-                  [
-                    "motorway",
-                    "trunk",
-                    "primary",
-                    "secondary",
-                    "tertiary",
-                  ].includes(road.kind))
+                  road.priority >= 2)
             )
             .map(road => {
               const p = road.world[Math.floor(road.world.length / 2)];
@@ -496,7 +527,7 @@ export default function OfflineMapCanvas({
                   y={y}
                   textAnchor="middle"
                   fontSize="12"
-                  fontWeight="600"
+                  fontWeight={road.priority >= 4 ? "700" : "500"}
                   fill={dark ? "#e3edec" : "#566760"}
                   paintOrder="stroke"
                   stroke={dark ? "#18272d" : "#eef2eb"}
@@ -506,36 +537,7 @@ export default function OfflineMapCanvas({
                 </text>
               );
             })}
-          {geometry.length > 1 && (
-            <>
-              <path
-                d={path(geometry)}
-                fill="none"
-                stroke={dark ? "#07191f" : "#ffffff"}
-                strokeWidth="11"
-                strokeOpacity="0.92"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d={path(geometry)}
-                fill="none"
-                stroke={
-                  estimated
-                    ? dark
-                      ? "#819399"
-                      : "#718287"
-                    : dark
-                      ? "#50F3EA"
-                      : "#1a73e8"
-                }
-                strokeWidth="6"
-                strokeDasharray={estimated ? "8 8" : undefined}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </>
-          )}
+
         </svg>
         {displayedMarkers.map(marker => {
           const p = project(marker);
@@ -624,13 +626,13 @@ export default function OfflineMapCanvas({
           aria-pressed={dark}
           onClick={() => setDark(v => !v)}
           className={
-            "absolute right-3 top-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " +
+            "absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
           }
         >
-          {dark ? "Claro" : "Escuro"}
+          {dark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}<span className="hidden sm:inline">{dark ? "Claro" : "Escuro"}</span>
         </button>
         <button
           type="button"
@@ -642,7 +644,7 @@ export default function OfflineMapCanvas({
           aria-pressed={showAllStreetNames}
           onClick={() => setShowAllStreetNames(value => !value)}
           className={
-            "absolute right-3 top-[4.25rem] min-h-11 rounded-xl px-3 text-xs font-bold shadow " +
+            "absolute right-3 top-[4.25rem] flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
             (showAllStreetNames
               ? "bg-[#37e6df] text-[#102028]"
               : dark
@@ -650,7 +652,7 @@ export default function OfflineMapCanvas({
                 : "bg-white/95 text-[#27414b]")
           }
         >
-          {showAllStreetNames ? "Ruas: todas" : "Ruas"}
+          <MapIcon className="size-4" aria-hidden="true" /><span className="hidden sm:inline">{showAllStreetNames ? "Ruas: todas" : "Ruas"}</span>
         </button>
         <button
           type="button"
@@ -658,13 +660,13 @@ export default function OfflineMapCanvas({
           aria-pressed={expanded}
           onClick={() => setExpanded(v => !v)}
           className={
-            "absolute bottom-3 right-3 min-h-11 rounded-xl px-3 text-xs font-bold shadow " +
+            "absolute bottom-3 right-3 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
           }
         >
-          {expanded ? "Reduzir" : "Ampliar"}
+          {expanded ? <Minimize className="size-4" aria-hidden="true" /> : <Expand className="size-4" aria-hidden="true" />}<span className="hidden sm:inline">{expanded ? "Reduzir" : "Ampliar"}</span>
         </button>
         <div
           className={
@@ -676,7 +678,7 @@ export default function OfflineMapCanvas({
         >
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
-            className="border-x border-b border-[#27414b]"
+            className={"border-x border-b " + (dark ? "border-[#e9ffff]" : "border-[#27414b]")}
           />
           {scaleMetres >= 1000
             ? scaleMetres / 1000 + " km"

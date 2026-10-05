@@ -198,7 +198,19 @@ const streetEndpointIds = [
   "via-osm-e04f4a6b272b", "via-osm-a5571ffd2353", "via-osm-de5332cbc47c",
   "via-osm-26660805dfbb", "via-osm-f2f3d0bf830f", "via-osm-1b3c23706c3f",
 ];
-export const READY_ROUTE_STREET_POINTS = streetEndpointIds.map(id => {
+const streetNameCounts = new Map<string, number>();
+for (const item of cityAtlasData.items) {
+  if (item.coordinateKind === "street-midpoint") {
+    const name = normalizeCatalogText(item.name);
+    streetNameCounts.set(name, (streetNameCounts.get(name) ?? 0) + 1);
+  }
+}
+const extraStreetIds = cityAtlasData.items.filter(item =>
+  item.coordinateKind === "street-midpoint" && Number.isFinite(item.lat) && Number.isFinite(item.lng) &&
+  /^(Avenida|Alameda|Rodovia|Estrada)\b/.test(item.name) &&
+  streetNameCounts.get(normalizeCatalogText(item.name)) === 1 && !streetEndpointIds.includes(item.id)
+).slice(0, 30 - streetEndpointIds.length).map(item => item.id);
+export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetIds].map(id => {
   const street = cityAtlasData.items.find(item => item.id === id);
   if (!street || street.coordinateKind !== "street-midpoint" || !Number.isFinite(street.lat) || !Number.isFinite(street.lng)) {
     throw new Error(`Ready route requires a mapped street midpoint: ${id}`);
@@ -216,6 +228,11 @@ const readyEndpoints: Record<string, { label: string; destination: string; categ
   ...Object.fromEntries(READY_ROUTE_STREET_POINTS.map(place => [place.id, place])),
   centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO", category: "centro" },
 };
+const streetToStreetPairs = READY_ROUTE_STREET_POINTS.flatMap((origin, index) =>
+  READY_ROUTE_STREET_POINTS.slice(index + 1).map(destination =>
+    [origin.id, destination.id] as const
+  )
+);
 const readyPairs = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
   ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
@@ -226,12 +243,12 @@ const readyPairs = [
   ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
   ["rodoviaria", "prefeitura"], ["aguas-lindas-shopping", "upa"],
   ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),
-  ...READY_ROUTE_STREET_POINTS.slice(0, 6).flatMap(street => [
-    [street.id, "upa"] as const, [street.id, "aguas-lindas-shopping"] as const,
-  ]),
-  ["via-osm-c1d703024625", "prefeitura"], ["via-osm-0da29ee8ad6a", "prefeitura"],
+  ...READY_ROUTE_STREET_POINTS.flatMap(street =>
+    ["upa", "heal", "prefeitura", "rodoviaria", "aguas-lindas-shopping", "hospital-bom-jesus"]
+      .map(destination => [street.id, destination] as const)),
+  ...streetToStreetPairs,
 ] as const;
-export const LOCAL_READY_ROUTES: ReadyCityRoute[] = readyPairs.map(([from, to]) => ({
+export const LOCAL_READY_ROUTES: ReadyCityRoute[] = Array.from(new Map(readyPairs.map(pair => [pair.join("-to-"), pair])).values()).map(([from, to]) => ({
   id: `${from}-to-${to}`,
   originId: from,
   originLabel: readyEndpoints[from].label,
