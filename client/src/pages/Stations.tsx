@@ -765,7 +765,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
                 <input
                   id="station-search"
-                  type="search"
+                  type="text"
                   value={input}
                   onChange={event => setInput(event.target.value)}
                   autoComplete="street-address"
@@ -926,7 +926,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
               <label className="premium-panel flex min-h-11 min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-background px-3">
                 <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
-                <input type="search" value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} enterKeyHint="search" placeholder="Filtrar por nome, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
+                <input type="text" value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} enterKeyHint="search" placeholder="Filtrar por nome, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 shrink-0 place-items-center rounded-lg text-white/65 hover:bg-white/[.04] hover:text-white" aria-label="Limpar filtro do diretório"><X className="size-3.5" aria-hidden="true" /></button>}
               </label>
               <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-background px-3 text-base font-black text-white/65">
