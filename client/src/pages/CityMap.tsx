@@ -32,6 +32,16 @@ import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
 import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
 
+const CITY_MAP_QUICK_FILTERS = [
+  { label: "UPA", value: "upa", category: "saude" },
+  { label: "Postos", value: "posto", category: "combustivel" },
+  { label: "Mercados", value: "mercado", category: "compras" },
+  { label: "Escolas", value: "escola", category: "educacao" },
+  { label: "Prefeitura", value: "prefeitura", category: "servicos" },
+  { label: "Shopping", value: "shopping", category: "compras" },
+  { label: "Rodoviária", value: "rodoviaria", category: "transporte" },
+] as const;
+
 export default function CityMap() {
   const [, navigate] = useLocation();
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
@@ -225,17 +235,11 @@ export default function CityMap() {
       </div>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
-        options={[
-          { label: "UPA", value: "upa" },
-          { label: "Postos", value: "posto" },
-          { label: "Mercados", value: "mercado" },
-          { label: "Escolas", value: "escola" },
-          { label: "Prefeitura", value: "prefeitura" },
-          { label: "Shopping", value: "shopping" },
-          { label: "Rodoviária", value: "rodoviaria" },
-        ]}
+        options={CITY_MAP_QUICK_FILTERS
+          .filter(item => category === "todos" || item.category === category)
+          .map(({ label, value }) => ({ label, value }))}
         value={query}
-        onPick={value => { setOnlyStreets(false); setCategory("todos"); setQuery(value); }}
+        onPick={value => { setOnlyStreets(false); setQuery(value); }}
         className="mt-3"
       />
       <div
