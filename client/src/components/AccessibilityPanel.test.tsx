@@ -1,6 +1,6 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AccessibilityPanel from "./AccessibilityPanel";
 
@@ -8,6 +8,25 @@ describe("AccessibilityPanel", () => {
   afterEach(() => {
     cleanup();
     localStorage.clear();
+  });
+
+  it("keeps keyboard focus inside the modal dialog", async () => {
+    const user = userEvent.setup();
+    render(<AccessibilityPanel />);
+    await user.click(screen.getAllByRole("button", { name: /abrir acessibilidade/i })[0]);
+    const dialog = screen.getByRole("dialog");
+    const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button:not([disabled])"));
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    await waitFor(() => expect(document.activeElement).toBe(first));
+
+    await user.tab({ shift: true });
+    expect(document.activeElement).toBe(last);
+
+    first.focus();
+    last.focus();
+    await user.tab();
+    expect(document.activeElement).toBe(first);
   });
 
   it("offers local data controls without touching unrelated storage", async () => {
