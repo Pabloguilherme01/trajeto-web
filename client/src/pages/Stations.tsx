@@ -10,7 +10,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { fuelFilterPriceKey, inferredBrand, sameStationIdentity, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
+import { fuelFilterPriceKey, inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import { toast } from "sonner";
@@ -107,7 +107,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const liveAnpRows = anpLiveQuery.data?.rows ?? [];
   const anpRows = staticRuntime ? staticAnpRows : liveAnpRows.length > 0 ? liveAnpRows : staticAnpRows;
   const anpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
-  const pricesByCnpj = useMemo(() => indexAnpPricesByCnpj(priceSnapshot?.data ?? []), [priceSnapshot]);
+  const pricesByCnpj = useMemo(() => {
+    const records = (priceSnapshot?.data ?? []).map(record => ({ ...record, cnpj: normalizeStationCnpj(record.cnpj) }));
+    return indexAnpPricesByCnpj(records);
+  }, [priceSnapshot]);
+  const hasIndividualPrices = pricesByCnpj.size > 0;
   const localDirectory = useMemo(() => {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
@@ -130,13 +134,18 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   );
 
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
+  const anpByCnpj = useMemo(() => new Map(anpStations.map(station => [normalizeStationCnpj(station.cnpj), station])), [anpStations]);
   const directoryCards = useMemo(() => {
-    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => ({
-      key: local.cnpj,
-      local,
-      anp: anpStations.find(station => station.cnpj === local.cnpj) ?? null,
-    }));
+    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => {
+      const key = normalizeStationCnpj(local.cnpj) || local.cnpj;
+      return {
+        key,
+        local,
+        anp: anpByCnpj.get(key) ?? null,
+      };
+    });
     for (const anp of anpStations) {
+      const key = normalizeStationCnpj(anp.cnpj) || anp.cnpj;
       const alreadyRepresented = cards.some(item => sameStationIdentity(
         {
           cnpj: item.anp?.cnpj || item.local?.cnpj,
@@ -152,10 +161,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         },
       ));
       if (alreadyRepresented) continue;
-      cards.push({ key: anp.cnpj, local: null, anp });
+      cards.push({ key, local: null, anp });
     }
     return cards;
-  }, [aguasLindasCatalog, anpStations]);
+  }, [aguasLindasCatalog, anpStations, anpByCnpj]);
 
   const directoryCardsFiltered = useMemo(() => {
     const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -186,11 +195,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     return [...matches].sort((a, b) => {
       const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
       if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) => {
-          const lat = item.anp?.latitude ?? item.local?.anp?.latitude;
-          const lng = item.anp?.longitude ?? item.local?.anp?.longitude;
-          return Number.isFinite(lat) && Number.isFinite(lng) ? { lat: Number(lat), lng: Number(lng) } : null;
-        };
+        const getCoords = (item: typeof directoryCards[number]) =>
+          stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
         const aCoords = getCoords(a);
         const bCoords = getCoords(b);
         const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
@@ -212,14 +218,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
-    const lat = anp?.latitude ?? local?.anp?.latitude;
-    const lng = anp?.longitude ?? local?.anp?.longitude;
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    const point = stationCoordinatePoint(anp?.latitude ?? local?.anp?.latitude, anp?.longitude ?? local?.anp?.longitude);
+    if (!point) {
       toast.message("Este cadastro ainda não possui coordenada consolidada para o atalho local.");
       return;
     }
     const station = {
-      placeId: "aguas-lindas:" + (anp?.cnpj || local?.cnpj),
+      placeId: "aguas-lindas:" + (normalizeStationCnpj(anp?.cnpj || local?.cnpj) || local?.id || "posto"),
       name: local?.displayName || anp?.razaoSocial || "Posto",
       address: [
         anp?.endereco || local?.address,
@@ -227,8 +232,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         anp?.municipio || "Águas Lindas de Goiás",
         anp?.uf || "GO",
       ].filter(Boolean).join(", "),
-      lat: Number(lat),
-      lng: Number(lng),
+      lat: point.lat,
+      lng: point.lng,
       phone: local?.mapData?.phone ?? null,
       website: null,
       openingHours: local?.mapData?.hours ? [local.mapData.hours] : [],
@@ -262,50 +267,50 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   const mapStations = useMemo<StationMapItem[]>(() => {
     const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
-    const official: StationMapItem[] = anpStations
-      .filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
-      .map(station => ({
+    const official: StationMapItem[] = anpStations.flatMap(station => {
+      const point = stationCoordinatePoint(station.latitude, station.longitude);
+      return point ? [{
         id: "anp-" + station.cnpj,
         name: station.razaoSocial || "Posto " + station.cnpj,
         address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(" · "),
-        lat: station.latitude as number,
-        lng: station.longitude as number,
+        ...point,
         cnpj: station.cnpj,
         brand: station.distribuidora,
         source: "ANP" as const,
-      }));
+      }] : [];
+    });
 
-    const local: StationMapItem[] = aguasLindasCatalog.map(station => ({
-      id: "local-" + station.cnpj,
-      name: station.displayName || station.legalName,
-      address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
-      ...(Number.isFinite(station.anp?.latitude) && Number.isFinite(station.anp?.longitude)
-        ? { lat: Number(station.anp?.latitude), lng: Number(station.anp?.longitude) }
-        : {}),
-      cnpj: station.cnpj,
-      brand: station.brand || station.mapData?.observedBrand,
-      source: "local" as const,
-    }));
+    const local: StationMapItem[] = aguasLindasCatalog.map(station => {
+      const point = stationCoordinatePoint(station.anp?.latitude, station.anp?.longitude);
+      return {
+        id: "local-" + station.cnpj,
+        name: station.displayName || station.legalName,
+        address: [station.address, station.neighborhood, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(" · "),
+        ...(point ?? {}),
+        cnpj: station.cnpj,
+        brand: station.brand || station.mapData?.observedBrand,
+        source: "local" as const,
+      };
+    });
 
-    const directory: StationMapItem[] = directoryCards.map(item => ({
-      id: "directory-" + item.key,
-      name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
-      address: [
-        item.anp?.endereco || item.local?.address,
-        item.anp?.complemento,
-        item.anp?.bairro || item.local?.neighborhood,
-        item.anp?.municipio || "Águas Lindas de Goiás",
-        item.anp?.uf || "GO",
-      ].filter(Boolean).join(" · "),
-      ...(Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)
-        ? { lat: Number(item.anp?.latitude), lng: Number(item.anp?.longitude) }
-        : Number.isFinite(item.local?.anp?.latitude) && Number.isFinite(item.local?.anp?.longitude)
-          ? { lat: Number(item.local?.anp?.latitude), lng: Number(item.local?.anp?.longitude) }
-          : {}),
-      cnpj: item.anp?.cnpj || item.local?.cnpj || null,
-      brand: item.anp?.distribuidora || item.local?.brand || item.local?.mapData?.observedBrand || null,
-      source: "local" as const,
-    }));
+    const directory: StationMapItem[] = directoryCards.map(item => {
+      const point = stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
+      return {
+        id: "directory-" + item.key,
+        name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
+        address: [
+          item.anp?.endereco || item.local?.address,
+          item.anp?.complemento,
+          item.anp?.bairro || item.local?.neighborhood,
+          item.anp?.municipio || "Águas Lindas de Goiás",
+          item.anp?.uf || "GO",
+        ].filter(Boolean).join(" · "),
+        ...(point ?? {}),
+        cnpj: item.anp?.cnpj || item.local?.cnpj || null,
+        brand: item.anp?.distribuidora || item.local?.brand || item.local?.mapData?.observedBrand || null,
+        source: "local" as const,
+      };
+    });
 
     const live: StationMapItem[] = liveStations
       .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
@@ -325,7 +330,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const merged: StationMapItem[] = [];
     for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
       const key = station.cnpj
-        ? "cnpj:" + station.cnpj
+        ? "cnpj:" + normalizeStationCnpj(station.cnpj)
         : station.placeId
           ? "place:" + station.placeId
           : "address:" + normalize(station.address || station.name);
@@ -340,7 +345,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     }
     return merged;
   }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
-  const anpWithCoordinates = anpStations.filter(station => Number.isFinite(station.latitude) && Number.isFinite(station.longitude)).length;
+  const anpWithCoordinates = anpStations.filter(station => Boolean(stationCoordinatePoint(station.latitude, station.longitude))).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
   const mapSecondaryCount = mapStations.filter(station => station.source !== "ANP").length;
@@ -566,52 +571,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     useNearby();
   }, [nearbyRequested, nearbyAutoAttempted, userCoords, locating]);
 
-  const handleMapStationSelect = (station: StationMapItem) => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-    const normalizedAddress = normalize(station.address);
-    let targetCnpj = station.cnpj?.trim();
-
-    if (!targetCnpj) {
-      const stationName = normalize(station.name);
-      const matched = directoryCards.find(item => {
-        const itemAddress = normalize([
-          item.anp?.endereco || item.local?.address,
-          item.anp?.bairro || item.local?.neighborhood,
-          item.anp?.municipio || "Águas Lindas de Goiás",
-          item.anp?.uf || "GO",
-        ].filter(Boolean).join(" · "));
-        const itemName = normalize(item.local?.displayName || item.anp?.razaoSocial || "");
-        return (normalizedAddress && itemAddress === normalizedAddress) || (stationName && itemName === stationName);
-      });
-      targetCnpj = matched?.anp?.cnpj || matched?.local?.cnpj || undefined;
-    }
-
-    if (!targetCnpj) {
-      toast.message("A referência do mapa ainda não possui ficha consolidada.");
-      return;
-    }
-
-    const matchedLocal = directoryCards.find(item => (item.anp?.cnpj || item.local?.cnpj) === targetCnpj)?.local;
-    if (matchedLocal) {
-      setLocation(appUrl("/local/" + encodeURIComponent(matchedLocal.id)));
-      return;
-    }
-
-    setDirectorySearch("");
-    setNeighborhoodFilter("all");
-    setBrandFilter("all");
-    setAddressOnly(false);
-    setVerifiedOnly(false);
-    setMappedOnly(false);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById("posto-" + encodeURIComponent(targetCnpj as string))
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-    });
-  };
-
   const savePointsOffline = () => {
     if (!mapStations.length) {
       toast.message("Ainda não há coordenadas suficientes para salvar os pontos.");
@@ -626,7 +585,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
     const saved = cacheOfflineMapStations(normalized);
     if (saved) setOfflineMap(getOfflineMapStations().stations);
-    toast.message(saved ? `Pontos salvos neste aparelho · ${mapStations.length} referências` : "Não foi possível gravar os pontos locais.");
+    toast.message(saved ? `Pontos salvos neste aparelho · ${normalized.length} pontos` : "Não foi possível gravar os pontos locais.");
   };
 
   const refreshStationData = async () => {
@@ -851,8 +810,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/65">{mapStations.length} referências</span>
               </div>
             </div>
+            <p className="px-4 py-2 text-xs text-white/65">{mapStations.filter(station => stationCoordinatePoint(station.lat, station.lng)).length} posicionados · {mapStations.filter(station => !stationCoordinatePoint(station.lat, station.lng)).length} sem coordenada</p>
             <div className="relative">
-              <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
+              <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
               <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">Mais perto</button>
@@ -868,11 +828,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         stations={mapStations}
                         showTraffic={online}
                         userCoords={userCoords}
-                        onSelectStation={handleMapStationSelect}
+                       
                       />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-xs text-white/65">
-                      <span>{mapStations.length} marcadores · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
+                      <span>{mapStations.filter(station => stationCoordinatePoint(station.lat, station.lng)).length} posicionados · {mapStations.filter(station => !stationCoordinatePoint(station.lat, station.lng)).length} sem coordenada · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
                       <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
                       <span>{anpWithoutCoordinates > 0 ? String(anpWithoutCoordinates) + " cadastro(s) ANP sem coordenada · ficha continua disponível" : "cobertura coordenada ANP completa nesta consulta"}</span>
                     </div>
@@ -922,7 +882,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
               <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Number.isFinite(item.anp?.latitude) && Number.isFinite(item.anp?.longitude)).length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Boolean(stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude))).length}</p></div>
               <div className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></div>
             </div>
 
@@ -944,12 +904,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </select>
               <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
-                <option value="price">Ordenar: menor preço ANP</option>
+                <option value="price" disabled={!hasIndividualPrices}>Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
+            {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-[#FFCF96]">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
@@ -973,11 +934,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
                   distanceKm={(() => {
                     if (!userCoords) return null;
-                    const lat = item.anp?.latitude ?? item.local?.anp?.latitude;
-                    const lng = item.anp?.longitude ?? item.local?.anp?.longitude;
-                    return Number.isFinite(lat) && Number.isFinite(lng) ? haversineKm(userCoords.lat, userCoords.lng, Number(lat), Number(lng)) : null;
+                    const point = stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
+                    return point ? haversineKm(userCoords.lat, userCoords.lng, point.lat, point.lng) : null;
                   })()}
-                  onToggleSaved={Number.isFinite(item.anp?.latitude ?? item.local?.anp?.latitude) && Number.isFinite(item.anp?.longitude ?? item.local?.anp?.longitude) ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
+                  onToggleSaved={stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude) ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
             </div>
