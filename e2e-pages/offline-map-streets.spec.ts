@@ -81,13 +81,16 @@ test("Pages: selects both endpoints and calculates every travel mode from the of
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
   await context.setOffline(true);
   await page.goto("planejar?experiencia=offline");
+  await page.locator("summary").filter({ hasText: "Escolher origem no catálogo" }).click();
   await page.getByRole("button", { name: "Escolher origem no catálogo local", exact: true }).click();
   await page.getByRole("textbox", { name: "Buscar origem local", exact: true }).fill("Avenida Brasília");
   await page.getByRole("list", { name: "Pontos locais para origem", exact: true }).getByRole("button").first().click();
+  await page.locator("summary").filter({ hasText: "Escolher destino no catálogo" }).click();
   await page.getByRole("button", { name: "Escolher destino no catálogo local", exact: true }).click();
   await page.getByRole("textbox", { name: "Buscar destino local", exact: true }).fill("HEAL");
   await page.getByRole("list", { name: "Pontos locais para destino", exact: true }).getByRole("button").first().click();
   for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
+    if (!await page.getByRole("button", { name: mode, exact: true }).isVisible()) await page.locator("summary").filter({ hasText: "Alterar viagem" }).click();
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
@@ -110,10 +113,12 @@ test("Pages: imported companies reload offline and plan all modes from their act
   await expect(card).toHaveCount(1);
   await expect(card.getByText(/Referência aproximada: Quadra/)).toBeVisible();
   await card.getByRole("link", { name: "Ir até aqui", exact: true }).click();
+  await page.locator("summary").filter({ hasText: "Escolher origem no catálogo" }).click();
   await page.getByRole("button", { name: "Escolher origem no catálogo local", exact: true }).click();
   await page.getByRole("textbox", { name: "Buscar origem local", exact: true }).fill("HEAL");
   await page.getByRole("list", { name: "Pontos locais para origem", exact: true }).getByRole("button").first().click();
   for (const mode of ["Carro", "A pé", "Bicicleta", "Transporte"]) {
+    if (!await page.getByRole("button", { name: mode, exact: true }).isVisible()) await page.locator("summary").filter({ hasText: "Alterar viagem" }).click();
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();

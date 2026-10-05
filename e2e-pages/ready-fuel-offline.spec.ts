@@ -10,6 +10,7 @@ test("calculates a ready fuel trip offline and explores its map at 320px", async
     return route.abort();
   });
   await page.goto("planejar");
+  await page.locator("summary").filter({ hasText: "Destinos e atalhos" }).click();
   await page.getByText(/trajetos prontos pela cidade/).click();
   await page.getByRole("button", { name: "Abastecer", exact: true }).click();
   await expect(page.getByRole("article")).toHaveCount(6);

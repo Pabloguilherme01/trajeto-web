@@ -15,6 +15,7 @@ test("Pages: clearing data resets the visible home and discards a pending GPS re
   await page.getByPlaceholder("De onde você sai").fill("Casa de teste");
   await page.getByPlaceholder("Para onde você vai").fill("Hospital");
   await page.getByRole("button", { name: "Usar minha localização como origem" }).click();
+  if (!await page.getByRole("button", { name: "Abrir acessibilidade" }).isVisible()) await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Explorar", exact: true }).click();
   await page.getByRole("button", { name: "Abrir acessibilidade" }).click();
   await page.getByRole("button", { name: "Limpar dados do Trajeto neste aparelho" }).click();
   await page.getByRole("button", { name: "Confirmar limpeza" }).click();
@@ -70,6 +71,7 @@ test("Pages: clearing Trajeto device data also removes offline routes and sessio
     db.close();
   });
 
+  if (!await page.getByRole("button", { name: "Abrir acessibilidade" }).isVisible()) await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Explorar", exact: true }).click();
   await page.getByRole("button", { name: "Abrir acessibilidade" }).click();
   const clear = page.getByRole("button", {
     name: "Limpar dados do Trajeto neste aparelho",

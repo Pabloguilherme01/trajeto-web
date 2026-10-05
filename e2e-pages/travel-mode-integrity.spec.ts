@@ -23,6 +23,7 @@ test("explicit offline mode keeps saved road geometry and navigation on device",
   const external: string[] = [];
   page.on("request", request => { if (/tile\.openstreetmap|router\.project-osrm|api\.mapbox|maps\.googleapis|nominatim/.test(request.url())) external.push(request.url()); });
   await page.goto("planejar?experiencia=offline&origem=Prefeitura&destino=Hospital");
+  await page.locator("summary").filter({ hasText: "Mais recursos da viagem" }).click();
   await expect(page.getByText("Pronta · recente", { exact: true })).toBeVisible();
   await page.getByTestId("planner-primary-action").click();
   await expect(page.getByRole("region", { name: "Mapa offline da viagem" })).toBeVisible();
@@ -41,6 +42,7 @@ for (const mode of ["A pé", "Bicicleta", "Transporte"]) {
     await page.goto("planejar");
     await page.getByPlaceholder("De onde você sai").fill("Prefeitura de Águas Lindas de Goiás");
     await page.getByPlaceholder("Para onde você vai").fill("UPA Mansões Odisseia");
+    if (!await page.getByRole("button", { name: mode, exact: true }).isVisible()) await page.locator("summary").filter({ hasText: "Alterar viagem" }).click();
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
     await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();

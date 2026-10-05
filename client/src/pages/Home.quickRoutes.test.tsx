@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import Home from "./Home";
 import { LOCAL_READY_ROUTES } from "@/lib/localRoutePresets";
@@ -13,7 +13,7 @@ afterEach(() => { cleanup(); localStorage.clear(); navigate.mockClear(); });
 it("puts the quick form before service cards and starts calculation in one submit", () => {
   render(<Home />);
   const origin = screen.getByPlaceholderText("De onde você sai");
-  expect(origin.compareDocumentPosition(screen.getByRole("button", { name: /Planejar uma rota/ })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(origin.compareDocumentPosition(within(screen.getByRole("region", { name: "Ações principais" })).getByRole("button", { name: "Postos" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   fireEvent.change(origin, { target: { value: "Prefeitura de Águas Lindas de Goiás" } });
   fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value: "UPA Mansões Odisseia" } });
   fireEvent.click(screen.getByRole("button", { name: "Ir até aqui" }));
@@ -24,7 +24,7 @@ it("puts the quick form before service cards and starts calculation in one submi
 });
 it("opens a ready trip with both endpoints", () => {
   render(<Home />);
-  fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
+  fireEvent.click(screen.getByText("Rotas prontas", { exact: true }));
   fireEvent.change(screen.getByRole("searchbox", { name: "Buscar trajeto" }), { target: { value: "Prefeitura UPA" } });
   fireEvent.click(screen.getByRole("button", { name: /Calcular Prefeitura → UPA/ }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");

@@ -1,7 +1,7 @@
 test("Pages: cliques principais funcionam dentro da base hospedada", async ({ page }, testInfo) => {
   const mobile = testInfo.project.name.includes("mobile");
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Resolva na cidade/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Para onde você vai/i })).toBeVisible();
 
   if (mobile) {
     await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Serviços públicos", exact: true }).click();
@@ -10,9 +10,9 @@ test("Pages: cliques principais funcionam dentro da base hospedada", async ({ pa
     await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Início" }).click();
   }
 
-  await page.getByRole("button", { name: /Planejar uma rota/i }).click();
+  await page.getByRole("navigation", { name: mobile ? "Navegação móvel" : "Navegação principal" }).getByRole("button", { name: "Rotas", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/planejar$/);
-  await expect(page.getByRole("heading", { name: /Sua próxima saída/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Planejar rota/i })).toBeVisible();
 
   const primaryNav = page.getByRole("navigation", { name: mobile ? "Navegação móvel" : "Navegação principal" });
   await primaryNav.getByRole("button", { name: "Explorar", exact: true }).click();
@@ -33,7 +33,7 @@ import { expect, test } from "@playwright/test";
 
 test("Pages: abre a home e navega entre os fluxos públicos", async ({ page }) => {
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Resolva na cidade/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Para onde você vai/i })).toBeVisible();
   await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await page.goto("salvos", { waitUntil: "domcontentloaded" });

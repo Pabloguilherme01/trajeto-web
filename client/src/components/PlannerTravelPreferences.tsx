@@ -27,8 +27,8 @@ export default function PlannerTravelPreferences({ mode, experienceMode, onModeC
         ))}
       </div>
     </fieldset>
-    <fieldset className="mt-4">
-      <legend className="mb-2 text-sm font-bold text-foreground">Preferência de viagem</legend>
+    <details className="mobile-disclosure mt-3"><summary>Preferências da viagem</summary>
+    <fieldset className="mt-3"><legend className="sr-only">Preferência de viagem</legend>
       <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
         {PLANNER_EXPERIENCE_OPTIONS.map(item => (
           <button key={item.id} type="button" aria-pressed={experienceMode === item.id} onClick={() => onExperienceChange(item.id)}
@@ -39,5 +39,6 @@ export default function PlannerTravelPreferences({ mode, experienceMode, onModeC
       </div>
       <p className="mt-2 task-detail">{plannerExperienceDetail(experienceMode)}</p>
     </fieldset>
+    </details>
   </>;
 }

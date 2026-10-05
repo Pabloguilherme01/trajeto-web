@@ -25,7 +25,7 @@ function readyRoutePriority(route: typeof LOCAL_READY_ROUTES[number]) {
   return 2;
 }
 
-export default function ReadyRouteShortcuts({ compact = false, initialMode = "driving" }: { compact?: boolean; initialMode?: TravelMode }) {
+export default function ReadyRouteShortcuts({ compact = false, initialMode = "driving", summaryLabel }: { compact?: boolean; initialMode?: TravelMode; summaryLabel?: string }) {
   const [, navigate] = useLocation();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
@@ -74,7 +74,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
   return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl" data-compact={compact || undefined}>
-    <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-accent">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
+    <summary className="min-h-11 cursor-pointer break-words text-sm font-bold text-foreground">{summaryLabel ?? `${LOCAL_READY_ROUTES.length} trajetos prontos pela cidade`}</summary>
     <p className="mt-2 text-xs leading-relaxed text-foreground/70">Busque um lugar, escolha como ir e toque em Ir até aqui. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
     <div className="mt-3" role="group" aria-label="O que você precisa fazer?">
       <p className="mb-2 text-xs font-bold text-foreground/80">O que você precisa fazer?</p>
