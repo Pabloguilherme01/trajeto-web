@@ -212,7 +212,8 @@ const extraStreetIds = cityAtlasData.items.filter(item =>
   item.coordinateKind === "street-midpoint" && Number.isFinite(item.lat) && Number.isFinite(item.lng) &&
   /^(Avenida|Alameda|Rodovia|Estrada)\b/.test(item.name) &&
   streetNameCounts.get(normalizeCatalogText(item.name)) === 1 && !streetEndpointIds.includes(item.id)
-).slice(0, 30 - streetEndpointIds.length).map(item => item.id);
+).filter(item => isAguasLindasRoutePoint({ lat: Number(item.lat), lng: Number(item.lng) }))
+  .slice(0, 50 - streetEndpointIds.length).map(item => item.id);
 export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetIds].map(id => {
   const street = cityAtlasData.items.find(item => item.id === id);
   if (
@@ -283,7 +284,7 @@ const readyPairs = [
   ...stationToStreetPairs,
   ...stationToStationPairs,
   ...READY_ROUTE_STATIONS.flatMap(station =>
-    ["centro", "prefeitura", "rodoviaria"].map(origin => [origin, station.id] as const)),
+    routeHubIds.map(origin => [origin, station.id] as const)),
   ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),
   ...READY_ROUTE_STREET_POINTS.flatMap(street =>
     ["upa", "heal", "prefeitura", "rodoviaria", "aguas-lindas-shopping", "hospital-bom-jesus"]

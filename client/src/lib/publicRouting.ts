@@ -456,9 +456,6 @@ function localGeocode(value: string): PublicCoordinate | null {
   if (preparedPoint && isAguasLindasRoutePoint(preparedPoint))
     return preparedPoint;
 
-  const atlasPoint = resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, value);
-  if (atlasPoint && isAguasLindasRoutePoint(atlasPoint)) return atlasPoint;
-
   // A city-qualified street, hospital or station is never the city centre.
   const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
   if (
@@ -471,6 +468,9 @@ function localGeocode(value: string): PublicCoordinate | null {
   ) {
     return { lat: -15.7545, lng: -48.2816 };
   }
+
+  const atlasPoint = resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, value);
+  if (atlasPoint && isAguasLindasRoutePoint(atlasPoint)) return atlasPoint;
 
   const snapshotMatches = groupAnpFuelRows(getOfflineAnpSnapshot().rows).filter(
     row => {

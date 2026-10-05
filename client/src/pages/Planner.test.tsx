@@ -334,6 +334,19 @@ describe("Planner travel state", () => {
     expect(screen.getByText(/usando a melhor rota já salva/i)).toBeTruthy();
   });
 
+  it("identifies a restored estimate without promising street directions", async () => {
+    state.search = "experiencia=offline&origem=Casa&destino=Trabalho";
+    state.listOffline.mockResolvedValue([{
+      id: "saved-estimate", origin: "Casa", destination: "Trabalho", savedAt: new Date().toISOString(),
+      payload: { ...payload, route: { ...payload.route, mode: "driving", source: "local-estimate", steps: [] }, anpReferences: [] },
+    }]);
+    render(<Planner />);
+    await waitFor(() => expect(state.listOffline).toHaveBeenCalled());
+    submit();
+    expect(await screen.findByText(/Estimativa salva recuperada neste aparelho/)).toBeTruthy();
+    expect(screen.queryByText(/Distância e instruções são da cópia local/)).toBeNull();
+  });
+
   it("uses local-only routing in offline planner mode when no exact saved route exists", async () => {
     state.search = "experiencia=offline&origem=Casa&destino=Hospital";
     render(<Planner />);

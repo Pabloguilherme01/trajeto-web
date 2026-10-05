@@ -75,7 +75,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   };
   return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl" data-compact={compact || undefined}>
     <summary className="min-h-11 cursor-pointer break-words text-sm font-black text-accent">{LOCAL_READY_ROUTES.length} trajetos prontos pela cidade</summary>
-    <p className="mt-2 text-xs leading-relaxed text-foreground/70">Busque um lugar, escolha como ir e toque em Calcular. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
+    <p className="mt-2 text-xs leading-relaxed text-foreground/70">Busque um lugar, escolha como ir e toque em Ir até aqui. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
     <div className="mt-3" role="group" aria-label="O que você precisa fazer?">
       <p className="mb-2 text-xs font-bold text-foreground/80">O que você precisa fazer?</p>
       <div className="flex flex-wrap gap-2">
@@ -106,7 +106,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
       className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-primary bg-primary/15 text-primary" : "border-white/15 text-foreground/80"} disabled:cursor-default disabled:opacity-100`}>
       {offlineActive ? "Offline ativo" : "Calcular offline"}
     </button>
-    <p className="mt-2 text-xs leading-relaxed text-foreground/65">Todos os trajetos deste catálogo abrem offline, incluindo conexões entre as vias mapeadas. Para seguir curva a curva pelas ruas, prepare a rota com internet antes de sair; sem geometria salva, o cálculo offline continua identificado como estimativa.</p>
+    <p className="mt-2 text-xs leading-relaxed text-foreground/65">Após preparar o acesso offline neste aparelho, os locais deste catálogo ficam disponíveis sem internet. Para seguir pelas ruas, calcule e salve a ida e a volta no modo escolhido antes de sair. Sem trajeto viário salvo, o cálculo mostra uma estimativa identificada.</p>
     <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <div className="min-w-0">
         <label className="text-xs font-bold text-foreground/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>

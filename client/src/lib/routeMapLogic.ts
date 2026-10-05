@@ -33,10 +33,7 @@ export function nearbyRouteReferences(
 ) {
   const anchors =
     routePoints.length > 1
-      ? routePoints.filter(
-          (_, index) =>
-            index % Math.max(1, Math.floor(routePoints.length / 24)) === 0,
-        )
+      ? routePoints.filter(isMapPoint)
       : [origin, destination].filter(
           (point): point is { lat: number; lng: number } => Boolean(point),
         );
@@ -44,7 +41,7 @@ export function nearbyRouteReferences(
   if (!anchors.length) return [];
   return LOCAL_GEOCODE_POINTS.map(point => ({
     point,
-    distance: Math.min(...anchors.map(anchor => distanceMeters(anchor, point))),
+    distance: distanceToRoute(point, anchors),
   }))
     .filter(item => item.distance <= 3_000)
     .sort((a, b) => a.distance - b.distance)
@@ -57,6 +54,26 @@ export function nearbyRouteReferences(
       lng: point.lng,
       source: "local" as const,
     }));
+}
+
+/** Project onto every segment so references along a long road are not missed. */
+export function distanceToRoute(point: { lat: number; lng: number }, anchors: Array<{ lat: number; lng: number }>) {
+  if (!isMapPoint(point) || !anchors.length) return Infinity;
+  let nearest = Infinity;
+  const longitudeScale = 111_320 * Math.cos(point.lat * Math.PI / 180);
+  for (let index = 0; index < anchors.length; index++) {
+    const a = anchors[index];
+    const b = anchors[index + 1];
+    if (!isMapPoint(a)) continue;
+    nearest = Math.min(nearest, distanceMeters(point, a));
+    if (!isMapPoint(b)) continue;
+    const ax = (a.lng - point.lng) * longitudeScale, ay = (a.lat - point.lat) * 110_574;
+    const dx = (b.lng - a.lng) * longitudeScale, dy = (b.lat - a.lat) * 110_574;
+    const lengthSquared = dx * dx + dy * dy;
+    const t = lengthSquared > 0 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / lengthSquared)) : 0;
+    nearest = Math.min(nearest, Math.hypot(ax + t * dx, ay + t * dy));
+  }
+  return nearest;
 }
 
 export function nearbyBusinessReferences(

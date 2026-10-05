@@ -2,6 +2,8 @@ import PlannerTravelPreferences from "@/components/PlannerTravelPreferences";
 import PlannerLocationPicker from "@/components/PlannerLocationPicker";
 import { useLiveTrip } from "@/hooks/useLiveTrip";
 import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
+import OfflineReadiness from "@/components/OfflineReadiness";
+import RoutePublicServiceCard from "@/components/RoutePublicServiceCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
@@ -292,7 +294,10 @@ export default function Planner() {
     setShowMap(true);
     setFallbackReady(false);
     setError(null);
-    setSavedMessage("Usando a melhor rota já salva para esta viagem e modo de deslocamento. Distância e instruções são da cópia local; trânsito e horários podem estar desatualizados.");
+    const restored = saved.payload as PlannedRoute;
+    setSavedMessage("source" in restored.route && restored.route.source === "local-estimate"
+      ? "Estimativa salva recuperada neste aparelho. Distância e tempo são aproximados; esta cópia não confirma o caminho pelas ruas nem fornece curvas."
+      : "Usando a melhor rota já salva para esta viagem e modo de deslocamento. Distância e instruções são da cópia local; trânsito e horários podem estar desatualizados.");
     return true;
   };
 
@@ -956,6 +961,8 @@ export default function Planner() {
           </section>
         )}
 
+        {!savedMode && (offlineMode || !online) && <OfflineReadiness />}
+
         {drivingMode && !savedMode && (
           <section className="mt-4 rounded-2xl border border-accent/15 bg-accent/[.04] px-4 py-3" role="status" aria-live="polite">
             <p className="text-xs font-black text-accent">Modo condução ativo</p>
@@ -1189,9 +1196,6 @@ export default function Planner() {
             {planned.route.destinationReference && <p className="mt-3 break-words rounded-xl border border-amber-300/20 bg-amber-300/5 p-3 text-xs leading-relaxed text-amber-100" role="note">
               {planned.route.destinationReference.name} · {planned.route.destinationReference.precision} Fonte: {planned.route.destinationReference.sourceLabel}
             </p>}
-            {!liveTrip.active && <ArrivalTimePlannerCard durationSeconds={planned.route.durationSeconds} />}
-            {mode === "driving" && <TripFuelBriefing distanceKm={(planned.route.distanceMeters ?? 0) / 1000} durationSeconds={planned.route.durationSeconds ?? undefined} />}
-
             {showMap && (
               <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-card shadow-[0_22px_60px_rgba(0,0,0,.28)]">
                 <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
@@ -1203,6 +1207,10 @@ export default function Planner() {
                 </div>
               </section>
             )}
+
+            <RoutePublicServiceCard destination={destination} online={online} />
+            {!liveTrip.active && <ArrivalTimePlannerCard durationSeconds={planned.route.durationSeconds} />}
+            {mode === "driving" && <TripFuelBriefing distanceKm={(planned.route.distanceMeters ?? 0) / 1000} durationSeconds={planned.route.durationSeconds ?? undefined} />}
 
             {planned.recommendation && (
               <section className="mt-3 rounded-[1.5rem] border border-primary/15 bg-card p-4">

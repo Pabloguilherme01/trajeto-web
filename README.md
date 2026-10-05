@@ -183,6 +183,14 @@ Se um backend Express for implantado para recursos avançados, configure `VITE_A
 
 O CI contém uma verificação específica para impedir que o núcleo do GitHub Pages passe a depender silenciosamente de API comercial paga.
 
+### Planejador e preparação offline
+
+O catálogo oferece 2.561 pares de origem e destino, com atalhos de ida e volta e quatro modos de deslocamento. As 50 referências viárias selecionadas usam pontos aproximados do catálogo OpenStreetMap; não representam entradas de imóveis. Os postos usam coordenadas do cadastro ANP. Os atalhos preenchem os locais para cálculo: não são 2.561 trajetos pelas ruas previamente verificados.
+
+No modo Offline, confira **Seu Trajeto sem internet** e prepare o acesso enquanto houver conexão. Calcule e salve a ida e a volta no modo que será usado. Uma rota viária preparada preserva sua geometria e as instruções disponíveis; locais conhecidos sem geometria salva recebem uma estimativa identificada. Endereços desconhecidos, trânsito atualizado e linhas/horários de transporte público não são garantidos offline.
+
+O mapa aparece antes dos painéis complementares e permite selecionar uma referência, ver origem/destino, enquadrar o percurso e abrir em tela cheia. Quando o destino corresponde a um serviço público cadastrado, o card **Antes de sair** mostra endereço, horário informado, contato, fonte e orientações disponíveis, incluindo avisos de atendimento a confirmar. A fonte online exige conexão; chamadas exigem rede telefônica. Nenhum contato ou horário novo é inferido pela posição do mapa.
+
 ## Desenvolvimento
 
 Requisitos:

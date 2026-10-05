@@ -279,6 +279,7 @@ export function OfflineRoutePreview({
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const hasLivePosition = isMapPoint(livePosition);
   const [following, setFollowing] = useState(hasLivePosition);
   const [focusRequest, setFocusRequest] = useState<{
@@ -726,6 +727,7 @@ export function OfflineRoutePreview({
         <RouteOverview route={selected} travelMode={travelMode} />
       )}
       <OfflineMapCanvas
+        selectedMarkerId={selectedMarkerId}
         controls={mapControls}
         initialDark={false}
         className="h-[min(62dvh,560px)] min-h-[320px]"
@@ -740,6 +742,7 @@ export function OfflineRoutePreview({
         estimated={selected?.source === "local-estimate"}
         ariaLabel="Prévia offline da rota"
         onSelect={marker => {
+          setSelectedMarkerId(marker.id);
           setSelectedPoint(
             marker.name +
               (nearbyBusinesses.find(item => item.id === marker.id)?.precision
@@ -826,6 +829,7 @@ export function OfflineRoutePreview({
                       marker => marker.id === place.id
                     );
                     if (point) {
+                      setSelectedMarkerId(point.id);
                       setSelectedPoint(place.name + " · " + place.detail);
                       focus(point);
                     }
