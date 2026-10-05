@@ -8,6 +8,17 @@ const items = [
   { id: "b", name: "Avenida Brasília", address: "Setor Sul" },
   { id: "c", name: "UPA", address: "Mansões Odisseia", category: "saude" },
 ];
+it("filters by category and clears an empty combined search", () => {
+  render(<MapDestinationPicker items={items} value="a" label="Escolher lugar" onSelect={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher lugar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
+  expect(screen.getAllByRole("option")).toHaveLength(1);
+  expect(screen.getByRole("option").textContent).toContain("UPA");
+  fireEvent.change(screen.getByRole("combobox"), { target: { value: "brasilia" } });
+  expect(screen.queryByRole("option")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Limpar busca e filtros" }));
+  expect(screen.getAllByRole("option")).toHaveLength(3);
+});
 it("searches without accents and distinguishes duplicate street names by address", () => {
   const choose = vi.fn();
   render(<MapDestinationPicker items={items} value="c" label="Escolher lugar" onSelect={choose} />);

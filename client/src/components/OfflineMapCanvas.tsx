@@ -1,5 +1,6 @@
 import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
 import { groundMetresPerPixel, roadPriority } from "@/lib/mapPresentation";
+import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
@@ -250,6 +251,7 @@ export default function OfflineMapCanvas({
     occupied.push(point);
     return true;
   });
+  const markerGroups = mapMarkerGroups(displayedMarkers, project, marker => zoom >= 6 || marker.id === selectedMarkerId || ["origin", "destination", "live-position", "device-location"].includes(marker.id));
   const path = (points: MapPoint[]) =>
     points
       .map((point, i) => {
@@ -539,7 +541,13 @@ export default function OfflineMapCanvas({
             })}
 
         </svg>
-        {displayedMarkers.map(marker => {
+        {markerGroups.groups.filter(group => group.x >= -30 && group.x <= size.width + 30 && group.y >= -30 && group.y <= size.height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+          onManualInteraction?.();
+          const next = Math.min(6, zoom * 1.8);
+          setPan({ x: -(group.x - size.width / 2 - pan.x) * next / zoom, y: -(group.y - size.height / 2 - pan.y) * next / zoom });
+          onZoom(next);
+        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
+        {markerGroups.singles.map(marker => {
           const p = project(marker);
           return (
             <button
@@ -554,7 +562,9 @@ export default function OfflineMapCanvas({
                 left: p.x,
                 top: p.y,
                 zIndex:
-                  marker.id === "live-position"
+                  marker.id === selectedMarkerId
+                    ? 3
+                    : marker.id === "live-position"
                     ? 2
                     : marker.isReference
                       ? 0
@@ -593,10 +603,10 @@ export default function OfflineMapCanvas({
               {(marker.id === "origin" ||
                 marker.id === "destination" ||
                 marker.id === "live-position" ||
-                zoom >= 2) && (
+                selectedMarkerId === marker.id || zoom >= 2) && (
                 <span
                   className={
-                    "pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-1.5 py-1 text-[0.62rem] font-extrabold shadow-sm " +
+                    "pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
                     (dark
                       ? "border-white/10 bg-[#101c24]/95 text-[#f2ffff]"
                       : "border-black/5 bg-white/95 text-[#27414b]")

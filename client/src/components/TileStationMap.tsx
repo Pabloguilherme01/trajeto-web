@@ -1,4 +1,4 @@
-import { Apple, LocateFixed, Navigation, Minus, Plus } from "lucide-react";
+import { Apple, LocateFixed, Navigation, Minus, Plus, Layers, Scan } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildAppleMapsDirectionsUrl,
@@ -9,6 +9,8 @@ import type { StationMapItem } from "@/components/StationMap";
 
 import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
+import MapPlaceActions from "@/components/MapPlaceActions";
+import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
@@ -107,7 +109,8 @@ export default function TileStationMap({
       window.removeEventListener("offline", update);
     };
   }, []);
-  const [routeStyle, setRouteStyle] = useState<keyof typeof ROUTE_STYLES>("teal");
+  const [routeStyle, setRouteStyle] = useState<keyof typeof ROUTE_STYLES>("blue");
+  const [localLayer, setLocalLayer] = useState(false);
   const appearance = ROUTE_STYLES[routeStyle];
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
@@ -157,7 +160,7 @@ export default function TileStationMap({
       observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [drawable.length, tileErrors >= 5, offline]);
+  }, [drawable.length, tileErrors >= 5, offline, localLayer]);
   const width = size.width;
   const height = size.height;
   const centerPx = project(center.lat, center.lng, zoom);
@@ -324,13 +327,14 @@ export default function TileStationMap({
     setZoom(value => Math.max(15, value));
   };
 
-  const tileFallback = Boolean(fallback && (offline || tileErrors >= 5));
+  const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= 5));
 
   if (tileFallback)
     return (
       <div>
+        {localLayer && !offline && <button type="button" onClick={() => setLocalLayer(false)} className="m-3 flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-slate-800 shadow"><Layers className="size-4" />Voltar ao mapa de ruas</button>}
         {fallback}
-        {!offline && (
+        {!offline && !localLayer && (
           <button
             type="button"
             onClick={() => setTileErrors(0)}
@@ -367,6 +371,7 @@ export default function TileStationMap({
 
   const selected =
     drawable.find(item => stationKey(item) === selectedId) ?? null;
+  const markerGroups = mapMarkerGroups(drawable, item => { const p = markerPosition(item); return { x: p.left, y: p.top }; }, item => zoom >= 17 || stationKey(item) === selectedId || ["origin", "destination"].includes(item.id ?? ""));
 
   return (
     <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
@@ -479,7 +484,12 @@ export default function TileStationMap({
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
-            {drawable.map(station => {
+            {markerGroups.groups.filter(group => group.x >= -30 && group.x <= width + 30 && group.y >= -30 && group.y <= height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+              setFollowing(false);
+              setCenter(unproject(centerPx.x + group.x - width / 2, centerPx.y + group.y - height / 2, zoom));
+              setZoom(value => Math.min(17, value + 2));
+            }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
+            {markerGroups.singles.map(station => {
               const position = markerPosition(station);
               if (
                 position.left < -30 ||
@@ -494,7 +504,7 @@ export default function TileStationMap({
                   key={stationKey(station)}
                   type="button"
                   className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
-                  style={{ left: position.left, top: position.top }}
+                  style={{ left: position.left, top: position.top, zIndex: active ? 10 : 1 }}
                   onPointerDown={event => event.stopPropagation()}
                   onClick={() => {
                     setSelectedId(stationKey(station));
@@ -546,7 +556,7 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-3 top-[8rem] z-20 flex flex-wrap gap-2"
+            className="absolute left-3 right-16 top-20 z-20 flex flex-wrap gap-2"
           >
             {routeEndpoints.map(point => (
               <button
@@ -560,11 +570,11 @@ export default function TileStationMap({
             ))}
           </div>
         )}
-        <div className="absolute left-3 right-3 top-3 z-20 grid grid-cols-4 gap-1.5">
+        <div role="group" aria-label="Controles do mapa" className="absolute right-3 top-20 z-20 flex w-11 flex-col gap-2">
           <button
             type="button"
             onClick={() => changeZoom(1)}
-            className="grid min-h-11 min-w-0 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg disabled:opacity-40"
             aria-label="Aumentar zoom"
             disabled={zoom >= 17}
           >
@@ -573,7 +583,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(-1)}
-            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg disabled:opacity-40"
             aria-label="Diminuir zoom"
             disabled={zoom <= 8}
           >
@@ -582,7 +592,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={recenter}
-            className="grid size-11 place-items-center rounded-xl bg-white/92 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"
             aria-label="Recentrar mapa"
             aria-pressed={following}
           >
@@ -591,13 +601,18 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={fitStations}
-            className="min-h-11 min-w-0 rounded-xl bg-white/92 px-1.5 text-[11px] font-black leading-tight text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"
+            aria-label="Ver todos"
+            title={routePoints.length > 1 ? "Enquadrar percurso" : "Ver todos os lugares"}
           >
-            Ver todos
+            <Scan className="size-4" />
           </button>
+
         </div>
 
-        <div className="absolute left-3 right-3 top-[4.6rem] z-20 min-w-0">
+        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"><Layers className="size-4" /></button>}
+
+        <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
             items={drawable.map(station => ({ ...station, id: stationKey(station) }))}
             onSelect={id => {
@@ -629,11 +644,7 @@ export default function TileStationMap({
           <div className="flex min-w-0 items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">
               <span className="text-xs font-black">
-                {selected.source === "ANP"
-                  ? "ANP"
-                  : selected.source === "Google"
-                    ? "MAPA"
-                    : "LOCAL"}
+                <MapPlaceIcon item={selected} className="size-5" />
               </span>
             </div>
             <div className="min-w-0 flex-1">
@@ -709,6 +720,7 @@ export default function TileStationMap({
                   </>
                 )}
               </div>
+              <MapPlaceActions place={selected} />
             </div>
           </div>
         ) : (
