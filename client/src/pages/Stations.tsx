@@ -805,7 +805,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>
               {!staticRuntime && (
-                <button type="button" onClick={() => setOnlyOpen(current => !current)} aria-pressed={onlyOpen} className={onlyOpen ? "task-action shrink-0 border border-accent/40 bg-accent/15 text-[#C9F7FF]" : "task-action task-action-secondary shrink-0"}>
+                <button type="button" onClick={() => setOnlyOpen(current => !current)} aria-pressed={onlyOpen} className={onlyOpen ? "task-action shrink-0 border border-accent/40 bg-accent/15 text-accent" : "task-action task-action-secondary shrink-0"}>
                   <CircleCheck className="mr-1 inline size-3.5" /> Abertos agora
                 </button>
               )}
@@ -877,7 +877,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
 
         {(broadAguasLindasQuery || staticRuntime) && !showSavedOnly && (
-          <section id="complete-stations" className="premium-card scroll-mt-24 mt-5 rounded-[1.6rem] border border-primary/20 bg-[#111A21] p-4 sm:p-5" aria-labelledby="complete-stations-title">
+          <section id="complete-stations" className="premium-card scroll-mt-24 mt-5 rounded-[1.6rem] border border-primary/20 bg-card p-4 sm:p-5" aria-labelledby="complete-stations-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Diretório completo</p>
@@ -887,7 +887,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <span className="inline-flex rounded-full border border-primary/15 bg-primary/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{directoryCards.length} fichas</span>
+                <span className="inline-flex rounded-full border border-primary/15 bg-primary/[.04] px-2 py-1 text-xs font-black text-primary">{directoryCards.length} fichas</span>
                 <p className="mt-1 text-xs font-bold text-white/65">{anpStations.length} registros ANP</p>
               </div>
             </div>
@@ -902,7 +902,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={savePointsOffline} className="min-h-11 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-xs font-black text-white/65">Salvar pontos offline</button>
-                  <button type="button" onClick={() => void refreshStationData()} className="min-h-11 rounded-lg border border-accent/15 bg-accent/[.03] px-2.5 text-xs font-black text-[#9FEFFF]">Atualizar</button>
+                  <button type="button" onClick={() => void refreshStationData()} className="min-h-11 rounded-lg border border-accent/15 bg-accent/[.03] px-2.5 text-xs font-black text-accent">Atualizar</button>
                 </div>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65 sm:grid-cols-3">
@@ -919,7 +919,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
               <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Cruzados ANP</p><p className="mt-1 text-lg font-black text-accent">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
               <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-primary">{directoryCards.filter(item => Boolean(stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude))).length}</p></div>
-              <div className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></div>
+              <div className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-accent">Offline</p><p className="mt-1 text-sm font-black text-accent">{online ? "cache ativo" : "modo offline"}</p></div>
             </div>
 
             </details>
@@ -944,7 +944,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-primary">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
             <QuickFilterChips
               label="Filtros rápidos do diretório"
@@ -967,7 +967,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 ["etanol", "Etanol"],
                 ["diesel-s10", "Diesel S10"],
                 ["gnv", "GNV"],
-              ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-primary/45 bg-primary/12 text-[#E6FFAB]" : "border-white/10 bg-white/[.03] text-white/70")}>{label}</button>)}
+              ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-primary/45 bg-primary/12 text-primary" : "border-white/10 bg-white/[.03] text-white/70")}>{label}</button>)}
             </div>
             {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-warning">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65" role="status" aria-live="polite">
@@ -1013,7 +1013,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <button
                   type="button"
                   onClick={() => setDirectoryVisibleCount(directoryCardsFiltered.length)}
-                  className="min-h-12 rounded-2xl border border-primary/15 bg-primary/[.04] text-xs font-black text-[#D9FF91] transition-transform duration-200 active:scale-[.99]"
+                  className="min-h-12 rounded-2xl border border-primary/15 bg-primary/[.04] text-xs font-black text-primary transition-transform duration-200 active:scale-[.99]"
                 >
                   Mostrar todos os {directoryCardsFiltered.length}
                 </button>
@@ -1037,7 +1037,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {staticRuntime && !showSavedOnly && (
-          <details className="mt-5 rounded-[1.6rem] border border-accent/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
+          <details className="mt-5 rounded-[1.6rem] border border-accent/20 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
             <summary className="min-h-11 cursor-pointer text-sm font-bold text-white/80">Fontes e referências adicionais</summary>
             <div className="flex items-start gap-3">
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent"><Navigation className="size-5" /></div>
@@ -1074,10 +1074,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <button type="button" onClick={() => openExternalUrl(buildGoogleMapsSearchUrl(query))} className="min-h-12 rounded-xl bg-primary px-3 text-xs font-black text-background">Pesquisar no Google Maps</button>
-              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-accent/25 bg-accent/[.05] px-3 text-xs font-black text-[#C9F7FF] disabled:opacity-50">Postos perto de mim</button>
+              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-accent/25 bg-accent/[.05] px-3 text-xs font-black text-accent disabled:opacity-50">Postos perto de mim</button>
             </div>
             {!online && (
-              <p className="mt-2 text-xs leading-relaxed text-[#DFFF9D]">
+              <p className="mt-2 text-xs leading-relaxed text-primary">
                 “Perto de mim” continua funcionando offline com o GPS do aparelho e o catálogo local. Sua posição não é enviada ao diretório.
               </p>
             )}
@@ -1098,7 +1098,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <h2 id="anp-directory-title" className="mt-1 text-xl font-black">Cadastro técnico dos postos</h2>
                 <p className="mt-1 text-sm leading-relaxed text-white/65">A API da ANP fornece autorização, CNPJ, endereço, distribuidora, produtos, tancagem, bicos, coordenadas, validação geográfica, situação constatada e status SIGAF.</p>
               </div>
-              <span className="shrink-0 rounded-full border border-accent/20 bg-accent/[.04] px-2 py-1 text-xs font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
+              <span className="shrink-0 rounded-full border border-accent/20 bg-accent/[.04] px-2 py-1 text-xs font-black text-accent">{anpStations.length || "—"} postos</span>
             </div>
 
             {anpLiveQuery.isLoading && !staticRuntime && <div className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/65">Consultando a base oficial da ANP…</div>}
@@ -1119,7 +1119,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
                   <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
                   <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
-                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
+                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-accent">Dados completos</p><p className="mt-1 text-sm font-black text-accent">Exportar CSV</p></button>
                 </div>
 
                 <div className="mt-3 space-y-2">
@@ -1142,11 +1142,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         <p><strong className="text-white/65">Situação:</strong> {station.situacaoConstatada ?? "não informada"} · <strong className="text-white/65">SIGAF:</strong> {station.statusSigaf || "sem ocorrência informada"} </p>
                         <p><strong className="text-white/65">Origem:</strong> {station.origemInformacao ?? "não informada"} · <strong className="text-white/65">Obtido em:</strong> {station.dataObtencao ?? "não informado"}</p>
                         <div className="rounded-xl border border-white/8 bg-white/[.02] p-3">
-                          <p className="text-xs font-black uppercase tracking-[.12em] text-[#87DFF0]">Produtos, tancagem e bicos</p>
+                          <p className="text-xs font-black uppercase tracking-[.12em] text-accent">Produtos, tancagem e bicos</p>
                           {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
                         </div>
                         <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
-                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => openExternalUrl(buildGoogleMapsDirectionsUrl("", station.latitude + "," + station.longitude, "driving", true))} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
+                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => openExternalUrl(buildGoogleMapsDirectionsUrl("", station.latitude + "," + station.longitude, "driving", true))} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-primary">Abrir coordenadas no Google Maps</button>}
                         {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
                       </div>
                     </details>
@@ -1239,7 +1239,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0"><p className="break-words text-base font-black">{station.name}</p><p className="mt-1 truncate text-sm text-white/65">{inferredBrand(station.name)} · {station.distanceLabel || "distância indisponível"}</p></div>
-                          {station.isOpen === true && <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-xs font-black text-[#D9FF91]">aberto</span>}
+                          {station.isOpen === true && <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-xs font-black text-primary">aberto</span>}
                         </div>
                         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/65">{station.address}</p>
                       </div>
@@ -1247,7 +1247,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
                                         <div className="mt-3 grid grid-cols-4 gap-1.5">
                       <button type="button" onClick={() => navigateTo(station)} className="col-span-2 min-h-11 rounded-xl bg-primary px-2 text-sm font-black text-background"><Navigation className="mr-1 inline size-3.5" />Navegar</button>
-                      <button type="button" onClick={() => toggleSaved(station)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isSaved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/[.06] text-[#FFB7A9]" : "border-white/8 text-white/65")} aria-label={isSaved ? "Remover dos salvos" : "Salvar posto"}><Heart className="size-4" fill={isSaved ? "currentColor" : "none"} /></button>
+                      <button type="button" onClick={() => toggleSaved(station)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isSaved ? "border-destructive/30 bg-destructive/[.06] text-destructive" : "border-white/8 text-white/65")} aria-label={isSaved ? "Remover dos salvos" : "Salvar posto"}><Heart className="size-4" fill={isSaved ? "currentColor" : "none"} /></button>
                       <button type="button" onClick={() => toggleCompare(station.placeId)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isCompared ? "border-accent/40 bg-accent/[.08] text-accent" : "border-white/8 text-white/65")} aria-label={isCompared ? "Remover da comparação" : "Comparar posto"}><SlidersHorizontal className="size-4" /></button>
                     </div>
                     {index === 0 && <p className="mt-2 text-center text-xs font-bold text-white/65">Ações principais ficam sempre no alcance do polegar.</p>}
