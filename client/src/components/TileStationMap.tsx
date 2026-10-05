@@ -504,7 +504,7 @@ export default function TileStationMap({
                   key={stationKey(station)}
                   type="button"
                   className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#163840]"
-                  style={{ left: position.left, top: position.top }}
+                  style={{ left: position.left, top: position.top, zIndex: active ? 10 : 1 }}
                   onPointerDown={event => event.stopPropagation()}
                   onClick={() => {
                     setSelectedId(stationKey(station));
