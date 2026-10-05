@@ -1,3 +1,4 @@
+import React from "react";
 import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, Map, MapPin, Phone, Route, Search as SearchIcon, Share2, Siren, Sparkles, Wifi, WifiOff, ShoppingBag, Utensils } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
