@@ -41,3 +41,18 @@ export function decodeMapPolyline(encoded: string): MapPoint[] {
   }
   return points.length >= 2 ? points : [];
 }
+
+
+/**
+ * Broad operational bounds used only to validate data that claims to belong
+ * to the local Águas Lindas catalogue. Manual coordinates remain global.
+ */
+export function isAguasLindasRoutePoint(point?: MapPoint | null): point is MapPoint {
+  return Boolean(
+    isMapPoint(point) &&
+    point.lat > -16.1 &&
+    point.lat < -15.3 &&
+    point.lng > -48.7 &&
+    point.lng < -47.9
+  );
+}
