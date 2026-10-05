@@ -497,7 +497,7 @@ export function OfflineRoutePreview({
       data-live={Boolean(livePosition)}
     >
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 text-xs font-bold text-muted-foreground">
-        <span className="rounded-full bg-[#163840] px-2.5 py-1 text-white">
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
           {livePosition
             ? "GPS ao vivo neste aparelho"
             : selected?.source === "offline-road"
@@ -892,7 +892,7 @@ export function OfflineRoutePreview({
             href={navigation}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 items-center justify-center rounded-xl bg-[#163840] px-3 font-bold text-white"
+            className="flex min-h-11 items-center justify-center rounded-xl bg-primary px-3 font-bold text-primary-foreground"
           >
             Abrir no Google Maps
           </a>
