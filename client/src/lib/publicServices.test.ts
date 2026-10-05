@@ -56,6 +56,17 @@ describe("public services catalog", () => {
     for (const shortcut of PUBLIC_SERVICE_SHORTCUTS)
       expect(searchPublicServices(shortcut.query).length).toBeGreaterThan(0);
   });
+  it.each([
+    ["vacina", "unidades-saude"],
+    ["matricula", "secretaria-educacao"],
+    ["emprego", "vapt-vupt"],
+    ["sine", "vapt-vupt"],
+    ["cnh", "detran"],
+    ["licenciamento", "detran"],
+  ])("maps citizen intent %s to an existing official service", (query, id) => {
+    expect(searchPublicServices(query).map(item => item.id)).toContain(id);
+  });
+
   it("keeps every call action a single number and includes official support channels", () => {
     for (const service of PUBLIC_SERVICES) {
       if (service.phone)
