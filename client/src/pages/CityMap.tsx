@@ -226,17 +226,26 @@ export default function CityMap() {
       </p>
       <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-white/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo disponíveis por nome, CNPJ, atividade ou bairro · consulta local"}</p>
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-white/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
-      <div className="mt-5 flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15212a] px-4">
-        <Search className="size-4 shrink-0 text-white/60" />
-        <input
-          aria-label="Buscar destino no mapa"
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-          placeholder="Destino, bairro ou serviço"
-          className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none"
-        />
-        {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center"><X className="size-4" /></button>}
-      </div>
+      <section className="mt-5" aria-labelledby="city-search-label">
+        <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-white/65">Buscar na cidade</label>
+        <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-[#15212a] px-3">
+          <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
+          <input
+            id="city-map-search"
+            type="search"
+            aria-label="Buscar destino no mapa"
+            aria-describedby="city-search-help"
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            enterKeyHint="search"
+            autoComplete="off"
+            placeholder="Lugar, bairro, rua ou serviço"
+            className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/55"
+          />
+          {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-white/65 hover:bg-white/[.04] hover:text-white"><X className="size-4" aria-hidden="true" /></button>}
+        </div>
+        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-white/60">A busca ignora acentos e combina nome, bairro, rua, serviço e dados cadastrados.</p>
+      </section>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
         options={CITY_MAP_QUICK_FILTERS
@@ -250,6 +259,9 @@ export default function CityMap() {
         }}
         className="mt-3"
       />
+      <p className="mt-2 text-xs text-white/60" role="status" aria-live="polite">
+        {query ? `${destinations.length + atlasDestinations.length} resultado(s) para “${query}”` : `${destinations.length + atlasDestinations.length} destinos disponíveis`}
+      </p>
       <div
         role="group"
         className="my-3 flex flex-wrap gap-2"
@@ -315,7 +327,7 @@ export default function CityMap() {
           {destinations.map(item => (
             <article
               key={item.id}
-              className="min-w-0 rounded-2xl border border-white/10 bg-gradient-to-br from-[#182a33] to-[#10191f] p-4"
+              className="task-surface premium-route-card min-w-0 p-4"
             >
               <div className="flex min-w-0 items-start gap-3">
                 <MapPin className="mt-1 size-5 shrink-0 text-primary" />
@@ -369,7 +381,7 @@ export default function CityMap() {
                 source: "local" as const,
               };
               return (
-                <article key={item.id} className="min-w-0 rounded-2xl border border-white/10 bg-card p-4">
+                <article key={item.id} className="task-surface premium-route-card min-w-0 p-4">
                   <div className="flex items-start gap-3">
                     <Database className="mt-1 size-4 shrink-0 text-accent" />
                     <div className="min-w-0">
@@ -401,7 +413,7 @@ export default function CityMap() {
             <button
               type="button"
               onClick={() => setVisibleCount(v => v + 24)}
-              className="mt-3 min-h-11 rounded-xl border border-white/10 px-4 text-xs font-black text-white/75"
+              className="task-action task-action-secondary mt-3"
             >
               Mostrar mais destinos ({visibleAtlasDestinations.length} de {atlasDestinations.length})
             </button>
