@@ -13,7 +13,6 @@ import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileBottomNav from "./components/MobileBottomNav";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import AccessibilityPanel from "./components/AccessibilityPanel";
-import SiteNavigation from "./components/SiteNavigation";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -23,7 +22,6 @@ const Operations = lazy(() => import("./pages/Operations"));
 const CityMap = lazy(() => import("./pages/CityMap"));
 const Stations = lazy(() => import("./pages/Stations"));
 const Local = lazy(() => import("./pages/Local"));
-const Explorer = lazy(() => import("./pages/Explorer"));
 const Help = lazy(() => import("./pages/Help"));
 const Personal = lazy(() => import("./pages/Personal"));
 const PublicServices = lazy(() => import("./pages/PublicServices"));
@@ -33,11 +31,11 @@ const routerBase = import.meta.env.BASE_URL === "/" ? undefined : import.meta.en
 
 function RouteLoading() {
   return (
-    <div role="status" aria-live="polite" className="grid min-h-[70dvh] place-items-center bg-[#0B1014] px-5 text-white">
-      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#121B22] p-5">
-        <div className="size-2 animate-pulse rounded-full bg-[#C7FF3C]" />
+    <div role="status" aria-live="polite" className="grid min-h-[70dvh] place-items-center bg-background px-5 text-foreground">
+      <div className="w-full max-w-sm rounded-3xl border border-border bg-card p-5">
+        <div className="size-2 animate-pulse rounded-full bg-primary" />
         <p className="mt-4 text-sm font-black">Abrindo o Trajeto…</p>
-        <p className="mt-1 text-xs leading-relaxed text-white/65">Carregando somente a tela necessária.</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Carregando somente a tela necessária.</p>
       </div>
     </div>
   );
@@ -83,7 +81,6 @@ function Router() {
         <Route path="/mapa" component={CityMap} />
         <Route path="/postos"><Stations /></Route>
         <Route path="/local/:id" component={Local} />
-        <Route path="/explorar" component={Explorer} />
         <Route path="/ajuda" component={Help} />
         <Route path="/minha-conta">{staticRuntime ? <NotFound /> : <Personal />}</Route>
         <Route path="/404" component={NotFound} />
@@ -103,7 +100,7 @@ export default function App() {
             <InstallAppPrompt />
             <PwaUpdatePrompt />
             <AccessibilityPanel />
-            <SiteNavigation />
+            <MobileBottomNav variant="desktop" />
             <MobileBottomNav />
             <AuthReturnHandler />
             <Router />
