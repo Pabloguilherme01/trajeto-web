@@ -249,6 +249,7 @@ export default function TileStationMap({
       key: string;
       left: number;
       top: number;
+      prefetch: boolean;
     }> = [];
     for (let dy = -radiusY; dy <= radiusY; dy++) {
       for (let dx = -radiusX; dx <= radiusX; dx++) {
@@ -260,6 +261,7 @@ export default function TileStationMap({
           key: `${tileZoom}:${rawX}:${y}`,
           left: (dx + radiusX) * TILE,
           top: (dy + radiusY) * TILE,
+          prefetch: Math.abs(dx) === radiusX || Math.abs(dy) === radiusY,
         });
       }
     }
@@ -592,6 +594,7 @@ export default function TileStationMap({
                 src={tileUrl(tileZoom, tile.x, tile.y)}
                 referrerPolicy="origin"
                 decoding="async"
+                loading={tile.prefetch ? "lazy" : "eager"}
                 alt=""
                 onError={() =>
                   setTileErrors(value => (value >= 5 ? value : value + 1))
