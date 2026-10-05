@@ -23,6 +23,8 @@ type PackedRoad = {
   kind: string;
   name: string;
   points: [number, number][];
+  nodeIds?: Array<string | number>;
+  permissions?: Partial<Record<OfflineRoadMode, "both" | "forward" | "backward" | "denied">>;
 };
 type PackedMap = {
   schema: number;
@@ -60,10 +62,6 @@ function distanceMeters(a: OfflineRoadPoint, b: OfflineRoadPoint) {
     Math.sin(dLat / 2) ** 2 +
     Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
   return earthRadiusMeters * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
-}
-
-function pointKey(point: OfflineRoadPoint) {
-  return point.lat.toFixed(5) + "," + point.lng.toFixed(5);
 }
 
 function speedKmh(mode: OfflineRoadMode, kind: string) {
@@ -117,7 +115,13 @@ function buildGraph(pack: PackedMap, mode: OfflineRoadMode): Graph {
   };
 
   for (const road of pack.roads) {
-    if (!roadAllowed(mode, road.kind) || !Array.isArray(road.points) || road.points.length < 2) continue;
+    // The display-only pack omits OSM node identities, access and one-way tags.
+    // Never turn it into navigation guidance by assuming bidirectional access.
+    const direction = road.permissions?.[mode];
+    if (!["both", "forward", "backward"].includes(direction ?? "") ||
+        !Array.isArray(road.points) || !Array.isArray(road.nodeIds) || road.nodeIds.length !== road.points.length ||
+        !road.nodeIds.every(id => (typeof id === "number" && Number.isFinite(id)) || (typeof id === "string" && id.length > 0)) ||
+        !roadAllowed(mode, road.kind) || !Array.isArray(road.points) || road.points.length < 2) continue;
     const kmh = speedKmh(mode, road.kind);
     const speedMps = kmh / 3.6;
     maxSpeed = Math.max(maxSpeed, speedMps);
@@ -127,8 +131,8 @@ function buildGraph(pack: PackedMap, mode: OfflineRoadMode): Graph {
       if (![fromLat, fromLng, toLat, toLng].every(Number.isFinite)) continue;
       const fromPoint = { lat: fromLat, lng: fromLng };
       const toPoint = { lat: toLat, lng: toLng };
-      const from = pointKey(fromPoint);
-      const to = pointKey(toPoint);
+      const from = String(road.nodeIds[index - 1]);
+      const to = String(road.nodeIds[index]);
       if (from === to) continue;
       nodes.set(from, nodes.get(from) ?? fromPoint);
       nodes.set(to, nodes.get(to) ?? toPoint);
@@ -143,8 +147,8 @@ function buildGraph(pack: PackedMap, mode: OfflineRoadMode): Graph {
         kind: road.kind,
       };
       const reverse = { ...edge, to: from };
-      addEdge(from, edge);
-      addEdge(to, reverse);
+      if (direction === "both" || direction === "forward") addEdge(from, edge);
+      if (direction === "both" || direction === "backward") addEdge(to, reverse);
     }
   }
 
@@ -300,7 +304,9 @@ export async function calculateOfflineRoadRoute(
   destination: OfflineRoadPoint,
   mode: OfflineRoadMode
 ): Promise<OfflineRoadRoute | null> {
-  const graph = await graphFor(mode);
+  if (![origin.lat, origin.lng, destination.lat, destination.lng].every(Number.isFinite)) return null;
+  const graph = await graphFor(mode).catch(() => null);
+  if (!graph) return null;
   const start = nearestNode(graph, origin);
   const finish = nearestNode(graph, destination);
   if (!start || !finish) return null;

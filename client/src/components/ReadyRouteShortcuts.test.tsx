@@ -2,7 +2,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import ReadyRouteShortcuts from "./ReadyRouteShortcuts";
-import { LOCAL_READY_ROUTES } from "@/lib/localRoutePresets";
+import { LOCAL_READY_ROUTES, READY_ROUTE_STREET_POINTS } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
 afterEach(() => { cleanup(); navigate.mockReset(); });
@@ -81,11 +81,20 @@ it("applies an intent without losing departure and calculates with the quick tra
 it("forces offline calculation and preserves the return direction and travel mode", () => {
   render(<ReadyRouteShortcuts initialMode="cycling" />); open();
   fireEvent.click(screen.getByRole("button", { name: "Calcular offline" }));
-  expect(screen.getByRole("button", { name: "Calcular offline" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("button", { name: "Offline ativo" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Calcular volta: UPA → Centro (referência)" }));
   const url = new URL(navigate.mock.calls[0][0], "https://example.com");
   expect(url.searchParams.get("experiencia")).toBe("offline");
   expect(url.searchParams.get("modo")).toBe("cycling");
   expect(url.searchParams.get("origem")).toContain("UPA");
   expect(url.searchParams.get("auto")).toBe("1");
+});
+
+
+it("surfaces ready street-to-street trips from the offline atlas", () => {
+  render(<ReadyRouteShortcuts />); open();
+  const [origin, destination] = READY_ROUTE_STREET_POINTS;
+  fireEvent.change(screen.getByRole("combobox", { name: "Saindo de" }), { target: { value: origin.id } });
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: destination.label } });
+  expect(screen.getByRole("article", { name: origin.label + " → " + destination.label })).toBeTruthy();
 });

@@ -389,3 +389,36 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
 }
 html.a11y-compact .premium-panel, html.a11y-compact .premium-route-card, html.a11y-compact .city-explore-card { box-shadow: none; }
 html.a11y-contrast .premium-panel, html.a11y-contrast .premium-route-card, html.a11y-contrast .city-explore-card { border-color: white; background: #000; }
+
+/* Consistent trip controls, with visible focus and quiet selected states. */
+.planner-premium {
+  background-image: radial-gradient(ellipse at 12% 0%, rgba(61,227,255,.07), transparent 36rem);
+}
+.planner-trip-form {
+  background-image: linear-gradient(135deg, rgba(61,227,255,.035), transparent 55%);
+}
+.planner-location-field:focus-within {
+  border-color: #3DE3FF;
+  box-shadow: 0 0 0 3px rgba(61,227,255,.12);
+}
+.planner-location-field input::placeholder { color: rgba(255,255,255,.55); }
+.planner-choice { min-width: 0; overflow-wrap: anywhere; }
+.planner-choice[aria-pressed="false"] { color: rgba(255,255,255,.76); }
+.planner-choice[aria-pressed="true"] { box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.planner-choice:focus-visible, .planner-primary-action:focus-visible {
+  outline: 2px solid #3DE3FF;
+  outline-offset: 3px;
+}
+.planner-primary-action:not(:disabled) {
+  background-image: linear-gradient(135deg, #DFFF8A, #C7FF3C 70%);
+  box-shadow: 0 8px 24px rgba(199,255,60,.12);
+}
+@media (hover: hover) and (pointer: fine) {
+  .planner-choice:hover { border-color: rgba(61,227,255,.55); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .planner-location-field, .planner-choice { transition: border-color 160ms ease, box-shadow 160ms ease; }
+}
+html.a11y-contrast .planner-location-field { border-color: white; background: #000; }
+html.a11y-contrast .planner-choice { color: white; border-color: white; }
+html.a11y-compact .planner-primary-action { box-shadow: none; }

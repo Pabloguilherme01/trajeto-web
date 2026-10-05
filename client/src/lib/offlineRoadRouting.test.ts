@@ -6,13 +6,14 @@ afterEach(() => {
   resetOfflineRoadRoutingForTests();
 });
 
-function mockRoadPack() {
+function mockRoadPack(withPermissions = true, oneWay = false) {
   const pack = {
     schema: 1,
     retrievedAt: "2026-10-04T00:00:00Z",
     roads: [
       {
         id: 1,
+        ...(withPermissions ? { nodeIds: [1, 2, 3], permissions: { driving: oneWay ? "forward" : "both", walking: "both", cycling: "both" } } : {}),
         kind: "residential",
         name: "Rua A",
         points: [
@@ -23,6 +24,7 @@ function mockRoadPack() {
       },
       {
         id: 2,
+        ...(withPermissions ? { nodeIds: [3, 4, 5], permissions: { driving: oneWay ? "forward" : "both", walking: "both", cycling: "both" } } : {}),
         kind: "residential",
         name: "Rua B",
         points: [
@@ -33,6 +35,7 @@ function mockRoadPack() {
       },
       {
         id: 3,
+        ...(withPermissions ? { nodeIds: [1, 6, 5], permissions: { driving: oneWay ? "forward" : "both", walking: "denied", cycling: "denied" } } : {}),
         kind: "trunk",
         name: "Via rápida",
         points: [
@@ -52,6 +55,16 @@ function mockRoadPack() {
 }
 
 describe("offline road routing", () => {
+  it("refuses display-only geometry without access and node identities", async () => {
+    mockRoadPack(false);
+    expect(await calculateOfflineRoadRoute({ lat: -15.75, lng: -48.28 }, { lat: -15.752, lng: -48.278 }, "driving")).toBeNull();
+  });
+
+  it("does not drive backwards on verified one-way roads", async () => {
+    mockRoadPack(true, true);
+    expect(await calculateOfflineRoadRoute({ lat: -15.752, lng: -48.278 }, { lat: -15.75, lng: -48.28 }, "driving")).toBeNull();
+    expect(await calculateOfflineRoadRoute({ lat: -15.75, lng: -48.28 }, { lat: -15.752, lng: -48.278 }, "driving")).not.toBeNull();
+  });
   it("builds street geometry and grouped guidance without external routing", async () => {
     const fetch = mockRoadPack();
     const route = await calculateOfflineRoadRoute(

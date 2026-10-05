@@ -228,6 +228,11 @@ const readyEndpoints: Record<string, { label: string; destination: string; categ
   ...Object.fromEntries(READY_ROUTE_STREET_POINTS.map(place => [place.id, place])),
   centro: { label: "Centro (referência)", destination: "Águas Lindas de Goiás, GO", category: "centro" },
 };
+const streetToStreetPairs = READY_ROUTE_STREET_POINTS.flatMap((origin, index) =>
+  READY_ROUTE_STREET_POINTS.slice(index + 1).map(destination =>
+    [origin.id, destination.id] as const
+  )
+);
 const readyPairs = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
   ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
@@ -241,6 +246,7 @@ const readyPairs = [
   ...READY_ROUTE_STREET_POINTS.flatMap(street =>
     ["upa", "heal", "prefeitura", "rodoviaria", "aguas-lindas-shopping", "hospital-bom-jesus"]
       .map(destination => [street.id, destination] as const)),
+  ...streetToStreetPairs,
 ] as const;
 export const LOCAL_READY_ROUTES: ReadyCityRoute[] = Array.from(new Map(readyPairs.map(pair => [pair.join("-to-"), pair])).values()).map(([from, to]) => ({
   id: `${from}-to-${to}`,
