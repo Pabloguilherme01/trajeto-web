@@ -37,11 +37,11 @@ export default function QuickFilterChips({
               "min-h-11 shrink-0 rounded-full border px-3 text-xs font-black transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 " +
               (variant === "light"
                 ? active
-                  ? "border-[#147b88] bg-[#147b88] text-white focus-visible:outline-[#147b88]"
-                  : "border-slate-200 bg-white/95 text-slate-700 hover:border-[#147b88]/40 focus-visible:outline-[#147b88]"
+                  ? "border-accent/45 bg-accent/12 text-accent focus-visible:outline-ring"
+                  : "border-border bg-card/95 text-card-foreground hover:border-accent/35 focus-visible:outline-ring"
                 : active
-                  ? "border-[#C7FF3C]/55 bg-[#C7FF3C]/15 text-[#E6FFAB] focus-visible:outline-[#C7FF3C]"
-                  : "border-white/12 bg-white/[.035] text-white/75 hover:border-[#3DE3FF]/30 hover:text-white focus-visible:outline-[#3DE3FF]")
+                  ? "border-primary/55 bg-primary/15 text-primary focus-visible:outline-ring"
+                  : "border-border/60 bg-muted/40 text-foreground/80 hover:border-accent/30 hover:text-foreground focus-visible:outline-ring")
             }
           >
             {option.label}
