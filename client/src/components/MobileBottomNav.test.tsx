@@ -47,11 +47,20 @@ describe("mobile navigation", () => {
     cleanup();
     state.location = "/mapa";
     render(<MobileBottomNav />);
-    expect(
-      screen
-        .getByRole("button", { name: "Explorar" })
-        .getAttribute("aria-current")
-    ).toBe("page");
+    const explore = screen.getByRole("button", { name: "Explorar" });
+    expect(explore.getAttribute("aria-current")).toBeNull();
+    expect(explore.getAttribute("data-active")).toBe("true");
+  });
+
+  it("does not announce Explore as the current page just because its dialog is open", () => {
+    state.location = "/";
+    render(<MobileBottomNav />);
+    const home = screen.getByRole("button", { name: "Início" });
+    const explore = screen.getByRole("button", { name: "Explorar" });
+    fireEvent.click(explore);
+    expect(home.getAttribute("aria-current")).toBe("page");
+    expect(explore.getAttribute("aria-current")).toBeNull();
+    expect(explore.getAttribute("aria-expanded")).toBe("true");
   });
 
   it("opens More, hides unavailable accounts, navigates to help and closes the dialog", async () => {

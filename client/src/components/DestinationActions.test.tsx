@@ -26,7 +26,7 @@ describe("DestinationActions", () => {
     const open = vi.spyOn(window, "open").mockImplementation(() => null);
     setPreferredNavigationProvider("waze");
     render(<DestinationActions destination={destination} />);
-    fireEvent.click(screen.getByRole("button", { name: /abrir no mapa/i }));
+    fireEvent.click(screen.getByRole("button", { name: /abrir app de mapa/i }));
     expect(open).toHaveBeenCalledWith(
       expect.stringContaining("waze.com/ul"),
       "_blank",

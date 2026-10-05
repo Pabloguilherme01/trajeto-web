@@ -56,7 +56,7 @@ test("planner: draws provider geometry over public street tiles", async ({
     "planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822"
   );
   await page
-    .getByRole("button", { name: "Ir até aqui", exact: true })
+    .getByTestId("planner-primary-action")
     .click();
   await expect(
     page.getByRole("img", { name: "Trajeto pelas ruas" })
@@ -89,9 +89,9 @@ test("street atlas: filters references and calculates a bundled destination offl
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await card.getByRole("link", { name: "Ir até aqui", exact: true }).click();
   await page.getByPlaceholder("De onde você sai").fill("-15.7545,-48.2816");
-  await expect(page.getByRole("button", { name: "Ir até aqui", exact: true })).toBeVisible();
+  await expect(page.getByTestId("planner-primary-action")).toBeVisible();
   await context.setOffline(true);
-  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
+  await page.getByTestId("planner-primary-action").click();
   await expect(page.getByText(/Estimativa local/).first()).toBeVisible();
 });
 
@@ -105,7 +105,7 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   });
   await page.route("https://router.project-osrm.org/**", route => route.abort());
   await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7345,-48.2816");
-  await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();
+  await page.getByTestId("planner-primary-action").click();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).click();
   await page.evaluate(() => {

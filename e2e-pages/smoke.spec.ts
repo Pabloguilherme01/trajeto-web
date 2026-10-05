@@ -49,7 +49,7 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
     body: JSON.stringify({ code: "Ok", routes: [{ distance: 12340, duration: 920, geometry: "r`d_B~~teHbwFg_mA" }] }),
   }));
   await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Ir até aqui" }).click();
+  await page.getByTestId("planner-primary-action").click();
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
   await expect(page.locator("[data-route-card]").getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
@@ -101,7 +101,7 @@ test("Pages: modos de rota ficam disponíveis sem backend", async ({ page }) => 
   await expect(page.getByRole("button", { name: /Bicicleta/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /Transporte/i })).toBeVisible();
   await page.getByRole("button", { name: /A pé/i }).click();
-  await page.getByRole("button", { name: "Ir até aqui" }).click();
+  await page.getByTestId("planner-primary-action").click();
   // The configured OSRM graph is for cars; walking must use the local estimate.
   await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/não confirmam ruas ou caminhos adequados/)).toBeVisible();
