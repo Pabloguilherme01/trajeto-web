@@ -104,11 +104,11 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
   const markers = stations.map((station, i) => ({ ...station, id: offlineStationKey(station), label: String(i + 1) }));
   if (userCoords) markers.push({ ...userCoords, id: "device-location", name: "Sua posição local", address: "", label: "●" });
   const select = (id: string) => { setSelectedId(id); const station = stations.find(item => offlineStationKey(item) === id); if (station) { setFocusRequest(previous => ({ point: station, key: (previous?.key ?? 0) + 1 })); onSelectStation?.(station); } };
-  return <div className="overflow-hidden bg-[#eef2eb] text-[#163840]">
-    <div className="flex flex-wrap items-center gap-2 border-b border-black/10 p-3">
-      <button type="button" onClick={() => setZoom(v => Math.min(6, v + .5))} disabled={zoom >= 6} className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40" aria-label="Aumentar zoom"><Plus className="size-4" /></button>
-      <button type="button" onClick={() => setZoom(v => Math.max(1, v - .5))} disabled={zoom <= 1} className="grid size-11 place-items-center rounded-xl bg-white disabled:opacity-40" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
-      <button type="button" onClick={() => { setFocusRequest(null); setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-xl bg-white" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
+  return <div className="overflow-hidden rounded-[1.6rem] border border-white/70 bg-[#eef2eb] text-[#163840] shadow-[0_24px_70px_rgba(15,35,45,.22)]">
+    <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[linear-gradient(110deg,#f8fbf9,#edf5f1)] p-3">
+      <button type="button" onClick={() => setZoom(v => Math.min(6, v + .5))} disabled={zoom >= 6} className="grid size-11 place-items-center rounded-2xl border border-white bg-white/95 shadow-lg disabled:opacity-40" aria-label="Aumentar zoom"><Plus className="size-4" /></button>
+      <button type="button" onClick={() => setZoom(v => Math.max(1, v - .5))} disabled={zoom <= 1} className="grid size-11 place-items-center rounded-2xl border border-white bg-white/95 shadow-lg disabled:opacity-40" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
+      <button type="button" onClick={() => { setFocusRequest(null); setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-2xl border border-white bg-white/95 shadow-lg" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       <span className="text-xs font-black">Disponível sem conexão</span>
       <div className="w-full"><MapDestinationPicker label={`Escolher ${itemLabel} no mapa offline`} value={selected ? offlineStationKey(selected) : null} items={stations.map(station => ({ ...station, id: offlineStationKey(station) }))} onSelect={select} /></div>
     </div>
@@ -316,7 +316,8 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden rounded-[1.6rem] border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,.24)]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#07191f]/35 to-transparent" />
       <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
         <button type="button" onClick={locateUser} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-white shadow-lg backdrop-blur" aria-label="Centralizar na minha localização">
           <LocateFixed className="size-4" />
