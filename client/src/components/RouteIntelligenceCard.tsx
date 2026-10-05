@@ -4,7 +4,7 @@ import { AlertTriangle, Ban, Car, Clock3, RefreshCw, Route, Wallet } from "lucid
 import { fetchRouteIntelligence, type RouteIntelligence } from "@/lib/routeIntelligence";
 import { fetchAppleRouteIntelligence, type AppleRouteIntelligence } from "@/lib/appleRouteIntelligence";
 import { getMobileVehicle } from "@/lib/mobileVehicle";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, openExternalUrl } from "@/lib/mobileTools";
 
 type Props = {
   origin: string;
@@ -154,10 +154,10 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
   };
 
   return (
-    <section aria-labelledby="route-intelligence-title" aria-busy={loading} className="mt-4 rounded-[1.35rem] border border-white/10 bg-[#0D151B] p-4 text-white">
+    <section aria-labelledby="route-intelligence-title" aria-busy={loading} className="mt-4 rounded-[1.35rem] border border-white/10 bg-card p-4 text-white">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-[#3DE3FF]">Inteligência da rota</p>
+          <p className="text-[0.55rem] font-black uppercase tracking-[.16em] text-accent">Inteligência da rota</p>
           <h3 id="route-intelligence-title" className="mt-1 text-base font-black">Trânsito, pedágio e alternativas</h3>
           <p className="mt-1 text-[0.65rem] leading-relaxed text-white/45">Dados externos são apresentados como estimativas e não substituem a navegação.</p>
         </div>
@@ -186,13 +186,13 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
               const nextAvoidTolls = mode === "no-tolls" ? true : mode === "balanced" || mode === "fastest" ? false : avoidTollsState;
               setAvoidTollsState(nextAvoidTolls);
               selectDecisionRoute(mode);
-            }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-[#C7FF3C] text-[#0B1014]" : "bg-white/[.05] text-white/65")}>{label}</button>
+            }} className={"min-h-11 rounded-lg px-2 text-[0.58rem] font-black " + (decisionMode === mode ? "bg-primary text-background" : "bg-white/[.05] text-white/65")}>{label}</button>
           ))}
         </div>
       </div>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <button type="button" aria-pressed={trafficDetailed} onClick={() => setTrafficDetailed(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black " + (trafficDetailed ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/10 bg-white/[.03] text-white/60")}>
+        <button type="button" aria-pressed={trafficDetailed} onClick={() => setTrafficDetailed(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black " + (trafficDetailed ? "border-primary/40 bg-primary/10 text-primary" : "border-white/10 bg-white/[.03] text-white/60")}>
           Trânsito detalhado {trafficDetailed ? "ativado" : "desativado"}
         </button>
         <span className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.58rem] text-white/45">{trafficDetailed ? "NORMAL · SLOW · TRAFFIC_JAM" : "Consulta básica"}</span>
@@ -202,10 +202,10 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       {message && <div role="alert" aria-live="polite" className="mt-3 flex gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[.05] p-3 text-[0.68rem] text-amber-100"><AlertTriangle className="mt-0.5 size-4 shrink-0" />{message}</div>}
 
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <button type="button" aria-pressed={avoidTollsState} onClick={() => setAvoidTollsState(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black transition " + (avoidTollsState ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10 text-[#D9FF91]" : "border-white/10 bg-white/[.03] text-white/60")}>
+        <button type="button" aria-pressed={avoidTollsState} onClick={() => setAvoidTollsState(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black transition " + (avoidTollsState ? "border-primary/40 bg-primary/10 text-primary" : "border-white/10 bg-white/[.03] text-white/60")}>
           <Ban className="size-3.5" /> {avoidTollsState ? "Evitando pedágios" : "Considerar pedágios"}
         </button>
-        <button type="button" aria-pressed={avoidHighwaysState} onClick={() => setAvoidHighwaysState(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black transition " + (avoidHighwaysState ? "border-[#3DE3FF]/40 bg-[#3DE3FF]/10 text-[#9FEFFF]" : "border-white/10 bg-white/[.03] text-white/60")}>
+        <button type="button" aria-pressed={avoidHighwaysState} onClick={() => setAvoidHighwaysState(value => !value)} className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[0.62rem] font-black transition " + (avoidHighwaysState ? "border-accent/40 bg-accent/10 text-accent" : "border-white/10 bg-white/[.03] text-white/60")}>
           <Route className="size-3.5" /> {avoidHighwaysState ? "Evitando rodovias" : "Considerar rodovias"}
         </button>
         <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-3 text-[0.62rem] font-black text-white/70 disabled:opacity-50">
@@ -227,19 +227,19 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
 
       {data && main && (
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-white/[.04] p-3"><Route className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Distância</p><strong className="text-sm">{(main.distanceMeters ?? 0) / 1000 < 1 ? "< 1 km" : `${((main.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km`}</strong></div>
-          <div className="rounded-xl bg-white/[.04] p-3"><Clock3 className="size-4 text-[#3DE3FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Com trânsito</p><strong className="text-sm">{formatDuration(main.durationSeconds)}</strong>{trafficDelay != null && trafficDelay > 30 && <p className="mt-1 text-[0.55rem] text-amber-200">+{formatDuration(trafficDelay)} por trânsito</p>}</div>
-          <div className="rounded-xl bg-white/[.04] p-3"><Wallet className="size-4 text-[#C7FF3C]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Pedágio</p><strong className="text-sm">{toll != null ? toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) : "Não informado"}</strong>{main.toll?.estimated && <p className="mt-1 text-[0.52rem] text-amber-200">estimado</p>}</div>
-          <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-[#BDA5FF]" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} {Math.max(0, data.routes.length - 1) === 1 ? "alternativa" : "alternativas"}</strong><p className="mt-1 text-[0.52rem] text-white/35">{data.trafficAware ? "trânsito considerado" : "trânsito básico"}</p></div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Route className="size-4 text-primary" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Distância</p><strong className="text-sm">{(main.distanceMeters ?? 0) / 1000 < 1 ? "< 1 km" : `${((main.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km`}</strong></div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Clock3 className="size-4 text-accent" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Com trânsito</p><strong className="text-sm">{formatDuration(main.durationSeconds)}</strong>{trafficDelay != null && trafficDelay > 30 && <p className="mt-1 text-[0.55rem] text-amber-200">+{formatDuration(trafficDelay)} por trânsito</p>}</div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Wallet className="size-4 text-primary" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Pedágio</p><strong className="text-sm">{toll != null ? toll.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) : "Não informado"}</strong>{main.toll?.estimated && <p className="mt-1 text-[0.52rem] text-amber-200">estimado</p>}</div>
+          <div className="rounded-xl bg-white/[.04] p-3"><Car className="size-4 text-accent" /><p className="mt-2 text-[0.55rem] uppercase tracking-wider text-white/40">Alternativas</p><strong className="text-sm">{Math.max(0, data.routes.length - 1)} {Math.max(0, data.routes.length - 1) === 1 ? "alternativa" : "alternativas"}</strong><p className="mt-1 text-[0.52rem] text-white/35">{data.trafficAware ? "trânsito considerado" : "trânsito básico"}</p></div>
         </div>
       )}
 
       {data && main && (
-        <div className="mt-3 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.035] p-3.5">
+        <div className="mt-3 rounded-2xl border border-primary/15 bg-primary/[.035] p-3.5">
           <div className="flex items-start gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#C7FF3C]/10 text-[#C7FF3C]"><Route className="size-4" /></span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Route className="size-4" /></span>
             <div className="min-w-0">
-              <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">Decisão da viagem</p>
+              <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-primary">Decisão da viagem</p>
               <p className="mt-1 text-sm font-black">{trafficDelay != null && trafficDelay > 120 ? "Reserve margem: o trânsito está adicionando tempo à rota." : totalCost(main) != null ? "Custo estimado do percurso: " + totalCost(main)!.toLocaleString("pt-BR", { style: "currency", currency: main.toll?.currency || "BRL" }) + "." : toll != null ? "Pedágio informado; complete o combustível para estimar o custo total." : "Confira tempo, distância e dados de custo antes de sair."}</p>
               <div className="mt-2 flex flex-wrap gap-1.5 text-[0.52rem] font-bold text-white/45">
                 <span className="rounded-full bg-white/[.05] px-2 py-1">{formatDuration(main.durationSeconds)} de percurso</span>
@@ -257,7 +257,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
           <label className="flex items-center gap-1 text-[0.58rem] text-white/50">R$/L<input aria-label="Preço do combustível por litro" inputMode="decimal" value={fuelPrice || ""} onChange={event => { const value = Number(event.target.value.replace(",", ".")); setFuelPrice(Number.isFinite(value) ? value : 0); try { localStorage.setItem("trajeto-route-fuel-price", String(value)); } catch {} }} className="w-20 rounded-lg border border-white/10 bg-white/[.06] px-2 py-2 text-xs font-black text-white outline-none" placeholder="0,00" /></label>
         </div>
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible">
-          {data.routes.slice(0, 4).map((route, index) => <div key={"cost-" + route.id} className="min-w-[13rem] snap-start rounded-xl bg-white/[.04] p-3 sm:min-w-0"><p className="text-[0.52rem] uppercase text-white/35">{index === 0 ? "Principal" : "Alternativa " + index}</p><p className="mt-1 text-[0.62rem] text-white/50">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p><strong className="mt-1 block text-sm">{totalCost(route) != null ? totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" }) : fuelCost(route) == null ? "Combustível não calculado" : route.toll?.amount == null ? "Pedágio não informado" : "Custo indisponível"}</strong>{routeSavings(route) != null && routeSavings(route)! > 0 && <p className="mt-1 text-[0.58rem] font-black text-[#C7FF3C]">Economia potencial de {routeSavings(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} vs. principal</p>}<p className="mt-1 text-[0.55rem] text-white/35">{fuelCost(route) != null ? `Combustível ${fuelCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : "Combustível não calculado"} · Pedágio {route.toll?.amount != null ? route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency }) : "não informado"}{route.toll?.estimated ? " · estimado" : ""}</p></div>)}
+          {data.routes.slice(0, 4).map((route, index) => <div key={"cost-" + route.id} className="min-w-[13rem] snap-start rounded-xl bg-white/[.04] p-3 sm:min-w-0"><p className="text-[0.52rem] uppercase text-white/35">{index === 0 ? "Principal" : "Alternativa " + index}</p><p className="mt-1 text-[0.62rem] text-white/50">{formatDuration(route.durationSeconds)} · {((route.distanceMeters ?? 0) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km</p><strong className="mt-1 block text-sm">{totalCost(route) != null ? totalCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: route.toll?.currency || "BRL" }) : fuelCost(route) == null ? "Combustível não calculado" : route.toll?.amount == null ? "Pedágio não informado" : "Custo indisponível"}</strong>{routeSavings(route) != null && routeSavings(route)! > 0 && <p className="mt-1 text-[0.58rem] font-black text-primary">Economia potencial de {routeSavings(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} vs. principal</p>}<p className="mt-1 text-[0.55rem] text-white/35">{fuelCost(route) != null ? `Combustível ${fuelCost(route)!.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : "Combustível não calculado"} · Pedágio {route.toll?.amount != null ? route.toll.amount.toLocaleString("pt-BR", { style: "currency", currency: route.toll.currency }) : "não informado"}{route.toll?.estimated ? " · estimado" : ""}</p></div>)}
         </div>
       </div>}
 
@@ -289,7 +289,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                 ? [...ranked].sort((a, b) => Number(metric(a)) - Number(metric(b)))[0]
                 : data.routes[0];
               const active = selectedRouteId === route.id;
-              return <button key={key} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-[#C7FF3C]/40 bg-[#C7FF3C]/10" : "border-white/8 bg-white/[.025]")}>
+              return <button key={key} type="button" onClick={() => onSelectRoute?.(route.id)} className={"min-h-11 rounded-xl border px-2 text-left " + (active ? "border-primary/40 bg-primary/10" : "border-white/8 bg-white/[.025]")}>
                 <span className="block text-[0.52rem] font-black uppercase text-white/35">{label}</span>
                 <span className="mt-1 block text-[0.62rem] font-black">{route.id === "principal" ? "Principal" : route.id.replace("alternativa-", "Alternativa ")}</span>
                 <span className="mt-1 block text-[0.48rem] text-white/35">{hint}</span>
@@ -325,8 +325,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
       )}
 
       {data && data.routes.length > 1 && selectedRouteId && (
-        <div className="mt-3 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.025] p-3.5">
-          <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-[#3DE3FF]">O que muda ao escolher esta rota</p>
+        <div className="mt-3 rounded-2xl border border-accent/15 bg-accent/[.025] p-3.5">
+          <p className="text-[0.55rem] font-black uppercase tracking-[.14em] text-accent">O que muda ao escolher esta rota</p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {(() => {
               const selected = data.routes.find(route => route.id === selectedRouteId) ?? data.routes[0];
@@ -353,7 +353,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
               const analysis = routeAnalysis(route, index);
               const selected = selectedRouteId === route.id;
               return (
-                <div key={route.id} className={"w-full rounded-xl border p-3 transition " + (selected ? "border-[#C7FF3C]/50 bg-[#C7FF3C]/[.08]" : "border-white/8 bg-white/[.025]")}>
+                <div key={route.id} className={"w-full rounded-xl border p-3 transition " + (selected ? "border-primary/50 bg-primary/[.08]" : "border-white/8 bg-white/[.025]")}>
                   <button type="button" aria-pressed={selected} onClick={() => onSelectRoute?.(route.id)} className="w-full text-left">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -370,7 +370,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <p className="text-[0.54rem] font-bold text-white/40">{selected ? "Prévia destacada no mapa" : "Toque para visualizar no mapa"}</p>
-                    {selected && <button type="button" onClick={() => onConfirmRoute?.(route.id)} className="min-h-9 rounded-lg bg-[#C7FF3C] px-3 text-[0.58rem] font-black text-[#0B1014]">Usar esta rota</button>}
+                    {selected && <button type="button" onClick={() => onConfirmRoute?.(route.id)} className="min-h-9 rounded-lg bg-primary px-3 text-[0.58rem] font-black text-background">Usar esta rota</button>}
                   </div>
                 </div>
               );
@@ -387,7 +387,7 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
             : "Confirme “Usar esta rota” para liberar a navegação externa."}
         </p>
         {routeConfirmed && <div className="mt-3 grid grid-cols-3 gap-2">
-          <button type="button" onClick={() => window.open(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-[0.62rem] font-black text-[#0B1014]">Google Maps</button>
+          <button type="button" onClick={() => openExternalUrl(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true))} className="min-h-11 rounded-xl bg-primary px-2 text-[0.62rem] font-black text-background">Google Maps</button>
           <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button>
           <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button>
         </div>}
