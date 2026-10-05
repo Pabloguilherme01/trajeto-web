@@ -98,6 +98,14 @@ export default function TileStationMap({
   );
 
   const singlePointKey = drawable.length === 1 ? `${drawable[0].lat},${drawable[0].lng}` : "";
+  const drawableByKey = useMemo(
+    () => new Map(drawable.map(item => [stationKey(item), item] as const)),
+    [drawable]
+  );
+  const pickerItems = useMemo(
+    () => drawable.map(station => ({ ...station, id: stationKey(station) })),
+    [drawable]
+  );
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
   useEffect(() => {
@@ -137,18 +145,24 @@ export default function TileStationMap({
   }, [userCoords?.lat, userCoords?.lng, following]);
 
   useEffect(() => {
-    if (!drawable.some(item => stationKey(item) === selectedId))
+    if (!selectedId || !drawableByKey.has(selectedId))
       setSelectedId(drawable[0] ? stationKey(drawable[0]) : null);
-  }, [drawable, selectedId]);
+  }, [drawable, drawableByKey, selectedId]);
 
   useEffect(() => {
     const target = viewport.current;
     if (!target) return;
-    const measure = () =>
-      setSize({
+    const measure = () => {
+      const next = {
         width: target.clientWidth || 320,
         height: target.clientHeight || 520,
-      });
+      };
+      setSize(current =>
+        current.width === next.width && current.height === next.height
+          ? current
+          : next
+      );
+    };
     measure();
     const observer =
       typeof ResizeObserver !== "undefined"
@@ -163,37 +177,45 @@ export default function TileStationMap({
   }, [drawable.length, tileErrors >= 5, offline, localLayer]);
   const width = size.width;
   const height = size.height;
-  const centerPx = project(center.lat, center.lng, zoom);
+  const centerPx = useMemo(
+    () => project(center.lat, center.lng, zoom),
+    [center.lat, center.lng, zoom]
+  );
   const tileZoom = Math.floor(zoom);
   const tileScale = 2 ** (zoom - tileZoom);
-  const tileCenter = project(center.lat, center.lng, tileZoom);
+  const tileCenter = useMemo(
+    () => project(center.lat, center.lng, tileZoom),
+    [center.lat, center.lng, tileZoom]
+  );
   const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
   const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
   const baseTileX = Math.floor(tileCenter.x / TILE);
   const baseTileY = Math.floor(tileCenter.y / TILE);
   const radiusX = Math.ceil(width / (2 * TILE * tileScale)) + 1;
   const radiusY = Math.ceil(height / (2 * TILE * tileScale)) + 1;
-  const tiles: Array<{
-    x: number;
-    y: number;
-    key: string;
-    left: number;
-    top: number;
-  }> = [];
-
-  for (let dy = -radiusY; dy <= radiusY; dy++) {
-    for (let dx = -radiusX; dx <= radiusX; dx++) {
-      const rawX = baseTileX + dx;
-      const y = baseTileY + dy;
-      tiles.push({
-        x: wrapTile(rawX, tileZoom),
-        y,
-        key: `${tileZoom}:${rawX}:${y}`,
-        left: (dx + radiusX) * TILE,
-        top: (dy + radiusY) * TILE,
-      });
+  const tiles = useMemo(() => {
+    const result: Array<{
+      x: number;
+      y: number;
+      key: string;
+      left: number;
+      top: number;
+    }> = [];
+    for (let dy = -radiusY; dy <= radiusY; dy++) {
+      for (let dx = -radiusX; dx <= radiusX; dx++) {
+        const rawX = baseTileX + dx;
+        const y = baseTileY + dy;
+        result.push({
+          x: wrapTile(rawX, tileZoom),
+          y,
+          key: `${tileZoom}:${rawX}:${y}`,
+          left: (dx + radiusX) * TILE,
+          top: (dy + radiusY) * TILE,
+        });
+      }
     }
-  }
+    return result;
+  }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
 
   const markerPosition = (station: { lat: number; lng: number }) => {
     const p = project(station.lat, station.lng, zoom);
@@ -202,6 +224,25 @@ export default function TileStationMap({
       top: height / 2 + p.y - centerPx.y,
     };
   };
+  const markerPositions = useMemo(() => {
+    const result = new Map<string, { left: number; top: number }>();
+    for (const station of drawable) {
+      const p = project(station.lat, station.lng, zoom);
+      result.set(stationKey(station), {
+        left: width / 2 + p.x - centerPx.x,
+        top: height / 2 + p.y - centerPx.y,
+      });
+    }
+    return result;
+  }, [drawable, width, height, centerPx.x, centerPx.y, zoom]);
+  const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
+  const routePolylinePoints = useMemo(
+    () => routePoints.map(point => {
+      const p = markerPosition(point);
+      return `${p.left},${p.top}`;
+    }).join(" "),
+    [routeGeometryKey, width, height, centerPx.x, centerPx.y, zoom]
+  );
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -303,7 +344,6 @@ export default function TileStationMap({
   };
 
   // A new array with the same geometry must not undo a user pan or zoom.
-  const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
   useEffect(() => {
     if (routePoints.length > 1) fitStations();
   }, [routeGeometryKey]);
@@ -314,12 +354,15 @@ export default function TileStationMap({
     }
   }, [singlePointKey]);
 
-  const routeEndpoints =
-    routePoints.length > 1
-      ? drawable.filter(
-          point => point.id === "origin" || point.id === "destination"
-        )
-      : [];
+  const routeEndpoints = useMemo(
+    () =>
+      routePoints.length > 1
+        ? drawable.filter(
+            point => point.id === "origin" || point.id === "destination"
+          )
+        : [],
+    [drawable, routePoints.length]
+  );
   const focusEndpoint = (point: (typeof drawable)[number]) => {
     setFollowing(false);
     setSelectedId(stationKey(point));
@@ -369,9 +412,22 @@ export default function TileStationMap({
     );
   }
 
-  const selected =
-    drawable.find(item => stationKey(item) === selectedId) ?? null;
-  const markerGroups = mapMarkerGroups(drawable, item => { const p = markerPosition(item); return { x: p.left, y: p.top }; }, item => zoom >= 17 || stationKey(item) === selectedId || ["origin", "destination"].includes(item.id ?? ""));
+  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
+  const markerGroups = useMemo(
+    () =>
+      mapMarkerGroups(
+        drawable,
+        item => {
+          const p = markerPositions.get(stationKey(item));
+          return p ? { x: p.left, y: p.top } : { x: -100000, y: -100000 };
+        },
+        item =>
+          zoom >= 17 ||
+          stationKey(item) === selectedId ||
+          ["origin", "destination"].includes(item.id ?? "")
+      ),
+    [drawable, markerPositions, selectedId, zoom]
+  );
 
   return (
     <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
@@ -436,10 +492,11 @@ export default function TileStationMap({
             style={{
               width: TILE * (radiusX * 2 + 1),
               height: TILE * (radiusY * 2 + 1),
-              left: width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale,
-              top: height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale,
-              transform: `scale(${tileScale})`,
+              left: 0,
+              top: 0,
+              transform: `translate3d(${width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale}px, ${height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale}px, 0) scale(${tileScale})`,
               transformOrigin: "0 0",
+              willChange: "transform",
             }}
           >
             {tiles.map(tile => (
@@ -447,9 +504,10 @@ export default function TileStationMap({
                 key={tile.key}
                 src={tileUrl(tileZoom, tile.x, tile.y)}
                 referrerPolicy="origin"
+                decoding="async"
                 alt=""
                 onError={() =>
-                  setTileErrors(value => Math.min(tiles.length, value + 1))
+                  setTileErrors(value => (value >= 5 ? value : value + 1))
                 }
                 draggable={false}
                 className="absolute size-64 max-w-none"
@@ -473,12 +531,7 @@ export default function TileStationMap({
                   strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={routePoints
-                    .map(point => {
-                      const p = markerPosition(point);
-                      return `${p.left},${p.top}`;
-                    })
-                    .join(" ")}
+                  points={routePolylinePoints}
                 />
               ))}
             </svg>
@@ -490,7 +543,8 @@ export default function TileStationMap({
               setZoom(value => Math.min(17, value + 2));
             }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
             {markerGroups.singles.map(station => {
-              const position = markerPosition(station);
+              const position = markerPositions.get(stationKey(station));
+              if (!position) return null;
               if (
                 position.left < -30 ||
                 position.left > width + 30 ||
@@ -614,9 +668,9 @@ export default function TileStationMap({
 
         <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
-            items={drawable.map(station => ({ ...station, id: stationKey(station) }))}
+            items={pickerItems}
             onSelect={id => {
-              const station = drawable.find(item => stationKey(item) === id);
+              const station = drawableByKey.get(id);
               if (!station) return;
               setSelectedId(id);
               onSelectStation?.(station);
