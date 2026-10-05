@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { LOCAL_READY_ROUTES, READY_ROUTE_STREET_POINTS } from "./localRoutePresets";
+import { LOCAL_READY_ROUTES, READY_ROUTE_STATIONS, READY_ROUTE_STREET_POINTS } from "./localRoutePresets";
 import { calculatePublicRoute, resetPublicRoutingTestState } from "./publicRouting";
 import { buildReusableTripPlannerUrl } from "./tripLinks";
 
@@ -9,6 +9,9 @@ it("opens and calculates every ready city route without internet", async () => {
   vi.stubGlobal("navigator", { onLine: false });
   const fetchMock = vi.fn(() => Promise.reject(new Error("offline")));
   vi.stubGlobal("fetch", fetchMock);
+  expect(LOCAL_READY_ROUTES.length).toBeGreaterThan(232);
+  expect(READY_ROUTE_STATIONS.length).toBeGreaterThan(0);
+  expect(LOCAL_READY_ROUTES.some(route => route.category === "combustivel")).toBe(true);
   expect(LOCAL_READY_ROUTES.length).toBeGreaterThanOrEqual(650);
   const streetLabels = new Set(READY_ROUTE_STREET_POINTS.map(point => point.label));
   const streetPairs = LOCAL_READY_ROUTES.filter(route => streetLabels.has(route.originLabel) && streetLabels.has(route.destinationLabel));

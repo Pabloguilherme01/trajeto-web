@@ -336,12 +336,18 @@ export function findBestOfflineRouteForTrip(
           normalizeOfflineMatchText(route.destination) === normalizedDestination
       )
       .sort((a, b) => {
-        return Date.parse(b.savedAt) - Date.parse(a.savedAt);
+        return preparedStreetQuality(b) - preparedStreetQuality(a) || Date.parse(b.savedAt) - Date.parse(a.savedAt);
       })[0] ?? null
   );
 }
 
 type PreparedPoint = { lat: number; lng: number };
+
+function preparedStreetQuality(saved: OfflineRoute) {
+  return isRecord(saved.payload) && isRecord(saved.payload.route) &&
+    ["osrm", "mapbox"].includes(String(saved.payload.route.source)) &&
+    typeof saved.payload.route.polyline === "string" && saved.payload.route.polyline.length > 0 ? 1 : 0;
+}
 
 function preparedPoint(value: unknown): PreparedPoint | null {
   if (!isRecord(value) || typeof value.lat !== "number" || typeof value.lng !== "number" ||
@@ -387,9 +393,7 @@ export function findPreparedRouteByCoordinates(
     const to = preparedPoint(route.destination);
     return !!from && !!to && samePreparedPoint(from, origin) && samePreparedPoint(to, destination);
   }).sort((a, b) => {
-    const road = (saved: OfflineRoute) => isRecord(saved.payload) && isRecord(saved.payload.route) &&
-      saved.payload.route.source !== "local-estimate" && typeof saved.payload.route.polyline === "string" && saved.payload.route.polyline.length > 0 ? 1 : 0;
-    return road(b) - road(a) || Date.parse(b.savedAt) - Date.parse(a.savedAt);
+    return preparedStreetQuality(b) - preparedStreetQuality(a) || Date.parse(b.savedAt) - Date.parse(a.savedAt);
   })[0] ?? null;
 }
 
