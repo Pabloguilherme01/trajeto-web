@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { MapPin, ArrowUpRight, ArrowLeft, Search, Stethoscope, ShoppingBag, Landmark, Bus, GraduationCap, Fuel, Utensils } from "lucide-react";
 import { LOCAL_READY_ROUTES, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
@@ -7,6 +7,7 @@ import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import { ROUTE_QUICK_FILTERS, isQuickFilterValue, quickFilterCategory, quickFilterMatchesCategory } from "@/lib/quickFilterPresets";
 
 type TravelMode = "driving" | "walking" | "cycling" | "transit";
 const destinationIcons = { saude: Stethoscope, compras: ShoppingBag, servicos: Landmark, transporte: Bus, educacao: GraduationCap, combustivel: Fuel, alimentacao: Utensils, centro: MapPin };
@@ -29,7 +30,10 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [originId, setOriginId] = useState("todos");
-  const origins = Array.from(new Map(LOCAL_READY_ROUTES.map(route => [route.originId, route.originLabel])).entries());
+  const origins = useMemo(
+    () => Array.from(new Map(LOCAL_READY_ROUTES.map(route => [route.originId, route.originLabel])).entries()),
+    []
+  );
   const [mode, setMode] = useState(initialMode);
   const [visibleCount, setVisibleCount] = useState(6);
   const [offlineOnly, setOfflineOnly] = useState(false);
@@ -45,13 +49,27 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     };
   }, []);
   const offlineActive = offlineOnly || !online;
-  const filtered = LOCAL_READY_ROUTES.filter(route =>
-    (originId === "todos" || originId === route.originId) &&
-    (category === "todos" || category === route.category) &&
-    matchesCatalogText(query, [route.label, route.origin, route.destination, route.detail])
-  ).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b));
-  const visible = filtered.slice(0, visibleCount);
+  const filtered = useMemo(
+    () => LOCAL_READY_ROUTES.filter(route =>
+      (originId === "todos" || originId === route.originId) &&
+      (category === "todos" || category === route.category) &&
+      matchesCatalogText(query, [route.label, route.origin, route.destination, route.detail])
+    ).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b)),
+    [originId, category, query]
+  );
+  const visible = useMemo(
+    () => filtered.slice(0, visibleCount),
+    [filtered, visibleCount]
+  );
   const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setVisibleCount(6); };
+  const applyCategory = (next: RouteDestinationCategoryFilter) => {
+    setCategory(next);
+    if (
+      isQuickFilterValue(query, ROUTE_QUICK_FILTERS) &&
+      !quickFilterMatchesCategory(query, next)
+    ) setQuery("");
+    setVisibleCount(6);
+  };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
@@ -96,17 +114,13 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         </label>
         <QuickFilterChips
           label="Atalhos de busca de trajetos"
-          options={[
-            { label: "UPA", value: "upa" },
-            { label: "Postos", value: "posto" },
-            { label: "Mercados", value: "mercado" },
-            { label: "Escolas", value: "escola" },
-            { label: "Prefeitura", value: "prefeitura" },
-            { label: "Shopping", value: "shopping" },
-            { label: "Rodoviária", value: "rodoviaria" },
-          ]}
+          options={ROUTE_QUICK_FILTERS}
           value={query}
-          onPick={value => { setQuery(value); setVisibleCount(6); }}
+          onPick={value => {
+            setQuery(value);
+            setCategory(quickFilterCategory(value) ?? "todos");
+            setVisibleCount(6);
+          }}
           className="mt-2"
         />
       </div>
@@ -117,7 +131,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
         </select>
       </label>
       <label className="min-w-0 text-xs font-bold text-white/80">Tipo de destino
-        <select value={category} onChange={event => { setCategory(event.target.value as RouteDestinationCategoryFilter); setVisibleCount(6); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
+        <select value={category} onChange={event => applyCategory(event.target.value as RouteDestinationCategoryFilter)} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
           {ROUTE_DESTINATION_CATEGORIES.filter(item => item.value === "todos" || LOCAL_READY_ROUTES.some(route => route.category === item.value)).map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
       </label>
