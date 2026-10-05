@@ -49,11 +49,6 @@ function projectBase(lat: number, lng: number) {
     y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * TILE,
   };
 }
-function project(lat: number, lng: number, zoom: number) {
-  const base = projectBase(lat, lng);
-  const scale = 2 ** zoom;
-  return { x: base.x * scale, y: base.y * scale };
-}
 function unproject(x: number, y: number, zoom: number) {
   const scale = TILE * 2 ** zoom;
   const lng = (x / scale) * 360 - 180;
@@ -323,10 +318,11 @@ export default function TileStationMap({
       const [a, b] = [...pointers.current.values()];
       const state = pinch.current;
       const nextZoom = Math.max(8, Math.min(17, state.zoom + Math.log2(Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / state.distance)));
-      const anchor = project(state.anchor.lat, state.anchor.lng, nextZoom);
+      const anchorBase = projectBase(state.anchor.lat, state.anchor.lng);
+      const nextScale = 2 ** nextZoom;
       const rect = event.currentTarget.getBoundingClientRect();
       setZoom(nextZoom);
-      setCenter(unproject(anchor.x - ((a.x + b.x) / 2 - rect.left - width / 2), anchor.y - ((a.y + b.y) / 2 - rect.top - height / 2), nextZoom));
+      setCenter(unproject(anchorBase.x * nextScale - ((a.x + b.x) / 2 - rect.left - width / 2), anchorBase.y * nextScale - ((a.y + b.y) / 2 - rect.top - height / 2), nextZoom));
       return;
     }
     const state = dragRef.current;
@@ -519,9 +515,10 @@ export default function TileStationMap({
             const rect = event.currentTarget.getBoundingClientRect();
             const nextZoom = Math.min(17, zoom + 1);
             const anchor = unproject(centerPx.x + event.clientX - rect.left - width / 2, centerPx.y + event.clientY - rect.top - height / 2, zoom);
-            const projected = project(anchor.lat, anchor.lng, nextZoom);
+            const anchorBase = projectBase(anchor.lat, anchor.lng);
+            const nextScale = 2 ** nextZoom;
             setZoom(nextZoom);
-            setCenter(unproject(projected.x - (event.clientX - rect.left - width / 2), projected.y - (event.clientY - rect.top - height / 2), nextZoom));
+            setCenter(unproject(anchorBase.x * nextScale - (event.clientX - rect.left - width / 2), anchorBase.y * nextScale - (event.clientY - rect.top - height / 2), nextZoom));
           }}
         >
           <div
