@@ -280,10 +280,11 @@ export default function TileStationMap({
   );
   const routePolylinePoints = useMemo(
     () => routeWorld.map(base =>
-      `${width / 2 + base.x * zoomScale - centerPx.x},${height / 2 + base.y * zoomScale - centerPx.y}`
+      `${base.x * zoomScale},${base.y * zoomScale}`
     ).join(" "),
-    [routeWorld, width, height, centerPx.x, centerPx.y, zoomScale]
+    [routeWorld, zoomScale]
   );
+  const routePanTransform = `translate(${width / 2 - centerPx.x} ${height / 2 - centerPx.y})`;
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -547,18 +548,20 @@ export default function TileStationMap({
               aria-label="Trajeto pelas ruas"
               role="img"
             >
-              {["#ffffff", appearance.color].map((color, index) => (
-                <polyline
-                  key={color}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={index ? appearance.width : appearance.width + 4}
-                  strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={routePolylinePoints}
-                />
-              ))}
+              <g data-route-geometry transform={routePanTransform}>
+                {["#ffffff", appearance.color].map((color, index) => (
+                  <polyline
+                    key={color}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={index ? appearance.width : appearance.width + 4}
+                    strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={routePolylinePoints}
+                  />
+                ))}
+              </g>
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
