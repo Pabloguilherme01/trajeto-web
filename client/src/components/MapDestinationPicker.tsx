@@ -1,4 +1,4 @@
-import React, { useId, useMemo, useState } from "react";
+import React, { useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { matchesCatalogText } from "@/lib/catalogSearch";
@@ -11,6 +11,7 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
   items: Place[]; value: string | null; label: string; onSelect: (id: string) => void;
 }) {
   const listId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(40);
@@ -37,10 +38,9 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
       </button>
     </PopoverTrigger>
     <PopoverContent align="start" side="bottom" sideOffset={6} collisionPadding={8} className="w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-1rem)] flex max-h-[min(22rem,var(--radix-popover-content-available-height))] flex-col overflow-hidden rounded-2xl border-slate-200 bg-white p-0 text-slate-900 shadow-2xl">
-      <label className="flex min-h-11 shrink-0 items-center gap-2 border-b border-slate-200 px-3">
+      <div className="flex min-h-11 shrink-0 items-center gap-2 border-b border-slate-200 px-3">
         <Search className="size-4 shrink-0 text-[#147b88]" aria-hidden="true" />
-        <span className="sr-only">Pesquisar lugares no mapa</span>
-        <input autoFocus type="search" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls={listId} aria-activedescendant={visible[active] ? `${listId}-${active}` : undefined} value={query} onChange={event => { setQuery(event.target.value); setLimit(40); setActive(0); }}
+        <input ref={inputRef} autoFocus type="search" role="combobox" aria-label="Pesquisar lugares no mapa" aria-expanded="true" aria-autocomplete="list" aria-controls={listId} aria-activedescendant={visible[active] ? `${listId}-${active}` : undefined} value={query} onChange={event => { setQuery(event.target.value); setLimit(40); setActive(0); }}
           onKeyDown={event => {
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
               event.preventDefault();
@@ -55,16 +55,16 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
           <button
             type="button"
             aria-label="Limpar busca de lugares"
-            onClick={() => { setQuery(""); setLimit(40); setActive(0); }}
+            onClick={() => { setQuery(""); setLimit(40); setActive(0); queueMicrotask(() => inputRef.current?.focus()); }}
             className="grid size-11 shrink-0 place-items-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900"
           >
             <X className="size-4" />
           </button>
         )}
-      </label>
+      </div>
       <QuickFilterChips label="Atalhos de busca no mapa" options={quickQueries} value={query} onPick={value => { setQuery(value); setLimit(40); setActive(0); }} variant="light" className="shrink-0 border-b border-slate-100 px-3 py-2" />
-      {categories.length > 1 && <div role="group" aria-label="Categorias de lugares" className="flex shrink-0 gap-2 overflow-x-auto border-b border-slate-100 px-3 py-2">
-        {["Todos", ...categories].map(label => <button key={label} type="button" aria-pressed={category === label} onClick={() => { setCategory(label); setActive(0); setLimit(40); }} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-bold " + (category === label ? "border-blue-200 bg-blue-50 text-blue-800" : "border-slate-200 bg-white text-slate-600")}>{label}</button>)}
+      {categories.length > 1 && <div role="group" aria-label="Categorias de lugares" className="flex shrink-0 snap-x gap-2 overflow-x-auto border-b border-slate-100 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {["Todos", ...categories].map(label => <button key={label} type="button" aria-pressed={category === label} onClick={() => { setCategory(label); setActive(0); setLimit(40); }} className={"min-h-11 shrink-0 snap-start rounded-full border px-3 text-xs font-bold " + (category === label ? "border-blue-200 bg-blue-50 text-blue-800" : "border-slate-200 bg-white text-slate-600")}>{label}</button>)}
       </div>}
       <p role="status" className="shrink-0 px-3 py-2 text-xs text-slate-500">{matches.length ? `${matches.length} lugares · toque para escolher` : "Nenhum lugar encontrado. Tente outro nome."}</p>
       {!matches.length && <button type="button" onClick={() => { setQuery(""); setCategory("Todos"); setActive(0); setLimit(40); }} className="min-h-11 shrink-0 text-sm font-bold text-blue-700">Limpar busca e filtros</button>}
