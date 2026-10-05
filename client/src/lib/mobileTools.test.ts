@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, shareText } from "./mobileTools";
+import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, openExternalUrl, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -98,6 +98,20 @@ describe("mobile tools", () => {
 
   it("keeps 99 on its verified public entrypoint without inventing private destination parameters", () => {
     expect(build99MobilityUrl("Posto Exemplo, Águas Lindas de Goiás")).toBe("https://99app.com/");
+  });
+
+  it("opens external URLs through one safe browser boundary", () => {
+    const open = vi.fn();
+    vi.stubGlobal("window", { open });
+    openExternalUrl("https://example.com/destino");
+    expect(open).toHaveBeenCalledWith("https://example.com/destino", "_blank", "noopener,noreferrer");
+    vi.unstubAllGlobals();
+  });
+
+  it("does not try to open external URLs outside the browser", () => {
+    vi.stubGlobal("window", undefined);
+    expect(() => openExternalUrl("https://example.com/destino")).not.toThrow();
+    vi.unstubAllGlobals();
   });
 
   it("uses the native share API when available", async () => {
