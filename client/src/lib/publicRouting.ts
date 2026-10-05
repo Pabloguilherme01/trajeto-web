@@ -109,6 +109,14 @@ function opaqueCacheToken(value: string) {
   );
 }
 
+function isExplicitAguasLindasQuery(value: string) {
+  const normalized = normalizeSearch(value);
+  return (
+    normalized.includes("aguas lindas") ||
+    normalized.includes("aguas lindas de goias")
+  );
+}
+
 function geocodeCacheKey(value: string) {
   // This token is not a secret or an authentication hash. Its purpose is to
   // keep the user's typed address out of browser-storage key names.
@@ -316,6 +324,10 @@ async function requestPublicGeocoder(query: string) {
     url.searchParams.set("limit", "1");
     url.searchParams.set("countrycodes", "br");
     url.searchParams.set("accept-language", "pt-BR");
+    if (isExplicitAguasLindasQuery(query)) {
+      url.searchParams.set("viewbox", "-48.7,-15.3,-47.9,-16.1");
+      url.searchParams.set("bounded", "1");
+    }
 
     try {
       const results = await fetchJson<NominatimResult[]>(url.toString());
@@ -441,10 +453,11 @@ function localGeocode(value: string): PublicCoordinate | null {
   if (streetReference) return streetReference;
 
   const preparedPoint = resolveLocalGeocodePoint(value);
-  if (preparedPoint) return preparedPoint;
+  if (preparedPoint && isAguasLindasRoutePoint(preparedPoint))
+    return preparedPoint;
 
   const atlasPoint = resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, value);
-  if (atlasPoint) return atlasPoint;
+  if (atlasPoint && isAguasLindasRoutePoint(atlasPoint)) return atlasPoint;
 
   // A city-qualified street, hospital or station is never the city centre.
   const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
@@ -593,7 +606,12 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const lat = Number(result?.lat);
   const lng = Number(result?.lon);
-  if (!isCoordinate({ lat, lng })) {
+  const geocodedPoint = { lat, lng };
+  if (
+    !isCoordinate(geocodedPoint) ||
+    (isExplicitAguasLindasQuery(query) &&
+      !isAguasLindasRoutePoint(geocodedPoint))
+  ) {
     const fallback = localGeocode(query);
     if (fallback) {
       cacheSet(cacheKey, fallback);
@@ -606,7 +624,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     );
   }
 
-  const geocodedCoordinate = { lat, lng };
+  const geocodedCoordinate = geocodedPoint;
   cacheSet(cacheKey, geocodedCoordinate);
   const expandedKey = geocodeCacheKey(expanded);
   if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);
