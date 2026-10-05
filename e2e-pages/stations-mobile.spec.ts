@@ -30,6 +30,7 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.getByRole("listbox", { name: "Resultados de lugares" }).getByRole("option").last().click();
   await expect(panel).toHaveCount(0);
+  await expect(page).toHaveURL(/mapa\/postos/);
   const marker = map.getByRole("button", { name: "Abrir " + station.name, exact: true });
   await expect(marker).toHaveAttribute("aria-pressed", "true");
   const box = await marker.boundingBox();
@@ -70,6 +71,7 @@ test("Pages: background failure keeps the offline picker and navigation touchabl
   const option = page.getByRole("listbox", { name: "Resultados de lugares" }).getByRole("option").last();
   const name = (await option.locator(".font-bold").textContent())!;
   await option.click();
+  await expect(page).toHaveURL(/mapa\/postos/);
   await expect(map.locator("p").filter({ hasText: name })).toBeVisible();
   await map.getByRole("button", { name: "Navegar pelo Google Maps", exact: true }).click({ trial: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);

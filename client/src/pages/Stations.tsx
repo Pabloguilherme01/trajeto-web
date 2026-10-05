@@ -571,52 +571,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     useNearby();
   }, [nearbyRequested, nearbyAutoAttempted, userCoords, locating]);
 
-  const handleMapStationSelect = (station: StationMapItem) => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-    const normalizedAddress = normalize(station.address);
-    let targetCnpj = station.cnpj?.trim();
-
-    if (!targetCnpj) {
-      const stationName = normalize(station.name);
-      const matched = directoryCards.find(item => {
-        const itemAddress = normalize([
-          item.anp?.endereco || item.local?.address,
-          item.anp?.bairro || item.local?.neighborhood,
-          item.anp?.municipio || "Águas Lindas de Goiás",
-          item.anp?.uf || "GO",
-        ].filter(Boolean).join(" · "));
-        const itemName = normalize(item.local?.displayName || item.anp?.razaoSocial || "");
-        return (normalizedAddress && itemAddress === normalizedAddress) || (stationName && itemName === stationName);
-      });
-      targetCnpj = matched?.anp?.cnpj || matched?.local?.cnpj || undefined;
-    }
-
-    if (!targetCnpj) {
-      toast.message("A referência do mapa ainda não possui ficha consolidada.");
-      return;
-    }
-
-    const matchedLocal = directoryCards.find(item => normalizeStationCnpj(item.anp?.cnpj || item.local?.cnpj) === normalizeStationCnpj(targetCnpj))?.local;
-    if (matchedLocal) {
-      setLocation(appUrl("/local/" + encodeURIComponent(matchedLocal.id)));
-      return;
-    }
-
-    setDirectorySearch("");
-    setNeighborhoodFilter("all");
-    setBrandFilter("all");
-    setAddressOnly(false);
-    setVerifiedOnly(false);
-    setMappedOnly(false);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById("posto-" + encodeURIComponent(targetCnpj as string))
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-    });
-  };
-
   const savePointsOffline = () => {
     if (!mapStations.length) {
       toast.message("Ainda não há coordenadas suficientes para salvar os pontos.");
@@ -858,7 +812,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
             <p className="px-4 py-2 text-xs text-white/65">{mapStations.filter(station => stationCoordinatePoint(station.lat, station.lng)).length} posicionados · {mapStations.filter(station => !stationCoordinatePoint(station.lat, station.lng)).length} sem coordenada</p>
             <div className="relative">
-              <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
+              <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
               <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">Mais perto</button>
@@ -874,7 +828,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         stations={mapStations}
                         showTraffic={online}
                         userCoords={userCoords}
-                        onSelectStation={handleMapStationSelect}
+                       
                       />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 px-3 py-2.5 text-xs text-white/65">
