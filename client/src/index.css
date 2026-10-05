@@ -26,6 +26,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-warning: var(--warning);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -34,19 +35,20 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.085 0.012 238);
+  --background: var(--background);
   --foreground: oklch(0.95 0.012 224);
-  --card: oklch(0.13 0.018 232);
+  --card: #121B22;
   --card-foreground: oklch(0.95 0.012 224);
-  --popover: oklch(0.13 0.018 232);
+  --popover: #121B22;
   --popover-foreground: oklch(0.95 0.012 224);
-  --primary: oklch(0.94 0.19 122);
-  --primary-foreground: oklch(0.1 0.014 238);
+  --primary: #C7FF3C;
+  --primary-foreground: #0B1014;
   --secondary: oklch(0.18 0.018 232);
   --secondary-foreground: oklch(0.94 0.012 224);
   --muted: oklch(0.18 0.018 232);
-  --muted-foreground: oklch(0.68 0.02 224);
-  --accent: oklch(0.84 0.13 201);
+  --muted-foreground: #A9BAC4;
+  --accent: #3DE3FF;
+  --warning: #FFCF96;
   --accent-foreground: oklch(0.1 0.014 238);
   --destructive: oklch(0.66 0.2 27);
   --destructive-foreground: oklch(0.98 0 0);
@@ -57,7 +59,7 @@
 
 @layer base {
   * { @apply border-border outline-ring/50; }
-  html { scroll-behavior: smooth; background: #0B1014; }
+  html { scroll-behavior: smooth; background: var(--background); }
   body { @apply bg-background font-sans text-foreground antialiased; }
   button, a { -webkit-tap-highlight-color: transparent; }
   html, body { min-height: 100%; }
@@ -67,9 +69,9 @@
     body { padding-bottom: env(safe-area-inset-bottom); }
   }
   button, a, input, select, textarea { touch-action: manipulation; }
-  :focus-visible { outline: 3px solid #3DE3FF; outline-offset: 3px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
   button:not(:disabled), [role="button"]:not([aria-disabled="true"]), [type="button"]:not(:disabled), [type="submit"]:not(:disabled), a[href], input[type="checkbox"]:not(:disabled) { @apply cursor-pointer; }
-  ::selection { background: #C7FF3C; color: #0B1014; }
+  ::selection { background: var(--primary); color: var(--primary-foreground); }
 }
 
 @layer components {
@@ -422,3 +424,12 @@ html.a11y-contrast .premium-panel, html.a11y-contrast .premium-route-card, html.
 html.a11y-contrast .planner-location-field { border-color: white; background: #000; }
 html.a11y-contrast .planner-choice { color: white; border-color: white; }
 html.a11y-compact .planner-primary-action { box-shadow: none; }
+
+/* Shared task surfaces; map artwork retains its own cartographic palette. */
+@layer components {
+  .task-surface { @apply min-w-0 rounded-2xl border border-border bg-card text-card-foreground; }
+  .task-action { @apply inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold; }
+  .task-action-primary { @apply bg-primary text-primary-foreground; }
+  .task-action-secondary { @apply border border-border bg-secondary text-secondary-foreground; }
+  .task-detail { @apply text-sm leading-relaxed text-muted-foreground; }
+}

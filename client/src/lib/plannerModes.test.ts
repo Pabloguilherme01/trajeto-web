@@ -27,7 +27,7 @@ describe("planner modes", () => {
   });
 
   it("keeps each mode explanatory", () => {
-    expect(plannerExperienceDetail("offline")).toMatch(/rotas salvas/i);
-    expect(plannerExperienceDetail("smart")).toMatch(/melhor camada/i);
+    expect(plannerExperienceDetail("offline")).toMatch(/salvos neste aparelho.*sem internet/i);
+    expect(plannerExperienceDetail("smart")).toMatch(/caminho disponível.*salva a rota/i);
   });
 });

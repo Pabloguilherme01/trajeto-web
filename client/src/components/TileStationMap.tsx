@@ -703,12 +703,12 @@ export default function TileStationMap({
                         : routePoints.length > 1 && station.id === "origin"
                           ? "bg-white text-[#163840]"
                           : active
-                        ? "scale-110 bg-[#C7FF3C] text-[#163840]"
+                        ? "scale-110 bg-primary text-[#163840]"
                         : station.coordinateKind === "street-midpoint"
                           ? "bg-amber-300 text-[#163840]"
                           : station.source === "ANP"
-                          ? "bg-[#C7FF3C] text-[#163840]"
-                          : "bg-[#3DE3FF] text-[#163840]")
+                          ? "bg-primary text-[#163840]"
+                          : "bg-accent text-[#163840]")
                     }
                   >
                     <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}</span>
@@ -723,7 +723,7 @@ export default function TileStationMap({
                 const top = height / 2 + userWorld.y * zoomScale - centerPx.y;
                 return (
                   <span
-                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-accent shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
                     style={{ left, top, width: 14, height: 14 }}
                     aria-label="Sua localização"
                   />
@@ -841,7 +841,7 @@ export default function TileStationMap({
                   <button
                     type="button"
                     onClick={() => onPlanDestination(selected)}
-                    className="min-h-11 min-w-0 rounded-lg bg-[#C7FF3C] px-2 text-xs font-black text-[#163840]"
+                    className="min-h-11 min-w-0 rounded-lg bg-primary px-2 text-xs font-black text-[#163840]"
                   >
                     Planejar até aqui
                   </button>

@@ -700,12 +700,12 @@ export function OfflineRoutePreview({
             ) : guidance && !liveProgress?.nearDestination ? (
               <div className="route-turn-banner bg-gradient-to-br from-[#163840] to-[#21535A] p-4 text-white sm:p-5">
                 <div className="flex min-w-0 items-start gap-3">
-                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#C7FF3C] text-[#163840] shadow-lg">
+                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary text-[#163840] shadow-lg">
                     <ManeuverIcon maneuver={guidance.step.maneuver} />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-[#C7FF3C]">
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-primary">
                         Agora
                       </span>
                       <span className="text-xs font-bold text-white/65">
@@ -1413,11 +1413,11 @@ function RouteMapContent({
         )}
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 bg-[#10191F] px-3 py-2.5 text-[11px] font-bold text-white/55">
           <span>
-            <span className="mr-1 inline-block size-2 rounded-full bg-[#C7FF3C]" />
+            <span className="mr-1 inline-block size-2 rounded-full bg-primary" />
             rota e pontos principais
           </span>
           <span>
-            <span className="mr-1 inline-block size-2 rounded-full bg-[#3DE3FF]" />
+            <span className="mr-1 inline-block size-2 rounded-full bg-accent" />
             referências próximas
           </span>
           <span>
@@ -1478,7 +1478,7 @@ function RouteMapContent({
               onClick={fitRoute}
               disabled={!mapReady}
               aria-label="Enquadrar viagem"
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 bg-background/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur disabled:opacity-40"
             >
               <LocateFixed className="size-4" />
               Viagem
@@ -1491,8 +1491,8 @@ function RouteMapContent({
               className={
                 "inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " +
                 (traffic
-                  ? "bg-[#C7FF3C] text-[#0B1014]"
-                  : "bg-[#0B1014]/90 text-white")
+                  ? "bg-primary text-background"
+                  : "bg-background/90 text-white")
               }
             >
               <TrafficCone className="size-4" />
@@ -1512,8 +1512,8 @@ function RouteMapContent({
               className={
                 "inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " +
                 (satellite
-                  ? "bg-white text-[#0B1014]"
-                  : "bg-[#0B1014]/90 text-white")
+                  ? "bg-white text-background"
+                  : "bg-background/90 text-white")
               }
             >
               <Satellite className="size-4" />
@@ -1521,7 +1521,7 @@ function RouteMapContent({
             </button>
           </div>
           <div className="absolute right-3 top-[7rem] z-10 flex flex-wrap justify-end gap-2">
-            <span className="inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur">
+            <span className="inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-background/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur">
               {isVector
                 ? "3D · VETORIAL"
                 : renderingType === "RASTER"
@@ -1536,8 +1536,8 @@ function RouteMapContent({
               className={
                 "min-h-11 rounded-xl border px-3 text-xs font-black shadow-lg backdrop-blur " +
                 (is3D
-                  ? "border-[#C7FF3C]/40 bg-[#C7FF3C] text-[#0B1014]"
-                  : "border-white/10 bg-[#0B1014]/90 text-white")
+                  ? "border-primary/40 bg-primary text-background"
+                  : "border-white/10 bg-background/90 text-white")
               }
             >
               {is3D ? "2D" : "3D"}
@@ -1547,17 +1547,17 @@ function RouteMapContent({
               onClick={rotateCompass}
               disabled={!mapReady || !isVector}
               aria-label={`Girar mapa para ${(heading + 45) % 360} graus`}
-              className="min-h-11 rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur"
+              className="min-h-11 rounded-xl border border-white/10 bg-background/90 px-3 text-xs font-black text-white shadow-lg backdrop-blur"
             >
               N {Math.round(heading)}°
             </button>
           </div>
           {selectedRoute && (
             <div
-              className="absolute bottom-3 left-3 max-w-[min(360px,calc(100%-84px))] rounded-xl border border-white/10 bg-[#0B1014]/90 p-3 text-white shadow-lg backdrop-blur"
+              className="absolute bottom-3 left-3 max-w-[min(360px,calc(100%-84px))] rounded-xl border border-white/10 bg-background/90 p-3 text-white shadow-lg backdrop-blur"
               aria-live="polite"
             >
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#3DE3FF]">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-accent">
                 Rota em análise
               </p>
               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold">
@@ -1586,7 +1586,7 @@ function RouteMapContent({
                 )}
               </div>
               {(trafficCounts.slow > 0 || trafficCounts.jam > 0) && (
-                <p className="mt-1 text-xs text-white/50">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {trafficCounts.slow} trecho(s) lento(s) · {trafficCounts.jam}{" "}
                   congestionado(s)
                 </p>
@@ -1604,7 +1604,7 @@ function RouteMapContent({
               }
               disabled={!mapReady}
               aria-label="Aumentar zoom"
-              className="grid size-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 text-white shadow-lg backdrop-blur disabled:opacity-40"
+              className="grid size-11 place-items-center rounded-xl border border-white/10 bg-background/90 text-white shadow-lg backdrop-blur disabled:opacity-40"
             >
               <Plus className="size-5" />
             </button>
@@ -1617,7 +1617,7 @@ function RouteMapContent({
               }
               disabled={!mapReady}
               aria-label="Diminuir zoom"
-              className="grid size-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 text-white shadow-lg backdrop-blur disabled:opacity-40"
+              className="grid size-11 place-items-center rounded-xl border border-white/10 bg-background/90 text-white shadow-lg backdrop-blur disabled:opacity-40"
             >
               <Minus className="size-5" />
             </button>

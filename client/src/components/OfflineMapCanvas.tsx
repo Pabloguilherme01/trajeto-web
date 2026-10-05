@@ -675,13 +675,13 @@ export default function OfflineMapCanvas({
               <span
                 className={
                   "relative grid size-9 place-items-center rounded-2xl border-[3px] border-white text-xs font-black shadow-lg " +
-                  (selectedMarkerId === marker.id ? "ring-4 ring-[#C7FF3C] " : "") +
+                  (selectedMarkerId === marker.id ? "ring-4 ring-primary " : "") +
                   (marker.id === "destination"
                     ? "bg-[#ff765e] text-white"
                     : marker.id === "live-position"
                       ? "bg-[#1a73e8] text-white"
                       : marker.id === "origin"
-                        ? "bg-[#C7FF3C] text-[#102028]"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-[#5b7cff] text-white")
                 }
               >
@@ -754,7 +754,7 @@ export default function OfflineMapCanvas({
           className={
             "absolute right-3 top-[4.25rem] z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (showAllStreetNames
-              ? "bg-[#37e6df] text-[#102028]"
+              ? "bg-[#37e6df] text-primary-foreground"
               : dark
                 ? "bg-[#162733]/95 text-[#e9ffff]"
                 : "bg-white/95 text-[#27414b]")

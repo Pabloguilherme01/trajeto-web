@@ -748,23 +748,23 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       <div className="container min-w-0 max-w-5xl overflow-x-clip pt-5 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.17em] text-[#3DE3FF]">Postos</p>
+            <p className="text-xs font-black uppercase tracking-[.17em] text-accent">Postos</p>
             <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">{showSavedOnly ? "Seus salvos." : "Encontre uma parada."}</h1>
           </div>
-          <span className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-[#C7FF3C]/20 text-[#C7FF3C]" : "border-[#FFB86B]/25 text-[#FFB86B]")}>
+          <span className={"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-black " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
             {online ? "online" : "offline"}
           </span>
         </header>
 
         {!showSavedOnly && (
-          <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-[#121B22] p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <form onSubmit={submit}>
               <label className="block text-xs font-black uppercase tracking-[.14em] text-white/65" htmlFor="station-search">Cidade, bairro ou posto</label>
-              <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
-                <Search className="size-4 shrink-0 text-[#3DE3FF]" />
+              <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
+                <Search className="size-4 shrink-0 text-accent" />
                 <input id="station-search" value={input} onChange={event => setInput(event.target.value)} autoComplete="street-address" enterKeyHint="search" className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/65" placeholder="Ex.: Águas Lindas de Goiás" />
-                <button type="submit" className="grid size-11 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]" aria-label="Pesquisar">
+                <button type="submit" className="grid size-11 place-items-center rounded-xl bg-primary text-background" aria-label="Pesquisar">
                   <ChevronRight className="size-5" />
                 </button>
               </div>
@@ -785,11 +785,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             />
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#C7FF3C] px-2 text-xs font-black text-[#0B1014] disabled:opacity-40">
+              <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-2 text-xs font-black text-background disabled:opacity-40">
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>
               {!staticRuntime && (
-                <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-[#3DE3FF] px-2 text-xs font-black text-[#0B1014]" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-2 text-xs font-bold text-white/65"}>
+                <button type="button" onClick={() => setOnlyOpen(current => !current)} className={onlyOpen ? "min-h-11 shrink-0 rounded-full bg-accent px-2 text-xs font-black text-background" : "min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-2 py-2 text-xs font-bold text-white/65"}>
                   <CircleCheck className="mr-1 inline size-3.5" /> Abertos agora
                 </button>
               )}
@@ -820,10 +820,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {mapFirst && showMap && !showSavedOnly && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
-          <section id="aguas-lindas-map" className="scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121B22] shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
+          <section id="aguas-lindas-map" className="scroll-mt-24 mt-5 overflow-hidden rounded-[1.7rem] border border-white/10 bg-card shadow-[0_24px_70px_rgba(0,0,0,.28)]" aria-labelledby="map-first-title">
             <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
               <div>
-                <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Mapa principal</p>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Mapa principal</p>
                 <h2 id="map-first-title" className="mt-1 text-lg font-black">Postos de Águas Lindas</h2>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-2">
@@ -835,14 +835,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-white/8 p-3">
-              <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-[#C7FF3C] text-xs font-black text-[#0B1014]">Mais perto</button>
+              <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-primary text-xs font-black text-background">Mais perto</button>
               <button type="button" onClick={() => document.getElementById("complete-stations")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="min-h-11 rounded-xl border border-white/8 text-xs font-black text-white/70">Ver fichas</button>
             </div>
           </section>
         )}
 
                 {!showSavedOnly && !mapFirst && showMap && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
-                  <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-[#0B1014]" aria-label="Mapa de todos os postos de Águas Lindas">
+                  <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-white/8 bg-background" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="relative">
                       <StationMap
                         stations={mapStations}
@@ -861,24 +861,24 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
 
         {(broadAguasLindasQuery || staticRuntime) && !showSavedOnly && (
-          <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-[#C7FF3C]/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
+          <section id="complete-stations" className="scroll-mt-24 mt-5 rounded-[1.6rem] border border-primary/20 bg-[#111A21] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="complete-stations-title">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[.15em] text-[#C7FF3C]">Diretório completo</p>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Diretório completo</p>
                 <h2 id="complete-stations-title" className="mt-1 text-xl font-black">Escolha onde abastecer</h2>
                 <p className="mt-2 text-sm leading-relaxed text-white/65">
                   Busque pelo nome ou bairro, compare os preços disponíveis e escolha sua rota. Horários e preços devem ser confirmados antes de sair.
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <span className="inline-flex rounded-full border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{directoryCards.length} fichas</span>
+                <span className="inline-flex rounded-full border border-primary/15 bg-primary/[.04] px-2 py-1 text-xs font-black text-[#D9FF91]">{directoryCards.length} fichas</span>
                 <p className="mt-1 text-xs font-bold text-white/65">{anpStations.length} registros ANP</p>
               </div>
             </div>
 
             <details className="mt-3 rounded-xl border border-white/10 px-3">
               <summary className="min-h-11 cursor-pointer py-3 text-xs font-bold text-white/70">Preços médios da cidade e dados do catálogo</summary>
-            <div className="mt-3 rounded-2xl border border-white/8 bg-[#0B1014] p-3">
+            <div className="mt-3 rounded-2xl border border-white/8 bg-background p-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[.12em] text-white/65">Referência municipal de preços</p>
@@ -886,7 +886,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={savePointsOffline} className="min-h-11 rounded-lg border border-white/8 bg-white/[.03] px-2.5 text-xs font-black text-white/65">Salvar pontos offline</button>
-                  <button type="button" onClick={() => void refreshStationData()} className="min-h-11 rounded-lg border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.03] px-2.5 text-xs font-black text-[#9FEFFF]">Atualizar</button>
+                  <button type="button" onClick={() => void refreshStationData()} className="min-h-11 rounded-lg border border-accent/15 bg-accent/[.03] px-2.5 text-xs font-black text-[#9FEFFF]">Atualizar</button>
                 </div>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65 sm:grid-cols-3">
@@ -900,20 +900,20 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Cruzados ANP</p><p className="mt-1 text-lg font-black text-[#3DE3FF]">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
-              <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-[#C7FF3C]">{directoryCards.filter(item => Boolean(stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude))).length}</p></div>
-              <div className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></div>
+              <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Cruzados ANP</p><p className="mt-1 text-lg font-black text-accent">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
+              <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-primary">{directoryCards.filter(item => Boolean(stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude))).length}</p></div>
+              <div className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Offline</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">{online ? "cache ativo" : "modo offline"}</p></div>
             </div>
 
             </details>
             <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
-              <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-[#0B1014] px-3">
+              <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
                 <Search className="size-4 text-white/65" />
                 <input value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} placeholder="Buscar posto, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/65" aria-label="Filtrar diretório de postos" />
                 {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 place-items-center rounded-lg text-white/65" aria-label="Limpar busca"><X className="size-3.5" /></button>}
               </label>
-              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
+              <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-background px-3 text-base font-black text-white/65">
                 <option value="all">Combustível: todos</option>
                 <option value="gasolina-comum">Gasolina comum</option>
                 <option value="etanol">Etanol</option>
@@ -922,13 +922,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="glp-p13">GLP P13</option>
                 <option value="gnv">GNV</option>
               </select>
-              <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-[#0B1014] px-3 text-base font-black text-white/65">
+              <select aria-label="Ordenar diretório de postos" value={directorySort} onChange={event => setDirectorySort(event.target.value as typeof directorySort)} className="min-h-11 min-w-0 w-full rounded-2xl border border-white/8 bg-background px-3 text-base font-black text-white/65">
                 <option value="name">Ordenar: nome</option>
                 <option value="price" disabled={!hasIndividualPrices}>Ordenar: menor preço ANP</option>
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
             <QuickFilterChips
               label="Filtros rápidos do diretório"
@@ -951,9 +951,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 ["etanol", "Etanol"],
                 ["diesel-s10", "Diesel S10"],
                 ["gnv", "GNV"],
-              ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-[#C7FF3C]/45 bg-[#C7FF3C]/12 text-[#E6FFAB]" : "border-white/10 bg-white/[.03] text-white/70")}>{label}</button>)}
+              ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-primary/45 bg-primary/12 text-[#E6FFAB]" : "border-white/10 bg-white/[.03] text-white/70")}>{label}</button>)}
             </div>
-            {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-[#FFCF96]">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
+            {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-warning">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65">
               <span>{directoryCardsFiltered.length} de {directoryCards.length} fichas visíveis · {anpStations.length} ANP</span>
               <span>{userCoords ? "distância calculada neste aparelho · GPS não enviado para o catálogo público" : "lista sem exigir localização"}</span>
@@ -962,7 +962,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             {!directoryCardsFiltered.length && <div className="mt-4 rounded-2xl border border-white/10 bg-white/[.03] p-4" role="status">
               <p className="font-bold">Nenhum posto encontrado com esses filtros.</p>
               <p className="mt-1 text-sm text-white/65">Tente outro nome, bairro ou combustível.</p>
-              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setInput("Águas Lindas de Goiás, GO"); setQuery("postos"); setLocation(appUrl("/postos") + "?q=postos"); }} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-sm font-bold text-[#102028]">Ver todos os postos</button>
+              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setInput("Águas Lindas de Goiás, GO"); setQuery("postos"); setLocation(appUrl("/postos") + "?q=postos"); }} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground">Ver todos os postos</button>
             </div>}
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
@@ -997,7 +997,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <button
                   type="button"
                   onClick={() => setDirectoryVisibleCount(directoryCardsFiltered.length)}
-                  className="min-h-12 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] text-xs font-black text-[#D9FF91] transition-transform duration-200 active:scale-[.99]"
+                  className="min-h-12 rounded-2xl border border-primary/15 bg-primary/[.04] text-xs font-black text-[#D9FF91] transition-transform duration-200 active:scale-[.99]"
                 >
                   Mostrar todos os {directoryCardsFiltered.length}
                 </button>
@@ -1021,28 +1021,28 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {staticRuntime && !showSavedOnly && (
-          <details className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
+          <details className="mt-5 rounded-[1.6rem] border border-accent/20 bg-[#0F1A20] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="public-stations-title">
             <summary className="min-h-11 cursor-pointer text-sm font-bold text-white/80">Fontes e referências adicionais</summary>
             <div className="flex items-start gap-3">
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#3DE3FF]/10 text-[#3DE3FF]"><Navigation className="size-5" /></div>
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent"><Navigation className="size-5" /></div>
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Modo público</p>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-accent">Modo público</p>
                 <h2 id="public-stations-title" className="mt-1 text-lg font-black">Como os dados são conferidos.</h2>
                 <p className="mt-2 text-sm leading-relaxed text-white/65">Os cadastros locais e da ANP ficam disponíveis no aparelho. Referências de mapas não confirmam autorização, horário ou preço atual.</p>
               </div>
             </div>
             {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length > 0 && (
-              <div className="mt-3 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-3 text-xs leading-relaxed text-white/65">
-                <strong className="text-[#FFD09A]">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} referências de estabelecimentos apareceram em mapas. Elas são exibidas para auditoria, mas não são somadas automaticamente à base cadastral até haver identificação confiável por CNPJ/endereço.
+              <div className="mt-3 rounded-xl border border-warning/20 bg-warning/[.04] p-3 text-xs leading-relaxed text-white/65">
+                <strong className="text-warning">Descobertas ainda não conciliadas:</strong> {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.length} referências de estabelecimentos apareceram em mapas. Elas são exibidas para auditoria, mas não são somadas automaticamente à base cadastral até haver identificação confiável por CNPJ/endereço.
                 <div className="mt-2 grid gap-2">
                   {AGUAS_LINDAS_MAP_ONLY_DISCOVERIES.map(item => (
-                    <div key={item.displayName + item.address} className="rounded-xl border border-white/8 bg-[#0B1014]/70 p-3">
+                    <div key={item.displayName + item.address} className="rounded-xl border border-white/8 bg-background/70 p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-sm font-black text-white">{item.displayName}</p>
                           <p className="mt-1 text-xs leading-relaxed text-white/65">{item.address}</p>
                         </div>
-                        <span className="shrink-0 rounded-full border border-[#FFB86B]/20 px-2 py-1 text-xs font-black text-[#FFD09A]">mapa</span>
+                        <span className="shrink-0 rounded-full border border-warning/20 px-2 py-1 text-xs font-black text-warning">mapa</span>
                       </div>
                       <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/65 sm:grid-cols-4">
                         <span>Telefone: {item.phone ?? "não informado"}</span>
@@ -1050,15 +1050,15 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
                         <span className="col-span-2 sm:col-span-1">{item.note}</span>
                       </div>
-                      <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className="mt-3 min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Abrir no Google Maps</button>
+                      <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-background">Abrir no Google Maps</button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">Pesquisar no Google Maps</button>
-              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-[#3DE3FF]/25 bg-[#3DE3FF]/[.05] px-3 text-xs font-black text-[#C9F7FF] disabled:opacity-50">Postos perto de mim</button>
+              <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-primary px-3 text-xs font-black text-background">Pesquisar no Google Maps</button>
+              <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-accent/25 bg-accent/[.05] px-3 text-xs font-black text-[#C9F7FF] disabled:opacity-50">Postos perto de mim</button>
             </div>
             {!online && (
               <p className="mt-2 text-xs leading-relaxed text-[#DFFF9D]">
@@ -1069,46 +1069,46 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {!showSavedOnly && broadAguasLindasQuery && (
-          <section className="mt-5 rounded-[1.6rem] border border-[#3DE3FF]/20 bg-[#0F171D] p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
+          <section className="mt-5 rounded-[1.6rem] border border-accent/20 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.22)] sm:p-5" aria-labelledby="anp-directory-title">
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-bold text-white">
-                Consultar dados oficiais e exportar cadastro
+                Sobre os dados · fontes e exportação
                 <span className="text-xs font-normal text-white/65">ANP</span>
               </summary>
 
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Fonte oficial ANP</p>
+                <p className="text-xs font-black uppercase tracking-[.15em] text-accent">Fonte oficial ANP</p>
                 <h2 id="anp-directory-title" className="mt-1 text-xl font-black">Cadastro técnico dos postos</h2>
                 <p className="mt-1 text-sm leading-relaxed text-white/65">A API da ANP fornece autorização, CNPJ, endereço, distribuidora, produtos, tancagem, bicos, coordenadas, validação geográfica, situação constatada e status SIGAF.</p>
               </div>
-              <span className="shrink-0 rounded-full border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-2 py-1 text-xs font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
+              <span className="shrink-0 rounded-full border border-accent/20 bg-accent/[.04] px-2 py-1 text-xs font-black text-[#9FEFFF]">{anpStations.length || "—"} postos</span>
             </div>
 
             {anpLiveQuery.isLoading && !staticRuntime && <div className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-xs text-white/65">Consultando a base oficial da ANP…</div>}
-            {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-11 rounded-xl border border-[#FFB86B]/20 px-3 font-black text-[#FFD09A]">Tentar novamente</button></div>}
-            {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-4 text-xs leading-relaxed text-white/65">Os dados oficiais não estão disponíveis nesta consulta. Use as fichas locais abaixo e tente atualizar quando estiver conectado.</div>}
+            {anpLiveQuery.isError && !staticRuntime && <div className="mt-4 rounded-xl border border-warning/20 bg-warning/[.04] p-4 text-xs leading-relaxed text-white/65">A consulta ao serviço da ANP falhou nesta tentativa. A base local continua disponível. <button type="button" onClick={() => void anpLiveQuery.refetch()} className="mt-2 min-h-11 rounded-xl border border-warning/20 px-3 font-black text-warning">Tentar novamente</button></div>}
+            {staticRuntime && !anpRows.length && <div className="mt-4 rounded-xl border border-warning/20 bg-warning/[.04] p-4 text-xs leading-relaxed text-white/65">Os dados oficiais não estão disponíveis nesta consulta. Use as fichas locais abaixo e tente atualizar quando estiver conectado.</div>}
 
             {(anpRows.length > 0 || mapStations.length > 0) && (
               <>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.03] p-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/15 bg-primary/[.03] p-3">
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[.12em] text-[#C7FF3C]">Mapa de Águas Lindas</p>
+                    <p className="text-xs font-black uppercase tracking-[.12em] text-primary">Mapa de Águas Lindas</p>
                     <p className="mt-1 text-sm leading-relaxed text-white/65">{anpWithCoordinates} de {anpStations.length} postos da ANP possuem coordenadas{anpWithoutCoordinates > 0 ? ` · ${anpWithoutCoordinates} sem coordenadas oficiais nesta resposta` : ""}. {mapSecondaryCount > 0 ? mapSecondaryCount + " referências secundárias também foram agregadas ao mapa." : ""}</p>
                   </div>
                 </div>
 
 
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
-                  <div className="rounded-xl border border-white/8 bg-[#0B1014] p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
-                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
+                  <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Linhas ANP</p><p className="mt-1 text-lg font-black">{anpRows.length}</p></div>
+                  <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">CNPJs</p><p className="mt-1 text-lg font-black">{anpStations.length}</p></div>
+                  <div className="rounded-xl border border-white/8 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-white/65">Com coordenadas</p><p className="mt-1 text-lg font-black">{anpStations.filter(item => item.latitude != null && item.longitude != null).length}</p></div>
+                  <button type="button" onClick={exportAnpCsv} className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-[#87DFF0]">Dados completos</p><p className="mt-1 text-sm font-black text-[#C9F7FF]">Exportar CSV</p></button>
                 </div>
 
                 <div className="mt-3 space-y-2">
                   {anpStations.slice(0, 12).map(station => (
-                    <details key={station.cnpj} className="rounded-[1.15rem] border border-white/8 bg-[#0B1014]">
+                    <details key={station.cnpj} className="rounded-[1.15rem] border border-white/8 bg-background">
                       <summary className="cursor-pointer list-none px-3.5 py-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
@@ -1130,7 +1130,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                           {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
                         </div>
                         <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
-                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-[#C7FF3C]/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
+                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
                         {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
                       </div>
                     </details>
@@ -1141,9 +1141,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             )}
 
             {!anpRows.length && mapStations.length > 0 && (
-              <section id="aguas-lindas-map-offline" className="scroll-mt-24 mt-4 overflow-hidden rounded-[1.35rem] border border-[#FFB86B]/20 bg-[#0B1014]" aria-label="Mapa offline de referências dos postos">
+              <section id="aguas-lindas-map-offline" className="scroll-mt-24 mt-4 overflow-hidden rounded-[1.35rem] border border-warning/20 bg-background" aria-label="Mapa offline de referências dos postos">
                 <div className="border-b border-white/8 px-3.5 py-3">
-                  <p className="text-xs font-black uppercase tracking-[.14em] text-[#FFCF96]">Mapa salvo no aparelho</p>
+                  <p className="text-xs font-black uppercase tracking-[.14em] text-warning">Mapa salvo no aparelho</p>
                   <p className="mt-1 text-sm leading-relaxed text-white/65">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis sem conexão. A navegação em aplicativos externos pode exigir internet.</p>
                 </div>
                 <div className="relative">
@@ -1172,23 +1172,23 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {nearby && (
-          <section className="mt-3 flex items-start gap-3 rounded-2xl border border-[#3DE3FF]/15 bg-[#3DE3FF]/[.04] p-3">
-            <MapPin className="mt-0.5 size-4 shrink-0 text-[#3DE3FF]" />
+          <section className="mt-3 flex items-start gap-3 rounded-2xl border border-accent/15 bg-accent/[.04] p-3">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-accent" />
             <div><p className="text-xs font-black">Busca por proximidade</p><p className="mt-1 text-xs leading-relaxed text-white/65">A localização foi usada para ordenar a consulta; suas coordenadas não são exibidas publicamente pelo Trajeto.</p></div>
           </section>
         )}
 
         {stationPages.isLoading && !showSavedOnly && (
           <section className="mt-5 grid gap-2" role="status" aria-live="polite">
-            {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-36 animate-pulse rounded-3xl border border-white/8 bg-[#121B22]" />)}
+            {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-36 animate-pulse rounded-3xl border border-white/8 bg-card" />)}
           </section>
         )}
 
         {stationPages.isError && !stations.length && !showSavedOnly && (
-          <section className="mt-5 rounded-3xl border border-[#FFB86B]/20 bg-[#FFB86B]/[.04] p-5">
+          <section className="mt-5 rounded-3xl border border-warning/20 bg-warning/[.04] p-5">
             <p className="text-sm font-black">A consulta não respondeu.</p>
             <p className="mt-1 text-xs leading-relaxed text-white/65">O objetivo continua disponível no Google Maps enquanto o serviço do Trajeto não responde.</p>
-            <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="mt-4 min-h-11 rounded-xl bg-[#C7FF3C] px-4 text-xs font-black text-[#0B1014]">Abrir no Google Maps</button>
+            <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-xs font-black text-background">Abrir no Google Maps</button>
           </section>
         )}
 
@@ -1202,12 +1202,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               </div>
               <div className="flex gap-2">
                 {showSavedOnly && <button type="button" onClick={() => setShowMap(current => !current)} disabled={!visibleStations.length} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/8 bg-white/[.03] text-white/60" aria-label={showMap ? "Ocultar mapa" : "Abrir mapa"}><MapIcon className="size-4" /></button>}
-                {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-[#C7FF3C] px-3 text-xs font-black text-[#0B1014]">{compareIds.length} comparar</button>}
+                {compareIds.length > 0 && <button type="button" onClick={() => document.getElementById("station-compare")?.scrollIntoView({ behavior: "smooth" })} className="min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-background">{compareIds.length} comparar</button>}
               </div>
             </section>
 
             {showMap && (showSavedOnly || !broadAguasLindasQuery) && visibleStations.length > 0 && (
-              <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-[#121B22]">
+              <section className="mt-3 overflow-hidden rounded-3xl border border-white/8 bg-card">
                 <div className="relative"><StationMap stations={visibleStations} userCoords={userCoords} /></div>
               </section>
             )}
@@ -1217,22 +1217,22 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 const isSaved = saved.some(item => item.placeId === station.placeId);
                 const isCompared = compareIds.includes(station.placeId);
                 return (
-                  <article key={station.placeId} className={"rounded-[1.35rem] border bg-[#121B22] p-4 " + (isCompared ? "border-[#3DE3FF]/50" : "border-white/8")}>
+                  <article key={station.placeId} className={"rounded-[1.35rem] border bg-card p-4 " + (isCompared ? "border-accent/50" : "border-white/8")}>
                     <div className="flex items-start gap-3">
-                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#C7FF3C] text-[#0B1014]"><Fuel className="size-4" /></div>
+                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-background"><Fuel className="size-4" /></div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0"><p className="break-words text-base font-black">{station.name}</p><p className="mt-1 truncate text-sm text-white/65">{inferredBrand(station.name)} · {station.distanceLabel || "distância indisponível"}</p></div>
-                          {station.isOpen === true && <span className="shrink-0 rounded-full bg-[#C7FF3C]/10 px-2 py-1 text-xs font-black text-[#D9FF91]">aberto</span>}
+                          {station.isOpen === true && <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-xs font-black text-[#D9FF91]">aberto</span>}
                         </div>
                         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/65">{station.address}</p>
                       </div>
                     </div>
 
                                         <div className="mt-3 grid grid-cols-4 gap-1.5">
-                      <button type="button" onClick={() => navigateTo(station)} className="col-span-2 min-h-11 rounded-xl bg-[#C7FF3C] px-2 text-sm font-black text-[#0B1014]"><Navigation className="mr-1 inline size-3.5" />Navegar</button>
+                      <button type="button" onClick={() => navigateTo(station)} className="col-span-2 min-h-11 rounded-xl bg-primary px-2 text-sm font-black text-background"><Navigation className="mr-1 inline size-3.5" />Navegar</button>
                       <button type="button" onClick={() => toggleSaved(station)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isSaved ? "border-[#FF7D6A]/30 bg-[#FF7D6A]/[.06] text-[#FFB7A9]" : "border-white/8 text-white/65")} aria-label={isSaved ? "Remover dos salvos" : "Salvar posto"}><Heart className="size-4" fill={isSaved ? "currentColor" : "none"} /></button>
-                      <button type="button" onClick={() => toggleCompare(station.placeId)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isCompared ? "border-[#3DE3FF]/40 bg-[#3DE3FF]/[.08] text-[#3DE3FF]" : "border-white/8 text-white/65")} aria-label={isCompared ? "Remover da comparação" : "Comparar posto"}><SlidersHorizontal className="size-4" /></button>
+                      <button type="button" onClick={() => toggleCompare(station.placeId)} className={"grid min-h-11 min-w-0 place-items-center rounded-xl border " + (isCompared ? "border-accent/40 bg-accent/[.08] text-accent" : "border-white/8 text-white/65")} aria-label={isCompared ? "Remover da comparação" : "Comparar posto"}><SlidersHorizontal className="size-4" /></button>
                     </div>
                     {index === 0 && <p className="mt-2 text-center text-xs font-bold text-white/65">Ações principais ficam sempre no alcance do polegar.</p>}
                   </article>
@@ -1248,13 +1248,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             )}
 
             {compared.length > 0 && (
-              <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-[#3DE3FF]/20 bg-[#121B22] p-4">
+              <section id="station-compare" className="mt-5 rounded-[1.5rem] border border-accent/20 bg-card p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#3DE3FF]">Comparação</p><h3 className="mt-1 text-xl font-black">{compared.length} parada(s)</h3></div>
+                  <div><p className="text-xs font-black uppercase tracking-[.15em] text-accent">Comparação</p><h3 className="mt-1 text-xl font-black">{compared.length} parada(s)</h3></div>
                   <button type="button" onClick={() => setCompareIds([])} className="grid size-9 place-items-center rounded-lg border border-white/8 text-white/65" aria-label="Limpar comparação"><X className="size-4" /></button>
                 </div>
                 <div className="mt-3 space-y-2">
-                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="flex min-h-12 w-full items-center justify-between rounded-xl bg-[#0B1014] px-3 text-left"><span className="min-w-0 truncate text-xs font-black">{item.name}<span className="ml-2 text-xs font-normal text-white/65">{item.distanceLabel || "sem distância"}</span></span><ChevronRight className="size-4 shrink-0 text-[#3DE3FF]" /></button>)}
+                  {compared.map(item => <button key={item.placeId} type="button" onClick={() => navigateTo(item)} className="flex min-h-12 w-full items-center justify-between rounded-xl bg-background px-3 text-left"><span className="min-w-0 truncate text-xs font-black">{item.name}<span className="ml-2 text-xs font-normal text-white/65">{item.distanceLabel || "sem distância"}</span></span><ChevronRight className="size-4 shrink-0 text-accent" /></button>)}
                 </div>
               </section>
             )}
@@ -1273,7 +1273,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         )}
 
         {!stations.length && !stationPages.isLoading && (
-          <section className="mt-5 rounded-3xl border border-white/8 bg-[#121B22] p-5 text-center">
+          <section className="mt-5 rounded-3xl border border-white/8 bg-card p-5 text-center">
             <Fuel className="mx-auto size-5 text-white/65" />
             <p className="mt-3 text-sm font-black">{showSavedOnly ? "Nenhum posto salvo." : "Pesquise uma região para começar."}</p>
             <p className="mt-1 text-xs leading-relaxed text-white/65">O Trajeto mostra resultados encontrados na consulta atual e separa as referências oficiais quando disponíveis.</p>
