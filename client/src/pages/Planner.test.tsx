@@ -176,11 +176,12 @@ describe("Planner travel state", () => {
     expect(screen.queryByRole("button", { name: "Abrir Google Maps" })).toBeNull();
   });
 
-  it("offers external navigation with the current position as an optional origin", async () => {
-    state.staticRuntime = true;
+  it.each([false, true])("offers external navigation with the current position as an optional origin (static=%s)", async staticRuntime => {
+    state.staticRuntime = staticRuntime;
     state.search = "destino=Hospital";
     render(<Planner />);
     submit();
+    await screen.findByRole("heading", { name: /Navegação pronta/i });
     await screen.findByRole("button", { name: "Abrir Google Maps" });
     expect(state.mutate).not.toHaveBeenCalled();
   });
