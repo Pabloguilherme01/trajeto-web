@@ -63,3 +63,18 @@ it("selects through keyboard and recovers from an empty search", () => {
   fireEvent.keyDown(input, { key: "Enter" });
   expect(choose).toHaveBeenCalledWith("b");
 });
+
+it("keeps the map picker semantic and readable on narrow layouts", () => {
+  render(<MapDestinationPicker items={items} value="a" label="Escolher lugar" onSelect={vi.fn()} />);
+  const trigger = screen.getByRole("button", { name: "Escolher lugar" });
+  expect(trigger.className).toContain("bg-card/95");
+  expect(trigger.className).toContain("text-card-foreground");
+  expect(trigger.className).not.toContain("bg-white");
+
+  fireEvent.click(trigger);
+  const activeOption = screen.getByRole("option", { name: "Avenida Brasília · Setor Norte" });
+  expect(activeOption.className).toContain("bg-muted");
+  expect(screen.getByText("Setor Norte").className).toContain("line-clamp-2");
+  expect(screen.getByText("Setor Norte").className).toContain("break-words");
+});
+
