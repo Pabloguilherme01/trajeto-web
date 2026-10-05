@@ -144,6 +144,45 @@ export default function TileStationMap({
     cx: number;
     cy: number;
   } | null>(null);
+  const gestureFrame = useRef<number | null>(null);
+  const pendingGesture = useRef<{
+    center: { lat: number; lng: number };
+    zoom?: number;
+  } | null>(null);
+
+  const applyGesture = (next: { center: { lat: number; lng: number }; zoom?: number }) => {
+    if (typeof next.zoom === "number") setZoom(next.zoom);
+    setCenter(next.center);
+  };
+  const scheduleGesture = (next: { center: { lat: number; lng: number }; zoom?: number }) => {
+    if (gestureFrame.current !== null) {
+      pendingGesture.current = next;
+      return;
+    }
+    applyGesture(next);
+    gestureFrame.current = window.requestAnimationFrame(() => {
+      gestureFrame.current = null;
+      const pending = pendingGesture.current;
+      pendingGesture.current = null;
+      if (pending) scheduleGesture(pending);
+    });
+  };
+  const flushGesture = () => {
+    if (gestureFrame.current !== null) {
+      window.cancelAnimationFrame(gestureFrame.current);
+      gestureFrame.current = null;
+    }
+    const pending = pendingGesture.current;
+    pendingGesture.current = null;
+    if (pending) applyGesture(pending);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (gestureFrame.current !== null)
+        window.cancelAnimationFrame(gestureFrame.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (userCoords && following) setCenter(userCoords);
@@ -321,8 +360,14 @@ export default function TileStationMap({
       const anchorBase = projectBase(state.anchor.lat, state.anchor.lng);
       const nextScale = 2 ** nextZoom;
       const rect = event.currentTarget.getBoundingClientRect();
-      setZoom(nextZoom);
-      setCenter(unproject(anchorBase.x * nextScale - ((a.x + b.x) / 2 - rect.left - width / 2), anchorBase.y * nextScale - ((a.y + b.y) / 2 - rect.top - height / 2), nextZoom));
+      scheduleGesture({
+        zoom: nextZoom,
+        center: unproject(
+          anchorBase.x * nextScale - ((a.x + b.x) / 2 - rect.left - width / 2),
+          anchorBase.y * nextScale - ((a.y + b.y) / 2 - rect.top - height / 2),
+          nextZoom
+        ),
+      });
       return;
     }
     const state = dragRef.current;
@@ -335,12 +380,13 @@ export default function TileStationMap({
       state.cy - (event.clientY - state.y),
       zoom
     );
-    setCenter(next);
+    scheduleGesture({ center: next });
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!pointers.current.has(event.pointerId)) return;
     pointers.current.delete(event.pointerId);
+    flushGesture();
     pinch.current = null;
     const remaining = [...pointers.current.entries()][0];
     dragRef.current = remaining ? { id: remaining[0], x: remaining[1].x, y: remaining[1].y, cx: centerPx.x, cy: centerPx.y } : null;
