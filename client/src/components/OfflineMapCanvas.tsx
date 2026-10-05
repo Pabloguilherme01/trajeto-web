@@ -562,7 +562,9 @@ export default function OfflineMapCanvas({
                 left: p.x,
                 top: p.y,
                 zIndex:
-                  marker.id === "live-position"
+                  marker.id === selectedMarkerId
+                    ? 3
+                    : marker.id === "live-position"
                     ? 2
                     : marker.isReference
                       ? 0

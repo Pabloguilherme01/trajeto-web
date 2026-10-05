@@ -8,6 +8,17 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+it("keeps the selected marker above coincident catalogue points", () => {
+  render(<TileStationMap stations={[
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Posto B", address: "Rua B", lat: -15.7545, lng: -48.2816 },
+  ]} />);
+  const first = screen.getByRole("button", { name: "Abrir Posto A" });
+  const second = screen.getByRole("button", { name: "Abrir Posto B" });
+  expect(Number(first.style.zIndex)).toBeGreaterThan(Number(second.style.zIndex));
+  fireEvent.click(second);
+  expect(Number(second.style.zIndex)).toBeGreaterThan(Number(first.style.zIndex));
+});
 it("opens the local map on demand and returns to the tiled camera", () => {
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local disponível</p>} />);
   fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
