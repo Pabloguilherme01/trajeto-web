@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { accessibilityPreferenceEvent, getAccessibilityPreferences, resetAccessibilityPreferences, setAccessibilityPreferences, updateAccessibilityPreference, type AccessibilityPreferences } from "@/lib/accessibilityPreferences";
 import { setEconomyMode } from "@/lib/mobilePreferences";
 import { clearLocalAppData, countLocalAppData, exportLocalAppData, localDataEvent } from "@/lib/localData";
-import { OPEN_ACCESSIBILITY_EVENT } from "@/components/DailyCommandCenter";
 
 const options: Array<{key:keyof AccessibilityPreferences; label:string; detail:string}> = [
   { key:"largeText", label:"Texto maior", detail:"Aumenta a leitura sem alterar os dados." },
@@ -23,12 +22,6 @@ export default function AccessibilityPanel() {
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const openPanel = () => { returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setOpen(true); };
   const closePanel = () => setOpen(false);
-
-  useEffect(()=>{
-    const openFromApp=()=>openPanel();
-    window.addEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
-    return()=>window.removeEventListener(OPEN_ACCESSIBILITY_EVENT, openFromApp);
-  },[]);
 
   useEffect(()=>{
     if (!open) return;
