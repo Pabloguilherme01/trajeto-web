@@ -448,7 +448,7 @@ export default function OfflineMapCanvas({
   return (
     <div
       className={
-        "offline-map relative overflow-hidden rounded-2xl " +
+        "offline-map relative overflow-hidden rounded-[1.6rem] border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,.24)] " +
         (dark ? "bg-[#18272d]" : "bg-[#eef2eb]")
       }
     >
@@ -456,7 +456,7 @@ export default function OfflineMapCanvas({
         ref={viewport}
         data-map-surface
         className={
-          "relative touch-none overflow-hidden outline-offset-[-3px] " +
+          "relative isolate touch-none overflow-hidden outline-offset-[-3px] " +
           (expanded ? "h-[75dvh] min-h-[360px]" : className)
         }
         role="region"
@@ -506,6 +506,7 @@ export default function OfflineMapCanvas({
         onPointerCancel={end}
         onLostPointerCapture={end}
       >
+        <div aria-hidden="true" className={"pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b " + (dark ? "from-[#07191f]/55 to-transparent" : "from-white/35 to-transparent")} />
         <svg
           width="100%"
           height="100%"
@@ -719,7 +720,7 @@ export default function OfflineMapCanvas({
         {controls}
         <div
           className={
-            "pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " +
+            "pointer-events-none absolute left-3 top-3 z-20 rounded-full border px-3 py-2 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
@@ -733,7 +734,7 @@ export default function OfflineMapCanvas({
           aria-pressed={dark}
           onClick={() => setDark(v => !v)}
           className={
-            "absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
+            "absolute right-3 top-3 z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
@@ -751,7 +752,7 @@ export default function OfflineMapCanvas({
           aria-pressed={showAllStreetNames}
           onClick={() => setShowAllStreetNames(value => !value)}
           className={
-            "absolute right-3 top-[4.25rem] flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
+            "absolute right-3 top-[4.25rem] z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (showAllStreetNames
               ? "bg-[#37e6df] text-[#102028]"
               : dark
@@ -767,7 +768,7 @@ export default function OfflineMapCanvas({
           aria-pressed={expanded}
           onClick={() => setExpanded(v => !v)}
           className={
-            "absolute bottom-3 right-3 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
+            "absolute bottom-3 right-3 z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
@@ -777,7 +778,7 @@ export default function OfflineMapCanvas({
         </button>
         <div
           className={
-            "pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " +
+            "pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border p-2 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/90 text-[#e9ffff]"
               : "bg-white/90 text-[#27414b]")
@@ -792,7 +793,7 @@ export default function OfflineMapCanvas({
             : scaleMetres + " m"}
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-xs text-[#536760]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/5 bg-[linear-gradient(180deg,#ffffff,#f3f8f5)] px-3 py-2.5 text-xs font-semibold text-[#536760]">
         <span role="status">
           {pack
             ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} trechos viários · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
