@@ -22,6 +22,11 @@ describe("DestinationActions", () => {
     vi.restoreAllMocks();
   });
 
+  it("exposes the destination actions as a named accessibility group", () => {
+    render(<DestinationActions destination={destination} />);
+    expect(screen.getByRole("group", { name: "Ações para Prefeitura" })).toBeTruthy();
+  });
+
   it("opens the preferred navigation provider instead of forcing Google Maps", () => {
     const open = vi.spyOn(window, "open").mockImplementation(() => null);
     setPreferredNavigationProvider("waze");
