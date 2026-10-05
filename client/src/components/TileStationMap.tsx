@@ -371,21 +371,29 @@ export default function TileStationMap({
       maxLat = Math.max(...points.map(p => p.lat));
     const minLng = Math.min(...points.map(p => p.lng)),
       maxLng = Math.max(...points.map(p => p.lng));
-    setFollowing(false);
-    let next = 17;
-    while (next > 8) {
-      const a = project(minLat, minLng, next),
-        b = project(maxLat, maxLng, next);
-      if (
-        Math.abs(b.x - a.x) <= Math.max(80, width - 80) &&
-        Math.abs(b.y - a.y) <= Math.max(80, height - 260)
+    const a = projectBase(minLat, minLng);
+    const b = projectBase(maxLat, maxLng);
+    const spanX = Math.max(Number.EPSILON, Math.abs(b.x - a.x));
+    const spanY = Math.max(Number.EPSILON, Math.abs(b.y - a.y));
+    const availableX = Math.max(80, width - 80);
+    const availableY = Math.max(80, height - 260);
+    const fittedZoom = Math.floor(
+      Math.min(
+        Math.log2(availableX / spanX),
+        Math.log2(availableY / spanY)
       )
-        break;
-      next--;
-    }
+    );
+    const next = Math.max(8, Math.min(17, fittedZoom));
+    const scale = 2 ** next;
+    setFollowing(false);
     setZoom(next);
-    const a = project(minLat, minLng, next), b = project(maxLat, maxLng, next);
-    setCenter(unproject((a.x + b.x) / 2, (a.y + b.y) / 2, next));
+    setCenter(
+      unproject(
+        ((a.x + b.x) / 2) * scale,
+        ((a.y + b.y) / 2) * scale,
+        next
+      )
+    );
   };
 
   // A new array with the same geometry must not undo a user pan or zoom.
