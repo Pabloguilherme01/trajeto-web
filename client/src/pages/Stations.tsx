@@ -800,7 +800,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               className="mt-3"
             />
 
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Ações rápidas de postos">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5" role="group" aria-label="Ações rápidas de postos">
               <button type="button" onClick={useNearby} disabled={locating} className="task-action task-action-primary shrink-0 disabled:opacity-40">
                 <Navigation className="size-3.5" /> {locating ? "GPS…" : "Perto de mim"}
               </button>

@@ -298,6 +298,10 @@ export default function Planner() {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (locating) {
+      setError("Aguarde a localização da origem terminar antes de calcular a rota.");
+      return;
+    }
     const from = origin.trim();
     const to = destination.trim();
 
@@ -772,7 +776,7 @@ export default function Planner() {
                       ))}
                     </div>
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-background px-3 text-base text-white outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
-                    <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} aria-label="Lista de destinos disponíveis">
+                    <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} role="region" aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-white/8 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
                           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent transition-colors group-hover:bg-accent/15"><RouteIcon className="size-4" /></span>
@@ -809,8 +813,8 @@ export default function Planner() {
                 }}
               />
 
-              <button type="submit" data-testid="planner-primary-action" aria-busy={planRoute.isPending || publicRoutePending} disabled={planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="planner-primary-action mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-primary px-4 text-sm font-black text-background disabled:opacity-35 active:scale-[.99]">
-                <span>{planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
+              <button type="submit" data-testid="planner-primary-action" aria-busy={locating || planRoute.isPending || publicRoutePending} disabled={locating || planRoute.isPending || publicRoutePending || destination.trim().length < 3} className="planner-primary-action mt-4 flex min-h-13 w-full items-center justify-between rounded-2xl bg-primary px-4 text-sm font-black text-background disabled:opacity-35 active:scale-[.99]">
+                <span>{locating ? "Aguarde a localização…" : planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending || publicRoutePending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
