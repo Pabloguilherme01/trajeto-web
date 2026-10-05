@@ -572,7 +572,7 @@ export function OfflineRoutePreview({
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-card/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-primary">
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[0.62rem] font-black uppercase tracking-[.14em] text-primary">
                         Agora
                       </span>
                       <span className="text-xs font-bold text-white/65">
@@ -591,8 +591,8 @@ export function OfflineRoutePreview({
                   </div>
                 </div>
                 {guidance.nextStep && (
-                  <div className="mt-4 flex min-w-0 items-start gap-2 rounded-2xl border border-white/10 bg-card/[.07] px-3 py-2.5">
-                    <span className="shrink-0 rounded-full bg-card/10 px-2 py-1 text-[0.58rem] font-black uppercase tracking-[.12em] text-white/65">
+                  <div className="mt-4 flex min-w-0 items-start gap-2 rounded-2xl border border-white/10 bg-white/[.07] px-3 py-2.5">
+                    <span className="shrink-0 rounded-full bg-white/10 px-2 py-1 text-[0.58rem] font-black uppercase tracking-[.12em] text-white/65">
                       Depois
                     </span>
                     <ManeuverIcon
@@ -1379,7 +1379,7 @@ function RouteMapContent({
               className={
                 "inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-black shadow-lg backdrop-blur " +
                 (satellite
-                  ? "bg-card text-background"
+                  ? "bg-foreground text-background"
                   : "bg-background/90 text-white")
               }
             >
