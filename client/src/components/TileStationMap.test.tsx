@@ -8,6 +8,22 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+it("moves cached route geometry and markers together without rebuilding the polyline on pan", () => {
+  const stations = [
+    { id: "origin", name: "Origem", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "destination", name: "Destino", address: "Rua B", lat: -15.755, lng: -48.282 },
+  ];
+  render(<TileStationMap stations={stations} routePoints={stations} />);
+  const svg = screen.getByRole("img", { name: "Trajeto pelas ruas" });
+  const shape = svg.querySelector("polyline")!.getAttribute("points");
+  const before = svg.querySelector("g")!.getAttribute("transform");
+  const marker = screen.getByRole("button", { name: "Abrir Origem" });
+  const left = parseFloat(marker.style.left);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
+  expect(svg.querySelector("polyline")!.getAttribute("points")).toBe(shape);
+  expect(svg.querySelector("g")!.getAttribute("transform")).not.toBe(before);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(left - 80);
+});
 it("keeps the selected marker above coincident catalogue points", () => {
   render(<TileStationMap stations={[
     { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },

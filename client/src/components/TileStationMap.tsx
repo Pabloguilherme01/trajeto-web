@@ -11,6 +11,7 @@ import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
+import { viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
@@ -98,6 +99,7 @@ export default function TileStationMap({
   );
 
   const singlePointKey = drawable.length === 1 ? `${drawable[0].lat},${drawable[0].lng}` : "";
+  const pickerItems = useMemo(() => drawable.map(station => ({ ...station, id: stationKey(station) })), [drawable]);
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
   useEffect(() => {
@@ -169,10 +171,7 @@ export default function TileStationMap({
   const tileCenter = project(center.lat, center.lng, tileZoom);
   const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
   const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
-  const baseTileX = Math.floor(tileCenter.x / TILE);
-  const baseTileY = Math.floor(tileCenter.y / TILE);
-  const radiusX = Math.ceil(width / (2 * TILE * tileScale)) + 1;
-  const radiusY = Math.ceil(height / (2 * TILE * tileScale)) + 1;
+  const tileBounds = viewportTileBounds(tileCenter, width, height, tileScale);
   const tiles: Array<{
     x: number;
     y: number;
@@ -181,22 +180,24 @@ export default function TileStationMap({
     top: number;
   }> = [];
 
-  for (let dy = -radiusY; dy <= radiusY; dy++) {
-    for (let dx = -radiusX; dx <= radiusX; dx++) {
-      const rawX = baseTileX + dx;
-      const y = baseTileY + dy;
+  for (let y = tileBounds.minY; y <= tileBounds.maxY; y++) {
+    if (y < 0 || y >= 2 ** tileZoom) continue;
+    for (let rawX = tileBounds.minX; rawX <= tileBounds.maxX; rawX++) {
       tiles.push({
         x: wrapTile(rawX, tileZoom),
         y,
         key: `${tileZoom}:${rawX}:${y}`,
-        left: (dx + radiusX) * TILE,
-        top: (dy + radiusY) * TILE,
+        left: (rawX - tileBounds.minX) * TILE,
+        top: (y - tileBounds.minY) * TILE,
       });
     }
   }
 
+  const projectedMarkers = useMemo(() => new Map(drawable.map(station => [station, project(station.lat, station.lng, zoom)])), [drawable, zoom]);
+  const projectedRoute = useMemo(() => routePoints.map(point => project(point.lat, point.lng, zoom)), [routePoints, zoom]);
+  const routeShape = useMemo(() => projectedRoute.map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" "), [projectedRoute]);
   const markerPosition = (station: { lat: number; lng: number }) => {
-    const p = project(station.lat, station.lng, zoom);
+    const p = projectedMarkers.get(station as (typeof drawable)[number]) ?? project(station.lat, station.lng, zoom);
     return {
       left: width / 2 + p.x - centerPx.x,
       top: height / 2 + p.y - centerPx.y,
@@ -434,10 +435,10 @@ export default function TileStationMap({
           <div
             className="absolute"
             style={{
-              width: TILE * (radiusX * 2 + 1),
-              height: TILE * (radiusY * 2 + 1),
-              left: width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale,
-              top: height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale,
+              width: TILE * (tileBounds.maxX - tileBounds.minX + 1),
+              height: TILE * (tileBounds.maxY - tileBounds.minY + 1),
+              left: width / 2 + (tileBounds.minX * TILE - tileCenter.x) * tileScale,
+              top: height / 2 + (tileBounds.minY * TILE - tileCenter.y) * tileScale,
               transform: `scale(${tileScale})`,
               transformOrigin: "0 0",
             }}
@@ -464,6 +465,7 @@ export default function TileStationMap({
               aria-label="Trajeto pelas ruas"
               role="img"
             >
+              <g transform={`translate(${width / 2 - centerPx.x} ${height / 2 - centerPx.y})`}>
               {["#ffffff", appearance.color].map((color, index) => (
                 <polyline
                   key={color}
@@ -473,14 +475,10 @@ export default function TileStationMap({
                   strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={routePoints
-                    .map(point => {
-                      const p = markerPosition(point);
-                      return `${p.left},${p.top}`;
-                    })
-                    .join(" ")}
+                  points={routeShape}
                 />
               ))}
+              </g>
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
@@ -614,7 +612,7 @@ export default function TileStationMap({
 
         <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
-            items={drawable.map(station => ({ ...station, id: stationKey(station) }))}
+            items={pickerItems}
             onSelect={id => {
               const station = drawable.find(item => stationKey(item) === id);
               if (!station) return;

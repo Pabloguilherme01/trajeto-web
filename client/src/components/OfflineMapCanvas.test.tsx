@@ -72,9 +72,14 @@ it("loads local streets with no coordinate or external request, and preserves da
   ).toBeTruthy();
   const marker = screen.getByRole("button", { name: "Selecionar Origem" });
   const initial = marker.style.left;
+  const route = screen.getByRole("img").querySelector("path[stroke-dasharray]")!;
+  const shape = route.getAttribute("d");
+  const beforePan = route.parentElement!.getAttribute("transform");
   const map = screen.getByRole("region", { name: "Explorar mapa offline" });
   fireEvent.keyDown(map, { key: "ArrowRight" });
   expect(marker.style.left).not.toBe(initial);
+  expect(route.getAttribute("d")).toBe(shape);
+  expect(route.parentElement!.getAttribute("transform")).not.toBe(beforePan);
   fireEvent.keyDown(map, { key: "Home" });
   expect(marker.style.left).toBe(initial);
   fireEvent.click(screen.getByRole("button", { name: "Usar mapa claro" }));

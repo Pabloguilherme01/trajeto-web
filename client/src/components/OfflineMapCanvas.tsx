@@ -119,16 +119,16 @@ export default function OfflineMapCanvas({
   gestureZoom.current = zoom;
   const gestureStarted = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
-  const validMarkers = markers.filter(isMapPoint);
-  const validGeometry = routePoints.filter(isMapPoint);
+  const validMarkers = useMemo(() => markers.filter(isMapPoint), [markers]);
+  const validGeometry = useMemo(() => routePoints.filter(isMapPoint), [routePoints]);
   const stride = Math.max(1, Math.ceil(validGeometry.length / 6000));
-  const geometry =
+  const geometry = useMemo(() =>
     stride === 1
       ? validGeometry
       : [
           ...validGeometry.filter((_, i) => i % stride === 0),
           validGeometry[validGeometry.length - 1],
-        ];
+        ], [validGeometry, stride]);
   // Nearby references must not zoom the trip out beyond its endpoints.
   const tripMarkers = validMarkers.filter(
     p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
@@ -252,13 +252,10 @@ export default function OfflineMapCanvas({
     return true;
   });
   const markerGroups = mapMarkerGroups(displayedMarkers, project, marker => zoom >= 6 || marker.id === selectedMarkerId || ["origin", "destination", "live-position", "device-location"].includes(marker.id));
-  const path = (points: MapPoint[]) =>
-    points
-      .map((point, i) => {
-        const p = project(point);
-        return `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
-      })
-      .join(" ");
+  const routePath = useMemo(() => geometry.map((point, i) => {
+    const p = world(point);
+    return `${i ? "L" : "M"}${(size.width / 2 + (p.x - camera.x) * camera.scale).toFixed(1)} ${(size.height / 2 + (p.y - camera.y) * camera.scale).toFixed(1)}`;
+  }).join(" "), [geometry, camera, size.width, size.height]);
   // Project and bound each road once per pack, rather than walking every
   // coordinate on each gesture. Only visible roads become SVG paths.
   const roads = useMemo(
@@ -281,6 +278,10 @@ export default function OfflineMapCanvas({
       }).sort((a, b) => a.priority - b.priority) ?? [],
     [pack]
   );
+  // Pan changes only the SVG translation, not the road geometry strings.
+  const roadPaths = useMemo(() => new Map(roads.map(road => [road.id, road.world.map((p, i) =>
+    `${i ? "L" : "M"}${(size.width / 2 + (p.x - camera.x) * camera.scale).toFixed(1)} ${(size.height / 2 + (p.y - camera.y) * camera.scale).toFixed(1)}`
+  ).join(" ")])), [roads, camera, size.width, size.height]);
   const visible = roads.filter(({ bounds }) => {
     const left = size.width / 2 - camera.x * camera.scale + pan.x;
     const top = size.height / 2 - camera.y * camera.scale + pan.y;
@@ -421,14 +422,9 @@ export default function OfflineMapCanvas({
             const priority = road.priority;
             const major = priority >= 2;
             const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
-            const d = road.world
-              .map(
-                (p, i) =>
-                  `${i ? "L" : "M"}${(size.width / 2 + (p.x - camera.x) * camera.scale + pan.x).toFixed(1)} ${(size.height / 2 + (p.y - camera.y) * camera.scale + pan.y).toFixed(1)}`
-              )
-              .join(" ");
+            const d = roadPaths.get(road.id);
             return (
-              <g key={road.id}>
+              <g key={road.id} transform={`translate(${pan.x} ${pan.y})`}>
                 <path
                   d={d}
                   fill="none"
@@ -455,9 +451,9 @@ export default function OfflineMapCanvas({
             );
           })}
           {geometry.length > 1 && (
-            <>
+            <g transform={`translate(${pan.x} ${pan.y})`}>
               <path
-                d={path(geometry)}
+                d={routePath}
                 fill="none"
                 stroke={dark ? "#07191f" : "#ffffff"}
                 strokeWidth="11"
@@ -466,7 +462,7 @@ export default function OfflineMapCanvas({
                 strokeLinejoin="round"
               />
               <path
-                d={path(geometry)}
+                d={routePath}
                 fill="none"
                 stroke={
                   estimated
@@ -482,7 +478,7 @@ export default function OfflineMapCanvas({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-            </>
+            </g>
           )}
           {namedRoads
             .filter(
