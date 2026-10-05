@@ -150,8 +150,13 @@ export default function TileStationMap({
     center: { lat: number; lng: number };
     zoom?: number;
   } | null>(null);
+  const cameraRef = useRef({ center, zoom });
+  cameraRef.current = { center, zoom };
 
   const applyGesture = (next: { center: { lat: number; lng: number }; zoom?: number }) => {
+    const nextZoom =
+      typeof next.zoom === "number" ? next.zoom : cameraRef.current.zoom;
+    cameraRef.current = { center: next.center, zoom: nextZoom };
     if (typeof next.zoom === "number") setZoom(next.zoom);
     setCenter(next.center);
   };
@@ -405,7 +410,21 @@ export default function TileStationMap({
     flushGesture();
     pinch.current = null;
     const remaining = [...pointers.current.entries()][0];
-    dragRef.current = remaining ? { id: remaining[0], x: remaining[1].x, y: remaining[1].y, cx: centerPx.x, cy: centerPx.y } : null;
+    const activeCamera = cameraRef.current;
+    const activeBase = projectBase(
+      activeCamera.center.lat,
+      activeCamera.center.lng
+    );
+    const activeScale = 2 ** activeCamera.zoom;
+    dragRef.current = remaining
+      ? {
+          id: remaining[0],
+          x: remaining[1].x,
+          y: remaining[1].y,
+          cx: activeBase.x * activeScale,
+          cy: activeBase.y * activeScale,
+        }
+      : null;
     setDragging(Boolean(remaining));
   };
 
