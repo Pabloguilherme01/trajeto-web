@@ -155,6 +155,9 @@ it("uses composited tile movement and asynchronous tile decoding", () => {
   expect(layer?.style.transform).toContain("translate3d");
   expect(layer?.style.willChange).toBe("transform");
   expect(tile?.getAttribute("decoding")).toBe("async");
+  const tiles = [...document.querySelectorAll('img[src*="tile.openstreetmap.org"]')];
+  expect(tiles.some(item => item.getAttribute("loading") === "eager")).toBe(true);
+  expect(tiles.some(item => item.getAttribute("loading") === "lazy")).toBe(true);
 });
 
 it("sends only the site origin as referrer for public OSM tiles", () => {
