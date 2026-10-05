@@ -283,7 +283,7 @@ export default function CityMap() {
             {label}
           </button>
         ))}
-        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-warning bg-warning text-warning-foreground" : "border-border bg-muted/40 text-foreground/80")}>Ruas e avenidas</button>
+        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-warning bg-warning text-primary-foreground" : "border-border bg-muted/40 text-foreground/80")}>Ruas e avenidas</button>
       </div>
       <section
         aria-label="Mapa da cidade"
