@@ -1,4 +1,5 @@
 import React from "react";
+import { normalizeCatalogText } from "@/lib/catalogSearch";
 
 export type QuickFilterOption = { label: string; value: string };
 
@@ -25,7 +26,7 @@ export default function QuickFilterChips({
       className={"mobile-scroll-x flex max-w-full gap-2 overflow-x-auto pb-1 " + className}
     >
       {options.map(option => {
-        const active = value.trim().toLocaleLowerCase("pt-BR") === option.value.trim().toLocaleLowerCase("pt-BR");
+        const active = normalizeCatalogText(value) === normalizeCatalogText(option.value);
         return (
           <button
             key={option.label + "|" + option.value}
