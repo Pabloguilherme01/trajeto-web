@@ -251,6 +251,7 @@ export default function CityMap() {
         className="mt-3"
       />
       <div
+        role="group"
         className="my-3 flex flex-wrap gap-2"
         aria-label="Categorias do mapa"
       >
