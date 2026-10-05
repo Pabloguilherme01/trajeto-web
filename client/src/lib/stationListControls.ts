@@ -1,4 +1,15 @@
 export type StationListItem = { name: string; isOpen: boolean | null; distanceMeters: number | null };
+
+export function normalizeStationCnpj(value?: string | null) {
+  return (value ?? "").replace(/\D/g, "");
+}
+
+export function stationCoordinatePoint(lat?: number | null, lng?: number | null) {
+  if (typeof lat !== "number" || !Number.isFinite(lat) || typeof lng !== "number" || !Number.isFinite(lng)) return null;
+  if (lat === 0 && lng === 0) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat, lng };
+}
 export type StationHoursFilter = "all" | "open" | "closed" | "unknown";
 export type StationSort = "distance" | "relevance" | "brand" | "hours";
 
@@ -84,8 +95,8 @@ export function normalizeStationIdentity(value: string | null | undefined) {
 }
 
 export function sameStationIdentity(first: StationIdentityInput, second: StationIdentityInput) {
-  const firstCnpj = (first.cnpj ?? "").replace(/\D/g, "");
-  const secondCnpj = (second.cnpj ?? "").replace(/\D/g, "");
+  const firstCnpj = normalizeStationCnpj(first.cnpj);
+  const secondCnpj = normalizeStationCnpj(second.cnpj);
   if (firstCnpj && secondCnpj) return firstCnpj === secondCnpj;
 
   const firstAddress = normalizeStationIdentity(first.address);

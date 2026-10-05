@@ -98,6 +98,17 @@ describe("service worker", () => {
       ["trajeto-%2Ftrajeto-web%2F-v24-static"],
     ]);
   });
+  it("takes control while old cache cleanup is pending", async () => {
+    const worker = loadWorker();
+    let finishCleanup!: (keys: string[]) => void;
+    worker.caches.keys.mockImplementation(() => new Promise<string[]>(resolve => { finishCleanup = resolve; }));
+    const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "activate")[1];
+    let completion!: Promise<unknown>;
+    handler({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
+    expect(worker.self.clients.claim).toHaveBeenCalledOnce();
+    finishCleanup([]);
+    await completion;
+  });
   it("does not announce readiness with a partial offline package", async () => {
     expect(await loadWorker().offlineStatus()).toEqual({ ready: false });
   });

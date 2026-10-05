@@ -10,6 +10,7 @@ import { getPreferredNavigationProvider, setPreferredNavigationProvider, shareTe
 import { stationDataConfidence, freshnessLabel } from "@/lib/stationEntity";
 import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
 import { destinationNavigationValue } from "@/lib/unifiedDestination";
+import { stationCoordinatePoint } from "@/lib/stationListControls";
 import { buildGoogleMapsDestinationUrl, buildWazeNavigationUrl, buildAppleMapsDirectionsUrl } from "@/lib/mobileTools";
 
 function normalize(value: string) {
@@ -90,11 +91,8 @@ export function StationDirectoryCard({
     "Águas Lindas de Goiás",
     "GO",
   ].filter(Boolean).join(", ");
-  const coords = Number.isFinite(anp?.latitude) && Number.isFinite(anp?.longitude)
-    ? { lat: Number(anp?.latitude), lng: Number(anp?.longitude) }
-    : Number.isFinite(local?.anp?.latitude) && Number.isFinite(local?.anp?.longitude)
-      ? { lat: Number(local?.anp?.latitude), lng: Number(local?.anp?.longitude) }
-      : null;
+  const coords = stationCoordinatePoint(anp?.latitude, anp?.longitude)
+    ?? stationCoordinatePoint(local?.anp?.latitude, local?.anp?.longitude);
   const distributor = anp?.distribuidora || local?.brand || local?.mapData?.observedBrand || "Bandeira não consolidada";
   const primaryPrice = prices.find(item => item.productKey === "gasolina-comum") ?? prices[0] ?? null;
   const confidence = stationDataConfidence({ anp, local, price: primaryPrice });
@@ -125,6 +123,12 @@ export function StationDirectoryCard({
     coordinates: coords,
     source: anp ? "ANP" : "catalog",
   };
+  const navigationValue = destinationNavigationValue(sharedDestination);
+  const navigationUrl = preferredProvider === "waze"
+    ? buildWazeNavigationUrl(address, coords ?? undefined)
+    : preferredProvider === "apple"
+      ? buildAppleMapsDirectionsUrl(navigationValue)
+      : buildGoogleMapsDestinationUrl(navigationValue, true);
 
   const copy = async (value: string) => {
     setActionError("");
@@ -211,14 +215,7 @@ export function StationDirectoryCard({
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2" aria-label={"Ações para " + stationName}>
         <a href={buildDestinationPlannerUrl(destinationNavigationValue(sharedDestination))} className="flex min-h-11 items-center justify-center rounded-xl bg-[#C7FF3C] px-2 text-xs font-black text-[#102028]">Traçar rota</a>
-        <button type="button" onClick={() => {
-          const provider = getPreferredNavigationProvider();
-          const value = destinationNavigationValue(sharedDestination);
-          const url = provider === "waze" ? buildWazeNavigationUrl(address, coords ?? undefined) : provider === "apple" ? buildAppleMapsDirectionsUrl(value) : buildGoogleMapsDestinationUrl(value, true);
-          const opened = window.open(url, "_blank", "noopener,noreferrer");
-          if (!opened) setActionError("O navegador bloqueou a abertura do mapa. Use “Traçar rota” ou permita novas abas e tente novamente.");
-          else setActionError(null);
-        }} className="min-h-11 rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF]">Navegar</button>
+        <a href={navigationUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.05] px-2 text-xs font-black text-[#C9F7FF]">Navegar</a>
         {phone && <a href={"tel:" + phone.replace(/[^+\d]/g, "")} className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 text-xs font-bold text-white/80"><Phone className="size-4" />Ligar para o posto</a>}
       </div>
       {actionError && <p role="alert" className="mt-2 text-xs text-[#FFD59B]">{actionError}</p>}

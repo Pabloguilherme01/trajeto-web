@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, sameStationIdentity, stationSupportsFuel } from "./stationListControls";
+import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, stationSupportsFuel } from "./stationListControls";
 
 describe("station list controls", () => {
   const stations = [
@@ -26,6 +26,21 @@ describe("station list controls", () => {
     expect(fuelFilterPriceKey("all")).toBe("gasolina-comum");
     expect(fuelFilterPriceKey("gnv")).toBe("gnv");
   });
+
+  it("normaliza CNPJ para cruzar catálogo local, ANP e preços", () => {
+    expect(normalizeStationCnpj("13.902.675/0001-78")).toBe("13902675000178");
+    expect(normalizeStationCnpj("13902675000178")).toBe("13902675000178");
+    expect(normalizeStationCnpj("")).toBe("");
+    expect(sameStationIdentity({ cnpj: "13.902.675/0001-78" }, { cnpj: "13902675000178" })).toBe(true);
+  });
+
+  it("não transforma coordenada ausente ou 0,0 em distância utilizável", () => {
+    expect(stationCoordinatePoint(null, null)).toBeNull();
+    expect(stationCoordinatePoint(undefined, undefined)).toBeNull();
+    expect(stationCoordinatePoint(0, 0)).toBeNull();
+    expect(stationCoordinatePoint(-15.6811689, -48.2680336)).toEqual({ lat: -15.6811689, lng: -48.2680336 });
+  });
+
   it("identifica a mesma unidade por CNPJ, endereço ou coordenadas sem fundir vizinhos", () => {
     expect(sameStationIdentity({ cnpj: "12.345.678/0001-90" }, { cnpj: "12345678000190" })).toBe(true);
     expect(sameStationIdentity({ address: "BR-070, Quadra 10, Jardim Brasília" }, { address: "BR 070 Quadra 10 Jardim Brasilia" })).toBe(true);
@@ -36,5 +51,4 @@ describe("station list controls", () => {
     )).toBe(false);
     expect(sameStationIdentity({ address: "Rua A, Jardim Brasília" }, { address: "Rua B, Jardim Brasília" })).toBe(false);
   });
-
 });

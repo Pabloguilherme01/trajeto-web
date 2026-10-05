@@ -15,6 +15,7 @@ test("Pages: station map and directory are usable at 320px", async ({ page }) =>
   const map = page.locator("#aguas-lindas-map");
   const picker = map.getByRole("button", { name: "Escolher posto no mapa" });
   await expect(picker).toBeVisible();
+  await expect(map.getByText(/\d+ posicionados · \d+ sem coordenada/)).toBeVisible();
   await picker.click();
   const search = page.getByRole("combobox", { name: "Pesquisar lugares no mapa" });
   await expect(search).toBeFocused();
@@ -96,7 +97,9 @@ test("Pages: station search uses compact cards and resets an empty query", async
   const card = page.locator("article[id^='posto-']").first();
   await expect(card.getByRole("heading")).toContainText(/ponteio/i);
   await expect(card.getByRole("link", { name: "Traçar rota", exact: true })).toHaveAttribute("href", /planejar.*destino=/);
-  await expect(card.getByRole("button", { name: "Navegar", exact: true })).toBeVisible();
+  await expect(card.getByRole("link", { name: "Navegar", exact: true })).toBeVisible();
+  await card.getByText("Mais opções do posto").click();
+  await expect(card.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
   await expect(card.locator("details").filter({ hasText: "Todos os dados disponíveis" })).not.toHaveAttribute("open");
   await expect(page.locator("details").filter({ has: page.getByText("Fontes e referências adicionais", { exact: true }) })).not.toHaveAttribute("open");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
@@ -133,5 +136,25 @@ test("Pages: price ordering is disabled when the ANP price snapshot is empty", a
   await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
   const sort = page.getByRole("combobox", { name: "Ordenar diretório de postos" });
   await expect(sort.locator('option[value="price"]')).toBeDisabled();
-  await expect(page.getByText("Preço individual ANP indisponível nesta coleta.")).toBeVisible();
+  await expect(page.getByText(/Preço individual ANP indisponível nesta coleta/)).toBeVisible();
+});
+
+
+test("Pages: enriched station favorites survive reload without duplicate identity", async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await context.grantPermissions(["geolocation"]);
+  await context.setGeolocation({ latitude: -15.6811689, longitude: -48.2680336 });
+  await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
+  await page.getByRole("textbox", { name: "Filtrar diretório de postos" }).fill("Forquilha");
+  const card = page.locator("article[id^='posto-']");
+  await expect(card).toHaveCount(1);
+  await card.getByRole("button", { name: "Salvar posto neste aparelho" }).click();
+  await expect(card.getByRole("button", { name: "Remover posto dos salvos" })).toBeVisible();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByRole("textbox", { name: "Filtrar diretório de postos" }).fill("Forquilha");
+  await expect(card).toHaveCount(1);
+  await expect(card.getByRole("button", { name: "Remover posto dos salvos" })).toBeVisible();
+  await card.getByRole("button", { name: "Remover posto dos salvos" }).click();
+  await expect(card.getByRole("button", { name: "Salvar posto neste aparelho" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
