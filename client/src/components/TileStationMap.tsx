@@ -11,6 +11,7 @@ import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
+import { viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
@@ -238,10 +239,10 @@ export default function TileStationMap({
   }, [centerBase, tileZoom]);
   const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
   const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
-  const baseTileX = Math.floor(tileCenter.x / TILE);
-  const baseTileY = Math.floor(tileCenter.y / TILE);
-  const radiusX = Math.ceil(width / (2 * TILE * tileScale)) + 1;
-  const radiusY = Math.ceil(height / (2 * TILE * tileScale)) + 1;
+  const tileBounds = useMemo(
+    () => viewportTileBounds(tileCenter, width, height, tileScale),
+    [tileCenter, width, height, tileScale]
+  );
   const tiles = useMemo(() => {
     const result: Array<{
       x: number;
@@ -251,22 +252,26 @@ export default function TileStationMap({
       top: number;
       prefetch: boolean;
     }> = [];
-    for (let dy = -radiusY; dy <= radiusY; dy++) {
-      for (let dx = -radiusX; dx <= radiusX; dx++) {
-        const rawX = baseTileX + dx;
-        const y = baseTileY + dy;
+    const maxTile = 2 ** tileZoom;
+    for (let y = tileBounds.minY; y <= tileBounds.maxY; y++) {
+      if (y < 0 || y >= maxTile) continue;
+      for (let rawX = tileBounds.minX; rawX <= tileBounds.maxX; rawX++) {
         result.push({
           x: wrapTile(rawX, tileZoom),
           y,
           key: `${tileZoom}:${rawX}:${y}`,
-          left: (dx + radiusX) * TILE,
-          top: (dy + radiusY) * TILE,
-          prefetch: Math.abs(dx) === radiusX || Math.abs(dy) === radiusY,
+          left: (rawX - tileBounds.minX) * TILE,
+          top: (y - tileBounds.minY) * TILE,
+          prefetch:
+            rawX === tileBounds.minX ||
+            rawX === tileBounds.maxX ||
+            y === tileBounds.minY ||
+            y === tileBounds.maxY,
         });
       }
     }
     return result;
-  }, [baseTileX, baseTileY, radiusX, radiusY, tileZoom]);
+  }, [tileBounds, tileZoom]);
 
   const clusterZoom = Math.min(17, Math.floor(zoom));
   const clusterScale = 2 ** clusterZoom;
@@ -582,11 +587,11 @@ export default function TileStationMap({
             data-map-tile-layer
             className="absolute"
             style={{
-              width: TILE * (radiusX * 2 + 1),
-              height: TILE * (radiusY * 2 + 1),
+              width: TILE * (tileBounds.maxX - tileBounds.minX + 1),
+              height: TILE * (tileBounds.maxY - tileBounds.minY + 1),
               left: 0,
               top: 0,
-              transform: `translate3d(${width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale}px, ${height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale}px, 0) scale(${tileScale})`,
+              transform: `translate3d(${width / 2 + (tileBounds.minX * TILE - tileCenter.x) * tileScale}px, ${height / 2 + (tileBounds.minY * TILE - tileCenter.y) * tileScale}px, 0) scale(${tileScale})`,
               transformOrigin: "0 0",
               willChange: "transform",
             }}
