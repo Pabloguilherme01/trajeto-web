@@ -7,6 +7,7 @@ import { OfflineStationMap } from "@/components/StationMap";
 import MapExplorerFrame from "@/components/MapExplorerFrame";
 import TileStationMap from "@/components/TileStationMap";
 import { DestinationActions } from "@/components/DestinationActions";
+import QuickFilterChips from "@/components/QuickFilterChips";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
 import {
   BUNDLED_CITY_ATLAS,
@@ -30,6 +31,16 @@ import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMap
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
 import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
+
+const CITY_MAP_QUICK_FILTERS = [
+  { label: "UPA", value: "upa", category: "saude" },
+  { label: "Postos", value: "posto", category: "combustivel" },
+  { label: "Mercados", value: "mercado", category: "compras" },
+  { label: "Escolas", value: "escola", category: "educacao" },
+  { label: "Prefeitura", value: "prefeitura", category: "servicos" },
+  { label: "Shopping", value: "shopping", category: "compras" },
+  { label: "Rodoviária", value: "rodoviaria", category: "transporte" },
+] as const;
 
 export default function CityMap() {
   const [, navigate] = useLocation();
@@ -222,6 +233,15 @@ export default function CityMap() {
         />
         {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center"><X className="size-4" /></button>}
       </div>
+      <QuickFilterChips
+        label="Filtros rápidos do mapa"
+        options={CITY_MAP_QUICK_FILTERS
+          .filter(item => category === "todos" || item.category === category)
+          .map(({ label, value }) => ({ label, value }))}
+        value={query}
+        onPick={value => { setOnlyStreets(false); setQuery(value); }}
+        className="mt-3"
+      />
       <div
         className="my-3 flex flex-wrap gap-2"
         aria-label="Categorias do mapa"

@@ -345,7 +345,7 @@ type PreparedPoint = { lat: number; lng: number };
 
 function preparedStreetQuality(saved: OfflineRoute) {
   return isRecord(saved.payload) && isRecord(saved.payload.route) &&
-    ["osrm", "mapbox"].includes(String(saved.payload.route.source)) &&
+    ["osrm", "mapbox", "offline-road"].includes(String(saved.payload.route.source)) &&
     typeof saved.payload.route.polyline === "string" && saved.payload.route.polyline.length > 0 ? 1 : 0;
 }
 

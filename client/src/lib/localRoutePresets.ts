@@ -4,6 +4,7 @@ import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
 import anpSnapshot from "../../public/data/aguas-lindas-anp.json";
+import { isAguasLindasRoutePoint } from "./mapGeometry";
 
 export type RouteDestinationCategory = "saude" | "educacao" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
 export type RouteDestinationCategoryFilter = "todos" | RouteDestinationCategory;
@@ -214,8 +215,12 @@ const extraStreetIds = cityAtlasData.items.filter(item =>
 ).slice(0, 30 - streetEndpointIds.length).map(item => item.id);
 export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetIds].map(id => {
   const street = cityAtlasData.items.find(item => item.id === id);
-  if (!street || street.coordinateKind !== "street-midpoint" || !Number.isFinite(street.lat) || !Number.isFinite(street.lng)) {
-    throw new Error(`Ready route requires a mapped street midpoint: ${id}`);
+  if (
+    !street ||
+    street.coordinateKind !== "street-midpoint" ||
+    !isAguasLindasRoutePoint({ lat: Number(street.lat), lng: Number(street.lng) })
+  ) {
+    throw new Error(`Ready route requires a mapped local street midpoint: ${id}`);
   }
   return { id, label: street.name, destination: `${street.name} · referência no mapa, Águas Lindas de Goiás - GO`, lat: street.lat!, lng: street.lng!, category: "centro" as const };
 });
@@ -225,10 +230,18 @@ export function resolveReadyRouteStreetPoint(value: string) {
   const matches = [...READY_ROUTE_STREET_POINTS, ...READY_ROUTE_STATIONS].filter(point => normalizeCatalogText(point.destination) === query);
   return matches.length === 1 ? { lat: matches[0].lat, lng: matches[0].lng } : null;
 }
-export const READY_ROUTE_STATIONS = Array.from(new Map(anpSnapshot.data.filter(station =>
-  station.latitude != null && String(station.latitude).trim() !== "" && Number.isFinite(Number(station.latitude)) && Math.abs(Number(station.latitude)) <= 90 &&
-  station.longitude != null && String(station.longitude).trim() !== "" && Number.isFinite(Number(station.longitude)) && Math.abs(Number(station.longitude)) <= 180
-).map(station => [station.cnpj, station])).values()).map(station => ({
+export const READY_ROUTE_STATIONS = Array.from(new Map(anpSnapshot.data.filter(station => {
+  if (station.latitude == null || station.longitude == null) return false;
+  const point = {
+    lat: Number(station.latitude),
+    lng: Number(station.longitude),
+  };
+  return (
+    String(station.latitude).trim() !== "" &&
+    String(station.longitude).trim() !== "" &&
+    isAguasLindasRoutePoint(point)
+  );
+}).map(station => [station.cnpj, station])).values()).map(station => ({
   id: "ready-station-" + station.cnpj,
   label: AGUAS_LINDAS_STATIONS.find(item => item.cnpj.replace(/\D/g, "") === station.cnpj)?.displayName ?? station.razaoSocial,
   destination: `${station.razaoSocial} · CNPJ ${station.cnpj}, Águas Lindas de Goiás - GO`,
@@ -247,6 +260,16 @@ const streetToStreetPairs = READY_ROUTE_STREET_POINTS.flatMap((origin, index) =>
     [origin.id, destination.id] as const
   )
 );
+const routeHubIds = ["centro", "prefeitura", "rodoviaria", "aguas-lindas-shopping", "upa", "heal", "hospital-bom-jesus"] as const;
+const hubToHubPairs = routeHubIds.flatMap((origin, index) =>
+  routeHubIds.slice(index + 1).map(destination => [origin, destination] as const)
+);
+const stationToStreetPairs = READY_ROUTE_STATIONS.flatMap(station =>
+  READY_ROUTE_STREET_POINTS.map(street => [station.id, street.id] as const)
+);
+const stationToStationPairs = READY_ROUTE_STATIONS.flatMap((origin, index) =>
+  READY_ROUTE_STATIONS.slice(index + 1).map(destination => [origin.id, destination.id] as const)
+);
 const readyPairs = [
   ["centro", "upa"], ["centro", "heal"], ["centro", "prefeitura"],
   ["centro", "rodoviaria"], ["centro", "aguas-lindas-shopping"], ["centro", "hospital-bom-jesus"],
@@ -256,6 +279,9 @@ const readyPairs = [
   ["heal", "rodoviaria"], ["heal", "aguas-lindas-shopping"], ["heal", "hospital-bom-jesus"],
   ["rodoviaria", "aguas-lindas-shopping"], ["aguas-lindas-shopping", "hospital-bom-jesus"],
   ["rodoviaria", "prefeitura"], ["aguas-lindas-shopping", "upa"],
+  ...hubToHubPairs,
+  ...stationToStreetPairs,
+  ...stationToStationPairs,
   ...READY_ROUTE_STATIONS.flatMap(station =>
     ["centro", "prefeitura", "rodoviaria"].map(origin => [origin, station.id] as const)),
   ...READY_ROUTE_STREET_POINTS.map(street => ["centro", street.id] as const),

@@ -91,6 +91,111 @@ describe("offline road routing", () => {
     expect(route!.steps.some(step => step.name === "Via rápida")).toBe(false);
     expect(route!.steps.some(step => step.name === "Rua A")).toBe(true);
     expect(route!.steps.some(step => step.name === "Rua B")).toBe(true);
+    expect(
+      route!.steps.some(
+        step =>
+          step.name === "Rua B" &&
+          step.instruction === "Vire à direita em Rua B" &&
+          step.maneuver === "turn-right"
+      )
+    ).toBe(true);
+  });
+
+  it("rejects out-of-range coordinates before loading the street graph", async () => {
+    const fetch = mockRoadPack();
+    expect(
+      await calculateOfflineRoadRoute(
+        { lat: 91, lng: -48.28 },
+        { lat: -15.752, lng: -48.278 },
+        "driving"
+      )
+    ).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("refuses conflicting coordinates for the same mapped node identity", async () => {
+    const pack = {
+      schema: 1,
+      retrievedAt: "2026-10-05T00:00:00Z",
+      roads: [
+        {
+          id: 1,
+          nodeIds: [1, 2],
+          permissions: { driving: "both" },
+          kind: "residential",
+          name: "Rua coerente",
+          points: [
+            [-15.75, -48.28],
+            [-15.75, -48.279],
+          ],
+        },
+        {
+          id: 2,
+          nodeIds: [2, 3],
+          permissions: { driving: "both" },
+          kind: "residential",
+          name: "Rua conflitante",
+          points: [
+            [-15.76, -48.29],
+            [-15.761, -48.289],
+          ],
+        },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: true, json: async () => pack }))
+    );
+    expect(
+      await calculateOfflineRoadRoute(
+        { lat: -15.75, lng: -48.28 },
+        { lat: -15.761, lng: -48.289 },
+        "driving"
+      )
+    ).toBeNull();
+  });
+
+  it("does not snap to isolated nodes from rejected oversized segments", async () => {
+    const pack = {
+      schema: 1,
+      retrievedAt: "2026-10-05T00:00:00Z",
+      roads: [
+        {
+          id: 1,
+          nodeIds: [1, 2, 3],
+          permissions: { driving: "both" },
+          kind: "residential",
+          name: "Rua válida",
+          points: [
+            [-15.75, -48.28],
+            [-15.75, -48.279],
+            [-15.75, -48.278],
+          ],
+        },
+        {
+          id: 2,
+          nodeIds: [9, 10],
+          permissions: { driving: "both" },
+          kind: "residential",
+          name: "Segmento inválido",
+          points: [
+            [-15.75005, -48.27805],
+            [-15.8, -48.34],
+          ],
+        },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: true, json: async () => pack }))
+    );
+    const route = await calculateOfflineRoadRoute(
+      { lat: -15.75, lng: -48.28 },
+      { lat: -15.75005, lng: -48.27805 },
+      "driving"
+    );
+    expect(route).not.toBeNull();
+    expect(route!.points.some(point => point.lng === -48.278)).toBe(true);
   });
 
   it("returns null when an endpoint is too far from the saved street mesh", async () => {

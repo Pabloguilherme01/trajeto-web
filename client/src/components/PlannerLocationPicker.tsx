@@ -4,6 +4,7 @@ import { normalizeCatalogText } from "@/lib/catalogSearch";
 
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
+import QuickFilterChips from "@/components/QuickFilterChips";
 
 const points: CityAtlasItem[] = [...buildCityAtlas(BUNDLED_CITY_ATLAS), ...LOCAL_GEOCODE_POINTS.map(point => ({
   id: "geocode-" + point.id,
@@ -51,6 +52,16 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(8);
+  const quickQueries = [
+    { label: "UPA", value: "upa" },
+    { label: "Postos", value: "posto" },
+    { label: "Mercados", value: "mercado" },
+    { label: "Escolas", value: "escola" },
+    { label: "Prefeitura", value: "prefeitura" },
+    { label: "Shopping", value: "shopping" },
+    { label: "Rodoviária", value: "rodoviaria" },
+    { label: "Bairros", value: "jardim" },
+  ];
   useEffect(() => { setVisibleCount(8); }, [query, kind]);
   const [selected, setSelected] = useState<{ coordinate: string; label: string } | null>(null);
   const matches = useMemo(() => {
@@ -93,6 +104,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
       <label className="block text-xs font-bold text-white/65">Buscar {kind} local
         <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Nome, rua ou bairro" className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-[#121B22] px-3 text-base text-white" autoComplete="off" enterKeyHint="search" />
       </label>
+      <QuickFilterChips label={"Filtros rápidos para " + kind} options={quickQueries} value={query} onPick={value => { setQuery(value); setVisibleCount(8); }} className="mt-2" />
       <p className="mt-2 break-words text-xs text-white/55">{matches.length} lugares encontrados · {offlineReadyCount} com coordenadas para uso offline</p>
       {businesses.loading && <p role="status" className="mt-2 text-xs text-white/60">Carregando empresas locais…</p>}
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 text-xs text-[#FFD59B]">Tentar carregar empresas novamente</button>}

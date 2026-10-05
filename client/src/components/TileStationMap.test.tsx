@@ -19,6 +19,20 @@ it("keeps the selected marker above coincident catalogue points", () => {
   fireEvent.click(second);
   expect(Number(second.style.zIndex)).toBeGreaterThan(Number(first.style.zIndex));
 });
+it("keeps marker clusters stable while panning the camera", () => {
+  render(<TileStationMap stations={[
+    { id: "selected", name: "Selecionado", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Ponto B", address: "Rua B", lat: -15.75455, lng: -48.28165 },
+    { id: "c", name: "Ponto C", address: "Rua C", lat: -15.7546, lng: -48.2817 },
+  ]} />);
+  const cluster = screen.getByRole("button", { name: "Ampliar grupo de 2 lugares" });
+  const before = parseFloat(cluster.style.left);
+  fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
+  const after = screen.getByRole("button", { name: "Ampliar grupo de 2 lugares" });
+  expect(after).toBe(cluster);
+  expect(parseFloat(after.style.left)).toBeCloseTo(before - 80);
+});
+
 it("opens the local map on demand and returns to the tiled camera", () => {
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local disponível</p>} />);
   fireEvent.keyDown(screen.getByRole("region", { name: "Mapa dos postos" }), { key: "ArrowRight" });
@@ -42,6 +56,15 @@ it("preserves manual exploration on GPS updates and resumes following on recente
   const recentered = marker.style.left;
   rerender(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2814 }} />);
   expect(marker.style.left).not.toBe(recentered);
+});
+
+it("contains map layout and overscroll inside the interactive viewport", () => {
+  render(<TileStationMap stations={[
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+  ]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  expect(map.style.contain).toBe("layout paint");
+  expect(map.style.overscrollBehavior).toBe("contain");
 });
 
 it("zooms around a double-clicked point without moving its marker", () => {
@@ -111,6 +134,30 @@ it("tracks the actual viewport and keeps the selected station after catalog upda
   fireEvent.click(screen.getByRole("button", { name: "Ver todos" }));
   expect(screen.getByRole("button", { name: "Abrir Posto B" })).toBeTruthy();
   expect(screen.queryByRole("button", { name: "2D" })).toBeNull();
+});
+
+it("uses composited tile movement and asynchronous tile decoding", () => {
+  render(
+    <TileStationMap
+      stations={[
+        {
+          id: "a",
+          name: "Posto A",
+          address: "Rua A",
+          lat: -15.7545,
+          lng: -48.2816,
+        },
+      ]}
+    />
+  );
+  const layer = document.querySelector("[data-map-tile-layer]") as HTMLElement | null;
+  const tile = document.querySelector('img[src*="tile.openstreetmap.org"]') as HTMLImageElement | null;
+  expect(layer?.style.transform).toContain("translate3d");
+  expect(layer?.style.willChange).toBe("transform");
+  expect(tile?.getAttribute("decoding")).toBe("async");
+  const tiles = [...document.querySelectorAll('img[src*="tile.openstreetmap.org"]')];
+  expect(tiles.some(item => item.getAttribute("loading") === "eager")).toBe(true);
+  expect(tiles.some(item => item.getAttribute("loading") === "lazy")).toBe(true);
 });
 
 it("sends only the site origin as referrer for public OSM tiles", () => {
@@ -203,6 +250,28 @@ it("preserves a manual pan when the same route geometry is recreated", () => {
 });
 
 
+it("moves long route geometry by transform instead of rebuilding its points on pan", () => {
+  const route = [
+    { lat: -15.7545, lng: -48.2816 },
+    { lat: -15.755, lng: -48.282 },
+    { lat: -15.756, lng: -48.283 },
+  ];
+  render(
+    <TileStationMap
+      stations={[{ id: "a", name: "Destino", address: "Rua A", lat: -15.7545, lng: -48.2816 }]}
+      routePoints={route}
+    />
+  );
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  const geometry = document.querySelector("[data-route-geometry]") as SVGGElement;
+  const line = geometry.querySelectorAll("polyline")[1];
+  const points = line.getAttribute("points");
+  const transform = geometry.getAttribute("transform");
+  fireEvent.keyDown(map, { key: "ArrowRight" });
+  expect(line.getAttribute("points")).toBe(points);
+  expect(geometry.getAttribute("transform")).not.toBe(transform);
+});
+
 it("returns from offline fallback when connectivity is restored", () => {
   const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
@@ -223,6 +292,29 @@ function sendPointer(map: HTMLElement, type: string, id: number, x: number, y = 
   Object.defineProperties(event, { pointerId: { value: id }, pointerType: { value: "touch" } });
   fireEvent(map, event);
 }
+
+it("coalesces repeated pan events to the latest position in the animation frame", () => {
+  let frame: FrameRequestCallback | null = null;
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(callback => {
+    frame = callback;
+    return 7;
+  });
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+  render(<TileStationMap stations={[
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+  ]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  sendPointer(map, "pointerdown", 1, 100);
+  sendPointer(map, "pointermove", 1, 120);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(180);
+  sendPointer(map, "pointermove", 1, 140);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(180);
+  act(() => frame?.(16));
+  expect(parseFloat(marker.style.left)).toBeCloseTo(200);
+  sendPointer(map, "pointerup", 1, 140);
+});
 
 it("keeps following after a tap but pauses after a real drag", () => {
   const stations = [{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }];

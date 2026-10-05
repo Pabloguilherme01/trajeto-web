@@ -74,4 +74,4 @@ jobs:
         run: npm run test:e2e
 
       - name: GitHub Pages base-path smoke
-        run: timeout 300s npm run test:e2e:pages
+        run: timeout 360s npm run test:e2e:pages

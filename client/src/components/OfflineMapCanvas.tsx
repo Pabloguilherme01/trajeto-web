@@ -22,6 +22,7 @@ type Road = {
   points: [number, number][];
 };
 type MapPack = { schema: number; retrievedAt: string; roads: Road[] };
+const ROAD_GRID = 4096;
 let packPromise: Promise<MapPack> | undefined;
 export function loadOfflineMapPack() {
   if (!packPromise)
@@ -119,31 +120,37 @@ export default function OfflineMapCanvas({
   gestureZoom.current = zoom;
   const gestureStarted = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
-  const validMarkers = markers.filter(isMapPoint);
-  const validGeometry = routePoints.filter(isMapPoint);
-  const stride = Math.max(1, Math.ceil(validGeometry.length / 6000));
-  const geometry =
-    stride === 1
+  const validMarkers = useMemo(() => markers.filter(isMapPoint), [markers]);
+  const validGeometry = useMemo(() => routePoints.filter(isMapPoint), [routePoints]);
+  const geometry = useMemo(() => {
+    const stride = Math.max(1, Math.ceil(validGeometry.length / 6000));
+    return stride === 1
       ? validGeometry
       : [
           ...validGeometry.filter((_, i) => i % stride === 0),
           validGeometry[validGeometry.length - 1],
         ];
+  }, [validGeometry]);
   // Nearby references must not zoom the trip out beyond its endpoints.
-  const tripMarkers = validMarkers.filter(
-    p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
+  const anchors = useMemo(() => {
+    const tripMarkers = validMarkers.filter(
+      p => p.id === "origin" || p.id === "destination" || (geometry.length < 2 && p.id.startsWith("stop-"))
+    );
+    return tripMarkers.length
+      ? tripMarkers
+      : validMarkers.filter(
+          p => p.id !== "live-position" && p.id !== "device-location"
+        );
+  }, [validMarkers, geometry.length]);
+  const fingerprint = useMemo(
+    () =>
+      (anchors.length || geometry.length ? anchors : validMarkers)
+        .map(p => `${p.id}:${p.lat}:${p.lng}`)
+        .join("|") +
+      ":" +
+      geometry.map(p => `${p.lat}:${p.lng}`).join("|"),
+    [anchors, geometry, validMarkers]
   );
-  const anchors = tripMarkers.length
-    ? tripMarkers
-    : validMarkers.filter(
-        p => p.id !== "live-position" && p.id !== "device-location"
-      );
-  const fingerprint =
-    (anchors.length || geometry.length ? anchors : validMarkers)
-      .map(p => `${p.id}:${p.lat}:${p.lng}`)
-      .join("|") +
-    ":" +
-    geometry.map(p => `${p.lat}:${p.lng}`).join("|");
   useEffect(() => {
     setPan({ x: 0, y: 0 });
     pointers.current.clear();
@@ -173,8 +180,14 @@ export default function OfflineMapCanvas({
   useEffect(() => {
     const el = viewport.current;
     if (!el) return;
-    const measure = () =>
-      setSize({ width: el.clientWidth || 320, height: el.clientHeight || 360 });
+    const measure = () => {
+      const next = { width: el.clientWidth || 320, height: el.clientHeight || 360 };
+      setSize(current =>
+        current.width === next.width && current.height === next.height
+          ? current
+          : next
+      );
+    };
     measure();
     const observer =
       typeof ResizeObserver !== "undefined"
@@ -228,37 +241,77 @@ export default function OfflineMapCanvas({
       y: -(point.y - camera.y) * camera.scale,
     });
   }, [followPoint?.lat, followPoint?.lng, camera]);
+  const markerWorld = useMemo(() => {
+    const result = new Map<string, { x: number; y: number }>();
+    for (const marker of validMarkers) result.set(marker.id, world(marker));
+    return result;
+  }, [validMarkers]);
+  const baseProject = (point: OfflineMapMarker) => {
+    const p = markerWorld.get(point.id) ?? world(point);
+    return {
+      x: size.width / 2 + (p.x - camera.x) * camera.scale,
+      y: size.height / 2 + (p.y - camera.y) * camera.scale,
+    };
+  };
   const project = (point: MapPoint) => {
-    const p = world(point);
+    const p = "id" in point && typeof point.id === "string"
+      ? markerWorld.get(point.id) ?? world(point)
+      : world(point);
     return {
       x: size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
       y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
     };
   };
   // Only supporting references are suppressed; trip endpoints and GPS remain selectable.
-  const occupied = validMarkers
-    .filter(marker => !marker.isReference)
-    .map(project);
-  const displayedMarkers = validMarkers.filter(marker => {
-    if (!marker.isReference) return true;
-    const point = project(marker);
-    if (
-      occupied.some(
-        other => Math.hypot(point.x - other.x, point.y - other.y) < 44
+  const displayedMarkers = useMemo(() => {
+    const occupied = validMarkers
+      .filter(marker => !marker.isReference)
+      .map(baseProject);
+    return validMarkers.filter(marker => {
+      if (!marker.isReference) return true;
+      const point = baseProject(marker);
+      if (
+        occupied.some(
+          other => Math.hypot(point.x - other.x, point.y - other.y) < 44
+        )
       )
-    )
-      return false;
-    occupied.push(point);
-    return true;
-  });
-  const markerGroups = mapMarkerGroups(displayedMarkers, project, marker => zoom >= 6 || marker.id === selectedMarkerId || ["origin", "destination", "live-position", "device-location"].includes(marker.id));
-  const path = (points: MapPoint[]) =>
-    points
-      .map((point, i) => {
-        const p = project(point);
-        return `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
-      })
-      .join(" ");
+        return false;
+      occupied.push(point);
+      return true;
+    });
+  }, [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]);
+  const markerGroups = useMemo(
+    () =>
+      mapMarkerGroups(
+        displayedMarkers,
+        baseProject,
+        marker =>
+          zoom >= 6 ||
+          marker.id === selectedMarkerId ||
+          ["origin", "destination", "live-position", "device-location"].includes(marker.id)
+      ),
+    [displayedMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height, zoom, selectedMarkerId]
+  );
+  const markerCollisionPoints = useMemo(
+    () =>
+      validMarkers.flatMap(marker => {
+        const point = markerWorld.get(marker.id);
+        if (!point) return [];
+        return [{
+          x: size.width / 2 + (point.x - camera.x) * camera.scale,
+          y: size.height / 2 + (point.y - camera.y) * camera.scale,
+        }];
+      }),
+    [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
+  );
+  const geometryPath = useMemo(
+    () =>
+      geometry
+        .map(point => world(point))
+        .map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(8)} ${point.y.toFixed(8)}`)
+        .join(" "),
+    [fingerprint]
+  );
   // Project and bound each road once per pack, rather than walking every
   // coordinate on each gesture. Only visible roads become SVG paths.
   const roads = useMemo(
@@ -277,23 +330,68 @@ export default function OfflineMapCanvas({
           bounds.minY = Math.min(bounds.minY, point.y);
           bounds.maxY = Math.max(bounds.maxY, point.y);
         }
-        return { ...road, priority: roadPriority(road.kind), world: points, bounds };
+        const path = points
+          .map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(8)} ${point.y.toFixed(8)}`)
+          .join(" ");
+        return { ...road, priority: roadPriority(road.kind), world: points, bounds, path };
       }).sort((a, b) => a.priority - b.priority) ?? [],
     [pack]
   );
-  const visible = roads.filter(({ bounds }) => {
+  const roadGrid = useMemo(() => {
+    const buckets = new Map<string, number[]>();
+    roads.forEach((road, index) => {
+      const minX = Math.floor(road.bounds.minX * ROAD_GRID);
+      const maxX = Math.floor(road.bounds.maxX * ROAD_GRID);
+      const minY = Math.floor(road.bounds.minY * ROAD_GRID);
+      const maxY = Math.floor(road.bounds.maxY * ROAD_GRID);
+      for (let x = minX; x <= maxX; x++) {
+        for (let y = minY; y <= maxY; y++) {
+          const key = `${x}:${y}`;
+          const bucket = buckets.get(key);
+          if (bucket) bucket.push(index);
+          else buckets.set(key, [index]);
+        }
+      }
+    });
+    return buckets;
+  }, [roads]);
+  const visible = useMemo(() => {
     const left = size.width / 2 - camera.x * camera.scale + pan.x;
     const top = size.height / 2 - camera.y * camera.scale + pan.y;
-    return (
-      bounds.maxX * camera.scale + left > -80 &&
-      bounds.minX * camera.scale + left < size.width + 80 &&
-      bounds.maxY * camera.scale + top > -80 &&
-      bounds.minY * camera.scale + top < size.height + 80
-    );
-  });
+    const minWorldX = (-80 - left) / camera.scale;
+    const maxWorldX = (size.width + 80 - left) / camera.scale;
+    const minWorldY = (-80 - top) / camera.scale;
+    const maxWorldY = (size.height + 80 - top) / camera.scale;
+    const minCellX = Math.floor(minWorldX * ROAD_GRID);
+    const maxCellX = Math.floor(maxWorldX * ROAD_GRID);
+    const minCellY = Math.floor(minWorldY * ROAD_GRID);
+    const maxCellY = Math.floor(maxWorldY * ROAD_GRID);
+    const cellCount = (maxCellX - minCellX + 1) * (maxCellY - minCellY + 1);
+    const candidates = new Set<number>();
+    if (cellCount > 144) {
+      roads.forEach((_, index) => candidates.add(index));
+    } else {
+      for (let x = minCellX; x <= maxCellX; x++) {
+        for (let y = minCellY; y <= maxCellY; y++) {
+          for (const index of roadGrid.get(`${x}:${y}`) ?? [])
+            candidates.add(index);
+        }
+      }
+    }
+    return [...candidates]
+      .sort((a, b) => a - b)
+      .map(index => roads[index])
+      .filter(({ bounds }) =>
+        bounds.maxX >= minWorldX &&
+        bounds.minX <= maxWorldX &&
+        bounds.maxY >= minWorldY &&
+        bounds.minY <= maxWorldY
+      );
+  }, [roads, roadGrid, size.width, size.height, camera.x, camera.y, camera.scale, pan.x, pan.y]);
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
+  const mapTransform = `translate(${size.width / 2 + pan.x - camera.x * camera.scale} ${size.height / 2 + pan.y - camera.y * camera.scale}) scale(${camera.scale})`;
   const metresPerPixel =
     groundMetresPerPixel(camera.y - pan.y / camera.scale, camera.scale);
   const scaleMetres =
@@ -350,7 +448,7 @@ export default function OfflineMapCanvas({
   return (
     <div
       className={
-        "offline-map relative overflow-hidden rounded-2xl " +
+        "offline-map relative overflow-hidden rounded-[1.6rem] border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,.24)] " +
         (dark ? "bg-[#18272d]" : "bg-[#eef2eb]")
       }
     >
@@ -358,7 +456,7 @@ export default function OfflineMapCanvas({
         ref={viewport}
         data-map-surface
         className={
-          "relative touch-none overflow-hidden outline-offset-[-3px] " +
+          "relative isolate touch-none overflow-hidden outline-offset-[-3px] " +
           (expanded ? "h-[75dvh] min-h-[360px]" : className)
         }
         role="region"
@@ -408,6 +506,7 @@ export default function OfflineMapCanvas({
         onPointerCancel={end}
         onLostPointerCapture={end}
       >
+        <div aria-hidden="true" className={"pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b " + (dark ? "from-[#07191f]/55 to-transparent" : "from-white/35 to-transparent")} />
         <svg
           width="100%"
           height="100%"
@@ -417,73 +516,74 @@ export default function OfflineMapCanvas({
           className="absolute inset-0"
         >
           <title>Ruas locais salvas e pontos da viagem</title>
-          {visible.map(road => {
-            const priority = road.priority;
-            const major = priority >= 2;
-            const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
-            const d = road.world
-              .map(
-                (p, i) =>
-                  `${i ? "L" : "M"}${(size.width / 2 + (p.x - camera.x) * camera.scale + pan.x).toFixed(1)} ${(size.height / 2 + (p.y - camera.y) * camera.scale + pan.y).toFixed(1)}`
-              )
-              .join(" ");
-            return (
-              <g key={road.id}>
+          <g data-offline-world-layer transform={mapTransform}>
+            {visible.map(road => {
+              const priority = road.priority;
+              const major = priority >= 2;
+              const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
+              return (
+                <g key={road.id}>
+                  <path
+                    d={road.path}
+                    fill="none"
+                    stroke={dark ? "#263e48" : major ? "#d6c9a8" : "#d6ddd0"}
+                    strokeWidth={width + (major ? 2.5 : 1.5)}
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <path
+                    d={road.path}
+                    fill="none"
+                    stroke={
+                      dark
+                        ? major
+                          ? "#60777d"
+                          : "#40585e"
+                        : major
+                          ? "#ffe9b3"
+                          : "#ffffff"
+                    }
+                    strokeWidth={width}
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </g>
+              );
+            })}
+            {geometry.length > 1 && (
+              <>
                 <path
-                  d={d}
+                  data-offline-route-geometry
+                  d={geometryPath}
                   fill="none"
-                  stroke={dark ? "#263e48" : major ? "#d6c9a8" : "#d6ddd0"}
-                  strokeWidth={width + (major ? 2.5 : 1.5)}
+                  stroke={dark ? "#07191f" : "#ffffff"}
+                  strokeWidth="11"
+                  strokeOpacity="0.92"
                   strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
                 />
                 <path
-                  d={d}
+                  d={geometryPath}
                   fill="none"
                   stroke={
-                    dark
-                      ? major
-                        ? "#60777d"
-                        : "#40585e"
-                      : major
-                        ? "#ffe9b3"
-                        : "#ffffff"
+                    estimated
+                      ? dark
+                        ? "#819399"
+                        : "#718287"
+                      : dark
+                        ? "#50F3EA"
+                        : "#1a73e8"
                   }
-                  strokeWidth={width}
+                  strokeWidth="6"
+                  strokeDasharray={estimated ? "8 8" : undefined}
                   strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
                 />
-              </g>
-            );
-          })}
-          {geometry.length > 1 && (
-            <>
-              <path
-                d={path(geometry)}
-                fill="none"
-                stroke={dark ? "#07191f" : "#ffffff"}
-                strokeWidth="11"
-                strokeOpacity="0.92"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d={path(geometry)}
-                fill="none"
-                stroke={
-                  estimated
-                    ? dark
-                      ? "#819399"
-                      : "#718287"
-                    : dark
-                      ? "#50F3EA"
-                      : "#1a73e8"
-                }
-                strokeWidth="6"
-                strokeDasharray={estimated ? "8 8" : undefined}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </>
-          )}
+              </>
+            )}
+          </g>
           {namedRoads
             .filter(
               road =>
@@ -494,34 +594,32 @@ export default function OfflineMapCanvas({
             )
             .map(road => {
               const p = road.world[Math.floor(road.world.length / 2)];
-              const x =
-                  size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
-                y = size.height / 2 + (p.y - camera.y) * camera.scale + pan.y;
+              const baseX = size.width / 2 + (p.x - camera.x) * camera.scale;
+              const baseY = size.height / 2 + (p.y - camera.y) * camera.scale;
+              const x = baseX + pan.x;
+              const y = baseY + pan.y;
               const text = road.name.slice(0, 42);
               const width = text.length * 6.5 + 12;
               if (
                 labels.has(road.name) ||
-                labelBoxes.some(
-                  box =>
-                    Math.abs(box.y - y) < 22 &&
-                    Math.abs(box.x - x) < (box.width + width) / 2
-                ) ||
-                validMarkers.some(marker => {
-                  const point = project(marker);
-                  return (
-                    Math.abs(point.y - y) < 30 &&
-                    Math.abs(point.x - x) < width / 2 + 24
-                  );
-                }) ||
                 labels.size >= (showAllStreetNames ? 140 : 60) ||
                 x < width / 2 + 8 ||
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
-                y > size.height - 40
+                y > size.height - 40 ||
+                labelBoxes.some(
+                  box =>
+                    Math.abs(box.y - baseY) < 22 &&
+                    Math.abs(box.x - baseX) < (box.width + width) / 2
+                ) ||
+                markerCollisionPoints.some(point =>
+                  Math.abs(point.y - baseY) < 30 &&
+                  Math.abs(point.x - baseX) < width / 2 + 24
+                )
               )
                 return null;
               labels.add(road.name);
-              labelBoxes.push({ x, y, width });
+              labelBoxes.push({ x: baseX, y: baseY, width });
               return (
                 <text
                   key={road.id}
@@ -541,12 +639,12 @@ export default function OfflineMapCanvas({
             })}
 
         </svg>
-        {markerGroups.groups.filter(group => group.x >= -30 && group.x <= size.width + 30 && group.y >= -30 && group.y <= size.height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+        {markerGroups.groups.filter(group => group.x + pan.x >= -30 && group.x + pan.x <= size.width + 30 && group.y + pan.y >= -30 && group.y + pan.y <= size.height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
           onManualInteraction?.();
           const next = Math.min(6, zoom * 1.8);
-          setPan({ x: -(group.x - size.width / 2 - pan.x) * next / zoom, y: -(group.y - size.height / 2 - pan.y) * next / zoom });
+          setPan({ x: -(group.x - size.width / 2) * next / zoom, y: -(group.y - size.height / 2) * next / zoom });
           onZoom(next);
-        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
+        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x + pan.x, top: group.y + pan.y }}>{group.items.length}</button>)}
         {markerGroups.singles.map(marker => {
           const p = project(marker);
           return (
@@ -622,7 +720,7 @@ export default function OfflineMapCanvas({
         {controls}
         <div
           className={
-            "pointer-events-none absolute left-3 top-3 rounded-full px-3 py-2 text-xs font-bold shadow " +
+            "pointer-events-none absolute left-3 top-3 z-20 rounded-full border px-3 py-2 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
@@ -636,7 +734,7 @@ export default function OfflineMapCanvas({
           aria-pressed={dark}
           onClick={() => setDark(v => !v)}
           className={
-            "absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
+            "absolute right-3 top-3 z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
@@ -654,7 +752,7 @@ export default function OfflineMapCanvas({
           aria-pressed={showAllStreetNames}
           onClick={() => setShowAllStreetNames(value => !value)}
           className={
-            "absolute right-3 top-[4.25rem] flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
+            "absolute right-3 top-[4.25rem] z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (showAllStreetNames
               ? "bg-[#37e6df] text-[#102028]"
               : dark
@@ -670,7 +768,7 @@ export default function OfflineMapCanvas({
           aria-pressed={expanded}
           onClick={() => setExpanded(v => !v)}
           className={
-            "absolute bottom-3 right-3 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl px-3 text-xs font-bold shadow-lg " +
+            "absolute bottom-3 right-3 z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/95 text-[#e9ffff]"
               : "bg-white/95 text-[#27414b]")
@@ -680,7 +778,7 @@ export default function OfflineMapCanvas({
         </button>
         <div
           className={
-            "pointer-events-none absolute bottom-3 left-3 rounded-lg p-2 text-xs font-bold " +
+            "pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border p-2 text-xs font-black shadow-lg backdrop-blur-md " +
             (dark
               ? "bg-[#162733]/90 text-[#e9ffff]"
               : "bg-white/90 text-[#27414b]")
@@ -695,7 +793,7 @@ export default function OfflineMapCanvas({
             : scaleMetres + " m"}
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 text-xs text-[#536760]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/5 bg-[linear-gradient(180deg,#ffffff,#f3f8f5)] px-3 py-2.5 text-xs font-semibold text-[#536760]">
         <span role="status">
           {pack
             ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} trechos viários · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`

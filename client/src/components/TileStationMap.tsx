@@ -11,6 +11,7 @@ import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
+import { viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
@@ -42,12 +43,11 @@ function stationKey(station: StationMapItem) {
 function clampLat(lat: number) {
   return Math.max(-85.05112878, Math.min(85.05112878, lat));
 }
-function project(lat: number, lng: number, zoom: number) {
-  const scale = TILE * 2 ** zoom;
+function projectBase(lat: number, lng: number) {
   const sin = Math.sin((clampLat(lat) * Math.PI) / 180);
   return {
-    x: ((lng + 180) / 360) * scale,
-    y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * scale,
+    x: ((lng + 180) / 360) * TILE,
+    y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * TILE,
   };
 }
 function unproject(x: number, y: number, zoom: number) {
@@ -98,6 +98,20 @@ export default function TileStationMap({
   );
 
   const singlePointKey = drawable.length === 1 ? `${drawable[0].lat},${drawable[0].lng}` : "";
+  const drawableByKey = useMemo(
+    () => new Map(drawable.map(item => [stationKey(item), item] as const)),
+    [drawable]
+  );
+  const pickerItems = useMemo(
+    () => drawable.map(station => ({ ...station, id: stationKey(station) })),
+    [drawable]
+  );
+  const drawableWorld = useMemo(() => {
+    const result = new Map<string, { x: number; y: number }>();
+    for (const station of drawable)
+      result.set(stationKey(station), projectBase(station.lat, station.lng));
+    return result;
+  }, [drawable]);
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
   useEffect(() => {
@@ -131,24 +145,69 @@ export default function TileStationMap({
     cx: number;
     cy: number;
   } | null>(null);
+  const gestureFrame = useRef<number | null>(null);
+  const pendingGesture = useRef<{
+    center: { lat: number; lng: number };
+    zoom?: number;
+  } | null>(null);
+
+  const applyGesture = (next: { center: { lat: number; lng: number }; zoom?: number }) => {
+    if (typeof next.zoom === "number") setZoom(next.zoom);
+    setCenter(next.center);
+  };
+  const scheduleGesture = (next: { center: { lat: number; lng: number }; zoom?: number }) => {
+    if (gestureFrame.current !== null) {
+      pendingGesture.current = next;
+      return;
+    }
+    applyGesture(next);
+    gestureFrame.current = window.requestAnimationFrame(() => {
+      gestureFrame.current = null;
+      const pending = pendingGesture.current;
+      pendingGesture.current = null;
+      if (pending) scheduleGesture(pending);
+    });
+  };
+  const flushGesture = () => {
+    if (gestureFrame.current !== null) {
+      window.cancelAnimationFrame(gestureFrame.current);
+      gestureFrame.current = null;
+    }
+    const pending = pendingGesture.current;
+    pendingGesture.current = null;
+    if (pending) applyGesture(pending);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (gestureFrame.current !== null)
+        window.cancelAnimationFrame(gestureFrame.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (userCoords && following) setCenter(userCoords);
   }, [userCoords?.lat, userCoords?.lng, following]);
 
   useEffect(() => {
-    if (!drawable.some(item => stationKey(item) === selectedId))
+    if (!selectedId || !drawableByKey.has(selectedId))
       setSelectedId(drawable[0] ? stationKey(drawable[0]) : null);
-  }, [drawable, selectedId]);
+  }, [drawable, drawableByKey, selectedId]);
 
   useEffect(() => {
     const target = viewport.current;
     if (!target) return;
-    const measure = () =>
-      setSize({
+    const measure = () => {
+      const next = {
         width: target.clientWidth || 320,
         height: target.clientHeight || 520,
-      });
+      };
+      setSize(current =>
+        current.width === next.width && current.height === next.height
+          ? current
+          : next
+      );
+    };
     measure();
     const observer =
       typeof ResizeObserver !== "undefined"
@@ -163,45 +222,116 @@ export default function TileStationMap({
   }, [drawable.length, tileErrors >= 5, offline, localLayer]);
   const width = size.width;
   const height = size.height;
-  const centerPx = project(center.lat, center.lng, zoom);
+  const zoomScale = 2 ** zoom;
+  const centerBase = useMemo(
+    () => projectBase(center.lat, center.lng),
+    [center.lat, center.lng]
+  );
+  const centerPx = useMemo(
+    () => ({ x: centerBase.x * zoomScale, y: centerBase.y * zoomScale }),
+    [centerBase, zoomScale]
+  );
   const tileZoom = Math.floor(zoom);
   const tileScale = 2 ** (zoom - tileZoom);
-  const tileCenter = project(center.lat, center.lng, tileZoom);
+  const tileCenter = useMemo(() => {
+    const scale = 2 ** tileZoom;
+    return { x: centerBase.x * scale, y: centerBase.y * scale };
+  }, [centerBase, tileZoom]);
   const metersPerPixel = 40075016.686 * Math.cos(center.lat * Math.PI / 180) / (TILE * 2 ** zoom);
   const scaleMeters = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000].find(value => value / metersPerPixel >= 60) ?? 50000;
-  const baseTileX = Math.floor(tileCenter.x / TILE);
-  const baseTileY = Math.floor(tileCenter.y / TILE);
-  const radiusX = Math.ceil(width / (2 * TILE * tileScale)) + 1;
-  const radiusY = Math.ceil(height / (2 * TILE * tileScale)) + 1;
-  const tiles: Array<{
-    x: number;
-    y: number;
-    key: string;
-    left: number;
-    top: number;
-  }> = [];
+  const tileBounds = useMemo(
+    () => viewportTileBounds(tileCenter, width, height, tileScale),
+    [tileCenter, width, height, tileScale]
+  );
+  const tiles = useMemo(() => {
+    const result: Array<{
+      x: number;
+      y: number;
+      key: string;
+      left: number;
+      top: number;
+      prefetch: boolean;
+    }> = [];
+    const maxTile = 2 ** tileZoom;
+    for (let y = tileBounds.minY; y <= tileBounds.maxY; y++) {
+      if (y < 0 || y >= maxTile) continue;
+      for (let rawX = tileBounds.minX; rawX <= tileBounds.maxX; rawX++) {
+        result.push({
+          x: wrapTile(rawX, tileZoom),
+          y,
+          key: `${tileZoom}:${rawX}:${y}`,
+          left: (rawX - tileBounds.minX) * TILE,
+          top: (y - tileBounds.minY) * TILE,
+          prefetch:
+            rawX === tileBounds.minX ||
+            rawX === tileBounds.maxX ||
+            y === tileBounds.minY ||
+            y === tileBounds.maxY,
+        });
+      }
+    }
+    return result;
+  }, [tileBounds, tileZoom]);
 
-  for (let dy = -radiusY; dy <= radiusY; dy++) {
-    for (let dx = -radiusX; dx <= radiusX; dx++) {
-      const rawX = baseTileX + dx;
-      const y = baseTileY + dy;
-      tiles.push({
-        x: wrapTile(rawX, tileZoom),
-        y,
-        key: `${tileZoom}:${rawX}:${y}`,
-        left: (dx + radiusX) * TILE,
-        top: (dy + radiusY) * TILE,
+  const clusterZoom = Math.min(17, Math.floor(zoom));
+  const clusterScale = 2 ** clusterZoom;
+  const clusterToCurrentScale = 2 ** (zoom - clusterZoom);
+  const markerClusterPixels = useMemo(() => {
+    const result = new Map<string, { x: number; y: number }>();
+    for (const station of drawable) {
+      const base = drawableWorld.get(stationKey(station));
+      if (!base) continue;
+      result.set(stationKey(station), {
+        x: base.x * clusterScale,
+        y: base.y * clusterScale,
       });
     }
-  }
-
-  const markerPosition = (station: { lat: number; lng: number }) => {
-    const p = project(station.lat, station.lng, zoom);
-    return {
-      left: width / 2 + p.x - centerPx.x,
-      top: height / 2 + p.y - centerPx.y,
-    };
-  };
+    return result;
+  }, [drawable, drawableWorld, clusterScale]);
+  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
+  const markerGroups = useMemo(
+    () =>
+      mapMarkerGroups(
+        drawable,
+        item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
+        item =>
+          clusterZoom >= 17 ||
+          stationKey(item) === selectedId ||
+          ["origin", "destination"].includes(item.id ?? "")
+      ),
+    [drawable, markerClusterPixels, selectedId, clusterZoom]
+  );
+  const markerPositions = useMemo(() => {
+    const result = new Map<string, { left: number; top: number }>();
+    for (const station of markerGroups.singles) {
+      const base = drawableWorld.get(stationKey(station));
+      if (!base) continue;
+      result.set(stationKey(station), {
+        left: width / 2 + base.x * zoomScale - centerPx.x,
+        top: height / 2 + base.y * zoomScale - centerPx.y,
+      });
+    }
+    return result;
+  }, [markerGroups, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
+  const routeGeometryKey = useMemo(
+    () => routePoints.map(point => `${point.lat},${point.lng}`).join(";"),
+    [routePoints]
+  );
+  const routeWorld = useMemo(
+    () => routePoints.map(point => projectBase(point.lat, point.lng)),
+    [routeGeometryKey]
+  );
+  const userWorld = useMemo(
+    () => userCoords ? projectBase(userCoords.lat, userCoords.lng) : null,
+    [userCoords?.lat, userCoords?.lng]
+  );
+  const routePolylinePoints = useMemo(
+    () => routeWorld.map(base =>
+      `${base.x * zoomScale},${base.y * zoomScale}`
+    ).join(" "),
+    [routeWorld, zoomScale]
+  );
+  const routePanTransform = `translate(${width / 2 - centerPx.x} ${height / 2 - centerPx.y})`;
 
   const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -237,10 +367,23 @@ export default function TileStationMap({
       const [a, b] = [...pointers.current.values()];
       const state = pinch.current;
       const nextZoom = Math.max(8, Math.min(17, state.zoom + Math.log2(Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / state.distance)));
-      const anchor = project(state.anchor.lat, state.anchor.lng, nextZoom);
+      const anchorBase = projectBase(state.anchor.lat, state.anchor.lng);
+      const nextScale = 2 ** nextZoom;
       const rect = event.currentTarget.getBoundingClientRect();
-      setZoom(nextZoom);
-      setCenter(unproject(anchor.x - ((a.x + b.x) / 2 - rect.left - width / 2), anchor.y - ((a.y + b.y) / 2 - rect.top - height / 2), nextZoom));
+      const nextGesture = {
+        zoom: nextZoom,
+        center: unproject(
+          anchorBase.x * nextScale - ((a.x + b.x) / 2 - rect.left - width / 2),
+          anchorBase.y * nextScale - ((a.y + b.y) / 2 - rect.top - height / 2),
+          nextZoom
+        ),
+      };
+      if (Math.floor(nextZoom) !== Math.floor(zoom)) {
+        flushGesture();
+        applyGesture(nextGesture);
+      } else {
+        scheduleGesture(nextGesture);
+      }
       return;
     }
     const state = dragRef.current;
@@ -253,12 +396,13 @@ export default function TileStationMap({
       state.cy - (event.clientY - state.y),
       zoom
     );
-    setCenter(next);
+    scheduleGesture({ center: next });
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!pointers.current.has(event.pointerId)) return;
     pointers.current.delete(event.pointerId);
+    flushGesture();
     pinch.current = null;
     const remaining = [...pointers.current.entries()][0];
     dragRef.current = remaining ? { id: remaining[0], x: remaining[1].x, y: remaining[1].y, cx: centerPx.x, cy: centerPx.y } : null;
@@ -285,25 +429,32 @@ export default function TileStationMap({
       maxLat = Math.max(...points.map(p => p.lat));
     const minLng = Math.min(...points.map(p => p.lng)),
       maxLng = Math.max(...points.map(p => p.lng));
-    setFollowing(false);
-    let next = 17;
-    while (next > 8) {
-      const a = project(minLat, minLng, next),
-        b = project(maxLat, maxLng, next);
-      if (
-        Math.abs(b.x - a.x) <= Math.max(80, width - 80) &&
-        Math.abs(b.y - a.y) <= Math.max(80, height - 260)
+    const a = projectBase(minLat, minLng);
+    const b = projectBase(maxLat, maxLng);
+    const spanX = Math.max(Number.EPSILON, Math.abs(b.x - a.x));
+    const spanY = Math.max(Number.EPSILON, Math.abs(b.y - a.y));
+    const availableX = Math.max(80, width - 80);
+    const availableY = Math.max(80, height - 260);
+    const fittedZoom = Math.floor(
+      Math.min(
+        Math.log2(availableX / spanX),
+        Math.log2(availableY / spanY)
       )
-        break;
-      next--;
-    }
+    );
+    const next = Math.max(8, Math.min(17, fittedZoom));
+    const scale = 2 ** next;
+    setFollowing(false);
     setZoom(next);
-    const a = project(minLat, minLng, next), b = project(maxLat, maxLng, next);
-    setCenter(unproject((a.x + b.x) / 2, (a.y + b.y) / 2, next));
+    setCenter(
+      unproject(
+        ((a.x + b.x) / 2) * scale,
+        ((a.y + b.y) / 2) * scale,
+        next
+      )
+    );
   };
 
   // A new array with the same geometry must not undo a user pan or zoom.
-  const routeGeometryKey = routePoints.map(point => `${point.lat},${point.lng}`).join(";");
   useEffect(() => {
     if (routePoints.length > 1) fitStations();
   }, [routeGeometryKey]);
@@ -314,12 +465,15 @@ export default function TileStationMap({
     }
   }, [singlePointKey]);
 
-  const routeEndpoints =
-    routePoints.length > 1
-      ? drawable.filter(
-          point => point.id === "origin" || point.id === "destination"
-        )
-      : [];
+  const routeEndpoints = useMemo(
+    () =>
+      routePoints.length > 1
+        ? drawable.filter(
+            point => point.id === "origin" || point.id === "destination"
+          )
+        : [],
+    [drawable, routePoints.length]
+  );
   const focusEndpoint = (point: (typeof drawable)[number]) => {
     setFollowing(false);
     setSelectedId(stationKey(point));
@@ -369,14 +523,11 @@ export default function TileStationMap({
     );
   }
 
-  const selected =
-    drawable.find(item => stationKey(item) === selectedId) ?? null;
-  const markerGroups = mapMarkerGroups(drawable, item => { const p = markerPosition(item); return { x: p.left, y: p.top }; }, item => zoom >= 17 || stationKey(item) === selectedId || ["origin", "destination"].includes(item.id ?? ""));
-
   return (
-    <div className={"min-w-0 max-w-full overflow-hidden rounded-[1.25rem] bg-[#dfe9e2]"}>
-      <div data-map-surface className={"relative " + heightClassName}>
-        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-9 left-3 z-20 rounded bg-white/90 px-2 py-1 text-xs font-semibold text-slate-900">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-white/80 bg-[#dfe9e2] shadow-[0_24px_70px_rgba(15,35,45,.24)]">
+      <div data-map-surface className={"relative isolate " + heightClassName}>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#0e3842]/20 via-[#0e3842]/5 to-transparent" />
+        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border border-white/80 bg-white/92 px-2.5 py-1.5 text-[0.68rem] font-black text-slate-800 shadow-lg backdrop-blur-md">
           {scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`}
           <div className="h-1 border-x-2 border-b-2 border-slate-900" style={{ width: scaleMeters / metersPerPixel }} />
         </div>
@@ -415,6 +566,7 @@ export default function TileStationMap({
             "absolute inset-0 select-none touch-none overflow-hidden " +
             (dragging ? "cursor-grabbing" : "cursor-grab")
           }
+          style={{ contain: "layout paint", overscrollBehavior: "contain" }}
           onPointerDown={beginDrag}
           onPointerMove={drag}
           onPointerUp={endDrag}
@@ -426,20 +578,23 @@ export default function TileStationMap({
             const rect = event.currentTarget.getBoundingClientRect();
             const nextZoom = Math.min(17, zoom + 1);
             const anchor = unproject(centerPx.x + event.clientX - rect.left - width / 2, centerPx.y + event.clientY - rect.top - height / 2, zoom);
-            const projected = project(anchor.lat, anchor.lng, nextZoom);
+            const anchorBase = projectBase(anchor.lat, anchor.lng);
+            const nextScale = 2 ** nextZoom;
             setZoom(nextZoom);
-            setCenter(unproject(projected.x - (event.clientX - rect.left - width / 2), projected.y - (event.clientY - rect.top - height / 2), nextZoom));
+            setCenter(unproject(anchorBase.x * nextScale - (event.clientX - rect.left - width / 2), anchorBase.y * nextScale - (event.clientY - rect.top - height / 2), nextZoom));
           }}
         >
           <div
+            data-map-tile-layer
             className="absolute"
             style={{
-              width: TILE * (radiusX * 2 + 1),
-              height: TILE * (radiusY * 2 + 1),
-              left: width / 2 - (radiusX * TILE + tileCenter.x - baseTileX * TILE) * tileScale,
-              top: height / 2 - (radiusY * TILE + tileCenter.y - baseTileY * TILE) * tileScale,
-              transform: `scale(${tileScale})`,
+              width: TILE * (tileBounds.maxX - tileBounds.minX + 1),
+              height: TILE * (tileBounds.maxY - tileBounds.minY + 1),
+              left: 0,
+              top: 0,
+              transform: `translate3d(${width / 2 + (tileBounds.minX * TILE - tileCenter.x) * tileScale}px, ${height / 2 + (tileBounds.minY * TILE - tileCenter.y) * tileScale}px, 0) scale(${tileScale})`,
               transformOrigin: "0 0",
+              willChange: "transform",
             }}
           >
             {tiles.map(tile => (
@@ -447,9 +602,11 @@ export default function TileStationMap({
                 key={tile.key}
                 src={tileUrl(tileZoom, tile.x, tile.y)}
                 referrerPolicy="origin"
+                decoding="async"
+                loading={tile.prefetch ? "lazy" : "eager"}
                 alt=""
                 onError={() =>
-                  setTileErrors(value => Math.min(tiles.length, value + 1))
+                  setTileErrors(value => (value >= 5 ? value : value + 1))
                 }
                 draggable={false}
                 className="absolute size-64 max-w-none"
@@ -464,33 +621,38 @@ export default function TileStationMap({
               aria-label="Trajeto pelas ruas"
               role="img"
             >
-              {["#ffffff", appearance.color].map((color, index) => (
-                <polyline
-                  key={color}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={index ? appearance.width : appearance.width + 4}
-                  strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={routePoints
-                    .map(point => {
-                      const p = markerPosition(point);
-                      return `${p.left},${p.top}`;
-                    })
-                    .join(" ")}
-                />
-              ))}
+              <g data-route-geometry transform={routePanTransform}>
+                {["#ffffff", appearance.color].map((color, index) => (
+                  <polyline
+                    key={color}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={index ? appearance.width : appearance.width + 4}
+                    strokeDasharray={index && travelMode === "walking" ? "2 9" : index && travelMode === "cycling" ? "10 6" : undefined}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={routePolylinePoints}
+                  />
+                ))}
+              </g>
             </svg>
           )}
           <div className="pointer-events-none absolute inset-0">
-            {markerGroups.groups.filter(group => group.x >= -30 && group.x <= width + 30 && group.y >= -30 && group.y <= height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
-              setFollowing(false);
-              setCenter(unproject(centerPx.x + group.x - width / 2, centerPx.y + group.y - height / 2, zoom));
-              setZoom(value => Math.min(17, value + 2));
-            }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x, top: group.y }}>{group.items.length}</button>)}
+            {markerGroups.groups.map(group => {
+              const worldX = group.x * clusterToCurrentScale;
+              const worldY = group.y * clusterToCurrentScale;
+              const left = width / 2 + worldX - centerPx.x;
+              const top = height / 2 + worldY - centerPx.y;
+              if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
+              return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+                setFollowing(false);
+                setCenter(unproject(worldX, worldY, zoom));
+                setZoom(value => Math.min(17, value + 2));
+              }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left, top }}>{group.items.length}</button>;
+            })}
             {markerGroups.singles.map(station => {
-              const position = markerPosition(station);
+              const position = markerPositions.get(stationKey(station));
+              if (!position) return null;
               if (
                 position.left < -30 ||
                 position.left > width + 30 ||
@@ -536,11 +698,10 @@ export default function TileStationMap({
               );
             })}
 
-            {userCoords &&
+            {userCoords && userWorld &&
               (() => {
-                const p = project(userCoords.lat, userCoords.lng, zoom);
-                const left = width / 2 + p.x - centerPx.x;
-                const top = height / 2 + p.y - centerPx.y;
+                const left = width / 2 + userWorld.x * zoomScale - centerPx.x;
+                const top = height / 2 + userWorld.y * zoomScale - centerPx.y;
                 return (
                   <span
                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#3DE3FF] shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
@@ -574,7 +735,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(1)}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg disabled:opacity-40"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
             aria-label="Aumentar zoom"
             disabled={zoom >= 17}
           >
@@ -583,7 +744,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(-1)}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg disabled:opacity-40"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
             aria-label="Diminuir zoom"
             disabled={zoom <= 8}
           >
@@ -592,7 +753,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={recenter}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
             aria-label="Recentrar mapa"
             aria-pressed={following}
           >
@@ -601,7 +762,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={fitStations}
-            className="grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"
+            className="grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
             aria-label="Ver todos"
             title={routePoints.length > 1 ? "Enquadrar percurso" : "Ver todos os lugares"}
           >
@@ -610,13 +771,13 @@ export default function TileStationMap({
 
         </div>
 
-        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl bg-white/95 text-[#163840] shadow-lg"><Layers className="size-4" /></button>}
+        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl border border-white/80 bg-white/92 text-[#163840] shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"><Layers className="size-4" /></button>}
 
         <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
-            items={drawable.map(station => ({ ...station, id: stationKey(station) }))}
+            items={pickerItems}
             onSelect={id => {
-              const station = drawable.find(item => stationKey(item) === id);
+              const station = drawableByKey.get(id);
               if (!station) return;
               setSelectedId(id);
               onSelectStation?.(station);
@@ -627,7 +788,7 @@ export default function TileStationMap({
         </div>
       </div>
 
-      <div className="relative min-w-0 border-t border-black/10 bg-white/95 p-3.5 sm:p-4">
+      <div className="relative min-w-0 border-t border-black/10 bg-[linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,250,248,.98))] p-3.5 sm:p-4">
         {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-bold text-slate-700">{TRAVEL_LABELS[travelMode]} · {travelMode === "walking" ? "linha pontilhada" : travelMode === "cycling" ? "linha tracejada" : "linha contínua"}</p>

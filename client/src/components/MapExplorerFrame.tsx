@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, Move, MapPinned } from "lucide-react";
 
 /** Keep the same map mounted when resizing so camera and GPS state survive. */
 export default function MapExplorerFrame({
@@ -83,10 +83,13 @@ export default function MapExplorerFrame({
       role={expanded ? "dialog" : undefined}
       aria-modal={expanded ? true : undefined}
       aria-label={expanded ? `${label} em tela cheia` : undefined}
-      className={`map-explorer-frame min-w-0 ${expanded ? "fixed inset-0 z-[1000] flex flex-col bg-[#0B1014] p-2" : "relative"}`}
+      className={`map-explorer-frame min-w-0 overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#0B1014] shadow-[0_28px_80px_rgba(0,0,0,.28)] ${expanded ? "fixed inset-0 z-[1000] flex flex-col rounded-none border-0 bg-[#0B1014] p-2" : "relative"}`}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2 bg-[#0B1014] p-2 text-white">
-        <span className="text-sm font-semibold">{label}</span>
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/8 bg-[linear-gradient(110deg,#10202a,#0B1014_58%,#102a2b)] p-2.5 text-white">
+        <div className="min-w-0">
+          <span className="flex items-center gap-2 text-sm font-black"><MapPinned className="size-4 text-[#3DE3FF]" />{label}</span>
+          <span className="mt-1 hidden items-center gap-1.5 text-[0.68rem] font-bold text-white/55 min-[360px]:flex"><Move className="size-3" />Arraste · pinça para zoom · toque nos pontos</span>
+        </div>
         <button
           ref={toggle}
           type="button"
@@ -94,7 +97,7 @@ export default function MapExplorerFrame({
           aria-label={
             expanded ? "Sair da tela cheia" : "Abrir mapa em tela cheia"
           }
-          className="flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-3 text-sm font-semibold"
+          className="flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-white/12 bg-white/[.05] px-3 text-xs font-black text-white shadow-lg backdrop-blur hover:border-[#3DE3FF]/30"
         >
           {expanded ? (
             <Minimize2 className="size-4" />

@@ -10,6 +10,7 @@ import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import { BUNDLED_CITY_ATLAS, resolveCityAtlasPoint, atlasDestinationReference, isAmbiguousAtlasStreet } from "@/lib/cityAtlas";
 import { requestOptionalMapboxRoute } from "@/lib/mapboxOptional";
 import { calculateOfflineRoadRoute } from "./offlineRoadRouting";
+import { isAguasLindasRoutePoint } from "./mapGeometry";
 
 const NOMINATIM_URL =
   import.meta.env.VITE_PUBLIC_GEOCODER_URL?.trim() ||
@@ -105,6 +106,14 @@ function opaqueCacheToken(value: string) {
   return (
     (first >>> 0).toString(16).padStart(8, "0") +
     (second >>> 0).toString(16).padStart(8, "0")
+  );
+}
+
+function isExplicitAguasLindasQuery(value: string) {
+  const normalized = normalizeSearch(value);
+  return (
+    normalized.includes("aguas lindas") ||
+    normalized.includes("aguas lindas de goias")
   );
 }
 
@@ -315,6 +324,10 @@ async function requestPublicGeocoder(query: string) {
     url.searchParams.set("limit", "1");
     url.searchParams.set("countrycodes", "br");
     url.searchParams.set("accept-language", "pt-BR");
+    if (isExplicitAguasLindasQuery(query)) {
+      url.searchParams.set("viewbox", "-48.7,-15.3,-47.9,-16.1");
+      url.searchParams.set("bounded", "1");
+    }
 
     try {
       const results = await fetchJson<NominatimResult[]>(url.toString());
@@ -440,10 +453,11 @@ function localGeocode(value: string): PublicCoordinate | null {
   if (streetReference) return streetReference;
 
   const preparedPoint = resolveLocalGeocodePoint(value);
-  if (preparedPoint) return preparedPoint;
+  if (preparedPoint && isAguasLindasRoutePoint(preparedPoint))
+    return preparedPoint;
 
   const atlasPoint = resolveCityAtlasPoint(BUNDLED_CITY_ATLAS, value);
-  if (atlasPoint) return atlasPoint;
+  if (atlasPoint && isAguasLindasRoutePoint(atlasPoint)) return atlasPoint;
 
   // A city-qualified street, hospital or station is never the city centre.
   const cityName = normalized.replace(/[,;]/g, " ").replace(/\s+/g, " ").trim();
@@ -460,7 +474,12 @@ function localGeocode(value: string): PublicCoordinate | null {
 
   const snapshotMatches = groupAnpFuelRows(getOfflineAnpSnapshot().rows).filter(
     row => {
-      if (!Number.isFinite(row.latitude) || !Number.isFinite(row.longitude))
+      if (
+        !isAguasLindasRoutePoint({
+          lat: Number(row.latitude),
+          lng: Number(row.longitude),
+        })
+      )
         return false;
       const rowText = normalizeSearch(
         [row.cnpj, row.razaoSocial, row.endereco, row.bairro, row.municipio]
@@ -482,10 +501,11 @@ function localGeocode(value: string): PublicCoordinate | null {
   }
 
   const matches = searchAguasLindasStations(value);
-  const withCoordinates = matches.filter(
-    station =>
-      Number.isFinite(station.anp?.latitude) &&
-      Number.isFinite(station.anp?.longitude)
+  const withCoordinates = matches.filter(station =>
+    isAguasLindasRoutePoint({
+      lat: Number(station.anp?.latitude),
+      lng: Number(station.anp?.longitude),
+    })
   );
   const exact = withCoordinates.filter(station => {
     const stationText = normalizeSearch(
@@ -586,7 +606,12 @@ async function geocode(value: string): Promise<PublicCoordinate> {
 
   const lat = Number(result?.lat);
   const lng = Number(result?.lon);
-  if (!isCoordinate({ lat, lng })) {
+  const geocodedPoint = { lat, lng };
+  if (
+    !isCoordinate(geocodedPoint) ||
+    (isExplicitAguasLindasQuery(query) &&
+      !isAguasLindasRoutePoint(geocodedPoint))
+  ) {
     const fallback = localGeocode(query);
     if (fallback) {
       cacheSet(cacheKey, fallback);
@@ -599,7 +624,7 @@ async function geocode(value: string): Promise<PublicCoordinate> {
     );
   }
 
-  const geocodedCoordinate = { lat, lng };
+  const geocodedCoordinate = geocodedPoint;
   cacheSet(cacheKey, geocodedCoordinate);
   const expandedKey = geocodeCacheKey(expanded);
   if (expandedKey !== cacheKey) cacheSet(expandedKey, geocodedCoordinate);

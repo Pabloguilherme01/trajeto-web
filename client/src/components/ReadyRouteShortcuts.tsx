@@ -6,6 +6,7 @@ import { matchesCatalogText } from "@/lib/catalogSearch";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
+import QuickFilterChips from "@/components/QuickFilterChips";
 
 type TravelMode = "driving" | "walking" | "cycling" | "transit";
 const destinationIcons = { saude: Stethoscope, compras: ShoppingBag, servicos: Landmark, transporte: Bus, educacao: GraduationCap, combustivel: Fuel, alimentacao: Utensils, centro: MapPin };
@@ -13,6 +14,15 @@ const modes: Array<{ value: TravelMode; label: string }> = [
   { value: "driving", label: "Carro" }, { value: "walking", label: "A pé" },
   { value: "cycling", label: "Bicicleta" }, { value: "transit", label: "Transporte público" },
 ];
+
+function readyRoutePriority(route: typeof LOCAL_READY_ROUTES[number]) {
+  if (route.originId === "centro") return 0;
+  if (route.originId === "prefeitura" || route.originId === "rodoviaria") return 1;
+  if (["aguas-lindas-shopping", "upa", "heal", "hospital-bom-jesus"].includes(route.originId)) return 2;
+  if (route.originId.startsWith("via-osm-")) return 3;
+  if (route.originId.startsWith("ready-station-")) return 4;
+  return 2;
+}
 
 export default function ReadyRouteShortcuts({ compact = false, initialMode = "driving" }: { compact?: boolean; initialMode?: TravelMode }) {
   const [, navigate] = useLocation();
@@ -39,7 +49,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     (originId === "todos" || originId === route.originId) &&
     (category === "todos" || category === route.category) &&
     matchesCatalogText(query, [route.label, route.origin, route.destination, route.detail])
-  );
+  ).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b));
   const visible = filtered.slice(0, visibleCount);
   const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setVisibleCount(6); };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
@@ -58,6 +68,8 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
           { value: "educacao", label: "Ir estudar" },
           { value: "combustivel", label: "Abastecer" },
           { value: "transporte", label: "Pegar transporte" },
+          { value: "alimentacao", label: "Comer" },
+          { value: "centro", label: "Ir para um bairro" },
         ].map(intent => <button key={intent.value} type="button" aria-pressed={category === intent.value}
           onClick={() => { setCategory(intent.value as RouteDestinationCategoryFilter); setQuery(""); setVisibleCount(6); }}
           className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-[#C7FF3C] bg-[#C7FF3C]/15 text-[#C7FF3C]" : "border-white/15 bg-white/5 text-white/80"}`}>
@@ -78,9 +90,26 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     </button>
     <p className="mt-2 text-xs leading-relaxed text-white/65">Todos os trajetos deste catálogo abrem offline, incluindo conexões entre as vias mapeadas. Para seguir curva a curva pelas ruas, prepare a rota com internet antes de sair; sem geometria salva, o cálculo offline continua identificado como estimativa.</p>
     <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <label className="min-w-0 text-xs font-bold text-white/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
-        <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />
-      </label>
+      <div className="min-w-0">
+        <label className="text-xs font-bold text-white/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
+          <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white" />
+        </label>
+        <QuickFilterChips
+          label="Atalhos de busca de trajetos"
+          options={[
+            { label: "UPA", value: "upa" },
+            { label: "Postos", value: "posto" },
+            { label: "Mercados", value: "mercado" },
+            { label: "Escolas", value: "escola" },
+            { label: "Prefeitura", value: "prefeitura" },
+            { label: "Shopping", value: "shopping" },
+            { label: "Rodoviária", value: "rodoviaria" },
+          ]}
+          value={query}
+          onPick={value => { setQuery(value); setVisibleCount(6); }}
+          className="mt-2"
+        />
+      </div>
       <label className="min-w-0 text-xs font-bold text-white/80">Saindo de
         <select value={originId} onChange={event => { setOriginId(event.target.value); setVisibleCount(6); }} className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-white/15 bg-[#10181d] px-3 text-base text-white">
           <option value="todos">Todas as partidas</option>

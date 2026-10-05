@@ -84,6 +84,31 @@ it("loads local streets with no coordinate or external request, and preserves da
       .getAttribute("aria-pressed")
   ).toBe("false");
 });
+it("moves precompiled offline streets and route with one world transform on pan", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
+  await setup();
+  await screen.findByText(/Ruas locais disponíveis/);
+  const layer = document.querySelector("[data-offline-world-layer]") as SVGGElement | null;
+  const route = document.querySelector("[data-offline-route-geometry]") as SVGPathElement | null;
+  expect(layer).toBeTruthy();
+  expect(route).toBeTruthy();
+  const road = layer?.querySelector("path:not([data-offline-route-geometry])") as SVGPathElement | null;
+  const roadPath = road?.getAttribute("d");
+  const routePath = route?.getAttribute("d");
+  const before = layer?.getAttribute("transform");
+  fireEvent.keyDown(
+    screen.getByRole("region", { name: "Explorar mapa offline" }),
+    { key: "ArrowRight" }
+  );
+  expect(road?.getAttribute("d")).toBe(roadPath);
+  expect(route?.getAttribute("d")).toBe(routePath);
+  expect(layer?.getAttribute("transform")).not.toBe(before);
+  expect(road?.getAttribute("vector-effect")).toBe("non-scaling-stroke");
+});
+
 it("keeps markers after pack failure and retries when connectivity returns", async () => {
   const fetchMock = vi
     .fn()

@@ -19,6 +19,13 @@ it("filters by category and clears an empty combined search", () => {
   fireEvent.click(screen.getByRole("button", { name: "Limpar busca e filtros" }));
   expect(screen.getAllByRole("option")).toHaveLength(3);
 });
+it("offers ready keyboard filters for common destinations", () => {
+  render(<MapDestinationPicker items={items} value="a" label="Escolher lugar" onSelect={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher lugar" }));
+  fireEvent.click(screen.getByRole("button", { name: "UPA" }));
+  expect(screen.getAllByRole("option")).toHaveLength(1);
+  expect(screen.getByRole("option").textContent).toContain("UPA");
+});
 it("searches without accents and distinguishes duplicate street names by address", () => {
   const choose = vi.fn();
   render(<MapDestinationPicker items={items} value="c" label="Escolher lugar" onSelect={choose} />);

@@ -9,6 +9,14 @@ for (const width of [320, 1280]) test(`map controls: categories, local layer and
   await page.route("https://tile.openstreetmap.org/**", route => route.fulfill({ contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64") }));
   await page.goto("mapa", { waitUntil: "domcontentloaded" });
   const map = page.locator('section[aria-label="Mapa da cidade"]');
+  const surface = map.getByRole("region", { name: "Mapa de destinos", exact: true });
+  await expect(surface).toBeVisible();
+  if (width === 320) expect(await surface.locator('img[src*="tile.openstreetmap.org"]').count()).toBeLessThanOrEqual(30);
+  await surface.focus();
+  await surface.press("ArrowRight");
+  await surface.press("+");
+  await expect(map.getByRole("button", { name: "Diminuir zoom", exact: true })).toBeEnabled();
+  await map.getByRole("button", { name: "Recentrar mapa", exact: true }).click();
   await map.getByRole("button", { name: "Escolher destino no mapa" }).click();
   const popup = page.locator('[data-slot="popover-content"]');
   await popup.getByRole("button", { name: "Saúde", exact: true }).click();
