@@ -4,7 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -723,10 +723,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     if (typeof station.lat === "number" && typeof station.lng === "number") {
       const urls = openNavigation(station.lat, station.lng, station.name);
       const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
-      window.open(url, "_blank", "noopener,noreferrer");
+      openExternalUrl(url);
       return;
     }
-    window.open(buildGoogleMapsSearchUrl([station.name, station.address].filter(Boolean).join(", ")), "_blank", "noopener,noreferrer");
+    openExternalUrl(buildGoogleMapsSearchUrl([station.name, station.address].filter(Boolean).join(", ")));
   };
 
   const shareCurrent = async () => {
@@ -1066,14 +1066,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                         <span>Avaliação: {item.rating ?? "—"}{item.reviews != null ? " · " + item.reviews + " avaliações" : ""}</span>
                         <span className="col-span-2 sm:col-span-1">{item.note}</span>
                       </div>
-                      <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address), "_blank", "noopener,noreferrer")} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-background">Abrir no Google Maps</button>
+                      <button type="button" onClick={() => openExternalUrl(buildGoogleMapsSearchUrl(item.displayName + ", " + item.address))} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-background">Abrir no Google Maps</button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="min-h-12 rounded-xl bg-primary px-3 text-xs font-black text-background">Pesquisar no Google Maps</button>
+              <button type="button" onClick={() => openExternalUrl(buildGoogleMapsSearchUrl(query))} className="min-h-12 rounded-xl bg-primary px-3 text-xs font-black text-background">Pesquisar no Google Maps</button>
               <button type="button" onClick={useNearby} disabled={locating || typeof navigator === "undefined" || !navigator.geolocation} className="min-h-12 rounded-xl border border-accent/25 bg-accent/[.05] px-3 text-xs font-black text-[#C9F7FF] disabled:opacity-50">Postos perto de mim</button>
             </div>
             {!online && (
@@ -1146,7 +1146,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                           {station.products.map((item, index) => <p key={item.produto + "-" + index} className="mt-1">{item.produto ?? "Produto não informado"} · tancagem {item.tancagem != null ? item.tancagem.toLocaleString("pt-BR") : "—"} {item.unidadeMedidaTancagem ?? ""} · bicos {item.quantidadeBicos ?? "—"}{item.classe ? " · " + item.classe : ""}</p>)}
                         </div>
                         <p><strong className="text-white/65">Geografia:</strong> {station.latitude != null && station.longitude != null ? station.latitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) + ", " + station.longitude.toLocaleString("pt-BR", { maximumFractionDigits: 7 }) : "sem coordenadas"}{station.validacao ? " · validação: " + station.validacao : ""}{station.estimativaAcuraciaM != null ? " · acurácia: " + station.estimativaAcuraciaM.toLocaleString("pt-BR") + " m" : ""}</p>
-                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => window.open("https://www.google.com/maps/dir/?api=1&destination=" + station.latitude + "," + station.longitude, "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
+                        {station.latitude != null && station.longitude != null && <button type="button" onClick={() => openExternalUrl(buildGoogleMapsDirectionsUrl("", station.latitude + "," + station.longitude, "driving", true))} className="min-h-11 rounded-xl border border-primary/20 px-3 text-xs font-black text-[#D9FF91]">Abrir coordenadas no Google Maps</button>}
                         {station.observacao && <p><strong className="text-white/65">Observação:</strong> {station.observacao}</p>}
                       </div>
                     </details>
@@ -1204,7 +1204,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           <section className="mt-5 rounded-3xl border border-warning/20 bg-warning/[.04] p-5">
             <p className="text-sm font-black">A consulta não respondeu.</p>
             <p className="mt-1 text-xs leading-relaxed text-white/65">O objetivo continua disponível no Google Maps enquanto o serviço do Trajeto não responde.</p>
-            <button type="button" onClick={() => window.open(buildGoogleMapsSearchUrl(query), "_blank", "noopener,noreferrer")} className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-xs font-black text-background">Abrir no Google Maps</button>
+            <button type="button" onClick={() => openExternalUrl(buildGoogleMapsSearchUrl(query))} className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-xs font-black text-background">Abrir no Google Maps</button>
           </section>
         )}
 
