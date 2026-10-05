@@ -213,7 +213,7 @@ export default function CityMap() {
   );
   const fallback = markers.length ? <OfflineStationMap stations={markers} itemLabel="destino" onPlanDestination={item => plan(plannerDestinationFromMapItem(item))} /> : emptyFallback;
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-white sm:px-6">
+    <main className="visual-shell mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-white sm:px-6">
       <p className="text-xs font-black uppercase tracking-[.16em] text-primary">
         Explore Águas Lindas
       </p>
@@ -287,7 +287,7 @@ export default function CityMap() {
       </div>
       <section
         aria-label="Mapa da cidade"
-        className="overflow-hidden rounded-3xl border border-white/15 shadow-2xl"
+        className="premium-card overflow-hidden rounded-3xl border border-white/15"
       >
         <MapExplorerFrame label="Mapa da cidade">
         {online && markers.length ? (
