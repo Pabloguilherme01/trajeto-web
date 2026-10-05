@@ -93,6 +93,60 @@ describe("offline road routing", () => {
     expect(route!.steps.some(step => step.name === "Rua B")).toBe(true);
   });
 
+  it("rejects out-of-range coordinates before loading the street graph", async () => {
+    const fetch = mockRoadPack();
+    expect(
+      await calculateOfflineRoadRoute(
+        { lat: 91, lng: -48.28 },
+        { lat: -15.752, lng: -48.278 },
+        "driving"
+      )
+    ).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("refuses conflicting coordinates for the same mapped node identity", async () => {
+    const pack = {
+      schema: 1,
+      retrievedAt: "2026-10-05T00:00:00Z",
+      roads: [
+        {
+          id: 1,
+          nodeIds: [1, 2],
+          permissions: { driving: "both" },
+          kind: "residential",
+          name: "Rua coerente",
+          points: [
+            [-15.75, -48.28],
+            [-15.75, -48.279],
+          ],
+        },
+        {
+          id: 2,
+          nodeIds: [2, 3],
+          permissions: { driving: "both" },
+          kind: "residential",
+          name: "Rua conflitante",
+          points: [
+            [-15.76, -48.29],
+            [-15.761, -48.289],
+          ],
+        },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: true, json: async () => pack }))
+    );
+    expect(
+      await calculateOfflineRoadRoute(
+        { lat: -15.75, lng: -48.28 },
+        { lat: -15.761, lng: -48.289 },
+        "driving"
+      )
+    ).toBeNull();
+  });
+
   it("returns null when an endpoint is too far from the saved street mesh", async () => {
     mockRoadPack();
     const route = await calculateOfflineRoadRoute(
