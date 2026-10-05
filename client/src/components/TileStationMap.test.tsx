@@ -58,6 +58,15 @@ it("preserves manual exploration on GPS updates and resumes following on recente
   expect(marker.style.left).not.toBe(recentered);
 });
 
+it("contains map layout and overscroll inside the interactive viewport", () => {
+  render(<TileStationMap stations={[
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+  ]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  expect(map.style.contain).toBe("layout paint");
+  expect(map.style.overscrollBehavior).toBe("contain");
+});
+
 it("zooms around a double-clicked point without moving its marker", () => {
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} />);
   fireEvent.doubleClick(screen.getByRole("region", { name: "Mapa dos postos" }), { clientX: 160, clientY: 260 });
