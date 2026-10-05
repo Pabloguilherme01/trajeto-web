@@ -856,6 +856,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <span className="rounded-full border border-white/8 bg-white/[.03] px-2.5 py-1 text-xs font-black text-white/65">{mapStations.length} referências</span>
               </div>
             </div>
+            <p className="px-4 py-2 text-xs text-white/65">{mapStations.filter(station => stationCoordinatePoint(station.lat, station.lng)).length} posicionados · {mapStations.filter(station => !stationCoordinatePoint(station.lat, station.lng)).length} sem coordenada</p>
             <div className="relative">
               <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} onSelectStation={handleMapStationSelect} />
             </div>
