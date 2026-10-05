@@ -15,6 +15,15 @@ const modes: Array<{ value: TravelMode; label: string }> = [
   { value: "cycling", label: "Bicicleta" }, { value: "transit", label: "Transporte público" },
 ];
 
+function readyRoutePriority(route: typeof LOCAL_READY_ROUTES[number]) {
+  if (route.originId === "centro") return 0;
+  if (route.originId === "prefeitura" || route.originId === "rodoviaria") return 1;
+  if (["aguas-lindas-shopping", "upa", "heal", "hospital-bom-jesus"].includes(route.originId)) return 2;
+  if (route.originId.startsWith("via-osm-")) return 3;
+  if (route.originId.startsWith("ready-station-")) return 4;
+  return 2;
+}
+
 export default function ReadyRouteShortcuts({ compact = false, initialMode = "driving" }: { compact?: boolean; initialMode?: TravelMode }) {
   const [, navigate] = useLocation();
   const [query, setQuery] = useState("");
@@ -40,7 +49,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     (originId === "todos" || originId === route.originId) &&
     (category === "todos" || category === route.category) &&
     matchesCatalogText(query, [route.label, route.origin, route.destination, route.detail])
-  );
+  ).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b));
   const visible = filtered.slice(0, visibleCount);
   const clearFilters = () => { setQuery(""); setCategory("todos"); setOriginId("todos"); setVisibleCount(6); };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
