@@ -13,6 +13,7 @@ import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE,
 import { fuelFilterPriceKey, inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
+import QuickFilterChips from "@/components/QuickFilterChips";
 import { toast } from "sonner";
 import { groupAnpFuelRows, normalizeAnpFuelRow, type AnpFuelRow } from "@shared/anpRevendedores";
 import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot, getOfflineMapAgeLabel, getOfflineMapStations, hydrateOfflineAnpSnapshot, hydrateOfflineMapStations } from "@/lib/stationMapOffline";
@@ -508,16 +509,13 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     setLocalVisibleCount(12);
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = input.trim();
-    if (trimmed.length < 3) {
-      toast.error("Digite uma cidade, bairro, endereço ou nome de posto.");
-      return;
-    }
+  const applyStationSearch = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed.length < 3) return false;
     rememberIntent("stations");
     rememberSearch(trimmed);
     vibration();
+    setInput(trimmed);
     setQuery(trimmed);
     setDirectorySearch("");
     setShowMap(false);
@@ -529,6 +527,14 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     setVerifiedOnly(false);
     setMappedOnly(false);
     setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(trimmed));
+    return true;
+  };
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!applyStationSearch(input)) {
+      toast.error("Digite uma cidade, bairro, endereço ou nome de posto.");
+    }
   };
 
   const useNearby = () => {
@@ -763,6 +769,20 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 </button>
               </div>
             </form>
+            <QuickFilterChips
+              label="Bairros e eixos rápidos"
+              options={[
+                { label: "Águas Lindas", value: "Águas Lindas de Goiás, GO" },
+                { label: "BR-070", value: "BR-070" },
+                { label: "Jardim Brasília", value: "Jardim Brasília" },
+                { label: "Parque da Barragem", value: "Parque da Barragem" },
+                { label: "Centro", value: "Centro, Águas Lindas de Goiás" },
+                { label: "Rodoviária", value: "Rodoviária" },
+              ]}
+              value={input}
+              onPick={value => void applyStationSearch(value)}
+              className="mt-3"
+            />
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <button type="button" onClick={useNearby} disabled={locating} className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#C7FF3C] px-2 text-xs font-black text-[#0B1014] disabled:opacity-40">
@@ -909,6 +929,29 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-[#C7FF3C]/15 bg-[#C7FF3C]/[.04] px-3 text-xs font-black text-[#D9FF91]">{userCoords ? "Mais perto" : "Ver todos"}</button>
+            </div>
+            <QuickFilterChips
+              label="Filtros rápidos do diretório"
+              options={[
+                { label: "Shell", value: "shell" },
+                { label: "Ipiranga", value: "ipiranga" },
+                { label: "BR", value: "petrobras" },
+                { label: "ZM", value: "zm" },
+                { label: "Jardim Brasília", value: "jardim brasilia" },
+                { label: "BR-070", value: "br-070" },
+              ]}
+              value={directorySearch}
+              onPick={value => setDirectorySearch(value)}
+              className="mt-2"
+            />
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Combustíveis rápidos">
+              {[
+                ["all", "Todos"],
+                ["gasolina-comum", "Gasolina"],
+                ["etanol", "Etanol"],
+                ["diesel-s10", "Diesel S10"],
+                ["gnv", "GNV"],
+              ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-[#C7FF3C]/45 bg-[#C7FF3C]/12 text-[#E6FFAB]" : "border-white/10 bg-white/[.03] text-white/70")}>{label}</button>)}
             </div>
             {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-[#FFCF96]">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-white/65">
