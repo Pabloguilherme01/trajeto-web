@@ -84,7 +84,8 @@ it("keeps quick filters compatible when switching categories and street mode", (
   const quickFilters = screen.getByRole("group", { name: "Filtros rápidos do mapa" });
   fireEvent.click(within(quickFilters).getByRole("button", { name: "Postos" }));
   expect(search.value).toBe("posto");
-  expect(screen.getByRole("button", { name: "Combustível" }).getAttribute("aria-pressed")).toBe("true");
+  const categories = screen.getByRole("group", { name: "Categorias do mapa" });
+  expect(within(categories).getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
   expect(search.value).toBe("");
   fireEvent.click(within(quickFilters).getByRole("button", { name: "UPA" }));
