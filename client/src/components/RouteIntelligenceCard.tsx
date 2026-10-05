@@ -388,8 +388,8 @@ export default function RouteIntelligenceCard({ origin, destination, waypoints =
         </p>
         {routeConfirmed && <div className="mt-3 grid grid-cols-3 gap-2">
           <button type="button" onClick={() => openExternalUrl(buildGoogleMapsDirectionsUrl(origin, destination, "driving", true))} className="min-h-11 rounded-xl bg-primary px-2 text-[0.62rem] font-black text-background">Google Maps</button>
-          <button type="button" onClick={() => window.open(buildWazeNavigationUrl(destination), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button>
-          <button type="button" onClick={() => window.open(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints), "_blank", "noopener,noreferrer")} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button>
+          <button type="button" onClick={() => openExternalUrl(buildWazeNavigationUrl(destination))} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Waze</button>
+          <button type="button" onClick={() => openExternalUrl(buildAppleMapsDirectionsUrl(destination, origin, avoidTolls ? "avoid-tolls" : avoidHighways ? "avoid-highways" : "default", waypoints))} className="min-h-11 rounded-xl bg-white/[.07] px-2 text-[0.62rem] font-black">Apple Maps</button>
         </div>}
       </div>}
 
