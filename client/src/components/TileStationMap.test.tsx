@@ -58,6 +58,25 @@ it("preserves manual exploration on GPS updates and resumes following on recente
   expect(marker.style.left).not.toBe(recentered);
 });
 
+it("keeps route endpoints in a single scrollable rail on narrow maps", () => {
+  render(
+    <TileStationMap
+      routePoints={[
+        { lat: -15.7545, lng: -48.2816 },
+        { lat: -15.7645, lng: -48.2916 },
+      ]}
+      stations={[
+        { id: "origin", name: "Origem", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+        { id: "destination", name: "Destino", address: "Rua B", lat: -15.7645, lng: -48.2916 },
+      ]}
+    />
+  );
+  const rail = screen.getByRole("group", { name: "Pontos do percurso" });
+  expect(rail.className).toContain("overflow-x-auto");
+  expect(screen.getByRole("button", { name: "Ver origem" }).className).toContain("shrink-0");
+  expect(screen.getByRole("button", { name: "Ver destino" }).className).toContain("snap-start");
+});
+
 it("contains map layout and overscroll inside the interactive viewport", () => {
   render(<TileStationMap stations={[
     { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
