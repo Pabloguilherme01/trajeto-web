@@ -98,7 +98,7 @@ test("Pages: station search uses compact cards and resets an empty query", async
   await page.goto("postos?q=ponteio", { waitUntil: "domcontentloaded" });
   const card = page.locator("article[id^='posto-']").first();
   await expect(card.getByRole("heading")).toContainText(/ponteio/i);
-  await expect(card.getByRole("link", { name: "Traçar rota", exact: true })).toHaveAttribute("href", /planejar.*destino=/);
+  await expect(card.getByRole("link", { name: "Ir até aqui", exact: true })).toHaveAttribute("href", /planejar.*destino=/);
   await expect(card.getByRole("link", { name: "Navegar", exact: true })).toBeVisible();
   await card.getByText("Mais opções do posto").click();
   await expect(card.getByRole("link", { name: "Pesquisar este posto na web" })).toBeVisible();
@@ -129,7 +129,7 @@ test("Pages: ANP identity enrichment survives formatted local CNPJ and fuel filt
   const card = page.locator("article[id^='posto-']").first();
   await expect(card).toContainText(/Forquilha/i);
   await expect(card).toContainText(/ANP/i);
-  await expect(card.getByRole("link", { name: "Traçar rota", exact: true })).toHaveAttribute("href", /-15\.6811689|-48\.2680336/);
+  await expect(card.getByRole("link", { name: "Ir até aqui", exact: true })).toHaveAttribute("href", /-15\.6811689|-48\.2680336/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
