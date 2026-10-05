@@ -91,6 +91,14 @@ describe("offline road routing", () => {
     expect(route!.steps.some(step => step.name === "Via rápida")).toBe(false);
     expect(route!.steps.some(step => step.name === "Rua A")).toBe(true);
     expect(route!.steps.some(step => step.name === "Rua B")).toBe(true);
+    expect(
+      route!.steps.some(
+        step =>
+          step.name === "Rua B" &&
+          step.instruction === "Vire à direita em Rua B" &&
+          step.maneuver === "turn-right"
+      )
+    ).toBe(true);
   });
 
   it("rejects out-of-range coordinates before loading the street graph", async () => {
