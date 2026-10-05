@@ -5,6 +5,7 @@ import {
   buildGoogleMapsDestinationUrl,
   buildWazeNavigationUrl,
   getPreferredNavigationProvider,
+  openExternalUrl,
 } from "@/lib/mobileTools";
 import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
 import { destinationNavigationValue, type UnifiedDestination } from "@/lib/unifiedDestination";
@@ -64,7 +65,7 @@ export function DestinationActions({
         : provider === "apple"
           ? buildAppleMapsDirectionsUrl(mapValue)
           : buildGoogleMapsDestinationUrl(mapValue, true);
-    window.open(url, "_blank", "noopener,noreferrer");
+    openExternalUrl(url);
   };
 
   return (
