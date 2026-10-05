@@ -796,10 +796,7 @@ export default function Planner() {
                 )}
               </div>
 
-              <details className="mt-3 task-surface px-3">
-                <summary className="min-h-11 cursor-pointer py-3 text-sm font-bold">Rotas prontas · escolha um caminho</summary>
-                <ReadyRouteShortcuts compact initialMode={mode} />
-              </details>
+              <ReadyRouteShortcuts compact initialMode={mode} />
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                 {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setLocation(buildReusableTripPlannerUrl(trip, { auto: true })); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-white/60">Última rota</button>}
                 <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-muted-foreground disabled:opacity-30">Limpar</button>
