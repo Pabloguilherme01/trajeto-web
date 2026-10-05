@@ -7,13 +7,12 @@ import {
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { OfflineRoutePreview, RouteMap } from "./RouteMap";
 import {
-  OfflineRoutePreview,
-  RouteMap,
-  maneuverSymbol,
   currentRouteGuidance,
+  maneuverSymbol,
   nearbyRouteReferences,
-} from "./RouteMap";
+} from "@/lib/routeMapLogic";
 
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: vi.fn(() => false) }));
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
