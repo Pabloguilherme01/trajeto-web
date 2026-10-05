@@ -488,6 +488,7 @@ export default function TileStationMap({
           }}
         >
           <div
+            data-map-tile-layer
             className="absolute"
             style={{
               width: TILE * (radiusX * 2 + 1),
