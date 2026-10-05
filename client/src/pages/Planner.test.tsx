@@ -104,6 +104,32 @@ describe("Planner travel state", () => {
     expect(screen.getByRole("button", { name: "Compartilhar" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Preparar para offline" })).toBeTruthy();
   });
+  it("blocks planning until a pending GPS origin finishes", async () => {
+    state.search = "destino=Hospital";
+    let gps!: PositionCallback;
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: {
+      getCurrentPosition: (callback: PositionCallback) => { gps = callback; },
+    } });
+    render(<Planner />);
+    fireEvent.click(screen.getByRole("button", { name: "Usar localização atual" }));
+    const action = screen.getByTestId("planner-primary-action") as HTMLButtonElement;
+    expect(action.disabled).toBe(true);
+    expect(action.getAttribute("aria-busy")).toBe("true");
+    fireEvent.submit(action.closest("form")!);
+    expect(state.mutate).not.toHaveBeenCalled();
+    expect(state.publicRoute).not.toHaveBeenCalled();
+    expect(state.privateRoute).not.toHaveBeenCalled();
+
+    act(() => gps({ coords: { latitude: -15.76123, longitude: -48.28123 } } as GeolocationPosition));
+    expect(action.disabled).toBe(false);
+    submit();
+    await waitFor(() => expect(state.privateRoute).toHaveBeenCalledWith(
+      "-15.76123, -48.28123",
+      "Hospital",
+      "driving"
+    ));
+  });
+
   it("keeps a manually edited origin when an earlier GPS request finishes", () => {
     let gps!: PositionCallback;
     Object.defineProperty(navigator, "geolocation", { configurable: true, value: {
