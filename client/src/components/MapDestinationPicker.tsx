@@ -71,7 +71,7 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
       <div id={listId} role="listbox" className="min-h-0 max-h-[min(14rem,35dvh)] overflow-y-auto overscroll-contain px-1 pb-1" aria-label="Resultados de lugares">
         {visible.map((item, index) => <button type="button" key={item.id} data-map-picker-option id={`${listId}-${index}`} role="option" tabIndex={-1} aria-label={item.name + " · " + item.address}
           aria-selected={item.id === value} onFocus={() => setActive(index)} onClick={() => choose(item.id)}
-          className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#147b88] ${index === active ? "bg-slate-100" : "hover:bg-slate-50"}`}>
+          className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${index === active ? "bg-slate-100" : "hover:bg-slate-50"}`}>
           <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#147b88]/10 text-[#147b88]"><MapPlaceIcon item={item} /></span>
           <span className="min-w-0 flex-1"><span className="block break-words text-sm font-bold">{item.name}</span><span className="block truncate text-xs text-slate-600">{item.address}</span></span>
           {item.id === value && <Check className="size-4 shrink-0 text-[#147b88]" aria-hidden="true" />}
