@@ -95,6 +95,45 @@ it("zooms with two fingers and continues dragging when one is lifted", () => {
   expect(parseFloat(marker.style.left)).toBeCloseTo(before + 20);
 });
 
+it("continues one-finger drag from the flushed pinch camera without jumping", () => {
+  let frame: FrameRequestCallback | null = null;
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(callback => {
+    frame = callback;
+    return 17;
+  });
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+
+  render(
+    <TileStationMap
+      stations={[
+        {
+          id: "a",
+          name: "Posto A",
+          address: "Rua A",
+          lat: -15.7545,
+          lng: -48.2816,
+        },
+      ]}
+    />
+  );
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+
+  sendPointer(map, "pointerdown", 1, 100);
+  sendPointer(map, "pointerdown", 2, 200);
+  sendPointer(map, "pointermove", 2, 220);
+  expect(frame).not.toBeNull();
+  sendPointer(map, "pointermove", 2, 230);
+
+  sendPointer(map, "pointerup", 2, 230);
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  const before = parseFloat(marker.style.left);
+
+  sendPointer(map, "pointermove", 1, 120);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(before + 20);
+  sendPointer(map, "pointerup", 1, 120);
+});
+
 it("tracks the actual viewport and keeps the selected station after catalog updates", () => {
   let resize = () => {};
   let width = 320;
