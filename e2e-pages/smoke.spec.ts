@@ -111,11 +111,13 @@ test("Pages: public filters survive category changes, reload and back navigation
   await page.goto("servicos", { waitUntil: "domcontentloaded" });
   const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
   await search.fill("informacao cidadao");
+  await page.locator("#service-filters summary").click();
   await page.getByRole("button", { name: "Cidadania", exact: true }).click();
   await expect(search).toHaveValue("informacao cidadao");
   await expect(page.getByRole("heading", { name: "Serviço de Informação ao Cidadão · SIC" })).toBeVisible();
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(search).toHaveValue("informacao cidadao");
+  await page.locator("#service-filters summary").click();
   await page.getByRole("button", { name: "Saúde", exact: true }).click();
   await expect(page.getByText("Nenhum serviço corresponde ao filtro.")).toBeVisible();
   await page.goBack();
