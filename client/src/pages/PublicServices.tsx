@@ -556,6 +556,7 @@ export default function PublicServices() {
                       aria-label={
                         (primaryContact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
                         service.name +
+                        (primaryContact.label ? " · " + primaryContact.label : "") +
                         ": " +
                         primaryContact.number
                       }
@@ -567,7 +568,9 @@ export default function PublicServices() {
                         <Phone className="size-3.5 shrink-0" />
                       )}
                       <span className="min-w-0 truncate">
-                        {primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar"} · {primaryContact.number}
+                        {primaryContact.label ||
+                          (primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar")} ·{" "}
+                        {primaryContact.number}
                       </span>
                     </a>
                   ) : (
