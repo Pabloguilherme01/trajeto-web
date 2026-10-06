@@ -178,7 +178,7 @@ export default function Home() {
               {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
               {online ? "online" : "offline"}
             </span>
-            <button type="button" onClick={() => void shareHome()} aria-label="Compartilhar Trajeto" className="grid size-11 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-foreground/70 active:scale-[.97]">
+            <button type="button" onClick={() => void shareHome()} aria-label="Compartilhar Trajeto" className="grid size-11 place-items-center rounded-xl border border-border/15 bg-muted/[.04] text-foreground/70 active:scale-[.97]">
               <Share2 className="size-4" />
             </button>
           </div>
@@ -200,7 +200,7 @@ export default function Home() {
           </button>
         </section>
 
-        <section className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-white/10 bg-card p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
+        <section className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-border/15 bg-card p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
           <h2 className="sr-only">Rota rápida</h2>
           <form onSubmit={submit} className="space-y-3">
             <label className="block">
@@ -250,7 +250,7 @@ export default function Home() {
               { label: "SAMU", number: "192", href: "tel:192" },
               { label: "Bombeiros", number: "193", href: "tel:193" },
             ].map(item => (
-              <a key={item.label} href={item.href} className="inline-flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-white/8 bg-background px-1.5 py-2 text-center text-xs font-bold text-foreground/75 transition hover:border-warning/25 active:scale-[.98]">
+              <a key={item.label} href={item.href} className="inline-flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-border/10 bg-background px-1.5 py-2 text-center text-xs font-bold text-foreground/75 transition hover:border-warning/25 active:scale-[.98]">
                 <Phone className="size-3.5 text-warning" />
                 <span className="max-w-full break-words">{item.label}</span>
                 <span className="text-foreground/60">{item.number}</span>
@@ -267,7 +267,7 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-[.16em] text-accent">Rotas locais</p>
               <h2 id="local-routes-title" className="mt-1 text-xl font-bold tracking-[-.035em]">Já deixe o destino pronto.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-bold text-foreground/55">Ver catálogo</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-border/10 px-3 text-xs font-bold text-foreground/55">Ver catálogo</button>
           </div>
           <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_ROUTE_PRESETS.slice(0, 10).map(route => (
@@ -278,7 +278,7 @@ export default function Home() {
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1");
                 }}
-                className="premium-card mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-card p-3 text-left transition hover:border-accent/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
+                className="premium-card mobile-card min-h-[5.8rem] w-[min(46%,10rem)] min-w-[8rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-border/10 bg-card p-3 text-left transition hover:border-accent/20 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink"
               >
                 <Route className="size-4 text-accent" aria-hidden="true" />
                 <span className="mt-2 block break-words text-sm font-bold">{route.label}</span>
@@ -294,7 +294,7 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-[.16em] text-warning">Guia local</p>
               <h2 id="local-guide-home-title" className="mt-1 text-xl font-bold tracking-[-.035em]">Comer, comprar, resolver.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-bold text-foreground/55">Abrir guia</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar") + "?q=compras")} className="min-h-11 max-w-full shrink-0 rounded-xl border border-border/10 px-3 text-xs font-bold text-foreground/55">Abrir guia</button>
           </div>
           <div className="mobile-scroll-x mt-3 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
             {LOCAL_PLACES.filter(place => place.category === "alimentacao" || place.category === "compras").slice(0, 6).map(place => {
@@ -304,7 +304,7 @@ export default function Home() {
                   rememberSearch(place.name);
                   rememberIntent("route");
                   setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(place.mapQuery) + "&auto=1");
-                }} className="mobile-card min-h-[6.75rem] w-[min(72%,18rem)] min-w-[11rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-white/8 bg-card p-3 text-left transition hover:border-warning/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
+                }} className="mobile-card min-h-[6.75rem] w-[min(72%,18rem)] min-w-[11rem] max-w-[calc(100vw-2rem)] shrink-0 snap-start rounded-2xl border border-border/10 bg-card p-3 text-left transition hover:border-warning/25 active:scale-[.985] sm:w-auto sm:min-w-0 sm:shrink">
                   <PlaceIcon className={"size-4 " + (place.category === "alimentacao" ? "text-warning" : "text-accent")} aria-hidden="true" />
                   <span className="mt-2 block break-words text-sm font-bold">{place.name}</span>
                   <span className="mt-0.5 block line-clamp-2 text-xs leading-snug text-foreground/65">{place.detail}</span>
@@ -321,7 +321,7 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-[.16em] text-foreground/60">Resolver agora</p>
               <h2 className="mt-1 text-lg font-bold tracking-[-.035em]">Acesso rápido.</h2>
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-white/8 px-3 text-xs font-bold text-foreground/55">Ver tudo</button>
+            <button type="button" onClick={() => setLocation(appUrl("/buscar"))} className="min-h-11 max-w-full shrink-0 rounded-xl border border-border/10 px-3 text-xs font-bold text-foreground/55">Ver tudo</button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
@@ -335,7 +335,7 @@ export default function Home() {
                 type="button"
                 aria-label={item.label}
                 onClick={item.action}
-                className="min-h-[5.25rem] rounded-2xl border border-white/8 bg-card p-3 text-left transition hover:-translate-y-0.5 hover:border-white/15 active:scale-[.985]"
+                className="min-h-[5.25rem] rounded-2xl border border-border/10 bg-card p-3 text-left transition hover:-translate-y-0.5 hover:border-border/15 active:scale-[.985]"
               >
                 <item.icon className="size-4 text-primary" aria-hidden="true" />
                 <span className="mt-2 block text-xs font-bold">{item.label}</span>
@@ -346,7 +346,7 @@ export default function Home() {
         </section>
 
         </details>
-        <details className="mt-4 rounded-[1.35rem] border border-white/8 bg-card p-4">
+        <details className="mt-4 rounded-[1.35rem] border border-border/10 bg-card p-4">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm font-bold">
             <span>Recursos do aparelho</span>
             <span className="text-xs font-bold uppercase tracking-[.12em] text-foreground/60">opcional</span>
@@ -370,7 +370,7 @@ export default function Home() {
                     rememberIntent("search");
                     setLocation(appUrl("/buscar") + "?q=" + encodeURIComponent(item));
                   }}
-                  className="max-w-[13rem] shrink-0 truncate rounded-full border border-white/8 bg-white/[.035] px-3.5 py-2.5 text-xs font-bold text-foreground/65"
+                  className="max-w-[13rem] shrink-0 truncate rounded-full border border-border/10 bg-muted/[.035] px-3.5 py-2.5 text-xs font-bold text-foreground/65"
                   aria-label={"Buscar novamente: " + item}
                 >
                   {item}
@@ -381,7 +381,7 @@ export default function Home() {
         )}
 
         {destinations.length > 0 && (
-          <section className="mt-7 rounded-3xl border border-white/8 bg-white/[.025] p-4">
+          <section className="mt-7 rounded-3xl border border-border/10 bg-muted/[.025] p-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-foreground/60">
               <Sparkles className="size-3 text-primary" /> Atalhos salvos neste aparelho
             </div>
@@ -397,7 +397,7 @@ export default function Home() {
         )}
 
         {recentTrips.length > 0 && (
-          <section className="mt-7 rounded-3xl border border-white/8 bg-white/[.025] p-4" aria-labelledby="recent-trips-title">
+          <section className="mt-7 rounded-3xl border border-border/10 bg-muted/[.025] p-4" aria-labelledby="recent-trips-title">
             <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[.16em] text-foreground/60">Rotas reutilizáveis</p>
@@ -406,7 +406,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setLocation(appUrl("/salvos"))}
-                className="min-h-11 shrink-0 rounded-xl border border-white/8 px-3 text-xs font-bold text-foreground/55"
+                className="min-h-11 shrink-0 rounded-xl border border-border/10 px-3 text-xs font-bold text-foreground/55"
               >
                 Ver salvos
               </button>
@@ -420,7 +420,7 @@ export default function Home() {
                     rememberIntent("route");
                     setLocation(buildReusableTripPlannerUrl(trip));
                   }}
-                  className="flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-white/8 bg-background p-3 text-left active:scale-[.99]"
+                  className="flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border/10 bg-background p-3 text-left active:scale-[.99]"
                   aria-label={"Repetir rota " + trip.origin + " para " + trip.destination}
                 >
                   <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
