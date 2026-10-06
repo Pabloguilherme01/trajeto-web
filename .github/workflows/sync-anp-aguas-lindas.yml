@@ -52,7 +52,7 @@ jobs:
         if: steps.pending.outputs.exists != 'true'
         run: node scripts/sync-anp-prices-aguas-lindas.mjs
 
-      - name: Open snapshot PR
+      - name: Publish snapshot for review
         if: steps.pending.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -67,4 +67,15 @@ jobs:
           git add client/public/data/aguas-lindas-anp.json client/public/data/aguas-lindas-anp-precos.json
           git commit -m "data: sync ANP Águas Lindas"
           git push --force-with-lease origin HEAD:refs/heads/automation/anp-snapshot
-          gh pr create --base main --head automation/anp-snapshot --title "Atualizar snapshots ANP de Águas Lindas" --body "Atualização dos dois snapshots oficiais ANP. Validar os checks do PR antes de squash merge; não há push direto nem merge automático na main."
+          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...automation/anp-snapshot?expand=1"
+          error_file="$(mktemp)"
+          trap 'rm -f "$error_file"' EXIT
+          if pr_url=$(gh pr create --base main --head automation/anp-snapshot --title "Atualizar snapshots ANP de Águas Lindas" --body "Atualização dos dois snapshots oficiais ANP. Validar os checks do PR antes de squash merge; não há push direto nem merge automático na main." 2>"$error_file"); then
+            printf '### Snapshot ANP pronto para revisão\n\nPR: %s\n' "$pr_url" >> "$GITHUB_STEP_SUMMARY"
+          elif grep -Fq 'GitHub Actions is not permitted to create or approve pull requests' "$error_file"; then
+            echo "::warning::Snapshot publicado na branch automation/anp-snapshot. A política do repositório bloqueia a criação automática de PR; revisão manual necessária."
+            printf '### Snapshot ANP aguarda abertura de PR\n\nOs dados foram preservados na branch `automation/anp-snapshot`. A política do repositório bloqueia a abertura automática de PR. Nenhuma atualização foi aplicada ao site.\n\n[Abrir comparação e PR](%s)\n' "$compare_url" >> "$GITHUB_STEP_SUMMARY"
+          else
+            cat "$error_file" >&2
+            exit 1
+          fi
