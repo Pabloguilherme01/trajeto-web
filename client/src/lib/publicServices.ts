@@ -38,7 +38,9 @@ export type PublicService = {
     | "Desenvolvimento Social de Goiás"
     | "Ministério do Desenvolvimento Social"
     | "Tribunal Superior Eleitoral"
-    | "Ministério da Justiça";
+    | "Ministério da Justiça"
+    | "Ministério da Defesa"
+    | "Detran-GO";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -1002,14 +1004,29 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "detran",
-    name: "Detran-GO",
+    name: "Detran-GO · CNH, veículo e licenciamento",
     category: "transito",
     description:
-      "Canal local listado pela Prefeitura para atendimento do Detran.",
-    keywords: ["cnh", "habilitacao", "licenciamento", "veiculo", "detran go"],
+      "Consulte CNH, IPVA, multas, CRLV, processos e outros serviços oficiais do trânsito em Goiás.",
+    keywords: [
+      "cnh",
+      "habilitacao",
+      "licenciamento",
+      "veiculo",
+      "detran go",
+      "ipva",
+      "multa",
+      "crlv",
+      "renovar cnh",
+    ],
     phone: "(61) 3613-4058",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: TELEFONES_UTEIS,
+    actionUrl: "https://www.detran.go.gov.br/",
+    actionLabel: "Abrir serviços digitais do Detran",
+    guidance:
+      "Para consultas digitais, use o portal oficial. Para atendimento presencial, confirme o serviço e o agendamento antes de sair.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Detran-GO",
+    sourceUrl: "https://www.detran.go.gov.br/",
     mapQuery: "Detran-GO, Águas Lindas de Goiás, GO",
   },
   {
@@ -1191,6 +1208,119 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "https://www.gov.br/mj/pt-br/acesso-a-informacao/perguntas-frequentes/consumidor/consumidor.Gov",
     verifiedAt: "06/10/2026",
   },
+
+  {
+    id: "delegacia-virtual-goias",
+    name: "Delegacia Virtual de Goiás · boletim de ocorrência",
+    category: "seguranca",
+    description:
+      "Registre pela internet ocorrências aceitas pela Polícia Civil de Goiás e acompanhe o protocolo sem precisar ir primeiro à delegacia.",
+    keywords: [
+      "boletim ocorrencia",
+      "bo",
+      "ocorrencia online",
+      "delegacia virtual",
+      "furto",
+      "perda documento",
+      "rai virtual",
+    ],
+    actionUrl: "https://goias.gov.br/policiacivil/delegacia-virtual/",
+    actionLabel: "Abrir Delegacia Virtual",
+    guidance:
+      "Use somente o canal oficial. Situações com violência, ameaça ou risco imediato devem ser tratadas pelo 190 ou presencialmente conforme a orientação policial.",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: "https://goias.gov.br/policiacivil/delegacia-virtual/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "seguro-desemprego",
+    name: "Seguro-Desemprego · solicitação e acompanhamento",
+    category: "assistencia",
+    description:
+      "Canal oficial para solicitar o benefício e acompanhar o pedido pelo gov.br ou pela Carteira de Trabalho Digital.",
+    keywords: [
+      "seguro desemprego",
+      "desempregado",
+      "demissao",
+      "beneficio trabalhador",
+      "emprega brasil",
+    ],
+    phone: "158",
+    actionUrl: "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
+    actionLabel: "Solicitar Seguro-Desemprego",
+    guidance:
+      "Tenha o número do requerimento entregue pelo empregador, quando aplicável, e entre com sua conta gov.br. A análise e a elegibilidade são do Ministério do Trabalho e Emprego.",
+    sourceLabel: "Ministério do Trabalho e Emprego",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "expresso-goias",
+    name: "Expresso Goiás · serviços estaduais em um só lugar",
+    category: "cidadania",
+    description:
+      "Portal oficial que reúne serviços digitais de órgãos do Governo de Goiás, com acesso integrado à conta gov.br.",
+    keywords: [
+      "expresso goias",
+      "servicos goias",
+      "governo goias",
+      "servico estadual",
+      "gov goias",
+    ],
+    actionUrl: "https://www.go.gov.br/",
+    actionLabel: "Abrir Portal Expresso",
+    guidance:
+      "Use o portal para localizar serviços estaduais digitais e presenciais. Alguns atendimentos exigem autenticação pela conta gov.br.",
+    sourceLabel: "SEAD Goiás",
+    sourceUrl: "https://www.go.gov.br/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "saude-digital-goias",
+    name: "Saúde Digital Goiás · prontuário, regulação e consultas",
+    category: "saude",
+    description:
+      "Acesso aos canais digitais da rede estadual para prontuário, fila da regulação, confirmação de consultas e serviços de medicamentos.",
+    keywords: [
+      "meu pep",
+      "fila regulacao",
+      "regulacao saude",
+      "consulta exame",
+      "medicamento alto custo",
+      "cemac",
+      "saude goias",
+    ],
+    actionUrl: "https://goias.gov.br/saude/",
+    actionLabel: "Abrir portal da Saúde de Goiás",
+    guidance:
+      "A disponibilidade depende do serviço estadual e do seu atendimento na rede. Consulte o portal oficial para acessar cada ferramenta e verificar os requisitos.",
+    sourceLabel: "SES-GO",
+    sourceUrl:
+      "https://goias.gov.br/saude/saiba-como-acessar-os-servicos-digitais-da-saude-em-goias/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "alistamento-militar",
+    name: "Alistamento Militar · serviço oficial",
+    category: "cidadania",
+    description:
+      "Faça o alistamento militar online quando estiver dentro do período e das regras oficiais ou consulte a Junta de Serviço Militar.",
+    keywords: [
+      "alistamento militar",
+      "exercito",
+      "servico militar",
+      "junta militar",
+      "reservista",
+    ],
+    actionUrl: "https://alistamento.eb.mil.br/alistamento",
+    actionLabel: "Iniciar alistamento online",
+    guidance:
+      "O período, o público e as etapas seguem as regras oficiais do Ministério da Defesa. Fora do prazo ou quando o serviço online não se aplicar, consulte a Junta de Serviço Militar indicada no portal.",
+    sourceLabel: "Ministério da Defesa",
+    sourceUrl:
+      "https://www.gov.br/pt-br/servicos/alistar-se-no-servico-militar-obrigatorio",
+    verifiedAt: "06/10/2026",
+  },
 ];
 
 export const PUBLIC_SERVICE_SHORTCUTS = [
@@ -1270,6 +1400,31 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Problema com uma compra",
     query: "consumidor",
     hint: "Proteção do consumidor",
+  },
+  {
+    label: "Boletim de ocorrência",
+    query: "boletim ocorrencia",
+    hint: "Delegacia Virtual de Goiás",
+  },
+  {
+    label: "Seguro-Desemprego",
+    query: "seguro desemprego",
+    hint: "Solicitação oficial pelo gov.br",
+  },
+  {
+    label: "Serviços estaduais",
+    query: "expresso goias",
+    hint: "Portal Expresso Goiás",
+  },
+  {
+    label: "Regulação e prontuário",
+    query: "regulacao saude",
+    hint: "Saúde Digital Goiás",
+  },
+  {
+    label: "Alistamento militar",
+    query: "alistamento militar",
+    hint: "Canal oficial do serviço militar",
   },
 ] as const;
 
