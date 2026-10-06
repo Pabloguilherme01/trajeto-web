@@ -16,6 +16,7 @@ export type PublicService = {
   actionUrl?: string;
   actionLabel?: string;
   guidance?: string;
+  documents?: string[];
   keywords?: string[];
   whatsappOnly?: string[];
   verifiedAt?: string;
@@ -32,7 +33,12 @@ export type PublicService = {
     | "Ministério do Trabalho e Emprego"
     | "INSS"
     | "Receita Federal"
-    | "CNES/DATASUS";
+    | "CNES/DATASUS"
+    | "Ministério da Saúde"
+    | "Desenvolvimento Social de Goiás"
+    | "Ministério do Desenvolvimento Social"
+    | "Tribunal Superior Eleitoral"
+    | "Ministério da Justiça";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -149,7 +155,8 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "01/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: CAPS,
-    mapQuery: "CAPS, Quadra 15, Loja 02, Lote 21, Jardim Brasília, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "CAPS, Quadra 15, Loja 02, Lote 21, Jardim Brasília, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-saude",
@@ -168,7 +175,14 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Unidades de Saúde do município",
     category: "saude",
     description: "Lista oficial com Hospital, ESF e UBS de Águas Lindas.",
-    keywords: ["vacina", "vacinacao", "posto de saude", "ubs", "esf", "consulta basica"],
+    keywords: [
+      "vacina",
+      "vacinacao",
+      "posto de saude",
+      "ubs",
+      "esf",
+      "consulta basica",
+    ],
     address: "Diversas unidades na cidade",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
@@ -592,7 +606,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Secretaria Municipal de Educação",
     category: "educacao",
     description: "Atendimento da rede municipal de educação.",
-    keywords: ["matricula", "matricula escolar", "vaga escola", "rede municipal", "transferencia escolar"],
+    keywords: [
+      "matricula",
+      "matricula escolar",
+      "vaga escola",
+      "rede municipal",
+      "transferencia escolar",
+    ],
     phone: "(61) 92002-3791 / (61) 92002-3483",
     extraPhone: "(61) 92002-3774",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -775,7 +795,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "defesa-civil",
-    keywords: ["defesa civil", "alagamento", "enchente", "desabamento", "risco estrutural"],
+    keywords: [
+      "defesa civil",
+      "alagamento",
+      "enchente",
+      "desabamento",
+      "risco estrutural",
+    ],
     name: "Proteção e atendimento de emergência",
     category: "seguranca",
     description:
@@ -789,29 +815,46 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "carteira-trabalho-digital",
     name: "Carteira de Trabalho Digital",
     category: "cidadania",
-    description: "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
+    description:
+      "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
     phone: "158",
     sourceLabel: "Ministério do Trabalho e Emprego",
     sourceUrl: "https://www.gov.br/pt-br/servicos/obter-a-carteira-de-trabalho",
     actionUrl: "https://www.gov.br/pt-br/servicos/obter-a-carteira-de-trabalho",
     actionLabel: "Acessar Carteira de Trabalho",
-    guidance: "Use sua conta gov.br no portal oficial. O acesso digital exige internet. Para dúvidas, consulte a Central 158.",
-    keywords: ["ctps", "carteira de trabalho", "contrato de trabalho", "documento trabalhador"],
+    guidance:
+      "Use sua conta gov.br no portal oficial. O acesso digital exige internet. Para dúvidas, consulte a Central 158.",
+    keywords: [
+      "ctps",
+      "carteira de trabalho",
+      "contrato de trabalho",
+      "documento trabalhador",
+    ],
     verifiedAt: "01/10/2026",
   },
   {
     id: "meu-inss",
     name: "Meu INSS · benefícios e extratos",
     category: "assistencia",
-    description: "Canal oficial para pedidos, acompanhamento de benefícios e extratos previdenciários, como o CNIS.",
+    description:
+      "Canal oficial para pedidos, acompanhamento de benefícios e extratos previdenciários, como o CNIS.",
     phone: "135",
     hours: "Central 135: segunda a sábado, 7h–22h (Brasília)",
     sourceLabel: "INSS",
-    sourceUrl: "https://www.gov.br/inss/pt-br/canais_atendimento/meu-inss/meu-inss",
+    sourceUrl:
+      "https://www.gov.br/inss/pt-br/canais_atendimento/meu-inss/meu-inss",
     actionUrl: "https://meu.inss.gov.br/",
     actionLabel: "Acessar Meu INSS",
-    guidance: "Entre com sua conta gov.br somente no portal oficial. Consultas e solicitações online exigem internet; a Central 135 precisa de rede telefônica. A análise do pedido cabe ao INSS.",
-    keywords: ["aposentadoria", "pensão", "previdencia", "cnis", "extrato contribuição", "beneficio inss"],
+    guidance:
+      "Entre com sua conta gov.br somente no portal oficial. Consultas e solicitações online exigem internet; a Central 135 precisa de rede telefônica. A análise do pedido cabe ao INSS.",
+    keywords: [
+      "aposentadoria",
+      "pensão",
+      "previdencia",
+      "cnis",
+      "extrato contribuição",
+      "beneficio inss",
+    ],
     verifiedAt: "01/10/2026",
   },
   {
@@ -935,7 +978,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
     category: "cidadania",
     description:
       "Unidade com atendimento de órgãos como Detran, INSS, Saneago e SINE.",
-    keywords: ["emprego", "sine", "trabalho", "vaga de emprego", "seguro desemprego"],
+    keywords: [
+      "emprego",
+      "sine",
+      "trabalho",
+      "vaga de emprego",
+      "seguro desemprego",
+    ],
     address:
       "Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás - GO, 72910-000",
     hours: "Segunda a sexta, 8h–17h; sem atendimento aos sábados",
@@ -1011,26 +1060,166 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "O portal oficial inclui chat e videochamada em Libras. Descreva a ocorrência, o local e quem precisa de proteção.",
     verifiedAt: "01/10/2026",
   },
+  {
+    id: "meu-sus-digital",
+    name: "Meu SUS Digital · vacinas e histórico de saúde",
+    category: "saude",
+    description:
+      "Consulte carteira de vacinação, número do Cartão Nacional de Saúde e registros de saúde disponíveis no sistema.",
+    keywords: [
+      "meu sus",
+      "cartao sus",
+      "cns",
+      "vacina",
+      "carteira vacinacao",
+      "exames",
+      "medicamentos",
+    ],
+    actionUrl: "https://meususdigital.saude.gov.br/",
+    actionLabel: "Acessar Meu SUS Digital",
+    guidance:
+      "Entre no canal oficial para consultar os registros disponíveis. O catálogo do Trajeto pode ser lido offline; o acesso aos seus dados no Meu SUS Digital depende do serviço online. Não é um canal de emergência: em urgência, ligue 192.",
+    sourceLabel: "Ministério da Saúde",
+    sourceUrl:
+      "https://www.gov.br/saude/pt-br/composicao/seidigi/meususdigital/perguntas-e-respostas/cidadao/2-quais-os-servicos-que",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "carteira-pessoa-idosa",
+    name: "Carteira da Pessoa Idosa · transporte interestadual",
+    category: "assistencia",
+    description:
+      "Documento para acesso aos benefícios de transporte interestadual, conforme as regras do programa.",
+    keywords: [
+      "idoso",
+      "idosa",
+      "passagem",
+      "onibus",
+      "transporte interestadual",
+      "carteira idoso",
+    ],
+    actionUrl: "https://carteiraidoso.cidadania.gov.br/",
+    actionLabel: "Emitir carteira no portal oficial",
+    guidance:
+      "Para pessoas com 60 anos ou mais, renda individual de até dois salários-mínimos e Cadastro Único atualizado. A emissão é gratuita. Entre com gov.br; se precisar de ajuda ou ainda não tiver CadÚnico, procure o Centro de Referência de Assistência Social. O benefício é interestadual, não um passe municipal.",
+    documents: [
+      "Número de Identificação Social (NIS)",
+      "Acesso à conta gov.br para emissão online",
+    ],
+    sourceLabel: "Ministério do Desenvolvimento Social",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/adquirir-carteira-do-idoso/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "carteira-autista-goias",
+    name: "Carteira de Identificação do Autista · Goiás",
+    category: "assistencia",
+    description:
+      "Orientação estadual para solicitar a carteira de identificação da pessoa com transtorno do espectro autista (Ciptea).",
+    keywords: [
+      "autismo",
+      "autista",
+      "tea",
+      "ciptea",
+      "carteira autista",
+      "pcd",
+    ],
+    phone: "(62) 98104-3652",
+    whatsappOnly: ["(62) 98104-3652"],
+    email: "pcd@goias.gov.br",
+    actionUrl:
+      "https://goias.gov.br/social/carteira-de-identificacao-do-autista/",
+    actionLabel: "Consultar formulário e procedimento",
+    guidance:
+      "No interior de Goiás, fale com o canal estadual para saber qual órgão do município está cadastrado. Não há um endereço local confirmado nesta ficha. Use o assunto Carteira de Identificação do Autista no e-mail e confirme o procedimento antes de se deslocar.",
+    documents: [
+      "Formulário de requerimento da página oficial",
+      "Relatório médico de especialista em Neurologia, Psiquiatria ou Pediatria",
+      "Certidão de nascimento ou identidade com CPF",
+      "Documentos do responsável legal, se menor de idade",
+      "Comprovante de endereço em Goiás e foto digital",
+    ],
+    sourceLabel: "Desenvolvimento Social de Goiás",
+    sourceUrl:
+      "https://goias.gov.br/social/carteira-de-identificacao-do-autista/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "autoatendimento-eleitoral",
+    name: "Autoatendimento Eleitoral · título e certidões",
+    category: "cidadania",
+    description:
+      "Canal do TSE para consultar serviços eleitorais, situação do título, local de votação e certidões.",
+    keywords: [
+      "titulo eleitor",
+      "eleitoral",
+      "eleicao",
+      "votacao",
+      "quitacao",
+      "certidao",
+    ],
+    actionUrl:
+      "https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral",
+    actionLabel: "Consultar serviços eleitorais",
+    guidance:
+      "Selecione o serviço no portal oficial. A disponibilidade de alteração cadastral e os prazos variam com o calendário eleitoral; confira as regras atuais no TSE antes de iniciar o pedido.",
+    sourceLabel: "Tribunal Superior Eleitoral",
+    sourceUrl:
+      "https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "consumidor-gov",
+    name: "Consumidor.gov.br · reclamação contra empresas",
+    category: "cidadania",
+    description:
+      "Serviço público gratuito para tratar problemas de consumo diretamente com empresas participantes.",
+    keywords: [
+      "consumidor",
+      "reclamacao empresa",
+      "compra",
+      "cobranca",
+      "produto",
+      "problema consumo",
+    ],
+    actionUrl: "https://www.consumidor.gov.br/",
+    actionLabel: "Consultar empresas e registrar reclamação",
+    guidance:
+      "Confira se a empresa participa da plataforma antes de registrar a reclamação. O canal trata problemas de consumo com empresas cadastradas; para demandas da Prefeitura, use a Ouvidoria Municipal. O atendimento acontece no portal externo e requer internet.",
+    sourceLabel: "Ministério da Justiça",
+    sourceUrl:
+      "https://www.gov.br/mj/pt-br/acesso-a-informacao/perguntas-frequentes/consumidor/consumidor.Gov",
+    verifiedAt: "06/10/2026",
+  },
 ];
 
 export const PUBLIC_SERVICE_SHORTCUTS = [
-  { label: "Saúde mental / CAPS", query: "saude mental", hint: "Atendimento psicossocial municipal" },
-  { label: "Água e segunda via", query: "conta agua", hint: "Saneago" },
-  { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
+  {
+    label: "Água e segunda via",
+    query: "conta agua",
+    hint: "Conta e atendimento Saneago",
+  },
   {
     label: "CadÚnico e benefícios",
     query: "cadunico",
-    hint: "Cadastro Único / Bolsa Família",
+    hint: "Cadastro e Bolsa Família",
   },
+  {
+    label: "Emprego e trabalho",
+    query: "emprego",
+    hint: "SINE e canais oficiais",
+  },
+  { label: "Agendar atendimento", query: "vapt vupt", hint: "Vapt Vupt" },
+  {
+    label: "Saúde mental / CAPS",
+    query: "saude mental",
+    hint: "Atendimento psicossocial municipal",
+  },
+  { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
   {
     label: "Assistência à família",
     query: "cras",
     hint: "Veja as três unidades",
-  },
-  {
-    label: "Agendar Vapt Vupt",
-    query: "vapt vupt",
-    hint: "Canal oficial de agendamento",
   },
   {
     label: "CPF e Receita Federal",
@@ -1053,14 +1242,34 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Secretaria Municipal de Educação",
   },
   {
-    label: "Emprego e SINE",
-    query: "emprego",
-    hint: "Atendimento disponível no Vapt Vupt",
-  },
-  {
     label: "CNH e veículo",
     query: "cnh",
     hint: "Detran-GO",
+  },
+  {
+    label: "Carteira da Pessoa Idosa",
+    query: "carteira idoso",
+    hint: "Transporte interestadual",
+  },
+  {
+    label: "Carteira do autista",
+    query: "ciptea",
+    hint: "Documentos e canal estadual",
+  },
+  {
+    label: "Meu SUS Digital",
+    query: "meu sus",
+    hint: "Vacinas e registros de saúde",
+  },
+  {
+    label: "Título e certidões",
+    query: "eleitoral",
+    hint: "Autoatendimento do TSE",
+  },
+  {
+    label: "Problema com uma compra",
+    query: "consumidor",
+    hint: "Proteção do consumidor",
   },
 ] as const;
 
