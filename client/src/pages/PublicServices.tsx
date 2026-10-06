@@ -655,7 +655,7 @@ export default function PublicServices() {
             </div>
             <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar rotas prontas">
               <button type="button" aria-pressed={readyRouteGroup === "todos"} onClick={() => setReadyRouteGroup("todos")} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === "todos" ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>Todas</button>
-              {READY_ROUTE_GROUPS.map(group => <button key={group.label} type="button" aria-pressed={readyRouteGroup === group.label} onClick={() => setReadyRouteGroup(group.label)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === group.label ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>{group.label}</button>)}
+              {READY_ROUTE_GROUPS.map(group => <button key={group.label} type="button" aria-label={`Filtrar rotas: ${group.label}`} aria-pressed={readyRouteGroup === group.label} onClick={() => setReadyRouteGroup(group.label)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === group.label ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>{group.label}</button>)}
             </div>
             <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
               {(readyRouteGroup === "todos"
