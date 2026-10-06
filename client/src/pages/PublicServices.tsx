@@ -87,6 +87,7 @@ const READY_ROUTE_IDS = [
   "hospital-bom-jesus",
   "prefeitura",
   "vapt-vupt",
+  "defensoria",
   "rodoviaria",
   "policia-civil",
   "cras-1",
@@ -114,7 +115,7 @@ const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
 
 const READY_ROUTE_GROUPS = [
   { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii"] },
-  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "policia-civil", "cras-1", "detran", "forum", "saneago"] },
+  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "policia-civil", "cras-1", "detran", "forum", "saneago"] },
   { label: "Transporte e educação", ids: ["rodoviaria", "secretaria-educacao", "cora-coralina", "praca-da-biblia"] },
 ] as const;
 
