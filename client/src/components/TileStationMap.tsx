@@ -245,7 +245,7 @@ export default function TileStationMap({
       observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [drawable.length, tileErrors >= 5, offline, localLayer]);
+  }, [drawable.length, tileErrors, offline, localLayer]);
   const width = size.width;
   const height = size.height;
   const zoomScale = 2 ** zoom;
