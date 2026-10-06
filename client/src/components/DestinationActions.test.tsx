@@ -51,6 +51,19 @@ describe("DestinationActions", () => {
     );
   });
 
+  it("opens Organic Maps with public destination coordinates when preferred", () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    setPreferredNavigationProvider("organic");
+    render(<DestinationActions destination={destination} />);
+    fireEvent.click(screen.getByRole("button", { name: /abrir app de mapa/i }));
+    expect(open).toHaveBeenCalledWith(
+      expect.stringContaining("omaps.app/v2/nav"),
+      "_blank",
+      "noopener,noreferrer",
+    );
+    expect(open.mock.calls[0]?.[0]).toContain("origin=currentLocation");
+  });
+
   it("uses the ready-route origin for Ir daqui instead of the destination", () => {
     render(<DestinationActions destination={{ ...destination, kind: "route", routeOrigin: "Centro de Águas Lindas" }} />);
     const href = screen.getByRole("link", { name: /Ir daqui/i }).getAttribute("href") || "";
