@@ -609,6 +609,7 @@ export default function PublicServices() {
             </section>
           )}
         {!selectedService && !savedOnly && !query.trim() && category === "todos" && resource === "todos" && (
+          <>
           <section className="mt-6" aria-labelledby="popular-actions-title">
             <div className="flex items-end justify-between gap-3">
               <div>
@@ -673,6 +674,7 @@ export default function PublicServices() {
               </button>
             </div>
           </section>
+          </>
         )}
 
         <div className="mt-6 flex items-end justify-between gap-3">
