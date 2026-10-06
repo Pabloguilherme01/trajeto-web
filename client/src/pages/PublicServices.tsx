@@ -78,7 +78,8 @@ const NEED_GROUPS = [
   { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência, vigilância e saúde digital" },
   { label: "Educação e creche", query: "creche", hint: "Creches, vagas, matrículas e escolas" },
   { label: "Trabalho e renda", query: "emprego", hint: "Emprego, seguro-desemprego e empreendedorismo" },
-  { label: "Casa e cidade", query: "buraco", hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana" },
+  { label: "Moradia e regularização", query: "regularizacao fundiaria", hint: "Habitação, regularização e atendimento municipal" },
+  { label: "Cidade e manutenção", query: "buraco", hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana" },
   { label: "Segurança e proteção", query: "delegacia", hint: "Delegacia, ocorrência e atendimento policial" },
 ] as const;
 
@@ -106,6 +107,11 @@ const READY_ROUTE_IDS = [
   "esf-perola-ii",
   "cora-coralina",
   "praca-da-biblia",
+  "drp-17",
+  "superintendencia-transito",
+  "camara-municipal",
+  "cepi-jk",
+  "paulo-freire",
 ] as const;
 
 const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
@@ -123,8 +129,8 @@ const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
 
 const READY_ROUTE_GROUPS = [
   { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii", "ubs-barragem-iv", "ubs-jardim-paraiso", "esf-aguas-bonitas", "esf-perola-ii"] },
-  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "procon", "conselho-tutelar", "policia-civil", "cras-1", "forum", "saneago"] },
-  { label: "Transporte e educação", ids: ["transito", "detran", "rodoviaria", "secretaria-educacao", "cora-coralina", "praca-da-biblia"] },
+  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "procon", "conselho-tutelar", "policia-civil", "drp-17", "cras-1", "forum", "saneago", "camara-municipal"] },
+  { label: "Transporte e educação", ids: ["transito", "superintendencia-transito", "detran", "rodoviaria", "secretaria-educacao", "cora-coralina", "cepi-jk", "paulo-freire", "praca-da-biblia"] },
 ] as const;
 
 export default function PublicServices() {
@@ -382,6 +388,20 @@ export default function PublicServices() {
             ))}
           </div>
         </header>
+
+        <section aria-label="Resumo da Central de Serviços" className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+          {[
+            ["Serviços", `${PUBLIC_SERVICES.length} no catálogo`],
+            ["Categorias", `${PUBLIC_SERVICE_CATEGORIES.length - 1} assuntos`],
+            ["Rotas prontas", `${READY_SERVICE_ROUTES.length} destinos`],
+            ["Offline", "catálogo e rotas salvas"],
+          ].map(([label, value]) => (
+            <div key={label} className="min-w-0 overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-card to-primary/[.035] px-3.5 py-3 shadow-sm">
+              <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">{label}</p>
+              <p className="mt-1 break-words text-sm font-black text-foreground">{value}</p>
+            </div>
+          ))}
+        </section>
 
         <form
           onSubmit={event => {
