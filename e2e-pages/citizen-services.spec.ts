@@ -174,7 +174,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("servicos", { waitUntil: "domcontentloaded" });
   await expect(
-    page.getByRole("heading", { name: "O que você precisa resolver?" })
+    page.getByRole("heading", { name: "Atalhos do dia a dia" })
   ).toBeVisible();
   await page.getByRole("button", { name: /CadÚnico e benefícios/ }).click();
   await expect(
@@ -228,10 +228,66 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
   await expect(page).toHaveURL(/planejar\?destino=CRAS%20II/);
 });
 
-
-test("Pages: universal search retains the query when opening all service results", async ({ page }) => {
+test("Pages: universal search retains the query when opening all service results", async ({
+  page,
+}) => {
   await page.goto("buscar?q=ESF", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: /Ver todos os \d+ serviços encontrados/ }).click();
+  await page
+    .getByRole("button", { name: /Ver todos os \d+ serviços encontrados/ })
+    .click();
   await expect(page).toHaveURL(/servicos\?q=ESF$/);
-  await expect(page.getByRole("heading", { name: "ESF Setor 09", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "ESF Setor 09", exact: true })
+  ).toBeVisible();
+});
+
+test("Pages: redesigned Central discovers official services at 320px", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("servicos", { waitUntil: "domcontentloaded" });
+  const search = page.getByRole("textbox", {
+    name: "Buscar serviços públicos",
+  });
+  await expect(search).toBeInViewport();
+  await expect(
+    page.getByRole("heading", { name: "Resolva por assunto" })
+  ).toBeVisible();
+  for (const number of ["190", "192", "193"])
+    await expect(
+      page.locator(`#emergency-strip a[href="tel:${number}"]`)
+    ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Canal oficial online", exact: true })
+  ).not.toBeVisible();
+  await page.locator("summary").filter({ hasText: "Mais atalhos" }).click();
+  await page.getByRole("button", { name: /Carteira do autista/ }).click();
+  const card = page
+    .getByRole("region", { name: "Serviços públicos" })
+    .getByRole("article");
+  await expect(card).toHaveCount(1);
+  await expect(
+    card.getByRole("link", { name: /WhatsApp de Carteira/ })
+  ).toHaveAttribute("href", "https://wa.me/5562981043652");
+  await card
+    .locator("summary")
+    .filter({ hasText: "Orientações e documentos" })
+    .click();
+  await expect(
+    card.getByText("Comprovante de endereço em Goiás e foto digital", {
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: "Rota", exact: true })
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth)
+  ).toBeLessThanOrEqual(320);
+  const results = await new AxeBuilder({ page }).include("main").analyze();
+  expect(
+    results.violations.filter(
+      item => item.impact === "critical" || item.impact === "serious"
+    )
+  ).toEqual([]);
 });
