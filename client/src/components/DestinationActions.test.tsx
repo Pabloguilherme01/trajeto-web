@@ -27,6 +27,18 @@ describe("DestinationActions", () => {
     expect(screen.getByRole("group", { name: "Ações para Prefeitura" })).toBeTruthy();
   });
 
+  it("keeps shared route and save actions readable with semantic colors", () => {
+    render(<DestinationActions destination={destination} />);
+    const from = screen.getByRole("link", { name: /Ir daqui/i });
+    const save = screen.getByRole("button", { name: /Salvar destino/i });
+    for (const action of [from, save]) {
+      expect(action.className).toContain("border-border");
+      expect(action.className).toContain("bg-muted/10");
+      expect(action.className).toContain("text-foreground/");
+      expect(action.className).not.toMatch(/(?:border|bg|text)-white/);
+    }
+  });
+
   it("opens the preferred navigation provider instead of forcing Google Maps", () => {
     const open = vi.spyOn(window, "open").mockImplementation(() => null);
     setPreferredNavigationProvider("waze");
