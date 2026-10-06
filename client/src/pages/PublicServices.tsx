@@ -525,6 +525,16 @@ export default function PublicServices() {
                   </button>
                 ))}
               </div>
+              <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/[.04] p-4">
+                <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Mapa e deslocamento</p>
+                <h2 className="mt-1 text-base font-black">Escolha o destino aqui. Navegue do seu jeito.</h2>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  O Trajeto organiza o serviço e prepara a rota. No planejador, destinos com coordenadas confirmadas podem continuar no Organic Maps, Google Maps, Waze ou Apple Maps.
+                </p>
+                <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-sm font-black text-primary">
+                  <Navigation className="size-4" /> Abrir mapa e destinos
+                </button>
+              </div>
               <h2
                 id="citizen-shortcuts-title"
                 className="mt-5 text-lg font-bold"
