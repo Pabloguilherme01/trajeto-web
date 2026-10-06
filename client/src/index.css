@@ -373,7 +373,8 @@ html.a11y-compact .mobile-card { border-radius: 1rem; }
 }
 .route-navigation[data-live="true"] .route-telemetry {
   order: 3;
-  background: white;
+  background: var(--card);
+  color: var(--card-foreground);
 }
 .route-navigation[data-live="true"] .route-arrival {
   order: 4;

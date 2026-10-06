@@ -70,13 +70,13 @@ export function DestinationActions({
 
   return (
     <div className={"grid min-w-0 gap-2 " + (compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4")} role="group" aria-label={"Ações para " + destination.name}>
-      <a href={buildOriginPlannerUrl(destination.routeOrigin ?? plannerOriginValue)} className="flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[.03] px-2 text-center text-xs font-black text-white/80">
+      <a href={buildOriginPlannerUrl(destination.routeOrigin ?? plannerOriginValue)} className="flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl border border-border bg-muted/10 px-2 text-center text-xs font-black text-foreground/80">
         <Route className="size-3.5 shrink-0" />Ir daqui
       </a>
       <a href={buildDestinationPlannerUrl(plannerValue)} className="flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl bg-primary px-2 text-center text-xs font-black text-primary-foreground">
         <Navigation className="size-3.5 shrink-0" />Ir até aqui
       </a>
-      <button type="button" onClick={toggleSaved} disabled={saveLocked} className={"flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl border px-2 text-center text-xs font-black disabled:cursor-default " + (isSaved ? "border-primary/30 bg-primary/10 text-primary" : "border-white/10 bg-white/[.03] text-white/75")} aria-pressed={isSaved}>
+      <button type="button" onClick={toggleSaved} disabled={saveLocked} className={"flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl border px-2 text-center text-xs font-black disabled:cursor-default " + (isSaved ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-muted/10 text-foreground/75")} aria-pressed={isSaved}>
         <Bookmark className="size-3.5 shrink-0" fill={isSaved ? "currentColor" : "none"} />{saveLocked ? "Salvo no aparelho" : isSaved ? "Destino salvo" : "Salvar destino"}
       </button>
       <button type="button" onClick={openPreferredMap} className="flex min-h-11 min-w-0 break-words items-center justify-center gap-1.5 rounded-xl border border-accent/20 bg-accent/[.04] px-2 text-center text-xs font-black text-accent">
