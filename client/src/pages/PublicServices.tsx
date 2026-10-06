@@ -468,7 +468,7 @@ export default function PublicServices() {
               rede telefônica
             </span>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-3 gap-1.5 min-[360px]:gap-2">
             {[
               { label: "Polícia", number: "190" },
               { label: "SAMU", number: "192" },
@@ -495,7 +495,7 @@ export default function PublicServices() {
           resource === "todos" && (
             <section className="mt-5" aria-labelledby="citizen-shortcuts-title">
               <h2 className="text-lg font-bold">Resolva por assunto</h2>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                 {PUBLIC_SERVICE_CATEGORIES.filter(
                   item => item.id !== "todos"
                 ).map(item => {
@@ -560,7 +560,7 @@ export default function PublicServices() {
               >
                 Atalhos do dia a dia
               </h2>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
                 {PUBLIC_SERVICE_SHORTCUTS.slice(0, 4).map(shortcut => (
                   <button
                     key={shortcut.query}
@@ -585,7 +585,7 @@ export default function PublicServices() {
                   Mais atalhos ({PUBLIC_SERVICE_SHORTCUTS.length - 4})
                   <ChevronRight className="size-4" />
                 </summary>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
                   {PUBLIC_SERVICE_SHORTCUTS.slice(4).map(shortcut => (
                     <button
                       key={shortcut.query}
@@ -616,7 +616,7 @@ export default function PublicServices() {
                 <h2 id="popular-actions-title" className="mt-1 text-lg font-bold">Resolva em poucos toques</h2>
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
               {[
                 { label: "Saúde agora", query: "upa", detail: "Urgência e unidades" },
                 { label: "Documentos", query: "cpf", detail: "CPF, título e cidadania" },
@@ -653,7 +653,7 @@ export default function PublicServices() {
                   key={route.id}
                   type="button"
                   onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")}
-                  className="premium-card flex min-h-28 w-[11rem] shrink-0 flex-col justify-between rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
+                  className="premium-card flex min-h-28 w-[min(82vw,18rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
                 >
                   <span>
                     <span className="block text-sm font-black text-foreground">{route.label}</span>
@@ -830,7 +830,7 @@ export default function PublicServices() {
                 aria-current={
                   selectedService?.id === service.id ? "true" : undefined
                 }
-                className="premium-card route-card group scroll-mt-20 rounded-[1.4rem] border border-border/8 bg-card p-4 outline-none"
+                className="premium-card route-card group min-w-0 scroll-mt-20 overflow-hidden rounded-[1.4rem] border border-border/8 bg-card p-3.5 outline-none sm:p-4"
               >
                 <div className="flex items-start gap-3">
                   <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-accent/15 bg-accent/[.06] text-accent">
@@ -844,7 +844,7 @@ export default function PublicServices() {
                         )?.shortLabel
                       }
                     </p>
-                    <h2 className="mt-1 text-base font-bold leading-snug">
+                    <h2 className="mt-1 break-words text-base font-bold leading-snug">
                       {service.name}
                     </h2>
                     <p className="mt-1.5 text-sm leading-relaxed text-foreground/70">
