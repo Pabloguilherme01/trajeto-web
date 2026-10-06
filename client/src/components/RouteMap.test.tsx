@@ -229,11 +229,15 @@ describe("RouteMap", () => {
     expect(screen.getByTestId("map-view").getAttribute("data-center")).toBe(
       "-15.7545,-48.2816"
     );
-    expect(
-      screen.getByRole("button", { name: "Enquadrar viagem" })
-    ).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Aumentar zoom" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Trânsito" }));
+    const fitTrip = screen.getByRole("button", { name: "Enquadrar viagem" });
+    expect(fitTrip).toBeTruthy();
+    expect(fitTrip.className).toContain("border-border");
+    expect(fitTrip.className).toContain("text-foreground");
+    expect(fitTrip.className).not.toContain("border-white");
+    expect(screen.getByRole("button", { name: "Aumentar zoom" }).className).toContain("border-border");
+    const trafficButton = screen.getByRole("button", { name: "Trânsito" });
+    expect(trafficButton.className).toContain("border-border");
+    fireEvent.click(trafficButton);
     expect(
       screen
         .getByRole("button", { name: "Trânsito" })
