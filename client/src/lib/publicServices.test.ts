@@ -233,6 +233,11 @@ describe("public services catalog", () => {
       ["itbi", "itbi-municipal", "tributos"],
       ["pcd", "secretaria-pcd-igualdade", "inclusao"],
       ["apreensao animais", "apreensao-animais", "ambiente"],
+      ["medicamentos sus", "medicamentos-sus-municipal", "saude"],
+      ["alto custo", "medicamentos-alto-custo-municipal", "saude"],
+      ["estoque farmacias", "estoque-farmacias-publicas", "saude"],
+      ["regulacao municipal", "regulacao-municipal-lista-espera", "saude"],
+      ["creche", "lista-espera-creches", "educacao"],
     ] as const) {
       const service = searchPublicServices(query).find(item => item.id === id)!;
       expect(service).toBeDefined();
