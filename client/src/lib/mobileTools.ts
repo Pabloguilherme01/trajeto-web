@@ -112,6 +112,21 @@ export function buildGoogleMapsNearbyStationsUrl(_lat: number, _lng: number) {
   return buildGoogleMapsSearchUrl("postos de combustível perto de mim");
 }
 
+export function buildOrganicMapsNavigationUrl(
+  destination: { lat: number; lng: number },
+  label = "Destino",
+  mode: "drive" | "walk" | "bike" = "drive",
+) {
+  if (!Number.isFinite(destination.lat) || !Number.isFinite(destination.lng)) return null;
+  const params = new URLSearchParams({
+    origin: "currentLocation",
+    destination: destination.lat + "," + destination.lng,
+    destination_name: label.trim().slice(0, 120) || "Destino",
+    mode,
+  });
+  return "om://v2/nav?" + params.toString();
+}
+
 export function buildWazeNavigationUrl(destination: string, coordinates?: { lat: number; lng: number }) {
   const params = new URLSearchParams({ navigate: "yes" });
   if (coordinates && Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng)) {
@@ -159,7 +174,8 @@ export function openNavigation(lat: number, lng: number, label?: string) {
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
   const waze = "https://www.waze.com/ul?ll=" + lat + "%2C" + lng + "&navigate=yes&zoom=17&q=" + encoded;
   const apple = buildAppleMapsDirectionsUrl(lat + "," + lng);
-  return { google, waze, apple };
+  const organic = buildOrganicMapsNavigationUrl({ lat, lng }, label) ?? undefined;
+  return { google, waze, apple, organic };
 }
 
 export function vibration(pattern: number | number[] = 12) {
