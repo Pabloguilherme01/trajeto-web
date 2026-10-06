@@ -298,10 +298,24 @@ export default function TileStationMap({
     }
     return result;
   }, [tileBounds, tileZoom]);
-  // Scale fallback to the active camera instead of abandoning a large map
-  // after the same fixed number of failures on every viewport size.
-  const tileFailureThreshold = Math.max(5, Math.ceil(tiles.length * 0.55));
-  const excessiveTileFailures = tileErrors >= tileFailureThreshold;
+  // Base fallback on tiles that actually cover the visible camera. The outer
+  // overscan ring is only a prefetch buffer and must not take a healthy map down.
+  const visibleTileKeys = useMemo(
+    () => new Set(tiles.filter(tile => !tile.prefetch).map(tile => tile.key)),
+    [tiles]
+  );
+  const visibleTileErrors = useMemo(() => {
+    let count = 0;
+    for (const key of failedTileKeys.current)
+      if (visibleTileKeys.has(key)) count += 1;
+    return count;
+  }, [visibleTileKeys, tileErrors]);
+  const tileFailureThreshold = Math.min(
+    visibleTileKeys.size,
+    Math.max(3, Math.ceil(visibleTileKeys.size * 0.55))
+  );
+  const excessiveTileFailures =
+    visibleTileKeys.size > 0 && visibleTileErrors >= tileFailureThreshold;
 
   // Discard errors belonging to tiles outside the current camera. Otherwise
   // unrelated failures accumulate across exploration and hide a healthy map.
