@@ -24,10 +24,10 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('className="mt-3 flex flex-wrap gap-2"');
   });
 
-  it("keeps the three emergency numbers visible in a compact mobile grid", () => {
+  it("keeps the three emergency numbers visible without squeezing 320px screens", () => {
     expect(source).toContain("PUBLIC_SERVICE_CATEGORIES.length - 1");
     expect(source).toContain("sm:inline-flex");
-    expect(source).toContain('className="mt-3 grid grid-cols-3 gap-2"');
+    expect(source).toContain('className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3"');
   });
 
   it("prioritizes route and the main contact while making daily shortcuts immediately discoverable", () => {
@@ -35,7 +35,7 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("const secondaryContacts = contacts.slice(1)");
     expect(source).toContain("Mais opções");
     expect(source).toContain("PUBLIC_SERVICE_SHORTCUTS.slice(0, 4).map");
-    expect(source).toContain("grid-cols-2 gap-2 sm:grid-cols-4");
+    expect(source).toContain("grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4");
   });
 
   it("keeps essential actions visible even when offline navigation loses deep-link expansion", () => {
