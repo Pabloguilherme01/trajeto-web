@@ -298,6 +298,11 @@ export default function TileStationMap({
     }
     return result;
   }, [tileBounds, tileZoom]);
+  // Scale fallback to the active camera instead of abandoning a large map
+  // after the same fixed number of failures on every viewport size.
+  const tileFailureThreshold = Math.max(5, Math.ceil(tiles.length * 0.55));
+  const excessiveTileFailures = tileErrors >= tileFailureThreshold;
+
   // Discard errors belonging to tiles outside the current camera. Otherwise
   // unrelated failures accumulate across exploration and hide a healthy map.
   useEffect(() => {
@@ -534,7 +539,9 @@ export default function TileStationMap({
     setZoom(value => Math.max(15, value));
   };
 
-  const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= 5));
+  const tileFallback = Boolean(
+    fallback && (localLayer || offline || excessiveTileFailures)
+  );
 
   if (tileFallback)
     return (
