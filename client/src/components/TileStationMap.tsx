@@ -245,7 +245,7 @@ export default function TileStationMap({
       observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [drawable.length, tileErrors >= 5, offline, localLayer]);
+  }, [drawable.length, tileErrors, offline, localLayer]);
   const width = size.width;
   const height = size.height;
   const zoomScale = 2 ** zoom;
@@ -298,6 +298,25 @@ export default function TileStationMap({
     }
     return result;
   }, [tileBounds, tileZoom]);
+  // Base fallback on tiles that actually cover the visible camera. The outer
+  // overscan ring is only a prefetch buffer and must not take a healthy map down.
+  const visibleTileKeys = useMemo(
+    () => new Set(tiles.filter(tile => !tile.prefetch).map(tile => tile.key)),
+    [tiles]
+  );
+  const visibleTileErrors = useMemo(() => {
+    let count = 0;
+    for (const key of failedTileKeys.current)
+      if (visibleTileKeys.has(key)) count += 1;
+    return count;
+  }, [visibleTileKeys, tileErrors]);
+  const tileFailureThreshold = Math.min(
+    visibleTileKeys.size,
+    Math.max(3, Math.ceil(visibleTileKeys.size * 0.55))
+  );
+  const excessiveTileFailures =
+    visibleTileKeys.size > 0 && visibleTileErrors >= tileFailureThreshold;
+
   // Discard errors belonging to tiles outside the current camera. Otherwise
   // unrelated failures accumulate across exploration and hide a healthy map.
   useEffect(() => {
@@ -534,7 +553,9 @@ export default function TileStationMap({
     setZoom(value => Math.max(15, value));
   };
 
-  const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= 5));
+  const tileFallback = Boolean(
+    fallback && (localLayer || offline || excessiveTileFailures)
+  );
 
   if (tileFallback)
     return (

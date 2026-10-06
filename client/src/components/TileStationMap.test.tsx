@@ -353,12 +353,23 @@ it("does not accumulate failures from previous zoom levels", () => {
   expect(screen.getByRole("region", { name: "Mapa dos postos" })).toBeTruthy();
 });
 
+it("does not abandon a large map after only five tile failures", () => {
+  vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(1440);
+  vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(800);
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
+  const tiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
+  expect(tiles.length).toBeGreaterThan(8);
+  tiles.slice(0, 5).forEach(tile => fireEvent.error(tile));
+  expect(screen.queryByText("Mapa local")).toBeNull();
+  expect(screen.getByRole("region", { name: "Mapa dos postos" })).toBeTruthy();
+});
+
 it("returns from offline fallback when connectivity is restored", () => {
   const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
   const tiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
   expect(tiles.length).toBeGreaterThanOrEqual(5);
-  tiles.slice(0, 5).forEach(tile => fireEvent.error(tile));
+  tiles.forEach(tile => fireEvent.error(tile));
   expect(screen.getByText("Mapa local")).toBeTruthy();
   online.mockReturnValue(false);
   act(() => window.dispatchEvent(new Event("offline")));

@@ -13,7 +13,9 @@ export type PublicServiceCategory =
   | "justica"
   | "digital"
   | "ambiente"
-  | "consumidor";
+  | "consumidor"
+  | "tributos"
+  | "inclusao";
 
 export type PublicService = {
   id: string;
@@ -55,6 +57,7 @@ export type PublicService = {
     | "Governo Digital"
     | "Anatel"
     | "Ibama"
+    | "ANEEL"
     | "Detran-GO"
     | "Defensoria Pública de Goiás";
   sourceUrl: string;
@@ -76,6 +79,8 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
   { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
   { id: "servicos-urbanos", label: "Cidade e serviços", shortLabel: "Cidade" },
+  { id: "tributos", label: "Tributos e notas", shortLabel: "Tributos" },
+  { id: "inclusao", label: "Inclusão e igualdade", shortLabel: "Inclusão" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -109,6 +114,203 @@ const ASSISTENCIA =
 const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
+  {
+    id: "celular-seguro",
+    name: "Celular Seguro · bloquear aparelho e linha",
+    category: "seguranca",
+    description:
+      "Programa federal para registrar aparelho, emitir alerta de roubo, furto ou perda e acionar bloqueios integrados.",
+    keywords: [
+      "celular roubado",
+      "celular furtado",
+      "perdi celular",
+      "bloquear imei",
+      "bloquear chip",
+      "celular seguro",
+    ],
+    actionUrl: "https://celularseguro.mj.gov.br/",
+    actionLabel: "Abrir Celular Seguro",
+    guidance:
+      "Entre com a conta gov.br. Se possível, cadastre o aparelho e uma pessoa de confiança antes de uma ocorrência. Em caso de crime, registre também o boletim de ocorrência pelos canais oficiais.",
+    sourceLabel: "Ministério da Justiça",
+    sourceUrl:
+      "https://www.gov.br/mj/pt-br/acesso-a-informacao/acoes-e-programas/celular-seguro/celular-seguro/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "tarifa-social-energia",
+    name: "Tarifa Social de Energia Elétrica",
+    category: "assistencia",
+    description:
+      "Regras oficiais do benefício na conta de luz para famílias elegíveis pelo CadÚnico ou BPC.",
+    keywords: [
+      "tarifa social",
+      "desconto energia",
+      "conta luz baixa renda",
+      "cadunico energia",
+      "bpc energia",
+    ],
+    actionUrl: "https://www.gov.br/aneel/pt-br/assuntos/tarifas/tarifa-social",
+    actionLabel: "Consultar regras da Tarifa Social",
+    guidance:
+      "A concessão é automática quando os cadastros e a titularidade atendem às regras. Se você se enquadra e o benefício não aparece na fatura, confirme seus dados no CadÚnico/BPC e fale com a distribuidora.",
+    sourceLabel: "ANEEL",
+    sourceUrl: "https://www.gov.br/aneel/pt-br/assuntos/tarifas/tarifa-social",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "nota-fiscal-iss",
+    name: "Nota Fiscal eletrônica e ISS · Águas Lindas",
+    category: "tributos",
+    description:
+      "Canal municipal para dúvidas e atendimento sobre Nota Fiscal eletrônica e ISS.",
+    phone: "(61) 99305-7551",
+    whatsappOnly: ["(61) 99305-7551"],
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    keywords: ["nota fiscal", "nfe", "nfse", "iss", "prestador", "tributo municipal"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/servico/nota-fiscal-eletronica/",
+    actionLabel: "Abrir serviço de Nota Fiscal",
+    guidance:
+      "O número informado pela Prefeitura é de atendimento por WhatsApp para Nota Fiscal/ISS. Confirme no canal oficial os documentos e a etapa adequada antes de se deslocar.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/servico/nota-fiscal-eletronica/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "itbi-municipal",
+    name: "ITBI · atendimento tributário municipal",
+    category: "tributos",
+    description:
+      "Canal da fiscalização tributária para orientações relacionadas ao ITBI em Águas Lindas.",
+    phone: "(61) 92005-3453",
+    whatsappOnly: ["(61) 92005-3453"],
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    keywords: ["itbi", "imovel", "transferencia imovel", "tributo municipal"],
+    guidance:
+      "O canal de ITBI é informado pela Secretaria de Fazenda como atendimento somente por WhatsApp. Confirme documentos, valores e procedimento diretamente com a Prefeitura.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-economia/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "secretaria-pcd-igualdade",
+    name: "Secretaria da Pessoa com Deficiência e da Igualdade Racial",
+    category: "inclusao",
+    description:
+      "Atendimento municipal sobre direitos da pessoa com deficiência, igualdade racial, diversidade e ações afirmativas.",
+    address:
+      "Quadra 32, Lote 11, Rua 20, Instituto Marques Paiva, Jardim Brasília, Águas Lindas de Goiás - GO",
+    phone: "(61) 99304-9971",
+    email: "smdracial@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    keywords: ["pcd", "pessoa com deficiencia", "igualdade racial", "acessibilidade", "inclusao"],
+    guidance:
+      "Entre em contato para confirmar o atendimento indicado para sua necessidade e os documentos necessários.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-da-pessoa-com-deficiencia-e-da-igualdade-racial/",
+    mapQuery:
+      "Secretaria Municipal da Pessoa com Deficiência e da Igualdade Racial, Quadra 32, Lote 11, Rua 20, Jardim Brasília, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "apreensao-animais",
+    name: "Apreensão de animais · Trânsito e Mobilidade",
+    category: "ambiente",
+    description:
+      "Canal municipal divulgado pela Secretaria de Trânsito para solicitações relacionadas à apreensão de animais.",
+    phone: "(61) 92003-6679",
+    keywords: ["apreensao animais", "animal solto", "animais na via", "risco transito"],
+    guidance:
+      "Use este contato para a finalidade indicada pela Prefeitura. Em situação de risco imediato a pessoas ou acidente, acione o serviço de emergência adequado.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-transito-e-mobilidade-urbana/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "medicamentos-sus-municipal",
+    name: "Lista de Medicamentos SUS · Águas Lindas",
+    category: "saude",
+    description:
+      "Consulta oficial municipal da lista de medicamentos do SUS disponibilizada no portal de Acesso à Informação.",
+    keywords: ["medicamentos sus", "remedios sus", "lista medicamentos", "farmacia publica", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_sus",
+    actionLabel: "Consultar lista de medicamentos",
+    guidance:
+      "Confira a data da informação publicada. Se a consulta não carregar, use os canais oficiais da Secretaria Municipal de Saúde para confirmar disponibilidade e retirada.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_sus",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "medicamentos-alto-custo-municipal",
+    name: "Medicamentos de Alto Custo · Águas Lindas",
+    category: "saude",
+    description:
+      "Acesso oficial municipal às informações publicadas sobre medicamentos de alto custo.",
+    keywords: ["alto custo", "medicamento alto custo", "remedio alto custo", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_altocusto",
+    actionLabel: "Consultar medicamentos de alto custo",
+    guidance:
+      "Use a consulta como referência e confirme critérios, documentos e fluxo de atendimento nos canais oficiais de saúde antes de se deslocar.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_altocusto",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "estoque-farmacias-publicas",
+    name: "Estoque de medicamentos · farmácias públicas",
+    category: "saude",
+    description:
+      "Consulta oficial do estoque de medicamentos das farmácias públicas de Águas Lindas.",
+    keywords: ["estoque medicamento", "farmacia publica", "tem remedio", "medicamento disponivel", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/estoque_medicamentos_farmacias",
+    actionLabel: "Consultar estoque das farmácias",
+    guidance:
+      "O estoque pode mudar ao longo do dia. Consulte a publicação mais recente e confirme a disponibilidade com a rede municipal quando necessário.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/estoque_medicamentos_farmacias",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "regulacao-municipal-lista-espera",
+    name: "Lista de espera da Regulação Municipal",
+    category: "saude",
+    description:
+      "Consulta oficial municipal da lista de espera da regulação de saúde.",
+    keywords: ["regulacao municipal", "fila regulacao", "lista espera saude", "consulta exame", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/lista_espera_regulacoes",
+    actionLabel: "Consultar fila da regulação",
+    guidance:
+      "Consulte a atualização publicada no portal. Para dúvidas sobre posição, encaminhamento ou prioridade, use os canais oficiais da rede de saúde.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/lista_espera_regulacoes",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "lista-espera-creches",
+    name: "Lista de espera em creches · Águas Lindas",
+    category: "educacao",
+    description:
+      "Página oficial municipal para acompanhar a lista de espera publicada para vagas em creches.",
+    keywords: ["creche", "lista espera creche", "vaga creche", "educacao infantil", "matricula"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    actionLabel: "Consultar lista de espera",
+    guidance:
+      "Confira a data da lista publicada e os critérios informados pela Secretaria de Educação antes de tomar qualquer decisão sobre matrícula ou atendimento.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    verifiedAt: "06/10/2026",
+  },
   {
     id: "recuperar-govbr",
     name: "Recuperar acesso à conta gov.br",
@@ -770,7 +972,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "secretaria-fazenda",
     whatsappOnly: ["(61) 92005-3453", "(61) 99305-7551"],
     name: "Secretaria Municipal de Fazenda e Planejamento",
-    category: "cidadania",
+    category: "tributos",
     description: "Atendimento tributário e de planejamento municipal.",
     phone: "(61) 99303-3717",
     extraPhone: "ITBI: (61) 92005-3453 · Nota Fiscal/ISS: (61) 99305-7551",
@@ -804,7 +1006,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-meio-ambiente",
     name: "Secretaria Municipal de Meio Ambiente",
-    category: "servicos-urbanos",
+    category: "ambiente",
     description: "Atendimento municipal relacionado ao meio ambiente.",
     phone: "(61) 99451-0844",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -1043,7 +1245,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "procon",
     name: "Procon Águas Lindas",
-    category: "cidadania",
+    category: "consumidor",
     description: "Atendimento ao consumidor e orientação sobre direitos.",
     phone: "(61) 3616-1133",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -1084,7 +1286,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "pav",
     ],
     name: "Receita Federal · ponto conveniado",
-    category: "cidadania",
+    category: "tributos",
     description:
       "Ponto de atendimento conveniado da Receita Federal em Águas Lindas de Goiás.",
     sourceLabel: "Receita Federal",
@@ -1299,7 +1501,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "carteira-autista-goias",
     name: "Carteira de Identificação do Autista · Goiás",
-    category: "assistencia",
+    category: "inclusao",
     description:
       "Orientação estadual para solicitar a carteira de identificação da pessoa com transtorno do espectro autista (Ciptea).",
     keywords: [
@@ -1357,7 +1559,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "consumidor-gov",
     name: "Consumidor.gov.br · reclamação contra empresas",
-    category: "cidadania",
+    category: "consumidor",
     description:
       "Serviço público gratuito para tratar problemas de consumo diretamente com empresas participantes.",
     keywords: [
@@ -1473,7 +1675,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "passe-livre-pcd-goias",
     name: "Passe Livre da Pessoa com Deficiência · Goiás",
-    category: "assistencia",
+    category: "inclusao",
     description:
       "Gratuidade no transporte intermunicipal em Goiás para pessoa com deficiência que atenda aos critérios do programa.",
     keywords: [
@@ -1671,6 +1873,26 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Atendimento psicossocial municipal",
   },
   { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
+  {
+    label: "Celular roubado ou perdido",
+    query: "celular seguro",
+    hint: "Bloqueio oficial pelo gov.br",
+  },
+  {
+    label: "Nota Fiscal e ISS",
+    query: "nota fiscal iss",
+    hint: "Atendimento tributário municipal",
+  },
+  {
+    label: "ITBI",
+    query: "itbi",
+    hint: "Canal municipal por WhatsApp",
+  },
+  {
+    label: "Inclusão e PCD",
+    query: "pcd",
+    hint: "Direitos, Ciptea e Passe Livre",
+  },
   {
     label: "Assistência à família",
     query: "cras",

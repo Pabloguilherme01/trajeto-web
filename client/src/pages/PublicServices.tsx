@@ -2,6 +2,8 @@ import {
   ArrowRight,
   Search,
   Scale,
+  Accessibility,
+  ReceiptText,
   Leaf,
   Smartphone,
   ShoppingBag,
@@ -73,6 +75,8 @@ const categoryIcons = {
   digital: Smartphone,
   ambiente: Leaf,
   consumidor: ShoppingBag,
+  tributos: ReceiptText,
+  inclusao: Accessibility,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -126,6 +130,21 @@ const NEED_GROUPS = [
     query: "delegacia",
     hint: "Delegacia, ocorrência e atendimento policial",
   },
+  {
+    label: "Tributos e notas",
+    query: "nota fiscal iss",
+    hint: "Nota Fiscal, ISS, ITBI e atendimento fazendário",
+  },
+  {
+    label: "Inclusão e acessibilidade",
+    query: "pcd",
+    hint: "PCD, Ciptea, Passe Livre e igualdade racial",
+  },
+  {
+    label: "Celular roubado ou perdido",
+    query: "celular seguro",
+    hint: "Bloqueio oficial, BO e proteção do aparelho",
+  },
 ] as const;
 
 const READY_ROUTE_IDS = [
@@ -168,6 +187,15 @@ const READY_ROUTE_IDS = [
   "cepi-jk",
   "cepm-aguas-lindas",
   "paulo-freire",
+  "secretaria-fazenda",
+  "secretaria-infraestrutura",
+  "secretaria-meio-ambiente",
+  "secretaria-habitacao",
+  "regularizacao-fundiaria",
+  "creas",
+  "secretaria-assistencia-social",
+  "secretaria-mulher",
+  "secretaria-pcd-igualdade",
 ] as const;
 
 const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
@@ -242,6 +270,20 @@ const READY_ROUTE_GROUPS = [
       "cepm-aguas-lindas",
       "paulo-freire",
       "praca-da-biblia",
+    ],
+  },
+  {
+    label: "Direitos e apoio",
+    ids: [
+      "secretaria-fazenda",
+      "secretaria-infraestrutura",
+      "secretaria-meio-ambiente",
+      "secretaria-habitacao",
+      "regularizacao-fundiaria",
+      "creas",
+      "secretaria-assistencia-social",
+      "secretaria-mulher",
+      "secretaria-pcd-igualdade",
     ],
   },
 ] as const;
@@ -412,18 +454,21 @@ export default function PublicServices() {
       appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery)
     );
   };
-  const openOrganicMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
-    if (!service.mapQuery) return;
+  const openOrganicDestination = (destination: string, label: string) => {
     let point: ReturnType<typeof resolveOfflineRoutePoint> = null;
     try {
-      point = resolveOfflineRoutePoint(service.mapQuery);
+      point = resolveOfflineRoutePoint(destination);
     } catch {
       point = null;
     }
     const url = point
-      ? buildOrganicMapsNavigationUrl(point, service.name, navigationMode)
-      : buildOrganicMapsSearchUrl(service.mapQuery);
+      ? buildOrganicMapsNavigationUrl(point, label, navigationMode)
+      : buildOrganicMapsSearchUrl(destination);
     if (url) window.location.href = url;
+  };
+  const openOrganicMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
+    if (!service.mapQuery) return;
+    openOrganicDestination(service.mapQuery, service.name);
   };
   const toggleSaved = (service: (typeof PUBLIC_SERVICES)[number]) => {
     const result = togglePublicServiceFavorite(service.id);
@@ -645,13 +690,21 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "min-h-11 rounded-full border px-3 text-sm font-black transition " +
+                  "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
                     ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
                     : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
                 }
               >
-                {item.label}
+                <span>{item.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.68rem] tabular-nums"
+                >
+                  {item.id === "todos"
+                    ? PUBLIC_SERVICES.length
+                    : PUBLIC_SERVICES.filter(service => service.category === item.id).length}
+                </span>
               </button>
             ))}
           </div>
@@ -1037,7 +1090,7 @@ export default function PublicServices() {
                     </h2>
                   </div>
                 </div>
-                <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+                <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                   {[
                     {
                       label: "Saúde agora",
@@ -1058,6 +1111,16 @@ export default function PublicServices() {
                       label: "Direitos",
                       query: "defensoria",
                       detail: "Defensoria e orientação",
+                    },
+                    {
+                      label: "Celular roubado",
+                      query: "celular seguro",
+                      detail: "Bloqueio oficial e BO",
+                    },
+                    {
+                      label: "Nota Fiscal / ITBI",
+                      query: "tributo municipal",
+                      detail: "ISS, Nota Fiscal e ITBI",
                     },
                   ].map(action => (
                     <button
@@ -1159,31 +1222,47 @@ export default function PublicServices() {
                         )?.ids.includes(route.id as never)
                       )
                   ).map(route => (
-                    <button
+                    <article
                       key={route.id}
-                      type="button"
-                      onClick={() =>
-                        setLocation(
-                          appUrl("/planejar") +
-                            "?destino=" +
-                            encodeURIComponent(route.destination) +
-                            "&auto=1"
-                        )
-                      }
-                      className="premium-card flex min-h-28 w-[min(82vw,18rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
+                      className="premium-card flex min-h-32 w-[min(86vw,19rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
                     >
-                      <span>
+                      <div>
                         <span className="block text-sm font-black text-foreground">
                           {route.label}
                         </span>
                         <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
                           {route.detail}
                         </span>
-                      </span>
-                      <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-primary">
-                        <Navigation className="size-3.5" /> Preparar rota
-                      </span>
-                    </button>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setLocation(
+                              appUrl("/planejar") +
+                                "?destino=" +
+                                encodeURIComponent(route.destination) +
+                                "&auto=1"
+                            )
+                          }
+                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl bg-primary px-2 text-xs font-black text-primary-foreground"
+                        >
+                          <Route className="size-3.5 shrink-0" />
+                          <span className="truncate">Trajeto</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openOrganicDestination(route.destination, route.label)
+                          }
+                          aria-label={"Abrir " + route.label + " no Organic Maps"}
+                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-primary/20 bg-primary/[.05] px-2 text-xs font-black text-primary"
+                        >
+                          <Navigation className="size-3.5 shrink-0" />
+                          <span className="truncate">Organic</span>
+                        </button>
+                      </div>
+                    </article>
                   ))}
                 </div>
                 <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">

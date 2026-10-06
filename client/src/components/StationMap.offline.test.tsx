@@ -14,7 +14,7 @@ it("keeps stations without ids selectable when background tiles fail", () => {
   ]} />);
   const tiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
   expect(tiles.length).toBeGreaterThanOrEqual(5);
-  tiles.slice(0, 5).forEach(tile => fireEvent.error(tile));
+  tiles.forEach(tile => fireEvent.error(tile));
   expect(screen.getByRole("img", { name: /Mapa offline vetorial/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Escolher posto no mapa offline" }));
   fireEvent.click(screen.getByRole("option", { name: "Posto B · Rua B" }));

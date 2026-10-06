@@ -225,6 +225,34 @@ describe("public services catalog", () => {
     expect(detran.verifiedAt).toBe("06/10/2026");
   });
 
+  it("organizes the expanded premium utility categories without duplicate records", () => {
+    for (const [query, id, category] of [
+      ["celular seguro", "celular-seguro", "seguranca"],
+      ["tarifa social", "tarifa-social-energia", "assistencia"],
+      ["nota fiscal iss", "nota-fiscal-iss", "tributos"],
+      ["itbi", "itbi-municipal", "tributos"],
+      ["pcd", "secretaria-pcd-igualdade", "inclusao"],
+      ["apreensao animais", "apreensao-animais", "ambiente"],
+      ["medicamentos sus", "medicamentos-sus-municipal", "saude"],
+      ["alto custo", "medicamentos-alto-custo-municipal", "saude"],
+      ["estoque farmacias", "estoque-farmacias-publicas", "saude"],
+      ["regulacao municipal", "regulacao-municipal-lista-espera", "saude"],
+      ["creche", "lista-espera-creches", "educacao"],
+    ] as const) {
+      const service = searchPublicServices(query).find(item => item.id === id)!;
+      expect(service).toBeDefined();
+      expect(service.category).toBe(category);
+      expect(service.verifiedAt).toBe("06/10/2026");
+      expect(service.sourceUrl).toMatch(/^https:\/\//);
+    }
+    expect(PUBLIC_SERVICES.find(item => item.id === "procon")?.category).toBe("consumidor");
+    expect(PUBLIC_SERVICES.find(item => item.id === "consumidor-gov")?.category).toBe("consumidor");
+    expect(PUBLIC_SERVICES.find(item => item.id === "secretaria-meio-ambiente")?.category).toBe("ambiente");
+    expect(PUBLIC_SERVICES.find(item => item.id === "carteira-autista-goias")?.category).toBe("inclusao");
+    expect(PUBLIC_SERVICES.find(item => item.id === "passe-livre-pcd-goias")?.category).toBe("inclusao");
+    expect(new Set(PUBLIC_SERVICES.map(item => item.id)).size).toBe(PUBLIC_SERVICES.length);
+  });
+
   it("finds the new public-utility services by practical intent", () => {
     expect(searchPublicServices("farmacia popular").some(service => service.id === "farmacia-popular")).toBe(true);
     expect(searchPublicServices("ouvsus").some(service => service.id === "ouvsus-136")).toBe(true);
