@@ -4,14 +4,19 @@ import {
   SlidersHorizontal,
   ChevronRight,
   CheckCircle2,
+  BadgeCheck,
   BookOpen,
   Building2,
+  Clock3,
+  Globe2,
   ExternalLink,
   Heart,
   HeartPulse,
   Landmark,
   MapPinned,
   MessageCircle,
+  Route,
+  Sparkles,
   Phone,
   Share2,
   ShieldAlert,
@@ -47,6 +52,15 @@ const categoryIcons = {
   transito: TrafficCone,
   educacao: BookOpen,
   cidadania: Landmark,
+} as const;
+
+const SERVICE_SUMMARY = {
+  contacts: PUBLIC_SERVICES.filter(
+    service => publicServiceContacts(service).length > 0
+  ).length,
+  routes: PUBLIC_SERVICES.filter(service => Boolean(service.mapQuery)).length,
+  online: PUBLIC_SERVICES.filter(service => Boolean(service.actionUrl)).length,
+  verified: PUBLIC_SERVICES.filter(service => Boolean(service.verifiedAt)).length,
 } as const;
 
 export default function PublicServices() {
@@ -245,30 +259,62 @@ export default function PublicServices() {
   return (
     <main className="premium-surface visual-shell min-h-[100dvh] bg-background pb-28 text-foreground md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[.17em] text-primary">
-              Central de serviços
-            </p>
-            <h1 className="mt-2 font-display text-[1.75rem] font-semibold leading-tight tracking-tight sm:text-4xl">
-              Como podemos ajudar?
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Águas Lindas de Goiás · serviços locais e canais públicos
-            </p>
-            <p className="mt-3 flex items-center gap-2 text-xs font-bold text-primary">
-              <WifiOff className="size-4 shrink-0" /> {PUBLIC_SERVICES.length}{" "}
-              serviços no catálogo offline ·{" "}
-              {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
-            </p>
+        <header className="premium-card rounded-[1.8rem] p-5 sm:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <span className="status-pill border-primary/20 bg-primary/10 text-primary">
+                <Sparkles className="size-3.5" /> Central de serviços
+              </span>
+              <h1 className="section-heading mt-3 max-w-3xl font-display text-[1.85rem] font-semibold leading-tight tracking-tight sm:text-4xl">
+                Encontre o serviço certo sem perder tempo.
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Pesquise pelo que você precisa — vacina, CNH, emprego, água,
+                documentos ou atendimento — e veja contato, rota e canal oficial
+                no mesmo lugar.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="status-pill text-foreground/80">
+                  <WifiOff className="size-3.5 text-primary" /> catálogo disponível offline
+                </span>
+                <span className="status-pill text-foreground/80">
+                  <BadgeCheck className="size-3.5 text-accent" /> {SERVICE_SUMMARY.verified} fichas conferidas
+                </span>
+                <span className="status-pill text-foreground/80">
+                  {online ? (
+                    <Globe2 className="size-3.5 text-accent" />
+                  ) : (
+                    <WifiOff className="size-3.5 text-warning" />
+                  )}
+                  {online ? "internet disponível" : "modo offline ativo"}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLocation(appUrl("/"))}
+              className="task-action task-action-secondary hidden shrink-0 sm:inline-flex"
+            >
+              Início
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setLocation(appUrl("/"))}
-            className="hidden min-h-11 shrink-0 items-center justify-center rounded-xl border border-border/10 px-3 text-xs font-black text-foreground/70 sm:inline-flex"
-          >
-            Início
-          </button>
+
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              [PUBLIC_SERVICES.length, "serviços"],
+              [SERVICE_SUMMARY.contacts, "com contato"],
+              [SERVICE_SUMMARY.routes, "com rota"],
+              [SERVICE_SUMMARY.online, "online"],
+            ].map(([value, label]) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-border/10 bg-background/55 p-3"
+              >
+                <p className="text-xl font-black tracking-tight text-foreground">{value}</p>
+                <p className="mt-0.5 text-xs font-bold text-muted-foreground">{label}</p>
+              </div>
+            ))}
+          </div>
         </header>
 
         <form
@@ -316,20 +362,41 @@ export default function PublicServices() {
           </kbd>
         </form>
 
+        {!selectedService && !query.trim() && (
+          <div
+            className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1"
+            aria-label="Buscas rápidas"
+          >
+            {PUBLIC_SERVICE_SHORTCUTS.slice(0, 7).map(shortcut => (
+              <button
+                key={shortcut.query}
+                type="button"
+                onClick={() => {
+                  setQuery(shortcut.query);
+                  applyFilters(shortcut.query, "todos");
+                }}
+                className="shrink-0 rounded-full border border-border/15 bg-card px-3 py-2 text-xs font-bold text-foreground/80 transition hover:border-accent hover:text-foreground"
+              >
+                {shortcut.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <section
           id="emergency-strip"
           tabIndex={-1}
-          className="mt-4 scroll-mt-20 rounded-2xl border border-warning/25 bg-card p-3 outline-none"
+          className="premium-card mt-4 scroll-mt-20 rounded-[1.45rem] border border-warning/25 bg-card p-4 outline-none"
           aria-labelledby="emergency-strip-title"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.14em] text-warning">
-                Emergências
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-warning">
+                <Siren className="size-4" /> Emergências
               </p>
               <h2
                 id="emergency-strip-title"
-                className="mt-1 text-sm font-black"
+                className="mt-1 text-base font-black"
               >
                 Em caso de risco, ligue agora
               </h2>
@@ -378,7 +445,7 @@ export default function PublicServices() {
                       key={item.id}
                       type="button"
                       onClick={() => applyCategory(item.id)}
-                      className="flex min-h-24 min-w-0 items-center gap-2 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-accent focus-visible:border-accent"
+                      className="premium-card flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-accent focus-visible:border-accent"
                     >
                       <Icon className="size-5 shrink-0 text-accent" />
                       <span className="min-w-0 flex-1">
@@ -408,7 +475,7 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="min-h-24 min-w-0 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary"
+                    className="premium-card min-h-24 min-w-0 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary"
                   >
                     <span className="block text-sm font-bold text-foreground">
                       {shortcut.label}
@@ -433,7 +500,7 @@ export default function PublicServices() {
                         setQuery(shortcut.query);
                         applyFilters(shortcut.query, "todos");
                       }}
-                      className="min-h-24 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
+                      className="premium-card min-h-24 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
                     >
                       <span className="block text-sm font-bold">
                         {shortcut.label}
@@ -454,7 +521,7 @@ export default function PublicServices() {
         >
           <div
             role="group"
-            className="mt-3 flex flex-wrap gap-2"
+            className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -464,7 +531,7 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "min-h-11 rounded-full border px-3 text-sm font-black transition " +
+                  "min-h-11 shrink-0 rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
                     ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
                     : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
@@ -474,30 +541,23 @@ export default function PublicServices() {
               </button>
             ))}
           </div>
-          <details
-            className="mobile-disclosure mt-3"
-            open={resource !== "todos" ? true : undefined}
-          >
-            <summary className="min-h-11">
-              <span className="flex items-center gap-2">
-                <SlidersHorizontal className="size-4" /> Filtrar por recurso
-                {resource !== "todos" ? " · ativo" : ""}
-              </span>
-              <ChevronRight className="size-4" />
-            </summary>
+          <div className="mt-4">
+            <p className="text-xs font-black uppercase tracking-[.12em] text-muted-foreground">
+              Como você quer resolver?
+            </p>
             <div
               role="group"
               aria-label="Recursos disponíveis"
-              className="mt-3 flex flex-wrap gap-2"
+              className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4"
             >
               {(
                 [
-                  ["todos", "Todos os recursos"],
-                  ["contato", "Ligar ou WhatsApp"],
-                  ["rota", "Com destino para rota"],
-                  ["online", "Canal oficial online"],
+                  { value: "todos", label: "Ver tudo", icon: SlidersHorizontal },
+                  { value: "contato", label: "Ligar ou WhatsApp", icon: Phone },
+                  { value: "rota", label: "Ir até o local", icon: Route },
+                  { value: "online", label: "Resolver online", icon: Globe2 },
                 ] as const
-              ).map(([value, label]) => (
+              ).map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}
                   type="button"
@@ -507,17 +567,18 @@ export default function PublicServices() {
                     if (selectedService) applyFilters(query, category);
                   }}
                   className={
-                    "min-h-11 rounded-xl border px-3 text-sm font-bold " +
+                    "flex min-h-16 min-w-0 items-center gap-2 rounded-2xl border px-3 text-left text-sm font-bold transition " +
                     (resource === value
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background text-foreground")
+                      ? "border-primary/35 bg-primary/10 text-primary"
+                      : "border-border/10 bg-background text-foreground/80 hover:border-accent/30")
                   }
                 >
-                  {label}
+                  <Icon className="size-4 shrink-0" />
+                  <span className="min-w-0">{label}</span>
                 </button>
               ))}
             </div>
-          </details>
+          </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -601,10 +662,10 @@ export default function PublicServices() {
                 aria-current={
                   selectedService?.id === service.id ? "true" : undefined
                 }
-                className="premium-card route-card scroll-mt-20 rounded-[1.4rem] border border-border/8 bg-card p-4 outline-none"
+                className="premium-card route-card group scroll-mt-20 rounded-[1.4rem] border border-border/8 bg-card p-4 outline-none"
               >
                 <div className="flex items-start gap-3">
-                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted/[.04] text-accent">
+                  <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-accent/15 bg-accent/[.06] text-accent">
                     <Icon className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -658,13 +719,16 @@ export default function PublicServices() {
                       Canal online
                     </span>
                   )}
+                  {service.verifiedAt && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-accent/[.06] px-2 py-1 text-accent">
+                      <BadgeCheck className="size-3.5" /> conferido {service.verifiedAt}
+                    </span>
+                  )}
                 </div>
                 {service.address && (
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/65">
-                    <span className="font-black text-foreground/70">
-                      Endereço:
-                    </span>{" "}
-                    {service.address}
+                  <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-foreground/70">
+                    <MapPinned className="mt-0.5 size-4 shrink-0 text-accent" />
+                    <span>{service.address}</span>
                   </p>
                 )}
                 {!service.mapQuery && (
@@ -673,8 +737,9 @@ export default function PublicServices() {
                   </p>
                 )}
                 {service.hours && (
-                  <p className="mt-3 text-sm font-bold text-foreground/75">
-                    {service.hours}
+                  <p className="mt-3 flex items-start gap-2 text-sm font-bold text-foreground/75">
+                    <Clock3 className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span>{service.hours}</span>
                   </p>
                 )}
                 {(service.guidance || service.documents?.length) && (
@@ -935,10 +1000,8 @@ export default function PublicServices() {
                   rel="noopener noreferrer"
                   className="mt-2 flex min-h-10 items-center justify-center text-center text-xs font-bold text-foreground/65 hover:text-foreground"
                 >
-                  Fonte: {service.sourceLabel}
-                  {service.verifiedAt
-                    ? " · conferido em " + service.verifiedAt
-                    : ""}
+                  <BadgeCheck className="mr-1.5 inline size-3.5 text-accent" />
+                  Fonte oficial: {service.sourceLabel}
                 </a>
               </article>
             );
