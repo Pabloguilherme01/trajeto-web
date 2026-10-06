@@ -1,4 +1,4 @@
-export type NavigationProvider = "google" | "waze" | "apple";
+export type NavigationProvider = "google" | "waze" | "apple" | "organic";
 export type NavigationPreference = "default" | "avoid-tolls" | "avoid-highways";
 
 const KEY = "trajeto-navigation-preferences";
@@ -12,7 +12,7 @@ export type StoredNavigationPreferences = {
 const DEFAULTS: StoredNavigationPreferences = { provider: "google", preference: "default" };
 
 function validProvider(value: unknown): value is NavigationProvider {
-  return value === "google" || value === "waze" || value === "apple";
+  return value === "google" || value === "waze" || value === "apple" || value === "organic";
 }
 
 function validPreference(value: unknown): value is NavigationPreference {
