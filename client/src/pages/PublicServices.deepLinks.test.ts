@@ -38,7 +38,7 @@ describe("PublicServices deep links", () => {
   });
 
   it("keeps every essential action visible when a service is opened directly", () => {
-    expect(source).toContain("const expandedActions = selectedService?.id === service.id");
+    expect(source).toContain("const expandedActions = selectedService?.id === service.id || results.length === 1");
     expect(source).toContain("expandedActions && secondaryContacts.length > 0");
     expect(source).toContain("expandedActions && service.actionUrl");
     expect(source).toContain("expandedActions && service.email");
