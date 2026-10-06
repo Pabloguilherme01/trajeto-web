@@ -298,6 +298,16 @@ export default function TileStationMap({
     }
     return result;
   }, [tileBounds, tileZoom]);
+  // Discard errors belonging to tiles outside the current camera. Otherwise
+  // unrelated failures accumulate across exploration and hide a healthy map.
+  useEffect(() => {
+    const active = new Set(tiles.map(tile => tile.key));
+    for (const key of failedTileKeys.current) {
+      if (!active.has(key)) failedTileKeys.current.delete(key);
+    }
+    setTileErrors(failedTileKeys.current.size);
+  }, [tiles]);
+
   const clusterZoom = Math.min(17, Math.floor(zoom));
   const clusterScale = 2 ** clusterZoom;
   const clusterToCurrentScale = 2 ** (zoom - clusterZoom);

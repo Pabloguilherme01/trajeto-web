@@ -344,6 +344,15 @@ it("ignores repeated failures from the same background tile", () => {
   expect(screen.getByRole("region", { name: "Mapa dos postos" })).toBeTruthy();
 });
 
+it("does not accumulate failures from previous zoom levels", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
+  Array.from(document.querySelectorAll("[data-map-tile-layer] img")).slice(0, 4).forEach(tile => fireEvent.error(tile));
+  fireEvent.click(screen.getByRole("button", { name: "Aumentar zoom" }));
+  fireEvent.error(document.querySelector("[data-map-tile-layer] img")!);
+  expect(screen.queryByText("Mapa local")).toBeNull();
+  expect(screen.getByRole("region", { name: "Mapa dos postos" })).toBeTruthy();
+});
+
 it("returns from offline fallback when connectivity is restored", () => {
   const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
