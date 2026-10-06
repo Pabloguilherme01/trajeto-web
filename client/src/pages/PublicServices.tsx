@@ -675,7 +675,14 @@ export default function PublicServices() {
           </section>
         )}
 
-        <h2 className="mt-6 text-lg font-bold">Explore os serviços</h2>
+        <div className="mt-6 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.14em] text-muted-foreground">Diretório público</p>
+            <h2 className="mt-1 text-lg font-bold">Explore os serviços</h2>
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Filtre só quando precisar. A busca e os atalhos acima continuam sendo o caminho mais rápido no celular.</p>
+          </div>
+          <span className="hidden rounded-full border border-border/15 bg-card px-3 py-1.5 text-xs font-black text-foreground/70 sm:inline">{PUBLIC_SERVICE_CATEGORIES.length - 1} categorias</span>
+        </div>
         <section
           aria-label="Filtrar catálogo"
           className="premium-card mt-5 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4"
