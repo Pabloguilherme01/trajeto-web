@@ -380,14 +380,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "Unidade da Polícia Civil para registros e atendimento policial.",
     address:
       "Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
-    phone: "(61) 3613-97944",
-    extraPhone: "(61) 3618-1456 / (62) 98424-2105",
+    phone: "(61) 3618-5359",
     hours: "Atendimento do interior: em regra, 8h–12h e 14h–18h; confirme antes de sair",
     guidance:
-      "A lista telefônica oficial de 2026 informa estes contatos. Em emergência imediata, ligue 190.",
+      "Contato principal conferido na página de atendimento da Polícia Civil, atualizada em 30/09/2026. Em emergência imediata, ligue 190.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Polícia Civil de Goiás",
-    sourceUrl: PCGO_TELEFONES_2026,
+    sourceUrl: PCGO,
     mapQuery:
       "1ª Delegacia de Polícia, Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás, GO",
   },
