@@ -859,7 +859,7 @@ export default function Planner() {
 
               </details>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
-                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
+                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-1 min-[360px]:grid-cols-3" : "grid-cols-1")}>
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
                     Google · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                   </button>
