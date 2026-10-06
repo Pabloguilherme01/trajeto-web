@@ -123,6 +123,38 @@ export function buildWazeNavigationUrl(destination: string, coordinates?: { lat:
   return "https://waze.com/ul?" + params.toString();
 }
 
+export function buildOrganicMapsSearchUrl(query: string) {
+  const params = new URLSearchParams({ query: query.trim() });
+  return "https://omaps.app/search?" + params.toString();
+}
+
+/**
+ * Opens turn-by-turn navigation in Organic Maps from the device's current
+ * location without putting the user's GPS coordinates in a shared URL.
+ * Organic Maps' universal HTTPS link works as an app deep link when installed
+ * and provides a web/install fallback otherwise.
+ */
+export function buildOrganicMapsNavigationUrl(
+  destination: string,
+  coordinates: { lat: number; lng: number },
+) {
+  if (
+    !Number.isFinite(coordinates.lat) ||
+    !Number.isFinite(coordinates.lng) ||
+    Math.abs(coordinates.lat) > 90 ||
+    Math.abs(coordinates.lng) > 180
+  ) {
+    return buildOrganicMapsSearchUrl(destination);
+  }
+  const params = new URLSearchParams({
+    origin: "currentLocation",
+    destination: `${coordinates.lat},${coordinates.lng}`,
+    destination_name: destination.trim(),
+    mode: "drive",
+  });
+  return "https://omaps.app/v2/nav?" + params.toString();
+}
+
 export type RoutePreference = NavigationPreference;
 
 export function buildAppleMapsDirectionsUrl(
@@ -159,7 +191,8 @@ export function openNavigation(lat: number, lng: number, label?: string) {
   const google = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving";
   const waze = "https://www.waze.com/ul?ll=" + lat + "%2C" + lng + "&navigate=yes&zoom=17&q=" + encoded;
   const apple = buildAppleMapsDirectionsUrl(lat + "," + lng);
-  return { google, waze, apple };
+  const organic = buildOrganicMapsNavigationUrl(label ?? (lat + "," + lng), { lat, lng });
+  return { google, waze, apple, organic };
 }
 
 export function vibration(pattern: number | number[] = 12) {
