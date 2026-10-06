@@ -242,7 +242,7 @@ export default function PublicServices() {
               Serviços e locais públicos essenciais já ficam incorporados ao
               app. O catálogo básico funciona sem depender de consulta online.
             </p>
-            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-3 flex flex-wrap gap-2">
               <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
                 {PUBLIC_SERVICES.length} serviços
               </span>
@@ -464,6 +464,21 @@ export default function PublicServices() {
             const primaryContact = contacts[0];
             const secondaryContacts = contacts.slice(1);
             const expandedActions = selectedService?.id === service.id;
+            const emergencyDirect = contacts.some(contact =>
+              ["tel:190", "tel:192", "tel:193"].includes(contact.href)
+            );
+            const showSecondaryContacts =
+              secondaryContacts.length > 0 && (expandedActions || emergencyDirect);
+            const showOfficialAction =
+              Boolean(service.actionUrl) &&
+              (expandedActions || (!primaryContact && !service.mapQuery));
+            const showEmail = Boolean(service.email) && expandedActions;
+            const hasMoreOptions =
+              !expandedActions &&
+              (Boolean(service.actionUrl && !showOfficialAction) ||
+                Boolean(service.email && !showEmail) ||
+                (secondaryContacts.length > 0 && !showSecondaryContacts) ||
+                Boolean(primaryContact));
             const saved = favorites.includes(service.id);
             return (
               <article
@@ -567,9 +582,9 @@ export default function PublicServices() {
                     </button>
                   )}
                 </div>
-                {expandedActions && secondaryContacts.length > 0 && (
+                {showSecondaryContacts && (
                   <div className="mt-2 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
-                    {secondaryContacts.map(contact => (
+                    {!showSecondaryContacts && secondaryContacts.map(contact => (
                       <a
                         key={contact.href}
                         href={contact.href}
@@ -596,7 +611,7 @@ export default function PublicServices() {
                     ))}
                   </div>
                 )}
-                {expandedActions && service.actionUrl && (
+                {showOfficialAction && service.actionUrl && (
                   <a
                     href={service.actionUrl}
                     target="_blank"
@@ -607,7 +622,7 @@ export default function PublicServices() {
                     {service.actionLabel} · online
                   </a>
                 )}
-                {expandedActions && service.email && (
+                {showEmail && service.email && (
                   <a
                     href={"mailto:" + service.email}
                     className="mt-2 flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-center text-sm text-foreground/75"
@@ -626,14 +641,14 @@ export default function PublicServices() {
                     Compartilhar
                   </button>
                 )}
-                {!expandedActions && (
+                {hasMoreOptions && (
                 <details className="mobile-disclosure mt-2">
                   <summary>
                     Mais opções
                     <ArrowRight className="size-4 shrink-0" />
                   </summary>
                   <div className="grid gap-2">
-                    {service.actionUrl && (
+                    {service.actionUrl && !showOfficialAction && (
                       <a
                         href={service.actionUrl}
                         target="_blank"
@@ -644,7 +659,7 @@ export default function PublicServices() {
                         {service.actionLabel} · online
                       </a>
                     )}
-                    {service.email && (
+                    {service.email && !showEmail && (
                       <a
                         href={"mailto:" + service.email}
                         className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
