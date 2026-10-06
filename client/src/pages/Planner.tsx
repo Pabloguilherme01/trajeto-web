@@ -714,7 +714,7 @@ export default function Planner() {
         </header>
 
         {!savedMode && (
-          <details open={!planned} className="premium-card premium-panel planner-trip-form mt-5 rounded-[1.6rem] border border-white/10 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
+          <details open={!planned} className="premium-card premium-panel planner-trip-form mt-5 rounded-[1.6rem] border border-border/15 bg-card p-4 shadow-[0_20px_55px_rgba(0,0,0,.25)] sm:p-5">
             <summary className="planner-form-summary">{planned ? "Alterar viagem" : "Origem e destino"}<ChevronDown className="size-4" /></summary>
             <form ref={plannerFormRef} onSubmit={submit}>
               <h2 className="sr-only">Escolha seu destino</h2>
@@ -739,7 +739,7 @@ export default function Planner() {
 
               <label className="block">
                 <span className="text-xs font-black uppercase tracking-[.14em] text-foreground/70">{staticRuntime ? "Origem · opcional" : "Origem"}</span>
-                <div className="premium-field planner-location-field mt-2 flex items-center gap-2 rounded-2xl border border-white/8 bg-background px-3">
+                <div className="premium-field planner-location-field mt-2 flex items-center gap-2 rounded-2xl border border-border/10 bg-background px-3">
                   <span className="size-2.5 rounded-full bg-accent" />
                   <input value={origin} onChange={event => { resetResult(); privateOriginRef.current = null; setOriginPrivate(false); setOrigin(event.target.value); }} className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground" placeholder="De onde você sai" autoComplete="street-address" />
                   <button type="button" onClick={useCurrentLocation} disabled={locating} className="grid size-11 shrink-0 place-items-center rounded-xl text-accent hover:bg-accent/10 focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-25" aria-label="Usar localização atual"><LocateFixed className="size-4" /></button>
@@ -758,7 +758,7 @@ export default function Planner() {
               </details>
 
               <div className="my-2 flex justify-end">
-                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-white/8 text-muted-foreground disabled:opacity-25" aria-label="Inverter origem e destino">
+                <button type="button" onClick={swap} disabled={!origin && !destination} className="grid size-11 place-items-center rounded-full border border-border/10 text-muted-foreground disabled:opacity-25" aria-label="Inverter origem e destino">
                   <ArrowLeftRight className="size-4" />
                 </button>
               </div>
@@ -785,7 +785,7 @@ export default function Planner() {
                   <ChevronDown className={"size-4 text-accent transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
-                  <div id="all-destinations-panel" className="premium-card mt-2 rounded-2xl border border-white/8 bg-card p-3">
+                  <div id="all-destinations-panel" className="premium-card mt-2 rounded-2xl border border-border/10 bg-card p-3">
                     <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
                       {([
                         ["todos", "Todos"],
@@ -798,25 +798,25 @@ export default function Planner() {
                         ["combustivel", "Combustível"],
                         ["centro", "Centro"],
                       ] as const).map(([value, label]) => (
-                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-10 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-primary/35 bg-primary/10 text-primary" : "border-white/8 bg-white/[.02] text-muted-foreground")}>{label}</button>
+                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-10 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-primary/35 bg-primary/10 text-primary" : "border-border/10 bg-muted/[.02] text-muted-foreground")}>{label}</button>
                       ))}
                     </div>
-                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-white/8 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
+                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} role="region" aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
-                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-white/8 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
+                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-border/10 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
                           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent transition-colors group-hover:bg-accent/15"><RouteIcon className="size-4" /></span>
                           <span className="min-w-0 flex-1">
                             <span className="flex flex-wrap items-center gap-1.5">
                               <span className="min-w-0 break-words text-xs font-black leading-snug text-foreground">{item.label}</span>
-                              <span className="rounded-full border border-white/10 bg-white/[.04] px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-[.07em] text-primary">{destinationCategoryLabel[item.category]}</span>
+                              <span className="rounded-full border border-border/15 bg-muted/[.04] px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-[.07em] text-primary">{destinationCategoryLabel[item.category]}</span>
                             </span>
                             <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</span>
                           </span>
                           <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-primary">Ir</span>
                         </button>
                       ))}
-                      {availableDestinations.length === 0 && <p className="rounded-xl bg-white/[.025] p-4 text-xs text-muted-foreground">Nenhum destino corresponde ao filtro.</p>}
+                      {availableDestinations.length === 0 && <p className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">Nenhum destino corresponde ao filtro.</p>}
                     </div>
                   </div>
                 )}
@@ -824,14 +824,14 @@ export default function Planner() {
 
               <ReadyRouteShortcuts compact initialMode={mode} />
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setLocation(buildReusableTripPlannerUrl(trip, { auto: true })); }} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-foreground/60">Última rota</button>}
-                <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-white/8 bg-white/[.03] px-3 text-xs font-bold text-muted-foreground disabled:opacity-30">Limpar</button>
+                {getLastTrip() && <button type="button" onClick={() => { const trip = getLastTrip(); if (!trip) return; setLocation(buildReusableTripPlannerUrl(trip, { auto: true })); }} className="min-h-11 shrink-0 rounded-full border border-border/10 bg-muted/[.03] px-3 text-xs font-bold text-foreground/60">Última rota</button>}
+                <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-border/10 bg-muted/[.03] px-3 text-xs font-bold text-muted-foreground disabled:opacity-30">Limpar</button>
               </div>
 
               </details>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
-                  <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-foreground/75">
+                  <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
                     Google · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                   </button>
                   {mode === "driving" && (
@@ -839,7 +839,7 @@ export default function Planner() {
                       <button type="button" onClick={() => openExternal("waze")} aria-label="Abrir Waze agora" className="min-h-11 rounded-xl border border-accent/20 bg-accent/[.04] px-2 text-xs font-black text-accent">
                         Waze
                       </button>
-                      <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-white/8 bg-white/[.03] px-2 text-xs font-black text-foreground/75">
+                      <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
                         Apple
                       </button>
                     </>
@@ -889,7 +889,7 @@ export default function Planner() {
         {!savedMode && <details className="mobile-disclosure mt-4"><summary>Mais recursos da viagem <ChevronDown className="size-4" /></summary>
         {!savedMode && (
           <section className="mt-4 grid gap-2 sm:grid-cols-3" aria-label="Estado do planejamento">
-            <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
+            <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
               <p className="text-[11px] font-black uppercase tracking-[.12em] text-muted-foreground">Modo efetivo</p>
               <p className="mt-1 text-sm font-black text-foreground">
                 {PLANNER_EXPERIENCE_OPTIONS.find(item => item.id === activeExperienceMode)?.label}
@@ -900,7 +900,7 @@ export default function Planner() {
                   : plannerExperienceDetail(activeExperienceMode)}
               </p>
             </div>
-            <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
+            <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
               <p className="text-[11px] font-black uppercase tracking-[.12em] text-muted-foreground">Cópia local</p>
               <p className="mt-1 text-sm font-black text-foreground">
                 {exactSavedRoute
@@ -919,7 +919,7 @@ export default function Planner() {
                   : "Calcule online uma vez para aumentar a cobertura offline."}
               </p>
             </div>
-            <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
+            <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
               <p className="text-[11px] font-black uppercase tracking-[.12em] text-muted-foreground">Rede</p>
               <p className={"mt-1 text-sm font-black " + (online ? "text-primary" : "text-warning")}>
                 {online ? "Conectado" : "Sem conexão"}
@@ -984,9 +984,9 @@ export default function Planner() {
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedRoutes.length + savedStations.length + favoriteDestinations.length}</span>
+              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedRoutes.length + savedStations.length + favoriteDestinations.length}</span>
             </div>
-            {savedMessage && <p role="status" className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-xs text-foreground/70">{savedMessage}</p>}
+            {savedMessage && <p role="status" className="mt-3 rounded-xl border border-border/15 px-3 py-2 text-xs text-foreground/70">{savedMessage}</p>}
             {savedRoutes.length > 0 && (
               <label className="mt-3 block">
                 <span className="sr-only">Filtrar rotas salvas</span>
@@ -994,7 +994,7 @@ export default function Planner() {
                   value={savedRouteQuery}
                   onChange={event => setSavedRouteQuery(event.target.value)}
                   placeholder="Filtrar por origem ou destino"
-                  className="min-h-11 w-full rounded-xl border border-white/8 bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  className="min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </label>
             )}
@@ -1004,9 +1004,9 @@ export default function Planner() {
                   <p className="text-xs font-black text-foreground">Biblioteca vazia, mas o modo offline continua útil.</p>
                   <p className="mt-1 text-xs leading-relaxed text-foreground/42">Os atalhos abaixo são destinos locais preparados no próprio app. Locais conhecidos permitem novas estimativas sem internet. Para guardar o trajeto pelas ruas e as instruções, calcule a viagem online uma vez; a cópia é salva automaticamente.</p>
                   <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
-                    <a href="tel:190" className="min-h-11 rounded-xl border border-white/8 bg-background px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
-                    <a href="tel:192" className="min-h-11 rounded-xl border border-white/8 bg-background px-2 py-2 text-center text-xs font-black">SAMU · 192</a>
-                    <a href="tel:193" className="min-h-11 rounded-xl border border-white/8 bg-background px-2 py-2 text-center text-xs font-black">Bombeiros · 193</a>
+                    <a href="tel:190" className="min-h-11 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
+                    <a href="tel:192" className="min-h-11 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-black">SAMU · 192</a>
+                    <a href="tel:193" className="min-h-11 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-black">Bombeiros · 193</a>
                   </div>
                 </div>
                 <section className="mt-4" aria-labelledby="offline-ready-title">
@@ -1016,7 +1016,7 @@ export default function Planner() {
                   </div>
                   <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                     {LOCAL_ROUTE_PRESETS.slice(0, 12).map(route => (
-                      <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-white/8 bg-card p-3 text-left">
+                      <button key={route.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")} className="min-h-[5.2rem] rounded-2xl border border-border/10 bg-card p-3 text-left">
                         <p className="break-words text-xs font-black leading-snug">{route.label}</p>
                         <p className="mt-1 line-clamp-2 text-xs leading-snug text-muted-foreground">{route.detail}</p>
                       </button>
@@ -1025,7 +1025,7 @@ export default function Planner() {
                 </section>
               </>
             ) : savedRoutes.length > 0 && filteredSavedRoutes.length === 0 ? (
-              <div className="mt-4 rounded-3xl border border-white/8 bg-card p-5 text-sm leading-relaxed text-muted-foreground">
+              <div className="mt-4 rounded-3xl border border-border/10 bg-card p-5 text-sm leading-relaxed text-muted-foreground">
                 Nenhuma rota corresponde ao filtro.
               </div>
             ) : (
@@ -1034,7 +1034,7 @@ export default function Planner() {
                   {filteredSavedRoutes.map(route => {
                     const stale = isOfflineRouteStale(route.savedAt);
                     return (
-                      <article key={route.id} className="premium-card rounded-2xl border border-white/8 bg-card p-4">
+                      <article key={route.id} className="premium-card rounded-2xl border border-border/10 bg-card p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="break-words text-xs font-black leading-snug">{route.origin} → {route.destination}</p>
@@ -1050,7 +1050,7 @@ export default function Planner() {
                             const savedMode = offlineRouteTravelMode(route);
                             const googleMode = savedMode === "cycling" ? "bicycling" : savedMode;
                             openExternalUrl(buildGoogleMapsDirectionsUrl(privateOriginForExternalNavigation(route.origin), route.destination, googleMode, true));
-                          }} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-foreground/70">Navegar agora · {offlineRouteTravelMode(route) === "walking" ? "a pé" : offlineRouteTravelMode(route) === "cycling" ? "bicicleta" : offlineRouteTravelMode(route) === "transit" ? "transporte" : "carro"}</button>
+                          }} className="min-h-11 rounded-xl border border-border/10 px-3 text-xs font-black text-foreground/70">Navegar agora · {offlineRouteTravelMode(route) === "walking" ? "a pé" : offlineRouteTravelMode(route) === "cycling" ? "bicicleta" : offlineRouteTravelMode(route) === "transit" ? "transporte" : "carro"}</button>
                         </div>
                         <button type="button" onClick={() => void removeSavedRoute(route)} aria-label={"Excluir rota salva " + route.destination} className="mt-2 min-h-10 w-full rounded-xl border border-destructive/20 text-xs font-black text-destructive"><Trash2 className="mr-1.5 inline size-3.5" />Excluir da biblioteca</button>
                       </article>
@@ -1066,11 +1066,11 @@ export default function Planner() {
           <section className="mt-5" aria-labelledby="saved-destinations-title">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Destinos favoritos</p><h2 id="saved-destinations-title" className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">Seus lugares.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-muted-foreground">{favoriteDestinations.length}</span>
+              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{favoriteDestinations.length}</span>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {favoriteDestinations.map(item => (
-                <article key={item.id} className="premium-card min-w-0 rounded-2xl border border-white/8 bg-card p-4">
+                <article key={item.id} className="premium-card min-w-0 rounded-2xl border border-border/10 bg-card p-4">
                   <p className="truncate text-sm font-black">{item.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.address}</p>
                   <div className="mt-3">
@@ -1091,18 +1091,18 @@ export default function Planner() {
           <section className="mt-5" aria-labelledby="saved-stations-title">
             <div className="flex items-end justify-between gap-3">
               <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Postos favoritos</p><h2 id="saved-stations-title" className="mt-1 font-display text-2xl font-semibold tracking-[-.05em]">Seus postos.</h2></div>
-              <span className="rounded-full border border-white/8 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedStations.length}</span>
+              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedStations.length}</span>
             </div>
             <div className="mt-3 space-y-2">
               {savedStations.map(station => (
-                <article key={station.placeId} className="premium-card rounded-2xl border border-white/8 bg-card p-4">
+                <article key={station.placeId} className="premium-card rounded-2xl border border-border/10 bg-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-black">{station.name}</p>
                       <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{station.address}</p>
                       {station.isOpen != null && <p className={"mt-2 text-xs font-black " + (station.isOpen ? "text-primary" : "text-muted-foreground")}>{station.isOpen ? "Aberto na consulta salva" : "Fechado na consulta salva"}</p>}
                     </div>
-                    <button type="button" onClick={() => { const result = toggleMobileStationFavorite(station); if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador."); else setSavedStations(result.stations); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-white/8 text-primary" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
+                    <button type="button" onClick={() => { const result = toggleMobileStationFavorite(station); if (result.error) setSavedMessage("Não foi possível alterar o favorito. Confira o espaço e as permissões do navegador."); else setSavedStations(result.stations); }} className="grid min-h-10 min-w-10 place-items-center rounded-xl border border-border/10 text-primary" aria-label={"Remover " + station.name + " dos favoritos"}><Bookmark className="size-4 fill-current" /></button>
                   </div>
                   <div className="mt-3">
                     <DestinationActions
@@ -1138,7 +1138,7 @@ export default function Planner() {
               {mode === "driving" && (
                 <>
                   <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-xl border border-warning/20 bg-warning/[.05] px-3 text-xs font-black text-warning">Abrir Waze</button>
-                  <button type="button" onClick={() => openExternal("apple")} className="min-h-12 rounded-xl border border-white/10 bg-white/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+                  <button type="button" onClick={() => openExternal("apple")} className="min-h-12 rounded-xl border border-border/15 bg-muted/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
                 </>
               )}
             </div>
@@ -1164,7 +1164,7 @@ export default function Planner() {
               </div>
 
               <div className="mt-3">
-                <div className="premium-card rounded-2xl border border-white/8 bg-white/[.025] p-3">
+                <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
                   <p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Trânsito</p>
                   <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
@@ -1181,12 +1181,12 @@ export default function Planner() {
                     {mode === "driving" && (
                       <>
                         <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-accent/30 bg-accent/[.06] px-3 text-xs font-black text-accent">Waze</button>
-                        <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-foreground/70">Apple Maps</button>
+                        <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.03] px-3 text-xs font-black text-foreground/70">Apple Maps</button>
                       </>
                     )}
                   </>
                 )}
-                <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.03] px-3 text-xs font-black text-foreground/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
+                <button type="button" onClick={() => void shareRoute()} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.03] px-3 text-xs font-black text-foreground/70"><Share2 className="mr-1.5 inline size-3.5" />Compartilhar</button>
               </div>
 
               <div className="mt-3 rounded-2xl border border-accent/20 bg-accent/[.04] p-3">
@@ -1196,8 +1196,8 @@ export default function Planner() {
                 {liveTrip.point && <p className="mt-2 break-words text-xs leading-relaxed text-foreground/60">GPS atualizado às {new Date(liveTrip.point.timestamp).toLocaleTimeString("pt-BR")}{liveTrip.speed !== null ? " · " + Math.round(liveTrip.speed * 3.6) + " km/h · chegada estimada pela velocidade atual" : " · chegada estimada pelo percurso"}. Sem trânsito ao vivo.</p>}
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-foreground/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
-                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-white/8 bg-white/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
+                <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
+                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-primary/[.05] px-3 py-2 text-xs font-bold text-primary">{savedMessage}</p>}
@@ -1207,8 +1207,8 @@ export default function Planner() {
               {planned.route.destinationReference.name} · {planned.route.destinationReference.precision} Fonte: {planned.route.destinationReference.sourceLabel}
             </p>}
             {showMap && (
-              <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-white/8 bg-card shadow-[0_22px_60px_rgba(0,0,0,.28)]">
-                <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
+              <section className="planner-map-shell mt-3 overflow-hidden rounded-[1.6rem] border border-border/10 bg-card shadow-[0_22px_60px_rgba(0,0,0,.28)]">
+                <div className="flex items-center justify-between border-b border-border/10 px-4 py-3">
                   <p className="text-xs font-black uppercase tracking-[.15em] text-muted-foreground">Mapa da rota</p>
 
                 </div>
@@ -1229,7 +1229,7 @@ export default function Planner() {
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.recommendation.detourSource === "real" ? "Desvio calculado pela rota real" : "Desvio estimado"} · {planned.recommendation.detourKm.toLocaleString("pt-BR")} km</p>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => openStation(planned.stops.find(stop => stop.name === planned.recommendation?.name) ?? planned.stops[0])} className="min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-background">Abrir rota até o posto</button>
-                  <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="min-h-11 rounded-xl border border-white/8 px-3 text-xs font-black text-foreground/70">Ver postos</button>
+                  <button type="button" onClick={() => setLocation(appUrl("/postos") + "?q=" + encodeURIComponent(planned.recommendation?.name ?? ""))} className="min-h-11 rounded-xl border border-border/10 px-3 text-xs font-black text-foreground/70">Ver postos</button>
                 </div>
               </section>
             )}
@@ -1239,20 +1239,20 @@ export default function Planner() {
                 <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.15em] text-accent">{publicRouteSource ? "No caminho" : "Paradas encontradas"}</p><h3 className="mt-1 text-2xl font-black tracking-[-.05em]">{planned.stops.length} posto(s)</h3></div><span className="text-xs text-muted-foreground">{publicRouteSource ? "catálogo local · posição estimada no corredor" : "dados desta consulta"}</span></div>
                 <div className="mt-3 space-y-2">
                   {planned.stops.slice(0, 6).map(stop => (
-                    <article key={stop.placeId} data-route-card className="min-w-0 rounded-2xl border border-white/8 bg-card p-4 shadow-[0_12px_30px_rgba(0,0,0,.18)]">
+                    <article key={stop.placeId} data-route-card className="min-w-0 rounded-2xl border border-border/10 bg-card p-4 shadow-[0_12px_30px_rgba(0,0,0,.18)]">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0"><p className="break-words text-sm font-black leading-snug">{stop.name}</p><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{stop.address}</p></div>
                         <Fuel className="size-4 shrink-0 text-accent" />
                       </div>
                       {stop.priceReference && <p className="mt-2 text-xs font-bold text-primary">Referência ANP: {Number(stop.priceReference.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>}
-                      <button type="button" onClick={() => openStation(stop)} className="mt-3 min-h-11 w-full rounded-xl border border-white/8 bg-white/[.03] text-xs font-black text-foreground/70">Navegar até esta parada</button>
+                      <button type="button" onClick={() => openStation(stop)} className="mt-3 min-h-11 w-full rounded-xl border border-border/10 bg-muted/[.03] text-xs font-black text-foreground/70">Navegar até esta parada</button>
                     </article>
                   ))}
                 </div>
               </section>
             )}
 
-            <section className="mt-3 rounded-3xl border border-white/8 bg-white/[.025] p-4">
+            <section className="mt-3 rounded-3xl border border-border/10 bg-muted/[.025] p-4">
               <details>
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-black"><span>Mais detalhes da decisão</span><ChevronDown className="size-4 text-muted-foreground" /></summary>
                 <div className="mt-3 grid gap-2 text-xs leading-relaxed text-muted-foreground">
