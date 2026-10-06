@@ -6,7 +6,7 @@ test("Pages: cliques principais funcionam dentro da base hospedada", async ({ pa
   if (mobile) {
     await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Serviços públicos", exact: true }).click();
     await expect(page).toHaveURL(/\/trajeto-web\/servicos$/);
-    await expect(page.getByRole("heading", { name: /Águas Lindas em um só lugar/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Como podemos ajudar/i })).toBeVisible();
     await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Início" }).click();
   }
 
@@ -131,7 +131,7 @@ test("Pages: first visit prepares unvisited public screens for offline use", asy
   page.on("pageerror", error => errors.push(error.message));
   await context.setOffline(true);
   for (const [path, title] of [
-    ["servicos", "Águas Lindas em um só lugar."],
+    ["servicos", "Como podemos ajudar?"],
     ["buscar", "Encontre e vá."],
     ["salvos", "Rotas salvas"],
     ["ajuda", "Use o Trajeto em poucos passos."],

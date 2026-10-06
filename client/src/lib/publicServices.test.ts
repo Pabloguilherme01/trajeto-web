@@ -75,7 +75,9 @@ describe("public services catalog", () => {
     }
     expect(phoneHref("190 / 193")).toBe("tel:190");
     expect(phoneHref("00000-0000")).toBeNull();
-    const health = PUBLIC_SERVICES.find(service => service.id === "secretaria-saude")!;
+    const health = PUBLIC_SERVICES.find(
+      service => service.id === "secretaria-saude"
+    )!;
     expect(health.phone).toBe("(61) 3618-4096 / (61) 99227-7937");
     expect(health.verifiedAt).toBe("01/10/2026");
     const vapt = PUBLIC_SERVICES.find(service => service.id === "vapt-vupt")!;
@@ -93,7 +95,9 @@ describe("public services catalog", () => {
     expect(PUBLIC_SERVICES.some(item => item.id === "hospital-bom-jesus")).toBe(
       true
     );
-    const bomJesus = PUBLIC_SERVICES.find(item => item.id === "hospital-bom-jesus")!;
+    const bomJesus = PUBLIC_SERVICES.find(
+      item => item.id === "hospital-bom-jesus"
+    )!;
     expect(bomJesus.sourceLabel).toBe("CNES/DATASUS");
     expect(bomJesus.verifiedAt).toBe("01/10/2026");
     expect(bomJesus.hours).toMatch(/confirmar/i);
@@ -112,7 +116,9 @@ describe("public services catalog", () => {
     expect(regional.phone).toBe("(61) 3613-4160");
     expect(regional.verifiedAt).toBe("01/10/2026");
     expect(regional.sourceUrl).toContain("delegacias-regionais");
-    const firstDp = PUBLIC_SERVICES.find(item => item.id === "policia-civil-1")!;
+    const firstDp = PUBLIC_SERVICES.find(
+      item => item.id === "policia-civil-1"
+    )!;
     expect(firstDp.address).toContain("Rua Adélia");
   });
   it("includes verified national protection and utility channels without fictitious routes", () => {
@@ -174,4 +180,22 @@ describe("public services catalog", () => {
     ])
       expect(item.mapQuery).toBeUndefined();
   });
+  it.each([
+    ["meu sus", "meu-sus-digital"],
+    ["ciptea", "carteira-autista-goias"],
+    ["carteira idoso", "carteira-pessoa-idosa"],
+    ["eleitoral", "autoatendimento-eleitoral"],
+    ["reclamacao empresa", "consumidor-gov"],
+  ])(
+    "finds the new official need %s without inventing a local route",
+    (query, id) => {
+      const service = searchPublicServices(query).find(item => item.id === id)!;
+      expect(service).toBeDefined();
+      expect(service.verifiedAt).toBe("06/10/2026");
+      expect(service.sourceUrl).toMatch(/^https:\/\//);
+      expect(service.actionUrl).toMatch(/^https:\/\//);
+      expect(service.mapQuery).toBeUndefined();
+      expect(service.address).toBeUndefined();
+    }
+  );
 });
