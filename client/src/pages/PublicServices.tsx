@@ -62,6 +62,7 @@ export default function PublicServices() {
   const [online, setOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine
   );
+  const [resource, setResource] = useState<"todos" | "contato" | "rota" | "online">("todos");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
@@ -127,13 +128,18 @@ export default function PublicServices() {
   const results = useMemo(() => {
     if (selectedService) return [selectedService];
     const matches = searchPublicServices(query, category).filter(
-      service => !savedOnly || favorites.includes(service.id)
+      service =>
+        (!savedOnly || favorites.includes(service.id)) &&
+        (resource === "todos" ||
+          (resource === "contato" && publicServiceContacts(service).length > 0) ||
+          (resource === "rota" && Boolean(service.mapQuery)) ||
+          (resource === "online" && Boolean(service.actionUrl)))
     );
     return [...matches].sort(
       (a, b) =>
         Number(favorites.includes(b.id)) - Number(favorites.includes(a.id))
     );
-  }, [query, category, selectedService, savedOnly, favorites]);
+  }, [query, category, selectedService, savedOnly, favorites, resource]);
 
   useEffect(() => {
     const targetId = selectedService
@@ -378,6 +384,21 @@ export default function PublicServices() {
               </button>
             ))}
           </div>
+          <div role="group" aria-label="Recursos disponíveis" className="mt-3 flex flex-wrap gap-2">
+            {([
+              ["todos", "Todos os recursos"],
+              ["contato", "Ligar ou WhatsApp"],
+              ["rota", "Com destino para rota"],
+              ["online", "Atendimento online"],
+            ] as const).map(([value, label]) => (
+              <button key={value} type="button" aria-pressed={resource === value}
+                onClick={() => { setResource(value); if (selectedService) applyFilters(query, category); }}
+                className={"min-h-11 rounded-xl border px-3 text-sm font-bold " +
+                  (resource === value ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground")}>
+                {label}
+              </button>
+            ))}
+          </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -400,7 +421,7 @@ export default function PublicServices() {
         {!selectedService &&
           !savedOnly &&
           !query.trim() &&
-          category === "todos" && (
+          category === "todos" && resource === "todos" && (
             <section className="mt-4" aria-labelledby="citizen-shortcuts-title">
               <h2 id="citizen-shortcuts-title" className="text-base font-bold">
                 O que você precisa resolver?
@@ -523,12 +544,18 @@ export default function PublicServices() {
                     />
                   </button>
                 </div>
+                <div className="mt-3 flex flex-wrap gap-1.5 text-xs font-bold text-muted-foreground" aria-label="Recursos deste serviço">
+                  {contacts.length > 0 && <span className="rounded-lg bg-muted px-2 py-1">{contacts.length} {contacts.length === 1 ? "contato" : "contatos"}</span>}
+                  {service.mapQuery && <span className="rounded-lg bg-muted px-2 py-1">Destino no planejador</span>}
+                  {service.actionUrl && <span className="rounded-lg bg-muted px-2 py-1">Canal online</span>}
+                </div>
                 {service.address && (
                   <p className="mt-3 text-sm leading-relaxed text-foreground/65">
                     <span className="font-black text-foreground/70">Endereço:</span>{" "}
                     {service.address}
                   </p>
                 )}
+                {!service.mapQuery && <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Sem destino confirmado para rota neste catálogo.</p>}
                 {service.hours && (
                   <p className="mt-3 text-sm font-bold text-foreground/75">{service.hours}</p>
                 )}
@@ -537,7 +564,7 @@ export default function PublicServices() {
                     {service.guidance}
                   </p>
                 )}
-                <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                   {service.mapQuery && (
                     <button
                       type="button"
@@ -560,14 +587,14 @@ export default function PublicServices() {
                         ": " +
                         primaryContact.number
                       }
-                      className={"inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " + (!service.mapQuery ? "col-span-2" : "")}
+                      className={"inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " + (!service.mapQuery ? "min-[380px]:col-span-2" : "")}
                     >
                       {primaryContact.channel === "whatsapp" ? (
                         <MessageCircle className="size-3.5 shrink-0" />
                       ) : (
                         <Phone className="size-3.5 shrink-0" />
                       )}
-                      <span className="min-w-0 truncate">
+                      <span className="min-w-0 break-words">
                         {primaryContact.label ||
                           (primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar")} ·{" "}
                         {primaryContact.number}
@@ -578,7 +605,7 @@ export default function PublicServices() {
                       type="button"
                       onClick={() => void shareService(service)}
                       aria-label={"Compartilhar serviço: " + service.name}
-                      className={"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " + (!service.mapQuery ? "col-span-2" : "")}
+                      className={"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " + (!service.mapQuery ? "min-[380px]:col-span-2" : "")}
                     >
                       <Share2 className="size-3.5" />
                       Compartilhar
@@ -647,7 +674,13 @@ export default function PublicServices() {
                 {hasMoreOptions && (
                 <details className="mobile-disclosure mt-2">
                   <summary>
-                    Mais opções
+                    {service.actionUrl && !showOfficialAction
+                      ? "Mais opções · atendimento online"
+                      : secondaryContacts.length > 0 && !showSecondaryContacts
+                        ? "Mais opções · contatos"
+                        : service.email && !showEmail
+                          ? "Mais opções · e-mail"
+                          : "Compartilhar serviço"}
                     <ArrowRight className="size-4 shrink-0" />
                   </summary>
                   <div className="grid gap-2">
@@ -743,6 +776,7 @@ export default function PublicServices() {
               onClick={() => {
                 setQuery("");
                 setCategory("todos");
+                setResource("todos");
                 applyFilters("", "todos", false, false);
               }}
               className="mt-3 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
@@ -765,8 +799,8 @@ export default function PublicServices() {
               </p>
               <p className="mt-1 text-sm leading-relaxed text-foreground/70">
                 {online
-                  ? "Endereços, contatos e fontes são apresentados como cadastro local; a navegação abre o mapa escolhido."
-                  : "Este catálogo continua visível sem internet. Rotas, mapa externo e atualizações em tempo real podem exigir conexão."}
+                  ? "Busca, fichas e serviços salvos ficam disponíveis no aparelho após preparar o app. Ligações precisam de rede telefônica; WhatsApp, canais online e consulta às fontes precisam de internet. No planejador, rotas por ruas offline precisam ter sido preparadas."
+                  : "Busca, fichas e serviços salvos continuam disponíveis. Ligações precisam de rede telefônica. WhatsApp, canais online e consulta às fontes exigem internet; no planejador, use rotas por ruas já preparadas."}
               </p>
             </div>
           </div>
