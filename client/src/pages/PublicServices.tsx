@@ -9,6 +9,10 @@ import {
   ExternalLink,
   Heart,
   HeartPulse,
+  Home,
+  Briefcase,
+  Scale,
+  Wrench,
   Landmark,
   MapPinned,
   MessageCircle,
@@ -23,7 +27,13 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
-import { shareText } from "@/lib/mobileTools";
+import {
+  buildOrganicMapsNavigationUrl,
+  buildOrganicMapsSearchUrl,
+  openExternalUrl,
+  shareText,
+} from "@/lib/mobileTools";
+import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
 import {
   listPublicServiceFavorites,
   publicServiceFavoritesEvent,
@@ -46,6 +56,10 @@ const categoryIcons = {
   assistencia: Siren,
   transito: TrafficCone,
   educacao: BookOpen,
+  utilidades: Wrench,
+  moradia: Home,
+  trabalho: Briefcase,
+  justica: Scale,
   cidadania: Landmark,
 } as const;
 
@@ -198,6 +212,18 @@ export default function PublicServices() {
       appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery)
     );
   };
+  const openOrganicMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
+    if (!service.mapQuery) return;
+    let point: ReturnType<typeof resolveOfflineRoutePoint> = null;
+    try {
+      point = resolveOfflineRoutePoint(service.mapQuery);
+    } catch {}
+    openExternalUrl(
+      point
+        ? buildOrganicMapsNavigationUrl(service.name, point)
+        : buildOrganicMapsSearchUrl(service.mapQuery)
+    );
+  };
   const toggleSaved = (service: (typeof PUBLIC_SERVICES)[number]) => {
     const result = togglePublicServiceFavorite(service.id);
     setFavorites(result.ids);
@@ -254,7 +280,7 @@ export default function PublicServices() {
               Como podemos ajudar?
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Águas Lindas de Goiás · serviços locais e canais públicos
+              Águas Lindas de Goiás · encontre o serviço certo, o contato, a orientação e a rota
             </p>
             <p className="mt-3 flex items-center gap-2 text-xs font-bold text-primary">
               <WifiOff className="size-4 shrink-0" /> {PUBLIC_SERVICES.length}{" "}
@@ -270,6 +296,28 @@ export default function PublicServices() {
             Início
           </button>
         </header>
+
+        <section
+          aria-label="Resumo da Central de Serviços"
+          className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4"
+        >
+          {[
+            ["Catálogo", PUBLIC_SERVICES.length + " serviços"],
+            ["Assuntos", PUBLIC_SERVICE_CATEGORIES.length - 1 + " categorias"],
+            ["Com rota", PUBLIC_SERVICES.filter(item => item.mapQuery).length + " locais"],
+            ["Online", PUBLIC_SERVICES.filter(item => item.actionUrl).length + " canais"],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              className="rounded-2xl border border-border/10 bg-card px-3 py-3 shadow-sm"
+            >
+              <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">
+                {label}
+              </p>
+              <p className="mt-1 text-sm font-black text-foreground">{value}</p>
+            </div>
+          ))}
+        </section>
 
         <form
           onSubmit={event => {
@@ -358,6 +406,36 @@ export default function PublicServices() {
           </div>
         </section>
 
+        {!selectedService && !query.trim() && category === "todos" && (
+          <section className="mt-4 rounded-2xl border border-primary/15 bg-primary/[.035] p-4">
+            <div className="flex items-start gap-3">
+              <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black text-foreground">Mapa conectado, sem prender você a um provedor</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Use a rota do Trajeto, inclusive as viagens preparadas para offline, ou abra o mesmo destino no Organic Maps quando quiser navegação externa.
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLocation(appUrl("/mapa"))}
+                    className="min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground"
+                  >
+                    Explorar mapa
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocation(appUrl("/planejar"))}
+                    className="min-h-11 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground"
+                  >
+                    Planejar rota
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {!selectedService &&
           !savedOnly &&
           !query.trim() &&
@@ -365,7 +443,7 @@ export default function PublicServices() {
           resource === "todos" && (
             <section className="mt-5" aria-labelledby="citizen-shortcuts-title">
               <h2 className="text-lg font-bold">Resolva por assunto</h2>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                 {PUBLIC_SERVICE_CATEGORIES.filter(
                   item => item.id !== "todos"
                 ).map(item => {
@@ -650,7 +728,7 @@ export default function PublicServices() {
                   )}
                   {service.mapQuery && (
                     <span className="rounded-lg bg-muted px-2 py-1">
-                      Destino no planejador
+                      Rota + Organic Maps
                     </span>
                   )}
                   {service.actionUrl && (
@@ -715,6 +793,17 @@ export default function PublicServices() {
                       Rota
                     </button>
                   )}
+                  {service.mapQuery && (
+                    <button
+                      type="button"
+                      onClick={() => openOrganicMaps(service)}
+                      className="min-h-11 rounded-xl border border-primary/25 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                      aria-label={"Abrir " + service.name + " no Organic Maps"}
+                    >
+                      <MapPinned className="mr-1.5 inline size-3.5" />
+                      Organic Maps
+                    </button>
+                  )}
                   {primaryContact ? (
                     <a
                       href={primaryContact.href}
@@ -741,7 +830,7 @@ export default function PublicServices() {
                       }
                       className={
                         "inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " +
-                        (!service.mapQuery ? "min-[380px]:col-span-2" : "")
+                        "min-[380px]:col-span-2"
                       }
                     >
                       {primaryContact.channel === "whatsapp" ? (
@@ -764,7 +853,7 @@ export default function PublicServices() {
                       aria-label={"Compartilhar serviço: " + service.name}
                       className={
                         "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " +
-                        (!service.mapQuery ? "min-[380px]:col-span-2" : "")
+                        "min-[380px]:col-span-2"
                       }
                     >
                       <Share2 className="size-3.5" />
