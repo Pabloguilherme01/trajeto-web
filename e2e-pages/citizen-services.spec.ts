@@ -152,7 +152,7 @@ test("Pages: national support opens directly from universal search", async ({
   await expect(
     page
       .getByRole("region", { name: "Serviços públicos" })
-      .getByRole("button", { name: "Rota", exact: true })
+      .getByRole("button", { name: "Planejar rota", exact: true })
   ).toHaveCount(0);
   await page.goto("servicos?servico=unknown", {
     waitUntil: "domcontentloaded",
