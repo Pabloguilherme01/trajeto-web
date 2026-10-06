@@ -121,6 +121,7 @@ test("Pages: public filters survive category changes, reload and back navigation
   await page.getByRole("button", { name: "Saúde", exact: true }).click();
   await expect(page.getByText("Nenhum serviço corresponde ao filtro.")).toBeVisible();
   await page.goBack();
+  await page.locator("#service-filters summary").click();
   await expect(page.getByRole("button", { name: "Cidadania", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(search).toHaveValue("informacao cidadao");
 });
