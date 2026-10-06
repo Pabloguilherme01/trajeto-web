@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, openExternalUrl, setPreferredNavigationProvider, shareText } from "./mobileTools";
+import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildOrganicMapsNavigationUrl, buildOrganicMapsSearchUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, openExternalUrl, setPreferredNavigationProvider, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds a nearby-stations URL with validated coordinates", () => {
@@ -44,6 +44,22 @@ describe("mobile tools", () => {
   it("builds Waze navigation links with a search fallback", () => {
     expect(buildWazeNavigationUrl("Brasília, DF")).toBe("https://waze.com/ul?navigate=yes&q=Bras%C3%ADlia%2C+DF");
     expect(buildWazeNavigationUrl("Destino", { lat: -15.86, lng: -48.03 })).toBe("https://waze.com/ul?navigate=yes&ll=-15.86%2C-48.03&zoom=17");
+  });
+
+  it("builds Organic Maps universal links without exposing the current GPS", () => {
+    const route = buildOrganicMapsNavigationUrl("Hospital", { lat: -15.761, lng: -48.281 });
+    expect(route).toContain("https://omaps.app/v2/nav?");
+    expect(route).toContain("origin=currentLocation");
+    expect(route).toContain("destination=-15.761%2C-48.281");
+    expect(route).toContain("destination_name=Hospital");
+    expect(route).toContain("mode=drive");
+  });
+
+  it("falls back to Organic Maps search for invalid coordinates", () => {
+    expect(buildOrganicMapsNavigationUrl("Prefeitura", { lat: Number.NaN, lng: -48.281 }))
+      .toBe("https://omaps.app/search?query=Prefeitura");
+    expect(buildOrganicMapsSearchUrl("Águas Lindas"))
+      .toBe("https://omaps.app/search?query=%C3%81guas+Lindas");
   });
 
   it("builds Apple Maps driving directions", () => {
