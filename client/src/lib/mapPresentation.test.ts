@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { groundMetresPerPixel, roadPriority, viewportTileBounds } from "./mapPresentation";
+import { groundMetresPerPixel, limitPolylinePoints, roadPriority, viewportTileBounds } from "./mapPresentation";
 it("keeps major roads and their links above local streets", () => {
   expect(roadPriority("motorway_link")).toBe(roadPriority("motorway"));
   expect(roadPriority("primary")).toBeGreaterThan(roadPriority("residential"));
@@ -21,4 +21,12 @@ it("uses the displayed latitude and zoom for the ground scale", () => {
   const latitude60 = (1 - Math.log(Math.tan(Math.PI / 3) + 1 / Math.cos(Math.PI / 3)) / Math.PI) / 2;
   expect(groundMetresPerPixel(latitude60, 1000)).toBeCloseTo(equator / 2);
   expect(groundMetresPerPixel(0.5, 2000)).toBeCloseTo(equator / 2);
+});
+
+it("limits dense route geometry without losing the route endpoints", () => {
+  const points = Array.from({ length: 6001 }, (_, index) => ({ lat: index, lng: -index }));
+  const limited = limitPolylinePoints(points, 1200);
+  expect(limited.length).toBeLessThanOrEqual(1200);
+  expect(limited[0]).toBe(points[0]);
+  expect(limited[limited.length - 1]).toBe(points[points.length - 1]);
 });
