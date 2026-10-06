@@ -27,6 +27,7 @@ type Props = {
   onGoogleMaps?: () => void;
   onWaze?: () => void;
   onAppleMaps?: () => void;
+  onOrganicMaps?: () => void;
   onMultiStopNavigate?: (waypoints: string[]) => void;
   onGoogleMapsPreferred?: (preference: "default" | "avoid-tolls" | "avoid-highways", waypoints: string[]) => void;
   onAppleMapsPreferred?: (preference: "default" | "avoid-tolls" | "avoid-highways", waypoints: string[]) => void;
@@ -37,13 +38,15 @@ type Props = {
 export default function MobileNavigationCenter({
   origin, destination, distance, duration, recommendationName, detourKm, detourSource,
   fuelCost, litersNeeded, autonomyKm, offline, snapshot = false, snapshotSavedAt,
-  saved = false, onNavigate, onShare, onSave, onRefresh, onStations, onGoogleMaps, onWaze, onAppleMaps, onMultiStopNavigate, onGoogleMapsPreferred, onAppleMapsPreferred, activeRouteLabel = null, routeConfirmed = true,
+  saved = false, onNavigate, onShare, onSave, onRefresh, onStations, onGoogleMaps, onWaze, onAppleMaps, onOrganicMaps, onMultiStopNavigate, onGoogleMapsPreferred, onAppleMapsPreferred, activeRouteLabel = null, routeConfirmed = true,
 }: Props) {
   const [stops, setStops] = useState<string[]>([]);
   const [stopDraft, setStopDraft] = useState("");
   const savedNavigation = getNavigationPreferences();
   const [routePreference, setRoutePreference] = useState<"default" | "avoid-tolls" | "avoid-highways">(savedNavigation.preference);
-  const [preferredProvider, setPreferredProvider] = useState<NavigationProvider>(savedNavigation.provider);
+  const [preferredProvider, setPreferredProvider] = useState<NavigationProvider>(
+    savedNavigation.provider === "organic" && !onOrganicMaps ? "google" : savedNavigation.provider
+  );
   const addStop = () => { const value = stopDraft.trim(); if (!value || stops.length >= 3) return; setStops(current => [...current, value]); setStopDraft(""); };
   const removeStop = (index: number) => setStops(current => current.filter((_, i) => i !== index));
 
@@ -145,19 +148,21 @@ export default function MobileNavigationCenter({
         {onGoogleMaps && <button type="button" onClick={onGoogleMaps} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-xs font-black text-accent disabled:opacity-40"><Map className="size-4" /> Google Maps</button>}
         {onWaze && <button type="button" onClick={onWaze} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-warning/20 bg-warning/[.05] px-3 text-xs font-black text-warning disabled:opacity-40">Waze</button>}
         {onAppleMaps && <button type="button" onClick={onAppleMaps} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border/15 bg-muted/[.04] px-3 text-xs font-black text-foreground disabled:opacity-40">Apple Maps</button>}
-        {(onGoogleMapsPreferred || onAppleMapsPreferred) && <div className="col-span-2 rounded-xl border border-border/10 bg-muted/[.03] p-3 sm:col-span-4">
+        {onOrganicMaps && <button type="button" onClick={onOrganicMaps} disabled={!canNavigate} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.04] px-3 text-xs font-black text-primary disabled:opacity-40">Organic Maps</button>}
+        {(onGoogleMapsPreferred || onAppleMapsPreferred || onOrganicMaps) && <div className="col-span-2 rounded-xl border border-border/10 bg-muted/[.03] p-3 sm:col-span-4">
           <p className="text-xs font-black text-foreground">Preferência da viagem</p>
           <p className="mt-1 text-[0.62rem] text-muted-foreground">O navegador escolhido calcula o trânsito e a rota atual.</p>
           <div className="mt-2 grid grid-cols-3 gap-1.5">
             {(["default","avoid-tolls","avoid-highways"] as const).map(value => <button key={value} type="button" onClick={() => { setRoutePreference(value); setNavigationPreference(value); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (routePreference === value ? "bg-primary text-background" : "bg-muted/[.06] text-foreground/70")}>{value === "default" ? "Equilibrada" : value === "avoid-tolls" ? "Evitar pedágios" : "Evitar rodovias"}</button>)}
           </div>
-          <div className="mt-2 grid grid-cols-3 gap-1.5">
-            {(["google","waze","apple"] as const).map(provider => <button key={provider} type="button" onClick={() => { setPreferredProvider(provider); saveNavigationPreferences({ provider, preference: routePreference }); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (preferredProvider === provider ? "bg-foreground text-background" : "bg-muted/[.06] text-foreground/70")}>{provider === "google" ? "Google" : provider === "waze" ? "Waze" : "Apple"}</button>)}
+          <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+            {(["google","waze","apple","organic"] as const).filter(provider => provider !== "organic" || Boolean(onOrganicMaps)).map(provider => <button key={provider} type="button" onClick={() => { setPreferredProvider(provider); saveNavigationPreferences({ provider, preference: routePreference }); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (preferredProvider === provider ? "bg-foreground text-background" : "bg-muted/[.06] text-foreground/70")}>{provider === "google" ? "Google" : provider === "waze" ? "Waze" : provider === "apple" ? "Apple" : "Organic"}</button>)}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {preferredProvider === "google" && onGoogleMapsPreferred && <button type="button" onClick={() => { saveNavigationPreferences({ provider: "google", preference: routePreference }); onGoogleMapsPreferred(routePreference, stops); }} disabled={!canNavigate} className="col-span-2 min-h-11 rounded-lg bg-primary text-xs font-black text-background disabled:opacity-40">Abrir no Google Maps</button>}
             {preferredProvider === "waze" && onWaze && <button type="button" onClick={() => { saveNavigationPreferences({ provider: "waze", preference: routePreference }); onWaze(); }} disabled={!canNavigate} className="col-span-2 min-h-11 rounded-lg bg-primary text-xs font-black text-background disabled:opacity-40">Abrir no Waze</button>}
             {preferredProvider === "apple" && onAppleMapsPreferred && <button type="button" onClick={() => { saveNavigationPreferences({ provider: "apple", preference: routePreference }); onAppleMapsPreferred(routePreference, stops); }} disabled={!canNavigate} className="col-span-2 min-h-11 rounded-lg bg-primary text-xs font-black text-background disabled:opacity-40">Abrir no Apple Maps</button>}
+            {preferredProvider === "organic" && onOrganicMaps && <button type="button" onClick={() => { saveNavigationPreferences({ provider: "organic", preference: routePreference }); onOrganicMaps(); }} disabled={!canNavigate} className="col-span-2 min-h-11 rounded-lg bg-primary text-xs font-black text-background disabled:opacity-40">Abrir no Organic Maps</button>}
           </div>
         </div>}
         {onMultiStopNavigate && <div className="col-span-2 rounded-xl border border-border/10 bg-muted/[.03] p-3 sm:col-span-4"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black text-foreground">Múltiplas paradas</p><p id="multi-stop-help" className="mt-1 text-[0.62rem] text-muted-foreground">{stops.length < 3 ? `Até 3 paradas · ${stops.length}/3 adicionadas.` : "Limite de 3 paradas atingido."}</p></div></div>{stops.map((stop, index) => <div key={stop + index} className="mt-2 flex items-center gap-2 rounded-lg bg-muted/[.04] px-3 py-2 text-xs text-foreground"><span className="font-black text-primary">{index + 1}</span><span className="min-w-0 flex-1 truncate">{stop}</span><button type="button" aria-label={"Remover parada " + (index + 1)} onClick={() => removeStop(index)}><X className="size-3.5" /></button></div>)}{stops.length < 3 && <div className="mt-2 flex gap-2"><input value={stopDraft} onChange={event => setStopDraft(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); addStop(); } }} inputMode="text" enterKeyHint="done" placeholder="Ex.: posto, endereço ou cidade" className="min-w-0 flex-1 rounded-lg border border-border/15 bg-muted/[.04] px-3 py-3 text-xs text-foreground outline-none placeholder:text-muted-foreground" aria-label="Nova parada" aria-describedby="multi-stop-help" /><button type="button" onClick={addStop} className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-muted/[.08] px-3 text-xs font-black"><Plus className="size-4" />Adicionar</button></div>}{stops.length > 0 && onMultiStopNavigate && <button type="button" onClick={() => onMultiStopNavigate(stops)} className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-xs font-black text-background"><Navigation className="size-4" />Navegar com {stops.length} {stops.length === 1 ? "parada" : "paradas"} no Google Maps</button>}</div>}
