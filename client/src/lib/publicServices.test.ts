@@ -32,6 +32,11 @@ describe("public services catalog", () => {
     ).toContain("sic");
     expect(searchPublicServices("informacao cidadao", "saude")).toEqual([]);
   });
+  it("does not confuse road identifiers with address or phone fragments", () => {
+    expect(searchPublicServices("BR 070").map(item => item.id)).not.toContain("deam-depai-dpca");
+    expect(searchPublicServices("BR 070")).toEqual([]);
+  });
+
   it("finds everyday needs and all shortcut queries locally", () => {
     expect(
       searchPublicServices("segunda via da conta de agua").map(item => item.id)
