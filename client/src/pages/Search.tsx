@@ -197,16 +197,16 @@ function ResultCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block break-words text-sm font-bold">{title}</span>
-        <span className="mt-1 block break-words text-sm leading-relaxed text-white/75">
+        <span className="mt-1 block break-words text-sm leading-relaxed text-foreground/75">
           {detail}
         </span>
         {source && (
-          <span className="mt-1 block break-words text-xs text-white/70">
+          <span className="mt-1 block break-words text-xs text-foreground/70">
             {source}
           </span>
         )}
       </span>
-      <ArrowRight className="size-4 shrink-0 text-white/70" />
+      <ArrowRight className="size-4 shrink-0 text-foreground/70" />
     </button>
   );
 }
@@ -347,7 +347,7 @@ export default function SearchPage() {
           <span className="block break-words text-sm font-bold">
             {action.label}
           </span>
-          <span className="mt-1 block text-xs leading-relaxed text-white/75">
+          <span className="mt-1 block text-xs leading-relaxed text-foreground/75">
             {action.hint}
           </span>
         </span>
@@ -356,7 +356,7 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="premium-surface visual-shell min-h-[100dvh] w-full min-w-0 bg-background pb-28 text-white md:pb-12">
+    <main className="premium-surface visual-shell min-h-[100dvh] w-full min-w-0 bg-background pb-28 text-foreground md:pb-12">
       <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pt-5 sm:px-8 sm:pt-8">
         <header>
           <p className="text-xs font-bold uppercase tracking-[.12em] text-primary">
@@ -366,7 +366,7 @@ export default function SearchPage() {
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-.06em] sm:text-4xl">
             Encontre e vá.
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-white/75">
+          <p className="mt-2 text-sm leading-relaxed text-foreground/75">
             Busque pelo nome, bairro ou pelo que precisa resolver.
           </p>
         </header>
@@ -380,7 +380,7 @@ export default function SearchPage() {
             value={input}
             onChange={event => setInput(event.target.value)}
             placeholder="Ex.: CRAS, falta de luz, bairro"
-            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-white/70"
+            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/70"
             autoComplete="off"
             enterKeyHint="search"
             aria-label="Buscar locais e serviços"
@@ -393,7 +393,7 @@ export default function SearchPage() {
                 search("");
                 inputRef.current?.focus();
               }}
-              className="grid size-11 shrink-0 place-items-center rounded-xl text-white/75"
+              className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/75"
               aria-label="Limpar busca"
             >
               <X className="size-4" />
@@ -422,7 +422,7 @@ export default function SearchPage() {
             <p
               role="status"
               aria-live="polite"
-              className="break-words text-sm text-white/80"
+              className="break-words text-sm text-foreground/80"
             >
               {results.total
                 ? results.total + " resultado(s) para “" + query + "”"
@@ -432,7 +432,7 @@ export default function SearchPage() {
               <section aria-labelledby="search-services-title">
                 <h2 id="search-services-title" className="text-lg font-bold">
                   Serviços públicos{" "}
-                  <span className="text-sm font-normal text-white/75">
+                  <span className="text-sm font-normal text-foreground/75">
                     ({results.services.length})
                   </span>
                 </h2>
@@ -473,7 +473,7 @@ export default function SearchPage() {
               <section aria-labelledby="search-transit-title">
                 <h2 id="search-transit-title" className="text-lg font-bold">
                   Transporte do Entorno{" "}
-                  <span className="text-sm font-normal text-white/75">
+                  <span className="text-sm font-normal text-foreground/75">
                     ({results.transitFares.length})
                   </span>
                 </h2>
@@ -506,7 +506,7 @@ export default function SearchPage() {
               <section aria-labelledby="search-data-title">
                 <h2 id="search-data-title" className="text-lg font-bold">
                   Dados e fontes{" "}
-                  <span className="text-sm font-normal text-white/75">
+                  <span className="text-sm font-normal text-foreground/75">
                     ({results.dataResources.length})
                   </span>
                 </h2>
@@ -534,7 +534,7 @@ export default function SearchPage() {
               <section aria-labelledby="search-stations-title">
                 <h2 id="search-stations-title" className="text-lg font-bold">
                   Postos{" "}
-                  <span className="text-sm font-normal text-white/75">
+                  <span className="text-sm font-normal text-foreground/75">
                     ({results.stations.length})
                   </span>
                 </h2>
@@ -568,7 +568,7 @@ export default function SearchPage() {
               <section aria-labelledby="search-places-title">
                 <h2 id="search-places-title" className="text-lg font-bold">
                   Lugares e comércio{" "}
-                  <span className="text-sm font-normal text-white/75">
+                  <span className="text-sm font-normal text-foreground/75">
                     ({results.places.length})
                   </span>
                 </h2>
@@ -596,7 +596,7 @@ export default function SearchPage() {
               <section aria-labelledby="search-routes-title">
                 <h2 id="search-routes-title" className="text-lg font-bold">
                   Outros destinos{" "}
-                  <span className="text-sm font-normal text-white/75">
+                  <span className="text-sm font-normal text-foreground/75">
                     ({results.routes.length})
                   </span>
                 </h2>
@@ -619,16 +619,16 @@ export default function SearchPage() {
               <button
                 type="button"
                 onClick={() => setResultLimit(limit => limit + 12)}
-                className="min-h-12 w-full rounded-xl border border-white/20 px-3 text-sm font-bold"
+                className="min-h-12 w-full rounded-xl border border-border/20 px-3 text-sm font-bold"
               >
                 Mostrar mais resultados
               </button>
             )}
             <section
-              className="premium-card rounded-2xl border border-white/10 bg-card p-4"
+              className="premium-card rounded-2xl border border-border/15 bg-card p-4"
               aria-label="Ajuda para encontrar"
             >
-              <p className="text-sm leading-relaxed text-white/80">
+              <p className="text-sm leading-relaxed text-foreground/80">
                 {results.total
                   ? "Ainda não encontrou o que precisa?"
                   : "Tente o nome do serviço ou do bairro, ou consulte a central."}
@@ -636,7 +636,7 @@ export default function SearchPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link
                   href={appUrl("/servicos")}
-                  className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-3 text-sm font-bold"
+                  className="inline-flex min-h-11 items-center rounded-xl border border-border/20 px-3 text-sm font-bold"
                 >
                   Abrir central de serviços
                 </Link>
@@ -646,7 +646,7 @@ export default function SearchPage() {
                     openGoogleMapsSearch(query + ", Águas Lindas de Goiás, GO")
                   }
                   disabled={!online}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-bold disabled:opacity-60"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/20 px-3 py-2 text-sm font-bold disabled:opacity-60"
                 >
                   <ExternalLink className="size-4" />
                   Buscar no Google Maps · online
@@ -659,7 +659,7 @@ export default function SearchPage() {
             <section className="mt-5" aria-labelledby="search-primary-title">
               <h2
                 id="search-primary-title"
-                className="text-sm font-bold text-white/80"
+                className="text-sm font-bold text-foreground/80"
               >
                 O que você precisa?
               </h2>
@@ -674,7 +674,7 @@ export default function SearchPage() {
                 aria-expanded={expanded}
                 aria-controls="search-more-actions"
                 onClick={() => setExpanded(value => !value)}
-                className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl border border-white/15 px-3 text-sm font-bold"
+                className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl border border-border/15 px-3 text-sm font-bold"
               >
                 {expanded
                   ? "Menos opções"
@@ -698,7 +698,7 @@ export default function SearchPage() {
               <section className="mt-5" aria-labelledby="search-recent-title">
                 <h2
                   id="search-recent-title"
-                  className="text-sm font-bold text-white/80"
+                  className="text-sm font-bold text-foreground/80"
                 >
                   Pesquisas recentes
                 </h2>
@@ -708,7 +708,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => search(item)}
-                      className="min-h-11 max-w-full break-words rounded-2xl border border-white/15 bg-card px-3 py-2 text-left text-sm text-white/85"
+                      className="min-h-11 max-w-full break-words rounded-2xl border border-border/15 bg-card px-3 py-2 text-left text-sm text-foreground/85"
                     >
                       {item}
                     </button>
@@ -749,14 +749,14 @@ export default function SearchPage() {
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <Link
                 href={appUrl("/servicos") + "?salvos=1"}
-                className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
+                className="flex min-h-12 items-center gap-2 rounded-xl border border-border/15 px-3 text-sm font-bold"
               >
                 <Bookmark className="size-4 text-primary" />
                 Meus serviços salvos
               </Link>
               <Link
                 href={appUrl("/ajuda") + "#offline-readiness-title"}
-                className="flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-bold"
+                className="flex min-h-12 items-center gap-2 rounded-xl border border-border/15 px-3 text-sm font-bold"
               >
                 <WifiOff className="size-4 text-accent" />
                 Preparar acesso offline
@@ -764,7 +764,7 @@ export default function SearchPage() {
             </div>
           </>
         )}
-        <footer className="mt-6 pb-4 text-sm leading-relaxed text-white/70">
+        <footer className="mt-6 pb-4 text-sm leading-relaxed text-foreground/70">
           Contatos e referências podem mudar. Confira a fonte do serviço antes
           de sair.
         </footer>
