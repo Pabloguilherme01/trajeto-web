@@ -1,7 +1,16 @@
 import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
-  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania";
+  | "saude"
+  | "seguranca"
+  | "assistencia"
+  | "transito"
+  | "educacao"
+  | "utilidades"
+  | "moradia"
+  | "trabalho"
+  | "justica"
+  | "cidadania";
 
 export type PublicService = {
   id: string;
@@ -54,7 +63,11 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "assistencia", label: "Assistência", shortLabel: "Assistência" },
   { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
-  { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
+  { id: "utilidades", label: "Água, luz e ambiente", shortLabel: "Utilidades" },
+  { id: "moradia", label: "Moradia e cidade", shortLabel: "Moradia" },
+  { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
+  { id: "justica", label: "Justiça e consumidor", shortLabel: "Justiça" },
+  { id: "cidadania", label: "Documentos e cidadania", shortLabel: "Cidadania" },
 ];
 
 const PREFEITURA_CONTATOS = "https://aguaslindasdegoias.go.gov.br/contatos/";
@@ -77,6 +90,8 @@ const PCGO =
   "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-de-atendimento/";
 const PCGO_REGIONAIS =
   "https://goias.gov.br/policiacivil/delegacias-regionais/";
+const PCGO_TELEFONES_2026 =
+  "https://goias.gov.br/policiacivil/wp-content/uploads/sites/71/2026/06/Lista-Telefonica-2026.pdf";
 const SEDUC =
   "https://goias.gov.br/educacao/lista-de-escolas-rede-estadual-de-educacao/";
 const ASSISTENCIA =
@@ -366,11 +381,18 @@ export const PUBLIC_SERVICES: PublicService[] = [
     description:
       "Unidade da Polícia Civil para registros e atendimento policial.",
     address:
-      "Rua Adélia, Quadra 3, Área Especial, Setor Sol Nascente, Águas Lindas de Goiás - GO",
-    phone: "(61) 3618-2716",
+      "Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
+    phone: "(61) 3613-97944",
+    extraPhone: "(61) 3618-1456",
+    whatsappOnly: ["(62) 98424-2105"],
+    hours: "Atendimento do interior: em regra, 8h–12h e 14h–18h; confirme antes de sair",
+    guidance:
+      "A lista telefônica oficial de 2026 informa estes contatos. Em emergência imediata, ligue 190.",
+    verifiedAt: "06/10/2026",
     sourceLabel: "Polícia Civil de Goiás",
-    sourceUrl: PCGO,
-    mapQuery: "1ª Delegacia de Polícia de Águas Lindas de Goiás",
+    sourceUrl: PCGO_TELEFONES_2026,
+    mapQuery:
+      "1ª Delegacia de Polícia, Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás, GO",
   },
   {
     id: "pcgo-17-drp",
@@ -379,13 +401,51 @@ export const PUBLIC_SERVICES: PublicService[] = [
     description:
       "Delegacia regional da Polícia Civil com atendimento em Águas Lindas.",
     address:
-      "Quadra 27, Rua 22, Área Especial, Parque Águas Bonitas I, Águas Lindas de Goiás - GO, 72926-052",
-    phone: "(61) 3613-4160",
-    verifiedAt: "01/10/2026",
+      "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO, 72911-316",
+    phone: "(61) 3613-4582",
+    whatsappOnly: ["(62) 99506-5190"],
+    guidance:
+      "Contatos e endereço conferidos na lista telefônica oficial da Polícia Civil de Goiás de 2026.",
+    verifiedAt: "06/10/2026",
     sourceLabel: "Polícia Civil de Goiás",
-    sourceUrl: PCGO_REGIONAIS,
+    sourceUrl: PCGO_TELEFONES_2026,
     mapQuery:
-      "17ª Delegacia Regional de Polícia, Quadra 27, Rua 22, Parque Águas Bonitas I, Águas Lindas de Goiás, GO",
+      "17ª Delegacia Regional de Polícia, Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "policia-civil-2",
+    name: "2ª Delegacia de Polícia de Águas Lindas",
+    category: "seguranca",
+    description:
+      "Unidade distrital da Polícia Civil para registros e atendimento policial.",
+    address:
+      "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO, 72911-316",
+    phone: "(62) 98477-5357",
+    guidance:
+      "Contato conferido na lista telefônica oficial de 2026. Em emergência imediata, ligue 190.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: PCGO_TELEFONES_2026,
+    mapQuery:
+      "2ª Delegacia de Polícia, Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "deam-depai-dpca",
+    name: "DEAM / DEPAI / DPCA · atendimento especializado",
+    category: "seguranca",
+    description:
+      "Atendimento especializado da Polícia Civil para mulheres, adolescentes e crianças.",
+    address:
+      "Rua Colibri, Quadra 27, Lote 03, Bairro Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
+    phone: "(61) 3613-0701",
+    whatsappOnly: ["(62) 98598-3382", "(62) 98593-6310"],
+    guidance:
+      "Contatos conferidos na lista telefônica oficial de 2026. Para risco imediato, ligue 190; o Ligue 180 também orienta mulheres em situação de violência.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: PCGO_TELEFONES_2026,
+    mapQuery:
+      "DEAM Águas Lindas, Rua Colibri, Quadra 27, Lote 03, Sol Nascente, Águas Lindas de Goiás, GO",
   },
   {
     id: "policia-militar",
@@ -668,7 +728,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-infraestrutura",
     name: "Secretaria Municipal de Infraestrutura e Obras",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal para infraestrutura e obras.",
     phone: "(61) 99303-4608",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -679,7 +739,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-meio-ambiente",
     name: "Secretaria Municipal de Meio Ambiente",
-    category: "cidadania",
+    category: "utilidades",
     description: "Atendimento municipal relacionado ao meio ambiente.",
     phone: "(61) 99451-0844",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -690,7 +750,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-habitacao",
     name: "Secretaria Municipal de Habitação",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal sobre habitação.",
     phone: "(61) 99303-6552",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -700,7 +760,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "regularizacao-fundiaria",
     name: "Secretaria Municipal de Regularização Fundiária",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal sobre regularização fundiária.",
     phone: "(61) 99310-0216",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -710,7 +770,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "desenvolvimento-economico",
     name: "Secretaria Municipal de Desenvolvimento Econômico",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Atendimento e programas municipais para desenvolvimento econômico.",
     phone: "(61) 99649-2690 / (61) 99310-6862",
@@ -742,7 +802,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "forum",
     name: "Fórum de Águas Lindas",
-    category: "cidadania",
+    category: "justica",
     description: "Atendimento do Poder Judiciário no município.",
     phone: "(61) 3617-2600",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -762,7 +822,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "sebrae",
     name: "SEBRAE",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Canal de apoio e atendimento empresarial listado pela Prefeitura.",
     phone: "(61) 3902-1135",
@@ -780,7 +840,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "segunda via conta luz",
     ],
     name: "Equatorial Goiás · energia",
-    category: "cidadania",
+    category: "utilidades",
     description:
       "Central estadual para falta de energia, contas e atendimento da distribuidora.",
     phone: "0800 062 0196",
@@ -814,7 +874,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "carteira-trabalho-digital",
     name: "Carteira de Trabalho Digital",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
     phone: "158",
@@ -918,7 +978,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "procon",
     name: "Procon Águas Lindas",
-    category: "cidadania",
+    category: "justica",
     description: "Atendimento ao consumidor e orientação sobre direitos.",
     phone: "(61) 3616-1133",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -934,7 +994,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "vazamento",
     ],
     name: "Saneago · água e esgoto",
-    category: "cidadania",
+    category: "utilidades",
     description:
       "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
     phone: "0800 645 0115",
@@ -971,6 +1031,21 @@ export const PUBLIC_SERVICES: PublicService[] = [
     guidance:
       "Consulte a página oficial antes de sair para confirmar os serviços disponíveis e eventual necessidade de agendamento. O Trajeto não publica endereço ou horário sem confirmação oficial.",
     verifiedAt: "01/10/2026",
+  },
+  {
+    id: "expresso-goias",
+    name: "Expresso Goiás · serviços digitais do Estado",
+    category: "cidadania",
+    description:
+      "Carta de serviços digitais do Governo de Goiás com atendimento de diversos órgãos estaduais.",
+    actionUrl: "https://www.go.gov.br/",
+    actionLabel: "Abrir Expresso Goiás",
+    guidance:
+      "O portal reúne serviços estaduais e permite realizar mais de cem serviços de forma digital. Use apenas os canais oficiais e confira requisitos antes de iniciar.",
+    keywords: ["expresso goias", "servicos estado", "governo goias", "servico digital", "go gov"],
+    verifiedAt: "06/10/2026",
+    sourceLabel: "SEAD Goiás",
+    sourceUrl: "https://goias.gov.br/administracao/expresso-portal/",
   },
   {
     id: "vapt-vupt",
@@ -1059,6 +1134,40 @@ export const PUBLIC_SERVICES: PublicService[] = [
     guidance:
       "O portal oficial inclui chat e videochamada em Libras. Descreva a ocorrência, o local e quem precisa de proteção.",
     verifiedAt: "01/10/2026",
+  },
+  {
+    id: "ouvsus-136",
+    name: "OuvSUS 136 · Ouvidoria-Geral do SUS",
+    category: "saude",
+    description:
+      "Canal federal para informações, solicitações, reclamações, denúncias, sugestões e elogios sobre o SUS.",
+    phone: "136",
+    hours: "Telefone: segunda a sexta, 8h–20h; sábado, 8h–18h",
+    actionUrl: "https://www.gov.br/saude/pt-br/canais-de-atendimento/ouvsus",
+    actionLabel: "Acessar OuvSUS",
+    guidance:
+      "Use o 136 ou o formulário oficial. O canal informa, recebe manifestações e encaminha demandas do SUS; urgências médicas devem ir para o SAMU 192.",
+    keywords: ["ouvidoria sus", "reclamacao sus", "denuncia saude", "disque saude", "136"],
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Ministério da Saúde",
+    sourceUrl: "https://www.gov.br/saude/pt-br/canais-de-atendimento/ouvsus",
+  },
+  {
+    id: "farmacia-popular",
+    name: "Farmácia Popular · lista oficial de participantes",
+    category: "saude",
+    description:
+      "Consulta oficial das farmácias credenciadas no Programa Farmácia Popular do Brasil.",
+    actionUrl:
+      "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/publicacoes/farmacias-participante-do-programa-farmacia-popular/view",
+    actionLabel: "Consultar farmácias participantes",
+    guidance:
+      "A lista nacional foi atualizada em 02/10/2026. Consulte o estabelecimento participante e confirme disponibilidade do medicamento antes de se deslocar.",
+    keywords: ["farmacia popular", "medicamento", "remedio", "gratuito", "desconto"],
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Ministério da Saúde",
+    sourceUrl:
+      "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/publicacoes/farmacias-participante-do-programa-farmacia-popular/view",
   },
   {
     id: "meu-sus-digital",
@@ -1171,7 +1280,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "consumidor-gov",
     name: "Consumidor.gov.br · reclamação contra empresas",
-    category: "cidadania",
+    category: "justica",
     description:
       "Serviço público gratuito para tratar problemas de consumo diretamente com empresas participantes.",
     keywords: [
@@ -1270,6 +1379,26 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Problema com uma compra",
     query: "consumidor",
     hint: "Proteção do consumidor",
+  },
+  {
+    label: "Delegacia da Mulher",
+    query: "deam",
+    hint: "Atendimento especializado",
+  },
+  {
+    label: "Farmácia Popular",
+    query: "farmacia popular",
+    hint: "Lista oficial de participantes",
+  },
+  {
+    label: "Serviços do Estado",
+    query: "expresso goias",
+    hint: "Expresso Goiás",
+  },
+  {
+    label: "Moradia e regularização",
+    query: "regularizacao fundiaria",
+    hint: "Habitação e cidade",
   },
 ] as const;
 
