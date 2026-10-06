@@ -644,7 +644,7 @@ export default function OfflineMapCanvas({
           const next = Math.min(6, zoom * 1.8);
           setPan({ x: -(group.x - size.width / 2) * next / zoom, y: -(group.y - size.height / 2) * next / zoom });
           onZoom(next);
-        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left: group.x + pan.x, top: group.y + pan.y }}>{group.items.length}</button>)}
+        }} className="absolute z-[1] grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-background bg-accent text-sm font-black text-accent-foreground shadow-md ring-4 ring-accent/20 focus-visible:ring-ring" style={{ left: group.x + pan.x, top: group.y + pan.y }}>{group.items.length}</button>)}
         {markerGroups.singles.map(marker => {
           const p = project(marker);
           return (
@@ -670,19 +670,19 @@ export default function OfflineMapCanvas({
               }}
             >
               {marker.id === "live-position" && (
-                <span className="pointer-events-none absolute size-10 rounded-full bg-[#50F3EA]/30 motion-safe:animate-ping" />
+                <span className="pointer-events-none absolute size-10 rounded-full bg-accent/30 motion-safe:animate-ping" />
               )}
               <span
                 className={
-                  "relative grid size-9 place-items-center rounded-2xl border-[3px] border-white text-xs font-black shadow-lg " +
+                  "relative grid size-9 place-items-center rounded-2xl border-[3px] border-background text-xs font-black shadow-lg " +
                   (selectedMarkerId === marker.id ? "ring-4 ring-primary " : "") +
                   (marker.id === "destination"
-                    ? "bg-[#ff765e] text-white"
+                    ? "bg-foreground text-background"
                     : marker.id === "live-position"
-                      ? "bg-[#1a73e8] text-white"
+                      ? "bg-accent text-accent-foreground"
                       : marker.id === "origin"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-[#5b7cff] text-white")
+                        : "bg-secondary text-secondary-foreground")
                 }
               >
                 {marker.id === "live-position" ? (
