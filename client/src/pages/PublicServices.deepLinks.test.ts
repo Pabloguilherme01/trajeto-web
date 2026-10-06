@@ -66,6 +66,13 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("deam-depai-dpca");
   });
 
+  it("offers Organic Maps directly from ready-route cards without nesting actions", () => {
+    expect(source).toContain("openOrganicDestination(route.destination, route.label)");
+    expect(source).toContain('aria-label={"Abrir " + route.label + " no Organic Maps"}');
+    expect(source).toContain(">Organic</span>");
+    expect(source).toContain(">Trajeto</span>");
+  });
+
   it("offers the official Organic Maps install fallback without exposing GPS", () => {
     expect(source).toContain("ORGANIC_MAPS_INSTALL_URL");
     expect(source).toContain("Instalar ou atualizar Organic Maps");
