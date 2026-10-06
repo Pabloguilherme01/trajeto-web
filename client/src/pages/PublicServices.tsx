@@ -100,6 +100,10 @@ const READY_ROUTE_IDS = [
   "saneago",
   "secretaria-educacao",
   "ubs-barragem-ii",
+  "ubs-barragem-iv",
+  "ubs-jardim-paraiso",
+  "esf-aguas-bonitas",
+  "esf-perola-ii",
   "cora-coralina",
   "praca-da-biblia",
 ] as const;
@@ -118,7 +122,7 @@ const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
 };
 
 const READY_ROUTE_GROUPS = [
-  { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii"] },
+  { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii", "ubs-barragem-iv", "ubs-jardim-paraiso", "esf-aguas-bonitas", "esf-perola-ii"] },
   { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "procon", "conselho-tutelar", "policia-civil", "cras-1", "forum", "saneago"] },
   { label: "Transporte e educação", ids: ["transito", "detran", "rodoviaria", "secretaria-educacao", "cora-coralina", "praca-da-biblia"] },
 ] as const;
