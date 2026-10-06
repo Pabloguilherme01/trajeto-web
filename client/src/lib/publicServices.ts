@@ -1576,6 +1576,9 @@ export function searchPublicServices(
     .join(" ");
   return PUBLIC_SERVICES.filter(service => {
     if (category !== "todos" && service.category !== category) return false;
+    // Exact agency searches should stay concise even when other services
+    // mention the agency only as referral guidance.
+    if (search === "cras" && !service.id.startsWith("cras-")) return false;
     return matchesCatalogText(search, [
       service.name,
       service.description,
