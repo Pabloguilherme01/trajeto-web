@@ -448,7 +448,7 @@ export default function OfflineMapCanvas({
   return (
     <div
       className={
-        "offline-map relative overflow-hidden rounded-[1.6rem] border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,.24)] " +
+        "offline-map relative overflow-hidden rounded-[1.6rem] border border-border/70 shadow-[0_24px_70px_rgba(0,0,0,.24)] " +
         (dark ? "bg-[#18272d]" : "bg-[#eef2eb]")
       }
     >
@@ -655,7 +655,7 @@ export default function OfflineMapCanvas({
               aria-pressed={selectedMarkerId === marker.id}
               onClick={() => onSelect?.(marker)}
               onPointerDown={e => e.stopPropagation()}
-              className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-[#1278cc]"
+              className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-ring"
               style={{
                 left: p.x,
                 top: p.y,

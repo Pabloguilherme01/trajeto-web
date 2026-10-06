@@ -526,7 +526,7 @@ export default function TileStationMap({
         className={
           "grid " +
           heightClassName +
-          " place-items-center bg-[#E8F0EA] p-6 text-center text-[#163840]"
+          " place-items-center bg-card p-6 text-center text-card-foreground"
         }
       >
         {fallback ?? (
@@ -534,7 +534,7 @@ export default function TileStationMap({
             <p className="text-sm font-black">
               Mapa sem coordenadas suficientes.
             </p>
-            <p className="mt-2 text-xs text-[#607169]">
+            <p className="mt-2 text-xs text-muted-foreground">
               Os locais continuam disponíveis em lista.
             </p>
           </div>
@@ -544,12 +544,12 @@ export default function TileStationMap({
   }
 
   return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-white/80 bg-[#dfe9e2] shadow-[0_24px_70px_rgba(15,35,45,.24)]">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-border/70 bg-[#dfe9e2] shadow-[0_24px_70px_rgba(15,35,45,.24)]">
       <div data-map-surface className={"relative isolate " + heightClassName}>
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#0e3842]/20 via-[#0e3842]/5 to-transparent" />
-        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border border-white/80 bg-white/92 px-2.5 py-1.5 text-[0.68rem] font-black text-slate-800 shadow-lg backdrop-blur-md">
+        <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border border-border bg-card/95 px-2.5 py-1.5 text-[0.68rem] font-black text-card-foreground shadow-lg backdrop-blur-md">
           {scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`}
-          <div className="h-1 border-x-2 border-b-2 border-slate-900" style={{ width: scaleMeters / metersPerPixel }} />
+          <div className="h-1 border-x-2 border-b-2 border-card-foreground" style={{ width: scaleMeters / metersPerPixel }} />
         </div>
         <div
           ref={viewport}
@@ -808,35 +808,35 @@ export default function TileStationMap({
         </div>
       </div>
 
-      <div className="relative min-w-0 border-t border-black/10 bg-[linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,250,248,.98))] p-3.5 sm:p-4">
-        {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div className="relative min-w-0 border-t border-border bg-card p-3.5 text-card-foreground sm:p-4">
+        {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-bold text-slate-700">{TRAVEL_LABELS[travelMode]} · {travelMode === "walking" ? "linha pontilhada" : travelMode === "cycling" ? "linha tracejada" : "linha contínua"}</p>
-            <label className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-bold text-slate-700">Cor do trajeto
+            <p className="text-xs font-bold text-foreground/80">{TRAVEL_LABELS[travelMode]} · {travelMode === "walking" ? "linha pontilhada" : travelMode === "cycling" ? "linha tracejada" : "linha contínua"}</p>
+            <label className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-bold text-foreground/80">Cor do trajeto
               <select value={routeStyle} onChange={event => setRouteStyle(event.target.value as keyof typeof ROUTE_STYLES)}
-                className="min-h-11 max-w-full rounded-lg border border-slate-300 bg-white px-2 text-base text-slate-900">
+                className="min-h-11 max-w-full rounded-lg border border-border bg-background px-2 text-base text-foreground">
                 {Object.entries(ROUTE_STYLES).map(([value, style]) => <option key={value} value={value}>{style.label}</option>)}
               </select>
             </label>
           </div>
-          <p className="mt-2 text-xs leading-relaxed text-slate-600">Personalize o traçado sem alterar o caminho. A escolha vale enquanto este mapa estiver aberto.</p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Personalize o traçado sem alterar o caminho. A escolha vale enquanto este mapa estiver aberto.</p>
         </div>}
         {selected ? (
           <div className="flex min-w-0 items-start gap-3">
-            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#163840] text-white">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary text-secondary-foreground">
               <span className="text-xs font-black">
                 <MapPlaceIcon item={selected} className="size-5" />
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="break-words text-base leading-snug font-black text-[#163840]">
+              <p className="break-words text-base font-black leading-snug text-foreground">
                 {selected.name}
               </p>
-              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#607169]">
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
                 {selected.address || "Endereço não informado"}
               </p>
-              {selected.coordinateLabel && <p className="mt-2 break-words text-xs font-bold text-[#765100]">{selected.coordinateLabel}</p>}
-              {selected.coordinateKind === "street-midpoint" && <p className="mt-2 text-xs font-bold text-[#765100]">Centro aproximado da via · confirme quadra, lote e entrada.</p>}
+              {selected.coordinateLabel && <p className="mt-2 break-words text-xs font-bold text-warning">{selected.coordinateLabel}</p>}
+              {selected.coordinateKind === "street-midpoint" && <p className="mt-2 text-xs font-bold text-warning">Centro aproximado da via · confirme quadra, lote e entrada.</p>}
               <div className="mt-2 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
                 {onPlanDestination && (
                   <button
@@ -859,7 +859,7 @@ export default function TileStationMap({
                       )
                     )
                   }
-                  className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg bg-[#163840] px-2 text-xs font-black text-white"
+                  className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg bg-secondary px-2 text-xs font-black text-secondary-foreground"
                 >
                   <Navigation className="size-3" /> Google
                 </button>
@@ -875,7 +875,7 @@ export default function TileStationMap({
                           })
                         )
                       }
-                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
+                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-border px-2 text-xs font-black text-foreground"
                     >
                       Waze
                     </button>
@@ -888,7 +888,7 @@ export default function TileStationMap({
                           )
                         )
                       }
-                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-black/10 px-2 text-xs font-black text-[#163840]"
+                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-border px-2 text-xs font-black text-foreground"
                     >
                       <Apple className="size-3" /> Apple
                     </button>
@@ -899,11 +899,11 @@ export default function TileStationMap({
             </div>
           </div>
         ) : (
-          <p className="text-xs font-bold text-[#607169]">
+          <p className="text-xs font-bold text-muted-foreground">
             Toque em um marcador para abrir a ficha.
           </p>
         )}
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#607169]">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <a
             href="https://www.openstreetmap.org/copyright"
             target="_blank"
