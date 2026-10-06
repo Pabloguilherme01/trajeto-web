@@ -689,14 +689,6 @@ export default function PublicServices() {
                 type="button"
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
-                aria-label={
-                  item.label +
-                  " · " +
-                  (item.id === "todos"
-                    ? PUBLIC_SERVICES.length
-                    : PUBLIC_SERVICES.filter(service => service.category === item.id).length) +
-                  " serviços"
-                }
                 className={
                   "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
