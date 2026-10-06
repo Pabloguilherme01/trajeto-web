@@ -266,7 +266,7 @@ export default function PublicServices() {
                 <Sparkles className="size-3.5" /> Central de serviços
               </span>
               <h1 className="section-heading mt-3 max-w-3xl font-display text-[1.85rem] font-semibold leading-tight tracking-tight sm:text-4xl">
-                Encontre o serviço certo sem perder tempo.
+                Como podemos ajudar? Encontre o serviço certo sem perder tempo.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
                 Pesquise pelo que você precisa — vacina, CNH, emprego, água,
