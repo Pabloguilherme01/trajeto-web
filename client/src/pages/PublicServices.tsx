@@ -266,22 +266,22 @@ export default function PublicServices() {
                 <Sparkles className="size-3.5" /> Central de serviços
               </span>
               <h1 className="section-heading mt-3 max-w-3xl font-display text-[1.85rem] font-semibold leading-tight tracking-tight sm:text-4xl">
-                Como podemos ajudar? Encontre o serviço certo sem perder tempo.
+                Como podemos ajudar?
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Pesquise pelo que você precisa — vacina, CNH, emprego, água,
-                documentos ou atendimento — e veja contato, rota e canal oficial
-                no mesmo lugar.
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base">
+                <span className="font-bold text-foreground">Encontre o serviço certo sem perder tempo.</span>{" "}
+                Pesquise por vacina, CNH, emprego, água, documentos ou atendimento
+                e veja contato, rota e canal oficial no mesmo lugar.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="status-pill text-foreground/80">
                   <WifiOff className="size-3.5 text-primary" /> catálogo offline ·{" "}
                   {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
                 </span>
-                <span className="status-pill text-foreground/80">
+                <span className="status-pill hidden text-foreground/80 sm:inline-flex">
                   <BadgeCheck className="size-3.5 text-accent" /> {SERVICE_SUMMARY.verified} fichas conferidas
                 </span>
-                <span className="status-pill text-foreground/80">
+                <span className="status-pill hidden text-foreground/80 sm:inline-flex">
                   {online ? (
                     <Globe2 className="size-3.5 text-accent" />
                   ) : (
@@ -300,7 +300,7 @@ export default function PublicServices() {
             </button>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-5 hidden grid-cols-2 gap-2 sm:grid sm:grid-cols-4">
             {[
               [PUBLIC_SERVICES.length, "serviços"],
               [SERVICE_SUMMARY.contacts, "com contato"],
@@ -372,6 +372,7 @@ export default function PublicServices() {
               <button
                 key={shortcut.query}
                 type="button"
+                aria-label={"Busca rápida: " + shortcut.hint}
                 onClick={() => {
                   setQuery(shortcut.query);
                   applyFilters(shortcut.query, "todos");
@@ -1002,7 +1003,10 @@ export default function PublicServices() {
                   className="mt-2 flex min-h-10 items-center justify-center text-center text-xs font-bold text-foreground/65 hover:text-foreground"
                 >
                   <BadgeCheck className="mr-1.5 inline size-3.5 text-accent" />
-                  Fonte oficial: {service.sourceLabel}
+                  Fonte: {service.sourceLabel}
+                  {service.verifiedAt
+                    ? " · conferido em " + service.verifiedAt
+                    : ""}
                 </a>
               </article>
             );
