@@ -122,9 +122,9 @@ describe("public services catalog", () => {
       item => item.id === "policia-civil-1"
     )!;
     expect(firstDp.address).toContain("Rua Adélia");
-    expect(firstDp.phone).toBe("(61) 3613-97944");
-    expect(firstDp.extraPhone).toContain("(62) 98424-2105");
+    expect(firstDp.phone).toBe("(61) 3618-5359");
     expect(firstDp.verifiedAt).toBe("06/10/2026");
+    expect(firstDp.sourceUrl).toContain("telefones-enderecos-e-horarios-de-atendimento");
     expect(PUBLIC_SERVICES.some(item => item.id === "policia-civil-2")).toBe(true);
     expect(PUBLIC_SERVICES.some(item => item.id === "deam-depai-dpca")).toBe(true);
   });
