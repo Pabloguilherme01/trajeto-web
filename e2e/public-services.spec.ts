@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 test("central de serviços abre offline e filtra saúde", async ({ page }) => {
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Como podemos ajudar/i })).toBeVisible();
+  await page.locator("#service-filters summary").click();
   await expect(page.getByRole("button", { name: "Saúde", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Saúde", exact: true }).click();
   await expect(page.getByRole("heading", { name: /UPA Mansões Odisseia/i })).toBeVisible();

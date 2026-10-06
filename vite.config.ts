@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { defineConfig } from "vite";
 
@@ -15,6 +15,8 @@ export default defineConfig({
     apply: "build",
     closeBundle() {
       const output = path.resolve(root, "dist/public");
+      // closeBundle also runs after a failed build; preserve its real error.
+      if (!existsSync(path.join(output, "offline-assets.json"))) return;
       const manifest = readFileSync(path.join(output, "offline-assets.json"), "utf8");
       const worker = path.join(output, "sw.js");
       const source = readFileSync(worker, "utf8");

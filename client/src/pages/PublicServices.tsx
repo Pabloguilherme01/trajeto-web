@@ -2,6 +2,9 @@ import {
   ArrowRight,
   Search,
   Scale,
+  Leaf,
+  Smartphone,
+  ShoppingBag,
   SlidersHorizontal,
   ChevronRight,
   CheckCircle2,
@@ -67,6 +70,9 @@ const categoryIcons = {
   moradia: Building2,
   "servicos-urbanos": Wrench,
   justica: Scale,
+  digital: Smartphone,
+  ambiente: Leaf,
+  consumidor: ShoppingBag,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -75,24 +81,58 @@ const SERVICE_SUMMARY = {
   ).length,
   routes: PUBLIC_SERVICES.filter(service => Boolean(service.mapQuery)).length,
   online: PUBLIC_SERVICES.filter(service => Boolean(service.actionUrl)).length,
-  verified: PUBLIC_SERVICES.filter(service => Boolean(service.verifiedAt)).length,
+  verified: PUBLIC_SERVICES.filter(service => Boolean(service.verifiedAt))
+    .length,
 } as const;
 
 const NEED_GROUPS = [
-  { label: "Documentos e direitos", query: "cpf", hint: "CPF, Receita, título, Defensoria e cidadania" },
-  { label: "Família e benefícios", query: "cadunico", hint: "CadÚnico, CRAS, benefícios e Passe Livre PCD" },
-  { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência, vigilância e saúde digital" },
-  { label: "Educação e creche", query: "creche", hint: "Creches, vagas, matrículas e escolas" },
-  { label: "Trabalho e renda", query: "emprego", hint: "Emprego, seguro-desemprego e empreendedorismo" },
-  { label: "Moradia e regularização", query: "regularizacao fundiaria", hint: "Habitação, regularização e atendimento municipal" },
-  { label: "Cidade e manutenção", query: "buraco", hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana" },
-  { label: "Segurança e proteção", query: "delegacia", hint: "Delegacia, ocorrência e atendimento policial" },
+  {
+    label: "Documentos e direitos",
+    query: "cpf",
+    hint: "CPF, Receita, título, Defensoria e cidadania",
+  },
+  {
+    label: "Família e benefícios",
+    query: "cadunico",
+    hint: "CadÚnico, CRAS, benefícios e Passe Livre PCD",
+  },
+  {
+    label: "Saúde perto de você",
+    query: "ubs",
+    hint: "UBS, ESF, urgência, vigilância e saúde digital",
+  },
+  {
+    label: "Educação e creche",
+    query: "creche",
+    hint: "Creches, vagas, matrículas e escolas",
+  },
+  {
+    label: "Trabalho e renda",
+    query: "emprego",
+    hint: "Emprego, seguro-desemprego e empreendedorismo",
+  },
+  {
+    label: "Moradia e regularização",
+    query: "regularizacao fundiaria",
+    hint: "Habitação, regularização e atendimento municipal",
+  },
+  {
+    label: "Cidade e manutenção",
+    query: "buraco",
+    hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana",
+  },
+  {
+    label: "Segurança e proteção",
+    query: "delegacia",
+    hint: "Delegacia, ocorrência e atendimento policial",
+  },
 ] as const;
 
 const READY_ROUTE_IDS = [
   "upa",
   "heal",
   "hospital-bom-jesus",
+  "caps",
   "prefeitura",
   "vapt-vupt",
   "defensoria",
@@ -102,6 +142,8 @@ const READY_ROUTE_IDS = [
   "rodoviaria",
   "policia-civil",
   "cras-1",
+  "cras-2",
+  "cras-3",
   "detran",
   "forum",
   "secretaria-educacao",
@@ -130,17 +172,20 @@ const READY_ROUTE_IDS = [
 
 const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
   ALL_LOCAL_ROUTE_DESTINATIONS.find(route => route.id === id)
-).filter(
-  (route): route is (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number] =>
-    Boolean(route)
+).filter((route): route is (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number] =>
+  Boolean(route)
 );
 
 const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
   if (service.guidance) return service.guidance;
-  if (service.hours && service.mapQuery) return "Confira o horário informado e, se o atendimento puder mudar, confirme no canal oficial antes de sair.";
-  if (service.mapQuery) return "Use a rota para chegar ao local. Quando não houver horário confirmado nesta ficha, consulte a fonte oficial antes do deslocamento.";
-  if (service.actionUrl) return "Este serviço possui canal externo. O catálogo continua disponível offline, mas a ação oficial precisa de internet.";
-  if (publicServiceContacts(service).length > 0) return "Entre em contato antes de sair para confirmar atendimento, horário e requisitos atuais.";
+  if (service.hours && service.mapQuery)
+    return "Confira o horário informado e, se o atendimento puder mudar, confirme no canal oficial antes de sair.";
+  if (service.mapQuery)
+    return "Use a rota para chegar ao local. Quando não houver horário confirmado nesta ficha, consulte a fonte oficial antes do deslocamento.";
+  if (service.actionUrl)
+    return "Este serviço possui canal externo. O catálogo continua disponível offline, mas a ação oficial precisa de internet.";
+  if (publicServiceContacts(service).length > 0)
+    return "Entre em contato antes de sair para confirmar atendimento, horário e requisitos atuais.";
   return "Consulte a fonte oficial desta ficha para confirmar requisitos e atendimento atual.";
 };
 
@@ -151,6 +196,7 @@ const READY_ROUTE_GROUPS = [
       "upa",
       "heal",
       "hospital-bom-jesus",
+      "caps",
       "ubs-barragem-ii",
       "ubs-barragem-iv",
       "ubs-jardim-paraiso",
@@ -173,6 +219,8 @@ const READY_ROUTE_GROUPS = [
       "procon",
       "conselho-tutelar",
       "cras-1",
+      "cras-2",
+      "cras-3",
       "forum",
       "camara-municipal",
     ],
@@ -203,6 +251,7 @@ export default function PublicServices() {
   const rawSearch = useSearch();
   const params = useMemo(() => new URLSearchParams(rawSearch), [rawSearch]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const filterRef = useRef<HTMLDetailsElement>(null);
   const [query, setQuery] = useState(() => params.get("q") ?? "");
   const [category, setCategory] = useState<PublicServiceCategory | "todos">(
     () => {
@@ -219,11 +268,20 @@ export default function PublicServices() {
     "todos" | "contato" | "rota" | "online"
   >("todos");
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
+  const [navigationMode, setNavigationMode] = useState<
+    "drive" | "walk" | "bike"
+  >("drive");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
     service => service.id === params.get("servico")
   );
+  const browsing =
+    !selectedService &&
+    !savedOnly &&
+    !query.trim() &&
+    category === "todos" &&
+    resource === "todos";
   const favoriteCount = PUBLIC_SERVICES.filter(service =>
     favorites.includes(service.id)
   ).length;
@@ -328,6 +386,12 @@ export default function PublicServices() {
     replace = false,
     onlySaved = savedOnly
   ) => {
+    if (filterRef.current?.open) {
+      if (filterRef.current.contains(document.activeElement)) {
+        filterRef.current.querySelector("summary")?.focus();
+      }
+      filterRef.current.open = false;
+    }
     const search = new URLSearchParams();
     if (value.trim()) search.set("q", value.trim());
     if (next !== "todos") search.set("categoria", next);
@@ -357,7 +421,7 @@ export default function PublicServices() {
       point = null;
     }
     const url = point
-      ? buildOrganicMapsNavigationUrl(point, service.name, "drive")
+      ? buildOrganicMapsNavigationUrl(point, service.name, navigationMode)
       : buildOrganicMapsSearchUrl(service.mapQuery);
     if (url) window.location.href = url;
   };
@@ -418,17 +482,20 @@ export default function PublicServices() {
                 Como podemos ajudar?
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base">
-                <span className="font-bold text-foreground">Encontre o serviço certo sem perder tempo.</span>{" "}
-                Pesquise por vacina, CNH, emprego, água, documentos ou atendimento
-                e veja contato, rota e canal oficial no mesmo lugar.
+                <span className="font-bold text-foreground">
+                  Encontre o serviço certo sem perder tempo.
+                </span>{" "}
+                Pesquise por vacina, CNH, emprego, água, documentos ou
+                atendimento e veja contato, rota e canal oficial no mesmo lugar.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="status-pill text-foreground/80">
-                  <WifiOff className="size-3.5 text-primary" /> catálogo offline ·{" "}
-                  {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
+                  <WifiOff className="size-3.5 text-primary" /> catálogo offline
+                  · {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
                 </span>
                 <span className="status-pill hidden text-foreground/80 sm:inline-flex">
-                  <BadgeCheck className="size-3.5 text-accent" /> {SERVICE_SUMMARY.verified} fichas conferidas
+                  <BadgeCheck className="size-3.5 text-accent" />{" "}
+                  {SERVICE_SUMMARY.verified} fichas conferidas
                 </span>
                 <span className="status-pill hidden text-foreground/80 sm:inline-flex">
                   {online ? (
@@ -460,8 +527,12 @@ export default function PublicServices() {
                 key={label}
                 className="rounded-2xl border border-border/10 bg-background/55 p-3"
               >
-                <p className="text-xl font-black tracking-tight text-foreground">{value}</p>
-                <p className="mt-0.5 text-xs font-bold text-muted-foreground">{label}</p>
+                <p className="text-xl font-black tracking-tight text-foreground">
+                  {value}
+                </p>
+                <p className="mt-0.5 text-xs font-bold text-muted-foreground">
+                  {label}
+                </p>
               </div>
             ))}
           </div>
@@ -526,7 +597,7 @@ export default function PublicServices() {
                   setQuery(shortcut.query);
                   applyFilters(shortcut.query, "todos");
                 }}
-                className="shrink-0 rounded-full border border-border/15 bg-card px-3 py-2 text-xs font-bold text-foreground/80 transition hover:border-accent hover:text-foreground"
+                className="min-h-11 shrink-0 rounded-full border border-border/15 bg-card px-3 py-2 text-xs font-bold text-foreground/80 transition hover:border-accent hover:text-foreground"
               >
                 {shortcut.label}
               </button>
@@ -534,85 +605,234 @@ export default function PublicServices() {
           </div>
         )}
 
-        <section className="mt-4 overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[.09] via-card to-accent/[.05] p-4 shadow-sm">
-          <div className="flex min-w-0 items-start gap-3">
-            <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-foreground">Mapa e navegação offline</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Planeje no Trajeto e continue no Organic Maps quando quiser navegação externa. Destinos reconhecidos abrem a rota; os demais abrem a busca no app. Baixe o mapa da região no Organic Maps para continuar sem internet.</p>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground">Explorar mapa</button>
-                <button type="button" onClick={() => setLocation(appUrl("/planejar?destinos=1"))} className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground">{READY_SERVICE_ROUTES.length} rotas prontas</button>
-              </div>
-              <a
-                href={ORGANIC_MAPS_INSTALL_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl px-1 text-xs font-black text-primary"
-              >
-                Instalar ou atualizar Organic Maps
-                <ExternalLink className="size-3.5 shrink-0" />
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="Resumo da Central de Serviços" className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-          {[
-            ["Serviços", `${PUBLIC_SERVICES.length} no catálogo`],
-            ["Categorias", `${PUBLIC_SERVICE_CATEGORIES.length - 1} assuntos`],
-            ["Rotas prontas", `${READY_SERVICE_ROUTES.length} destinos`],
-            ["Offline", "catálogo e rotas salvas"],
-          ].map(([label, value]) => (
-            <div key={label} className="min-w-0 overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-card to-primary/[.035] px-3.5 py-3 shadow-sm">
-              <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">{label}</p>
-              <p className="mt-1 break-words text-sm font-black text-foreground">{value}</p>
-            </div>
-          ))}
-        </section>
-
         <section
-          id="emergency-strip"
-          tabIndex={-1}
-          className="premium-card mt-4 scroll-mt-20 rounded-[1.45rem] border border-warning/25 bg-card p-4 outline-none"
-          aria-labelledby="emergency-strip-title"
+          id="service-filters"
+          aria-label="Filtrar catálogo"
+          className="premium-card mt-3 scroll-mt-4 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4"
         >
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-warning">
-                <Siren className="size-4" /> Emergências
-              </p>
-              <h2
-                id="emergency-strip-title"
-                className="mt-1 text-base font-black"
+          <details ref={filterRef} className="service-filter-disclosure">
+            <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-sm font-bold">
+              <span className="flex items-center gap-2"><SlidersHorizontal className="size-4 shrink-0 text-primary" /> Categorias e opções de atendimento</span>
+              <ChevronRight className="size-4 shrink-0" />
+            </summary>
+          <label className="mt-3 flex min-w-0 flex-wrap items-center gap-2 text-sm font-bold">
+            <Navigation className="size-4 shrink-0 text-primary" />
+            Navegar no Organic Maps
+            <select
+              aria-label="Modo de navegação no Organic Maps"
+              value={navigationMode}
+              onChange={event =>
+                setNavigationMode(
+                  event.target.value as "drive" | "walk" | "bike"
+                )
+              }
+              className="min-h-11 min-w-0 max-w-full rounded-xl border border-border bg-background px-3 text-base text-foreground"
+            >
+              <option value="drive">Carro</option>
+              <option value="walk">A pé</option>
+              <option value="bike">Bicicleta</option>
+            </select>
+          </label>
+          <div
+            role="group"
+            className="mt-3 flex flex-wrap gap-2"
+            aria-label="Categorias de serviços"
+          >
+            {PUBLIC_SERVICE_CATEGORIES.map(item => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={category === item.id}
+                onClick={() => applyCategory(item.id)}
+                className={
+                  "min-h-11 rounded-full border px-3 text-sm font-black transition " +
+                  (category === item.id
+                    ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
+                    : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
+                }
               >
-                Em caso de risco, ligue agora
-              </h2>
-            </div>
-            <span className="text-xs font-bold text-foreground/65">
-              rede telefônica
-            </span>
-          </div>
-          <div className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3">
-            {[
-              { label: "Polícia", number: "190" },
-              { label: "SAMU", number: "192" },
-              { label: "Bombeiros", number: "193" },
-            ].map(item => (
-              <a
-                key={item.label}
-                href={phoneHref(item.number) ?? "#"}
-                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-bold text-foreground transition hover:border-warning/30 hover:text-foreground"
-              >
-                <span>{item.label}</span>
-                <span className="text-xl font-black text-warning">
-                  {item.number}
-                </span>
-              </a>
+                {item.label}
+              </button>
             ))}
           </div>
+          <div className="mt-4">
+            <p className="text-xs font-black uppercase tracking-[.12em] text-muted-foreground">
+              Como você quer resolver?
+            </p>
+            <div
+              role="group"
+              aria-label="Recursos disponíveis"
+              className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4"
+            >
+              {(
+                [
+                  {
+                    value: "todos",
+                    label: "Ver tudo",
+                    icon: SlidersHorizontal,
+                  },
+                  { value: "contato", label: "Ligar ou WhatsApp", icon: Phone },
+                  { value: "rota", label: "Ir até o local", icon: Route },
+                  { value: "online", label: "Resolver online", icon: Globe2 },
+                ] as const
+              ).map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={resource === value}
+                  onClick={() => {
+                    setResource(value);
+                    applyFilters(query, category);
+                  }}
+                  className={
+                    "flex min-h-16 min-w-0 items-center gap-2 rounded-2xl border px-3 text-left text-sm font-bold transition " +
+                    (resource === value
+                      ? "border-primary/35 bg-primary/10 text-primary"
+                      : "border-border/10 bg-background text-foreground/80 hover:border-accent/30")
+                  }
+                >
+                  <Icon className="size-4 shrink-0" />
+                  <span className="min-w-0">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          </details>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              aria-pressed={savedOnly}
+              onClick={() => applyFilters(query, category, false, !savedOnly)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+            >
+              <Heart
+                className="size-4"
+                fill={savedOnly ? "currentColor" : "none"}
+              />
+              Serviços salvos ({favoriteCount})
+            </button>
+            <p className="text-xs text-foreground/65">
+              Toque no coração para criar seus atalhos offline.
+            </p>
+          </div>
         </section>
 
+        {browsing && (
+          <>
+            <section className="mt-4 overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[.09] via-card to-accent/[.05] p-4 shadow-sm">
+              <div className="flex min-w-0 items-start gap-3">
+                <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black text-foreground">
+                    Mapa e navegação offline
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Planeje no Trajeto e continue no Organic Maps quando quiser
+                    navegação externa. Destinos reconhecidos abrem a rota; os
+                    demais abrem a busca no app. Baixe o mapa da região no
+                    Organic Maps para continuar sem internet.
+                  </p>
+                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setLocation(appUrl("/mapa"))}
+                      className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground"
+                    >
+                      Explorar mapa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setLocation(appUrl("/planejar?destinos=1"))
+                      }
+                      className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground"
+                    >
+                      {READY_SERVICE_ROUTES.length} rotas prontas
+                    </button>
+                  </div>
+                  <a
+                    href={ORGANIC_MAPS_INSTALL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl px-1 text-xs font-black text-primary"
+                  >
+                    Instalar ou atualizar Organic Maps
+                    <ExternalLink className="size-3.5 shrink-0" />
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <section
+              aria-label="Resumo da Central de Serviços"
+              className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4"
+            >
+              {[
+                ["Serviços", `${PUBLIC_SERVICES.length} no catálogo`],
+                [
+                  "Categorias",
+                  `${PUBLIC_SERVICE_CATEGORIES.length - 1} assuntos`,
+                ],
+                ["Rotas prontas", `${READY_SERVICE_ROUTES.length} destinos`],
+                ["Offline", "catálogo e rotas salvas"],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="min-w-0 overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-card to-primary/[.035] px-3.5 py-3 shadow-sm"
+                >
+                  <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">
+                    {label}
+                  </p>
+                  <p className="mt-1 break-words text-sm font-black text-foreground">
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </section>
+
+            <section
+              id="emergency-strip"
+              tabIndex={-1}
+              className="premium-card mt-4 scroll-mt-20 rounded-[1.45rem] border border-warning/25 bg-card p-4 outline-none"
+              aria-labelledby="emergency-strip-title"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-warning">
+                    <Siren className="size-4" /> Emergências
+                  </p>
+                  <h2
+                    id="emergency-strip-title"
+                    className="mt-1 text-base font-black"
+                  >
+                    Em caso de risco, ligue agora
+                  </h2>
+                </div>
+                <span className="text-xs font-bold text-foreground/65">
+                  rede telefônica
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3">
+                {[
+                  { label: "Polícia", number: "190" },
+                  { label: "SAMU", number: "192" },
+                  { label: "Bombeiros", number: "193" },
+                ].map(item => (
+                  <a
+                    key={item.label}
+                    href={phoneHref(item.number) ?? "#"}
+                    className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-bold text-foreground transition hover:border-warning/30 hover:text-foreground"
+                  >
+                    <span>{item.label}</span>
+                    <span className="text-xl font-black text-warning">
+                      {item.number}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
         {!selectedService &&
           !savedOnly &&
           !query.trim() &&
@@ -635,7 +855,9 @@ export default function PublicServices() {
                       onClick={() => applyCategory(item.id)}
                       className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md focus-visible:border-accent"
                     >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent"><Icon className="size-5" /></span>
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
+                        <Icon className="size-5" />
+                      </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-bold">
                           {item.label}
@@ -650,37 +872,94 @@ export default function PublicServices() {
               </div>
               <div className="mt-5 grid gap-2 sm:grid-cols-3">
                 {[
-                  { label: "Preciso de ajuda jurídica", query: "defensoria", hint: "Defensoria, mediação e orientação" },
-                  { label: "Tenho um problema na rua", query: "buraco", hint: "Iluminação, vias, bueiros e limpeza" },
-                  { label: "Preciso de um benefício", query: "cadunico", hint: "CadÚnico, CRAS e benefícios sociais" },
+                  {
+                    label: "Preciso de ajuda jurídica",
+                    query: "defensoria",
+                    hint: "Defensoria, mediação e orientação",
+                  },
+                  {
+                    label: "Tenho um problema na rua",
+                    query: "buraco",
+                    hint: "Iluminação, vias, bueiros e limpeza",
+                  },
+                  {
+                    label: "Preciso de um benefício",
+                    query: "cadunico",
+                    hint: "CadÚnico, CRAS e benefícios sociais",
+                  },
                 ].map(item => (
-                  <button key={item.label} type="button" onClick={() => { setQuery(item.query); applyFilters(item.query, "todos"); }} className="premium-card min-h-20 rounded-2xl border border-primary/12 bg-primary/[.035] p-3 text-left transition hover:border-primary/30">
-                    <span className="block text-sm font-black text-foreground">{item.label}</span>
-                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{item.hint}</span>
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setQuery(item.query);
+                      applyFilters(item.query, "todos");
+                    }}
+                    className="premium-card min-h-20 rounded-2xl border border-primary/12 bg-primary/[.035] p-3 text-left transition hover:border-primary/30"
+                  >
+                    <span className="block text-sm font-black text-foreground">
+                      {item.label}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                      {item.hint}
+                    </span>
                   </button>
                 ))}
               </div>
-              <h2 className="mt-5 text-lg font-bold">Encontre pela sua situação</h2>
+              <h2 className="mt-5 text-lg font-bold">
+                Encontre pela sua situação
+              </h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {NEED_GROUPS.map(group => (
-                  <button key={group.label} type="button" onClick={() => { setQuery(group.query); applyFilters(group.query, "todos"); }} className="premium-card min-h-20 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md">
-                    <span className="block text-sm font-black text-foreground">{group.label}</span>
-                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{group.hint}</span>
+                  <button
+                    key={group.label}
+                    type="button"
+                    onClick={() => {
+                      setQuery(group.query);
+                      applyFilters(group.query, "todos");
+                    }}
+                    className="premium-card min-h-20 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md"
+                  >
+                    <span className="block text-sm font-black text-foreground">
+                      {group.label}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                      {group.hint}
+                    </span>
                   </button>
                 ))}
               </div>
               <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/[.04] p-4">
-                <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Mapa e deslocamento</p>
-                <h2 className="mt-1 text-base font-black">Escolha o destino aqui. Navegue do seu jeito.</h2>
+                <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
+                  Mapa e deslocamento
+                </p>
+                <h2 className="mt-1 text-base font-black">
+                  Escolha o destino aqui. Navegue do seu jeito.
+                </h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  O Trajeto organiza o serviço e prepara a rota. No planejador, o Organic Maps recebe a rota quando o destino já tem coordenadas locais e abre a busca do app nos demais casos; Google Maps, Waze e Apple Maps continuam disponíveis.
+                  O Trajeto organiza o serviço e prepara a rota. No planejador,
+                  o Organic Maps recebe a rota quando o destino já tem
+                  coordenadas locais e abre a busca do app nos demais casos;
+                  Google Maps, Waze e Apple Maps continuam disponíveis.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-[0.68rem] font-black">
-                  <span className="rounded-full border border-primary/15 bg-primary/[.06] px-2.5 py-1 text-primary">Organic Maps</span>
-                  <span className="rounded-full border border-border/15 bg-background px-2.5 py-1 text-foreground/70">carro · a pé · bicicleta</span>
-                  <span className="rounded-full border border-border/15 bg-background px-2.5 py-1 text-foreground/70">offline após baixar o mapa</span>
+                  <span className="rounded-full border border-primary/15 bg-primary/[.06] px-2.5 py-1 text-primary">
+                    Organic Maps
+                  </span>
+                  <span className="rounded-full border border-border/15 bg-background px-2.5 py-1 text-foreground/70">
+                    carro · a pé · bicicleta
+                  </span>
+                  <span className="rounded-full border border-border/15 bg-background px-2.5 py-1 text-foreground/70">
+                    offline após baixar o mapa
+                  </span>
                 </div>
-                <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-sm font-black text-primary">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLocation(appUrl("/planejar") + "?destinos=1")
+                  }
+                  className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-sm font-black text-primary"
+                >
                   <Navigation className="size-4" /> Abrir mapa e destinos
                 </button>
               </div>
@@ -738,169 +1017,201 @@ export default function PublicServices() {
               </details>
             </section>
           )}
-        {!selectedService && !savedOnly && !query.trim() && category === "todos" && resource === "todos" && (
-          <>
-          <section className="mt-6" aria-labelledby="popular-actions-title">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[.14em] text-accent">Mais usados</p>
-                <h2 id="popular-actions-title" className="mt-1 text-lg font-bold">Resolva em poucos toques</h2>
-              </div>
-            </div>
-            <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-              {[
-                { label: "Saúde agora", query: "upa", detail: "Urgência e unidades" },
-                { label: "Documentos", query: "cpf", detail: "CPF, título e cidadania" },
-                { label: "Água e cidade", query: "vazamento agua", detail: "Saneamento e manutenção" },
-                { label: "Direitos", query: "defensoria", detail: "Defensoria e orientação" },
-              ].map(action => (
-                <button key={action.label} type="button" onClick={() => { setQuery(action.query); applyFilters(action.query, "todos"); }} className="premium-card min-h-20 rounded-2xl border border-border/12 bg-card p-3 text-left transition hover:border-accent/35">
-                  <span className="block text-sm font-black">{action.label}</span>
-                  <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{action.detail}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-          <section className="mt-6" aria-labelledby="ready-routes-title">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Chegue mais rápido</p>
-                <h2 id="ready-routes-title" className="mt-1 text-lg font-bold">Rotas prontas para o dia a dia</h2>
-                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Saúde, documentos, transporte, escola e serviços urbanos em poucos toques. O Trajeto prepara o destino e, quando houver coordenadas confirmadas, você pode continuar no Organic Maps.</p><div className="mt-3 flex flex-wrap gap-2" aria-label="Recursos das rotas prontas">
-                  <span className="rounded-full border border-primary/15 bg-primary/[.05] px-2.5 py-1 text-[0.68rem] font-black text-primary">{READY_SERVICE_ROUTES.length} destinos públicos</span>
-                  <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">saúde por região</span>
-                  <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">navegação externa</span>
+        {!selectedService &&
+          !savedOnly &&
+          !query.trim() &&
+          category === "todos" &&
+          resource === "todos" && (
+            <>
+              <section className="mt-6" aria-labelledby="popular-actions-title">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[.14em] text-accent">
+                      Mais usados
+                    </p>
+                    <h2
+                      id="popular-actions-title"
+                      className="mt-1 text-lg font-bold"
+                    >
+                      Resolva em poucos toques
+                    </h2>
+                  </div>
                 </div>
-              </div>
-              <Route className="hidden size-6 text-primary sm:block" />
-            </div>
-            <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar rotas prontas">
-              <button type="button" aria-pressed={readyRouteGroup === "todos"} onClick={() => setReadyRouteGroup("todos")} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === "todos" ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>Todas</button>
-              {READY_ROUTE_GROUPS.map(group => <button key={group.label} type="button" aria-label={`Filtrar rotas: ${group.label}`} aria-pressed={readyRouteGroup === group.label} onClick={() => setReadyRouteGroup(group.label)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === group.label ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>{group.label}</button>)}
-            </div>
-            <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
-              {(readyRouteGroup === "todos"
-                ? READY_SERVICE_ROUTES
-                : READY_SERVICE_ROUTES.filter(route =>
-                    READY_ROUTE_GROUPS.find(group => group.label === readyRouteGroup)?.ids.includes(route.id as never)
-                  )).map(route => (
-                <button
-                  key={route.id}
-                  type="button"
-                  onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")}
-                  className="premium-card flex min-h-28 w-[min(82vw,18rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
+                <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+                  {[
+                    {
+                      label: "Saúde agora",
+                      query: "upa",
+                      detail: "Urgência e unidades",
+                    },
+                    {
+                      label: "Documentos",
+                      query: "cpf",
+                      detail: "CPF, título e cidadania",
+                    },
+                    {
+                      label: "Água e cidade",
+                      query: "vazamento agua",
+                      detail: "Saneamento e manutenção",
+                    },
+                    {
+                      label: "Direitos",
+                      query: "defensoria",
+                      detail: "Defensoria e orientação",
+                    },
+                  ].map(action => (
+                    <button
+                      key={action.label}
+                      type="button"
+                      onClick={() => {
+                        setQuery(action.query);
+                        applyFilters(action.query, "todos");
+                      }}
+                      className="premium-card min-h-20 rounded-2xl border border-border/12 bg-card p-3 text-left transition hover:border-accent/35"
+                    >
+                      <span className="block text-sm font-black">
+                        {action.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                        {action.detail}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+              <section className="mt-6" aria-labelledby="ready-routes-title">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
+                      Chegue mais rápido
+                    </p>
+                    <h2
+                      id="ready-routes-title"
+                      className="mt-1 text-lg font-bold"
+                    >
+                      Rotas prontas para o dia a dia
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+                      Saúde, documentos, transporte, escola e serviços urbanos
+                      em poucos toques. O Trajeto prepara o destino e, quando
+                      houver coordenadas confirmadas, você pode continuar no
+                      Organic Maps.
+                    </p>
+                    <div
+                      className="mt-3 flex flex-wrap gap-2"
+                      aria-label="Recursos das rotas prontas"
+                    >
+                      <span className="rounded-full border border-primary/15 bg-primary/[.05] px-2.5 py-1 text-[0.68rem] font-black text-primary">
+                        {READY_SERVICE_ROUTES.length} destinos públicos
+                      </span>
+                      <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">
+                        saúde por região
+                      </span>
+                      <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">
+                        navegação externa
+                      </span>
+                    </div>
+                  </div>
+                  <Route className="hidden size-6 text-primary sm:block" />
+                </div>
+                <div
+                  className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1"
+                  role="group"
+                  aria-label="Filtrar rotas prontas"
                 >
-                  <span>
-                    <span className="block text-sm font-black text-foreground">{route.label}</span>
-                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{route.detail}</span>
-                  </span>
-                  <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-primary"><Navigation className="size-3.5" /> Preparar rota</span>
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
-              <div>
-                <p className="text-sm font-black text-foreground">Também vai a bancos, farmácias, praças, bairros e comércio?</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Esses locais ficam separados do catálogo público para a Central continuar simples. Abra o diretório completo no planejador.</p>
-              </div>
-              <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-xs font-black text-primary sm:mt-0">
-                Explorar todos os destinos <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </section>
-          </>
-        )}
-
-        <div className="mt-6 flex items-end justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[.14em] text-muted-foreground">Diretório público</p>
-            <h2 className="mt-1 text-lg font-bold">Explore os serviços</h2>
-            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Filtre só quando precisar. A busca e os atalhos acima continuam sendo o caminho mais rápido no celular.</p>
-          </div>
-          <span className="hidden rounded-full border border-border/15 bg-card px-3 py-1.5 text-xs font-black text-foreground/70 sm:inline">{PUBLIC_SERVICE_CATEGORIES.length - 1} categorias</span>
-        </div>
-        <section
-          aria-label="Filtrar catálogo"
-          className="premium-card mt-5 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4"
-        >
-          <div
-            role="group"
-            className="mt-3 flex flex-wrap gap-2"
-            aria-label="Categorias de serviços"
-          >
-            {PUBLIC_SERVICE_CATEGORIES.map(item => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={category === item.id}
-                onClick={() => applyCategory(item.id)}
-                className={
-                  "min-h-11 rounded-full border px-3 text-sm font-black transition " +
-                  (category === item.id
-                    ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
-                    : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
-                }
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-          <div className="mt-4">
-            <p className="text-xs font-black uppercase tracking-[.12em] text-muted-foreground">
-              Como você quer resolver?
-            </p>
-            <div
-              role="group"
-              aria-label="Recursos disponíveis"
-              className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4"
-            >
-              {(
-                [
-                  { value: "todos", label: "Ver tudo", icon: SlidersHorizontal },
-                  { value: "contato", label: "Ligar ou WhatsApp", icon: Phone },
-                  { value: "rota", label: "Ir até o local", icon: Route },
-                  { value: "online", label: "Resolver online", icon: Globe2 },
-                ] as const
-              ).map(({ value, label, icon: Icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={resource === value}
-                  onClick={() => {
-                    setResource(value);
-                    if (selectedService) applyFilters(query, category);
-                  }}
-                  className={
-                    "flex min-h-16 min-w-0 items-center gap-2 rounded-2xl border px-3 text-left text-sm font-bold transition " +
-                    (resource === value
-                      ? "border-primary/35 bg-primary/10 text-primary"
-                      : "border-border/10 bg-background text-foreground/80 hover:border-accent/30")
-                  }
-                >
-                  <Icon className="size-4 shrink-0" />
-                  <span className="min-w-0">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              aria-pressed={savedOnly}
-              onClick={() => applyFilters(query, category, false, !savedOnly)}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
-            >
-              <Heart
-                className="size-4"
-                fill={savedOnly ? "currentColor" : "none"}
-              />
-              Serviços salvos ({favoriteCount})
-            </button>
-            <p className="text-xs text-foreground/65">
-              Toque no coração para criar seus atalhos offline.
-            </p>
-          </div>
-        </section>
+                  <button
+                    type="button"
+                    aria-pressed={readyRouteGroup === "todos"}
+                    onClick={() => setReadyRouteGroup("todos")}
+                    className={
+                      "min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " +
+                      (readyRouteGroup === "todos"
+                        ? "border-primary/35 bg-primary/10 text-primary"
+                        : "border-border/15 bg-card text-foreground/75")
+                    }
+                  >
+                    Todas
+                  </button>
+                  {READY_ROUTE_GROUPS.map(group => (
+                    <button
+                      key={group.label}
+                      type="button"
+                      aria-label={`Filtrar rotas: ${group.label}`}
+                      aria-pressed={readyRouteGroup === group.label}
+                      onClick={() => setReadyRouteGroup(group.label)}
+                      className={
+                        "min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " +
+                        (readyRouteGroup === group.label
+                          ? "border-primary/35 bg-primary/10 text-primary"
+                          : "border-border/15 bg-card text-foreground/75")
+                      }
+                    >
+                      {group.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
+                  {(readyRouteGroup === "todos"
+                    ? READY_SERVICE_ROUTES
+                    : READY_SERVICE_ROUTES.filter(route =>
+                        READY_ROUTE_GROUPS.find(
+                          group => group.label === readyRouteGroup
+                        )?.ids.includes(route.id as never)
+                      )
+                  ).map(route => (
+                    <button
+                      key={route.id}
+                      type="button"
+                      onClick={() =>
+                        setLocation(
+                          appUrl("/planejar") +
+                            "?destino=" +
+                            encodeURIComponent(route.destination) +
+                            "&auto=1"
+                        )
+                      }
+                      className="premium-card flex min-h-28 w-[min(82vw,18rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
+                    >
+                      <span>
+                        <span className="block text-sm font-black text-foreground">
+                          {route.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                          {route.detail}
+                        </span>
+                      </span>
+                      <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-primary">
+                        <Navigation className="size-3.5" /> Preparar rota
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
+                  <div>
+                    <p className="text-sm font-black text-foreground">
+                      Também vai a bancos, farmácias, praças, bairros e
+                      comércio?
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      Esses locais ficam separados do catálogo público para a
+                      Central continuar simples. Abra o diretório completo no
+                      planejador.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLocation(appUrl("/planejar") + "?destinos=1")
+                    }
+                    className="mt-3 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-xs font-black text-primary sm:mt-0"
+                  >
+                    Explorar todos os destinos{" "}
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
+              </section>
+            </>
+          )}
 
         {selectedService && (
           <button
@@ -966,7 +1277,7 @@ export default function PublicServices() {
                 aria-current={
                   selectedService?.id === service.id ? "true" : undefined
                 }
-                className="premium-card route-card group min-w-0 scroll-mt-20 overflow-hidden rounded-[1.4rem] border border-border/8 bg-card p-3.5 outline-none sm:p-4"
+                className="premium-card service-directory-card route-card group min-w-0 scroll-mt-20 overflow-hidden rounded-[1.4rem] border border-border/8 bg-card p-3.5 outline-none sm:p-4"
               >
                 <div className="flex items-start gap-3">
                   <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-accent/15 bg-accent/[.06] text-accent">
@@ -995,7 +1306,7 @@ export default function PublicServices() {
                       (saved ? "Remover dos salvos: " : "Salvar serviço: ") +
                       service.name
                     }
-                    className="grid size-11 shrink-0 place-items-center rounded-xl border border-border/15 text-destructive"
+                    className="grid size-11 shrink-0 place-items-center rounded-xl border border-border/15 text-primary"
                   >
                     <Heart
                       className="size-4"
@@ -1020,7 +1331,8 @@ export default function PublicServices() {
                   )}
                   {service.actionUrl ? (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
-                      <Globe2 className="size-3.5" /> canal externo exige internet
+                      <Globe2 className="size-3.5" /> canal externo exige
+                      internet
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
@@ -1029,7 +1341,8 @@ export default function PublicServices() {
                   )}
                   {service.verifiedAt && (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-accent/[.06] px-2 py-1 text-accent">
-                      <BadgeCheck className="size-3.5" /> conferido {service.verifiedAt}
+                      <BadgeCheck className="size-3.5" /> conferido{" "}
+                      {service.verifiedAt}
                     </span>
                   )}
                 </div>
@@ -1056,7 +1369,8 @@ export default function PublicServices() {
                 >
                   <summary className="min-h-11">
                     <span className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-accent" /> Antes de sair
+                      <CheckCircle2 className="size-4 text-accent" /> Antes de
+                      sair
                     </span>
                     <ChevronRight className="size-4" />
                   </summary>
@@ -1064,7 +1378,9 @@ export default function PublicServices() {
                     <p>{servicePreparationHint(service)}</p>
                     {service.documents?.length ? (
                       <div>
-                        <p className="font-bold">Documentos informados para este serviço</p>
+                        <p className="font-bold">
+                          Documentos informados para este serviço
+                        </p>
                         <ul className="mt-2 list-disc space-y-1 pl-5">
                           {service.documents.map(document => (
                             <li key={document}>{document}</li>
@@ -1072,7 +1388,10 @@ export default function PublicServices() {
                         </ul>
                       </div>
                     ) : (
-                      <p className="text-xs text-muted-foreground">Esta ficha não presume documentos. Confira os requisitos no canal oficial antes do atendimento.</p>
+                      <p className="text-xs text-muted-foreground">
+                        Esta ficha não presume documentos. Confira os requisitos
+                        no canal oficial antes do atendimento.
+                      </p>
                     )}
                   </div>
                 </details>

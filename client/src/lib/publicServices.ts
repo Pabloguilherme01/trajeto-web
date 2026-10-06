@@ -1,7 +1,19 @@
 import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
-  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania" | "trabalho" | "moradia" | "servicos-urbanos" | "justica";
+  | "saude"
+  | "seguranca"
+  | "assistencia"
+  | "transito"
+  | "educacao"
+  | "cidadania"
+  | "trabalho"
+  | "moradia"
+  | "servicos-urbanos"
+  | "justica"
+  | "digital"
+  | "ambiente"
+  | "consumidor";
 
 export type PublicService = {
   id: string;
@@ -40,6 +52,9 @@ export type PublicService = {
     | "Tribunal Superior Eleitoral"
     | "Ministério da Justiça"
     | "Ministério da Defesa"
+    | "Governo Digital"
+    | "Anatel"
+    | "Ibama"
     | "Detran-GO"
     | "Defensoria Pública de Goiás";
   sourceUrl: string;
@@ -61,6 +76,9 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
   { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
   { id: "servicos-urbanos", label: "Cidade e serviços", shortLabel: "Cidade" },
+  { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
+  { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
+  { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
   { id: "justica", label: "Justiça e direitos", shortLabel: "Justiça" },
 ];
 
@@ -91,6 +109,69 @@ const ASSISTENCIA =
 const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
+  {
+    id: "recuperar-govbr",
+    name: "Recuperar acesso à conta gov.br",
+    category: "digital",
+    description:
+      "Orientação oficial para recuperar a senha e voltar a acessar serviços públicos digitais.",
+    keywords: ["senha govbr", "recuperar conta", "acesso digital"],
+    actionUrl: "https://acesso.gov.br",
+    actionLabel: "Recuperar acesso",
+    guidance:
+      "Siga as opções do portal oficial. Se não conseguir recuperar o acesso, use o formulário indicado na página de ajuda. Nunca compartilhe senha ou código de acesso.",
+    sourceLabel: "Governo Digital",
+    sourceUrl:
+      "https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/atendimento-gov.br/duvidas-na-conta-gov.br/recuperar-senha-da-conta-gov.br",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "anatel-consumidor",
+    name: "Anatel Consumidor · telefonia e internet",
+    category: "consumidor",
+    description:
+      "Canal oficial para reclamações sobre telefonia, internet e TV por assinatura.",
+    keywords: [
+      "operadora",
+      "telefonia",
+      "internet",
+      "tv assinatura",
+      "reclamacao anatel",
+    ],
+    documents: ["Número do protocolo de atendimento da operadora"],
+    actionUrl: "https://apps.anatel.gov.br/anatelconsumidor/",
+    actionLabel: "Abrir Anatel Consumidor",
+    guidance:
+      "Procure primeiro sua operadora e guarde o protocolo. Se o problema continuar, registre a reclamação no canal oficial da Anatel.",
+    sourceLabel: "Anatel",
+    sourceUrl: "https://www.gov.br/anatel/pt-br/consumidor",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "ibama-denuncia",
+    name: "Ibama · denúncia ambiental",
+    category: "ambiente",
+    description:
+      "Canal nacional para comunicar infrações e danos ambientais ao Ibama.",
+    phone: "0800 061 8080",
+    keywords: [
+      "denuncia ambiental",
+      "desmatamento",
+      "pesca ilegal",
+      "venda ilegal animais",
+      "ibama",
+    ],
+    actionUrl:
+      "https://www.gov.br/pt-br/servicos/apresentar-denuncia-ambiental",
+    actionLabel: "Consultar denúncia ambiental",
+    guidance:
+      "Informe local, descrição e evidências disponíveis pelo canal oficial. Não se exponha para reunir provas; este canal não substitui atendimento de emergência.",
+    sourceLabel: "Ibama",
+    sourceUrl:
+      "https://www.gov.br/ibama/pt-br/assuntos/fiscalizacao-e-protecao-ambiental/fiscalizacao-ambiental/denuncias",
+    verifiedAt: "06/10/2026",
+  },
+
   {
     id: "upa-mansoes-odisseia",
     name: "UPA Mansões Odisseia",
@@ -398,28 +479,38 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "policia-civil-2",
     name: "2ª Delegacia de Polícia de Águas Lindas",
     category: "seguranca",
-    description: "Unidade distrital da Polícia Civil para registros e atendimento policial.",
-    address: "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO, 72911-316",
+    description:
+      "Unidade distrital da Polícia Civil para registros e atendimento policial.",
+    address:
+      "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO, 72911-316",
     phone: "(62) 98477-5357",
-    guidance: "Contato conferido na lista telefônica oficial da Polícia Civil de Goiás de 2026. Em emergência imediata, ligue 190.",
+    guidance:
+      "Contato conferido na lista telefônica oficial da Polícia Civil de Goiás de 2026. Em emergência imediata, ligue 190.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Polícia Civil de Goiás",
-    sourceUrl: "https://goias.gov.br/policiacivil/wp-content/uploads/sites/71/2026/06/Lista-Telefonica-2026.pdf",
-    mapQuery: "2ª Delegacia de Polícia, Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás, GO",
+    sourceUrl:
+      "https://goias.gov.br/policiacivil/wp-content/uploads/sites/71/2026/06/Lista-Telefonica-2026.pdf",
+    mapQuery:
+      "2ª Delegacia de Polícia, Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás, GO",
   },
   {
     id: "deam-depai-dpca",
     name: "DEAM / DEPAI / DPCA · atendimento especializado",
     category: "seguranca",
-    description: "Atendimento especializado da Polícia Civil para mulheres, adolescentes e crianças.",
-    address: "Rua Colibri, Quadra 27, Lote 03, Bairro Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
+    description:
+      "Atendimento especializado da Polícia Civil para mulheres, adolescentes e crianças.",
+    address:
+      "Rua Colibri, Quadra 27, Lote 03, Bairro Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
     phone: "(61) 3613-0701",
     extraPhone: "(62) 98598-3382 / (62) 98593-6310",
-    guidance: "Contatos conferidos na lista telefônica oficial de 2026. Para risco imediato, ligue 190; o Ligue 180 também orienta mulheres em situação de violência.",
+    guidance:
+      "Contatos conferidos na lista telefônica oficial de 2026. Para risco imediato, ligue 190; o Ligue 180 também orienta mulheres em situação de violência.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Polícia Civil de Goiás",
-    sourceUrl: "https://goias.gov.br/policiacivil/wp-content/uploads/sites/71/2026/06/Lista-Telefonica-2026.pdf",
-    mapQuery: "DEAM Águas Lindas, Rua Colibri, Quadra 27, Lote 03, Sol Nascente, Águas Lindas de Goiás, GO",
+    sourceUrl:
+      "https://goias.gov.br/policiacivil/wp-content/uploads/sites/71/2026/06/Lista-Telefonica-2026.pdf",
+    mapQuery:
+      "DEAM Águas Lindas, Rua Colibri, Quadra 27, Lote 03, Sol Nascente, Águas Lindas de Goiás, GO",
   },
   {
     id: "policia-militar",
@@ -1113,13 +1204,21 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "ouvsus-136",
     name: "OuvSUS 136 · Ouvidoria-Geral do SUS",
     category: "saude",
-    description: "Canal federal para informações, solicitações, reclamações, denúncias, sugestões e elogios sobre o SUS.",
+    description:
+      "Canal federal para informações, solicitações, reclamações, denúncias, sugestões e elogios sobre o SUS.",
     phone: "136",
     hours: "Telefone: segunda a sexta, 8h–20h; sábado, 8h–18h",
     actionUrl: "https://www.gov.br/saude/pt-br/canais-de-atendimento/ouvsus",
     actionLabel: "Acessar OuvSUS",
-    guidance: "Use o 136 ou o formulário oficial. O canal recebe manifestações e orienta sobre o SUS; urgências médicas devem ir para o SAMU 192.",
-    keywords: ["ouvidoria sus", "reclamacao sus", "denuncia saude", "disque saude", "136"],
+    guidance:
+      "Use o 136 ou o formulário oficial. O canal recebe manifestações e orienta sobre o SUS; urgências médicas devem ir para o SAMU 192.",
+    keywords: [
+      "ouvidoria sus",
+      "reclamacao sus",
+      "denuncia saude",
+      "disque saude",
+      "136",
+    ],
     verifiedAt: "06/10/2026",
     sourceLabel: "Ministério da Saúde",
     sourceUrl: "https://www.gov.br/saude/pt-br/canais-de-atendimento/ouvsus",
@@ -1128,14 +1227,24 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "farmacia-popular",
     name: "Farmácia Popular · participantes oficiais",
     category: "saude",
-    description: "Consulta oficial das farmácias credenciadas no Programa Farmácia Popular do Brasil.",
-    actionUrl: "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/publicacoes/farmacias-participante-do-programa-farmacia-popular/view",
+    description:
+      "Consulta oficial das farmácias credenciadas no Programa Farmácia Popular do Brasil.",
+    actionUrl:
+      "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/publicacoes/farmacias-participante-do-programa-farmacia-popular/view",
     actionLabel: "Consultar farmácias participantes",
-    guidance: "Consulte a lista oficial e confirme a disponibilidade do medicamento no estabelecimento antes de se deslocar.",
-    keywords: ["farmacia popular", "medicamento", "remedio", "gratuito", "desconto"],
+    guidance:
+      "Consulte a lista oficial e confirme a disponibilidade do medicamento no estabelecimento antes de se deslocar.",
+    keywords: [
+      "farmacia popular",
+      "medicamento",
+      "remedio",
+      "gratuito",
+      "desconto",
+    ],
     verifiedAt: "06/10/2026",
     sourceLabel: "Ministério da Saúde",
-    sourceUrl: "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/publicacoes/farmacias-participante-do-programa-farmacia-popular/view",
+    sourceUrl:
+      "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/publicacoes/farmacias-participante-do-programa-farmacia-popular/view",
   },
   {
     id: "meu-sus-digital",
@@ -1306,12 +1415,14 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "emprega brasil",
     ],
     phone: "158",
-    actionUrl: "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
+    actionUrl:
+      "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
     actionLabel: "Solicitar Seguro-Desemprego",
     guidance:
       "Tenha o número do requerimento entregue pelo empregador, quando aplicável, e entre com sua conta gov.br. A análise e a elegibilidade são do Ministério do Trabalho e Emprego.",
     sourceLabel: "Ministério do Trabalho e Emprego",
-    sourceUrl: "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
+    sourceUrl:
+      "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
     verifiedAt: "06/10/2026",
   },
   {
@@ -1363,76 +1474,152 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "passe-livre-pcd-goias",
     name: "Passe Livre da Pessoa com Deficiência · Goiás",
     category: "assistencia",
-    description: "Gratuidade no transporte intermunicipal em Goiás para pessoa com deficiência que atenda aos critérios do programa.",
-    keywords: ["pcd", "pessoa com deficiencia", "passe livre", "onibus", "transporte intermunicipal", "gratuidade"],
+    description:
+      "Gratuidade no transporte intermunicipal em Goiás para pessoa com deficiência que atenda aos critérios do programa.",
+    keywords: [
+      "pcd",
+      "pessoa com deficiencia",
+      "passe livre",
+      "onibus",
+      "transporte intermunicipal",
+      "gratuidade",
+    ],
     phone: "(62) 98104-3652",
     whatsappOnly: ["(62) 98104-3652"],
     email: "pcd@goias.gov.br",
-    actionUrl: "https://goias.gov.br/social/passe-livre-da-pessoa-com-deficiencia/",
+    actionUrl:
+      "https://goias.gov.br/social/passe-livre-da-pessoa-com-deficiencia/",
     actionLabel: "Consultar Passe Livre",
-    guidance: "No interior, a orientação estadual é procurar o CRAS ou usar os canais da Gerência da Pessoa com Deficiência para confirmar onde solicitar. O benefício é para linhas intermunicipais dentro de Goiás.",
-    documents: ["Laudo médico de especialista dentro da validade exigida", "Espelho do CadÚnico conforme o critério de renda", "Comprovante de residência em Goiás", "Documento de identificação e CPF", "Foto digital"],
+    guidance:
+      "No interior, a orientação estadual é procurar o CRAS ou usar os canais da Gerência da Pessoa com Deficiência para confirmar onde solicitar. O benefício é para linhas intermunicipais dentro de Goiás.",
+    documents: [
+      "Laudo médico de especialista dentro da validade exigida",
+      "Espelho do CadÚnico conforme o critério de renda",
+      "Comprovante de residência em Goiás",
+      "Documento de identificação e CPF",
+      "Foto digital",
+    ],
     verifiedAt: "06/10/2026",
     sourceLabel: "Desenvolvimento Social de Goiás",
-    sourceUrl: "https://goias.gov.br/social/passe-livre-da-pessoa-com-deficiencia/",
+    sourceUrl:
+      "https://goias.gov.br/social/passe-livre-da-pessoa-com-deficiencia/",
   },
   {
     id: "servicos-urbanos-solicitacao",
     name: "Serviços urbanos · iluminação, buracos, bueiros e limpeza",
     category: "servicos-urbanos",
-    description: "Canal municipal para solicitar manutenção de iluminação pública, recuperação de vias, limpeza urbana e serviços em bueiros e galerias.",
-    keywords: ["buraco", "asfalto", "iluminacao publica", "lampada poste", "bueiro", "boca de lobo", "limpeza urbana", "varricao", "lixo", "galeria pluvial"],
-    address: "Rua 16, Quadra 31, Área Especial, Setor 02, Águas Lindas de Goiás - GO",
+    description:
+      "Canal municipal para solicitar manutenção de iluminação pública, recuperação de vias, limpeza urbana e serviços em bueiros e galerias.",
+    keywords: [
+      "buraco",
+      "asfalto",
+      "iluminacao publica",
+      "lampada poste",
+      "bueiro",
+      "boca de lobo",
+      "limpeza urbana",
+      "varricao",
+      "lixo",
+      "galeria pluvial",
+    ],
+    address:
+      "Rua 16, Quadra 31, Área Especial, Setor 02, Águas Lindas de Goiás - GO",
     phone: "(61) 99303-4608",
     extraPhone: "(61) 3613-9458",
     hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
     email: "infraeobras@aguaslindasdegoias.go.gov.br",
-    guidance: "Informe o tipo de problema e a localização com referência clara. Os serviços municipais atendem espaços públicos; confirme o protocolo e o atendimento pelo canal oficial.",
+    guidance:
+      "Informe o tipo de problema e a localização com referência clara. Os serviços municipais atendem espaços públicos; confirme o protocolo e o atendimento pelo canal oficial.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/",
-    mapQuery: "Secretaria Municipal de Infraestrutura e Obras, Rua 16, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/",
+    mapQuery:
+      "Secretaria Municipal de Infraestrutura e Obras, Rua 16, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
   },
   {
     id: "defensoria-aguas-lindas",
     name: "Defensoria Pública · Mediação e Cidadania",
     category: "justica",
-    description: "Atendimento público gratuito para orientação, mediação e acesso à Justiça conforme os critérios da DPE-GO.",
-    keywords: ["defensoria", "advogado gratuito", "justica", "justiça", "direitos", "mediacao", "mediação", "processo", "familia", "família"],
-    address: "Quadra 36, Lote 1E, Quadra 53, Jardim Brasília, Águas Lindas de Goiás - GO, 72915-054",
+    description:
+      "Atendimento público gratuito para orientação, mediação e acesso à Justiça conforme os critérios da DPE-GO.",
+    keywords: [
+      "defensoria",
+      "advogado gratuito",
+      "justica",
+      "justiça",
+      "direitos",
+      "mediacao",
+      "mediação",
+      "processo",
+      "familia",
+      "família",
+    ],
+    address:
+      "Quadra 36, Lote 1E, Quadra 53, Jardim Brasília, Águas Lindas de Goiás - GO, 72915-054",
     phone: "(62) 3602-1224",
     hours: "Segunda a sexta, 8h às 18h",
     email: "faleconosco@defensoria.go.def.br",
     actionUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
     actionLabel: "Consultar atendimento da DPE-GO",
-    guidance: "A DPE-GO orienta procurar a unidade do município e verificar a área de atendimento. A assistência é gratuita para quem se enquadra nos critérios institucionais; confirme o direcionamento pela Central Virtual antes de sair.",
+    guidance:
+      "A DPE-GO orienta procurar a unidade do município e verificar a área de atendimento. A assistência é gratuita para quem se enquadra nos critérios institucionais; confirme o direcionamento pela Central Virtual antes de sair.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Defensoria Pública de Goiás",
     sourceUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
-    mapQuery: "Centro de Referência em Mediação e Cidadania, Jardim Brasília, Águas Lindas de Goiás, GO",
+    mapQuery:
+      "Centro de Referência em Mediação e Cidadania, Jardim Brasília, Águas Lindas de Goiás, GO",
   },
   {
     id: "creches-lista-espera",
     name: "Creches municipais · vagas e lista de espera",
     category: "educacao",
-    description: "Guia oficial para acesso às vagas em creches municipais e conveniadas de Águas Lindas.",
-    keywords: ["creche", "bercario", "berçario", "educacao infantil", "educação infantil", "vaga", "lista de espera", "matricula", "matrícula"],
-    actionUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    description:
+      "Guia oficial para acesso às vagas em creches municipais e conveniadas de Águas Lindas.",
+    keywords: [
+      "creche",
+      "bercario",
+      "berçario",
+      "educacao infantil",
+      "educação infantil",
+      "vaga",
+      "lista de espera",
+      "matricula",
+      "matrícula",
+    ],
+    actionUrl:
+      "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
     actionLabel: "Consultar vagas em creches",
-    guidance: "Consulte o guia e a lista de espera atual antes de procurar uma unidade. A Prefeitura publica critérios de prioridade e orientações da Gerência de Matrículas Escolares.",
+    guidance:
+      "Consulte o guia e a lista de espera atual antes de procurar uma unidade. A Prefeitura publica critérios de prioridade e orientações da Gerência de Matrículas Escolares.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
   },
   {
     id: "vigilancia-saude-municipal",
     name: "Vigilância em Saúde · sanitária, endemias e zoonoses",
     category: "saude",
-    description: "Estrutura municipal responsável por vigilância epidemiológica, sanitária, ambiental, saúde do trabalhador, endemias e zoonoses.",
-    keywords: ["vigilancia sanitaria", "vigilância sanitária", "zoonoses", "dengue", "endemias", "escorpiao", "escorpião", "fiscalizacao sanitaria", "fiscalização sanitária", "saude ambiental", "saúde ambiental"],
+    description:
+      "Estrutura municipal responsável por vigilância epidemiológica, sanitária, ambiental, saúde do trabalhador, endemias e zoonoses.",
+    keywords: [
+      "vigilancia sanitaria",
+      "vigilância sanitária",
+      "zoonoses",
+      "dengue",
+      "endemias",
+      "escorpiao",
+      "escorpião",
+      "fiscalizacao sanitaria",
+      "fiscalização sanitária",
+      "saude ambiental",
+      "saúde ambiental",
+    ],
     actionUrl: "https://aguaslindasdegoias.go.gov.br/servicos/",
     actionLabel: "Consultar serviços municipais",
-    guidance: "Use a busca de serviços da Prefeitura para localizar o atendimento correspondente. Esta ficha não presume endereço ou telefone porque a fonte consultada confirma a estrutura e as competências, mas não um único canal público para todas as áreas.",
+    guidance:
+      "Use a busca de serviços da Prefeitura para localizar o atendimento correspondente. Esta ficha não presume endereço ou telefone porque a fonte consultada confirma a estrutura e as competências, mas não um único canal público para todas as áreas.",
     verifiedAt: "06/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1606",
@@ -1629,7 +1816,6 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     query: "meio ambiente",
     hint: "Atendimento ambiental municipal",
   },
-
 ] as const;
 
 export function searchPublicServices(
