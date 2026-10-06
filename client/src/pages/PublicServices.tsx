@@ -275,7 +275,8 @@ export default function PublicServices() {
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="status-pill text-foreground/80">
-                  <WifiOff className="size-3.5 text-primary" /> catálogo disponível offline
+                  <WifiOff className="size-3.5 text-primary" /> catálogo offline ·{" "}
+                  {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
                 </span>
                 <span className="status-pill text-foreground/80">
                   <BadgeCheck className="size-3.5 text-accent" /> {SERVICE_SUMMARY.verified} fichas conferidas
@@ -521,7 +522,7 @@ export default function PublicServices() {
         >
           <div
             role="group"
-            className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1"
+            className="mt-3 flex flex-wrap gap-2"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -531,7 +532,7 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "min-h-11 shrink-0 rounded-full border px-3 text-sm font-black transition " +
+                  "min-h-11 rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
                     ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
                     : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
