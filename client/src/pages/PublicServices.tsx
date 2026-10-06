@@ -815,8 +815,8 @@ export default function PublicServices() {
                     </span>
                   )}
                   {service.mapQuery && (
-                    <span className="rounded-lg bg-muted px-2 py-1">
-                      Destino no planejador
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
+                      <Navigation className="size-3.5" /> rota + navegadores
                     </span>
                   )}
                   {service.actionUrl ? (
@@ -885,7 +885,7 @@ export default function PublicServices() {
                       className="min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground"
                     >
                       <MapPinned className="mr-1.5 inline size-3.5" />
-                      Rota
+                      Planejar rota
                     </button>
                   )}
                   {primaryContact ? (
