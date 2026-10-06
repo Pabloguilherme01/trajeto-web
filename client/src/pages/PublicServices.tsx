@@ -403,34 +403,6 @@ export default function PublicServices() {
           </div>
         </header>
 
-        <section className="mt-4 overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[.09] via-card to-accent/[.05] p-4 shadow-sm">
-          <div className="flex min-w-0 items-start gap-3">
-            <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-foreground">Mapa e navegação offline</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Planeje no Trajeto e continue no Organic Maps quando quiser navegação externa. Baixe o mapa da região no Organic Maps para continuar sem internet.</p>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground">Explorar mapa</button>
-                <button type="button" onClick={() => setLocation(appUrl("/planejar?destinos=1"))} className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground">{READY_SERVICE_ROUTES.length} rotas prontas</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="Resumo da Central de Serviços" className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-          {[
-            ["Serviços", `${PUBLIC_SERVICES.length} no catálogo`],
-            ["Categorias", `${PUBLIC_SERVICE_CATEGORIES.length - 1} assuntos`],
-            ["Rotas prontas", `${READY_SERVICE_ROUTES.length} destinos`],
-            ["Offline", "catálogo e rotas salvas"],
-          ].map(([label, value]) => (
-            <div key={label} className="min-w-0 overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-card to-primary/[.035] px-3.5 py-3 shadow-sm">
-              <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">{label}</p>
-              <p className="mt-1 break-words text-sm font-black text-foreground">{value}</p>
-            </div>
-          ))}
-        </section>
-
         <form
           onSubmit={event => {
             event.preventDefault();
@@ -497,6 +469,34 @@ export default function PublicServices() {
             ))}
           </div>
         )}
+
+        <section className="mt-4 overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[.09] via-card to-accent/[.05] p-4 shadow-sm">
+          <div className="flex min-w-0 items-start gap-3">
+            <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-black text-foreground">Mapa e navegação offline</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Planeje no Trajeto e continue no Organic Maps quando quiser navegação externa. Baixe o mapa da região no Organic Maps para continuar sem internet.</p>
+              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground">Explorar mapa</button>
+                <button type="button" onClick={() => setLocation(appUrl("/planejar?destinos=1"))} className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground">{READY_SERVICE_ROUTES.length} rotas prontas</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section aria-label="Resumo da Central de Serviços" className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+          {[
+            ["Serviços", `${PUBLIC_SERVICES.length} no catálogo`],
+            ["Categorias", `${PUBLIC_SERVICE_CATEGORIES.length - 1} assuntos`],
+            ["Rotas prontas", `${READY_SERVICE_ROUTES.length} destinos`],
+            ["Offline", "catálogo e rotas salvas"],
+          ].map(([label, value]) => (
+            <div key={label} className="min-w-0 overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-card to-primary/[.035] px-3.5 py-3 shadow-sm">
+              <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">{label}</p>
+              <p className="mt-1 break-words text-sm font-black text-foreground">{value}</p>
+            </div>
+          ))}
+        </section>
 
         <section
           id="emergency-strip"
