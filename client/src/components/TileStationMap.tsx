@@ -544,9 +544,9 @@ export default function TileStationMap({
   }
 
   return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-border/70 bg-[#dfe9e2] shadow-[0_24px_70px_rgba(15,35,45,.24)]">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-border/70 bg-muted shadow-xl">
       <div data-map-surface className={"relative isolate " + heightClassName}>
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#0e3842]/20 via-[#0e3842]/5 to-transparent" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-foreground/15 via-foreground/[.04] to-transparent" />
         <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border border-border bg-card/95 px-2.5 py-1.5 text-[0.68rem] font-black text-card-foreground shadow-lg backdrop-blur-md">
           {scaleMeters >= 1000 ? `${scaleMeters / 1000} km` : `${scaleMeters} m`}
           <div className="h-1 border-x-2 border-b-2 border-card-foreground" style={{ width: scaleMeters / metersPerPixel }} />
@@ -668,7 +668,7 @@ export default function TileStationMap({
                 setFollowing(false);
                 setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
-              }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-white bg-[#e4edff] text-sm font-black text-[#2457b8] shadow-md ring-4 ring-blue-500/10" style={{ left, top }}>{group.items.length}</button>;
+              }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-background bg-primary/10 text-sm font-black text-primary shadow-md ring-4 ring-primary/10" style={{ left, top }}>{group.items.length}</button>;
             })}
             {markerGroups.singles.map(station => {
               const position = markerPositions.get(stationKey(station));
@@ -698,18 +698,18 @@ export default function TileStationMap({
                 >
                   <span
                     className={
-                      "grid size-9 place-items-center rounded-2xl border-2 border-white shadow-lg motion-safe:transition-transform " +
+                      "grid size-9 place-items-center rounded-2xl border-2 border-background shadow-lg motion-safe:transition-transform " +
                       (routePoints.length > 1 && station.id === "destination"
-                        ? "bg-[#163840] text-white"
+                        ? "bg-foreground text-background"
                         : routePoints.length > 1 && station.id === "origin"
-                          ? "bg-white text-[#163840]"
+                          ? "bg-background text-foreground"
                           : active
-                        ? "scale-110 bg-primary text-[#163840]"
+                        ? "scale-110 bg-primary text-primary-foreground"
                         : station.coordinateKind === "street-midpoint"
-                          ? "bg-amber-300 text-[#163840]"
+                          ? "bg-warning text-warning-foreground"
                           : station.source === "ANP"
-                          ? "bg-primary text-[#163840]"
-                          : "bg-accent text-[#163840]")
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-accent text-accent-foreground")
                     }
                   >
                     <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}</span>
@@ -724,7 +724,7 @@ export default function TileStationMap({
                 const top = height / 2 + userWorld.y * zoomScale - centerPx.y;
                 return (
                   <span
-                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-accent shadow-[0_0_0_10px_rgba(61,227,255,.18)]"
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-background bg-accent shadow-md ring-[10px] ring-accent/20"
                     style={{ left, top, width: 14, height: 14 }}
                     aria-label="Sua localização"
                   />
@@ -737,7 +737,7 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-16 top-20 z-20 flex snap-x gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="absolute left-3 right-16 top-20 z-20 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {routeEndpoints.map(point => (
               <button
