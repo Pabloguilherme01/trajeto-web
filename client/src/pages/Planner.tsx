@@ -629,6 +629,13 @@ export default function Planner() {
       organicMode,
     );
     if (!target) return;
+    setSavedMessage(
+      mode === "walking"
+        ? "Abrindo no Organic Maps em modo a pé. Baixe o mapa da região no app para usar a navegação offline."
+        : mode === "cycling"
+          ? "Abrindo no Organic Maps em modo bicicleta. Baixe o mapa da região no app para usar a navegação offline."
+          : "Abrindo no Organic Maps para dirigir. Baixe o mapa da região no app para usar a navegação offline."
+    );
     window.location.href = target;
     track("route_open", destination || origin);
   };
@@ -1200,7 +1207,7 @@ export default function Planner() {
                     <button type="button" aria-label="Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-primary px-3 text-xs font-black text-background">
                       Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                     </button>
-                    <button type="button" onClick={openOrganicMaps} className="min-h-12 rounded-2xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-black text-primary">Organic Maps · offline</button>
+                    <button type="button" onClick={openOrganicMaps} className="min-h-12 rounded-2xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-black text-primary">Abrir no Organic Maps</button>
                     {mode === "driving" && (
                       <>
                         <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-accent/30 bg-accent/[.06] px-3 text-xs font-black text-accent">Waze</button>
