@@ -550,6 +550,11 @@ export default function PublicServices() {
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   O Trajeto organiza o serviço e prepara a rota. No planejador, destinos com coordenadas confirmadas podem continuar no Organic Maps, Google Maps, Waze ou Apple Maps.
                 </p>
+                <div className="mt-3 flex flex-wrap gap-2 text-[0.68rem] font-black">
+                  <span className="rounded-full border border-primary/15 bg-primary/[.06] px-2.5 py-1 text-primary">Organic Maps</span>
+                  <span className="rounded-full border border-border/15 bg-background px-2.5 py-1 text-foreground/70">carro · a pé · bicicleta</span>
+                  <span className="rounded-full border border-border/15 bg-background px-2.5 py-1 text-foreground/70">offline após baixar o mapa</span>
+                </div>
                 <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-sm font-black text-primary">
                   <Navigation className="size-4" /> Abrir mapa e destinos
                 </button>
