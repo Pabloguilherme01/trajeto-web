@@ -53,6 +53,16 @@ describe("local route presets", () => {
       )
     ).toBe(true);
     expect(
+      getLocalRoutePresets("2ª Delegacia").some(
+        item => item.id === "policia-civil-2"
+      )
+    ).toBe(true);
+    expect(
+      getLocalRoutePresets("DEAM").some(
+        item => item.id === "deam-depai-dpca"
+      )
+    ).toBe(true);
+    expect(
       getLocalRoutePresets("UBS").some(item => item.id === "ubs-barragem-ii")
     ).toBe(true);
     expect(getLocalRoutePresets("odisseia", "saude").some(item => item.id === "upa")).toBe(true);

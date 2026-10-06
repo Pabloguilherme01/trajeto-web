@@ -58,6 +58,20 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('className="mt-3 flex flex-wrap gap-2"');
   });
 
+  it("keeps ready-route counts dynamic and includes the full local destination catalog", () => {
+    expect(source).toContain("ALL_LOCAL_ROUTE_DESTINATIONS.find");
+    expect(source).toContain("{READY_SERVICE_ROUTES.length} destinos públicos");
+    expect(source).not.toContain("23 destinos públicos");
+    expect(source).toContain("policia-civil-2");
+    expect(source).toContain("deam-depai-dpca");
+  });
+
+  it("offers the official Organic Maps install fallback without exposing GPS", () => {
+    expect(source).toContain("ORGANIC_MAPS_INSTALL_URL");
+    expect(source).toContain("Instalar ou atualizar Organic Maps");
+    expect(source).toContain("window.location.href = url");
+  });
+
   it("uses shared semantic theme tokens instead of a page-specific palette", () => {
     expect(source).not.toMatch(/#0B1014|#121B22|#C7FF3C|#3DE3FF/);
     expect(source).toContain("bg-background");
