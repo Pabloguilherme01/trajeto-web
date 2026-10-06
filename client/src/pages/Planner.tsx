@@ -15,7 +15,7 @@ import { localDataEvent } from "@/lib/localData";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOrganicMapsNavigationUrl, buildOrganicMapsSearchUrl, buildWazeNavigationUrl, buildRouteShareText, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
 import { findPreparedRouteByCoordinates, findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
@@ -596,17 +596,28 @@ export default function Planner() {
     } catch {}
   };
 
-  const openExternal = (provider: "google" | "waze" | "apple") => {
+  const openExternal = (provider: "google" | "waze" | "apple" | "organic") => {
     const googleMode = mode === "walking" ? "walking" : mode === "cycling" ? "bicycling" : mode === "transit" ? "transit" : "driving";
     const externalOrigin = routeOriginIsPrivate
       ? privateOriginForExternalNavigation(PRIVATE_LOCATION_LABEL)
       : origin;
-    const target =
-      provider === "google" || mode !== "driving"
-        ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
-        : provider === "waze"
-          ? buildWazeNavigationUrl(destination)
-          : buildAppleMapsDirectionsUrl(destination, externalOrigin);
+    let target: string;
+    if (provider === "organic") {
+      let point: ReturnType<typeof resolveOfflineRoutePoint> = null;
+      try {
+        point = resolveOfflineRoutePoint(destination);
+      } catch {}
+      target = point
+        ? buildOrganicMapsNavigationUrl(destination, point)
+        : buildOrganicMapsSearchUrl(destination);
+    } else {
+      target =
+        provider === "google" || mode !== "driving"
+          ? buildGoogleMapsDirectionsUrl(externalOrigin, destination, googleMode, true)
+          : provider === "waze"
+            ? buildWazeNavigationUrl(destination)
+            : buildAppleMapsDirectionsUrl(destination, externalOrigin);
+    }
     openExternalUrl(target);
     track("route_open", destination || origin);
   };
@@ -830,7 +841,7 @@ export default function Planner() {
 
               </details>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
-                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
+                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-2 min-[480px]:grid-cols-4" : "grid-cols-1")}>
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
                     Google · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                   </button>
@@ -841,6 +852,9 @@ export default function Planner() {
                       </button>
                       <button type="button" onClick={() => openExternal("apple")} aria-label="Abrir Apple Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
                         Apple
+                      </button>
+                      <button type="button" onClick={() => openExternal("organic")} aria-label="Abrir Organic Maps agora" className="min-h-11 rounded-xl border border-primary/20 bg-primary/[.04] px-2 text-xs font-black text-primary">
+                        Organic Maps
                       </button>
                     </>
                   )}
@@ -1131,7 +1145,7 @@ export default function Planner() {
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{staticRuntime ? "Sua rota está pronta para abrir. O site público prepara a viagem sem fingir um cálculo próprio; o navegador escolhido recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "O cálculo interno não está disponível para esta partida, mas sua viagem não ficou travada. Nenhuma distância, tempo ou pedágio foi inventado; o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
-            <div className={"mt-4 grid grid-cols-1 gap-2 " + (mode === "driving" ? "sm:grid-cols-3" : "")}>
+            <div className={"mt-4 grid grid-cols-1 gap-2 " + (mode === "driving" ? "min-[360px]:grid-cols-2 sm:grid-cols-4" : "")}>
               <button type="button" aria-label="Abrir Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-xl bg-primary px-3 text-xs font-black text-background">
                 Abrir Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
               </button>
@@ -1139,6 +1153,7 @@ export default function Planner() {
                 <>
                   <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-xl border border-warning/20 bg-warning/[.05] px-3 text-xs font-black text-warning">Abrir Waze</button>
                   <button type="button" onClick={() => openExternal("apple")} className="min-h-12 rounded-xl border border-border/15 bg-muted/[.04] px-3 text-xs font-black">Abrir Apple Maps</button>
+                  <button type="button" onClick={() => openExternal("organic")} className="min-h-12 rounded-xl border border-primary/20 bg-primary/[.04] px-3 text-xs font-black text-primary">Abrir Organic Maps</button>
                 </>
               )}
             </div>
@@ -1182,6 +1197,7 @@ export default function Planner() {
                       <>
                         <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-accent/30 bg-accent/[.06] px-3 text-xs font-black text-accent">Waze</button>
                         <button type="button" onClick={() => openExternal("apple")} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.03] px-3 text-xs font-black text-foreground/70">Apple Maps</button>
+                        <button type="button" onClick={() => openExternal("organic")} className="min-h-11 rounded-2xl border border-primary/20 bg-primary/[.04] px-3 text-xs font-black text-primary">Organic Maps</button>
                       </>
                     )}
                   </>
