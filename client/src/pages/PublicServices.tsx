@@ -101,6 +101,15 @@ const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
   LOCAL_ROUTE_PRESETS.find(route => route.id === id)
 ).filter((route): route is (typeof LOCAL_ROUTE_PRESETS)[number] => Boolean(route));
 
+const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
+  if (service.guidance) return service.guidance;
+  if (service.hours && service.mapQuery) return "Confira o horário informado e, se o atendimento puder mudar, confirme no canal oficial antes de sair.";
+  if (service.mapQuery) return "Use a rota para chegar ao local. Quando não houver horário confirmado nesta ficha, consulte a fonte oficial antes do deslocamento.";
+  if (service.actionUrl) return "Este serviço possui canal externo. O catálogo continua disponível offline, mas a ação oficial precisa de internet.";
+  if (publicServiceContacts(service).length > 0) return "Entre em contato antes de sair para confirmar atendimento, horário e requisitos atuais.";
+  return "Consulte a fonte oficial desta ficha para confirmar requisitos e atendimento atual.";
+};
+
 const READY_ROUTE_GROUPS = [
   { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii"] },
   { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "policia-civil", "cras-1", "detran", "forum", "saneago"] },
@@ -842,33 +851,32 @@ export default function PublicServices() {
                     <span>{service.hours}</span>
                   </p>
                 )}
-                {(service.guidance || service.documents?.length) && (
-                  <details
-                    className="mobile-disclosure mt-3"
-                    open={expandedActions || undefined}
-                  >
-                    <summary className="min-h-11">
-                      <span className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-accent" />{" "}
-                        Orientações e documentos
-                      </span>
-                      <ChevronRight className="size-4" />
-                    </summary>
-                    <div className="space-y-3 text-sm leading-relaxed text-foreground">
-                      {service.guidance && <p>{service.guidance}</p>}
-                      {service.documents?.length && (
-                        <div>
-                          <p className="font-bold">Prepare antes de acessar</p>
-                          <ul className="mt-2 list-disc space-y-1 pl-5">
-                            {service.documents.map(document => (
-                              <li key={document}>{document}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </details>
-                )}
+                <details
+                  className="mobile-disclosure mt-3"
+                  open={expandedActions || undefined}
+                >
+                  <summary className="min-h-11">
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 text-accent" /> Antes de sair
+                    </span>
+                    <ChevronRight className="size-4" />
+                  </summary>
+                  <div className="space-y-3 text-sm leading-relaxed text-foreground">
+                    <p>{servicePreparationHint(service)}</p>
+                    {service.documents?.length ? (
+                      <div>
+                        <p className="font-bold">Documentos informados para este serviço</p>
+                        <ul className="mt-2 list-disc space-y-1 pl-5">
+                          {service.documents.map(document => (
+                            <li key={document}>{document}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Esta ficha não presume documentos. Confira os requisitos no canal oficial antes do atendimento.</p>
+                    )}
+                  </div>
+                </details>
                 <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                   {service.mapQuery && (
                     <button
