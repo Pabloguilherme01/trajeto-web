@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   Search,
+  Scale,
   SlidersHorizontal,
   ChevronRight,
   CheckCircle2,
@@ -59,6 +60,7 @@ const categoryIcons = {
   trabalho: BriefcaseBusiness,
   moradia: Building2,
   "servicos-urbanos": Wrench,
+  justica: Scale,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -71,7 +73,7 @@ const SERVICE_SUMMARY = {
 } as const;
 
 const NEED_GROUPS = [
-  { label: "Documentos e direitos", query: "cpf", hint: "CPF, Receita, título e serviços de cidadania" },
+  { label: "Documentos e direitos", query: "cpf", hint: "CPF, Receita, título, Defensoria e cidadania" },
   { label: "Família e benefícios", query: "cadunico", hint: "CadÚnico, CRAS, benefícios e Passe Livre PCD" },
   { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência e saúde digital" },
   { label: "Trabalho e renda", query: "emprego", hint: "Emprego, seguro-desemprego e empreendedorismo" },
@@ -515,6 +517,18 @@ export default function PublicServices() {
                     </button>
                   );
                 })}
+              </div>
+              <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                {[
+                  { label: "Preciso de ajuda jurídica", query: "defensoria", hint: "Defensoria, mediação e orientação" },
+                  { label: "Tenho um problema na rua", query: "buraco", hint: "Iluminação, vias, bueiros e limpeza" },
+                  { label: "Preciso de um benefício", query: "cadunico", hint: "CadÚnico, CRAS e benefícios sociais" },
+                ].map(item => (
+                  <button key={item.label} type="button" onClick={() => { setQuery(item.query); applyFilters(item.query, "todos"); }} className="premium-card min-h-20 rounded-2xl border border-primary/12 bg-primary/[.035] p-3 text-left transition hover:border-primary/30">
+                    <span className="block text-sm font-black text-foreground">{item.label}</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{item.hint}</span>
+                  </button>
+                ))}
               </div>
               <h2 className="mt-5 text-lg font-bold">Encontre pela sua situação</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
