@@ -1429,6 +1429,32 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     query: "alistamento militar",
     hint: "Canal oficial do serviço militar",
   },
+  {
+    label: "Moradia e regularização",
+    query: "regularizacao fundiaria",
+    hint: "Habitação e regularização municipal",
+  },
+  {
+    label: "Obras e infraestrutura",
+    query: "infraestrutura obras",
+    hint: "Atendimento municipal sobre vias e obras",
+  },
+  {
+    label: "Água, esgoto e vazamento",
+    query: "vazamento agua",
+    hint: "Saneago e atendimento de saneamento",
+  },
+  {
+    label: "Direitos da mulher",
+    query: "mulher",
+    hint: "Atendimento, proteção e orientação",
+  },
+  {
+    label: "Meio ambiente",
+    query: "meio ambiente",
+    hint: "Atendimento ambiental municipal",
+  },
+
 ] as const;
 
 export function searchPublicServices(
