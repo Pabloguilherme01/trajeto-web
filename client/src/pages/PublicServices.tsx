@@ -349,10 +349,7 @@ export default function PublicServices() {
                 href={phoneHref(item.number) ?? "#"}
                 className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-bold text-foreground transition hover:border-warning/30 hover:text-foreground"
               >
-                <span className="inline-flex items-center gap-1.5">
-                  <Phone className="size-3.5 shrink-0 text-warning" />
-                  {item.label}
-                </span>
+                <span>{item.label}</span>
                 <span className="text-xl font-black text-warning">
                   {item.number}
                 </span>
