@@ -810,9 +810,13 @@ export default function PublicServices() {
                       Destino no planejador
                     </span>
                   )}
-                  {service.actionUrl && (
-                    <span className="rounded-lg bg-muted px-2 py-1">
-                      Canal online
+                  {service.actionUrl ? (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
+                      <Globe2 className="size-3.5" /> exige internet
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
+                      <WifiOff className="size-3.5" /> ficha disponível offline
                     </span>
                   )}
                   {service.verifiedAt && (
