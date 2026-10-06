@@ -389,7 +389,7 @@ export default function PublicServices() {
               ["todos", "Todos os recursos"],
               ["contato", "Ligar ou WhatsApp"],
               ["rota", "Com destino para rota"],
-              ["online", "Atendimento online"],
+              ["online", "Canal oficial online"],
             ] as const).map(([value, label]) => (
               <button key={value} type="button" aria-pressed={resource === value}
                 onClick={() => { setResource(value); if (selectedService) applyFilters(query, category); }}
@@ -675,7 +675,7 @@ export default function PublicServices() {
                 <details className="mobile-disclosure mt-2">
                   <summary>
                     {service.actionUrl && !showOfficialAction
-                      ? "Mais opções · atendimento online"
+                      ? "Mais opções · canal online"
                       : secondaryContacts.length > 0 && !showSecondaryContacts
                         ? "Mais opções · contatos"
                         : service.email && !showEmail
