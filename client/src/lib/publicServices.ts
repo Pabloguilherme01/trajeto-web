@@ -88,8 +88,6 @@ const CT =
   "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-tutelar/";
 const PCGO =
   "https://goias.gov.br/policiacivil/telefones-enderecos-e-horarios-de-atendimento/";
-const PCGO_REGIONAIS =
-  "https://goias.gov.br/policiacivil/delegacias-regionais/";
 const PCGO_TELEFONES_2026 =
   "https://goias.gov.br/policiacivil/wp-content/uploads/sites/71/2026/06/Lista-Telefonica-2026.pdf";
 const SEDUC =
