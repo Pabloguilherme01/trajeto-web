@@ -298,8 +298,6 @@ export default function TileStationMap({
     }
     return result;
   }, [tileBounds, tileZoom]);
-  const tileFailureThreshold = Math.max(5, Math.ceil(tiles.length / 2));
-
   const clusterZoom = Math.min(17, Math.floor(zoom));
   const clusterScale = 2 ** clusterZoom;
   const clusterToCurrentScale = 2 ** (zoom - clusterZoom);
@@ -526,7 +524,7 @@ export default function TileStationMap({
     setZoom(value => Math.max(15, value));
   };
 
-  const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= tileFailureThreshold));
+  const tileFallback = Boolean(fallback && (localLayer || offline || tileErrors >= 5));
 
   if (tileFallback)
     return (
