@@ -26,6 +26,13 @@ export function getUniversalSearchResults(query: string) {
   const normalizedQuery = normalizeCatalogText(value);
   const dataResources = searchPublicDataResources(value).filter(item => {
     if (!serviceCategories.has(item.category)) return true;
+    // Numeric/road identifiers such as BR-070 are specific enough to keep
+    // official datasets even when a service from the same broad category also matches.
+    if (
+      /\d/.test(normalizedQuery) &&
+      normalizeCatalogText(item.keywords.join(" ")).includes(normalizedQuery)
+    )
+      return true;
     return [item.id, item.title, item.sourceLabel].some(field => {
       const normalizedField = normalizeCatalogText(field);
       return (

@@ -12,7 +12,7 @@ import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
-import { viewportTileBounds } from "@/lib/mapPresentation";
+import { limitPolylinePoints, viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
@@ -115,8 +115,15 @@ export default function TileStationMap({
   }, [drawable]);
 
   const [offline, setOffline] = useState(() => !navigator.onLine);
+  const failedTileKeys = useRef(new Set<string>());
   useEffect(() => {
-    const update = () => { setOffline(!navigator.onLine); if (navigator.onLine) setTileErrors(0); };
+    const update = () => {
+      setOffline(!navigator.onLine);
+      if (navigator.onLine) {
+        failedTileKeys.current.clear();
+        setTileErrors(0);
+      }
+    };
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     return () => {
@@ -134,6 +141,19 @@ export default function TileStationMap({
   );
   const [size, setSize] = useState({ width: 320, height: 520 });
   const [tileErrors, setTileErrors] = useState(0);
+  const reportTileError = (key: string) => {
+    if (failedTileKeys.current.has(key)) return;
+    failedTileKeys.current.add(key);
+    setTileErrors(failedTileKeys.current.size);
+  };
+  const reportTileLoad = (key: string) => {
+    if (!failedTileKeys.current.delete(key)) return;
+    setTileErrors(failedTileKeys.current.size);
+  };
+  const resetTileFailures = () => {
+    failedTileKeys.current.clear();
+    setTileErrors(0);
+  };
   const [dragging, setDragging] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
@@ -278,7 +298,6 @@ export default function TileStationMap({
     }
     return result;
   }, [tileBounds, tileZoom]);
-
   const clusterZoom = Math.min(17, Math.floor(zoom));
   const clusterScale = 2 ** clusterZoom;
   const clusterToCurrentScale = 2 ** (zoom - clusterZoom);
@@ -323,9 +342,13 @@ export default function TileStationMap({
     () => routePoints.map(point => `${point.lat},${point.lng}`).join(";"),
     [routePoints]
   );
+  const maxRouteGeometryPoints = width <= 480 ? 1200 : 2500;
   const routeWorld = useMemo(
-    () => routePoints.map(point => projectBase(point.lat, point.lng)),
-    [routeGeometryKey]
+    () =>
+      limitPolylinePoints(routePoints, maxRouteGeometryPoints).map(point =>
+        projectBase(point.lat, point.lng)
+      ),
+    [routeGeometryKey, maxRouteGeometryPoints]
   );
   const userWorld = useMemo(
     () => userCoords ? projectBase(userCoords.lat, userCoords.lng) : null,
@@ -511,7 +534,7 @@ export default function TileStationMap({
         {!offline && !localLayer && (
           <button
             type="button"
-            onClick={() => setTileErrors(0)}
+            onClick={resetTileFailures}
             className="m-3 min-h-11 rounded-xl border border-border bg-card px-4 text-sm font-bold text-card-foreground"
           >
             Tentar carregar mapa de ruas
@@ -625,9 +648,8 @@ export default function TileStationMap({
                 decoding="async"
                 loading={tile.prefetch ? "lazy" : "eager"}
                 alt=""
-                onError={() =>
-                  setTileErrors(value => (value >= 5 ? value : value + 1))
-                }
+                onError={() => reportTileError(tile.key)}
+                onLoad={() => reportTileLoad(tile.key)}
                 draggable={false}
                 className="absolute size-64 max-w-none"
                 style={{ left: tile.left, top: tile.top }}
@@ -737,14 +759,14 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-16 top-20 z-20 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="absolute left-3 right-[4.25rem] top-20 z-20 flex min-w-0 max-w-[calc(100%-5rem)] snap-x gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {routeEndpoints.map(point => (
               <button
                 key={stationKey(point)}
                 type="button"
                 onClick={() => focusEndpoint(point)}
-                className="min-h-11 shrink-0 snap-start rounded-xl border border-border bg-card/95 px-3 text-xs font-bold text-card-foreground shadow-md backdrop-blur-md focus-visible:outline-2 focus-visible:outline-ring"
+                className="min-h-11 max-w-[min(68vw,15rem)] shrink-0 snap-start overflow-hidden text-ellipsis whitespace-nowrap rounded-xl border border-border bg-card/95 px-3 text-xs font-bold text-card-foreground shadow-md backdrop-blur-md focus-visible:outline-2 focus-visible:outline-ring"
               >
                 {point.id === "origin" ? "Ver origem" : "Ver destino"}
               </button>

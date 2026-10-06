@@ -225,4 +225,11 @@ describe("public services catalog", () => {
     expect(detran.verifiedAt).toBe("06/10/2026");
   });
 
+  it("finds the new public-utility services by practical intent", () => {
+    expect(searchPublicServices("farmacia popular").some(service => service.id === "farmacia-popular")).toBe(true);
+    expect(searchPublicServices("ouvsus").some(service => service.id === "ouvsus-136")).toBe(true);
+    expect(searchPublicServices("deam").some(service => service.id === "deam-depai-dpca")).toBe(true);
+    expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
+  });
+
 });

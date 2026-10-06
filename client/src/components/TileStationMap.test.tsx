@@ -336,11 +336,20 @@ it("moves long route geometry by transform instead of rebuilding its points on p
   expect(geometry.getAttribute("transform")).not.toBe(transform);
 });
 
+it("ignores repeated failures from the same background tile", () => {
+  render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
+  const tile = document.querySelector("[data-map-tile-layer] img")!;
+  for (let i = 0; i < 5; i++) fireEvent.error(tile);
+  expect(screen.queryByText("Mapa local")).toBeNull();
+  expect(screen.getByRole("region", { name: "Mapa dos postos" })).toBeTruthy();
+});
+
 it("returns from offline fallback when connectivity is restored", () => {
   const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
-  const tile = document.querySelector("img")!;
-  for (let i = 0; i < 5; i++) fireEvent.error(tile);
+  const tiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
+  expect(tiles.length).toBeGreaterThanOrEqual(5);
+  tiles.slice(0, 5).forEach(tile => fireEvent.error(tile));
   expect(screen.getByText("Mapa local")).toBeTruthy();
   online.mockReturnValue(false);
   act(() => window.dispatchEvent(new Event("offline")));
