@@ -411,7 +411,7 @@ export default function PublicServices() {
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Planeje no Trajeto e continue no Organic Maps quando quiser navegação externa. Baixe o mapa da região no Organic Maps para continuar sem internet.</p>
               <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground">Explorar mapa</button>
-                <button type="button" onClick={() => setLocation(appUrl("/planejar?destinos=1"))} className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground">Ver 28 rotas prontas</button>
+                <button type="button" onClick={() => setLocation(appUrl("/planejar?destinos=1"))} className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground">{READY_SERVICE_ROUTES.length} rotas prontas</button>
               </div>
             </div>
           </div>
