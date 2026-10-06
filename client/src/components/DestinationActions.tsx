@@ -3,6 +3,8 @@ import { Bookmark, MapPinned, Navigation, Route } from "lucide-react";
 import {
   buildAppleMapsDirectionsUrl,
   buildGoogleMapsDestinationUrl,
+  buildOrganicMapsNavigationUrl,
+  buildOrganicMapsSearchUrl,
   buildWazeNavigationUrl,
   getPreferredNavigationProvider,
   openExternalUrl,
@@ -64,7 +66,11 @@ export function DestinationActions({
         ? buildWazeNavigationUrl(destination.address, destination.coordinates ?? undefined)
         : provider === "apple"
           ? buildAppleMapsDirectionsUrl(mapValue)
-          : buildGoogleMapsDestinationUrl(mapValue, true);
+          : provider === "organic"
+            ? destination.coordinates
+              ? buildOrganicMapsNavigationUrl(destination.name, destination.coordinates)
+              : buildOrganicMapsSearchUrl(mapValue)
+            : buildGoogleMapsDestinationUrl(mapValue, true);
     openExternalUrl(url);
   };
 
