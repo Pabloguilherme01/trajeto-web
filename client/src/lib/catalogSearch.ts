@@ -4,5 +4,11 @@ export function normalizeCatalogText(value: string) {
 
 export function matchesCatalogText(query: string, values: Array<string | undefined>) {
   const text = normalizeCatalogText(values.filter(Boolean).join(" "));
-  return normalizeCatalogText(query).split(" ").filter(Boolean).every(term => text.includes(term));
+  const terms = normalizeCatalogText(query).split(" ").filter(Boolean);
+  const tokens = new Set(text.split(/[^a-z0-9]+/i).filter(Boolean));
+
+  return terms.every(term => {
+    const requireWholeToken = term.length <= 3 || /^\d+$/.test(term);
+    return requireWholeToken ? tokens.has(term) : text.includes(term);
+  });
 }
