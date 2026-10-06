@@ -178,7 +178,7 @@ export default function MobileNavigationCenter({
       <p className="border-t border-border/10 px-4 py-2.5 text-center text-[0.56rem] font-semibold leading-relaxed text-muted-foreground">
         {offline
           ? "A rota salva continua disponível. Dados novos e navegação externa precisam de conexão."
-          : "O Google Maps abre a navegação externa. Mantenha a atenção na direção."}
+          : "O app de mapa escolhido abre a navegação externa. Mantenha a atenção na direção."}
       </p>
     </section>
   );
