@@ -663,9 +663,15 @@ export default function PublicServices() {
                 </button>
               ))}
             </div>
-            <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/15 px-3 text-xs font-black text-foreground/80">
-              Ver todos os destinos <ChevronRight className="size-4" />
-            </button>
+            <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
+              <div>
+                <p className="text-sm font-black text-foreground">Também vai a bancos, farmácias, praças, bairros e comércio?</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Esses locais ficam separados do catálogo público para a Central continuar simples. Abra o diretório completo no planejador.</p>
+              </div>
+              <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-3 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-primary/20 bg-background px-3 text-xs font-black text-primary sm:mt-0">
+                Explorar todos os destinos <ChevronRight className="size-4" />
+              </button>
+            </div>
           </section>
         )}
 
