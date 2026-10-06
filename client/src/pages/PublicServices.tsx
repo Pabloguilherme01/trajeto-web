@@ -101,6 +101,12 @@ const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
   LOCAL_ROUTE_PRESETS.find(route => route.id === id)
 ).filter((route): route is (typeof LOCAL_ROUTE_PRESETS)[number] => Boolean(route));
 
+const READY_ROUTE_GROUPS = [
+  { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii"] },
+  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "policia-civil", "cras-1", "detran", "forum", "saneago"] },
+  { label: "Transporte e educação", ids: ["rodoviaria", "secretaria-educacao", "cora-coralina", "praca-da-biblia"] },
+] as const;
+
 export default function PublicServices() {
   const [, setLocation] = useLocation();
   const rawSearch = useSearch();
@@ -121,6 +127,7 @@ export default function PublicServices() {
   const [resource, setResource] = useState<
     "todos" | "contato" | "rota" | "online"
   >("todos");
+  const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
@@ -573,8 +580,16 @@ export default function PublicServices() {
               </div>
               <Route className="hidden size-6 text-primary sm:block" />
             </div>
+            <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar rotas prontas">
+              <button type="button" aria-pressed={readyRouteGroup === "todos"} onClick={() => setReadyRouteGroup("todos")} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === "todos" ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>Todas</button>
+              {READY_ROUTE_GROUPS.map(group => <button key={group.label} type="button" aria-pressed={readyRouteGroup === group.label} onClick={() => setReadyRouteGroup(group.label)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (readyRouteGroup === group.label ? "border-primary/35 bg-primary/10 text-primary" : "border-border/15 bg-card text-foreground/75")}>{group.label}</button>)}
+            </div>
             <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
-              {READY_SERVICE_ROUTES.map(route => (
+              {(readyRouteGroup === "todos"
+                ? READY_SERVICE_ROUTES
+                : READY_SERVICE_ROUTES.filter(route =>
+                    READY_ROUTE_GROUPS.find(group => group.label === readyRouteGroup)?.ids.includes(route.id as never)
+                  )).map(route => (
                 <button
                   key={route.id}
                   type="button"
