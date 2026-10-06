@@ -37,13 +37,20 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("w-[min(74vw,18rem)]");
   });
 
-  it("keeps every essential action visible when a service is opened directly", () => {
+  it("keeps essential actions visible even when offline navigation loses deep-link expansion", () => {
     expect(source).toContain("const expandedActions = selectedService?.id === service.id");
-    expect(source).toContain("expandedActions && secondaryContacts.length > 0");
-    expect(source).toContain("expandedActions && service.actionUrl");
-    expect(source).toContain("expandedActions && service.email");
-    expect(source).toContain("expandedActions && primaryContact");
-    expect(source).toContain("!expandedActions && (");
+    expect(source).toContain("const emergencyDirect = contacts.some");
+    expect(source).toContain("const showSecondaryContacts");
+    expect(source).toContain("expandedActions || emergencyDirect");
+    expect(source).toContain("const showOfficialAction");
+    expect(source).toContain("expandedActions || (!primaryContact && !service.mapQuery)");
+    expect(source).toContain("const hasMoreOptions");
+    expect(source).toContain("!showOfficialAction");
+    expect(source).toContain("!showSecondaryContacts");
+  });
+
+  it("does not make the informational header a keyboard-inaccessible scroll region", () => {
+    expect(source).toContain('className="mt-3 flex flex-wrap gap-2"');
   });
 
   it("uses shared semantic theme tokens instead of a page-specific palette", () => {
