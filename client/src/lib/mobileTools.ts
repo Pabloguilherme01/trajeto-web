@@ -112,10 +112,12 @@ export function buildGoogleMapsNearbyStationsUrl(_lat: number, _lng: number) {
   return buildGoogleMapsSearchUrl("postos de combustível perto de mim");
 }
 
+export const ORGANIC_MAPS_INSTALL_URL = "https://get.omaps.org/";
+
 export function buildOrganicMapsSearchUrl(query: string) {
   const value = query.trim();
-  if (!value) return "https://omaps.app/";
-  return "https://omaps.app/search?" + new URLSearchParams({ query: value }).toString();
+  if (!value) return "om://search";
+  return "om://search?" + new URLSearchParams({ query: value }).toString();
 }
 
 export function buildOrganicMapsNavigationUrl(
@@ -136,7 +138,7 @@ export function buildOrganicMapsNavigationUrl(
     destination_name: label.trim().slice(0, 120) || "Destino",
     mode,
   });
-  return "https://omaps.app/v2/nav?" + params.toString();
+  return "om://v2/nav?" + params.toString();
 }
 
 export function buildWazeNavigationUrl(destination: string, coordinates?: { lat: number; lng: number }) {
