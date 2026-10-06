@@ -9,6 +9,17 @@ afterEach(() => { cleanup(); navigate.mockReset(); });
 function open() {
   fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
 }
+it("uses semantic tokens for ready-route filters and secondary actions", () => {
+  render(<ReadyRouteShortcuts />); open();
+  const health = screen.getByRole("button", { name: "Cuidar da saúde" });
+  expect(health.className).toContain("border-border");
+  expect(health.className).toContain("bg-muted/10");
+  expect(health.className).not.toContain("border-white");
+  const returnTrip = screen.getAllByRole("button", { name: /Calcular volta:/ })[0];
+  expect(returnTrip.className).toContain("border-border");
+  expect(returnTrip.className).not.toContain("border-white");
+});
+
 it("finds routes without accents, filters categories and recovers an empty search", () => {
   render(<ReadyRouteShortcuts />); open();
   expect(screen.getAllByRole("article")).toHaveLength(6);

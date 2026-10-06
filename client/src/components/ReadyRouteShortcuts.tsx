@@ -90,7 +90,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
           { value: "centro", label: "Ir para um bairro" },
         ].map(intent => <button key={intent.value} type="button" aria-pressed={category === intent.value}
           onClick={() => { setCategory(intent.value as RouteDestinationCategoryFilter); setQuery(""); setVisibleCount(6); }}
-          className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-primary bg-primary/15 text-primary" : "border-white/15 bg-white/5 text-foreground/80"}`}>
+          className={`min-h-11 min-w-0 rounded-xl border px-3 text-xs font-bold ${category === intent.value ? "border-primary bg-primary/15 text-primary" : "border-border bg-muted/10 text-foreground/80"}`}>
           {intent.label}
         </button>)}
       </div>
@@ -98,12 +98,12 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Modo rápido de viagem">
       {modes.map(item => <button key={item.value} type="button" aria-pressed={mode === item.value}
         onClick={() => setMode(item.value)}
-        className={`min-h-11 rounded-xl border px-3 text-xs font-bold ${mode === item.value ? "border-accent bg-accent/10 text-accent" : "border-white/15 text-foreground/70"}`}>
+        className={`min-h-11 rounded-xl border px-3 text-xs font-bold ${mode === item.value ? "border-accent bg-accent/10 text-accent" : "border-border text-foreground/70"}`}>
         {item.label}
       </button>)}
     </div>
     <button type="button" aria-pressed={offlineActive} disabled={!online} onClick={() => setOfflineOnly(value => !value)}
-      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-primary bg-primary/15 text-primary" : "border-white/15 text-foreground/80"} disabled:cursor-default disabled:opacity-100`}>
+      className={`mt-3 min-h-11 rounded-xl border px-3 text-sm font-bold ${offlineActive ? "border-primary bg-primary/15 text-primary" : "border-border text-foreground/80"} disabled:cursor-default disabled:opacity-100`}>
       {offlineActive ? "Offline ativo" : "Calcular offline"}
     </button>
     <p className="mt-2 text-xs leading-relaxed text-foreground/65">Após preparar o acesso offline neste aparelho, os locais deste catálogo ficam disponíveis sem internet. Para seguir pelas ruas, calcule e salve a ida e a volta no modo escolhido antes de sair. Sem trajeto viário salvo, o cálculo mostra uma estimativa identificada.</p>
@@ -143,7 +143,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     </div>
     <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
       <p role="status" className="text-xs text-foreground/65">{filtered.length ? `${visible.length} de ${filtered.length} trajetos` : "Nenhum trajeto encontrado."}</p>
-      {(query || category !== "todos" || originId !== "todos") && <button type="button" onClick={clearFilters} className="min-h-11 rounded-xl border border-white/15 px-3 text-xs font-bold text-foreground">Limpar filtros</button>}
+      {(query || category !== "todos" || originId !== "todos") && <button type="button" onClick={clearFilters} className="min-h-11 rounded-xl border border-border px-3 text-xs font-bold text-foreground">Limpar filtros</button>}
     </div>
     {!filtered.length && <p className="mt-2 text-xs text-foreground/65">Tente outro nome ou limpe os filtros para ver os trajetos disponíveis.</p>}
     <div className="mt-3 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-3">
@@ -163,9 +163,9 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button type="button" onClick={() => openRoute(route)} aria-label={"Calcular " + route.label} className="min-h-11 min-w-0 break-words rounded-xl bg-primary px-2 text-xs font-black text-primary-foreground"><span className="inline-flex items-center justify-center gap-1">Ir até aqui<ArrowUpRight className="size-3.5 shrink-0" /></span></button>
-            <button type="button" onClick={() => openRoute(route, true)} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-white/15 px-2 text-xs font-bold text-foreground"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
+            <button type="button" onClick={() => openRoute(route, true)} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-border px-2 text-xs font-bold text-foreground"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
           </div>
-          <details className="mt-2 border-t border-white/10 pt-2">
+          <details className="mt-2 border-t border-border pt-2">
             <summary className="min-h-11 cursor-pointer text-xs font-bold text-foreground/70">Detalhes e opções do destino</summary>
             <p className="mb-3 break-words text-xs leading-relaxed text-foreground/65">De: {route.origin}<br />Até: {route.destination}</p>
             <DestinationActions destination={readyRouteDestination(route)} compact />
@@ -175,7 +175,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     </div>
     <div className="mt-3 flex flex-wrap gap-2">
       {visible.length < filtered.length && <button type="button" onClick={() => setVisibleCount(value => value + 12)} className="min-h-11 flex-1 rounded-xl border border-accent/25 px-3 text-sm font-bold text-accent">Ver mais {Math.min(12, filtered.length - visible.length)} trajetos</button>}
-      {visibleCount > 6 && <button type="button" onClick={() => setVisibleCount(6)} className="min-h-11 rounded-xl border border-white/15 px-3 text-sm font-bold text-foreground/80">Mostrar menos trajetos</button>}
+      {visibleCount > 6 && <button type="button" onClick={() => setVisibleCount(6)} className="min-h-11 rounded-xl border border-border px-3 text-sm font-bold text-foreground/80">Mostrar menos trajetos</button>}
     </div>
     <p className="mt-3 text-xs leading-relaxed text-foreground/55">Sem internet, o caminho e a distância podem ser estimativas. Transporte público não informa horários em tempo real.</p>
   </details>;
