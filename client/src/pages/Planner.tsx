@@ -15,7 +15,7 @@ import { localDataEvent } from "@/lib/localData";
 import { appUrl } from "@/lib/appUrl";
 import { getLastTrip, rememberTrip } from "@/lib/mobilePreferences";
 import { listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildWazeNavigationUrl, buildRouteShareText, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
+import { buildAppleMapsDirectionsUrl, buildGoogleMapsDirectionsUrl, buildOrganicMapsNavigationUrl, buildWazeNavigationUrl, buildRouteShareText, openExternalUrl, shareText, vibration } from "@/lib/mobileTools";
 import { findPreparedRouteByCoordinates, findBestOfflineRouteForTrip, getOfflineRoute, listOfflineRoutes, offlineRouteId, offlineRouteTravelMode, saveOfflineRoute, removeOfflineRoute, isOfflineRouteStale, type OfflineRoute } from "@/lib/offlineStore";
 import { RouteMap } from "@/components/RouteMap";
 import LocalRouteCalculator from "@/components/LocalRouteCalculator";
@@ -611,6 +611,28 @@ export default function Planner() {
     track("route_open", destination || origin);
   };
 
+  const openOrganicMaps = () => {
+    const point = planned?.route?.destination as unknown;
+    if (!point || typeof point !== "object") {
+      setSavedMessage("Organic Maps fica disponível quando a rota tem coordenadas confirmadas. Calcule a rota no Trajeto primeiro.");
+      return;
+    }
+    const candidate = point as { lat?: number; lng?: number };
+    if (!Number.isFinite(candidate.lat) || !Number.isFinite(candidate.lng)) {
+      setSavedMessage("Organic Maps fica disponível quando a rota tem coordenadas confirmadas.");
+      return;
+    }
+    const organicMode = mode === "walking" ? "walk" : mode === "cycling" ? "bike" : "drive";
+    const target = buildOrganicMapsNavigationUrl(
+      { lat: candidate.lat as number, lng: candidate.lng as number },
+      destination,
+      organicMode,
+    );
+    if (!target) return;
+    window.location.href = target;
+    track("route_open", destination || origin);
+  };
+
   const openStation = (stop: PlannedRoute["stops"][number] | undefined) => {
     if (!stop) { setSavedMessage("Não há endereço disponível para esta parada."); return; }
     openExternalUrl(buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true));
@@ -1178,6 +1200,7 @@ export default function Planner() {
                     <button type="button" aria-label="Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-primary px-3 text-xs font-black text-background">
                       Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                     </button>
+                    <button type="button" onClick={openOrganicMaps} className="min-h-12 rounded-2xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-black text-primary">Organic Maps · offline</button>
                     {mode === "driving" && (
                       <>
                         <button type="button" onClick={() => openExternal("waze")} className="min-h-12 rounded-2xl border border-accent/30 bg-accent/[.06] px-3 text-xs font-black text-accent">Waze</button>
@@ -1279,7 +1302,7 @@ export default function Planner() {
         )}
 
         <section className="mt-8 pb-3 text-center text-xs leading-relaxed text-muted-foreground">
-          O Trajeto organiza dados e abre a navegação externa; ele não substitui Google Maps, Waze ou Apple Maps.
+          O Trajeto organiza dados e abre a navegação externa; ele não substitui Google Maps, Waze, Apple Maps ou Organic Maps.
         </section>
       </div>
     </main>
