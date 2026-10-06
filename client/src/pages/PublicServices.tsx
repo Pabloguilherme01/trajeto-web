@@ -609,6 +609,27 @@ export default function PublicServices() {
             </section>
           )}
         {!selectedService && !savedOnly && !query.trim() && category === "todos" && resource === "todos" && (
+          <section className="mt-6" aria-labelledby="popular-actions-title">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.14em] text-accent">Mais usados</p>
+                <h2 id="popular-actions-title" className="mt-1 text-lg font-bold">Resolva em poucos toques</h2>
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[
+                { label: "Saúde agora", query: "upa", detail: "Urgência e unidades" },
+                { label: "Documentos", query: "cpf", detail: "CPF, título e cidadania" },
+                { label: "Água e cidade", query: "vazamento agua", detail: "Saneamento e manutenção" },
+                { label: "Direitos", query: "defensoria", detail: "Defensoria e orientação" },
+              ].map(action => (
+                <button key={action.label} type="button" onClick={() => { setQuery(action.query); applyFilters(action.query, "todos"); }} className="premium-card min-h-20 rounded-2xl border border-border/12 bg-card p-3 text-left transition hover:border-accent/35">
+                  <span className="block text-sm font-black">{action.label}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{action.detail}</span>
+                </button>
+              ))}
+            </div>
+          </section>
           <section className="mt-6" aria-labelledby="ready-routes-title">
             <div className="flex items-end justify-between gap-3">
               <div>
