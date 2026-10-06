@@ -48,6 +48,24 @@ async function setup() {
   }
   return render(<Map />);
 }
+it("uses semantic tokens for offline map controls and status chrome", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(JSON.stringify(pack)))
+  );
+  await setup();
+  await screen.findByText(/Ruas locais disponíveis/);
+  const themeToggle = screen.getByRole("button", { name: "Usar mapa claro" });
+  expect(themeToggle.className).toContain("bg-card/95");
+  expect(themeToggle.className).toContain("text-card-foreground");
+  const expand = screen.getByRole("button", { name: "Ampliar mapa" });
+  expect(expand.className).toContain("bg-card/95");
+  expect(expand.className).toContain("text-card-foreground");
+  const status = screen.getByRole("status");
+  expect(status.parentElement?.className).toContain("bg-card");
+  expect(status.parentElement?.className).toContain("text-muted-foreground");
+});
+
 it("loads local streets with no coordinate or external request, and preserves dashed estimates", async () => {
   const fetchMock = vi
     .fn()
