@@ -1,7 +1,7 @@
 import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
-  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania" | "trabalho" | "moradia" | "servicos-urbanos";
+  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania" | "trabalho" | "moradia" | "servicos-urbanos" | "justica";
 
 export type PublicService = {
   id: string;
@@ -40,7 +40,8 @@ export type PublicService = {
     | "Tribunal Superior Eleitoral"
     | "Ministério da Justiça"
     | "Ministério da Defesa"
-    | "Detran-GO";
+    | "Detran-GO"
+    | "Defensoria Pública de Goiás";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -60,6 +61,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
   { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
   { id: "servicos-urbanos", label: "Cidade e serviços", shortLabel: "Cidade" },
+  { id: "justica", label: "Justiça e direitos", shortLabel: "Justiça" },
 ];
 
 const PREFEITURA_CONTATOS = "https://aguaslindasdegoias.go.gov.br/contatos/";
@@ -1337,6 +1339,24 @@ export const PUBLIC_SERVICES: PublicService[] = [
     mapQuery: "Secretaria Municipal de Infraestrutura e Obras, Rua 16, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
   },
   {
+    id: "defensoria-aguas-lindas",
+    name: "Defensoria Pública · Mediação e Cidadania",
+    category: "justica",
+    description: "Atendimento público gratuito para orientação, mediação e acesso à Justiça conforme os critérios da DPE-GO.",
+    keywords: ["defensoria", "advogado gratuito", "justica", "justiça", "direitos", "mediacao", "mediação", "processo", "familia", "família"],
+    address: "Quadra 36, Lote 1E, Quadra 53, Jardim Brasília, Águas Lindas de Goiás - GO, 72915-054",
+    phone: "(62) 3602-1224",
+    hours: "Segunda a sexta, 8h às 18h",
+    email: "faleconosco@defensoria.go.def.br",
+    actionUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
+    actionLabel: "Consultar atendimento da DPE-GO",
+    guidance: "A DPE-GO orienta procurar a unidade do município e verificar a área de atendimento. A assistência é gratuita para quem se enquadra nos critérios institucionais; confirme o direcionamento pela Central Virtual antes de sair.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Defensoria Pública de Goiás",
+    sourceUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
+    mapQuery: "Centro de Referência em Mediação e Cidadania, Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
     id: "alistamento-militar",
     name: "Alistamento Militar · serviço oficial",
     category: "cidadania",
@@ -1482,6 +1502,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Direitos da mulher",
     query: "mulher",
     hint: "Atendimento, proteção e orientação",
+  },
+  {
+    label: "Defensoria e direitos",
+    query: "defensoria",
+    hint: "Orientação jurídica gratuita",
   },
   {
     label: "Passe Livre PCD",
