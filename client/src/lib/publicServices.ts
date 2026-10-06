@@ -229,6 +229,89 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "06/10/2026",
   },
   {
+    id: "medicamentos-sus-municipal",
+    name: "Lista de Medicamentos SUS · Águas Lindas",
+    category: "saude",
+    description:
+      "Consulta oficial municipal da lista de medicamentos do SUS disponibilizada no portal de Acesso à Informação.",
+    keywords: ["medicamentos sus", "remedios sus", "lista medicamentos", "farmacia publica", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_sus",
+    actionLabel: "Consultar lista de medicamentos",
+    guidance:
+      "Confira a data da informação publicada. Se a consulta não carregar, use os canais oficiais da Secretaria Municipal de Saúde para confirmar disponibilidade e retirada.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_sus",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "medicamentos-alto-custo-municipal",
+    name: "Medicamentos de Alto Custo · Águas Lindas",
+    category: "saude",
+    description:
+      "Acesso oficial municipal às informações publicadas sobre medicamentos de alto custo.",
+    keywords: ["alto custo", "medicamento alto custo", "remedio alto custo", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_altocusto",
+    actionLabel: "Consultar medicamentos de alto custo",
+    guidance:
+      "Use a consulta como referência e confirme critérios, documentos e fluxo de atendimento nos canais oficiais de saúde antes de se deslocar.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/medicamentos_altocusto",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "estoque-farmacias-publicas",
+    name: "Estoque de medicamentos · farmácias públicas",
+    category: "saude",
+    description:
+      "Consulta oficial do estoque de medicamentos das farmácias públicas de Águas Lindas.",
+    keywords: ["estoque medicamento", "farmacia publica", "tem remedio", "medicamento disponivel", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/estoque_medicamentos_farmacias",
+    actionLabel: "Consultar estoque das farmácias",
+    guidance:
+      "O estoque pode mudar ao longo do dia. Consulte a publicação mais recente e confirme a disponibilidade com a rede municipal quando necessário.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/estoque_medicamentos_farmacias",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "regulacao-municipal-lista-espera",
+    name: "Lista de espera da Regulação Municipal",
+    category: "saude",
+    description:
+      "Consulta oficial municipal da lista de espera da regulação de saúde.",
+    keywords: ["regulacao municipal", "fila regulacao", "lista espera saude", "consulta exame", "saude"],
+    actionUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/lista_espera_regulacoes",
+    actionLabel: "Consultar fila da regulação",
+    guidance:
+      "Consulte a atualização publicada no portal. Para dúvidas sobre posição, encaminhamento ou prioridade, use os canais oficiais da rede de saúde.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://acessoainformacao.aguaslindasdegoias.go.gov.br/cidadao/outras_informacoes/lista_espera_regulacoes",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "lista-espera-creches",
+    name: "Lista de espera em creches · Águas Lindas",
+    category: "educacao",
+    description:
+      "Página oficial municipal para acompanhar a lista de espera publicada para vagas em creches.",
+    keywords: ["creche", "lista espera creche", "vaga creche", "educacao infantil", "matricula"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    actionLabel: "Consultar lista de espera",
+    guidance:
+      "Confira a data da lista publicada e os critérios informados pela Secretaria de Educação antes de tomar qualquer decisão sobre matrícula ou atendimento.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    verifiedAt: "06/10/2026",
+  },
+  {
     id: "recuperar-govbr",
     name: "Recuperar acesso à conta gov.br",
     category: "digital",
