@@ -526,7 +526,7 @@ export default function TileStationMap({
         className={
           "grid " +
           heightClassName +
-          " place-items-center bg-[#E8F0EA] p-6 text-center text-[#163840]"
+          " place-items-center bg-muted p-6 text-center text-foreground"
         }
       >
         {fallback ?? (
@@ -534,7 +534,7 @@ export default function TileStationMap({
             <p className="text-sm font-black">
               Mapa sem coordenadas suficientes.
             </p>
-            <p className="mt-2 text-xs text-[#607169]">
+            <p className="mt-2 text-xs text-muted-foreground">
               Os locais continuam disponíveis em lista.
             </p>
           </div>
