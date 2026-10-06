@@ -7,6 +7,8 @@ import {
   BadgeCheck,
   BookOpen,
   Building2,
+  BriefcaseBusiness,
+  Wrench,
   Clock3,
   Globe2,
   ExternalLink,
@@ -52,6 +54,9 @@ const categoryIcons = {
   transito: TrafficCone,
   educacao: BookOpen,
   cidadania: Landmark,
+  trabalho: BriefcaseBusiness,
+  moradia: Building2,
+  "servicos-urbanos": Wrench,
 } as const;
 
 const SERVICE_SUMMARY = {
