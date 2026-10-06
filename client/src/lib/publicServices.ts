@@ -1237,7 +1237,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     name: "Seguro-Desemprego · solicitação e acompanhamento",
     category: "assistencia",
     description:
-      "Canal oficial para solicitar o benefício e acompanhar o pedido pelo gov.br ou pela Carteira de Trabalho Digital.",
+      "Canal oficial para solicitar o benefício e acompanhar o pedido pelos serviços digitais do trabalho.",
     keywords: [
       "seguro desemprego",
       "desempregado",
