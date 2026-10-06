@@ -223,7 +223,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
     .getByRole("region", { name: "Serviços públicos" })
     .getByRole("article")
     .filter({ hasText: "CRAS II · Santa Lúcia" })
-    .getByRole("button", { name: "Rota", exact: true })
+    .getByRole("button", { name: "Planejar rota", exact: true })
     .click();
   await expect(page).toHaveURL(/planejar\?destino=CRAS%20II/);
 });
@@ -271,7 +271,7 @@ test("Pages: redesigned Central discovers official services at 320px", async ({
   ).toHaveAttribute("href", "https://wa.me/5562981043652");
   await card
     .locator("summary")
-    .filter({ hasText: "Orientações e documentos" })
+    .filter({ hasText: "Antes de sair" })
     .click();
   await expect(
     card.getByText("Comprovante de endereço em Goiás e foto digital", {
@@ -279,7 +279,7 @@ test("Pages: redesigned Central discovers official services at 320px", async ({
     })
   ).toBeVisible();
   await expect(
-    card.getByRole("button", { name: "Rota", exact: true })
+    card.getByRole("button", { name: "Planejar rota", exact: true })
   ).toHaveCount(0);
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
