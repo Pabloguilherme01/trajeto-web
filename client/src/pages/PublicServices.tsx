@@ -320,7 +320,7 @@ export default function PublicServices() {
   return (
     <main className="premium-surface visual-shell min-h-[100dvh] bg-background pb-28 text-foreground md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
-        <header className="premium-card rounded-[1.8rem] p-5 sm:p-6">
+        <header className="premium-card relative overflow-hidden rounded-[1.8rem] border border-primary/10 bg-gradient-to-br from-card via-card to-primary/[.045] p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
               <span className="status-pill border-primary/20 bg-primary/10 text-primary">
@@ -508,9 +508,9 @@ export default function PublicServices() {
                       key={item.id}
                       type="button"
                       onClick={() => applyCategory(item.id)}
-                      className="premium-card flex min-h-24 min-w-0 items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-accent focus-visible:border-accent"
+                      className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md focus-visible:border-accent"
                     >
-                      <Icon className="size-5 shrink-0 text-accent" />
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent"><Icon className="size-5" /></span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-bold">
                           {item.label}
@@ -538,7 +538,7 @@ export default function PublicServices() {
               <h2 className="mt-5 text-lg font-bold">Encontre pela sua situação</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {NEED_GROUPS.map(group => (
-                  <button key={group.label} type="button" onClick={() => { setQuery(group.query); applyFilters(group.query, "todos"); }} className="premium-card min-h-20 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-accent">
+                  <button key={group.label} type="button" onClick={() => { setQuery(group.query); applyFilters(group.query, "todos"); }} className="premium-card min-h-20 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md">
                     <span className="block text-sm font-black text-foreground">{group.label}</span>
                     <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{group.hint}</span>
                   </button>
