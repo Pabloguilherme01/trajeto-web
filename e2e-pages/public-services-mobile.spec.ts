@@ -7,9 +7,13 @@ for (const width of [320, 390]) {
     const errors: string[] = [];
     page.on("pageerror", error => errors.push(error.message));
     await page.goto("servicos", { waitUntil: "domcontentloaded" });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await expect(page.getByRole("button", { name: /Abrir .* no Organic Maps/ }).first()).toBeVisible();
     const filters = page.locator("#service-filters summary");
     await filters.click();
-    await page.getByRole("button", { name: "Defesa do consumidor", exact: true }).click();
+    await expect(page.getByRole("button", { name: /Tributos e notas · \d+ serviços/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Inclusão e igualdade · \d+ serviços/ })).toBeVisible();
+    await page.getByRole("button", { name: /Defesa do consumidor · \d+ serviços/ }).click();
     await expect(page.locator("#service-anatel-consumidor")).toBeVisible();
     await expect(page.locator("#service-filters details")).toHaveJSProperty("open", false);
     await expect(page.getByText("Mapa e navegação offline", { exact: true })).toHaveCount(0);
