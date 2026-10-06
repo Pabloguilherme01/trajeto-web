@@ -673,7 +673,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-infraestrutura",
     name: "Secretaria Municipal de Infraestrutura e Obras",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description: "Atendimento municipal para infraestrutura e obras.",
     phone: "(61) 99303-4608",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -684,7 +684,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-meio-ambiente",
     name: "Secretaria Municipal de Meio Ambiente",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description: "Atendimento municipal relacionado ao meio ambiente.",
     phone: "(61) 99451-0844",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -695,7 +695,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-habitacao",
     name: "Secretaria Municipal de Habitação",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal sobre habitação.",
     phone: "(61) 99303-6552",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -705,7 +705,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "regularizacao-fundiaria",
     name: "Secretaria Municipal de Regularização Fundiária",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal sobre regularização fundiária.",
     phone: "(61) 99310-0216",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -715,7 +715,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "desenvolvimento-economico",
     name: "Secretaria Municipal de Desenvolvimento Econômico",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Atendimento e programas municipais para desenvolvimento econômico.",
     phone: "(61) 99649-2690 / (61) 99310-6862",
@@ -767,7 +767,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "sebrae",
     name: "SEBRAE",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Canal de apoio e atendimento empresarial listado pela Prefeitura.",
     phone: "(61) 3902-1135",
@@ -785,7 +785,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "segunda via conta luz",
     ],
     name: "Equatorial Goiás · energia",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description:
       "Central estadual para falta de energia, contas e atendimento da distribuidora.",
     phone: "0800 062 0196",
@@ -819,7 +819,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "carteira-trabalho-digital",
     name: "Carteira de Trabalho Digital",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
     phone: "158",
@@ -939,7 +939,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "vazamento",
     ],
     name: "Saneago · água e esgoto",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description:
       "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
     phone: "0800 645 0115",
@@ -1238,7 +1238,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "seguro-desemprego",
     name: "Seguro-Desemprego · solicitação e acompanhamento",
-    category: "assistencia",
+    category: "trabalho",
     description:
       "Canal oficial para solicitar o benefício e acompanhar o pedido pelos serviços digitais do trabalho.",
     keywords: [
