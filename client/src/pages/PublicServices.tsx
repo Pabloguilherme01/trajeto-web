@@ -25,6 +25,7 @@ import {
   Siren,
   TrafficCone,
   WifiOff,
+  Navigation,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -46,6 +47,7 @@ import {
   searchPublicServices,
   type PublicServiceCategory,
 } from "@/lib/publicServices";
+import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
 
 const categoryIcons = {
   saude: HeartPulse,
@@ -67,6 +69,23 @@ const SERVICE_SUMMARY = {
   online: PUBLIC_SERVICES.filter(service => Boolean(service.actionUrl)).length,
   verified: PUBLIC_SERVICES.filter(service => Boolean(service.verifiedAt)).length,
 } as const;
+
+const READY_ROUTE_IDS = [
+  "upa",
+  "heal",
+  "prefeitura",
+  "vapt-vupt",
+  "rodoviaria",
+  "policia-civil",
+  "cras-1",
+  "detran",
+  "forum",
+  "praca-da-biblia",
+] as const;
+
+const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
+  LOCAL_ROUTE_PRESETS.find(route => route.id === id)
+).filter((route): route is (typeof LOCAL_ROUTE_PRESETS)[number] => Boolean(route));
 
 export default function PublicServices() {
   const [, setLocation] = useLocation();
@@ -521,6 +540,38 @@ export default function PublicServices() {
               </details>
             </section>
           )}
+        {!selectedService && !savedOnly && !query.trim() && category === "todos" && resource === "todos" && (
+          <section className="mt-6" aria-labelledby="ready-routes-title">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Chegue mais rápido</p>
+                <h2 id="ready-routes-title" className="mt-1 text-lg font-bold">Rotas prontas</h2>
+                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Destinos úteis já cadastrados. Escolha um local e o Trajeto prepara a rota; quando houver coordenadas confirmadas, você também pode continuar no Organic Maps.</p>
+              </div>
+              <Route className="hidden size-6 text-primary sm:block" />
+            </div>
+            <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
+              {READY_SERVICE_ROUTES.map(route => (
+                <button
+                  key={route.id}
+                  type="button"
+                  onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(route.destination) + "&auto=1")}
+                  className="premium-card flex min-h-28 w-[11rem] shrink-0 flex-col justify-between rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
+                >
+                  <span>
+                    <span className="block text-sm font-black text-foreground">{route.label}</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{route.detail}</span>
+                  </span>
+                  <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-primary"><Navigation className="size-3.5" /> Preparar rota</span>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setLocation(appUrl("/planejar") + "?destinos=1")} className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/15 px-3 text-xs font-black text-foreground/80">
+              Ver todos os destinos <ChevronRight className="size-4" />
+            </button>
+          </section>
+        )}
+
         <h2 className="mt-6 text-lg font-bold">Explore os serviços</h2>
         <section
           aria-label="Filtrar catálogo"
