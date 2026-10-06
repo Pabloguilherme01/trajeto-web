@@ -3,8 +3,8 @@ export function normalizeCatalogText(value: string) {
 }
 
 export function matchesCatalogText(query: string, values: Array<string | undefined>) {
-  const text = normalizeCatalogText(values.filter(Boolean).join(" "));
-  const terms = normalizeCatalogText(query).split(" ").filter(Boolean);
+  const text = normalizeCatalogText(values.filter(Boolean).join(" ")).replace(/[ºª]/g, "");
+  const terms = normalizeCatalogText(query).replace(/[ºª]/g, "").split(" ").filter(Boolean);
   const tokens = new Set(text.split(/[^a-z0-9]+/i).filter(Boolean));
 
   return terms.every(term => {
