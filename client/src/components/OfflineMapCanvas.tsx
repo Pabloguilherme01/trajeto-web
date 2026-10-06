@@ -731,9 +731,7 @@ export default function OfflineMapCanvas({
           onClick={() => setDark(v => !v)}
           className={
             "absolute right-3 top-3 z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
-            (dark
-              ? "bg-[#162733]/95 text-[#e9ffff]"
-              : "bg-white/95 text-[#27414b]")
+            "border-border bg-card/95 text-card-foreground"
           }
         >
           {dark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}<span className="hidden sm:inline">{dark ? "Claro" : "Escuro"}</span>
@@ -763,9 +761,7 @@ export default function OfflineMapCanvas({
           onClick={() => setExpanded(v => !v)}
           className={
             "absolute bottom-3 right-3 z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
-            (dark
-              ? "bg-[#162733]/95 text-[#e9ffff]"
-              : "bg-white/95 text-[#27414b]")
+            "border-border bg-card/95 text-card-foreground"
           }
         >
           {expanded ? <Minimize className="size-4" aria-hidden="true" /> : <Expand className="size-4" aria-hidden="true" />}<span className="hidden sm:inline">{expanded ? "Reduzir" : "Ampliar"}</span>
