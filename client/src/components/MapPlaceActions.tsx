@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Copy, Share2, Ruler, X } from "lucide-react";
+import { Copy, Share2, Ruler, X, MapPinned } from "lucide-react";
 import type { StationMapItem } from "./StationMap";
 import { buildDestinationPlannerUrl } from "@/lib/tripLinks";
+import {
+  buildOrganicMapsNavigationUrl,
+  buildOrganicMapsSearchUrl,
+  openExternalUrl,
+} from "@/lib/mobileTools";
 
 /** Share the named destination only; never append the user's GPS to a link. */
 export default function MapPlaceActions({ place }: { place: StationMapItem }) {
@@ -39,10 +44,17 @@ export default function MapPlaceActions({ place }: { place: StationMapItem }) {
     try { await navigator.clipboard.writeText(place.address); setNotice("Endereço copiado."); }
     catch { setFailed(true); setNotice("Não foi possível copiar. Confira a permissão do navegador."); }
   };
+  const openOrganicMaps = () => {
+    const url = validPoint(place)
+      ? buildOrganicMapsNavigationUrl(destination, { lat: place.lat!, lng: place.lng! })
+      : buildOrganicMapsSearchUrl(destination);
+    openExternalUrl(url);
+  };
   return <div className="mt-3">
     <div className="flex flex-wrap gap-2 [&>button]:flex-1 [&>button]:basis-32">
       <button type="button" onClick={() => void share()} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl bg-blue-50 px-2 text-xs font-bold text-blue-800"><Share2 className="size-4 shrink-0" />Compartilhar</button>
       <button type="button" disabled={!place.address} onClick={() => void copy()} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 px-2 text-xs font-bold text-slate-700 disabled:opacity-40"><Copy className="size-4 shrink-0" />Copiar endereço</button>
+      <button type="button" onClick={openOrganicMaps} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 px-2 text-xs font-bold text-slate-700"><MapPinned className="size-4 shrink-0" />Organic Maps</button>
     </div>
     {!measureFrom && validPoint(place) && <button type="button" onClick={() => setMeasureFrom(place)} className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-2 text-xs font-bold text-slate-700"><Ruler className="size-4" />Medir a partir daqui</button>}
     {measureFrom && <div className="mt-2 rounded-xl bg-slate-50 p-3">
