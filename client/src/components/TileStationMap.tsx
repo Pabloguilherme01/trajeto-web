@@ -759,14 +759,14 @@ export default function TileStationMap({
           <div
             role="group"
             aria-label="Pontos do percurso"
-            className="absolute left-3 right-16 top-20 z-20 flex max-w-full snap-x gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="absolute left-3 right-[4.25rem] top-20 z-20 flex min-w-0 max-w-[calc(100%-5rem)] snap-x gap-2 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {routeEndpoints.map(point => (
               <button
                 key={stationKey(point)}
                 type="button"
                 onClick={() => focusEndpoint(point)}
-                className="min-h-11 shrink-0 snap-start rounded-xl border border-border bg-card/95 px-3 text-xs font-bold text-card-foreground shadow-md backdrop-blur-md focus-visible:outline-2 focus-visible:outline-ring"
+                className="min-h-11 max-w-[min(68vw,15rem)] shrink-0 snap-start overflow-hidden text-ellipsis whitespace-nowrap rounded-xl border border-border bg-card/95 px-3 text-xs font-bold text-card-foreground shadow-md backdrop-blur-md focus-visible:outline-2 focus-visible:outline-ring"
               >
                 {point.id === "origin" ? "Ver origem" : "Ver destino"}
               </button>
