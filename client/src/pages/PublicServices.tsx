@@ -645,7 +645,11 @@ export default function PublicServices() {
               <div>
                 <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Chegue mais rápido</p>
                 <h2 id="ready-routes-title" className="mt-1 text-lg font-bold">Rotas prontas para o dia a dia</h2>
-                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Saúde, documentos, transporte, escola e serviços urbanos em poucos toques. O Trajeto prepara o destino e, quando houver coordenadas confirmadas, você pode continuar no Organic Maps.</p>
+                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Saúde, documentos, transporte, escola e serviços urbanos em poucos toques. O Trajeto prepara o destino e, quando houver coordenadas confirmadas, você pode continuar no Organic Maps.</p><div className="mt-3 flex flex-wrap gap-2" aria-label="Recursos das rotas prontas">
+                  <span className="rounded-full border border-primary/15 bg-primary/[.05] px-2.5 py-1 text-[0.68rem] font-black text-primary">23 destinos públicos</span>
+                  <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">saúde por região</span>
+                  <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">navegação externa</span>
+                </div>
               </div>
               <Route className="hidden size-6 text-primary sm:block" />
             </div>
