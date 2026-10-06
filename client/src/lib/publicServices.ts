@@ -1,7 +1,7 @@
 import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
-  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania";
+  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania" | "trabalho" | "moradia" | "servicos-urbanos" | "justica";
 
 export type PublicService = {
   id: string;
@@ -38,7 +38,10 @@ export type PublicService = {
     | "Desenvolvimento Social de Goiás"
     | "Ministério do Desenvolvimento Social"
     | "Tribunal Superior Eleitoral"
-    | "Ministério da Justiça";
+    | "Ministério da Justiça"
+    | "Ministério da Defesa"
+    | "Detran-GO"
+    | "Defensoria Pública de Goiás";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -55,6 +58,10 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
   { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
+  { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
+  { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
+  { id: "servicos-urbanos", label: "Cidade e serviços", shortLabel: "Cidade" },
+  { id: "justica", label: "Justiça e direitos", shortLabel: "Justiça" },
 ];
 
 const PREFEITURA_CONTATOS = "https://aguaslindasdegoias.go.gov.br/contatos/";
@@ -668,7 +675,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-infraestrutura",
     name: "Secretaria Municipal de Infraestrutura e Obras",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description: "Atendimento municipal para infraestrutura e obras.",
     phone: "(61) 99303-4608",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -679,7 +686,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-meio-ambiente",
     name: "Secretaria Municipal de Meio Ambiente",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description: "Atendimento municipal relacionado ao meio ambiente.",
     phone: "(61) 99451-0844",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -690,7 +697,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-habitacao",
     name: "Secretaria Municipal de Habitação",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal sobre habitação.",
     phone: "(61) 99303-6552",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -700,7 +707,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "regularizacao-fundiaria",
     name: "Secretaria Municipal de Regularização Fundiária",
-    category: "cidadania",
+    category: "moradia",
     description: "Atendimento municipal sobre regularização fundiária.",
     phone: "(61) 99310-0216",
     sourceLabel: "Prefeitura de Águas Lindas",
@@ -710,7 +717,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "desenvolvimento-economico",
     name: "Secretaria Municipal de Desenvolvimento Econômico",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Atendimento e programas municipais para desenvolvimento econômico.",
     phone: "(61) 99649-2690 / (61) 99310-6862",
@@ -762,7 +769,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "sebrae",
     name: "SEBRAE",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Canal de apoio e atendimento empresarial listado pela Prefeitura.",
     phone: "(61) 3902-1135",
@@ -780,7 +787,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "segunda via conta luz",
     ],
     name: "Equatorial Goiás · energia",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description:
       "Central estadual para falta de energia, contas e atendimento da distribuidora.",
     phone: "0800 062 0196",
@@ -814,7 +821,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "carteira-trabalho-digital",
     name: "Carteira de Trabalho Digital",
-    category: "cidadania",
+    category: "trabalho",
     description:
       "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
     phone: "158",
@@ -934,7 +941,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "vazamento",
     ],
     name: "Saneago · água e esgoto",
-    category: "cidadania",
+    category: "servicos-urbanos",
     description:
       "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
     phone: "0800 645 0115",
@@ -1002,14 +1009,29 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "detran",
-    name: "Detran-GO",
+    name: "Detran-GO · CNH, veículo e licenciamento",
     category: "transito",
     description:
-      "Canal local listado pela Prefeitura para atendimento do Detran.",
-    keywords: ["cnh", "habilitacao", "licenciamento", "veiculo", "detran go"],
+      "Consulte CNH, IPVA, multas, CRLV, processos e outros serviços oficiais do trânsito em Goiás.",
+    keywords: [
+      "cnh",
+      "habilitacao",
+      "licenciamento",
+      "veiculo",
+      "detran go",
+      "ipva",
+      "multa",
+      "crlv",
+      "renovar cnh",
+    ],
     phone: "(61) 3613-4058",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: TELEFONES_UTEIS,
+    actionUrl: "https://www.detran.go.gov.br/",
+    actionLabel: "Abrir serviços digitais do Detran",
+    guidance:
+      "Para consultas digitais, use o portal oficial. Para atendimento presencial, confirme o serviço e o agendamento antes de sair.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Detran-GO",
+    sourceUrl: "https://www.detran.go.gov.br/",
     mapQuery: "Detran-GO, Águas Lindas de Goiás, GO",
   },
   {
@@ -1191,6 +1213,197 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "https://www.gov.br/mj/pt-br/acesso-a-informacao/perguntas-frequentes/consumidor/consumidor.Gov",
     verifiedAt: "06/10/2026",
   },
+
+  {
+    id: "delegacia-virtual-goias",
+    name: "Delegacia Virtual de Goiás · boletim de ocorrência",
+    category: "seguranca",
+    description:
+      "Registre pela internet ocorrências aceitas pela Polícia Civil de Goiás e acompanhe o protocolo sem precisar ir primeiro à delegacia.",
+    keywords: [
+      "boletim ocorrencia",
+      "bo",
+      "ocorrencia online",
+      "delegacia virtual",
+      "furto",
+      "perda documento",
+      "rai virtual",
+    ],
+    actionUrl: "https://goias.gov.br/policiacivil/delegacia-virtual/",
+    actionLabel: "Abrir Delegacia Virtual",
+    guidance:
+      "Use somente o canal oficial. Situações com violência, ameaça ou risco imediato devem ser tratadas pelo 190 ou presencialmente conforme a orientação policial.",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: "https://goias.gov.br/policiacivil/delegacia-virtual/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "seguro-desemprego",
+    name: "Seguro-Desemprego · solicitação e acompanhamento",
+    category: "trabalho",
+    description:
+      "Canal oficial para solicitar o benefício e acompanhar o pedido pelos serviços digitais do trabalho.",
+    keywords: [
+      "seguro desemprego",
+      "desempregado",
+      "demissao",
+      "beneficio trabalhador",
+      "emprega brasil",
+    ],
+    phone: "158",
+    actionUrl: "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
+    actionLabel: "Solicitar Seguro-Desemprego",
+    guidance:
+      "Tenha o número do requerimento entregue pelo empregador, quando aplicável, e entre com sua conta gov.br. A análise e a elegibilidade são do Ministério do Trabalho e Emprego.",
+    sourceLabel: "Ministério do Trabalho e Emprego",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/solicitar-o-seguro-desemprego",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "expresso-goias",
+    name: "Expresso Goiás · serviços estaduais em um só lugar",
+    category: "cidadania",
+    description:
+      "Portal oficial que reúne serviços digitais de órgãos do Governo de Goiás, com acesso integrado à conta gov.br.",
+    keywords: [
+      "expresso goias",
+      "servicos goias",
+      "governo goias",
+      "servico estadual",
+      "gov goias",
+    ],
+    actionUrl: "https://www.go.gov.br/",
+    actionLabel: "Abrir Portal Expresso",
+    guidance:
+      "Use o portal para localizar serviços estaduais digitais e presenciais. Alguns atendimentos exigem autenticação pela conta gov.br.",
+    sourceLabel: "SEAD Goiás",
+    sourceUrl: "https://www.go.gov.br/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "saude-digital-goias",
+    name: "Saúde Digital Goiás · prontuário, regulação e consultas",
+    category: "saude",
+    description:
+      "Acesso aos canais digitais da rede estadual para prontuário, fila da regulação, confirmação de consultas e serviços de medicamentos.",
+    keywords: [
+      "meu pep",
+      "fila regulacao",
+      "regulacao saude",
+      "consulta exame",
+      "medicamento alto custo",
+      "cemac",
+      "saude goias",
+    ],
+    actionUrl: "https://goias.gov.br/saude/",
+    actionLabel: "Abrir portal da Saúde de Goiás",
+    guidance:
+      "A disponibilidade depende do serviço estadual e do seu atendimento na rede. Consulte o portal oficial para acessar cada ferramenta e verificar os requisitos.",
+    sourceLabel: "SES-GO",
+    sourceUrl:
+      "https://goias.gov.br/saude/saiba-como-acessar-os-servicos-digitais-da-saude-em-goias/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "passe-livre-pcd-goias",
+    name: "Passe Livre da Pessoa com Deficiência · Goiás",
+    category: "assistencia",
+    description: "Gratuidade no transporte intermunicipal em Goiás para pessoa com deficiência que atenda aos critérios do programa.",
+    keywords: ["pcd", "pessoa com deficiencia", "passe livre", "onibus", "transporte intermunicipal", "gratuidade"],
+    phone: "(62) 98104-3652",
+    whatsappOnly: ["(62) 98104-3652"],
+    email: "pcd@goias.gov.br",
+    actionUrl: "https://goias.gov.br/social/passe-livre-da-pessoa-com-deficiencia/",
+    actionLabel: "Consultar Passe Livre",
+    guidance: "No interior, a orientação estadual é procurar o CRAS ou usar os canais da Gerência da Pessoa com Deficiência para confirmar onde solicitar. O benefício é para linhas intermunicipais dentro de Goiás.",
+    documents: ["Laudo médico de especialista dentro da validade exigida", "Espelho do CadÚnico conforme o critério de renda", "Comprovante de residência em Goiás", "Documento de identificação e CPF", "Foto digital"],
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Desenvolvimento Social de Goiás",
+    sourceUrl: "https://goias.gov.br/social/passe-livre-da-pessoa-com-deficiencia/",
+  },
+  {
+    id: "servicos-urbanos-solicitacao",
+    name: "Serviços urbanos · iluminação, buracos, bueiros e limpeza",
+    category: "servicos-urbanos",
+    description: "Canal municipal para solicitar manutenção de iluminação pública, recuperação de vias, limpeza urbana e serviços em bueiros e galerias.",
+    keywords: ["buraco", "asfalto", "iluminacao publica", "lampada poste", "bueiro", "boca de lobo", "limpeza urbana", "varricao", "lixo", "galeria pluvial"],
+    address: "Rua 16, Quadra 31, Área Especial, Setor 02, Águas Lindas de Goiás - GO",
+    phone: "(61) 99303-4608",
+    extraPhone: "(61) 3613-9458",
+    hours: "Segunda a sexta, 08h às 12h e 13h às 17h",
+    email: "infraeobras@aguaslindasdegoias.go.gov.br",
+    guidance: "Informe o tipo de problema e a localização com referência clara. Os serviços municipais atendem espaços públicos; confirme o protocolo e o atendimento pelo canal oficial.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-infraestrutura-e-obras/",
+    mapQuery: "Secretaria Municipal de Infraestrutura e Obras, Rua 16, Quadra 31, Setor 02, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "defensoria-aguas-lindas",
+    name: "Defensoria Pública · Mediação e Cidadania",
+    category: "justica",
+    description: "Atendimento público gratuito para orientação, mediação e acesso à Justiça conforme os critérios da DPE-GO.",
+    keywords: ["defensoria", "advogado gratuito", "justica", "justiça", "direitos", "mediacao", "mediação", "processo", "familia", "família"],
+    address: "Quadra 36, Lote 1E, Quadra 53, Jardim Brasília, Águas Lindas de Goiás - GO, 72915-054",
+    phone: "(62) 3602-1224",
+    hours: "Segunda a sexta, 8h às 18h",
+    email: "faleconosco@defensoria.go.def.br",
+    actionUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
+    actionLabel: "Consultar atendimento da DPE-GO",
+    guidance: "A DPE-GO orienta procurar a unidade do município e verificar a área de atendimento. A assistência é gratuita para quem se enquadra nos critérios institucionais; confirme o direcionamento pela Central Virtual antes de sair.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Defensoria Pública de Goiás",
+    sourceUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
+    mapQuery: "Centro de Referência em Mediação e Cidadania, Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "creches-lista-espera",
+    name: "Creches municipais · vagas e lista de espera",
+    category: "educacao",
+    description: "Guia oficial para acesso às vagas em creches municipais e conveniadas de Águas Lindas.",
+    keywords: ["creche", "bercario", "berçario", "educacao infantil", "educação infantil", "vaga", "lista de espera", "matricula", "matrícula"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+    actionLabel: "Consultar vagas em creches",
+    guidance: "Consulte o guia e a lista de espera atual antes de procurar uma unidade. A Prefeitura publica critérios de prioridade e orientações da Gerência de Matrículas Escolares.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
+  },
+  {
+    id: "vigilancia-saude-municipal",
+    name: "Vigilância em Saúde · sanitária, endemias e zoonoses",
+    category: "saude",
+    description: "Estrutura municipal responsável por vigilância epidemiológica, sanitária, ambiental, saúde do trabalhador, endemias e zoonoses.",
+    keywords: ["vigilancia sanitaria", "vigilância sanitária", "zoonoses", "dengue", "endemias", "escorpiao", "escorpião", "fiscalizacao sanitaria", "fiscalização sanitária", "saude ambiental", "saúde ambiental"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/servicos/",
+    actionLabel: "Consultar serviços municipais",
+    guidance: "Use a busca de serviços da Prefeitura para localizar o atendimento correspondente. Esta ficha não presume endereço ou telefone porque a fonte consultada confirma a estrutura e as competências, mas não um único canal público para todas as áreas.",
+    verifiedAt: "06/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1606",
+  },
+  {
+    id: "alistamento-militar",
+    name: "Alistamento Militar · serviço oficial",
+    category: "cidadania",
+    description:
+      "Faça o alistamento militar online quando estiver dentro do período e das regras oficiais ou consulte a Junta de Serviço Militar.",
+    keywords: [
+      "alistamento militar",
+      "exercito",
+      "servico militar",
+      "junta militar",
+      "reservista",
+    ],
+    actionUrl: "https://alistamento.eb.mil.br/alistamento",
+    actionLabel: "Iniciar alistamento online",
+    guidance:
+      "O período, o público e as etapas seguem as regras oficiais do Ministério da Defesa. Fora do prazo ou quando o serviço online não se aplicar, consulte a Junta de Serviço Militar indicada no portal.",
+    sourceLabel: "Ministério da Defesa",
+    sourceUrl:
+      "https://www.gov.br/pt-br/servicos/alistar-se-no-servico-militar-obrigatorio",
+    verifiedAt: "06/10/2026",
+  },
 ];
 
 export const PUBLIC_SERVICE_SHORTCUTS = [
@@ -1271,6 +1484,82 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     query: "consumidor",
     hint: "Proteção do consumidor",
   },
+  {
+    label: "Boletim de ocorrência",
+    query: "boletim ocorrencia",
+    hint: "Delegacia Virtual de Goiás",
+  },
+  {
+    label: "Seguro-Desemprego",
+    query: "seguro desemprego",
+    hint: "Solicitação oficial pelo gov.br",
+  },
+  {
+    label: "Serviços estaduais",
+    query: "expresso goias",
+    hint: "Portal Expresso Goiás",
+  },
+  {
+    label: "Regulação e prontuário",
+    query: "regulacao saude",
+    hint: "Saúde Digital Goiás",
+  },
+  {
+    label: "Alistamento militar",
+    query: "alistamento militar",
+    hint: "Canal oficial do serviço militar",
+  },
+  {
+    label: "Moradia e regularização",
+    query: "regularizacao fundiaria",
+    hint: "Habitação e regularização municipal",
+  },
+  {
+    label: "Obras e infraestrutura",
+    query: "infraestrutura obras",
+    hint: "Atendimento municipal sobre vias e obras",
+  },
+  {
+    label: "Água, esgoto e vazamento",
+    query: "vazamento agua",
+    hint: "Saneago e atendimento de saneamento",
+  },
+  {
+    label: "Direitos da mulher",
+    query: "mulher",
+    hint: "Atendimento, proteção e orientação",
+  },
+  {
+    label: "Creches e vagas",
+    query: "creche",
+    hint: "Educação infantil e lista de espera",
+  },
+  {
+    label: "Dengue e zoonoses",
+    query: "zoonoses",
+    hint: "Vigilância, endemias e saúde ambiental",
+  },
+  {
+    label: "Defensoria e direitos",
+    query: "defensoria",
+    hint: "Orientação jurídica gratuita",
+  },
+  {
+    label: "Passe Livre PCD",
+    query: "passe livre",
+    hint: "Gratuidade intermunicipal em Goiás",
+  },
+  {
+    label: "Buraco, luz ou bueiro",
+    query: "buraco",
+    hint: "Solicitar manutenção urbana",
+  },
+  {
+    label: "Meio ambiente",
+    query: "meio ambiente",
+    hint: "Atendimento ambiental municipal",
+  },
+
 ] as const;
 
 export function searchPublicServices(
@@ -1287,6 +1576,9 @@ export function searchPublicServices(
     .join(" ");
   return PUBLIC_SERVICES.filter(service => {
     if (category !== "todos" && service.category !== category) return false;
+    // Exact agency searches should stay concise even when other services
+    // mention the agency only as referral guidance.
+    if (search === "cras" && !service.id.startsWith("cras-")) return false;
     return matchesCatalogText(search, [
       service.name,
       service.description,

@@ -186,6 +186,11 @@ describe("public services catalog", () => {
     ["carteira idoso", "carteira-pessoa-idosa"],
     ["eleitoral", "autoatendimento-eleitoral"],
     ["reclamacao empresa", "consumidor-gov"],
+    ["boletim ocorrencia", "delegacia-virtual-goias"],
+    ["seguro desemprego", "seguro-desemprego"],
+    ["expresso goias", "expresso-goias"],
+    ["regulacao saude", "saude-digital-goias"],
+    ["alistamento militar", "alistamento-militar"],
   ])(
     "finds the new official need %s without inventing a local route",
     (query, id) => {
@@ -198,4 +203,26 @@ describe("public services catalog", () => {
       expect(service.address).toBeUndefined();
     }
   );
+
+  it("adds richer official digital channels without inventing local addresses", () => {
+    for (const id of [
+      "delegacia-virtual-goias",
+      "seguro-desemprego",
+      "expresso-goias",
+      "saude-digital-goias",
+      "alistamento-militar",
+    ]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service).toBeDefined();
+      expect(service.verifiedAt).toBe("06/10/2026");
+      expect(service.actionUrl).toMatch(/^https:\/\//);
+      expect(service.sourceUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+    const detran = PUBLIC_SERVICES.find(item => item.id === "detran")!;
+    expect(detran.actionUrl).toBe("https://www.detran.go.gov.br/");
+    expect(detran.verifiedAt).toBe("06/10/2026");
+  });
+
 });

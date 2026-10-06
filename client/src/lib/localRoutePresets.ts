@@ -47,6 +47,7 @@ const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "policia-civil", label: "1ª Delegacia", detail: "Polícia Civil · Sol Nascente", destination: "1ª Delegacia de Polícia de Águas Lindas, Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "saneago", label: "Saneago", detail: "Água e saneamento", destination: "Saneago, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "vapt-vupt", label: "Vapt Vupt", detail: "Serviços públicos", destination: "Vapt Vupt, Rua Um, 2210, Jardim da Barragem IV, Águas Lindas de Goiás, GO", category: "servicos" },
+  { id: "defensoria", label: "Defensoria Pública", detail: "Mediação e cidadania · Jardim Brasília", destination: "Centro de Referência em Mediação e Cidadania, Quadra 36, Lote 1E, Quadra 53, Jardim Brasília, Águas Lindas de Goiás, GO", category: "servicos" },
   { id: "detran", label: "Detran-GO", detail: "Serviços de trânsito", destination: "Detran-GO, Águas Lindas de Goiás, GO", category: "transporte" },
   { id: "cora-coralina", label: "Cora Coralina", detail: "Colégio estadual", destination: "Colégio Estadual Cora Coralina, Rua 38, Mansões Village, Águas Lindas de Goiás, GO", category: "educacao" },
   { id: "cepi-jk", label: "CEPI JK", detail: "Educação estadual · Mansões Odisseia", destination: "CEPI Juscelino Kubitschek de Oliveira, Rua Mansões Odisseia, Águas Lindas de Goiás, GO", category: "educacao" },
