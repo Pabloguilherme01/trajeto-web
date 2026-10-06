@@ -705,9 +705,7 @@ export default function OfflineMapCanvas({
                 <span
                   className={
                     "pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
-                    (dark
-                      ? "border-white/10 bg-[#101c24]/95 text-[#f2ffff]"
-                      : "border-black/5 bg-white/95 text-[#27414b]")
+                    "border-border bg-card/95 text-card-foreground"
                   }
                   title={marker.name}
                 >
@@ -721,9 +719,7 @@ export default function OfflineMapCanvas({
         <div
           className={
             "pointer-events-none absolute left-3 top-3 z-20 rounded-full border px-3 py-2 text-xs font-black shadow-lg backdrop-blur-md " +
-            (dark
-              ? "bg-[#162733]/95 text-[#e9ffff]"
-              : "bg-white/95 text-[#27414b]")
+            "border-border bg-card/95 text-card-foreground"
           }
         >
           N ↑ · mapa local
@@ -754,10 +750,8 @@ export default function OfflineMapCanvas({
           className={
             "absolute right-3 top-[4.25rem] z-20 flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-lg backdrop-blur-md " +
             (showAllStreetNames
-              ? "bg-[#37e6df] text-primary-foreground"
-              : dark
-                ? "bg-[#162733]/95 text-[#e9ffff]"
-                : "bg-white/95 text-[#27414b]")
+              ? "border-primary/40 bg-primary text-primary-foreground"
+              : "border-border bg-card/95 text-card-foreground")
           }
         >
           <MapIcon className="size-4" aria-hidden="true" /><span className="hidden sm:inline">{showAllStreetNames ? "Ruas: todas" : "Ruas"}</span>
@@ -779,21 +773,19 @@ export default function OfflineMapCanvas({
         <div
           className={
             "pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border p-2 text-xs font-black shadow-lg backdrop-blur-md " +
-            (dark
-              ? "bg-[#162733]/90 text-[#e9ffff]"
-              : "bg-white/90 text-[#27414b]")
+            "border-border bg-card/90 text-card-foreground"
           }
         >
           <div
             style={{ width: Math.min(100, scaleMetres / metresPerPixel) }}
-            className={"border-x border-b " + (dark ? "border-[#e9ffff]" : "border-[#27414b]")}
+            className="border-x border-b border-card-foreground"
           />
           {scaleMetres >= 1000
             ? scaleMetres / 1000 + " km"
             : scaleMetres + " m"}
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/5 bg-[linear-gradient(180deg,#ffffff,#f3f8f5)] px-3 py-2.5 text-xs font-semibold text-[#536760]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-3 py-2.5 text-xs font-semibold text-muted-foreground">
         <span role="status">
           {pack
             ? `Ruas locais disponíveis · ${pack.roads.length.toLocaleString("pt-BR")} trechos viários · ${new Date(pack.retrievedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
@@ -805,7 +797,7 @@ export default function OfflineMapCanvas({
           <button
             type="button"
             onClick={() => setAttempt(v => v + 1)}
-            className="min-h-11 rounded-lg border border-[#536760]/30 px-3 font-bold"
+            className="min-h-11 rounded-lg border border-border px-3 font-bold text-foreground"
           >
             Tentar recuperar ruas
           </button>
