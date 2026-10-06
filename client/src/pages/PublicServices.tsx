@@ -72,10 +72,10 @@ const SERVICE_SUMMARY = {
 
 const NEED_GROUPS = [
   { label: "Documentos e direitos", query: "cpf", hint: "CPF, Receita, título e serviços de cidadania" },
-  { label: "Família e benefícios", query: "cadunico", hint: "CadÚnico, CRAS e apoio social" },
+  { label: "Família e benefícios", query: "cadunico", hint: "CadÚnico, CRAS, benefícios e Passe Livre PCD" },
   { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência e saúde digital" },
   { label: "Trabalho e renda", query: "emprego", hint: "Emprego, seguro-desemprego e empreendedorismo" },
-  { label: "Casa e cidade", query: "regularizacao fundiaria", hint: "Habitação, regularização e serviços urbanos" },
+  { label: "Casa e cidade", query: "buraco", hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana" },
   { label: "Segurança e proteção", query: "delegacia", hint: "Delegacia, ocorrência e atendimento policial" },
 ] as const;
 
