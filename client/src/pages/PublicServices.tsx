@@ -32,7 +32,12 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
-import { buildOrganicMapsNavigationUrl, buildOrganicMapsSearchUrl, openExternalUrl, shareText } from "@/lib/mobileTools";
+import {
+  buildOrganicMapsNavigationUrl,
+  buildOrganicMapsSearchUrl,
+  ORGANIC_MAPS_INSTALL_URL,
+  shareText,
+} from "@/lib/mobileTools";
 import {
   listPublicServiceFavorites,
   publicServiceFavoritesEvent,
@@ -48,7 +53,7 @@ import {
   searchPublicServices,
   type PublicServiceCategory,
 } from "@/lib/publicServices";
-import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
+import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
 import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
 
 const categoryIcons = {
@@ -105,19 +110,31 @@ const READY_ROUTE_IDS = [
   "ubs-barragem-iv",
   "ubs-jardim-paraiso",
   "esf-aguas-bonitas",
+  "esf-aguas-lindas-ii",
+  "esf-america",
+  "esf-camping-club",
+  "esf-cidade-entorno",
+  "esf-coimbra",
   "esf-perola-ii",
   "cora-coralina",
   "praca-da-biblia",
+  "sic",
   "drp-17",
+  "policia-civil-2",
+  "deam-depai-dpca",
   "superintendencia-transito",
   "camara-municipal",
   "cepi-jk",
+  "cepm-aguas-lindas",
   "paulo-freire",
 ] as const;
 
 const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
-  LOCAL_ROUTE_PRESETS.find(route => route.id === id)
-).filter((route): route is (typeof LOCAL_ROUTE_PRESETS)[number] => Boolean(route));
+  ALL_LOCAL_ROUTE_DESTINATIONS.find(route => route.id === id)
+).filter(
+  (route): route is (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number] =>
+    Boolean(route)
+);
 
 const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
   if (service.guidance) return service.guidance;
@@ -129,9 +146,58 @@ const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
 };
 
 const READY_ROUTE_GROUPS = [
-  { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii", "ubs-barragem-iv", "ubs-jardim-paraiso", "esf-aguas-bonitas", "esf-perola-ii"] },
-  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "procon", "conselho-tutelar", "policia-civil", "drp-17", "cras-1", "forum", "saneago", "camara-municipal"] },
-  { label: "Transporte e educação", ids: ["transito", "superintendencia-transito", "detran", "rodoviaria", "secretaria-educacao", "cora-coralina", "cepi-jk", "paulo-freire", "praca-da-biblia"] },
+  {
+    label: "Saúde",
+    ids: [
+      "upa",
+      "heal",
+      "hospital-bom-jesus",
+      "ubs-barragem-ii",
+      "ubs-barragem-iv",
+      "ubs-jardim-paraiso",
+      "esf-aguas-bonitas",
+      "esf-aguas-lindas-ii",
+      "esf-america",
+      "esf-camping-club",
+      "esf-cidade-entorno",
+      "esf-coimbra",
+      "esf-perola-ii",
+    ],
+  },
+  {
+    label: "Serviços",
+    ids: [
+      "prefeitura",
+      "sic",
+      "vapt-vupt",
+      "defensoria",
+      "procon",
+      "conselho-tutelar",
+      "cras-1",
+      "forum",
+      "saneago",
+      "camara-municipal",
+    ],
+  },
+  {
+    label: "Segurança",
+    ids: ["policia-civil", "drp-17", "policia-civil-2", "deam-depai-dpca"],
+  },
+  {
+    label: "Transporte e educação",
+    ids: [
+      "transito",
+      "superintendencia-transito",
+      "detran",
+      "rodoviaria",
+      "secretaria-educacao",
+      "cora-coralina",
+      "cepi-jk",
+      "cepm-aguas-lindas",
+      "paulo-freire",
+      "praca-da-biblia",
+    ],
+  },
 ] as const;
 
 export default function PublicServices() {
@@ -295,7 +361,7 @@ export default function PublicServices() {
     const url = point
       ? buildOrganicMapsNavigationUrl(point, service.name, "drive")
       : buildOrganicMapsSearchUrl(service.mapQuery);
-    if (url) openExternalUrl(url);
+    if (url) window.location.href = url;
   };
   const toggleSaved = (service: (typeof PUBLIC_SERVICES)[number]) => {
     const result = togglePublicServiceFavorite(service.id);
@@ -475,11 +541,20 @@ export default function PublicServices() {
             <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-black text-foreground">Mapa e navegação offline</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Planeje no Trajeto e continue no Organic Maps quando quiser navegação externa. Baixe o mapa da região no Organic Maps para continuar sem internet.</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Planeje no Trajeto e continue no Organic Maps quando quiser navegação externa. Destinos reconhecidos abrem a rota; os demais abrem a busca no app. Baixe o mapa da região no Organic Maps para continuar sem internet.</p>
               <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground">Explorar mapa</button>
                 <button type="button" onClick={() => setLocation(appUrl("/planejar?destinos=1"))} className="min-h-11 min-w-0 rounded-xl border border-border/15 bg-background px-3 text-xs font-black text-foreground">{READY_SERVICE_ROUTES.length} rotas prontas</button>
               </div>
+              <a
+                href={ORGANIC_MAPS_INSTALL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl px-1 text-xs font-black text-primary"
+              >
+                Instalar ou atualizar Organic Maps
+                <ExternalLink className="size-3.5 shrink-0" />
+              </a>
             </div>
           </div>
         </section>
@@ -600,7 +675,7 @@ export default function PublicServices() {
                 <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Mapa e deslocamento</p>
                 <h2 className="mt-1 text-base font-black">Escolha o destino aqui. Navegue do seu jeito.</h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  O Trajeto organiza o serviço e prepara a rota. No planejador, destinos com coordenadas confirmadas podem continuar no Organic Maps, Google Maps, Waze ou Apple Maps.
+                  O Trajeto organiza o serviço e prepara a rota. No planejador, o Organic Maps recebe a rota quando o destino já tem coordenadas locais e abre a busca do app nos demais casos; Google Maps, Waze e Apple Maps continuam disponíveis.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-[0.68rem] font-black">
                   <span className="rounded-full border border-primary/15 bg-primary/[.06] px-2.5 py-1 text-primary">Organic Maps</span>
@@ -694,7 +769,7 @@ export default function PublicServices() {
                 <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Chegue mais rápido</p>
                 <h2 id="ready-routes-title" className="mt-1 text-lg font-bold">Rotas prontas para o dia a dia</h2>
                 <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Saúde, documentos, transporte, escola e serviços urbanos em poucos toques. O Trajeto prepara o destino e, quando houver coordenadas confirmadas, você pode continuar no Organic Maps.</p><div className="mt-3 flex flex-wrap gap-2" aria-label="Recursos das rotas prontas">
-                  <span className="rounded-full border border-primary/15 bg-primary/[.05] px-2.5 py-1 text-[0.68rem] font-black text-primary">23 destinos públicos</span>
+                  <span className="rounded-full border border-primary/15 bg-primary/[.05] px-2.5 py-1 text-[0.68rem] font-black text-primary">{READY_SERVICE_ROUTES.length} destinos públicos</span>
                   <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">saúde por região</span>
                   <span className="rounded-full border border-border/15 bg-card px-2.5 py-1 text-[0.68rem] font-black text-foreground/70">navegação externa</span>
                 </div>
