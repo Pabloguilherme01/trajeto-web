@@ -89,6 +89,9 @@ const READY_ROUTE_IDS = [
   "prefeitura",
   "vapt-vupt",
   "defensoria",
+  "procon",
+  "conselho-tutelar",
+  "transito",
   "rodoviaria",
   "policia-civil",
   "cras-1",
@@ -116,8 +119,8 @@ const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
 
 const READY_ROUTE_GROUPS = [
   { label: "Saúde", ids: ["upa", "heal", "hospital-bom-jesus", "ubs-barragem-ii"] },
-  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "policia-civil", "cras-1", "detran", "forum", "saneago"] },
-  { label: "Transporte e educação", ids: ["rodoviaria", "secretaria-educacao", "cora-coralina", "praca-da-biblia"] },
+  { label: "Serviços", ids: ["prefeitura", "vapt-vupt", "defensoria", "procon", "conselho-tutelar", "policia-civil", "cras-1", "forum", "saneago"] },
+  { label: "Transporte e educação", ids: ["transito", "detran", "rodoviaria", "secretaria-educacao", "cora-coralina", "praca-da-biblia"] },
 ] as const;
 
 export default function PublicServices() {
