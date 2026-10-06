@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildOrganicMapsNavigationUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, openExternalUrl, setPreferredNavigationProvider, shareText } from "./mobileTools";
+import { build99MobilityUrl, buildAppleMapsDirectionsUrl, buildOrganicMapsNavigationUrl, buildOrganicMapsSearchUrl, buildGoogleMapsDirectionsUrl, buildGoogleMapsMultiStopUrl, buildGoogleMapsNearbyStationsUrl, buildGoogleMapsSearchUrl, buildNearbyStationsUrl, buildRouteShareText, buildUberRideUrl, buildWazeNavigationUrl, getPreferredNavigationProvider, openExternalUrl, setPreferredNavigationProvider, shareText } from "./mobileTools";
 
 describe("mobile tools", () => {
   it("builds Organic Maps navigation links without exposing current GPS coordinates", () => {
     const drive = buildOrganicMapsNavigationUrl({ lat: -15.86, lng: -48.03 }, "UPA Águas Lindas", "drive");
-    expect(drive).toContain("om://v2/nav?");
+    expect(drive).toContain("https://omaps.app/v2/nav?");
     expect(drive).toContain("origin=currentLocation");
     expect(drive).toContain("destination=-15.86%2C-48.03");
     expect(drive).toContain("destination_name=UPA+%C3%81guas+Lindas");
@@ -13,6 +13,9 @@ describe("mobile tools", () => {
     expect(buildOrganicMapsNavigationUrl({ lat: -15.86, lng: -48.03 }, "UBS", "walk")).toContain("mode=walk");
     expect(buildOrganicMapsNavigationUrl({ lat: -15.86, lng: -48.03 }, "UBS", "bike")).toContain("mode=bike");
     expect(buildOrganicMapsNavigationUrl({ lat: Number.NaN, lng: -48.03 })).toBeNull();
+    expect(buildOrganicMapsNavigationUrl({ lat: 95, lng: -48.03 })).toBeNull();
+    expect(buildOrganicMapsSearchUrl("UPA Águas Lindas")).toContain("https://omaps.app/search?");
+    expect(buildOrganicMapsSearchUrl("UPA Águas Lindas")).toContain("query=UPA+%C3%81guas+Lindas");
   });
 
   it("builds a nearby-stations URL with validated coordinates", () => {
