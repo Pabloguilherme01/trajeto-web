@@ -37,3 +37,17 @@ it("reports clipboard failure without claiming success", async () => {
   await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("Não foi possível copiar"));
   expect(screen.queryByText("Endereço copiado.")).toBeNull();
 });
+
+it("opens Organic Maps with the public destination and currentLocation origin", () => {
+  const open = vi.spyOn(window, "open").mockImplementation(() => null);
+  render(<MapPlaceActions place={place} />);
+  fireEvent.click(screen.getByRole("button", { name: "Organic Maps" }));
+  expect(open).toHaveBeenCalledWith(
+    expect.stringContaining("omaps.app/v2/nav"),
+    "_blank",
+    "noopener,noreferrer",
+  );
+  const url = new URL(open.mock.calls[0][0] as string);
+  expect(url.searchParams.get("origin")).toBe("currentLocation");
+  expect(url.searchParams.get("destination")).toBe("-15.75,-48.28");
+});
