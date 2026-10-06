@@ -82,6 +82,7 @@ const NEED_GROUPS = [
 const READY_ROUTE_IDS = [
   "upa",
   "heal",
+  "hospital-bom-jesus",
   "prefeitura",
   "vapt-vupt",
   "rodoviaria",
@@ -89,6 +90,10 @@ const READY_ROUTE_IDS = [
   "cras-1",
   "detran",
   "forum",
+  "saneago",
+  "secretaria-educacao",
+  "ubs-barragem-ii",
+  "cora-coralina",
   "praca-da-biblia",
 ] as const;
 
@@ -563,8 +568,8 @@ export default function PublicServices() {
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Chegue mais rápido</p>
-                <h2 id="ready-routes-title" className="mt-1 text-lg font-bold">Rotas prontas</h2>
-                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Destinos úteis já cadastrados. Escolha um local e o Trajeto prepara a rota; quando houver coordenadas confirmadas, você também pode continuar no Organic Maps.</p>
+                <h2 id="ready-routes-title" className="mt-1 text-lg font-bold">Rotas prontas para o dia a dia</h2>
+                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">Saúde, documentos, transporte, escola e serviços urbanos em poucos toques. O Trajeto prepara o destino e, quando houver coordenadas confirmadas, você pode continuar no Organic Maps.</p>
               </div>
               <Route className="hidden size-6 text-primary sm:block" />
             </div>
