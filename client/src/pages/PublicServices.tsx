@@ -75,7 +75,8 @@ const SERVICE_SUMMARY = {
 const NEED_GROUPS = [
   { label: "Documentos e direitos", query: "cpf", hint: "CPF, Receita, título, Defensoria e cidadania" },
   { label: "Família e benefícios", query: "cadunico", hint: "CadÚnico, CRAS, benefícios e Passe Livre PCD" },
-  { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência e saúde digital" },
+  { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência, vigilância e saúde digital" },
+  { label: "Educação e creche", query: "creche", hint: "Creches, vagas, matrículas e escolas" },
   { label: "Trabalho e renda", query: "emprego", hint: "Emprego, seguro-desemprego e empreendedorismo" },
   { label: "Casa e cidade", query: "buraco", hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana" },
   { label: "Segurança e proteção", query: "delegacia", hint: "Delegacia, ocorrência e atendimento policial" },
