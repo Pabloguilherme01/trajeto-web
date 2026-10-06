@@ -70,6 +70,15 @@ const SERVICE_SUMMARY = {
   verified: PUBLIC_SERVICES.filter(service => Boolean(service.verifiedAt)).length,
 } as const;
 
+const NEED_GROUPS = [
+  { label: "Documentos e direitos", query: "documentos", hint: "CPF, título, documentos e cidadania" },
+  { label: "Família e benefícios", query: "beneficios", hint: "CadÚnico, CRAS, INSS e apoio social" },
+  { label: "Saúde perto de você", query: "ubs", hint: "UBS, ESF, urgência e saúde digital" },
+  { label: "Trabalho e renda", query: "emprego", hint: "Emprego, seguro-desemprego e empreendedorismo" },
+  { label: "Casa e cidade", query: "moradia", hint: "Habitação, regularização e serviços urbanos" },
+  { label: "Segurança e proteção", query: "seguranca", hint: "Delegacia, proteção e emergência" },
+] as const;
+
 const READY_ROUTE_IDS = [
   "upa",
   "heal",
@@ -485,6 +494,15 @@ export default function PublicServices() {
                     </button>
                   );
                 })}
+              </div>
+              <h2 className="mt-5 text-lg font-bold">Encontre pela sua situação</h2>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {NEED_GROUPS.map(group => (
+                  <button key={group.label} type="button" onClick={() => { setQuery(group.query); applyFilters(group.query, "todos"); }} className="premium-card min-h-20 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-accent">
+                    <span className="block text-sm font-black text-foreground">{group.label}</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{group.hint}</span>
+                  </button>
+                ))}
               </div>
               <h2
                 id="citizen-shortcuts-title"
