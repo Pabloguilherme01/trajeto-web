@@ -288,7 +288,7 @@ export default function PublicServices() {
               precisa de rede telefônica
             </span>
           </div>
-          <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
               { label: "Polícia", number: "190" },
               { label: "SAMU", number: "192" },
@@ -298,7 +298,7 @@ export default function PublicServices() {
               <a
                 key={item.label}
                 href={phoneHref(item.number) ?? "#"}
-                className="inline-flex min-h-16 w-[8.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-sm font-bold text-foreground/80 transition hover:border-warning/30 hover:text-foreground sm:w-auto sm:shrink"
+                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-sm font-bold text-foreground/80 transition hover:border-warning/30 hover:text-foreground"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Phone className="size-3.5 shrink-0 text-warning" />
@@ -358,7 +358,7 @@ export default function PublicServices() {
 
           <div
             role="group"
-            className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mt-3 flex flex-wrap gap-2"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -368,7 +368,7 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "min-h-11 shrink-0 snap-start rounded-full border px-3 text-sm font-black transition " +
+                  "min-h-11 rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
                     ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
                     : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
@@ -405,7 +405,7 @@ export default function PublicServices() {
               <h2 id="citizen-shortcuts-title" className="text-base font-bold">
                 O que você precisa resolver?
               </h2>
-              <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0">
+              <div className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-4">
                 {PUBLIC_SERVICE_SHORTCUTS.map(shortcut => (
                   <button
                     key={shortcut.query}
@@ -414,7 +414,7 @@ export default function PublicServices() {
                       setQuery(shortcut.query);
                       applyFilters(shortcut.query, "todos");
                     }}
-                    className="premium-card min-h-20 w-[min(74vw,18rem)] min-w-[14rem] shrink-0 snap-start rounded-2xl border border-accent/20 bg-accent/5 p-3 text-left sm:w-auto sm:min-w-0 sm:shrink"
+                    className="premium-card min-h-20 min-w-0 rounded-2xl border border-accent/20 bg-accent/5 p-3 text-left"
                   >
                     <span className="block text-sm font-bold text-foreground">
                       {shortcut.label}

@@ -15,26 +15,24 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("(prefers-reduced-motion: reduce)");
     expect(source).toContain('behavior: reduceMotion ? "auto" : "smooth"');
   });
-  it("keeps service categories compact and keyboard accessible on mobile", () => {
+  it("keeps all service categories visible without requiring horizontal discovery", () => {
     expect(source).toContain('role="group"');
     expect(source).toContain('aria-label="Categorias de serviços"');
-    expect(source).toContain("overflow-x-auto");
-    expect(source).toContain("shrink-0 snap-start");
+    expect(source).toContain('className="mt-3 flex flex-wrap gap-2"');
   });
 
-  it("keeps the service header and emergency actions compact on narrow screens", () => {
+  it("shows every emergency action in a two-column mobile grid", () => {
     expect(source).toContain("PUBLIC_SERVICE_CATEGORIES.length - 1");
     expect(source).toContain("sm:inline-flex");
-    expect(source).toContain('w-[8.5rem]');
-    expect(source).toContain("sm:grid sm:grid-cols-4");
+    expect(source).toContain('className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4"');
   });
 
-  it("prioritizes route and the main contact while keeping secondary options compact", () => {
+  it("prioritizes route and the main contact while making daily shortcuts immediately discoverable", () => {
     expect(source).toContain("const primaryContact = contacts[0]");
     expect(source).toContain("const secondaryContacts = contacts.slice(1)");
     expect(source).toContain("Mais opções");
     expect(source).toContain("PUBLIC_SERVICE_SHORTCUTS.map");
-    expect(source).toContain("w-[min(74vw,18rem)]");
+    expect(source).toContain("grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-4");
   });
 
   it("keeps essential actions visible even when offline navigation loses deep-link expansion", () => {
