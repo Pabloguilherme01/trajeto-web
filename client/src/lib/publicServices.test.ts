@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { phoneHref } from "./contactActions";
 import {
   PUBLIC_SERVICES,
+  PUBLIC_SERVICE_CATEGORIES,
   PUBLIC_SERVICE_SHORTCUTS,
   searchPublicServices,
 } from "./publicServices";
@@ -111,15 +112,31 @@ describe("public services catalog", () => {
       true
     );
     const regional = PUBLIC_SERVICES.find(item => item.id === "pcgo-17-drp")!;
-    expect(regional.address).toContain("Quadra 27, Rua 22");
-    expect(regional.address).toContain("Parque Águas Bonitas I");
-    expect(regional.phone).toBe("(61) 3613-4160");
-    expect(regional.verifiedAt).toBe("01/10/2026");
-    expect(regional.sourceUrl).toContain("delegacias-regionais");
+    expect(regional.address).toContain("Jardim Pérola II");
+    expect(regional.address).toContain("Quadra 55, Lote 08");
+    expect(regional.phone).toBe("(61) 3613-4582");
+    expect(regional.extraPhone).toBe("(62) 99506-5190");
+    expect(regional.verifiedAt).toBe("06/10/2026");
+    expect(regional.sourceUrl).toContain("Lista-Telefonica-2026.pdf");
     const firstDp = PUBLIC_SERVICES.find(
       item => item.id === "policia-civil-1"
     )!;
     expect(firstDp.address).toContain("Rua Adélia");
+    expect(firstDp.phone).toBe("(61) 3613-97944");
+    expect(firstDp.extraPhone).toContain("(62) 98424-2105");
+    expect(firstDp.verifiedAt).toBe("06/10/2026");
+    expect(PUBLIC_SERVICES.some(item => item.id === "policia-civil-2")).toBe(true);
+    expect(PUBLIC_SERVICES.some(item => item.id === "deam-depai-dpca")).toBe(true);
+  });
+
+  it("separates broad citizenship needs into easier utility categories", () => {
+    expect(PUBLIC_SERVICE_CATEGORIES.map(item => item.id)).toEqual(
+      expect.arrayContaining(["utilidades", "moradia", "trabalho", "justica"])
+    );
+    expect(searchPublicServices("falta de luz", "utilidades").map(item => item.id)).toContain("energia");
+    expect(searchPublicServices("regularizacao fundiaria", "moradia").map(item => item.id)).toContain("regularizacao-fundiaria");
+    expect(searchPublicServices("ctps", "trabalho").map(item => item.id)).toContain("carteira-trabalho-digital");
+    expect(searchPublicServices("procon", "justica").map(item => item.id)).toContain("procon");
   });
   it("includes verified national protection and utility channels without fictitious routes", () => {
     for (const [id, number] of [
@@ -186,6 +203,9 @@ describe("public services catalog", () => {
     ["carteira idoso", "carteira-pessoa-idosa"],
     ["eleitoral", "autoatendimento-eleitoral"],
     ["reclamacao empresa", "consumidor-gov"],
+    ["ouvidoria sus", "ouvsus-136"],
+    ["farmacia popular", "farmacia-popular"],
+    ["expresso goias", "expresso-goias"],
   ])(
     "finds the new official need %s without inventing a local route",
     (query, id) => {
