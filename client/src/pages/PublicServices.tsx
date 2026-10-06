@@ -242,7 +242,7 @@ export default function PublicServices() {
               Serviços e locais públicos essenciais já ficam incorporados ao
               app. O catálogo básico funciona sem depender de consulta online.
             </p>
-            <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-3 flex flex-wrap gap-2 pb-1">
               <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
                 {PUBLIC_SERVICES.length} serviços
               </span>
@@ -463,7 +463,7 @@ export default function PublicServices() {
             const contacts = publicServiceContacts(service);
             const primaryContact = contacts[0];
             const secondaryContacts = contacts.slice(1);
-            const expandedActions = selectedService?.id === service.id;
+            const expandedActions = selectedService?.id === service.id || results.length === 1;
             const saved = favorites.includes(service.id);
             return (
               <article
