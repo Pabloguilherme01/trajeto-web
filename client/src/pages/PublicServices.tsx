@@ -899,7 +899,7 @@ export default function PublicServices() {
                   )}
                   {service.actionUrl ? (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
-                      <Globe2 className="size-3.5" /> exige internet
+                      <Globe2 className="size-3.5" /> canal externo exige internet
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
