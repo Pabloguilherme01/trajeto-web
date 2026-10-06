@@ -18,3 +18,15 @@ export function viewportTileBounds(center: { x: number; y: number }, width: numb
     maxY: Math.floor((center.y + height / (2 * scale)) / 256) + 1,
   };
 }
+
+
+/** Limit very dense route geometries while preserving both endpoints. */
+export function limitPolylinePoints<T>(points: T[], maxPoints = 2500) {
+  if (points.length <= maxPoints || maxPoints < 2) return points;
+  const stride = Math.max(1, Math.ceil((points.length - 1) / (maxPoints - 1)));
+  const limited = [points[0]];
+  for (let index = stride; index < points.length - 1; index += stride)
+    limited.push(points[index]);
+  limited.push(points[points.length - 1]);
+  return limited;
+}
