@@ -1,5 +1,9 @@
 import {
   ArrowRight,
+  Search,
+  SlidersHorizontal,
+  ChevronRight,
+  CheckCircle2,
   BookOpen,
   Building2,
   ExternalLink,
@@ -62,7 +66,9 @@ export default function PublicServices() {
   const [online, setOnline] = useState(
     () => typeof navigator === "undefined" || navigator.onLine
   );
-  const [resource, setResource] = useState<"todos" | "contato" | "rota" | "online">("todos");
+  const [resource, setResource] = useState<
+    "todos" | "contato" | "rota" | "online"
+  >("todos");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
@@ -131,7 +137,8 @@ export default function PublicServices() {
       service =>
         (!savedOnly || favorites.includes(service.id)) &&
         (resource === "todos" ||
-          (resource === "contato" && publicServiceContacts(service).length > 0) ||
+          (resource === "contato" &&
+            publicServiceContacts(service).length > 0) ||
           (resource === "rota" && Boolean(service.mapQuery)) ||
           (resource === "online" && Boolean(service.actionUrl)))
     );
@@ -152,7 +159,9 @@ export default function PublicServices() {
     const frame = window.requestAnimationFrame(() => {
       const target = document.getElementById(targetId);
       if (!target) return;
-      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      const reduceMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
       target.scrollIntoView({
         behavior: reduceMotion ? "auto" : "smooth",
         block: "center",
@@ -241,27 +250,17 @@ export default function PublicServices() {
             <p className="text-xs font-black uppercase tracking-[.17em] text-primary">
               Central de serviços
             </p>
-            <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-.065em] sm:text-5xl">
-              Águas Lindas em um só lugar.
+            <h1 className="mt-2 font-display text-[1.75rem] font-semibold leading-tight tracking-tight sm:text-4xl">
+              Como podemos ajudar?
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-foreground/70">
-              Serviços e locais públicos essenciais já ficam incorporados ao
-              app. O catálogo básico funciona sem depender de consulta online.
+            <p className="mt-2 text-sm text-muted-foreground">
+              Águas Lindas de Goiás · serviços locais e canais públicos
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
-                {PUBLIC_SERVICES.length} serviços
-              </span>
-              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
-                {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
-              </span>
-              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/70">
-                funciona offline
-              </span>
-              <span className="shrink-0 snap-start rounded-full border border-border/8 bg-muted/[.025] px-2.5 py-1 text-xs font-bold text-foreground/65">
-                confirme na fonte oficial
-              </span>
-            </div>
+            <p className="mt-3 flex items-center gap-2 text-xs font-bold text-primary">
+              <WifiOff className="size-4 shrink-0" /> {PUBLIC_SERVICES.length}{" "}
+              serviços no catálogo offline ·{" "}
+              {PUBLIC_SERVICE_CATEGORIES.length - 1} categorias
+            </p>
           </div>
           <button
             type="button"
@@ -272,96 +271,190 @@ export default function PublicServices() {
           </button>
         </header>
 
+        <form
+          onSubmit={event => {
+            event.preventDefault();
+            applyFilters(query, category);
+            inputRef.current?.blur();
+          }}
+          className="premium-search mt-5 flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3"
+        >
+          <Search className="size-5 shrink-0 text-primary" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Do que você precisa?"
+            className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/65"
+            autoComplete="off"
+            enterKeyHint="search"
+            aria-label="Buscar serviços públicos"
+            aria-keyshortcuts="Control+K Meta+K"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                applyFilters("", category, true);
+              }}
+              className="grid size-11 place-items-center rounded-xl text-foreground/70"
+              aria-label="Limpar busca"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+          <button
+            type="submit"
+            aria-label="Pesquisar serviços"
+            className="grid size-11 shrink-0 place-items-center rounded-xl text-primary"
+          >
+            <ArrowRight className="size-5" />
+          </button>
+          <kbd className="hidden rounded-lg border border-border/8 bg-muted/[.03] px-2 py-1 text-xs font-black text-foreground/70 sm:inline">
+            Ctrl K
+          </kbd>
+        </form>
+
         <section
           id="emergency-strip"
           tabIndex={-1}
-          className="premium-card mt-5 scroll-mt-20 rounded-[1.5rem] border border-warning/20 bg-warning/5 p-3 outline-none"
+          className="mt-4 scroll-mt-20 rounded-2xl border border-warning/25 bg-card p-3 outline-none"
           aria-labelledby="emergency-strip-title"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[.14em] text-warning">
-                Utilidade imediata
+                Emergências
               </p>
               <h2
                 id="emergency-strip-title"
                 className="mt-1 text-sm font-black"
               >
-                Canais de emergência
+                Em caso de risco, ligue agora
               </h2>
             </div>
             <span className="text-xs font-bold text-foreground/65">
-              precisa de rede telefônica
+              rede telefônica
             </span>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-3 gap-2">
             {[
               { label: "Polícia", number: "190" },
               { label: "SAMU", number: "192" },
               { label: "Bombeiros", number: "193" },
-              { label: "Polícia Civil", number: "(61) 3618-2716" },
             ].map(item => (
               <a
                 key={item.label}
                 href={phoneHref(item.number) ?? "#"}
-                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-sm font-bold text-foreground/80 transition hover:border-warning/30 hover:text-foreground"
+                className="inline-flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-bold text-foreground transition hover:border-warning/30 hover:text-foreground"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Phone className="size-3.5 shrink-0 text-warning" />
                   {item.label}
                 </span>
-                <span className="text-xs text-foreground/70">{item.number}</span>
+                <span className="text-xl font-black text-warning">
+                  {item.number}
+                </span>
               </a>
             ))}
           </div>
         </section>
 
-        <section className="premium-card mt-5 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4">
-          <form
-            onSubmit={event => {
-              event.preventDefault();
-              applyFilters(query, category);
-              inputRef.current?.blur();
-            }}
-            className="premium-search flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3"
-          >
-            <MapPinned className="size-4 shrink-0 text-primary" />
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-              placeholder="Buscar saúde, escola, polícia, prefeitura..."
-              className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/65"
-              autoComplete="off"
-              enterKeyHint="search"
-              aria-label="Buscar serviços públicos"
-              aria-keyshortcuts="Control+K Meta+K"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery("");
-                  applyFilters("", category, true);
-                }}
-                className="grid size-11 place-items-center rounded-xl text-foreground/70"
-                aria-label="Limpar busca"
+        {!selectedService &&
+          !savedOnly &&
+          !query.trim() &&
+          category === "todos" &&
+          resource === "todos" && (
+            <section className="mt-5" aria-labelledby="citizen-shortcuts-title">
+              <h2 className="text-lg font-bold">Resolva por assunto</h2>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {PUBLIC_SERVICE_CATEGORIES.filter(
+                  item => item.id !== "todos"
+                ).map(item => {
+                  const Icon = categoryIcons[item.id as PublicServiceCategory];
+                  const count = PUBLIC_SERVICES.filter(
+                    service => service.category === item.id
+                  ).length;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => applyCategory(item.id)}
+                      className="flex min-h-24 min-w-0 items-center gap-2 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-accent focus-visible:border-accent"
+                    >
+                      <Icon className="size-5 shrink-0 text-accent" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-bold">
+                          {item.label}
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {count} serviços
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <h2
+                id="citizen-shortcuts-title"
+                className="mt-5 text-lg font-bold"
               >
-                <X className="size-4" />
-              </button>
-            )}
-            <button
-              type="submit"
-              aria-label="Pesquisar serviços"
-              className="grid size-11 shrink-0 place-items-center rounded-xl text-primary"
-            >
-              <ArrowRight className="size-5" />
-            </button>
-            <kbd className="hidden rounded-lg border border-border/8 bg-muted/[.03] px-2 py-1 text-xs font-black text-foreground/70 sm:inline">
-              Ctrl K
-            </kbd>
-          </form>
-
+                Atalhos do dia a dia
+              </h2>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {PUBLIC_SERVICE_SHORTCUTS.slice(0, 4).map(shortcut => (
+                  <button
+                    key={shortcut.query}
+                    type="button"
+                    onClick={() => {
+                      setQuery(shortcut.query);
+                      applyFilters(shortcut.query, "todos");
+                    }}
+                    className="min-h-24 min-w-0 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary"
+                  >
+                    <span className="block text-sm font-bold text-foreground">
+                      {shortcut.label}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-foreground/70">
+                      {shortcut.hint}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <details className="mobile-disclosure mt-2">
+                <summary className="min-h-11">
+                  Mais atalhos ({PUBLIC_SERVICE_SHORTCUTS.length - 4})
+                  <ChevronRight className="size-4" />
+                </summary>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {PUBLIC_SERVICE_SHORTCUTS.slice(4).map(shortcut => (
+                    <button
+                      key={shortcut.query}
+                      type="button"
+                      onClick={() => {
+                        setQuery(shortcut.query);
+                        applyFilters(shortcut.query, "todos");
+                      }}
+                      className="min-h-24 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
+                    >
+                      <span className="block text-sm font-bold">
+                        {shortcut.label}
+                      </span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {shortcut.hint}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </details>
+            </section>
+          )}
+        <h2 className="mt-6 text-lg font-bold">Explore os serviços</h2>
+        <section
+          aria-label="Filtrar catálogo"
+          className="premium-card mt-5 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4"
+        >
           <div
             role="group"
             className="mt-3 flex flex-wrap gap-2"
@@ -384,21 +477,50 @@ export default function PublicServices() {
               </button>
             ))}
           </div>
-          <div role="group" aria-label="Recursos disponíveis" className="mt-3 flex flex-wrap gap-2">
-            {([
-              ["todos", "Todos os recursos"],
-              ["contato", "Ligar ou WhatsApp"],
-              ["rota", "Com destino para rota"],
-              ["online", "Canal oficial online"],
-            ] as const).map(([value, label]) => (
-              <button key={value} type="button" aria-pressed={resource === value}
-                onClick={() => { setResource(value); if (selectedService) applyFilters(query, category); }}
-                className={"min-h-11 rounded-xl border px-3 text-sm font-bold " +
-                  (resource === value ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground")}>
-                {label}
-              </button>
-            ))}
-          </div>
+          <details
+            className="mobile-disclosure mt-3"
+            open={resource !== "todos" ? true : undefined}
+          >
+            <summary className="min-h-11">
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="size-4" /> Filtrar por recurso
+                {resource !== "todos" ? " · ativo" : ""}
+              </span>
+              <ChevronRight className="size-4" />
+            </summary>
+            <div
+              role="group"
+              aria-label="Recursos disponíveis"
+              className="mt-3 flex flex-wrap gap-2"
+            >
+              {(
+                [
+                  ["todos", "Todos os recursos"],
+                  ["contato", "Ligar ou WhatsApp"],
+                  ["rota", "Com destino para rota"],
+                  ["online", "Canal oficial online"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={resource === value}
+                  onClick={() => {
+                    setResource(value);
+                    if (selectedService) applyFilters(query, category);
+                  }}
+                  className={
+                    "min-h-11 rounded-xl border px-3 text-sm font-bold " +
+                    (resource === value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground")
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </details>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -417,37 +539,6 @@ export default function PublicServices() {
             </p>
           </div>
         </section>
-
-        {!selectedService &&
-          !savedOnly &&
-          !query.trim() &&
-          category === "todos" && resource === "todos" && (
-            <section className="mt-4" aria-labelledby="citizen-shortcuts-title">
-              <h2 id="citizen-shortcuts-title" className="text-base font-bold">
-                O que você precisa resolver?
-              </h2>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-4">
-                {PUBLIC_SERVICE_SHORTCUTS.map(shortcut => (
-                  <button
-                    key={shortcut.query}
-                    type="button"
-                    onClick={() => {
-                      setQuery(shortcut.query);
-                      applyFilters(shortcut.query, "todos");
-                    }}
-                    className="premium-card min-h-20 min-w-0 rounded-2xl border border-accent/20 bg-accent/5 p-3 text-left"
-                  >
-                    <span className="block text-sm font-bold text-foreground">
-                      {shortcut.label}
-                    </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-foreground/70">
-                      {shortcut.hint}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
 
         {selectedService && (
           <button
@@ -476,7 +567,10 @@ export default function PublicServices() {
           {results.length} serviços encontrados
         </p>
         <section
-          className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          className={
+            "mt-3 grid gap-3 " +
+            (selectedService ? "max-w-2xl" : "sm:grid-cols-2 lg:grid-cols-3")
+          }
           aria-label="Serviços públicos"
         >
           {results.map(service => {
@@ -489,7 +583,8 @@ export default function PublicServices() {
               ["tel:190", "tel:192", "tel:193"].includes(contact.href)
             );
             const showSecondaryContacts =
-              secondaryContacts.length > 0 && (expandedActions || emergencyDirect);
+              secondaryContacts.length > 0 &&
+              (expandedActions || emergencyDirect);
             const showOfficialAction =
               Boolean(service.actionUrl) &&
               (expandedActions || (!primaryContact && !service.mapQuery));
@@ -506,7 +601,9 @@ export default function PublicServices() {
                 key={service.id}
                 id={"service-" + service.id}
                 tabIndex={-1}
-                aria-current={selectedService?.id === service.id ? "true" : undefined}
+                aria-current={
+                  selectedService?.id === service.id ? "true" : undefined
+                }
                 className="premium-card route-card scroll-mt-20 rounded-[1.4rem] border border-border/8 bg-card p-4 outline-none"
               >
                 <div className="flex items-start gap-3">
@@ -521,7 +618,7 @@ export default function PublicServices() {
                         )?.shortLabel
                       }
                     </p>
-                    <h2 className="mt-1 text-sm font-black leading-snug">
+                    <h2 className="mt-1 text-base font-bold leading-snug">
                       {service.name}
                     </h2>
                     <p className="mt-1.5 text-sm leading-relaxed text-foreground/70">
@@ -544,25 +641,71 @@ export default function PublicServices() {
                     />
                   </button>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-1.5 text-xs font-bold text-muted-foreground" aria-label="Recursos deste serviço">
-                  {contacts.length > 0 && <span className="rounded-lg bg-muted px-2 py-1">{contacts.length} {contacts.length === 1 ? "contato" : "contatos"}</span>}
-                  {service.mapQuery && <span className="rounded-lg bg-muted px-2 py-1">Destino no planejador</span>}
-                  {service.actionUrl && <span className="rounded-lg bg-muted px-2 py-1">Canal online</span>}
+                <div
+                  className="mt-3 flex flex-wrap gap-1.5 text-xs font-bold text-muted-foreground"
+                  aria-label="Recursos deste serviço"
+                >
+                  {contacts.length > 0 && (
+                    <span className="rounded-lg bg-muted px-2 py-1">
+                      {contacts.length}{" "}
+                      {contacts.length === 1 ? "contato" : "contatos"}
+                    </span>
+                  )}
+                  {service.mapQuery && (
+                    <span className="rounded-lg bg-muted px-2 py-1">
+                      Destino no planejador
+                    </span>
+                  )}
+                  {service.actionUrl && (
+                    <span className="rounded-lg bg-muted px-2 py-1">
+                      Canal online
+                    </span>
+                  )}
                 </div>
                 {service.address && (
                   <p className="mt-3 text-sm leading-relaxed text-foreground/65">
-                    <span className="font-black text-foreground/70">Endereço:</span>{" "}
+                    <span className="font-black text-foreground/70">
+                      Endereço:
+                    </span>{" "}
                     {service.address}
                   </p>
                 )}
-                {!service.mapQuery && <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Sem destino confirmado para rota neste catálogo.</p>}
-                {service.hours && (
-                  <p className="mt-3 text-sm font-bold text-foreground/75">{service.hours}</p>
-                )}
-                {service.guidance && (
-                  <p className="mt-3 rounded-xl bg-muted/5 p-3 text-sm leading-relaxed text-foreground/75">
-                    {service.guidance}
+                {!service.mapQuery && (
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                    Sem destino confirmado para rota neste catálogo.
                   </p>
+                )}
+                {service.hours && (
+                  <p className="mt-3 text-sm font-bold text-foreground/75">
+                    {service.hours}
+                  </p>
+                )}
+                {(service.guidance || service.documents?.length) && (
+                  <details
+                    className="mobile-disclosure mt-3"
+                    open={expandedActions || undefined}
+                  >
+                    <summary className="min-h-11">
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 className="size-4 text-accent" />{" "}
+                        Orientações e documentos
+                      </span>
+                      <ChevronRight className="size-4" />
+                    </summary>
+                    <div className="space-y-3 text-sm leading-relaxed text-foreground">
+                      {service.guidance && <p>{service.guidance}</p>}
+                      {service.documents?.length && (
+                        <div>
+                          <p className="font-bold">Prepare antes de acessar</p>
+                          <ul className="mt-2 list-disc space-y-1 pl-5">
+                            {service.documents.map(document => (
+                              <li key={document}>{document}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </details>
                 )}
                 <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                   {service.mapQuery && (
@@ -578,16 +721,31 @@ export default function PublicServices() {
                   {primaryContact ? (
                     <a
                       href={primaryContact.href}
-                      target={primaryContact.channel === "whatsapp" ? "_blank" : undefined}
-                      rel={primaryContact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
+                      target={
+                        primaryContact.channel === "whatsapp"
+                          ? "_blank"
+                          : undefined
+                      }
+                      rel={
+                        primaryContact.channel === "whatsapp"
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                       aria-label={
-                        (primaryContact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
+                        (primaryContact.channel === "whatsapp"
+                          ? "WhatsApp de "
+                          : "Ligar para ") +
                         service.name +
-                        (primaryContact.label ? " · " + primaryContact.label : "") +
+                        (primaryContact.label
+                          ? " · " + primaryContact.label
+                          : "") +
                         ": " +
                         primaryContact.number
                       }
-                      className={"inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " + (!service.mapQuery ? "min-[380px]:col-span-2" : "")}
+                      className={
+                        "inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " +
+                        (!service.mapQuery ? "min-[380px]:col-span-2" : "")
+                      }
                     >
                       {primaryContact.channel === "whatsapp" ? (
                         <MessageCircle className="size-3.5 shrink-0" />
@@ -596,8 +754,10 @@ export default function PublicServices() {
                       )}
                       <span className="min-w-0 break-words">
                         {primaryContact.label ||
-                          (primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar")} ·{" "}
-                        {primaryContact.number}
+                          (primaryContact.channel === "whatsapp"
+                            ? "WhatsApp"
+                            : "Ligar")}{" "}
+                        · {primaryContact.number}
                       </span>
                     </a>
                   ) : (
@@ -605,7 +765,10 @@ export default function PublicServices() {
                       type="button"
                       onClick={() => void shareService(service)}
                       aria-label={"Compartilhar serviço: " + service.name}
-                      className={"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " + (!service.mapQuery ? "min-[380px]:col-span-2" : "")}
+                      className={
+                        "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " +
+                        (!service.mapQuery ? "min-[380px]:col-span-2" : "")
+                      }
                     >
                       <Share2 className="size-3.5" />
                       Compartilhar
@@ -618,10 +781,18 @@ export default function PublicServices() {
                       <a
                         key={contact.href}
                         href={contact.href}
-                        target={contact.channel === "whatsapp" ? "_blank" : undefined}
-                        rel={contact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
+                        target={
+                          contact.channel === "whatsapp" ? "_blank" : undefined
+                        }
+                        rel={
+                          contact.channel === "whatsapp"
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
                         aria-label={
-                          (contact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
+                          (contact.channel === "whatsapp"
+                            ? "WhatsApp de "
+                            : "Ligar para ") +
                           service.name +
                           (contact.label ? " · " + contact.label : "") +
                           ": " +
@@ -635,7 +806,11 @@ export default function PublicServices() {
                           <Phone className="size-3.5 shrink-0" />
                         )}
                         <span className="min-w-0 break-words">
-                          {contact.label || (contact.channel === "whatsapp" ? "WhatsApp" : "Ligar")} · {contact.number}
+                          {contact.label ||
+                            (contact.channel === "whatsapp"
+                              ? "WhatsApp"
+                              : "Ligar")}{" "}
+                          · {contact.number}
                         </span>
                       </a>
                     ))}
@@ -672,76 +847,90 @@ export default function PublicServices() {
                   </button>
                 )}
                 {hasMoreOptions && (
-                <details className="mobile-disclosure mt-2">
-                  <summary>
-                    {service.actionUrl && !showOfficialAction
-                      ? "Mais opções · canal online"
-                      : secondaryContacts.length > 0 && !showSecondaryContacts
-                        ? "Mais opções · contatos"
-                        : service.email && !showEmail
-                          ? "Mais opções · e-mail"
-                          : "Compartilhar serviço"}
-                    <ArrowRight className="size-4 shrink-0" />
-                  </summary>
-                  <div className="grid gap-2">
-                    {service.actionUrl && !showOfficialAction && (
-                      <a
-                        href={service.actionUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
-                      >
-                        <ExternalLink className="size-4" />
-                        {service.actionLabel} · online
-                      </a>
-                    )}
-                    {service.email && !showEmail && (
-                      <a
-                        href={"mailto:" + service.email}
-                        className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
-                      >
-                        {service.email}
-                      </a>
-                    )}
-                    {!showSecondaryContacts && secondaryContacts.map(contact => (
-                      <a
-                        key={contact.href}
-                        href={contact.href}
-                        target={contact.channel === "whatsapp" ? "_blank" : undefined}
-                        rel={contact.channel === "whatsapp" ? "noopener noreferrer" : undefined}
-                        aria-label={
-                          (contact.channel === "whatsapp" ? "WhatsApp de " : "Ligar para ") +
-                          service.name +
-                          (contact.label ? " · " + contact.label : "") +
-                          ": " +
-                          contact.number
-                        }
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-sm font-bold text-accent"
-                      >
-                        {contact.channel === "whatsapp" ? (
-                          <MessageCircle className="size-3.5 shrink-0" />
-                        ) : (
-                          <Phone className="size-3.5 shrink-0" />
-                        )}
-                        <span className="break-words">
-                          {contact.label || "Contato alternativo"} · {contact.number}
-                          {contact.channel === "whatsapp" ? " · WhatsApp" : ""}
-                        </span>
-                      </a>
-                    ))}
-                    {primaryContact && (
-                      <button
-                        type="button"
-                        onClick={() => void shareService(service)}
-                        aria-label={"Compartilhar serviço: " + service.name}
-                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
-                      >
-                        <Share2 className="size-3.5" />
-                        Compartilhar
-                      </button>
-                    )}
-                  </div>
-                </details>
+                  <details className="mobile-disclosure mt-2">
+                    <summary>
+                      {service.actionUrl && !showOfficialAction
+                        ? "Mais opções · canal online"
+                        : secondaryContacts.length > 0 && !showSecondaryContacts
+                          ? "Mais opções · contatos"
+                          : service.email && !showEmail
+                            ? "Mais opções · e-mail"
+                            : "Compartilhar serviço"}
+                      <ArrowRight className="size-4 shrink-0" />
+                    </summary>
+                    <div className="grid gap-2">
+                      {service.actionUrl && !showOfficialAction && (
+                        <a
+                          href={service.actionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
+                        >
+                          <ExternalLink className="size-4" />
+                          {service.actionLabel} · online
+                        </a>
+                      )}
+                      {service.email && !showEmail && (
+                        <a
+                          href={"mailto:" + service.email}
+                          className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
+                        >
+                          {service.email}
+                        </a>
+                      )}
+                      {!showSecondaryContacts &&
+                        secondaryContacts.map(contact => (
+                          <a
+                            key={contact.href}
+                            href={contact.href}
+                            target={
+                              contact.channel === "whatsapp"
+                                ? "_blank"
+                                : undefined
+                            }
+                            rel={
+                              contact.channel === "whatsapp"
+                                ? "noopener noreferrer"
+                                : undefined
+                            }
+                            aria-label={
+                              (contact.channel === "whatsapp"
+                                ? "WhatsApp de "
+                                : "Ligar para ") +
+                              service.name +
+                              (contact.label ? " · " + contact.label : "") +
+                              ": " +
+                              contact.number
+                            }
+                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-sm font-bold text-accent"
+                          >
+                            {contact.channel === "whatsapp" ? (
+                              <MessageCircle className="size-3.5 shrink-0" />
+                            ) : (
+                              <Phone className="size-3.5 shrink-0" />
+                            )}
+                            <span className="break-words">
+                              {contact.label || "Contato alternativo"} ·{" "}
+                              {contact.number}
+                              {contact.channel === "whatsapp"
+                                ? " · WhatsApp"
+                                : ""}
+                            </span>
+                          </a>
+                        ))}
+                      {primaryContact && (
+                        <button
+                          type="button"
+                          onClick={() => void shareService(service)}
+                          aria-label={"Compartilhar serviço: " + service.name}
+                          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                        >
+                          <Share2 className="size-3.5" />
+                          Compartilhar
+                        </button>
+                      )}
+                    </div>
+                  </details>
                 )}
                 <a
                   href={service.sourceUrl}
