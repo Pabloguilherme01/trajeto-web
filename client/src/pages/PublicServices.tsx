@@ -32,7 +32,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
-import { shareText } from "@/lib/mobileTools";
+import { buildOrganicMapsNavigationUrl, buildOrganicMapsSearchUrl, openExternalUrl, shareText } from "@/lib/mobileTools";
 import {
   listPublicServiceFavorites,
   publicServiceFavoritesEvent,
@@ -49,6 +49,7 @@ import {
   type PublicServiceCategory,
 } from "@/lib/publicServices";
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
+import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
 
 const categoryIcons = {
   saude: HeartPulse,
@@ -282,6 +283,19 @@ export default function PublicServices() {
     setLocation(
       appUrl("/planejar") + "?destino=" + encodeURIComponent(service.mapQuery)
     );
+  };
+  const openOrganicMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
+    if (!service.mapQuery) return;
+    let point: ReturnType<typeof resolveOfflineRoutePoint> = null;
+    try {
+      point = resolveOfflineRoutePoint(service.mapQuery);
+    } catch {
+      point = null;
+    }
+    const url = point
+      ? buildOrganicMapsNavigationUrl(point, service.name, "drive")
+      : buildOrganicMapsSearchUrl(service.mapQuery);
+    if (url) openExternalUrl(url);
   };
   const toggleSaved = (service: (typeof PUBLIC_SERVICES)[number]) => {
     const result = togglePublicServiceFavorite(service.id);
@@ -984,6 +998,17 @@ export default function PublicServices() {
                     >
                       <MapPinned className="mr-1.5 inline size-3.5" />
                       Planejar rota
+                    </button>
+                  )}
+                  {service.mapQuery && (
+                    <button
+                      type="button"
+                      onClick={() => openOrganicMaps(service)}
+                      aria-label={"Abrir " + service.name + " no Organic Maps"}
+                      className="min-h-11 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                    >
+                      <Navigation className="mr-1.5 inline size-3.5" />
+                      Organic Maps
                     </button>
                   )}
                   {primaryContact ? (
