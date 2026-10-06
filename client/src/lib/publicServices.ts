@@ -1,7 +1,7 @@
 import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
-  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania";
+  "saude" | "seguranca" | "assistencia" | "transito" | "educacao" | "cidadania" | "trabalho" | "moradia" | "servicos-urbanos";
 
 export type PublicService = {
   id: string;
@@ -57,6 +57,9 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
   { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
+  { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
+  { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
+  { id: "servicos-urbanos", label: "Cidade e serviços", shortLabel: "Cidade" },
 ];
 
 const PREFEITURA_CONTATOS = "https://aguaslindasdegoias.go.gov.br/contatos/";
