@@ -539,6 +539,7 @@ export default function PublicServices() {
               <button
                 key={item.id}
                 type="button"
+                aria-label={item.id === "cidadania" ? "Cidadania" : item.label}
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
