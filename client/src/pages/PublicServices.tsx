@@ -472,7 +472,7 @@ export default function PublicServices() {
               rede telefônica
             </span>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-1.5 min-[360px]:gap-2">
+          <div className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3">
             {[
               { label: "Polícia", number: "190" },
               { label: "SAMU", number: "192" },
@@ -731,7 +731,7 @@ export default function PublicServices() {
             <div
               role="group"
               aria-label="Recursos disponíveis"
-              className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4"
+              className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4"
             >
               {(
                 [
