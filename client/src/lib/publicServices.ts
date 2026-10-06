@@ -383,8 +383,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address:
       "Rua Adélia, Quadra 3, Setor Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
     phone: "(61) 3613-97944",
-    extraPhone: "(61) 3618-1456",
-    whatsappOnly: ["(62) 98424-2105"],
+    extraPhone: "(61) 3618-1456 / (62) 98424-2105",
     hours: "Atendimento do interior: em regra, 8h–12h e 14h–18h; confirme antes de sair",
     guidance:
       "A lista telefônica oficial de 2026 informa estes contatos. Em emergência imediata, ligue 190.",
@@ -403,7 +402,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address:
       "Jardim Pérola II, Quadra 55, Lote 08, Águas Lindas de Goiás - GO, 72911-316",
     phone: "(61) 3613-4582",
-    whatsappOnly: ["(62) 99506-5190"],
+    extraPhone: "(62) 99506-5190",
     guidance:
       "Contatos e endereço conferidos na lista telefônica oficial da Polícia Civil de Goiás de 2026.",
     verifiedAt: "06/10/2026",
@@ -438,7 +437,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address:
       "Rua Colibri, Quadra 27, Lote 03, Bairro Sol Nascente, Águas Lindas de Goiás - GO, 72912-730",
     phone: "(61) 3613-0701",
-    whatsappOnly: ["(62) 98598-3382", "(62) 98593-6310"],
+    extraPhone: "(62) 98598-3382 / (62) 98593-6310",
     guidance:
       "Contatos conferidos na lista telefônica oficial de 2026. Para risco imediato, ligue 190; o Ligue 180 também orienta mulheres em situação de violência.",
     verifiedAt: "06/10/2026",
