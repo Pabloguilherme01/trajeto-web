@@ -12,7 +12,8 @@ it("keeps stations without ids selectable when background tiles fail", () => {
     { placeId: "saved-a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
     { placeId: "saved-b", name: "Posto B", address: "Rua B", lat: -15.76, lng: -48.29 },
   ]} />);
-  const tiles = screen.getAllByRole("presentation");
+  const tiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
+  expect(tiles.length).toBeGreaterThanOrEqual(5);
   tiles.slice(0, 5).forEach(tile => fireEvent.error(tile));
   expect(screen.getByRole("img", { name: /Mapa offline vetorial/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Escolher posto no mapa offline" }));
