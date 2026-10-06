@@ -406,7 +406,7 @@ export default function PublicServices() {
           </div>
         </section>
 
-        {!selectedService && !query.trim() && category === "todos" && (
+        {!selectedService && !savedOnly && !query.trim() && category === "todos" && (
           <section className="mt-4 rounded-2xl border border-primary/15 bg-primary/[.035] p-4">
             <div className="flex items-start gap-3">
               <MapPinned className="mt-0.5 size-5 shrink-0 text-primary" />
