@@ -706,7 +706,7 @@ export default function TileStationMap({
                           : active
                         ? "scale-110 bg-primary text-primary-foreground"
                         : station.coordinateKind === "street-midpoint"
-                          ? "bg-warning text-warning-foreground"
+                          ? "bg-warning text-foreground"
                           : station.source === "ANP"
                           ? "bg-primary text-primary-foreground"
                           : "bg-accent text-accent-foreground")
