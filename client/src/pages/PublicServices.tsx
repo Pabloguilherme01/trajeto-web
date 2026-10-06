@@ -584,7 +584,7 @@ export default function PublicServices() {
                 </div>
                 {showSecondaryContacts && (
                   <div className="mt-2 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
-                    {!showSecondaryContacts && secondaryContacts.map(contact => (
+                    {secondaryContacts.map(contact => (
                       <a
                         key={contact.href}
                         href={contact.href}
@@ -667,7 +667,7 @@ export default function PublicServices() {
                         {service.email}
                       </a>
                     )}
-                    {secondaryContacts.map(contact => (
+                    {!showSecondaryContacts && secondaryContacts.map(contact => (
                       <a
                         key={contact.href}
                         href={contact.href}
