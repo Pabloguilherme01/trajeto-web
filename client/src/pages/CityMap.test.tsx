@@ -19,6 +19,15 @@ afterEach(() => {
   vi.restoreAllMocks();
   navigate.mockClear();
 });
+it("mounts initial stops in batches and still searches the full catalog", () => {
+  render(<CityMap />);
+  const stops = screen.getByRole("region", { name: "Escolha sua próxima parada" });
+  expect(within(stops).getAllByRole("article")).toHaveLength(18);
+  fireEvent.click(within(stops).getByRole("button", { name: /Mostrar mais paradas/ }));
+  expect(within(stops).getAllByRole("article")).toHaveLength(36);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "Sala do Empreendedor" } });
+  expect(within(stops).getByText("Sala do Empreendedor · Águas Lindas")).toBeTruthy();
+});
 it("filters accent-insensitive destinations and carries the selected destination to the planner", () => {
   render(<CityMap />);
   fireEvent.change(

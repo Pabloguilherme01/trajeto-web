@@ -106,6 +106,10 @@ export default function CityMap() {
     () => onlyStreets ? [] : getLocalRoutePresets(query, category),
     [query, category, onlyStreets]
   );
+  const [destinationLimit, setDestinationLimit] = useState(18);
+  useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets]);
+  const displayedDestinations = !query.trim() && category === "todos"
+    ? destinations.slice(0, destinationLimit) : destinations;
   const atlas = useMemo(() => [...buildCityAtlas(atlasSnapshot), ...businesses.items], [atlasSnapshot, businesses.items]);
   useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
@@ -396,7 +400,7 @@ export default function CityMap() {
           </button>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {destinations.map(item => (
+          {displayedDestinations.map(item => (
             <article
               key={item.id}
               className="task-surface premium-route-card min-w-0 p-4"
@@ -414,6 +418,12 @@ export default function CityMap() {
             </article>
           ))}
         </div>
+        {displayedDestinations.length < destinations.length && (
+          <button type="button" onClick={() => setDestinationLimit(count => count + 18)}
+            className="mt-3 min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm font-bold text-foreground">
+            Mostrar mais paradas ({displayedDestinations.length} de {destinations.length})
+          </button>
+        )}
         {!destinations.length && !atlasDestinations.length && (
           markers.length ? (
             <p role="status" className="mt-3 text-sm text-foreground/70">
