@@ -1273,16 +1273,20 @@ export default function PublicServices() {
                 >
                   <button
                     type="button"
+                    aria-label={`Todas as rotas prontas · ${READY_SERVICE_ROUTES.length} destinos`}
                     aria-pressed={readyRouteGroup === "todos"}
                     onClick={() => setReadyRouteGroup("todos")}
                     className={
-                      "min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " +
+                      "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-xs font-black " +
                       (readyRouteGroup === "todos"
                         ? "border-primary/35 bg-primary/10 text-primary"
                         : "border-border/15 bg-card text-foreground/75")
                     }
                   >
-                    Todas
+                    <span>Todas</span>
+                    <span aria-hidden="true" className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.65rem] tabular-nums">
+                      {READY_SERVICE_ROUTES.length}
+                    </span>
                   </button>
                   {READY_ROUTE_GROUPS.map(group => (
                     <button
