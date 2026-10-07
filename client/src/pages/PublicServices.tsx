@@ -93,6 +93,7 @@ const categoryIcons = {
   transparencia: Globe2,
   "agua-energia": Zap,
   telecom: Phone,
+  previdencia: ReceiptText,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -205,6 +206,11 @@ const NEED_GROUPS = [
     label: "Internet e telefonia",
     query: "internet telefonia",
     hint: "Anatel, linhas pré-pagas no CPF e bloqueio de telemarketing",
+  },
+  {
+    label: "INSS e benefícios",
+    query: "beneficio",
+    hint: "Meu INSS, BPC, incapacidade e salário-maternidade",
   },
   {
     label: "Celular roubado ou perdido",

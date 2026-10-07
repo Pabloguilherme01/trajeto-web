@@ -287,6 +287,34 @@ describe("public services catalog", () => {
     );
   });
 
+  it("groups INSS benefits without inventing local routes", () => {
+    expect(searchPublicServices("", "previdencia").map(item => item.id)).toEqual(
+      expect.arrayContaining([
+        "meu-inss",
+        "bpc-idoso",
+        "bpc-pessoa-deficiencia",
+        "auxilio-incapacidade-temporaria",
+        "salario-maternidade-inss",
+      ])
+    );
+    expect(searchPublicServices("BPC").map(item => item.id)).toEqual(
+      expect.arrayContaining(["bpc-idoso", "bpc-pessoa-deficiencia"])
+    );
+    for (const id of [
+      "meu-inss",
+      "bpc-idoso",
+      "bpc-pessoa-deficiencia",
+      "auxilio-incapacidade-temporaria",
+      "salario-maternidade-inss",
+    ]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.category).toBe("previdencia");
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+      expect(service.sourceLabel).toBe("INSS");
+    }
+  });
+
   it("groups internet and telephony services without inventing local routes", () => {
     expect(searchPublicServices("", "telecom").map(item => item.id)).toEqual(
       expect.arrayContaining(["anatel-consumidor", "cadastro-pre-pago", "nao-me-perturbe"])
