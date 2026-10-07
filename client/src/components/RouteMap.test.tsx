@@ -261,7 +261,7 @@ it("focuses endpoints and pauses GPS following when the map is explored", () => 
       stops={[]}
     />
   );
-  fireEvent.click(screen.getByRole("button", { name: "Ver destino" }));
+  fireEvent.click(screen.getByRole("button", { name: /Ver destino:/ }));
   expect(
     parseFloat(
       screen.getByRole("button", { name: "Selecionar Destino" }).style.left
@@ -570,7 +570,7 @@ it("mostra resumo e guia completo no mapa online do Pages sem duplicar no fallba
   const summary = screen.getByRole("region", { name: "Resumo do percurso no mapa" });
   expect(within(summary).getByText("12,3 km")).toBeTruthy();
   expect(within(summary).getByText("15 min")).toBeTruthy();
-  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: /Ver origem:/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: /Instruções pelas ruas/ }));
   expect(screen.getByText("Chegue ao destino")).toBeTruthy();
   expect(screen.getByText("0 m")).toBeTruthy();
@@ -586,6 +586,6 @@ it("lets the user declutter offline references and labels straight-line estimate
   expect(button.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(button);
   expect(screen.getByRole("button", { name: "Mostrar referências" }).getAttribute("aria-pressed")).toBe("false");
-  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
-  expect(screen.getByRole("button", { name: "Ver destino" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: /Ver origem:/ })).toBeTruthy();
+  expect(screen.getByRole("button", { name: /Ver destino:/ })).toBeTruthy();
 });
