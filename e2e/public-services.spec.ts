@@ -13,8 +13,18 @@ test("filtro online expõe a ação digital principal no card", async ({ page })
   await page.goto("/servicos?q=detran&recurso=online", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Detran-GO · CNH, veículo e licenciamento/i })).toBeVisible();
   const card = page.locator("article").filter({ hasText: "Detran-GO · CNH, veículo e licenciamento" });
-  const primaryActions = card.locator(".mt-4.grid");
+  const primaryActions = card.getByRole("group", { name: "Ações principais do serviço" });
   await expect(primaryActions.getByRole("link", { name: /Abrir serviços digitais do Detran · online/i })).toBeVisible();
+});
+
+test("serviço apenas digital mostra ação online no topo sem filtro", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?q=editais%20cultura", { waitUntil: "domcontentloaded" });
+  const card = page.locator("#service-editais-cultura");
+  await expect(card.getByRole("heading", { name: "Editais e seleções públicas de cultura" })).toBeVisible();
+  const primaryActions = card.getByRole("group", { name: "Ações principais do serviço" });
+  await expect(primaryActions.getByRole("link", { name: /Consultar editais culturais · online/i })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
 test("resumo de filtros mostra estado ativo no mobile", async ({ page }) => {
