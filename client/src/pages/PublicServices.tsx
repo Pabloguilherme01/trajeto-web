@@ -1469,7 +1469,7 @@ export default function PublicServices() {
                     />
                   </button>
                 </div>
-                <div aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                <div role="group" aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                   {showOfficialAction && service.actionUrl && resource === "online" && (
                     <a
                       href={service.actionUrl}
