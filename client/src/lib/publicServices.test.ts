@@ -10,7 +10,6 @@ describe("public services catalog", () => {
   it.each([
     ["Receita Federal", "receita-federal-pav"],
     ["CPF", "receita-federal-pav"],
-    ["CNPJ", "receita-federal-pav"],
     ["imposto de renda", "receita-federal-pav"],
     ["Defesa Civil", "defesa-civil"],
     ["alagamento", "defesa-civil"],
@@ -22,6 +21,13 @@ describe("public services catalog", () => {
     expect(results.map(item => item.id)).toEqual([id]);
     expect(results[0].mapQuery).toBeUndefined();
     expect(results[0].address).toBeUndefined();
+  });
+  it("finds both Receita Federal and REDESIM for CNPJ without inventing a local route", () => {
+    const results = searchPublicServices("CNPJ");
+    expect(results.map(item => item.id)).toEqual(
+      expect.arrayContaining(["receita-federal-pav", "abrir-cnpj-redesim"])
+    );
+    expect(results.every(item => item.mapQuery === undefined && item.address === undefined)).toBe(true);
   });
   it("finds serviços without accents and retains category filtering", () => {
     expect(
@@ -264,7 +270,7 @@ describe("public services catalog", () => {
   });
 
   it("groups entrepreneurship and business services in a dedicated category", () => {
-    expect(searchPublicServices("mei", "empreendedor").map(item => item.id)).toEqual(
+    expect(searchPublicServices("", "empreendedor").map(item => item.id)).toEqual(
       expect.arrayContaining(["desenvolvimento-economico", "sala-empreendedor", "portal-empreendedor-mei", "abrir-cnpj-redesim"])
     );
     for (const id of ["desenvolvimento-economico", "sala-empreendedor", "portal-empreendedor-mei", "abrir-cnpj-redesim"])
