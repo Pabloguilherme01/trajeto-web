@@ -277,6 +277,21 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups transparency services and keeps digital portals route-free", () => {
+    expect(searchPublicServices("", "transparencia").map(item => item.id)).toEqual(
+      expect.arrayContaining(["sic", "ouvidoria-municipal", "portal-transparencia-municipal", "portal-sei-processos", "legislacao-municipal"])
+    );
+    for (const id of ["portal-transparencia-municipal", "portal-sei-processos", "legislacao-municipal"]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.category).toBe("transparencia");
+      expect(service.actionUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+    expect(PUBLIC_SERVICES.find(item => item.id === "sic")?.category).toBe("transparencia");
+    expect(PUBLIC_SERVICES.find(item => item.id === "ouvidoria-municipal")?.category).toBe("transparencia");
+  });
+
   it("groups youth services without inventing local routes or vacancies", () => {
     expect(searchPublicServices("", "juventude").map(item => item.id)).toEqual(
       expect.arrayContaining(["atendimento-juventude", "id-jovem", "aprendizagem-profissional-jovem"])
