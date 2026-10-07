@@ -71,6 +71,7 @@ export type PublicService = {
     | "Ibama"
     | "ANEEL"
     | "Detran-GO"
+    | "Senatran"
     | "Defensoria Pública de Goiás"
     | "Empresas & Negócios"
     | "Secretaria Nacional de Juventude";
@@ -1662,6 +1663,30 @@ export const PUBLIC_SERVICES: PublicService[] = [
     guidance: "Use o Portal Expresso para conferir documentos, regras e unidades disponíveis. Em situações elegíveis, a segunda via simplificada pode ser solicitada digitalmente. Confirme o local de atendimento no sistema antes de sair.",
     sourceLabel: "Polícia Civil de Goiás",
     sourceUrl: "https://goias.gov.br/policiacivil/instituto-de-identificacao/",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "cnh-digital",
+    name: "CNH Digital · Carteira Nacional de Habilitação",
+    category: "documentos",
+    description:
+      "Versão digital da Carteira Nacional de Habilitação, com a mesma validade jurídica do documento físico.",
+    keywords: [
+      "cnh digital",
+      "cnh-e",
+      "carteira habilitacao digital",
+      "habilitacao celular",
+      "cnh app",
+      "cnh do brasil",
+    ],
+    actionUrl:
+      "https://www.gov.br/pt-br/servicos/emitir-a-carteira-nacional-de-habilitacao-digital-cnh-e",
+    actionLabel: "Acessar CNH Digital",
+    guidance:
+      "Disponível para quem possui CNH válida com QR Code e conta gov.br. O documento digital é acessado pelo aplicativo oficial CNH do Brasil; confira os requisitos atuais antes de iniciar.",
+    sourceLabel: "Senatran",
+    sourceUrl:
+      "https://www.gov.br/pt-br/servicos/emitir-a-carteira-nacional-de-habilitacao-digital-cnh-e",
     verifiedAt: "07/10/2026",
   },
   {
