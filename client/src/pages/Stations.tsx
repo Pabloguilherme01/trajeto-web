@@ -129,13 +129,16 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       a.displayName.localeCompare(b.displayName, "pt-BR")
     );
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
-  const localBrands = useMemo(() => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))).sort((a,b) => a.localeCompare(b, "pt-BR")), []);
+  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
+  const localBrands = useMemo(
+    () => Array.from(new Set(aguasLindasCatalog.map(station => station.brand ?? "Sem bandeira"))).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [aguasLindasCatalog]
+  );
   const localNeighborhoods = useMemo(
-    () => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    []
+    () => Array.from(new Set(aguasLindasCatalog.map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [aguasLindasCatalog]
   );
 
-  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const anpByCnpj = useMemo(() => new Map(anpStations.map(station => [normalizeStationCnpj(station.cnpj), station])), [anpStations]);
   const directoryCards = useMemo(() => {
     const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => {
