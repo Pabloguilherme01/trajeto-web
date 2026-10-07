@@ -649,6 +649,7 @@ export default function Planner() {
     openExternalUrl(buildGoogleMapsDirectionsUrl(routeOriginIsPrivate ? "" : origin, stop.address || stop.name, "driving", true));
   };
 
+  const destinationCount = useMemo(() => getLocalRoutePresets().length, []);
   const availableDestinations = useMemo(
     () => getLocalRoutePresets(destinationFilter, destinationCategory),
     [destinationFilter, destinationCategory]
@@ -814,7 +815,7 @@ export default function Planner() {
               <details className="mobile-disclosure mt-3"><summary>Destinos e atalhos <ChevronDown className="size-4" /></summary>
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-accent/15 bg-accent/[.04] px-3 text-left">
-                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-accent">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-foreground/75">Todos os {getLocalRoutePresets().length} destinos locais, lojas e referências, por categoria</span></span>
+                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-accent">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-foreground/75">Todos os {destinationCount} destinos locais, lojas e referências, por categoria</span></span>
                   <ChevronDown className={"size-4 text-accent transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (

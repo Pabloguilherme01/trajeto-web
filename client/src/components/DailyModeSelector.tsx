@@ -63,7 +63,7 @@ export default function DailyModeSelector() {
     setSelected("automatico");
     setSavedDailyMode("automatico");
     setExpanded(false);
-    setLocation(appUrl(active?.href ?? automatic.href));
+    setLocation(appUrl(automatic.href));
   };
 
   return (

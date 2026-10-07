@@ -5,7 +5,7 @@ import { useBusinessCatalog } from "./useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 const load = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/businessCatalog", () => ({ loadBusinessCatalog: load }));
-beforeEach(() => load.mockReset());
+beforeEach(() => { load.mockReset(); });
 afterEach(cleanup);
 it("finishes loading an empty catalog instead of showing an endless spinner", async () => {
   load.mockResolvedValue([]);
@@ -43,4 +43,16 @@ it("allows unmounting before the request finishes", async () => {
   const { unmount } = renderHook(() => useBusinessCatalog());
   unmount();
   await act(async () => reject(new Error("late")));
+});
+
+it("waits for an enabled consumer and ignores completion after it closes", async () => {
+  let complete!: (items: CityAtlasItem[]) => void;
+  load.mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+  const { result, rerender } = renderHook(({ enabled }) => useBusinessCatalog(enabled), { initialProps: { enabled: false } });
+  expect(load).not.toHaveBeenCalled();
+  rerender({ enabled: true });
+  expect(load).toHaveBeenCalledOnce();
+  rerender({ enabled: false });
+  await act(async () => complete([{ id: "late" } as CityAtlasItem]));
+  expect(result.current.items).toEqual([]);
 });

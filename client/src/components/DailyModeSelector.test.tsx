@@ -2,6 +2,9 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const navigate = vi.hoisted(() => vi.fn());
+vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
+
 import DailyModeSelector from "./DailyModeSelector";
 
 vi.mock("@/lib/offlineStore", () => ({
@@ -26,4 +29,12 @@ describe("DailyModeSelector", () => {
     fireEvent.click(screen.getByRole("button", { name: "Economia" }));
     expect(localStorage.getItem("trajeto-daily-mode")).toBe("economia");
   });
+});
+
+it("opens the automatic destination when leaving a manual mode", () => {
+  localStorage.setItem("trajeto-daily-mode", "economia");
+  render(<DailyModeSelector />);
+  fireEvent.click(screen.getByRole("button", { name: /Automático:/ }));
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/planejar$/));
+  expect(localStorage.getItem("trajeto-daily-mode")).toBe("automatico");
 });
