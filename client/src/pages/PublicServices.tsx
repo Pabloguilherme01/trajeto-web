@@ -33,6 +33,7 @@ import {
   WifiOff,
   Navigation,
   PawPrint,
+  UsersRound,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -80,6 +81,7 @@ const categoryIcons = {
   inclusao: Accessibility,
   mulher: Heart,
   animais: PawPrint,
+  idoso: UsersRound,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -152,6 +154,11 @@ const NEED_GROUPS = [
     label: "Animais e zoonoses",
     query: "zoonoses",
     hint: "Castração, animais soltos e Vigilância em Saúde",
+  },
+  {
+    label: "Pessoa idosa",
+    query: "idoso",
+    hint: "CMDI, CCI, carteira da pessoa idosa e direitos",
   },
   {
     label: "Celular roubado ou perdido",
