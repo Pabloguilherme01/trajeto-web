@@ -269,6 +269,22 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups official culture services without inventing routes for digital modules", () => {
+    expect(searchPublicServices("", "cultura").map(item => item.id)).toEqual(
+      expect.arrayContaining(["secretaria-cultura-turismo", "cadastro-agente-cultural", "editais-cultura", "mapa-cultural", "calendario-cultural"])
+    );
+    const sede = PUBLIC_SERVICES.find(item => item.id === "secretaria-cultura-turismo")!;
+    expect(sede.whatsappOnly).toContain("(61) 99310-0497");
+    expect(sede.mapQuery).toContain("Instituto Marques Paiva");
+    for (const id of ["cadastro-agente-cultural", "editais-cultura", "mapa-cultural", "calendario-cultural"]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.category).toBe("cultura");
+      expect(service.actionUrl).toMatch(/^https:\/\/cultura\.aguaslindasdegoias\.go\.gov\.br\//);
+      expect(service.mapQuery).toBeUndefined();
+      expect(service.address).toBeUndefined();
+    }
+  });
+
   it("groups entrepreneurship and business services in a dedicated category", () => {
     expect(searchPublicServices("", "empreendedor").map(item => item.id)).toEqual(
       expect.arrayContaining(["desenvolvimento-economico", "sala-empreendedor", "portal-empreendedor-mei", "abrir-cnpj-redesim"])

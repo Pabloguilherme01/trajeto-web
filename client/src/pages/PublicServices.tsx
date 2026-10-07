@@ -84,6 +84,7 @@ const categoryIcons = {
   animais: PawPrint,
   idoso: UsersRound,
   empreendedor: Store,
+  cultura: Sparkles,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -168,6 +169,11 @@ const NEED_GROUPS = [
     hint: "Sala do Empreendedor, MEI, CNPJ e desenvolvimento econômico",
   },
   {
+    label: "Cultura e eventos",
+    query: "cultura",
+    hint: "Agentes, editais, mapa, calendário e atendimento cultural",
+  },
+  {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
     hint: "Bloqueio oficial, BO e proteção do aparelho",
@@ -189,6 +195,7 @@ const READY_ROUTE_IDS = [
   "cci-idoso",
   "vigilancia-saude-zoonoses",
   "biblioteca-municipal",
+  "secretaria-cultura-turismo",
   "conselho-tutelar",
   "transito",
   "rodoviaria",
@@ -308,7 +315,7 @@ const READY_ROUTE_GROUPS = [
     ids: ["policia-civil", "drp-17", "policia-civil-2", "deam-depai-dpca"],
   },
   {
-    label: "Transporte e educação",
+    label: "Transporte, educação e cultura",
     ids: [
       "transito",
       "superintendencia-transito",
@@ -316,6 +323,7 @@ const READY_ROUTE_GROUPS = [
       "rodoviaria",
       "secretaria-educacao",
       "biblioteca-municipal",
+      "secretaria-cultura-turismo",
       "cora-coralina",
       "cepi-jk",
       "cepm-aguas-lindas",
