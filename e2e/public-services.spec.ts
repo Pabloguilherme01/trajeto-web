@@ -213,6 +213,26 @@ test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("card de serviço prioriza planejar e contato e mantém Organic Maps em mais opções", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?q=agricultura", { waitUntil: "domcontentloaded" });
+
+  const card = page.locator("article").filter({
+    hasText: "Secretaria Municipal de Agricultura e Abastecimento",
+  });
+  await expect(card.getByRole("button", { name: "Planejar rota" })).toBeVisible();
+  await expect(card.getByRole("link", { name: /Ligar para Secretaria Municipal de Agricultura/ })).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: /Abrir Secretaria Municipal de Agricultura e Abastecimento no Organic Maps/ })
+  ).toHaveCount(0);
+
+  await card.getByText("Mais opções · navegar e compartilhar").click();
+  await expect(
+    card.getByRole("button", { name: /Abrir Secretaria Municipal de Agricultura e Abastecimento no Organic Maps/ })
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("categoria de óbitos fica utilizável e sem overflow em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos?categoria=obitos", { waitUntil: "domcontentloaded" });

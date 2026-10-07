@@ -1808,7 +1808,8 @@ export default function PublicServices() {
             const showEmail = Boolean(service.email) && expandedActions;
             const hasMoreOptions =
               !expandedActions &&
-              (Boolean(service.actionUrl && !showOfficialAction) ||
+              (Boolean(service.mapQuery) ||
+                Boolean(service.actionUrl && !showOfficialAction) ||
                 Boolean(service.email && !showEmail) ||
                 (secondaryContacts.length > 0 && !showSecondaryContacts) ||
                 Boolean(primaryContact));
@@ -1878,17 +1879,6 @@ export default function PublicServices() {
                     >
                       <MapPinned className="mr-1.5 inline size-3.5" />
                       Planejar rota
-                    </button>
-                  )}
-                  {service.mapQuery && (
-                    <button
-                      type="button"
-                      onClick={() => openOrganicMaps(service)}
-                      aria-label={"Abrir " + service.name + " no Organic Maps"}
-                      className="min-h-11 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
-                    >
-                      <Navigation className="mr-1.5 inline size-3.5" />
-                      Organic · {navigationModeLabel}
                     </button>
                   )}
                   {primaryContact ? (
@@ -2104,16 +2094,29 @@ export default function PublicServices() {
                 {hasMoreOptions && (
                   <details className="mobile-disclosure mt-2">
                     <summary>
-                      {service.actionUrl && !showOfficialAction
-                        ? "Mais opções · canal online"
-                        : secondaryContacts.length > 0 && !showSecondaryContacts
-                          ? "Mais opções · contatos"
-                          : service.email && !showEmail
-                            ? "Mais opções · e-mail"
-                            : "Compartilhar serviço"}
+                      {service.mapQuery
+                        ? "Mais opções · navegar e compartilhar"
+                        : service.actionUrl && !showOfficialAction
+                          ? "Mais opções · canal online"
+                          : secondaryContacts.length > 0 && !showSecondaryContacts
+                            ? "Mais opções · contatos"
+                            : service.email && !showEmail
+                              ? "Mais opções · e-mail"
+                              : "Compartilhar serviço"}
                       <ArrowRight className="size-4 shrink-0" />
                     </summary>
                     <div className="grid gap-2">
+                      {service.mapQuery && (
+                        <button
+                          type="button"
+                          onClick={() => openOrganicMaps(service)}
+                          aria-label={"Abrir " + service.name + " no Organic Maps"}
+                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                        >
+                          <Navigation className="size-4 shrink-0" />
+                          Organic Maps · {navigationModeLabel}
+                        </button>
+                      )}
                       {service.actionUrl && !showOfficialAction && (
                         <a
                           href={service.actionUrl}
