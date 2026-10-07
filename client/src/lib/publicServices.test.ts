@@ -456,6 +456,36 @@ describe("public services catalog", () => {
       );
   });
 
+  it("groups municipal licenses and permits without inventing local routes", () => {
+    const ids = [
+      "alvara-funcionamento-municipal",
+      "alvara-construcao-loteamento",
+      "licenciamento-sanitario-municipal",
+    ];
+    for (const id of ids) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service).toBeDefined();
+      expect(service.category).toBe("licenciamento");
+      expect(service.verifiedAt).toBe("07/10/2026");
+      expect(service.sourceUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+    expect(
+      searchPublicServices("alvara funcionamento", "licenciamento").map(item => item.id)
+    ).toContain("alvara-funcionamento-municipal");
+    expect(
+      searchPublicServices("alvara construcao", "licenciamento").map(item => item.id)
+    ).toContain("alvara-construcao-loteamento");
+    expect(
+      searchPublicServices("licenciamento sanitario", "licenciamento").map(item => item.id)
+    ).toContain("licenciamento-sanitario-municipal");
+    const funcionamento = PUBLIC_SERVICES.find(
+      item => item.id === "alvara-funcionamento-municipal"
+    )!;
+    expect(funcionamento.actionUrl).toContain("portaldoempreendedorgoiano.go.gov.br");
+  });
+
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
     expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])

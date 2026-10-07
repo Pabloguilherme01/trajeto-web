@@ -21,6 +21,7 @@ export type PublicServiceCategory =
   | "animais"
   | "idoso"
   | "empreendedor"
+  | "licenciamento"
   | "cultura"
   | "esporte"
   | "juventude"
@@ -102,6 +103,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "animais", label: "Animais e zoonoses", shortLabel: "Animais" },
   { id: "idoso", label: "Pessoa idosa", shortLabel: "Idoso" },
   { id: "empreendedor", label: "Empreendedor e empresas", shortLabel: "Empreender" },
+  { id: "licenciamento", label: "Licenças e alvarás", shortLabel: "Licenças" },
   { id: "cultura", label: "Cultura e turismo", shortLabel: "Cultura" },
   { id: "esporte", label: "Esporte e lazer", shortLabel: "Esporte" },
   { id: "juventude", label: "Juventude", shortLabel: "Juventude" },
@@ -144,6 +146,85 @@ const ASSISTENCIA =
 const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
+  {
+    id: "alvara-funcionamento-municipal",
+    name: "Alvará de funcionamento · abrir ou regularizar empresa",
+    category: "licenciamento",
+    description:
+      "Orientação para licenciamento e renovação do alvará de funcionamento de atividades comerciais, industriais e de serviços em Águas Lindas de Goiás.",
+    keywords: [
+      "alvara funcionamento",
+      "alvará funcionamento",
+      "licenca funcionamento",
+      "licença funcionamento",
+      "abrir empresa",
+      "regularizar empresa",
+      "sigfacil",
+      "redesim",
+      "viabilidade",
+    ],
+    actionUrl: "https://www.portaldoempreendedorgoiano.go.gov.br/s/consulta-de-informacao/matriz",
+    actionLabel: "Consultar exigências no SIGFÁCIL",
+    guidance:
+      "A Prefeitura orienta iniciar a viabilidade pelo Portal do Empreendedor Goiano/SIGFÁCIL. A Lei municipal nº 1.787/2025 prevê validade de 5 anos para o alvará de funcionamento, salvo situações específicas, com renovação no último ano de vigência.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/portaria-n-o01-2024-define-e-regulamenta-os-procedimentos-de-licenciamento-e-renovacao-do-alvara-de-funcionamento-e-da-outras-providencias-smde/",
+  },
+  {
+    id: "alvara-construcao-loteamento",
+    name: "Alvará de construção e licença para loteamento",
+    category: "licenciamento",
+    description:
+      "Referência municipal para aprovação e licenciamento de construção, reforma, ampliação, demolição e loteamento.",
+    keywords: [
+      "alvara construcao",
+      "alvará construção",
+      "licenca obra",
+      "licença obra",
+      "construcao",
+      "construção",
+      "reforma",
+      "ampliacao",
+      "ampliação",
+      "demolicao",
+      "demolição",
+      "loteamento",
+      "projeto obra",
+    ],
+    guidance:
+      "A legislação municipal atual exige alvará para execução de obras e prevê taxa no protocolo do requerimento de análise de projeto de obra ou loteamento. Consulte a Prefeitura antes de iniciar a execução.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1723",
+  },
+  {
+    id: "licenciamento-sanitario-municipal",
+    name: "Licenciamento sanitário e Alvará de Licença Sanitária",
+    category: "licenciamento",
+    description:
+      "Orientação municipal para atividades sujeitas à Vigilância Sanitária, incluindo licenciamento de estabelecimentos de médio e alto risco.",
+    keywords: [
+      "licenciamento sanitario",
+      "licenciamento sanitário",
+      "alvara sanitario",
+      "alvará sanitário",
+      "vigilancia sanitaria",
+      "vigilância sanitária",
+      "licenca sanitaria",
+      "licença sanitária",
+      "risco sanitario",
+      "risco sanitário",
+    ],
+    guidance:
+      "O Código Sanitário municipal de 2026 prevê licenciamento obrigatório para atividades de médio e alto risco e procedimento preferencialmente eletrônico, vinculado à inscrição municipal. Atividades de baixo risco podem ter dispensa conforme a classificação aplicável.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1628",
+  },
   {
     id: "secretaria-agricultura-abastecimento",
     name: "Secretaria Municipal de Agricultura e Abastecimento",
