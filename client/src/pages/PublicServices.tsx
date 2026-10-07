@@ -606,7 +606,7 @@ export default function PublicServices() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [category, savedOnly, setLocation]);
+  }, [category, savedOnly, resource, setLocation]);
 
   const offlineReadyRouteIds = useMemo(() => {
     return new Set(
@@ -726,7 +726,7 @@ export default function PublicServices() {
   };
 
   useEffect(() => {
-    if (!pendingSection || !browsing) return;
+    if (!pendingSection || (pendingSection === "ready-routes" && !browsing)) return;
     const frame = window.requestAnimationFrame(() => {
       const target = document.getElementById(pendingSection);
       if (!target) return;
@@ -746,8 +746,8 @@ export default function PublicServices() {
     setQuery("");
     setCategory("todos");
     setResource("todos");
+    setPendingSection("service-results");
     applyFilters("", "todos", false, false, "todos");
-    scrollToSection("service-results");
   };
 
   const openCategoriesFromSummary = () => {
@@ -1803,6 +1803,7 @@ export default function PublicServices() {
         </p>
         <section
           id="service-results"
+          tabIndex={-1}
           className={
             "mt-3 grid gap-3 " +
             (selectedService ? "max-w-2xl" : "sm:grid-cols-2 lg:grid-cols-3")

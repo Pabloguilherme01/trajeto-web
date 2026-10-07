@@ -8,6 +8,25 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   Element.prototype.scrollIntoView = vi.fn();
 });
+it("keeps the current resource filter when Escape clears the search", async () => {
+  window.history.replaceState({}, "", "/servicos?q=anatel");
+  render(<PublicServices />);
+  fireEvent.click(screen.getByRole("button", { name: "Resolver online" }));
+  await waitFor(() => expect(window.location.search).toContain("recurso=online"));
+  const input = screen.getByRole("textbox", { name: "Buscar serviços públicos" });
+  input.focus();
+  fireEvent.keyDown(window, { key: "Escape" });
+  await waitFor(() => expect(window.location.search).toBe("?recurso=online"));
+});
+
+it("focuses all services after leaving an individual service", async () => {
+  window.history.replaceState({}, "", "/servicos?servico=upa-mansoes-odisseia");
+  render(<PublicServices />);
+  fireEvent.click(screen.getByRole("button", { name: /Ver todos os .* serviços oficiais/ }));
+  await waitFor(() => expect(window.location.search).toBe(""));
+  await waitFor(() => expect(document.activeElement?.id).toBe("service-results"));
+  expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(1);
+});
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
