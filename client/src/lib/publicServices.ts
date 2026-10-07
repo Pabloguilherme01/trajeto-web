@@ -23,7 +23,8 @@ export type PublicServiceCategory =
   | "cultura"
   | "esporte"
   | "juventude"
-  | "transparencia";
+  | "transparencia"
+  | "agua-energia";
 
 export type PublicService = {
   id: string;
@@ -99,6 +100,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "esporte", label: "Esporte e lazer", shortLabel: "Esporte" },
   { id: "juventude", label: "Juventude", shortLabel: "Juventude" },
   { id: "transparencia", label: "Transparência e participação", shortLabel: "Transparência" },
+  { id: "agua-energia", label: "Água e energia", shortLabel: "Água e energia" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -158,7 +160,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "tarifa-social-energia",
     name: "Tarifa Social de Energia Elétrica",
-    category: "assistencia",
+    category: "agua-energia",
     description:
       "Regras oficiais do benefício na conta de luz para famílias elegíveis pelo CadÚnico ou BPC.",
     keywords: [
@@ -1401,7 +1403,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "segunda via conta luz",
     ],
     name: "Equatorial Goiás · energia",
-    category: "servicos-urbanos",
+    category: "agua-energia",
     description:
       "Central estadual para falta de energia, contas e atendimento da distribuidora.",
     phone: "0800 062 0196",
@@ -1413,6 +1415,33 @@ export const PUBLIC_SERVICES: PublicService[] = [
     guidance:
       "Tenha o número da unidade consumidora e o endereço em mãos. Guarde o protocolo do atendimento.",
     verifiedAt: "01/10/2026",
+  },
+  {
+    id: "reclamar-distribuidora-aneel",
+    name: "ANEEL · reclamar da distribuidora de energia",
+    category: "agua-energia",
+    description:
+      "Canal oficial para registrar reclamação quando o problema com a distribuidora não foi resolvido após atendimento e ouvidoria.",
+    phone: "167",
+    extraPhone: "0800 727 0167",
+    hours: "Segunda a sábado, 08h–20h",
+    keywords: [
+      "aneel",
+      "reclamar energia",
+      "reclamacao distribuidora",
+      "ouvidoria energia",
+      "problema equatorial",
+      "falta energia protocolo",
+    ],
+    actionUrl:
+      "https://www.gov.br/aneel/pt-br/canais_atendimento/reclame-da-distribuidora",
+    actionLabel: "Registrar reclamação na ANEEL",
+    guidance:
+      "Primeiro fale com a distribuidora e guarde o protocolo. Se não resolver, procure a ouvidoria da distribuidora; depois, registre a demanda na ANEEL com os protocolos anteriores.",
+    sourceLabel: "ANEEL",
+    sourceUrl:
+      "https://www.gov.br/aneel/pt-br/canais_atendimento/reclame-da-distribuidora",
+    verifiedAt: "06/10/2026",
   },
   {
     id: "defesa-civil",
@@ -1594,7 +1623,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "vazamento",
     ],
     name: "Saneago · água e esgoto",
-    category: "servicos-urbanos",
+    category: "agua-energia",
     description:
       "Central de atendimento para abastecimento de água, esgoto e serviços da conta.",
     phone: "0800 645 0115",
@@ -2267,6 +2296,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Atendimento psicossocial municipal",
   },
   { label: "Falta de luz", query: "falta luz", hint: "Equatorial Goiás" },
+  {
+    label: "Conta de água e luz",
+    query: "agua energia",
+    hint: "Saneago, Equatorial, Tarifa Social e ANEEL",
+  },
   {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
