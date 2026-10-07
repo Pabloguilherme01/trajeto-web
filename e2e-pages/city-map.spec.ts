@@ -67,7 +67,7 @@ test("planner: draws provider geometry over public street tiles", async ({
   ).toBeVisible();
   const map = page.getByRole("region", { name: "Mapa independente da viagem" });
   await expect(map.getByRole("region", { name: "Resumo do percurso no mapa" })).toContainText("12,3 km");
-  await map.getByRole("button", { name: "Ver destino", exact: true }).click();
+  await map.getByRole("button", { name: /Ver destino:/ }).click();
   await expect(map.getByRole("button", { name: "Escolher ponto da viagem" })).toHaveAttribute("data-selected-id", "destination");
   await map.getByRole("button", { name: "Escolher ponto da viagem" }).click();
   await page.getByRole("combobox", { name: "Pesquisar lugares no mapa" }).fill("inicio");
