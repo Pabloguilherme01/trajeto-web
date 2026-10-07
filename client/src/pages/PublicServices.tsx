@@ -146,6 +146,11 @@ const NEED_GROUPS = [
     hint: "Creches, vagas, matrículas e escolas",
   },
   {
+    label: "Transporte escolar",
+    query: "transporte escolar",
+    hint: "Rotas, pontos, horários e orientação da rede municipal",
+  },
+  {
     label: "Trabalho e renda",
     query: "emprego",
     hint: "Emprego, seguro-desemprego e empreendedorismo",

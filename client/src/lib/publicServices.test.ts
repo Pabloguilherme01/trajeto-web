@@ -486,6 +486,24 @@ describe("public services catalog", () => {
     expect(funcionamento.actionUrl).toContain("portaldoempreendedorgoiano.go.gov.br");
   });
 
+  it("finds municipal school transport without inventing route data", () => {
+    const service = PUBLIC_SERVICES.find(
+      item => item.id === "transporte-escolar-municipal"
+    )!;
+    expect(service).toBeDefined();
+    expect(service.phone).toBe("(61) 92002-3791");
+    expect(service.extraPhone).toContain("92002-3483");
+    expect(service.verifiedAt).toBe("07/10/2026");
+    expect(service.mapQuery).toBeUndefined();
+    expect(service.address).toBeUndefined();
+    expect(searchPublicServices("onibus escolar").map(item => item.id)).toContain(
+      "transporte-escolar-municipal"
+    );
+    expect(searchPublicServices("rota escolar").map(item => item.id)).toContain(
+      "transporte-escolar-municipal"
+    );
+  });
+
   it("finds protection channels from common situation language", () => {
     expect(searchPublicServices("violencia domestica").map(item => item.id)).toContain(
       "ligue-180"

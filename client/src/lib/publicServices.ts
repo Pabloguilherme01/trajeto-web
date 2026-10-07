@@ -1484,7 +1484,32 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "(61) 92002-3774",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    verifiedAt: "07/10/2026",
     mapQuery: "Secretaria Municipal de Educação, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "transporte-escolar-municipal",
+    name: "Transporte Escolar Municipal",
+    category: "educacao",
+    description:
+      "Orientação da rede municipal sobre transporte escolar, rotas, pontos, horários e atendimento aos estudantes.",
+    keywords: [
+      "transporte escolar",
+      "onibus escolar",
+      "ônibus escolar",
+      "rota escolar",
+      "ponto escolar",
+      "horario onibus escolar",
+      "horário ônibus escolar",
+      "estudante transporte",
+    ],
+    phone: "(61) 92002-3791",
+    extraPhone: "(61) 92002-3483 / (61) 92002-3774",
+    guidance:
+      "Confirme com a Secretaria Municipal de Educação se o estudante é atendido pelo transporte escolar, além da rota, ponto e horários vigentes. O Trajeto não presume itinerários nem pontos de embarque.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
   },
   {
     id: "secretaria-assistencia-social",
