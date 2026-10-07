@@ -301,6 +301,15 @@ describe("public services catalog", () => {
     }
   });
 
+  it("keeps document guidance current for CNH and the 2026 electoral calendar", () => {
+    const cnh = PUBLIC_SERVICES.find(item => item.id === "cnh-digital")!;
+    expect(cnh.sourceLabel).toBe("Senatran");
+    expect(cnh.actionUrl).toContain("carteira-nacional-de-habilitacao-digital");
+    const electoral = PUBLIC_SERVICES.find(item => item.id === "autoatendimento-eleitoral")!;
+    expect(electoral.guidance).toContain("02/11/2026");
+    expect(electoral.verifiedAt).toBe("07/10/2026");
+  });
+
   it("groups INSS benefits without inventing local routes", () => {
     expect(searchPublicServices("", "previdencia").map(item => item.id)).toEqual(
       expect.arrayContaining([
