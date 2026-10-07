@@ -501,6 +501,16 @@ const READY_ROUTE_GROUPS = READY_ROUTE_GROUPS_BASE.map(group => ({
   ],
 }));
 
+const READY_ROUTE_GROUP_COUNTS = new Map(
+  READY_ROUTE_GROUPS.map(group => [
+    group.label,
+    READY_SERVICE_ROUTES.reduce(
+      (count, route) => count + Number(group.ids.includes(route.id as never)),
+      0
+    ),
+  ])
+);
+
 export default function PublicServices() {
   const [, setLocation] = useLocation();
   const rawSearch = useSearch();
@@ -1271,9 +1281,7 @@ export default function PublicServices() {
                   .slice(0, 6)
                   .map(item => {
                     const Icon = categoryIcons[item.id as PublicServiceCategory];
-                    const count = PUBLIC_SERVICES.filter(
-                      service => service.category === item.id
-                    ).length;
+                    const count = SERVICE_CATEGORY_COUNTS[item.id] ?? 0;
                     return (
                       <button
                         key={item.id}
@@ -1308,9 +1316,7 @@ export default function PublicServices() {
                     .slice(6)
                     .map(item => {
                       const Icon = categoryIcons[item.id as PublicServiceCategory];
-                      const count = PUBLIC_SERVICES.filter(
-                        service => service.category === item.id
-                      ).length;
+                      const count = SERVICE_CATEGORY_COUNTS[item.id] ?? 0;
                       return (
                         <button
                           key={item.id}
@@ -1658,9 +1664,7 @@ export default function PublicServices() {
                     </span>
                   </button>
                   {READY_ROUTE_GROUPS.map(group => {
-                    const groupCount = READY_SERVICE_ROUTES.filter(route =>
-                      group.ids.includes(route.id as never)
-                    ).length;
+                    const groupCount = READY_ROUTE_GROUP_COUNTS.get(group.label) ?? 0;
                     return (
                       <button
                         key={group.label}
