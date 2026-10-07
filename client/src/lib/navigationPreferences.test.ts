@@ -55,6 +55,18 @@ describe("navigation preferences", () => {
     });
   });
 
+  it("accepts Organic Maps as a stored preferred provider", () => {
+    const { data } = installStorage();
+    expect(setNavigationProvider("organic")).toEqual({
+      provider: "organic",
+      preference: "default",
+    });
+    expect(JSON.parse(data.get("trajeto-navigation-preferences") || "{}")).toEqual({
+      provider: "organic",
+      preference: "default",
+    });
+  });
+
   it("changes the provider without losing the route preference", () => {
     installStorage({
       "trajeto-navigation-preferences": JSON.stringify({
