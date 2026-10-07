@@ -121,6 +121,11 @@ const NEED_GROUPS = [
     hint: "CadÚnico, CRAS, benefícios e Passe Livre PCD",
   },
   {
+    label: "Perdi um familiar",
+    query: "auxilio funeral",
+    hint: "Auxílio funeral, orientação sobre óbito e sepultamento",
+  },
+  {
     label: "Saúde perto de você",
     query: "ubs",
     hint: "UBS, ESF, urgência, vigilância e saúde digital",
