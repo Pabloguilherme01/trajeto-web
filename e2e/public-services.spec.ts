@@ -213,6 +213,25 @@ test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("modo do Organic Maps fica junto da área de mapa e funciona em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+
+  const mapSection = page.locator("section").filter({ hasText: "Mapa e navegação offline" });
+  const mode = mapSection.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
+  await expect(mode).toBeVisible();
+  await mode.selectOption("walk");
+  await expect(mode).toHaveValue("walk");
+
+  const filters = page.locator("#service-filters");
+  await filters.locator("summary").click();
+  await expect(
+    filters.getByRole("combobox", { name: "Modo de navegação no Organic Maps" })
+  ).toHaveCount(0);
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("card de serviço prioriza planejar e contato e mantém Organic Maps em mais opções", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos?q=agricultura", { waitUntil: "domcontentloaded" });

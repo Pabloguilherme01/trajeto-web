@@ -999,24 +999,6 @@ export default function PublicServices() {
               </span>
               <ChevronRight className="size-4 shrink-0" />
             </summary>
-          <label className="mt-3 flex min-w-0 flex-wrap items-center gap-2 text-sm font-bold">
-            <Navigation className="size-4 shrink-0 text-primary" />
-            Navegar no Organic Maps
-            <select
-              aria-label="Modo de navegação no Organic Maps"
-              value={navigationMode}
-              onChange={event =>
-                setNavigationMode(
-                  event.target.value as "drive" | "walk" | "bike"
-                )
-              }
-              className="min-h-11 min-w-0 max-w-full rounded-xl border border-border bg-background px-3 text-base text-foreground"
-            >
-              <option value="drive">Carro</option>
-              <option value="walk">A pé</option>
-              <option value="bike">Bicicleta</option>
-            </select>
-          </label>
           <div
             role="group"
             className="mobile-scroll-x -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
@@ -1124,6 +1106,26 @@ export default function PublicServices() {
                     demais abrem a busca no app. Baixe o mapa da região no
                     Organic Maps para continuar sem internet.
                   </p>
+                  <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-xl border border-primary/10 bg-background/70 px-3 py-2 text-xs font-black text-foreground">
+                    <span className="inline-flex min-w-0 items-center gap-2">
+                      <Navigation className="size-4 shrink-0 text-primary" />
+                      <span className="min-w-0">Modo no Organic Maps</span>
+                    </span>
+                    <select
+                      aria-label="Modo de navegação no Organic Maps"
+                      value={navigationMode}
+                      onChange={event =>
+                        setNavigationMode(
+                          event.target.value as "drive" | "walk" | "bike"
+                        )
+                      }
+                      className="min-h-11 max-w-[8.5rem] rounded-xl border border-border bg-background px-2 text-base text-foreground"
+                    >
+                      <option value="drive">Carro</option>
+                      <option value="walk">A pé</option>
+                      <option value="bike">Bicicleta</option>
+                    </select>
+                  </label>
                   <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                     <button
                       type="button"
