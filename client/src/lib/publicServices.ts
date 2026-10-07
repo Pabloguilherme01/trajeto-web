@@ -2524,13 +2524,14 @@ export function searchPublicServices(
         ...(service.keywords ?? []),
       ]);
     }
+    const includeCategoryIntent = search.split(" ").filter(Boolean).length <= 2;
     return matchesCatalogText(search, [
       service.name,
       service.description,
       service.address,
       service.phone,
       service.extraPhone,
-      service.category,
+      ...(includeCategoryIntent ? [service.category] : []),
       service.guidance,
       service.actionLabel,
       service.hours,
