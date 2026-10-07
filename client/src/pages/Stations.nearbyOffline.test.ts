@@ -21,6 +21,10 @@ describe("Stations nearby offline", () => {
     expect(source).not.toContain("setUserCoords({ lat: position.coords.latitude, lng: position.coords.longitude })");
   });
 
+  it("never passes personal location into station maps", () => {
+    expect(source).not.toContain("userCoords={userCoords}");
+  });
+
   it("makes station deep links accessible and motion-aware", () => {
     expect(source).toContain("(prefers-reduced-motion: reduce)");
     expect(source).toContain("element.focus({ preventScroll: true })");
