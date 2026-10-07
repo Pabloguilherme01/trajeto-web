@@ -297,21 +297,6 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "06/10/2026",
   },
   {
-    id: "lista-espera-creches",
-    name: "Lista de espera em creches · Águas Lindas",
-    category: "educacao",
-    description:
-      "Página oficial municipal para acompanhar a lista de espera publicada para vagas em creches.",
-    keywords: ["creche", "lista espera creche", "vaga creche", "educacao infantil", "matricula"],
-    actionUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
-    actionLabel: "Consultar lista de espera",
-    guidance:
-      "Confira a data da lista publicada e os critérios informados pela Secretaria de Educação antes de tomar qualquer decisão sobre matrícula ou atendimento.",
-    sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: "https://aguaslindasdegoias.go.gov.br/lista-de-espera-em-creches/",
-    verifiedAt: "06/10/2026",
-  },
-  {
     id: "recuperar-govbr",
     name: "Recuperar acesso à conta gov.br",
     category: "digital",
