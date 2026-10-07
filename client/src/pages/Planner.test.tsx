@@ -73,6 +73,21 @@ describe("Planner travel state", () => {
     expect(calculatedGoogle.textContent).toContain("a pé");
     expect(screen.queryByRole("button", { name: "Waze" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Apple Maps" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Abrir no Organic Maps" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Instalar ou atualizar Organic Maps/i }).getAttribute("href")).toBe("https://get.omaps.org/");
+  });
+
+  it("hides Organic Maps when public transit is selected", async () => {
+    state.search = "origem=Casa&destino=Trabalho&modo=transit";
+    state.staticRuntime = true;
+    render(<Planner />);
+    submit();
+    await screen.findByTestId("route-map");
+    expect(screen.getByRole("button", { name: "Google Maps" }).textContent).toContain("transporte");
+    expect(screen.queryByRole("button", { name: "Abrir no Organic Maps" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /Instalar ou atualizar Organic Maps/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Waze" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Apple Maps" })).toBeNull();
   });
 
   it("changes the main action when explicit offline mode is selected", () => {
