@@ -4,6 +4,7 @@ export type PublicServiceCategory =
   | "saude"
   | "seguranca"
   | "assistencia"
+  | "obitos"
   | "transito"
   | "educacao"
   | "cidadania"
@@ -91,6 +92,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "saude", label: "Saúde", shortLabel: "Saúde" },
   { id: "seguranca", label: "Segurança", shortLabel: "Segurança" },
   { id: "assistencia", label: "Assistência", shortLabel: "Assistência" },
+  { id: "obitos", label: "Óbitos e sepultamento", shortLabel: "Óbitos" },
   { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
   { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
@@ -146,6 +148,57 @@ const ASSISTENCIA =
 const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
+  {
+    id: "auxilio-funeral-municipal",
+    name: "Auxílio funeral · assistência social",
+    category: "obitos",
+    description:
+      "Benefício eventual da assistência social municipal para famílias em situação de vulnerabilidade diante de despesas essenciais de funeral e sepultamento, conforme critérios vigentes.",
+    keywords: [
+      "auxilio funeral",
+      "auxílio funeral",
+      "beneficio funeral",
+      "benefício funeral",
+      "funeral gratuito",
+      "sepultamento gratuito",
+      "falecimento",
+      "obito",
+      "óbito",
+      "luto",
+    ],
+    guidance:
+      "A legislação municipal atribui ao Município o custeio do auxílio funeral como benefício eventual. Procure a rede de assistência social para confirmar critérios, documentação e fluxo atual antes de contratar serviços por conta própria.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1417",
+  },
+  {
+    id: "controle-obitos-sepultamentos",
+    name: "Controle de óbitos e sepultamentos",
+    category: "obitos",
+    description:
+      "Estrutura municipal responsável por orientar familiares, organizar registros e fiscalizar procedimentos ligados a óbitos e sepultamentos no município.",
+    keywords: [
+      "obito",
+      "óbito",
+      "sepultamento",
+      "cemiterio",
+      "cemitério",
+      "falecimento",
+      "funeraria",
+      "funerária",
+      "guia sepultamento",
+      "cadastro de obitos",
+      "cadastro de óbitos",
+    ],
+    guidance:
+      "A legislação municipal prevê orientação aos familiares e controle dos registros de sepultamento. Como a fonte atual não publica nesta página um contato ou endereço único da divisão responsável, o Trajeto não cria telefone ou rota presumidos.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1342",
+  },
   {
     id: "alvara-funcionamento-municipal",
     name: "Alvará de funcionamento · abrir ou regularizar empresa",
