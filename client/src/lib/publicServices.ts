@@ -24,7 +24,8 @@ export type PublicServiceCategory =
   | "esporte"
   | "juventude"
   | "transparencia"
-  | "agua-energia";
+  | "agua-energia"
+  | "telecom";
 
 export type PublicService = {
   id: string;
@@ -101,6 +102,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "juventude", label: "Juventude", shortLabel: "Juventude" },
   { id: "transparencia", label: "Transparência e participação", shortLabel: "Transparência" },
   { id: "agua-energia", label: "Água e energia", shortLabel: "Água e energia" },
+  { id: "telecom", label: "Internet e telefonia", shortLabel: "Internet e telefone" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
