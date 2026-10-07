@@ -257,78 +257,51 @@ const NEED_GROUPS = [
   },
 ] as const;
 
-const READY_ROUTE_IDS = [
-  "upa",
-  "heal",
-  "hospital-bom-jesus",
-  "caps",
-  "prefeitura",
-  "vapt-vupt",
-  "defensoria",
-  "procon",
-  "sala-empreendedor",
-  "desenvolvimento-economico",
-  "cmdi",
-  "cci-idoso",
-  "vigilancia-saude-zoonoses",
-  "biblioteca-municipal",
-  "secretaria-cultura-turismo",
-  "conselho-tutelar",
-  "transito",
+const READY_ROUTE_ALIAS_BY_SERVICE_ID: Record<string, string> = {
+  "upa-mansoes-odisseia": "upa",
+  "defensoria-aguas-lindas": "defensoria",
+  "transito-mobilidade": "transito",
+  "policia-civil-1": "policia-civil",
+  "coralina": "cora-coralina",
+  "pcgo-17-drp": "drp-17",
+  "cepi-juscelino": "cepi-jk",
+  "pm-go-aguas-lindas": "cepm-aguas-lindas",
+};
+
+const READY_ROUTE_EXCLUDED_SERVICE_IDS = new Set([
+  "samu",
+  "bombeiros",
+  "policia-militar",
+  "unidades-saude",
+  "educacao-estado",
+]);
+
+const READY_ROUTE_STANDALONE_IDS = [
   "rodoviaria",
-  "policia-civil",
-  "cras-1",
-  "cras-2",
-  "cras-3",
-  "detran",
-  "forum",
-  "secretaria-educacao",
-  "ubs-barragem-ii",
-  "ubs-barragem-iv",
-  "ubs-jardim-paraiso",
-  "esf-aguas-bonitas",
-  "esf-aguas-lindas-ii",
-  "esf-america",
-  "esf-camping-club",
-  "esf-cidade-entorno",
-  "esf-coimbra",
-  "esf-perola-ii",
-  "esf-guaira",
-  "esf-laranjeiras",
-  "esf-padre-lucio",
-  "esf-pinheiro-i",
-  "esf-setor-ii",
-  "esf-setor-09",
-  "cora-coralina",
   "praca-da-biblia",
-  "sic",
-  "drp-17",
-  "policia-civil-2",
-  "deam-depai-dpca",
-  "superintendencia-transito",
-  "camara-municipal",
-  "cepi-jk",
-  "cepm-aguas-lindas",
-  "paulo-freire",
-  "secretaria-fazenda",
-  "secretaria-infraestrutura",
-  "secretaria-meio-ambiente",
-  "secretaria-habitacao",
-  "regularizacao-fundiaria",
-  "creas",
-  "secretaria-assistencia-social",
-  "secretaria-mulher",
-  "secretaria-pcd-igualdade",
-  "secretaria-agricultura-abastecimento",
-  "secretaria-saude",
-  "esf-barragem-v",
-  "cadunico",
-  "secretaria-administracao",
-  "funpreval",
-  "sebrae",
-  "ouvidoria-municipal",
-  "servicos-urbanos-solicitacao",
 ] as const;
+
+const readyRouteDestinationIds = new Set(
+  ALL_LOCAL_ROUTE_DESTINATIONS.map(route => route.id)
+);
+
+const READY_ROUTE_SERVICE_BY_ROUTE_ID = new Map(
+  PUBLIC_SERVICES.filter(
+    service =>
+      Boolean(service.mapQuery) &&
+      !READY_ROUTE_EXCLUDED_SERVICE_IDS.has(service.id)
+  ).map(service => [
+    READY_ROUTE_ALIAS_BY_SERVICE_ID[service.id] ?? service.id,
+    service,
+  ] as const)
+);
+
+const READY_ROUTE_IDS = Array.from(
+  new Set([
+    ...READY_ROUTE_STANDALONE_IDS,
+    ...READY_ROUTE_SERVICE_BY_ROUTE_ID.keys(),
+  ])
+).filter(id => readyRouteDestinationIds.has(id));
 
 const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
   ALL_LOCAL_ROUTE_DESTINATIONS.find(route => route.id === id)
@@ -349,7 +322,7 @@ const servicePreparationHint = (service: (typeof PUBLIC_SERVICES)[number]) => {
   return "Consulte a fonte oficial desta ficha para confirmar requisitos e atendimento atual.";
 };
 
-const READY_ROUTE_GROUPS = [
+const READY_ROUTE_GROUPS_BASE = [
   {
     label: "Saúde",
     ids: [
@@ -441,6 +414,43 @@ const READY_ROUTE_GROUPS = [
     ],
   },
 ] as const;
+
+const READY_ROUTE_GROUPED_IDS = new Set<string>(
+  READY_ROUTE_GROUPS_BASE.flatMap(group => [...group.ids])
+);
+
+const defaultReadyRouteGroup = (routeId: string) => {
+  const category = READY_ROUTE_SERVICE_BY_ROUTE_ID.get(routeId)?.category;
+  if (category === "saude") return "Saúde";
+  if (category === "seguranca") return "Segurança";
+  if (category === "transito" || category === "educacao" || category === "cultura")
+    return "Transporte, educação e cultura";
+  if (
+    category === "assistencia" ||
+    category === "moradia" ||
+    category === "servicos-urbanos" ||
+    category === "tributos" ||
+    category === "inclusao" ||
+    category === "mulher" ||
+    category === "animais" ||
+    category === "idoso" ||
+    category === "agricultura"
+  )
+    return "Direitos e apoio";
+  return "Serviços";
+};
+
+const READY_ROUTE_GROUPS = READY_ROUTE_GROUPS_BASE.map(group => ({
+  ...group,
+  ids: [
+    ...group.ids,
+    ...READY_SERVICE_ROUTES.filter(
+      route =>
+        !READY_ROUTE_GROUPED_IDS.has(route.id) &&
+        defaultReadyRouteGroup(route.id) === group.label
+    ).map(route => route.id),
+  ],
+}));
 
 export default function PublicServices() {
   const [, setLocation] = useLocation();

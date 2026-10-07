@@ -84,6 +84,29 @@ test("rotas prontas incluem serviços físicos novos sem overflow em 320 px", as
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("rotas prontas acompanham automaticamente o catálogo e excluem bases de emergência", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+
+  const routes = page.locator('section[aria-labelledby="ready-routes-title"]');
+  const search = routes.getByRole("searchbox", { name: "Buscar rota pronta" });
+
+  await search.fill("Ouvidoria SUS");
+  const sus = routes.locator("article").filter({ hasText: "Ouvidoria SUS" });
+  await expect(sus).toBeVisible();
+  await expect(
+    sus.getByRole("button", { name: /Abrir Ouvidoria SUS no Organic Maps/ })
+  ).toBeVisible();
+
+  await search.fill("SAMU");
+  await expect(routes.locator("article")).toHaveCount(0);
+  await expect(
+    routes.getByText("Nenhuma rota pronta corresponde a esta busca neste grupo.")
+  ).toBeVisible();
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("filtro Offline mostra apenas rotas resolvidas localmente em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
