@@ -19,7 +19,8 @@ export type PublicServiceCategory =
   | "mulher"
   | "animais"
   | "idoso"
-  | "empreendedor";
+  | "empreendedor"
+  | "cultura";
 
 export type PublicService = {
   id: string;
@@ -90,6 +91,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "animais", label: "Animais e zoonoses", shortLabel: "Animais" },
   { id: "idoso", label: "Pessoa idosa", shortLabel: "Idoso" },
   { id: "empreendedor", label: "Empreendedor e empresas", shortLabel: "Empreender" },
+  { id: "cultura", label: "Cultura e turismo", shortLabel: "Cultura" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -313,6 +315,76 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1606",
     mapQuery:
       "Vigilância em Saúde, Avenida Brasília, Quadra 109, Lote 30/32, Conjunto B, Setor 10, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "secretaria-cultura-turismo",
+    name: "Secretaria Municipal de Cultura e Turismo",
+    category: "cultura",
+    description: "Atendimento municipal de cultura e turismo, orientação a agentes culturais, editais, projetos e serviços da política cultural.",
+    whatsappOnly: ["(61) 99310-0497"],
+    email: "cultura@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, 08h–12h e 14h–18h",
+    address: "Instituto Marques Paiva, Rua 20, Quadra 32, Lote 11, Jardim Brasília, Sala 2, 3º andar, Águas Lindas de Goiás - GO",
+    keywords: ["cultura", "turismo", "secretaria cultura", "agente cultural", "artista", "evento cultural"],
+    actionUrl: "https://cultura.aguaslindasdegoias.go.gov.br/plataforma-cultural-aguas-lindas",
+    actionLabel: "Abrir Plataforma Cultural",
+    guidance: "Use o WhatsApp institucional para orientação e confirme presencialmente quando o atendimento exigir documentos ou suporte assistido.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://cultura.aguaslindasdegoias.go.gov.br/plataforma-cultural-aguas-lindas",
+    mapQuery: "Secretaria Municipal de Cultura e Turismo, Instituto Marques Paiva, Rua 20, Quadra 32, Lote 11, Jardim Brasília, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "cadastro-agente-cultural",
+    name: "Cadastro Municipal de Agentes Culturais",
+    category: "cultura",
+    description: "Cadastro oficial e gratuito para artistas, coletivos, produtores, mestres, espaços e demais agentes culturais do município.",
+    keywords: ["agente cultural", "cadastro cultural", "artista", "coletivo cultural", "carteira agente cultural"],
+    actionUrl: "https://cultura.aguaslindasdegoias.go.gov.br/plataforma-cultural-aguas-lindas.html?abrir=cadastro",
+    actionLabel: "Fazer cadastro cultural",
+    guidance: "O cadastro é gratuito. A plataforma informa os documentos e comprovações exigidos antes do envio e oferece atendimento presencial para quem tiver dificuldade de acesso digital.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://cultura.aguaslindasdegoias.go.gov.br/plataforma-cultural-aguas-lindas.html?abrir=cadastro",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "editais-cultura",
+    name: "Editais e seleções públicas de cultura",
+    category: "cultura",
+    description: "Editais municipais de fomento, documentos, cronogramas, inscrições e resultados da política cultural.",
+    keywords: ["edital cultura", "pnab", "fomento cultura", "premio cultural", "ponto de cultura", "fundo municipal cultura"],
+    actionUrl: "https://cultura.aguaslindasdegoias.go.gov.br/editais",
+    actionLabel: "Consultar editais culturais",
+    guidance: "Confira o cronograma e os documentos da edição atual antes de se inscrever; prazos e etapas podem mudar por retificação oficial.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://cultura.aguaslindasdegoias.go.gov.br/editais",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "mapa-cultural",
+    name: "Mapa Cultural de Águas Lindas",
+    category: "cultura",
+    description: "Mapa público de agentes, Pontos e Pontões de Cultura, com filtros por segmento e tipo.",
+    keywords: ["mapa cultural", "agentes culturais", "ponto de cultura", "espaco cultural", "artistas mapa"],
+    actionUrl: "https://cultura.aguaslindasdegoias.go.gov.br/mapa-cultural.html",
+    actionLabel: "Abrir Mapa Cultural",
+    guidance: "O portal municipal informa que a localização pública do agente usa região aproximada para preservar privacidade, sem exibir o endereço residencial exato.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://cultura.aguaslindasdegoias.go.gov.br/mapa-cultural.html",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "calendario-cultural",
+    name: "Calendário Cultural de Águas Lindas",
+    category: "cultura",
+    description: "Agenda oficial com eventos, prazos de editais, reuniões e outras atividades culturais do município.",
+    keywords: ["calendario cultural", "agenda cultural", "evento cultural", "eventos", "prazo edital"],
+    actionUrl: "https://cultura.aguaslindasdegoias.go.gov.br/calendario-cultural",
+    actionLabel: "Abrir calendário cultural",
+    guidance: "Consulte a agenda oficial antes de sair para confirmar data, horário e local de cada atividade.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://cultura.aguaslindasdegoias.go.gov.br/calendario-cultural",
     verifiedAt: "06/10/2026",
   },
   {
@@ -2138,6 +2210,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Matrícula escolar",
     query: "matricula",
     hint: "Secretaria Municipal de Educação",
+  },
+  {
+    label: "Cultura e editais",
+    query: "cultura",
+    hint: "Agentes, editais, mapa e calendário",
   },
   {
     label: "CNH e veículo",
