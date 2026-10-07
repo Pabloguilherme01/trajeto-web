@@ -1018,33 +1018,73 @@ export default function PublicServices() {
               <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                 {PUBLIC_SERVICE_CATEGORIES.filter(
                   item => item.id !== "todos"
-                ).map(item => {
-                  const Icon = categoryIcons[item.id as PublicServiceCategory];
-                  const count = PUBLIC_SERVICES.filter(
-                    service => service.category === item.id
-                  ).length;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => applyCategory(item.id)}
-                      className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md focus-visible:border-accent"
-                    >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
-                        <Icon className="size-5" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold">
-                          {item.label}
+                )
+                  .slice(0, 6)
+                  .map(item => {
+                    const Icon = categoryIcons[item.id as PublicServiceCategory];
+                    const count = PUBLIC_SERVICES.filter(
+                      service => service.category === item.id
+                    ).length;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => applyCategory(item.id)}
+                        className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md focus-visible:border-accent"
+                      >
+                        <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
+                          <Icon className="size-5" />
                         </span>
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          {count} serviços
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-bold">
+                            {item.label}
+                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {count} serviços
+                          </span>
                         </span>
-                      </span>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
               </div>
+              <details className="mobile-disclosure mt-2">
+                <summary className="min-h-11">
+                  Ver todos os assuntos ({PUBLIC_SERVICE_CATEGORIES.length - 7})
+                  <ChevronRight className="size-4" />
+                </summary>
+                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
+                  {PUBLIC_SERVICE_CATEGORIES.filter(
+                    item => item.id !== "todos"
+                  )
+                    .slice(6)
+                    .map(item => {
+                      const Icon = categoryIcons[item.id as PublicServiceCategory];
+                      const count = PUBLIC_SERVICES.filter(
+                        service => service.category === item.id
+                      ).length;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => applyCategory(item.id)}
+                          className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:border-accent/45 hover:shadow-md"
+                        >
+                          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
+                            <Icon className="size-5" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-bold">
+                              {item.label}
+                            </span>
+                            <span className="mt-1 block text-xs text-muted-foreground">
+                              {count} serviços
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              </details>
               <div className="mt-5 grid gap-2 sm:grid-cols-3">
                 {[
                   {
