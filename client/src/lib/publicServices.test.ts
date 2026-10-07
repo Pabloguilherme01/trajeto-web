@@ -310,6 +310,22 @@ describe("public services catalog", () => {
     expect(electoral.verifiedAt).toBe("07/10/2026");
   });
 
+  it("groups TJGO digital services under Justiça without inventing routes", () => {
+    expect(searchPublicServices("", "justica").map(item => item.id)).toEqual(
+      expect.arrayContaining(["defensoria-aguas-lindas", "tjgo-balcao-virtual", "tjgo-consulta-processual"])
+    );
+    for (const id of ["tjgo-balcao-virtual", "tjgo-consulta-processual"]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.category).toBe("justica");
+      expect(service.sourceLabel).toBe("Tribunal de Justiça de Goiás");
+      expect(service.actionUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+    expect(searchPublicServices("balcao virtual").map(item => item.id)).toContain("tjgo-balcao-virtual");
+    expect(searchPublicServices("consulta processual").map(item => item.id)).toContain("tjgo-consulta-processual");
+  });
+
   it("groups INSS benefits without inventing local routes", () => {
     expect(searchPublicServices("", "previdencia").map(item => item.id)).toEqual(
       expect.arrayContaining([
