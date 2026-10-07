@@ -13,7 +13,7 @@ for (const width of [320, 390]) {
     await filters.click();
     await expect(page.getByRole("button", { name: "Tributos e notas", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Inclusão e igualdade", exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Defesa do consumidor", exact: true }).click();
+    await page.getByRole("button", { name: "Internet e telefonia", exact: true }).click();
     await expect(page.locator("#service-anatel-consumidor")).toBeVisible();
     await expect(page.locator("#service-filters details")).toHaveJSProperty("open", false);
     await expect(page.getByText("Mapa e navegação offline", { exact: true })).toHaveCount(0);
