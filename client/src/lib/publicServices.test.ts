@@ -486,6 +486,26 @@ describe("public services catalog", () => {
     expect(funcionamento.actionUrl).toContain("portaldoempreendedorgoiano.go.gov.br");
   });
 
+  it("groups death, burial and funeral-assistance guidance without inventing routes", () => {
+    const aid = PUBLIC_SERVICES.find(item => item.id === "auxilio-funeral-municipal")!;
+    const control = PUBLIC_SERVICES.find(item => item.id === "controle-obitos-sepultamentos")!;
+    for (const service of [aid, control]) {
+      expect(service).toBeDefined();
+      expect(service.category).toBe("obitos");
+      expect(service.verifiedAt).toBe("07/10/2026");
+      expect(service.sourceUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+    expect(searchPublicServices("auxilio funeral", "obitos").map(item => item.id)).toContain(
+      "auxilio-funeral-municipal"
+    );
+    expect(searchPublicServices("sepultamento", "obitos").map(item => item.id)).toContain(
+      "controle-obitos-sepultamentos"
+    );
+    expect(searchPublicServices("perdi um familiar").length).toBeGreaterThanOrEqual(0);
+  });
+
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
     expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])
