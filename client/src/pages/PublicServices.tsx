@@ -1288,23 +1288,31 @@ export default function PublicServices() {
                       {READY_SERVICE_ROUTES.length}
                     </span>
                   </button>
-                  {READY_ROUTE_GROUPS.map(group => (
-                    <button
-                      key={group.label}
-                      type="button"
-                      aria-label={`Filtrar rotas: ${group.label}`}
-                      aria-pressed={readyRouteGroup === group.label}
-                      onClick={() => setReadyRouteGroup(group.label)}
-                      className={
-                        "min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " +
-                        (readyRouteGroup === group.label
-                          ? "border-primary/35 bg-primary/10 text-primary"
-                          : "border-border/15 bg-card text-foreground/75")
-                      }
-                    >
-                      {group.label}
-                    </button>
-                  ))}
+                  {READY_ROUTE_GROUPS.map(group => {
+                    const groupCount = READY_SERVICE_ROUTES.filter(route =>
+                      group.ids.includes(route.id as never)
+                    ).length;
+                    return (
+                      <button
+                        key={group.label}
+                        type="button"
+                        aria-label={`Filtrar rotas: ${group.label} · ${groupCount} destinos`}
+                        aria-pressed={readyRouteGroup === group.label}
+                        onClick={() => setReadyRouteGroup(group.label)}
+                        className={
+                          "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-xs font-black " +
+                          (readyRouteGroup === group.label
+                            ? "border-primary/35 bg-primary/10 text-primary"
+                            : "border-border/15 bg-card text-foreground/75")
+                        }
+                      >
+                        <span>{group.label}</span>
+                        <span aria-hidden="true" className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.65rem] tabular-nums">
+                          {groupCount}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
                   {(readyRouteGroup === "todos"
