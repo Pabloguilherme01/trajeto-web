@@ -20,7 +20,8 @@ export type PublicServiceCategory =
   | "animais"
   | "idoso"
   | "empreendedor"
-  | "cultura";
+  | "cultura"
+  | "esporte";
 
 export type PublicService = {
   id: string;
@@ -92,6 +93,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "idoso", label: "Pessoa idosa", shortLabel: "Idoso" },
   { id: "empreendedor", label: "Empreendedor e empresas", shortLabel: "Empreender" },
   { id: "cultura", label: "Cultura e turismo", shortLabel: "Cultura" },
+  { id: "esporte", label: "Esporte e lazer", shortLabel: "Esporte" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -315,6 +317,32 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1606",
     mapQuery:
       "Vigilância em Saúde, Avenida Brasília, Quadra 109, Lote 30/32, Conjunto B, Setor 10, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "secretaria-esporte-lazer",
+    name: "Secretaria Municipal de Esporte e Lazer",
+    category: "esporte",
+    description: "Canal municipal para informações sobre esporte, lazer, projetos, competições, atividades comunitárias e políticas esportivas.",
+    phone: "(61) 99310-2157",
+    email: "esporteelazer@aguaslindasdegoias.go.gov.br",
+    keywords: ["esporte", "lazer", "secretaria esporte", "atividade fisica", "campeonato", "torneio", "projeto esportivo"],
+    guidance: "Entre em contato para confirmar programação, inscrições, locais e requisitos atuais. A legislação municipal de 2026 atribui à Secretaria a execução de projetos e programas de esporte e lazer.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/contatos/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "projeto-multiesportes",
+    name: "Projeto MultiEsportes · informações oficiais",
+    category: "esporte",
+    description: "Projeto municipal previsto em parceria oficial para atividades educacionais, recreativas e formação esportiva em modalidades como karatê, futsal, vôlei, basquete, futebol e taekwondo.",
+    keywords: ["multiesportes", "karate", "futsal", "volei", "basquete", "futebol", "taekwondo", "esporte crianca", "esporte adolescente"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/prefeitura-de-aguas-lindas-por-intermedio-da-secretaria-de-esporte-torna-publico-o-edital-de-chamamento-publico-visando-a-selecao-de-organizacao-da-sociedade-civil-interessada-em-celebrar-termo-de-c/",
+    actionLabel: "Consultar Projeto MultiEsportes",
+    guidance: "O edital de 2025 documenta a execução do projeto, mas não implica turma ou vaga aberta hoje. Confirme calendário, inscrições e locais atuais com a Secretaria de Esporte e Lazer.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/prefeitura-de-aguas-lindas-por-intermedio-da-secretaria-de-esporte-torna-publico-o-edital-de-chamamento-publico-visando-a-selecao-de-organizacao-da-sociedade-civil-interessada-em-celebrar-termo-de-c/",
     verifiedAt: "06/10/2026",
   },
   {
@@ -2215,6 +2243,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Cultura e editais",
     query: "cultura",
     hint: "Agentes, editais, mapa e calendário",
+  },
+  {
+    label: "Esporte e lazer",
+    query: "esporte",
+    hint: "Secretaria e Projeto MultiEsportes",
   },
   {
     label: "CNH e veículo",
