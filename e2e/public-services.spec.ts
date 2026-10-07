@@ -56,6 +56,34 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("rotas prontas incluem serviços físicos novos sem overflow em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+
+  const routes = page.locator('section[aria-labelledby="ready-routes-title"]');
+  const search = routes.getByRole("searchbox", { name: "Buscar rota pronta" });
+
+  await search.fill("agricultura");
+  const agriculture = routes.locator("article").filter({
+    hasText: "Secretaria Municipal de Agricultura e Abastecimento",
+  });
+  await expect(agriculture).toBeVisible();
+  await expect(
+    agriculture.getByRole("button", {
+      name: /Abrir Secretaria Municipal de Agricultura e Abastecimento no Organic Maps/,
+    })
+  ).toBeVisible();
+
+  await search.fill("cadastro unico");
+  const cadunico = routes.locator("article").filter({
+    hasText: "Cadastro Único / Bolsa Família",
+  });
+  await expect(cadunico).toBeVisible();
+  await expect(cadunico.getByRole("button", { name: /Planejar rota para Cadastro Único/ })).toBeVisible();
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("filtro Offline mostra apenas rotas resolvidas localmente em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
