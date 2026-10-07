@@ -12,6 +12,15 @@ describe("local route presets", () => {
       ALL_LOCAL_ROUTE_DESTINATIONS.some(item => item.id === "saneago")
     ).toBe(false);
   });
+  it("derives new public-service destinations from the shared catalog", () => {
+    expect(getLocalRoutePresets("Sala do Empreendedor", "servicos").some(item => item.id === "sala-empreendedor")).toBe(true);
+    expect(getLocalRoutePresets("Desenvolvimento Econômico", "servicos").some(item => item.id === "desenvolvimento-economico")).toBe(true);
+    expect(getLocalRoutePresets("CMDI", "servicos").some(item => item.id === "cmdi")).toBe(true);
+    expect(getLocalRoutePresets("Centro de Convivência do Idoso", "servicos").some(item => item.id === "cci-idoso")).toBe(true);
+    expect(getLocalRoutePresets("zoonoses", "servicos").some(item => item.id === "vigilancia-saude-zoonoses")).toBe(true);
+    expect(getLocalRoutePresets("Biblioteca Municipal", "educacao").some(item => item.id === "biblioteca-municipal")).toBe(true);
+  });
+
   it("provides a broad set of reusable city destinations", () => {
     expect(LOCAL_ROUTE_PRESETS.length).toBeGreaterThanOrEqual(20);
     expect(ALL_LOCAL_ROUTE_DESTINATIONS.length).toBeGreaterThanOrEqual(80);
