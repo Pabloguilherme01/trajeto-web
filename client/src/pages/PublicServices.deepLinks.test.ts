@@ -94,6 +94,10 @@ describe("PublicServices deep links", () => {
     expect(source).toContain(">Planejar</span>");
     expect(source).toContain("snap-x snap-mandatory");
     expect(source).toContain("snap-start");
+    expect(source).toContain("offlineReadyRouteIds");
+    expect(source).toContain('data-route-readiness={offlineReadyRouteIds.has(route.id) ? "offline" : "online"}');
+    expect(source).toContain("Destino offline");
+    expect(source).toContain("Localizar online");
   });
 
   it("offers the official Organic Maps install fallback without exposing GPS", () => {
