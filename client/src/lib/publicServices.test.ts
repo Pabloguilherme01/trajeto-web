@@ -198,22 +198,22 @@ describe("public services catalog", () => {
       expect(item.mapQuery).toBeUndefined();
   });
   it.each([
-    ["meu sus", "meu-sus-digital"],
-    ["ciptea", "carteira-autista-goias"],
-    ["carteira idoso", "carteira-pessoa-idosa"],
-    ["eleitoral", "autoatendimento-eleitoral"],
-    ["reclamacao empresa", "consumidor-gov"],
-    ["boletim ocorrencia", "delegacia-virtual-goias"],
-    ["seguro desemprego", "seguro-desemprego"],
-    ["expresso goias", "expresso-goias"],
-    ["regulacao saude", "saude-digital-goias"],
-    ["alistamento militar", "alistamento-militar"],
+    ["meu sus", "meu-sus-digital", "06/10/2026"],
+    ["ciptea", "carteira-autista-goias", "06/10/2026"],
+    ["carteira idoso", "carteira-pessoa-idosa", "06/10/2026"],
+    ["eleitoral", "autoatendimento-eleitoral", "07/10/2026"],
+    ["reclamacao empresa", "consumidor-gov", "06/10/2026"],
+    ["boletim ocorrencia", "delegacia-virtual-goias", "06/10/2026"],
+    ["seguro desemprego", "seguro-desemprego", "06/10/2026"],
+    ["expresso goias", "expresso-goias", "06/10/2026"],
+    ["regulacao saude", "saude-digital-goias", "06/10/2026"],
+    ["alistamento militar", "alistamento-militar", "06/10/2026"],
   ])(
     "finds the new official need %s without inventing a local route",
-    (query, id) => {
+    (query, id, verifiedAt) => {
       const service = searchPublicServices(query).find(item => item.id === id)!;
       expect(service).toBeDefined();
-      expect(service.verifiedAt).toBe("06/10/2026");
+      expect(service.verifiedAt).toBe(verifiedAt);
       expect(service.sourceUrl).toMatch(/^https:\/\//);
       expect(service.actionUrl).toMatch(/^https:\/\//);
       expect(service.mapQuery).toBeUndefined();
