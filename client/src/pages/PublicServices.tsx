@@ -319,6 +319,15 @@ const READY_ROUTE_IDS = [
   "secretaria-assistencia-social",
   "secretaria-mulher",
   "secretaria-pcd-igualdade",
+  "secretaria-agricultura-abastecimento",
+  "secretaria-saude",
+  "esf-barragem-v",
+  "cadunico",
+  "secretaria-administracao",
+  "funpreval",
+  "sebrae",
+  "ouvidoria-municipal",
+  "servicos-urbanos-solicitacao",
 ] as const;
 
 const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
@@ -364,6 +373,8 @@ const READY_ROUTE_GROUPS = [
       "esf-pinheiro-i",
       "esf-setor-ii",
       "esf-setor-09",
+      "secretaria-saude",
+      "esf-barragem-v",
     ],
   },
   {
@@ -385,6 +396,11 @@ const READY_ROUTE_GROUPS = [
       "cras-3",
       "forum",
       "camara-municipal",
+      "cadunico",
+      "secretaria-administracao",
+      "funpreval",
+      "sebrae",
+      "ouvidoria-municipal",
     ],
   },
   {
@@ -420,6 +436,8 @@ const READY_ROUTE_GROUPS = [
       "secretaria-assistencia-social",
       "secretaria-mulher",
       "secretaria-pcd-igualdade",
+      "secretaria-agricultura-abastecimento",
+      "servicos-urbanos-solicitacao",
     ],
   },
 ] as const;
