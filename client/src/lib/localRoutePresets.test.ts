@@ -12,6 +12,10 @@ describe("local route presets", () => {
       ALL_LOCAL_ROUTE_DESTINATIONS.some(item => item.id === "saneago")
     ).toBe(false);
   });
+  it("derives the Culture Secretariat as a routable public destination", () => {
+    expect(getLocalRoutePresets("Cultura e Turismo", "servicos").some(item => item.id === "secretaria-cultura-turismo")).toBe(true);
+  });
+
   it("derives new public-service destinations from the shared catalog", () => {
     expect(getLocalRoutePresets("Sala do Empreendedor", "servicos").some(item => item.id === "sala-empreendedor")).toBe(true);
     expect(getLocalRoutePresets("Desenvolvimento Econômico", "servicos").some(item => item.id === "desenvolvimento-economico")).toBe(true);
