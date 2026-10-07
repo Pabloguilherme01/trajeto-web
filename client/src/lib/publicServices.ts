@@ -24,7 +24,8 @@ export type PublicServiceCategory =
   | "esporte"
   | "juventude"
   | "transparencia"
-  | "agua-energia";
+  | "agua-energia"
+  | "telecom";
 
 export type PublicService = {
   id: string;
@@ -101,6 +102,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "juventude", label: "Juventude", shortLabel: "Juventude" },
   { id: "transparencia", label: "Transparência e participação", shortLabel: "Transparência" },
   { id: "agua-energia", label: "Água e energia", shortLabel: "Água e energia" },
+  { id: "telecom", label: "Internet e telefonia", shortLabel: "Internet e telefone" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -575,24 +577,71 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "anatel-consumidor",
     name: "Anatel Consumidor · telefonia e internet",
-    category: "consumidor",
+    category: "telecom",
     description:
       "Canal oficial para reclamações sobre telefonia, internet e TV por assinatura.",
+    phone: "1331",
+    hours: "Segunda a sexta, 08h–20h",
     keywords: [
       "operadora",
       "telefonia",
       "internet",
       "tv assinatura",
       "reclamacao anatel",
+      "1331",
     ],
     documents: ["Número do protocolo de atendimento da operadora"],
     actionUrl: "https://apps.anatel.gov.br/anatelconsumidor/",
     actionLabel: "Abrir Anatel Consumidor",
     guidance:
-      "Procure primeiro sua operadora e guarde o protocolo. Se o problema continuar, registre a reclamação no canal oficial da Anatel.",
+      "Procure primeiro sua operadora e guarde o protocolo. Se não resolver, fale com a ouvidoria da operadora e depois registre a reclamação na Anatel.",
     sourceLabel: "Anatel",
-    sourceUrl: "https://www.gov.br/anatel/pt-br/consumidor",
-    verifiedAt: "06/10/2026",
+    sourceUrl: "https://www.gov.br/anatel/pt-br/consumidor/quer-reclamar/reclamacao",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "cadastro-pre-pago",
+    name: "Cadastro Pré · linhas pré-pagas no seu CPF",
+    category: "telecom",
+    description:
+      "Consulta se existem linhas móveis pré-pagas ativas vinculadas ao seu CPF e em quais prestadoras.",
+    keywords: [
+      "cadastro pre",
+      "linha no cpf",
+      "chip no cpf",
+      "telefone no cpf",
+      "pre pago",
+      "fraude chip",
+    ],
+    actionUrl: "https://cadastropre.com.br/",
+    actionLabel: "Consultar linhas pré-pagas",
+    guidance:
+      "A consulta informa em quais prestadoras há linhas pré-pagas ativas no CPF, sem mostrar número de telefone nem quantidade de linhas. Se aparecer algo inesperado, contate a prestadora indicada para pedir correção ou desvinculação.",
+    sourceLabel: "Anatel",
+    sourceUrl: "https://www.gov.br/anatel/pt-br/dados/utilidade-publica/cadastro-pre-pago/",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "nao-me-perturbe",
+    name: "Não Me Perturbe · bloquear telemarketing",
+    category: "telecom",
+    description:
+      "Cadastro gratuito para bloquear ofertas por telefone de prestadoras de telecomunicações e instituições financeiras participantes.",
+    keywords: [
+      "nao me perturbe",
+      "telemarketing",
+      "ligacao indesejada",
+      "spam telefone",
+      "bloquear chamadas",
+      "0303",
+    ],
+    actionUrl: "https://www.naomeperturbe.com.br/",
+    actionLabel: "Cadastrar no Não Me Perturbe",
+    guidance:
+      "O bloqueio cobre ofertas de telecomunicações e de instituições financeiras participantes para crédito consignado. Cobranças, prevenção a fraude e outros contatos legítimos podem não ser bloqueados.",
+    sourceLabel: "Anatel",
+    sourceUrl: "https://www.gov.br/anatel/pt-br/consumidor/chamadas-abusivas",
+    verifiedAt: "07/10/2026",
   },
   {
     id: "ibama-denuncia",
@@ -2300,6 +2349,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Conta de água e luz",
     query: "agua energia",
     hint: "Saneago, Equatorial, Tarifa Social e ANEEL",
+  },
+  {
+    label: "Internet e telefonia",
+    query: "internet telefonia",
+    hint: "Anatel, linhas no CPF e bloqueio de telemarketing",
   },
   {
     label: "Celular roubado ou perdido",
