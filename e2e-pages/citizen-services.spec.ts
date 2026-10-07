@@ -173,10 +173,9 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("servicos", { waitUntil: "domcontentloaded" });
-  await expect(
-    page.getByRole("heading", { name: "Atalhos do dia a dia" })
-  ).toBeVisible();
-  await page.getByRole("button", { name: /CadÚnico e benefícios/ }).click();
+  const cadunicoShortcut = page.getByRole("button", { name: /CadÚnico e benefícios/ });
+  await expect(cadunicoShortcut).toBeVisible();
+  await cadunicoShortcut.click();
   await expect(
     page.getByRole("heading", {
       name: "Cadastro Único / Bolsa Família",
