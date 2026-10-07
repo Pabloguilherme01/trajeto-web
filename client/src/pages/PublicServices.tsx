@@ -1396,7 +1396,9 @@ export default function PublicServices() {
               (expandedActions || emergencyDirect);
             const showOfficialAction =
               Boolean(service.actionUrl) &&
-              (expandedActions || (!primaryContact && !service.mapQuery));
+              (expandedActions ||
+                resource === "online" ||
+                (!primaryContact && !service.mapQuery));
             const showEmail = Boolean(service.email) && expandedActions;
             const hasMoreOptions =
               !expandedActions &&
