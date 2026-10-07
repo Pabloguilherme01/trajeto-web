@@ -34,6 +34,19 @@ test("resumo de filtros mostra estado ativo no mobile", async ({ page }) => {
   await expect(summary).toContainText("Saúde · Rota");
 });
 
+test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+  const routes = page.locator('section[aria-labelledby="ready-routes-title"]');
+  const search = routes.getByRole("searchbox", { name: "Buscar rota pronta" });
+  await search.fill("biblioteca");
+  await expect(routes.getByText("Biblioteca Municipal · Jardim Barragem II", { exact: true })).toBeVisible();
+  await expect(routes.getByText("1 destinos neste filtro", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await routes.getByRole("button", { name: "Limpar busca de rotas" }).click();
+  await expect(search).toHaveValue("");
+});
+
 test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
