@@ -32,6 +32,7 @@ import {
   TrafficCone,
   Store,
   Trophy,
+  Zap,
   WifiOff,
   Navigation,
   PawPrint,
@@ -90,6 +91,7 @@ const categoryIcons = {
   esporte: Trophy,
   juventude: BadgeCheck,
   transparencia: Globe2,
+  "agua-energia": Zap,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -192,6 +194,11 @@ const NEED_GROUPS = [
     label: "Transparência e participação",
     query: "transparencia",
     hint: "SIC, Ouvidoria, gastos públicos, processos e leis",
+  },
+  {
+    label: "Água e energia",
+    query: "agua energia",
+    hint: "Saneago, Equatorial, Tarifa Social e ANEEL",
   },
   {
     label: "Celular roubado ou perdido",
