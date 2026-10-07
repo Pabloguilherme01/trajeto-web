@@ -44,7 +44,9 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("const primaryContact = contacts[0]");
     expect(source).toContain("const secondaryContacts = contacts.slice(1)");
     expect(source).toContain("Mais opções");
-    expect(source).toContain("PUBLIC_SERVICE_SHORTCUTS.slice(0, 4).map");
+    expect(source).toContain("PUBLIC_SERVICE_SHORTCUTS.slice(0, 7).map");
+    expect(source).toContain("PUBLIC_SERVICE_SHORTCUTS.slice(7).map");
+    expect(source).toContain("Mais atalhos úteis");
     expect(source).toContain("grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4");
   });
 
