@@ -32,6 +32,7 @@ import {
   TrafficCone,
   WifiOff,
   Navigation,
+  PawPrint,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -78,6 +79,7 @@ const categoryIcons = {
   tributos: ReceiptText,
   inclusao: Accessibility,
   mulher: Heart,
+  animais: PawPrint,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -145,6 +147,11 @@ const NEED_GROUPS = [
     label: "Mulher e proteção",
     query: "mulher",
     hint: "Secretaria da Mulher, Ligue 180 e atendimento especializado",
+  },
+  {
+    label: "Animais e zoonoses",
+    query: "zoonoses",
+    hint: "Castração, animais soltos e Vigilância em Saúde",
   },
   {
     label: "Celular roubado ou perdido",

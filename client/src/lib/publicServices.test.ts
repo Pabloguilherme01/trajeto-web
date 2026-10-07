@@ -232,9 +232,9 @@ describe("public services catalog", () => {
       ["nota fiscal iss", "nota-fiscal-iss", "tributos"],
       ["itbi", "itbi-municipal", "tributos"],
       ["pcd", "secretaria-pcd-igualdade", "inclusao"],
-      ["apreensao animais", "apreensao-animais", "ambiente"],
+      ["apreensao animais", "apreensao-animais", "animais"],
       ["iptu", "emitir-taxas-municipais", "tributos"],
-      ["castracao", "bem-estar-animal-castracao", "ambiente"],
+      ["castracao", "bem-estar-animal-castracao", "animais"],
       ["biblioteca", "biblioteca-municipal", "educacao"],
       ["medicamentos sus", "medicamentos-sus-municipal", "saude"],
       ["alto custo", "medicamentos-alto-custo-municipal", "saude"],
@@ -261,6 +261,18 @@ describe("public services catalog", () => {
     expect(searchPublicServices("ouvsus").some(service => service.id === "ouvsus-136")).toBe(true);
     expect(searchPublicServices("deam").some(service => service.id === "deam-depai-dpca")).toBe(true);
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
+  });
+
+  it("groups animal care and zoonoses in a dedicated utility category", () => {
+    expect(searchPublicServices("zoonoses", "animais").map(item => item.id)).toEqual(
+      expect.arrayContaining(["bem-estar-animal-castracao", "vigilancia-saude-zoonoses"])
+    );
+    for (const id of ["apreensao-animais", "bem-estar-animal-castracao", "vigilancia-saude-zoonoses"])
+      expect(PUBLIC_SERVICES.find(item => item.id === id)?.category).toBe("animais");
+    const vigilancia = PUBLIC_SERVICES.find(item => item.id === "vigilancia-saude-zoonoses")!;
+    expect(vigilancia.phone).toBe("(61) 3618-1409");
+    expect(vigilancia.mapQuery).toContain("Avenida Brasília");
+    expect(vigilancia.sourceUrl).toMatch(/^https:\/\/legislacao\.aguaslindasdegoias\.go\.gov\.br/);
   });
 
   it("groups women protection services in a dedicated utility category", () => {

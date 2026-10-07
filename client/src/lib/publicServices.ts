@@ -16,7 +16,8 @@ export type PublicServiceCategory =
   | "consumidor"
   | "tributos"
   | "inclusao"
-  | "mulher";
+  | "mulher"
+  | "animais";
 
 export type PublicService = {
   id: string;
@@ -83,6 +84,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "tributos", label: "Tributos e notas", shortLabel: "Tributos" },
   { id: "inclusao", label: "Inclusão e igualdade", shortLabel: "Inclusão" },
   { id: "mulher", label: "Mulher e proteção", shortLabel: "Mulher" },
+  { id: "animais", label: "Animais e zoonoses", shortLabel: "Animais" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -218,7 +220,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "apreensao-animais",
     name: "Apreensão de animais · Trânsito e Mobilidade",
-    category: "ambiente",
+    category: "animais",
     description:
       "Canal municipal divulgado pela Secretaria de Trânsito para solicitações relacionadas à apreensão de animais.",
     phone: "(61) 92003-6679",
@@ -255,7 +257,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "bem-estar-animal-castracao",
     name: "Bem-Estar Animal · castração de cães e gatos",
-    category: "ambiente",
+    category: "animais",
     description:
       "Projeto municipal voltado ao controle populacional de cães e gatos e à prevenção de doenças por meio de castração.",
     keywords: [
@@ -275,6 +277,37 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl:
       "https://aguaslindasdegoias.go.gov.br/servico/projeto-bem-estar-animal/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "vigilancia-saude-zoonoses",
+    name: "Vigilância em Saúde · zoonoses",
+    category: "animais",
+    description:
+      "Canal municipal da Vigilância em Saúde para orientação e encaminhamento de situações relacionadas a zoonoses e riscos à saúde pública.",
+    phone: "(61) 3618-1409",
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    email: "saude@aguaslindasdegoias.go.gov.br",
+    address:
+      "Avenida Brasília, Quadra 109, Lote 30/32, Conjunto B, Setor 10, Águas Lindas de Goiás - GO",
+    keywords: [
+      "zoonoses",
+      "vigilancia em saude",
+      "animal doente",
+      "doenca animal",
+      "morcego",
+      "raiva animal",
+      "vetores",
+    ],
+    actionUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-saude-2/vigilancia-em-saude/",
+    actionLabel: "Abrir Vigilância em Saúde",
+    guidance:
+      "A estrutura municipal de 2026 inclui um Departamento de Zoonoses. Use o contato da Vigilância em Saúde para confirmar o encaminhamento adequado antes de se deslocar.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1606",
+    mapQuery:
+      "Vigilância em Saúde, Avenida Brasília, Quadra 109, Lote 30/32, Conjunto B, Setor 10, Águas Lindas de Goiás, GO",
     verifiedAt: "06/10/2026",
   },
   {
