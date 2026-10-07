@@ -48,15 +48,16 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   value: string;
   onChoose: (coordinate: string) => void;
 }) {
-  const businesses = useBusinessCatalog();
-  const allPoints = useMemo(() => dedupePlannerLocationItems([...points, ...businesses.items.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))]), [businesses.items]);
   const [open, setOpen] = useState(false);
+  const businesses = useBusinessCatalog(open);
+  const allPoints = useMemo(() => open ? dedupePlannerLocationItems([...points, ...businesses.items.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))]) : [], [open, businesses.items]);
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(8);
   const quickQueries = PLANNER_LOCATION_QUICK_FILTERS;
   useEffect(() => { setVisibleCount(8); }, [query, kind]);
   const [selected, setSelected] = useState<{ coordinate: string; label: string } | null>(null);
   const matches = useMemo(() => {
+    if (!open) return [];
     const normalizedQuery = normalizeCatalogText(query.trim());
     const filtered = filterCityAtlas(allPoints, query, "todos");
     if (normalizedQuery) {
@@ -87,7 +88,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
       })
       .sort((a, b) => a.relevance - b.relevance || pickerItemScore(b.item) - pickerItemScore(a.item) || a.index - b.index)
       .map(entry => entry.item);
-  }, [allPoints, query]);
+  }, [allPoints, query, open]);
   const offlineReadyCount = useMemo(() => matches.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng)).length, [matches]);
   return <div className="mt-2 min-w-0 max-w-full overflow-hidden">
     <button type="button" aria-expanded={open} onClick={() => setOpen(v => !v)} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-left text-xs font-bold text-[#C9F7FF]">Escolher {kind} no catálogo local</button>

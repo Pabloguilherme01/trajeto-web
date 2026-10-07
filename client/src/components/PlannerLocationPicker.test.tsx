@@ -1,6 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
+import * as atlas from "@/lib/cityAtlas";
 import PlannerLocationPicker from "./PlannerLocationPicker";
 afterEach(cleanup);
 
@@ -97,4 +98,15 @@ it("shows distinct same-name streets and waits for an explicit selection", () =>
   expect(choose).not.toHaveBeenCalled();
   fireEvent.click(options[1]);
   expect(choose).toHaveBeenCalledOnce();
+});
+
+it("does not search the catalog while closed, including during parent mode changes", () => {
+  const filter = vi.spyOn(atlas, "filterCityAtlas");
+  try {
+    const view = render(<PlannerLocationPicker kind="destino" value="" onChoose={vi.fn()} />);
+    view.rerender(<PlannerLocationPicker kind="destino" value="HEAL" onChoose={vi.fn()} />);
+    expect(filter).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+    expect(filter).toHaveBeenCalled();
+  } finally { filter.mockRestore(); }
 });
