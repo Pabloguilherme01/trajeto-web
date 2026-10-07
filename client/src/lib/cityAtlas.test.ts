@@ -1,12 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import * as catalogSearch from "./catalogSearch";
 import {
   buildCityAtlas,
   cityAtlasCounts,
   filterCityAtlas,
+  prepareCityAtlasSearch,
   normalizeCityAtlasSnapshot,
   resolveCityAtlasPoint,
   type CityAtlasSnapshot,
 } from "./cityAtlas";
+
+it("uses prepared indexes on the first query without renormalizing records", () => {
+  const items = buildCityAtlas(snapshot());
+  prepareCityAtlasSearch(items);
+  const normalize = vi.spyOn(catalogSearch, "normalizeCatalogText");
+  try {
+    const results = filterCityAtlas(items, "escola", "todos");
+    expect(results).toBeDefined();
+    expect(normalize).toHaveBeenCalledTimes(1);
+  } finally { normalize.mockRestore(); }
+});
 
 function snapshot(): CityAtlasSnapshot {
   return {

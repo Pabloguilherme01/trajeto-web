@@ -430,6 +430,12 @@ export function resolveCityAtlasPoint(
 
 const searchIndex = new WeakMap<CityAtlasItem, string>();
 
+export function prepareCityAtlasSearch(items: CityAtlasItem[]) {
+  // Exercise the same search path in small background batches. This also
+  // materializes normalized strings before the user's first keystroke.
+  filterCityAtlas(items, "__prepare_catalog__", "todos");
+}
+
 export function filterCityAtlas(
   items: CityAtlasItem[],
   query: string,
