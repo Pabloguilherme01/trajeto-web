@@ -80,6 +80,7 @@ const categoryIcons = {
   justica: Scale,
   digital: Smartphone,
   ambiente: Leaf,
+  agricultura: Leaf,
   consumidor: ShoppingBag,
   tributos: ReceiptText,
   inclusao: Accessibility,
@@ -142,6 +143,11 @@ const NEED_GROUPS = [
     label: "Cidade e manutenção",
     query: "buraco",
     hint: "Iluminação, vias, limpeza, bueiros e manutenção urbana",
+  },
+  {
+    label: "Agricultura e produtor rural",
+    query: "agricultura",
+    hint: "Agricultura familiar, abastecimento e orientação ao produtor",
   },
   {
     label: "Segurança e proteção",

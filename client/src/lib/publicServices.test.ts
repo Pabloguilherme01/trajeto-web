@@ -416,6 +416,24 @@ describe("public services catalog", () => {
     expect(municipal.mapQuery).toBeUndefined();
   });
 
+  it("groups agriculture and rural support in a dedicated verified category", () => {
+    const service = PUBLIC_SERVICES.find(
+      item => item.id === "secretaria-agricultura-abastecimento"
+    )!;
+    expect(service).toBeDefined();
+    expect(service.category).toBe("agricultura");
+    expect(service.phone).toBe("(61) 99310-6862");
+    expect(service.email).toBe("agricultura@aguaslindasdegoias.go.gov.br");
+    expect(service.verifiedAt).toBe("07/10/2026");
+    expect(service.mapQuery).toContain("Condomínio Embaixador");
+    expect(searchPublicServices("agricultura familiar", "agricultura").map(item => item.id)).toContain(
+      "secretaria-agricultura-abastecimento"
+    );
+    expect(searchPublicServices("produtor rural").map(item => item.id)).toContain(
+      "secretaria-agricultura-abastecimento"
+    );
+  });
+
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
     expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])

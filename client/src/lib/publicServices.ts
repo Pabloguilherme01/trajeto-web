@@ -13,6 +13,7 @@ export type PublicServiceCategory =
   | "justica"
   | "digital"
   | "ambiente"
+  | "agricultura"
   | "consumidor"
   | "tributos"
   | "inclusao"
@@ -111,6 +112,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "documentos", label: "Documentos e certidões", shortLabel: "Documentos" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
+  { id: "agricultura", label: "Agricultura e abastecimento", shortLabel: "Agricultura" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
   { id: "justica", label: "Justiça e direitos", shortLabel: "Justiça" },
 ];
@@ -142,6 +144,36 @@ const ASSISTENCIA =
 const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
+  {
+    id: "secretaria-agricultura-abastecimento",
+    name: "Secretaria Municipal de Agricultura e Abastecimento",
+    category: "agricultura",
+    description:
+      "Atendimento municipal para agricultura familiar, produção agropecuária, abastecimento e orientação ao produtor rural.",
+    address:
+      "Área Especial 01, Condomínio Embaixador, Águas Lindas de Goiás - GO",
+    phone: "(61) 99310-6862",
+    email: "agricultura@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    keywords: [
+      "agricultura",
+      "agricultor",
+      "produtor rural",
+      "agricultura familiar",
+      "agropecuaria",
+      "pecuaria",
+      "abastecimento",
+      "producao rural",
+    ],
+    guidance:
+      "Entre em contato antes de se deslocar para confirmar o atendimento indicado para sua necessidade e os documentos eventualmente exigidos.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-agricultura/",
+    mapQuery:
+      "Secretaria Municipal de Agricultura e Abastecimento, Condomínio Embaixador, Águas Lindas de Goiás, GO",
+  },
   {
     id: "celular-seguro",
     name: "Celular Seguro · bloquear aparelho e linha",
