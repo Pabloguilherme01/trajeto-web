@@ -385,17 +385,22 @@ describe("public services catalog", () => {
     expect(aneel.actionUrl).toContain("/reclame-da-distribuidora");
   });
 
-  it("groups transparency services and keeps digital portals route-free", () => {
+  it("groups transparency services and keeps purely digital portals route-free", () => {
     expect(searchPublicServices("", "transparencia").map(item => item.id)).toEqual(
       expect.arrayContaining(["sic", "ouvidoria-municipal", "portal-transparencia-municipal", "portal-sei-processos", "legislacao-municipal"])
     );
-    for (const id of ["portal-transparencia-municipal", "portal-sei-processos", "legislacao-municipal"]) {
+    for (const id of ["portal-transparencia-municipal", "legislacao-municipal"]) {
       const service = PUBLIC_SERVICES.find(item => item.id === id)!;
       expect(service.category).toBe("transparencia");
       expect(service.actionUrl).toMatch(/^https:\/\//);
       expect(service.address).toBeUndefined();
       expect(service.mapQuery).toBeUndefined();
     }
+    const sei = PUBLIC_SERVICES.find(item => item.id === "portal-sei-processos")!;
+    expect(sei.category).toBe("transparencia");
+    expect(sei.actionUrl).toMatch(/^https:\/\//);
+    expect(sei.address).toContain("Quadra 15");
+    expect(sei.mapQuery).toContain("Secretaria Municipal de Administração");
     expect(PUBLIC_SERVICES.find(item => item.id === "sic")?.category).toBe("transparencia");
     expect(PUBLIC_SERVICES.find(item => item.id === "ouvidoria-municipal")?.category).toBe("transparencia");
   });
@@ -582,7 +587,12 @@ describe("public services catalog", () => {
     expect(searchPublicServices("sepultamento", "obitos").map(item => item.id)).toContain(
       "controle-obitos-sepultamentos"
     );
-    expect(searchPublicServices("falecimento").map(item => item.id)).toEqual(\n      expect.arrayContaining(["auxilio-funeral-municipal", "controle-obitos-sepultamentos"])\n    );
+    expect(searchPublicServices("falecimento").map(item => item.id)).toEqual(
+      expect.arrayContaining([
+        "auxilio-funeral-municipal",
+        "controle-obitos-sepultamentos",
+      ])
+    );
   });
 
   it("keeps current Conselho Tutelar contacts and child-protection searches discoverable", () => {
