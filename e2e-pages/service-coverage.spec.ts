@@ -22,45 +22,45 @@ const cases = [
 ];
 
 async function checkCard(page: Page, id: string, name: string) {
-  const cards = page
+  const card = page
     .getByRole("region", { name: "Serviços públicos" })
-    .getByRole("article");
-  await expect(cards).toHaveCount(1);
-  await expect(cards.getByRole("heading", { name, exact: true })).toBeVisible();
-  await expect(cards.getByText("Endereço:", { exact: true })).toHaveCount(0);
+    .locator("#service-" + id);
+  await expect(card).toHaveCount(1);
+  await expect(card.getByRole("heading", { name, exact: true })).toBeVisible();
+  await expect(card.getByText("Endereço:", { exact: true })).toHaveCount(0);
   await expect(
-    cards.getByRole("button", { name: "Rota", exact: true })
+    card.getByRole("button", { name: "Rota", exact: true })
   ).toHaveCount(0);
   await expect(
-    cards.locator(
+    card.locator(
       'a[href*="wa.me"], a[href*="maps.google"], a[href*="google.com/maps"]'
     )
   ).toHaveCount(0);
   if (id === "receita-federal-pav") {
-    await expect(cards.locator('a[href^="tel:"]')).toHaveCount(0);
+    await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);
     await expect(
-      cards.getByRole("link", {
+      card.getByRole("link", {
         name: "Consultar atendimento oficial · online",
       })
     ).toHaveAttribute("href", officialUrl);
     await expect(
-      cards.getByRole("link", {
+      card.getByRole("link", {
         name: "Fonte: Receita Federal · conferido em 01/10/2026",
       })
     ).toHaveAttribute("href", officialUrl);
   } else {
-    await expect(cards.locator('a[href^="tel:"]')).toHaveCount(2);
-    await expect(cards.locator('a[href="tel:193"]')).toHaveCount(1);
-    await expect(cards.locator('a[href="tel:190"]')).toHaveCount(1);
+    await expect(card.locator('a[href^="tel:"]')).toHaveCount(2);
+    await expect(card.locator('a[href="tel:193"]')).toHaveCount(1);
+    await expect(card.locator('a[href="tel:190"]')).toHaveCount(1);
     await expect(
-      cards.getByRole("link", { name: /Polícia · emergência policial/ })
+      card.getByRole("link", { name: /Polícia · emergência policial/ })
     ).toHaveAttribute("href", "tel:190");
     await expect(
-      cards.getByRole("link", { name: /Bombeiros · resgate e salvamento/ })
+      card.getByRole("link", { name: /Bombeiros · resgate e salvamento/ })
     ).toHaveAttribute("href", "tel:193");
-    await expect(cards.getByText(/Alternativo/)).toHaveCount(0);
+    await expect(card.getByText(/Alternativo/)).toHaveCount(0);
     await expect(
-      cards.getByText(
+      card.getByText(
         "Use 193 para incêndio, resgate e salvamento e 190 para emergência policial.",
         { exact: true }
       )
