@@ -115,6 +115,14 @@ const SERVICE_SUMMARY = {
     .length,
 } as const;
 
+const SERVICE_CATEGORY_COUNTS = PUBLIC_SERVICES.reduce<Record<string, number>>(
+  (counts, service) => {
+    counts[service.category] = (counts[service.category] ?? 0) + 1;
+    return counts;
+  },
+  {}
+);
+
 const NEED_GROUPS = [
   {
     label: "Documentos pessoais",
@@ -1090,7 +1098,7 @@ export default function PublicServices() {
                 >
                   {item.id === "todos"
                     ? PUBLIC_SERVICES.length
-                    : PUBLIC_SERVICES.filter(service => service.category === item.id).length}
+                    : SERVICE_CATEGORY_COUNTS[item.id] ?? 0}
                 </span>
               </button>
             ))}
