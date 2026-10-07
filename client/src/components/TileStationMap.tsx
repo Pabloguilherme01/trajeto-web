@@ -4,6 +4,7 @@ import {
   buildAppleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrl,
   buildOrganicMapsNavigationUrl,
+  ORGANIC_MAPS_INSTALL_URL,
   buildWazeNavigationUrl,
   openExternalUrl,
 } from "@/lib/mobileTools";
@@ -972,6 +973,16 @@ export default function TileStationMap({
                   </button>
                 )}
               </div>
+              {travelMode !== "transit" && (
+                <a
+                  href={ORGANIC_MAPS_INSTALL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex min-h-10 max-w-full items-center break-words text-xs font-bold text-muted-foreground underline decoration-dotted underline-offset-2"
+                >
+                  Não tem o app? Instalar ou atualizar Organic Maps
+                </a>
+              )}
               <MapPlaceActions place={selected} />
             </div>
           </div>

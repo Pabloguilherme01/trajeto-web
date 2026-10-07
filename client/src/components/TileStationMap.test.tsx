@@ -8,6 +8,20 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+it("offers the official Organic Maps install link beside navigation", () => {
+  render(
+    <TileStationMap
+      stations={[
+        { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+      ]}
+      travelMode="walking"
+    />
+  );
+  const install = screen.getByRole("link", { name: /Instalar ou atualizar Organic Maps/i });
+  expect(install.getAttribute("href")).toBe("https://get.omaps.org/");
+  expect(screen.getByRole("button", { name: /Abrir Posto A no Organic Maps/i })).toBeTruthy();
+});
+
 it("keeps the selected marker above coincident catalogue points", () => {
   render(<TileStationMap stations={[
     { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
