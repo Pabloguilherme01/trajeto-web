@@ -946,22 +946,30 @@ export default function TileStationMap({
                     >
                       <Apple className="size-3" /> Apple
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const target = buildOrganicMapsNavigationUrl(
-                          { lat: selected.lat, lng: selected.lng },
-                          selected.name,
-                          "drive"
-                        );
-                        if (target) openExternalUrl(target);
-                      }}
-                      className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-primary/25 bg-primary/[.05] px-2 text-xs font-black text-primary"
-                      aria-label={"Abrir " + selected.name + " no Organic Maps"}
-                    >
-                      <Navigation className="size-3" /> Organic
-                    </button>
                   </>
+                )}
+                {travelMode !== "transit" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const organicMode =
+                        travelMode === "walking"
+                          ? "walk"
+                          : travelMode === "cycling"
+                            ? "bike"
+                            : "drive";
+                      const target = buildOrganicMapsNavigationUrl(
+                        { lat: selected.lat, lng: selected.lng },
+                        selected.name,
+                        organicMode
+                      );
+                      if (target) openExternalUrl(target);
+                    }}
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-lg border border-primary/25 bg-primary/[.05] px-2 text-xs font-black text-primary"
+                    aria-label={"Abrir " + selected.name + " no Organic Maps"}
+                  >
+                    <Navigation className="size-3" /> Organic
+                  </button>
                 )}
               </div>
               <MapPlaceActions place={selected} />
