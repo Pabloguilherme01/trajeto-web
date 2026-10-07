@@ -213,7 +213,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
   await input.fill("cras");
   await input.press("Enter");
   await expect(
-    page.getByRole("region", { name: "Serviços públicos" }).getByRole("article")
+    page.getByRole("region", { name: "Serviços públicos" }).locator("#service-cras-1, #service-cras-2, #service-cras-3")
   ).toHaveCount(3);
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
