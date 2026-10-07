@@ -769,7 +769,7 @@ export default function PublicServices() {
           </label>
           <div
             role="group"
-            className="mt-3 flex flex-wrap gap-2"
+            className="mobile-scroll-x -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -779,7 +779,7 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm font-black transition " +
+                  "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-sm font-black transition " +
                   (category === item.id
                     ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
                     : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")

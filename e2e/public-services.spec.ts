@@ -34,6 +34,18 @@ test("resumo de filtros mostra estado ativo no mobile", async ({ page }) => {
   await expect(summary).toContainText("Saúde · Rota");
 });
 
+test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+  await page.locator("#service-filters summary").click();
+  const categories = page.getByRole("group", { name: "Categorias de serviços" });
+  await expect(categories).toBeVisible();
+  expect(await categories.evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true);
+  await page.getByRole("button", { name: /Esporte e lazer/ }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole("button", { name: /Esporte e lazer/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("central de serviços abre offline e filtra saúde", async ({ page }) => {
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Como podemos ajudar/i })).toBeVisible();
