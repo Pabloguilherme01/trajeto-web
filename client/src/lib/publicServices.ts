@@ -73,6 +73,7 @@ export type PublicService = {
     | "Detran-GO"
     | "Senatran"
     | "Defensoria Pública de Goiás"
+    | "Tribunal de Justiça de Goiás"
     | "Empresas & Negócios"
     | "Secretaria Nacional de Juventude";
   sourceUrl: string;
@@ -2384,6 +2385,35 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl: "https://www2.defensoria.go.def.br/unidades-de-atendimento",
     mapQuery:
       "Centro de Referência em Mediação e Cidadania, Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "tjgo-balcao-virtual",
+    name: "Balcão Virtual · TJGO",
+    category: "justica",
+    description: "Atendimento por videoconferência com unidades judiciárias do Tribunal de Justiça de Goiás.",
+    phone: "(62) 3216-2000",
+    extraPhone: "(62) 3236-3700",
+    hours: "Atendimento ao público: segunda a sexta, 12h–18h",
+    keywords: ["balcao virtual", "tjgo", "tribunal justica", "atendimento judicial", "videoconferencia justica", "vara judicial", "forum online"],
+    actionUrl: "https://www.tjgo.jus.br/index.php/bc-virtual",
+    actionLabel: "Abrir Balcão Virtual do TJGO",
+    guidance: "Escolha a unidade judiciária no portal oficial. O Balcão Virtual permite atendimento direto por videoconferência; horários específicos podem variar por unidade.",
+    sourceLabel: "Tribunal de Justiça de Goiás",
+    sourceUrl: "https://www.tjgo.jus.br/index.php/bc-virtual",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "tjgo-consulta-processual",
+    name: "Consulta Processual · TJGO",
+    category: "justica",
+    description: "Consulta oficial de processos no Tribunal de Justiça do Estado de Goiás.",
+    keywords: ["consulta processual", "processo tjgo", "numero processo", "andamento processo", "tribunal goias", "projudi"],
+    actionUrl: "https://www.tjgo.jus.br/index.php/processos/consulta-processual/",
+    actionLabel: "Consultar processo no TJGO",
+    guidance: "Use a consulta oficial para localizar processos e movimentações disponíveis ao público. Processos sob sigilo ou com acesso restrito podem exigir autenticação ou não exibir todos os dados.",
+    sourceLabel: "Tribunal de Justiça de Goiás",
+    sourceUrl: "https://www.tjgo.jus.br/index.php/processos/consulta-processual/",
+    verifiedAt: "07/10/2026",
   },
   {
     id: "creches-lista-espera",
