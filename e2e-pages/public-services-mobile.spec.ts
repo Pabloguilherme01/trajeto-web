@@ -47,3 +47,21 @@ test("Central shortcuts restore ready routes after a search at 320px", async ({ 
   await expect(page.getByRole("button", { name: /Mostrar somente destinos offline/ })).toHaveAttribute("aria-pressed", "false");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+test("service needs and Organic Maps modes remain usable at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("servicos", { waitUntil: "domcontentloaded" });
+  await page.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("baixar empresa");
+  await expect(page.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeVisible();
+  await page.goto("servicos?servico=upa-mansoes-odisseia", { waitUntil: "domcontentloaded" });
+  const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
+  await mode.selectOption("walk");
+  await expect(page.getByRole("button", { name: /Abrir .* no Organic Maps/ })).toContainText("a pé");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.goto("servicos?categoria=capacitacao", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#service-results article")).toHaveCount(2);
+  await expect(page.getByText("ficha disponível offline")).toHaveCount(2);
+  await expect(page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  expect((await new AxeBuilder({ page }).include("main").analyze()).violations).toEqual([]);
+});

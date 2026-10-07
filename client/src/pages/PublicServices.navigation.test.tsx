@@ -35,3 +35,28 @@ it("shows the new official higher education services in their category", () => {
   expect(screen.getByRole("heading", { name: "Prouni · bolsas em faculdades particulares" })).toBeTruthy();
   expect(document.querySelectorAll("#service-results article")).toHaveLength(2);
 });
+
+
+it("searches ready routes by the public service need locally", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  fireEvent.change(screen.getByRole("searchbox", { name: "Buscar rota pronta" }), { target: { value: "baixar empresa" } });
+  expect(screen.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeTruthy();
+}, 15000);
+
+it("offers Organic Maps transport modes after selecting a physical service", () => {
+  window.history.replaceState({}, "", "/servicos?servico=upa-mansoes-odisseia");
+  render(<PublicServices />);
+  const mode = screen.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
+  fireEvent.change(mode, { target: { value: "walk" } });
+  expect((mode as HTMLSelectElement).value).toBe("walk");
+  expect(screen.getByRole("button", { name: /Abrir .* no Organic Maps/ }).textContent).toContain("a pé");
+});
+
+it("finds both official course catalogs without assigning a local route", () => {
+  window.history.replaceState({}, "", "/servicos?categoria=capacitacao&q=cursos%20gratuitos");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(2);
+  expect(screen.queryByRole("button", { name: "Planejar rota" })).toBeNull();
+  expect(screen.getAllByText("ficha disponível offline")).toHaveLength(2);
+});

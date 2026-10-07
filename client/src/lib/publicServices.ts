@@ -8,6 +8,7 @@ export type PublicServiceCategory =
   | "transito"
   | "educacao"
   | "ensino-superior"
+  | "capacitacao"
   | "cidadania"
   | "trabalho"
   | "moradia"
@@ -55,6 +56,7 @@ export type PublicService = {
     | "Polícia Civil de Goiás"
     | "SEDUC Goiás"
     | "Ministério da Educação"
+    | "Enap"
     | "SES-GO"
     | "SEAD Goiás"
     | "Ministério das Mulheres"
@@ -98,6 +100,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
   { id: "ensino-superior", label: "Faculdade e bolsas", shortLabel: "Faculdade" },
+  { id: "capacitacao", label: "Cursos e qualificação", shortLabel: "Cursos" },
   { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
   { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
   { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
@@ -2830,6 +2833,33 @@ export const PUBLIC_SERVICES: PublicService[] = [
     guidance: "Consulte o edital atual para confirmar prazos, critérios e documentos exigidos pela instituição. A conta gov.br é usada no canal oficial. Não envie documentos pelo Trajeto; a inscrição e a consulta de resultados precisam de internet.",
     sourceLabel: "Ministério da Educação",
     sourceUrl: "https://www.gov.br/pt-br/servicos/obter-bolsa-de-estudo-do-prouni",
+    verifiedAt: "07/10/2026",
+  },
+
+  {
+    id: "aprenda-mais-mec",
+    name: "Aprenda Mais · cursos gratuitos do MEC",
+    category: "capacitacao",
+    description: "Cursos online abertos e gratuitos, desenvolvidos pela Rede Federal, com certificação conforme as regras de conclusão de cada curso.",
+    keywords: ["cursos gratuitos", "qualificacao", "capacitacao", "aprender", "curso online", "certificado", "aprenda mais", "mec"],
+    actionUrl: "https://aprendamais.mec.gov.br/",
+    actionLabel: "Consultar cursos do Aprenda Mais",
+    guidance: "Escolha o curso no catálogo oficial e confira requisitos, carga horária e critérios de aprovação. O cadastro e as aulas são realizados na plataforma do MEC e precisam de internet. O Trajeto não coleta seus dados de matrícula.",
+    sourceLabel: "Ministério da Educação",
+    sourceUrl: "https://aprendamais.mec.gov.br/mod/page/view.php?id=100&lang=pt_br",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "escola-virtual-governo",
+    name: "Escola Virtual de Governo · cursos gratuitos",
+    category: "capacitacao",
+    description: "Cursos online gratuitos da EV.G, coordenada pela Enap, para cidadãos e servidores públicos, com certificado após aprovação.",
+    keywords: ["cursos gratuitos", "qualificacao", "capacitacao", "aprender", "curso online", "certificado", "escola virtual", "enap", "evg"],
+    actionUrl: "https://www.escolavirtual.gov.br/",
+    actionLabel: "Consultar cursos da EV.G",
+    guidance: "Consulte o público, os prazos e as condições de conclusão do curso escolhido. Faça o cadastro e a inscrição diretamente na EV.G; o acesso às aulas e a emissão de certificado precisam de internet.",
+    sourceLabel: "Enap",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/inscrever-se-em-cursos-autoinstrucionais-na-escola-virtual-de-governo",
     verifiedAt: "07/10/2026",
   },
 ];
