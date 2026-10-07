@@ -27,6 +27,19 @@ test("serviço apenas digital mostra ação online no topo sem filtro", async ({
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("transporte escolar fica encontrável e sem rota presumida em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?q=transporte%20escolar", { waitUntil: "domcontentloaded" });
+
+  const card = page.locator("#service-transporte-escolar-municipal");
+  await expect(
+    card.getByRole("heading", { name: "Transporte Escolar Municipal" })
+  ).toBeVisible();
+  await expect(card.getByRole("link", { name: /Ligar para Transporte Escolar Municipal/ })).toBeVisible();
+  await expect(card.getByText("Sem destino confirmado para rota neste catálogo.")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("resumo de filtros mostra estado ativo no mobile", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos?categoria=saude&recurso=rota", { waitUntil: "domcontentloaded" });
