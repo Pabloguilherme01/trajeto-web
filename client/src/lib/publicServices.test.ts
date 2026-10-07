@@ -269,6 +269,21 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups current sport services without assuming open enrollment or inventing locations", () => {
+    expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
+      expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])
+    );
+    const secretaria = PUBLIC_SERVICES.find(item => item.id === "secretaria-esporte-lazer")!;
+    expect(secretaria.phone).toBe("(61) 99310-2157");
+    expect(secretaria.email).toBe("esporteelazer@aguaslindasdegoias.go.gov.br");
+    expect(secretaria.mapQuery).toBeUndefined();
+    const projeto = PUBLIC_SERVICES.find(item => item.id === "projeto-multiesportes")!;
+    expect(projeto.category).toBe("esporte");
+    expect(projeto.guidance).toMatch(/não implica turma ou vaga aberta hoje/i);
+    expect(projeto.address).toBeUndefined();
+    expect(projeto.mapQuery).toBeUndefined();
+  });
+
   it("groups official culture services without inventing routes for digital modules", () => {
     expect(searchPublicServices("", "cultura").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-cultura-turismo", "cadastro-agente-cultural", "editais-cultura", "mapa-cultural", "calendario-cultural"])
