@@ -3,7 +3,7 @@ export function phoneHref(phone?: string) {
   let digits = phone?.split(/[\/·]/)[0].replace(/\D/g, "") ?? "";
   if ([12, 13].includes(digits.length) && digits.startsWith("55"))
     digits = digits.slice(2);
-  return [3, 8, 10, 11].includes(digits.length) ? "tel:" + digits : null;
+  return [3, 4, 8, 10, 11].includes(digits.length) ? "tel:" + digits : null;
 }
 
 export function phoneContacts(...values: Array<string | undefined>) {

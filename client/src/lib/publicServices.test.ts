@@ -28,6 +28,8 @@ describe("public services catalog", () => {
     expect(searchPublicServices("MEI").map(item => item.id)).toEqual(
       expect.arrayContaining(["sala-empreendedor", "portal-empreendedor-mei"])
     );
+    expect(searchPublicServices("linha no cpf").map(item => item.id)).toContain("cadastro-pre-pago");
+    expect(phoneHref("1331")).toBe("tel:1331");
   });
 
   it("finds both Receita Federal and REDESIM for CNPJ without inventing a local route", () => {
@@ -85,7 +87,7 @@ describe("public services catalog", () => {
   it("keeps every call action a single number and includes official support channels", () => {
     for (const service of PUBLIC_SERVICES) {
       if (service.phone)
-        expect(phoneHref(service.phone)).toMatch(/^tel:(?:\d{3}|\d{10,11})$/);
+        expect(phoneHref(service.phone)).toMatch(/^tel:(?:\d{3,4}|\d{8}|\d{10,11})$/);
       expect(service.sourceUrl.startsWith("https://")).toBe(true);
     }
     expect(phoneHref("190 / 193")).toBe("tel:190");
