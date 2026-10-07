@@ -153,6 +153,9 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
     if (!ready || offline || !mapRef.current || !window.google?.maps?.places) return;
     const unresolved = resolvedStations.filter(station => !hasCoordinates(station));
     if (!unresolved.length) return;
+    // Resolve a bounded batch per mount so weak phones are not flooded with
+    // concurrent Places work when a large directory is opened.
+    const pending = unresolved.slice(0, 12);
     let cancelled = false;
     type PlacesNewApi = {
       Place?: {
@@ -163,7 +166,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
     const searchByText = placeApi?.searchByText;
     if (!searchByText) return;
     let cursor = 0;
-    const workers = Math.min(3, unresolved.length);
+    const workers = Math.min(2, pending.length);
     const resolveOne = async (station: StationMapItem) => {
       const query = [station.name, station.address, "Águas Lindas de Goiás", "GO"].filter(Boolean).join(", ");
       try {
@@ -194,14 +197,14 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
       }
     };
     const worker = async () => {
-      while (!cancelled) { const index = cursor++; if (index >= unresolved.length) return; await resolveOne(unresolved[index]); }
+      while (!cancelled) { const index = cursor++; if (index >= pending.length) return; await resolveOne(pending[index]); }
     };
-    setResolvingCount(unresolved.length);
+    setResolvingCount(pending.length);
     void Promise.all(Array.from({ length: workers }, () => worker())).finally(() => { if (!cancelled) setResolvingCount(0); });
     return () => { cancelled = true; };
   }, [ready, offline, resolvedStations.map(item => item.cnpj || item.id || item.name).join("|")]);
 
-  const drawableStations = resolvedStations.filter(hasCoordinates);
+  const drawableStations = useMemo(() => resolvedStations.filter(hasCoordinates), [resolvedStations]);
 
   useEffect(() => {
     if (!drawableStations.length) return;
