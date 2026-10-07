@@ -30,12 +30,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(gh api "/repos/$GH_REPO/commits/$SHA/pulls" --jq '[.[] | select(.merged_at != null and .base.ref == "main")] | length')"
-          if [ "$count" -lt 1 ]; then
-            echo "::error::Commit $SHA is on main without an associated merged pull request. Pages deployment is blocked."
-            exit 1
-          fi
-          echo "Governance gate passed: commit is associated with a merged pull request into main."
+          count=0
+          for attempt in {1..12}; do
+            count="$(gh api "/repos/$GH_REPO/commits/$SHA/pulls" --jq '[.[] | select(.merged_at != null and .base.ref == "main")] | length' || echo 0)"
+            if [ "$count" -ge 1 ]; then
+              echo "Governance gate passed: commit is associated with a merged pull request into main."
+              exit 0
+            fi
+            if [ "$attempt" -lt 12 ]; then
+              echo "Merged PR association is not visible yet (attempt $attempt/12); retrying in 5s."
+              sleep 5
+            fi
+          done
+          echo "::error::Commit $SHA is on main without an associated merged pull request after waiting for GitHub API propagation. Pages deployment is blocked."
+          exit 1
 
   quality-gate:
     if: github.ref == 'refs/heads/main'
