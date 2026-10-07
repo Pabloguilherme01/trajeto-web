@@ -27,6 +27,21 @@ test("city map: filters destinations and opens planner with ride options at 320p
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(320);
 });
+test("city map: jumps between map and results without overflow at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+
+  await page.getByRole("button", { name: "Ver resultados", exact: true }).click();
+  await expect(page.locator("#city-destinations")).toBeFocused();
+
+  await page.getByRole("button", { name: "Voltar ao mapa", exact: true }).click();
+  await expect(page.locator("#city-map-surface")).toBeFocused();
+
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth)
+  ).toBeLessThanOrEqual(320);
+});
+
 test("planner: draws provider geometry over public street tiles", async ({
   page,
 }) => {
