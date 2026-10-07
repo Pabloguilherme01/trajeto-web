@@ -142,6 +142,11 @@ const NEED_GROUPS = [
     hint: "PCD, Ciptea, Passe Livre e igualdade racial",
   },
   {
+    label: "Mulher e proteção",
+    query: "mulher",
+    hint: "Secretaria da Mulher, Ligue 180 e atendimento especializado",
+  },
+  {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
     hint: "Bloqueio oficial, BO e proteção do aparelho",
