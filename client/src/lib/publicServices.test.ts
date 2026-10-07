@@ -582,7 +582,12 @@ describe("public services catalog", () => {
     expect(searchPublicServices("sepultamento", "obitos").map(item => item.id)).toContain(
       "controle-obitos-sepultamentos"
     );
-    expect(searchPublicServices("falecimento").map(item => item.id)).toEqual(\n      expect.arrayContaining(["auxilio-funeral-municipal", "controle-obitos-sepultamentos"])\n    );
+    expect(searchPublicServices("falecimento").map(item => item.id)).toEqual(
+      expect.arrayContaining([
+        "auxilio-funeral-municipal",
+        "controle-obitos-sepultamentos",
+      ])
+    );
   });
 
   it("keeps current Conselho Tutelar contacts and child-protection searches discoverable", () => {
