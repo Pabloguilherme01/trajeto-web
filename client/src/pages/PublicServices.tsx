@@ -94,6 +94,7 @@ const categoryIcons = {
   "agua-energia": Zap,
   telecom: Phone,
   previdencia: ReceiptText,
+  documentos: BadgeCheck,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -211,6 +212,11 @@ const NEED_GROUPS = [
     label: "INSS e benefícios",
     query: "beneficio",
     hint: "Meu INSS, BPC, incapacidade e salário-maternidade",
+  },
+  {
+    label: "Documentos e certidões",
+    query: "documento certidao",
+    hint: "CIN, título eleitoral, CTPS e antecedentes",
   },
   {
     label: "Celular roubado ou perdido",
