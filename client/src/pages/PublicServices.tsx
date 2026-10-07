@@ -1424,6 +1424,10 @@ export default function PublicServices() {
               (expandedActions ||
                 resource === "online" ||
                 (!primaryContact && !service.mapQuery));
+            const officialActionIsPrimary =
+              showOfficialAction &&
+              Boolean(service.actionUrl) &&
+              (resource === "online" || (!primaryContact && !service.mapQuery));
             const showEmail = Boolean(service.email) && expandedActions;
             const hasMoreOptions =
               !expandedActions &&
@@ -1478,7 +1482,7 @@ export default function PublicServices() {
                   </button>
                 </div>
                 <div role="group" aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
-                  {showOfficialAction && service.actionUrl && resource === "online" && (
+                  {officialActionIsPrimary && service.actionUrl && (
                     <a
                       href={service.actionUrl}
                       target="_blank"
@@ -1690,7 +1694,7 @@ export default function PublicServices() {
                     ))}
                   </div>
                 )}
-                {showOfficialAction && service.actionUrl && resource !== "online" && (
+                {showOfficialAction && service.actionUrl && !officialActionIsPrimary && (
                   <a
                     href={service.actionUrl}
                     target="_blank"
