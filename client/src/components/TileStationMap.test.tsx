@@ -414,6 +414,26 @@ it("does not abandon a large map after only five tile failures", () => {
   expect(screen.getByRole("region", { name: "Mapa dos postos" })).toBeTruthy();
 });
 
+it("remounts street tiles when retrying after visible tile failures", () => {
+  render(
+    <TileStationMap
+      stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]}
+      fallback={<p>Mapa local</p>}
+    />
+  );
+  const firstTiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
+  expect(firstTiles.length).toBeGreaterThanOrEqual(5);
+  firstTiles.forEach(tile => fireEvent.error(tile));
+  expect(screen.getByText("Mapa local")).toBeTruthy();
+
+  fireEvent.click(screen.getByRole("button", { name: "Tentar carregar mapa de ruas" }));
+
+  const retriedTiles = Array.from(document.querySelectorAll("[data-map-tile-layer] img"));
+  expect(screen.queryByText("Mapa local")).toBeNull();
+  expect(retriedTiles.length).toBeGreaterThanOrEqual(5);
+  expect(retriedTiles[0]).not.toBe(firstTiles[0]);
+});
+
 it("returns from offline fallback when connectivity is restored", () => {
   const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   render(<TileStationMap stations={[{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }]} fallback={<p>Mapa local</p>} />);
