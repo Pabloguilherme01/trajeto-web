@@ -6,8 +6,6 @@ import MobileNavigationCenter from "./MobileNavigationCenter";
 afterEach(cleanup);
 
 describe("MobileNavigationCenter", () => {
-  afterEach(() => cleanup());
-
   it("offers Organic Maps when the integration callback is available", () => {
     const organic = vi.fn();
     render(
