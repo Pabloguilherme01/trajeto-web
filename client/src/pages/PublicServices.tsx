@@ -77,6 +77,7 @@ const categoryIcons = {
   consumidor: ShoppingBag,
   tributos: ReceiptText,
   inclusao: Accessibility,
+  mulher: Heart,
 } as const;
 
 const SERVICE_SUMMARY = {

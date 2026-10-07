@@ -263,4 +263,10 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups women protection services in a dedicated utility category", () => {
+    expect(searchPublicServices("mulher", "mulher").map(item => item.id)).toEqual(expect.arrayContaining(["secretaria-mulher", "ligue-180", "deam-depai-dpca"]));
+    for (const id of ["secretaria-mulher", "ligue-180", "deam-depai-dpca"])
+      expect(PUBLIC_SERVICES.find(item => item.id === id)?.category).toBe("mulher");
+  });
+
 });
