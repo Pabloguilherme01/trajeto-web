@@ -88,6 +88,7 @@ const categoryIcons = {
   animais: PawPrint,
   idoso: UsersRound,
   empreendedor: Store,
+  licenciamento: ReceiptText,
   cultura: Sparkles,
   esporte: Trophy,
   juventude: BadgeCheck,
@@ -188,6 +189,16 @@ const NEED_GROUPS = [
     label: "Empreender e abrir empresa",
     query: "mei",
     hint: "Sala do Empreendedor, MEI, CNPJ e desenvolvimento econômico",
+  },
+  {
+    label: "Licenças e alvarás",
+    query: "alvara funcionamento",
+    hint: "Funcionamento, construção, loteamento e licença sanitária",
+  },
+  {
+    label: "Construir ou reformar",
+    query: "alvara construcao",
+    hint: "Alvará de obra, ampliação, demolição e loteamento",
   },
   {
     label: "Cultura e eventos",
