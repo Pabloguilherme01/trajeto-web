@@ -51,15 +51,25 @@ test("descoberta inicial fica compacta sem esconder assuntos em 320 px", async (
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
 
-  const allTopics = page.getByText(/Ver todos os assuntos/);
+  const topicsDisclosure = page.locator("details").filter({
+    has: page.getByText(/Ver todos os assuntos/),
+  });
+  const allTopics = topicsDisclosure.getByText(/Ver todos os assuntos/);
+  const transparencyCategory = topicsDisclosure.getByRole("button", {
+    name: /Transparência e participação/,
+  });
   await expect(allTopics).toBeVisible();
-  await expect(page.getByRole("button", { name: /Transparência e participação/ })).not.toBeVisible();
+  await expect(transparencyCategory).not.toBeVisible();
   await allTopics.click();
-  await expect(page.getByRole("button", { name: /Transparência e participação/ })).toBeVisible();
+  await expect(transparencyCategory).toBeVisible();
 
-  const allNeeds = page.getByText(/Ver todas as situações/);
-  await allNeeds.click();
-  await expect(page.getByRole("button", { name: /Juventude e primeiro emprego/ })).toBeVisible();
+  const needsDisclosure = page.locator("details").filter({
+    has: page.getByText(/Ver todas as situações/),
+  });
+  await needsDisclosure.getByText(/Ver todas as situações/).click();
+  await expect(
+    needsDisclosure.getByRole("button", { name: /Juventude e primeiro emprego/ })
+  ).toBeVisible();
 
   const moreShortcuts = page.getByText(/Mais atalhos úteis/);
   await expect(moreShortcuts).toBeVisible();
