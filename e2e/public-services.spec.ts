@@ -69,6 +69,24 @@ test("filtro Offline mostra apenas rotas resolvidas localmente em 320 px", async
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("ações principais ficam acessíveis e sem overflow em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+
+  const actions = page.getByRole("navigation", { name: "Ações principais da Central" });
+  await expect(actions.getByRole("button", { name: "Buscar serviço" })).toBeVisible();
+  await expect(actions.getByRole("button", { name: "Mapa da cidade" })).toBeVisible();
+  await expect(actions.getByRole("button", { name: "Rotas prontas" })).toBeVisible();
+  await expect(actions.getByRole("button", { name: "Usar offline" })).toBeVisible();
+
+  await actions.getByRole("button", { name: "Buscar serviço" }).click();
+  await expect(page.getByRole("textbox", { name: "Buscar serviços públicos" })).toBeFocused();
+
+  await actions.getByRole("button", { name: "Usar offline" }).click();
+  await expect(page.getByRole("button", { name: /Mostrar somente destinos offline/ })).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("resumo da Central abre filtros e rotas offline em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });

@@ -814,6 +814,44 @@ export default function PublicServices() {
           </div>
         </header>
 
+        <nav
+          aria-label="Ações principais da Central"
+          className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4"
+        >
+          <button
+            type="button"
+            onClick={() => inputRef.current?.focus()}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <Search className="size-4 shrink-0 text-primary" />
+            <span className="min-w-0">Buscar serviço</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocation(appUrl("/mapa"))}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <MapPinned className="size-4 shrink-0 text-primary" />
+            <span className="min-w-0">Mapa da cidade</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => openReadyRoutesFromSummary(false)}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <Route className="size-4 shrink-0 text-primary" />
+            <span className="min-w-0">Rotas prontas</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => openReadyRoutesFromSummary(true)}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-accent/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <WifiOff className="size-4 shrink-0 text-accent" />
+            <span className="min-w-0">Usar offline</span>
+          </button>
+        </nav>
+
         <form
           onSubmit={event => {
             event.preventDefault();
