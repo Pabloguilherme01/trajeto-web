@@ -2482,6 +2482,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Meu INSS, BPC, incapacidade e salário-maternidade",
   },
   {
+    label: "Documentos e certidões",
+    query: "documento certidao",
+    hint: "CIN, título eleitoral, CTPS e antecedentes",
+  },
+  {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
     hint: "Bloqueio oficial pelo gov.br",
