@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+test("filtro online expõe a ação digital principal no card", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?q=detran&recurso=online", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /Detran-GO · CNH, veículo e licenciamento/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Abrir serviços digitais do Detran · online/i })).toBeVisible();
+});
+
 test("resumo de filtros mostra estado ativo no mobile", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos?categoria=saude&recurso=rota", { waitUntil: "domcontentloaded" });
