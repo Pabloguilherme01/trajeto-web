@@ -31,6 +31,7 @@ import {
   Siren,
   TrafficCone,
   Store,
+  Trophy,
   WifiOff,
   Navigation,
   PawPrint,
@@ -85,6 +86,7 @@ const categoryIcons = {
   idoso: UsersRound,
   empreendedor: Store,
   cultura: Sparkles,
+  esporte: Trophy,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -172,6 +174,11 @@ const NEED_GROUPS = [
     label: "Cultura e eventos",
     query: "cultura",
     hint: "Agentes, editais, mapa, calendário e atendimento cultural",
+  },
+  {
+    label: "Esporte e lazer",
+    query: "esporte",
+    hint: "Projetos, modalidades e atendimento da Secretaria",
   },
   {
     label: "Celular roubado ou perdido",
