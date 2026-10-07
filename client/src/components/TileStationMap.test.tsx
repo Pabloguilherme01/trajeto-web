@@ -19,7 +19,9 @@ it("offers the official Organic Maps install link beside navigation", () => {
   );
   const install = screen.getByRole("link", { name: /Instalar ou atualizar Organic Maps/i });
   expect(install.getAttribute("href")).toBe("https://get.omaps.org/");
-  expect(screen.getByRole("button", { name: /Abrir Posto A no Organic Maps/i })).toBeTruthy();
+  const organic = screen.getByRole("button", { name: /Abrir Posto A no Organic Maps/i });
+  expect(organic).toBeTruthy();
+  expect(organic.textContent).toContain("Organic Maps");
 });
 
 it("keeps the selected marker above coincident catalogue points", () => {
@@ -86,9 +88,10 @@ it("keeps route endpoints in a single scrollable rail on narrow maps", () => {
     />
   );
   const rail = screen.getByRole("group", { name: "Pontos do percurso" });
-  const origin = screen.getByRole("button", { name: "Ver origem" });
-  const destination = screen.getByRole("button", { name: "Ver destino" });
+  const origin = screen.getByRole("button", { name: "Ver origem: Origem" });
+  const destination = screen.getByRole("button", { name: "Ver destino: Destino" });
   expect(rail.className).toContain("overflow-x-auto");
+  expect(rail.className).toContain("snap-mandatory");
   expect(origin.className).toContain("shrink-0");
   expect(origin.className).toContain("bg-card/95");
   expect(origin.className).toContain("text-card-foreground");
