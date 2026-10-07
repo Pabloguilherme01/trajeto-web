@@ -30,6 +30,7 @@ import {
   ShieldAlert,
   Siren,
   TrafficCone,
+  Store,
   WifiOff,
   Navigation,
   PawPrint,
@@ -82,6 +83,7 @@ const categoryIcons = {
   mulher: Heart,
   animais: PawPrint,
   idoso: UsersRound,
+  empreendedor: Store,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -159,6 +161,11 @@ const NEED_GROUPS = [
     label: "Pessoa idosa",
     query: "idoso",
     hint: "CMDI, CCI, carteira da pessoa idosa e direitos",
+  },
+  {
+    label: "Empreender e abrir empresa",
+    query: "mei",
+    hint: "Sala do Empreendedor, MEI, CNPJ e desenvolvimento econômico",
   },
   {
     label: "Celular roubado ou perdido",
