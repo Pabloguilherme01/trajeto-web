@@ -75,6 +75,7 @@ const categoryIcons = {
   obitos: Heart,
   transito: TrafficCone,
   educacao: BookOpen,
+  "ensino-superior": BookOpen,
   cidadania: Landmark,
   trabalho: BriefcaseBusiness,
   moradia: Building2,
@@ -146,6 +147,11 @@ const NEED_GROUPS = [
     label: "Educação e creche",
     query: "creche",
     hint: "Creches, vagas, matrículas e escolas",
+  },
+  {
+    label: "Faculdade e bolsas de estudo",
+    query: "ensino superior",
+    hint: "Sisu, vagas públicas e bolsas do Prouni no canal do MEC",
   },
   {
     label: "Transporte escolar",
@@ -500,6 +506,7 @@ export default function PublicServices() {
   const [resource, setResource] = useState<
     "todos" | "contato" | "rota" | "online"
   >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
+  const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
   const [readyRouteQuery, setReadyRouteQuery] = useState("");
   const [readyRouteOfflineOnly, setReadyRouteOfflineOnly] = useState(false);
@@ -711,6 +718,23 @@ export default function PublicServices() {
     });
   };
 
+  useEffect(() => {
+    if (!pendingSection || !browsing) return;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(pendingSection);
+      if (!target) return;
+      target.scrollIntoView({
+        behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+      target.focus({ preventScroll: true });
+      setPendingSection(null);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pendingSection, browsing]);
+
   const showAllServicesFromSummary = () => {
     setQuery("");
     setCategory("todos");
@@ -726,7 +750,13 @@ export default function PublicServices() {
 
   const openReadyRoutesFromSummary = (offlineOnly = false) => {
     setReadyRouteOfflineOnly(offlineOnly);
-    scrollToSection("ready-routes");
+    setReadyRouteGroup("todos");
+    setReadyRouteQuery("");
+    setQuery("");
+    setCategory("todos");
+    setResource("todos");
+    setPendingSection("ready-routes");
+    applyFilters("", "todos", false, false, "todos");
   };
 
   const openMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
@@ -1185,33 +1215,6 @@ export default function PublicServices() {
             </section>
 
             <section
-              aria-label="Resumo da Central de Serviços"
-              className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4"
-            >
-              {[
-                ["Serviços", `${PUBLIC_SERVICES.length} no catálogo`],
-                [
-                  "Categorias",
-                  `${PUBLIC_SERVICE_CATEGORIES.length - 1} assuntos`,
-                ],
-                ["Rotas prontas", `${READY_SERVICE_ROUTES.length} destinos`],
-                ["Offline", "catálogo e rotas salvas"],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="min-w-0 overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-card to-primary/[.035] px-3.5 py-3 shadow-sm"
-                >
-                  <p className="text-[0.65rem] font-black uppercase tracking-[.12em] text-muted-foreground">
-                    {label}
-                  </p>
-                  <p className="mt-1 break-words text-sm font-black text-foreground">
-                    {value}
-                  </p>
-                </div>
-              ))}
-            </section>
-
-            <section
               id="emergency-strip"
               tabIndex={-1}
               className="premium-card mt-4 scroll-mt-20 rounded-[1.45rem] border border-warning/25 bg-card p-4 outline-none"
@@ -1260,7 +1263,7 @@ export default function PublicServices() {
           category === "todos" &&
           resource === "todos" && (
             <section className="mt-5" aria-labelledby="citizen-shortcuts-title">
-              <h2 className="text-lg font-bold">Resolva por assunto</h2>
+              <h2 id="citizen-shortcuts-title" className="text-lg font-bold">Resolva por assunto</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                 {PUBLIC_SERVICE_CATEGORIES.filter(
                   item => item.id !== "todos"
@@ -1552,7 +1555,7 @@ export default function PublicServices() {
                   ))}
                 </div>
               </section>
-              <section id="ready-routes" className="mt-6 scroll-mt-4" aria-labelledby="ready-routes-title">
+              <section id="ready-routes" tabIndex={-1} className="mt-6 scroll-mt-4 outline-none" aria-labelledby="ready-routes-title">
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[.14em] text-primary">

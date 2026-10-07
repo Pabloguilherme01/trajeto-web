@@ -7,6 +7,7 @@ export type PublicServiceCategory =
   | "obitos"
   | "transito"
   | "educacao"
+  | "ensino-superior"
   | "cidadania"
   | "trabalho"
   | "moradia"
@@ -53,6 +54,7 @@ export type PublicService = {
     | "Prefeitura de Águas Lindas"
     | "Polícia Civil de Goiás"
     | "SEDUC Goiás"
+    | "Ministério da Educação"
     | "SES-GO"
     | "SEAD Goiás"
     | "Ministério das Mulheres"
@@ -95,6 +97,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "obitos", label: "Óbitos e sepultamento", shortLabel: "Óbitos" },
   { id: "transito", label: "Trânsito", shortLabel: "Trânsito" },
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
+  { id: "ensino-superior", label: "Faculdade e bolsas", shortLabel: "Faculdade" },
   { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
   { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
   { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
@@ -2801,6 +2804,33 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl:
       "https://www.gov.br/pt-br/servicos/alistar-se-no-servico-militar-obrigatorio",
     verifiedAt: "06/10/2026",
+  },
+
+  {
+    id: "sisu",
+    name: "Sisu · vagas em universidades públicas",
+    category: "ensino-superior",
+    description: "Consulta de vagas, inscrição e acompanhamento da seleção para instituições públicas de ensino superior pelo MEC.",
+    keywords: ["sisu", "enem", "faculdade", "universidade publica", "ensino superior", "vestibular", "lista de espera"],
+    actionUrl: "https://sisualuno.mec.gov.br/",
+    actionLabel: "Acessar Sisu",
+    guidance: "Confira o edital e o calendário atual no canal oficial. O acesso utiliza a conta gov.br; requisitos, edições aceitas do Enem e etapas dependem do processo seletivo. A inscrição e o acompanhamento precisam de internet.",
+    sourceLabel: "Ministério da Educação",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/inscrever-se-no-sisu-sistema-de-selecao-unificada",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "prouni",
+    name: "Prouni · bolsas em faculdades particulares",
+    category: "ensino-superior",
+    description: "Canal do MEC para consultar e concorrer a bolsas de estudo integrais ou parciais em instituições privadas de ensino superior.",
+    keywords: ["prouni", "enem", "faculdade", "bolsa de estudo", "universidade", "ensino superior", "lista de espera"],
+    actionUrl: "https://prounialuno.mec.gov.br/",
+    actionLabel: "Acessar Prouni",
+    guidance: "Consulte o edital atual para confirmar prazos, critérios e documentos exigidos pela instituição. A conta gov.br é usada no canal oficial. Não envie documentos pelo Trajeto; a inscrição e a consulta de resultados precisam de internet.",
+    sourceLabel: "Ministério da Educação",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/obter-bolsa-de-estudo-do-prouni",
+    verifiedAt: "07/10/2026",
   },
 ];
 
