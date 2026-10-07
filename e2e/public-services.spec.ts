@@ -56,6 +56,19 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("filtro Offline mostra apenas rotas resolvidas localmente em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+  const routes = page.locator('section[aria-labelledby="ready-routes-title"]');
+  const offline = routes.getByRole("button", { name: /Mostrar somente destinos offline/ });
+  await offline.click();
+  await expect(offline).toHaveAttribute("aria-pressed", "true");
+  await expect(routes.locator('[data-route-readiness="online"]')).toHaveCount(0);
+  await routes.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("UPA");
+  await expect(routes.locator('[data-route-readiness="offline"]').first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("descoberta inicial fica compacta sem esconder assuntos em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
