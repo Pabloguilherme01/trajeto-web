@@ -516,11 +516,11 @@ it("identifica os pontos A/B e centraliza o destino sem alterar a rota", () => {
   const framedOrigin = screen.getByRole("button", { name: "Abrir Origem" }).style.left;
   expect(screen.getByRole("button", { name: "Abrir Origem" }).textContent).toBe("A");
   expect(screen.getByRole("button", { name: "Abrir Destino" }).textContent).toBe("B");
-  fireEvent.click(screen.getByRole("button", { name: "Ver destino" }));
+  fireEvent.click(screen.getByRole("button", { name: "Ver destino: Destino" }));
   expect(screen.getByRole("button", { name: "Abrir Destino" }).style.left).toBe("160px");
   expect(screen.getByRole("button", { name: "Abrir Destino" }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByRole("img", { name: "Trajeto pelas ruas" })).toBeTruthy();
-  fireEvent.click(screen.getByRole("button", { name: "Ver origem" }));
+  fireEvent.click(screen.getByRole("button", { name: "Ver origem: Origem" }));
   expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe("160px");
   fireEvent.click(screen.getByRole("button", { name: "Recentrar mapa" }));
   expect(screen.getByRole("button", { name: "Abrir Origem" }).style.left).toBe(framedOrigin);
