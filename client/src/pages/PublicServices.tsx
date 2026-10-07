@@ -231,6 +231,11 @@ const NEED_GROUPS = [
     hint: "SIC, Ouvidoria, gastos públicos, processos e leis",
   },
   {
+    label: "Acompanhar processo da Prefeitura",
+    query: "acompanhar processo",
+    hint: "Portal SEI, autenticação de documentos e usuário externo",
+  },
+  {
     label: "Água e energia",
     query: "agua energia",
     hint: "Saneago, Equatorial, Tarifa Social e ANEEL",
