@@ -8,6 +8,23 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   Element.prototype.scrollIntoView = vi.fn();
 });
+it("recovers a search hidden by category without losing the term", async () => {
+  window.history.replaceState({}, "", "/servicos?q=anatel&categoria=saude");
+  render(<PublicServices />);
+  fireEvent.click(screen.getByRole("button", { name: "Buscar este termo em todo o catálogo" }));
+  await waitFor(() => expect(window.location.search).toBe("?q=anatel"));
+  expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0);
+});
+
+it("restores ready routes after an empty search", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  const input = screen.getByRole("searchbox", { name: "Buscar rota pronta" });
+  fireEvent.change(input, { target: { value: "zzzzzzzzzz" } });
+  fireEvent.click(screen.getByRole("button", { name: "Ver todas as rotas prontas" }));
+  expect((input as HTMLInputElement).value).toBe("");
+  expect(screen.getAllByRole("button", { name: /Planejar rota para/ }).length).toBeGreaterThan(0);
+}, 15000);
 it("keeps the current resource filter when Escape clears the search", async () => {
   window.history.replaceState({}, "", "/servicos?q=anatel");
   render(<PublicServices />);

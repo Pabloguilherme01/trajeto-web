@@ -1742,6 +1742,17 @@ export default function PublicServices() {
                   {visibleReadyRoutes.length === 0 && (
                     <div className="w-[min(86vw,19rem)] shrink-0 rounded-2xl border border-dashed border-border/30 bg-muted/[.025] p-4 text-sm text-muted-foreground sm:col-span-2 sm:w-auto lg:col-span-5">
                       Nenhuma rota pronta corresponde a esta busca neste grupo.
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReadyRouteQuery("");
+                          setReadyRouteGroup("todos");
+                          setReadyRouteOfflineOnly(false);
+                        }}
+                        className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-primary/20 bg-background px-3 text-sm font-bold text-primary"
+                      >
+                        Ver todas as rotas prontas
+                      </button>
                     </div>
                   )}
                 </div>
@@ -2259,6 +2270,19 @@ export default function PublicServices() {
                 ? "Veja o catálogo e toque no coração dos serviços que você mais usa."
                 : "Experimente outro termo ou veja todas as categorias."}
             </p>
+            {query.trim() && (category !== "todos" || resource !== "todos" || savedOnly) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCategory("todos");
+                  setResource("todos");
+                  applyFilters(query, "todos", false, false, "todos");
+                }}
+                className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-primary/20 bg-background px-3 text-sm font-bold text-primary"
+              >
+                Buscar este termo em todo o catálogo
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
