@@ -36,7 +36,7 @@ describe("PublicServices deep links", () => {
       source.indexOf('aria-label="Recursos deste serviço"')
     );
     expect(source.indexOf('aria-label="Ações principais do serviço"')).toBeLessThan(
-      source.indexOf("Antes de sair")
+      source.indexOf("servicePreparationHint(service)")
     );
   });
 
