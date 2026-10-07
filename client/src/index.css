@@ -671,3 +671,31 @@ html.a11y-compact .app-dock {
     transform: none;
   }
 }
+
+
+/* Mobile performance: avoid expensive compositing on long public-service screens. */
+@media (max-width: 767px), (hover: none) and (pointer: coarse) {
+  .visual-shell .premium-search,
+  .app-dock {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .visual-shell .premium-search {
+    background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
+    box-shadow: 0 4px 14px rgba(0,0,0,.12);
+  }
+
+  .app-dock {
+    background: color-mix(in srgb, var(--background) 97%, var(--card) 3%);
+    box-shadow: 0 -4px 18px rgba(0,0,0,.22);
+  }
+
+  .visual-shell .service-directory-card {
+    box-shadow: 0 4px 14px rgba(0,0,0,.12);
+  }
+
+  .visual-shell .premium-card::before {
+    display: none;
+  }
+}
