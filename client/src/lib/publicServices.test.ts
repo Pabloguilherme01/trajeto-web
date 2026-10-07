@@ -434,6 +434,28 @@ describe("public services catalog", () => {
     );
   });
 
+  it("keeps the 2026 municipal health-surveillance structure discoverable without inventing contact or route", () => {
+    const service = PUBLIC_SERVICES.find(
+      item => item.id === "vigilancia-saude-municipal"
+    )!;
+    expect(service).toBeDefined();
+    expect(service.category).toBe("saude");
+    expect(service.verifiedAt).toBe("07/10/2026");
+    expect(service.sourceUrl).toContain("/leis/1606");
+    expect(service.address).toBeUndefined();
+    expect(service.mapQuery).toBeUndefined();
+    for (const query of [
+      "vigilancia sanitaria",
+      "vigilancia epidemiologica",
+      "saude do trabalhador",
+      "surto",
+      "risco sanitario",
+    ])
+      expect(searchPublicServices(query).map(item => item.id)).toContain(
+        "vigilancia-saude-municipal"
+      );
+  });
+
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
     expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])
