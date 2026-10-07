@@ -49,6 +49,11 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await routes.getByRole("button", { name: "Limpar busca de rotas" }).click();
   await expect(search).toHaveValue("");
+
+  await search.fill("UPA");
+  const upaCard = routes.locator("article").filter({ hasText: "UPA" }).first();
+  await expect(upaCard.locator('[data-route-readiness="offline"]')).toHaveText(/Destino offline/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
 test("descoberta inicial fica compacta sem esconder assuntos em 320 px", async ({ page }) => {
