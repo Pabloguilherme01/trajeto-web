@@ -1204,59 +1204,35 @@ export default function PublicServices() {
                   <Navigation className="size-4" /> Abrir mapa e destinos
                 </button>
               </div>
-              <h2
-                id="citizen-shortcuts-title"
-                className="mt-5 text-lg font-bold"
-              >
-                Atalhos do dia a dia
-              </h2>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-                {PUBLIC_SERVICE_SHORTCUTS.slice(0, 4).map(shortcut => (
-                  <button
-                    key={shortcut.query}
-                    type="button"
-                    onClick={() => {
-                      setQuery(shortcut.query);
-                      applyFilters(shortcut.query, "todos");
-                    }}
-                    className="premium-card min-h-24 min-w-0 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary"
-                  >
-                    <span className="block text-sm font-bold text-foreground">
-                      {shortcut.label}
-                    </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-foreground/70">
-                      {shortcut.hint}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <details className="mobile-disclosure mt-2">
-                <summary className="min-h-11">
-                  Mais atalhos ({PUBLIC_SERVICE_SHORTCUTS.length - 4})
-                  <ChevronRight className="size-4" />
-                </summary>
-                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-                  {PUBLIC_SERVICE_SHORTCUTS.slice(4).map(shortcut => (
-                    <button
-                      key={shortcut.query}
-                      type="button"
-                      onClick={() => {
-                        setQuery(shortcut.query);
-                        applyFilters(shortcut.query, "todos");
-                      }}
-                      className="premium-card min-h-24 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
-                    >
-                      <span className="block text-sm font-bold">
-                        {shortcut.label}
-                      </span>
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {shortcut.hint}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </details>
-            </section>
+              {PUBLIC_SERVICE_SHORTCUTS.length > 7 && (
+                <details className="mobile-disclosure mt-5">
+                  <summary id="citizen-shortcuts-title" className="min-h-11">
+                    Mais atalhos úteis ({PUBLIC_SERVICE_SHORTCUTS.length - 7})
+                    <ChevronRight className="size-4" />
+                  </summary>
+                  <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+                    {PUBLIC_SERVICE_SHORTCUTS.slice(7).map(shortcut => (
+                      <button
+                        key={shortcut.query}
+                        type="button"
+                        onClick={() => {
+                          setQuery(shortcut.query);
+                          applyFilters(shortcut.query, "todos");
+                        }}
+                        className="premium-card min-h-20 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
+                      >
+                        <span className="block text-sm font-bold">
+                          {shortcut.label}
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {shortcut.hint}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              )}
+                          </section>
           )}
         {!selectedService &&
           !savedOnly &&
