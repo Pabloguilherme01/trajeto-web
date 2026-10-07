@@ -75,7 +75,6 @@ describe("PublicServices deep links", () => {
 
   it("shows dynamic counts in the ready-route filters", () => {
     expect(source).toContain("Todas as rotas prontas · ${READY_SERVICE_ROUTES.length} destinos");
-    expect(source).toContain("const groupCount = READY_SERVICE_ROUTES.filter");
     expect(source).toContain("Filtrar rotas: ${group.label} · ${groupCount} destinos");
   });
 

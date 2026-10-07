@@ -20,6 +20,7 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
+import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -62,7 +63,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
-  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(48);
+  const [directoryVisibleCount, setDirectoryVisibleCount] = useState(24);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
   const [addressOnly, setAddressOnly] = useState(false);
@@ -128,13 +129,16 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       a.displayName.localeCompare(b.displayName, "pt-BR")
     );
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
-  const localBrands = useMemo(() => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.brand ?? "Sem bandeira"))).sort((a,b) => a.localeCompare(b, "pt-BR")), []);
+  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
+  const localBrands = useMemo(
+    () => Array.from(new Set(aguasLindasCatalog.map(station => station.brand ?? "Sem bandeira"))).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [aguasLindasCatalog]
+  );
   const localNeighborhoods = useMemo(
-    () => Array.from(new Set(searchAguasLindasStations("postos").map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    []
+    () => Array.from(new Set(aguasLindasCatalog.map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [aguasLindasCatalog]
   );
 
-  const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   const anpByCnpj = useMemo(() => new Map(anpStations.map(station => [normalizeStationCnpj(station.cnpj), station])), [anpStations]);
   const directoryCards = useMemo(() => {
     const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => {
@@ -348,8 +352,26 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
   const anpWithCoordinates = anpStations.filter(station => Boolean(stationCoordinatePoint(station.latitude, station.longitude))).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
-  const mapOfficialCount = mapStations.filter(station => station.source === "ANP").length;
-  const mapSecondaryCount = mapStations.filter(station => station.source !== "ANP").length;
+  const mapPositionedCount = useMemo(
+    () => mapStations.reduce((count, station) => count + Number(Boolean(stationCoordinatePoint(station.lat, station.lng))), 0),
+    [mapStations]
+  );
+  const mapOfficialCount = useMemo(
+    () => mapStations.reduce((count, station) => count + Number(station.source === "ANP"), 0),
+    [mapStations]
+  );
+  const mapSecondaryCount = mapStations.length - mapOfficialCount;
+  const directoryStats = useMemo(
+    () => directoryCards.reduce(
+      (stats, item) => {
+        if (item.anp) stats.crossed += 1;
+        if (stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude)) stats.routable += 1;
+        return stats;
+      },
+      { crossed: 0, routable: 0 }
+    ),
+    [directoryCards]
+  );
   const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt);
   const cachedSnapshot = getCachedStations(query);
   const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
@@ -489,11 +511,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   useEffect(() => {
     setLocalVisibleCount(12);
-    setDirectoryVisibleCount(48);
+    setDirectoryVisibleCount(24);
   }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
   useEffect(() => {
-    setDirectoryVisibleCount(48);
+    setDirectoryVisibleCount(24);
   }, [directorySearch, directorySort, fuelFilter]);
 
   useEffect(() => {
@@ -547,7 +569,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       position => {
         setLocating(false);
         rememberIntent("nearby");
-        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const coords = coarsenCoordinatePoint(
+          { lat: position.coords.latitude, lng: position.coords.longitude },
+          3,
+        );
         setUserCoords(coords);
         setDirectorySort("distance");
         setShowMap(true);
@@ -567,7 +592,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         setLocating(false);
         toast.error("Não foi possível obter sua localização.");
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 },
     );
   };
 
@@ -858,9 +883,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <span className="rounded-full border border-border/10 bg-muted/[.03] px-2.5 py-1 text-xs font-black text-muted-foreground">{mapStations.length} referências</span>
               </div>
             </div>
-            <p className="px-4 py-2 text-xs text-muted-foreground">{mapStations.filter(station => stationCoordinatePoint(station.lat, station.lng)).length} posicionados · {mapStations.filter(station => !stationCoordinatePoint(station.lat, station.lng)).length} sem coordenada</p>
+            <p className="px-4 py-2 text-xs text-muted-foreground">{mapPositionedCount} posicionados · {mapStations.length - mapPositionedCount} sem coordenada</p>
             <div className="relative">
-              <StationMap stations={mapStations} showTraffic={online} userCoords={userCoords} />
+              <StationMap stations={mapStations} showTraffic={online} />
             </div>
             <div className="grid grid-cols-2 gap-2 border-t border-border/10 p-3">
               <button type="button" onClick={useNearby} disabled={locating} className="min-h-11 rounded-xl bg-primary text-xs font-black text-background">Mais perto</button>
@@ -872,15 +897,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 {!showSavedOnly && !mapFirst && showMap && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-border/10 bg-background" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="relative">
-                      <StationMap
-                        stations={mapStations}
-                        showTraffic={online}
-                        userCoords={userCoords}
-                       
-                      />
+                      <StationMap stations={mapStations} showTraffic={online} />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/10 px-3 py-2.5 text-xs text-muted-foreground">
-                      <span>{mapStations.filter(station => stationCoordinatePoint(station.lat, station.lng)).length} posicionados · {mapStations.filter(station => !stationCoordinatePoint(station.lat, station.lng)).length} sem coordenada · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
+                      <span>{mapPositionedCount} posicionados · {mapStations.length - mapPositionedCount} sem coordenada · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
                       <span>{online ? "online · tráfego quando disponível" : "offline · coordenadas salvas no aparelho"}</span>
                       <span>{anpWithoutCoordinates > 0 ? String(anpWithoutCoordinates) + " cadastro(s) ANP sem coordenada · ficha continua disponível" : "cobertura coordenada ANP completa nesta consulta"}</span>
                     </div>
@@ -929,8 +949,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-xl border border-border/10 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Base local</p><p className="mt-1 text-lg font-black">{aguasLindasCatalog.length}</p></div>
-              <div className="rounded-xl border border-border/10 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Cruzados ANP</p><p className="mt-1 text-lg font-black text-accent">{directoryCards.filter(item => Boolean(item.anp)).length}</p></div>
-              <div className="rounded-xl border border-border/10 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-primary">{directoryCards.filter(item => Boolean(stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude))).length}</p></div>
+              <div className="rounded-xl border border-border/10 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Cruzados ANP</p><p className="mt-1 text-lg font-black text-accent">{directoryStats.crossed}</p></div>
+              <div className="rounded-xl border border-border/10 bg-background p-3"><p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Com rota por coordenada</p><p className="mt-1 text-lg font-black text-primary">{directoryStats.routable}</p></div>
               <div className="rounded-xl border border-accent/20 bg-accent/[.04] p-3 text-left"><p className="text-xs font-black uppercase tracking-[.1em] text-accent">Offline</p><p className="mt-1 text-sm font-black text-accent">{online ? "cache ativo" : "modo offline"}</p></div>
             </div>
 
@@ -1035,10 +1055,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             {directoryVisibleCount >= directoryCardsFiltered.length && directoryCardsFiltered.length > 16 && (
               <button
                 type="button"
-                onClick={() => setDirectoryVisibleCount(48)}
+                onClick={() => setDirectoryVisibleCount(24)}
                 className="mt-2 min-h-11 w-full text-sm font-bold text-muted-foreground"
               >
-                Mostrar apenas os primeiros 48
+                Mostrar apenas os primeiros 24
               </button>
             )}
 
@@ -1175,7 +1195,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">A ANP não respondeu nesta sessão. As coordenadas de consultas anteriores continuam disponíveis sem conexão. A navegação em aplicativos externos pode exigir internet.</p>
                 </div>
                 <div className="relative">
-                  <StationMap stations={mapStations} showTraffic={false} userCoords={userCoords} />
+                  <StationMap stations={mapStations} showTraffic={false} />
                 </div>
                 <div className="border-t border-border/10 px-3 py-2.5 text-xs text-muted-foreground">{mapStations.length} referências armazenadas · {offlineMapAge}.</div>
               </section>
@@ -1236,7 +1256,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             {showMap && (showSavedOnly || !broadAguasLindasQuery) && visibleStations.length > 0 && (
               <section className="mt-3 overflow-hidden rounded-3xl border border-border/10 bg-card">
-                <div className="relative"><StationMap stations={visibleStations} userCoords={userCoords} /></div>
+                <div className="relative"><StationMap stations={visibleStations} /></div>
               </section>
             )}
 

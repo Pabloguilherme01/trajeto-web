@@ -115,6 +115,16 @@ const SERVICE_SUMMARY = {
     .length,
 } as const;
 
+const SERVICE_BATCH_SIZE = 18;
+
+const SERVICE_CATEGORY_COUNTS = PUBLIC_SERVICES.reduce<Record<string, number>>(
+  (counts, service) => {
+    counts[service.category] = (counts[service.category] ?? 0) + 1;
+    return counts;
+  },
+  {}
+);
+
 const NEED_GROUPS = [
   {
     label: "Documentos pessoais",
@@ -154,7 +164,7 @@ const NEED_GROUPS = [
   {
     label: "Faculdade e bolsas de estudo",
     query: "ensino superior",
-    hint: "Sisu, vagas públicas e bolsas do Prouni no canal do MEC",
+    hint: "Sisu, bolsas do Prouni e financiamento do Fies no MEC",
   },
   {
     label: "Transporte escolar",
@@ -493,6 +503,16 @@ const READY_ROUTE_GROUPS = READY_ROUTE_GROUPS_BASE.map(group => ({
   ],
 }));
 
+const READY_ROUTE_GROUP_COUNTS = new Map(
+  READY_ROUTE_GROUPS.map(group => [
+    group.label,
+    READY_SERVICE_ROUTES.reduce(
+      (count, route) => count + Number(group.ids.includes(route.id as never)),
+      0
+    ),
+  ])
+);
+
 export default function PublicServices() {
   const [, setLocation] = useLocation();
   const rawSearch = useSearch();
@@ -522,19 +542,22 @@ export default function PublicServices() {
     "drive" | "walk" | "bike"
   >("drive");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
+  const [serviceLimit, setServiceLimit] = useState(SERVICE_BATCH_SIZE);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
     service => service.id === params.get("servico")
   );
   const browsing =
-    !selectedService &&
+    !params.has("servico") &&
     !savedOnly &&
     !query.trim() &&
     category === "todos" &&
     resource === "todos";
-  const favoriteCount = PUBLIC_SERVICES.filter(service =>
-    favorites.includes(service.id)
-  ).length;
+  const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
+  const favoriteCount = useMemo(
+    () => PUBLIC_SERVICES.reduce((count, service) => count + Number(favoriteIds.has(service.id)), 0),
+    [favoriteIds]
+  );
   const activeCategoryLabel =
     PUBLIC_SERVICE_CATEGORIES.find(item => item.id === category)?.shortLabel ??
     "Tudo";
@@ -647,7 +670,7 @@ export default function PublicServices() {
     if (selectedService) return [selectedService];
     const matches = searchPublicServices(query, category).filter(
       service =>
-        (!savedOnly || favorites.includes(service.id)) &&
+        (!savedOnly || favoriteIds.has(service.id)) &&
         (resource === "todos" ||
           (resource === "contato" &&
             publicServiceContacts(service).length > 0) ||
@@ -656,9 +679,16 @@ export default function PublicServices() {
     );
     return [...matches].sort(
       (a, b) =>
-        Number(favorites.includes(b.id)) - Number(favorites.includes(a.id))
+        Number(favoriteIds.has(b.id)) - Number(favoriteIds.has(a.id))
     );
-  }, [query, category, selectedService, savedOnly, favorites, resource]);
+  }, [query, category, selectedService, savedOnly, favoriteIds, resource]);
+
+  useEffect(() => {
+    setServiceLimit(SERVICE_BATCH_SIZE);
+  }, [browsing]);
+  // Search, category filters, favorites and direct links expose every match.
+  // Only the unfiltered directory mounts cards in batches on first entry.
+  const displayedServices = browsing ? results.slice(0, serviceLimit) : results;
 
   useEffect(() => {
     const targetId = selectedService
@@ -1090,7 +1120,7 @@ export default function PublicServices() {
                 >
                   {item.id === "todos"
                     ? PUBLIC_SERVICES.length
-                    : PUBLIC_SERVICES.filter(service => service.category === item.id).length}
+                    : SERVICE_CATEGORY_COUNTS[item.id] ?? 0}
                 </span>
               </button>
             ))}
@@ -1261,9 +1291,7 @@ export default function PublicServices() {
                   .slice(0, 6)
                   .map(item => {
                     const Icon = categoryIcons[item.id as PublicServiceCategory];
-                    const count = PUBLIC_SERVICES.filter(
-                      service => service.category === item.id
-                    ).length;
+                    const count = SERVICE_CATEGORY_COUNTS[item.id] ?? 0;
                     return (
                       <button
                         key={item.id}
@@ -1298,9 +1326,7 @@ export default function PublicServices() {
                     .slice(6)
                     .map(item => {
                       const Icon = categoryIcons[item.id as PublicServiceCategory];
-                      const count = PUBLIC_SERVICES.filter(
-                        service => service.category === item.id
-                      ).length;
+                      const count = SERVICE_CATEGORY_COUNTS[item.id] ?? 0;
                       return (
                         <button
                           key={item.id}
@@ -1648,9 +1674,7 @@ export default function PublicServices() {
                     </span>
                   </button>
                   {READY_ROUTE_GROUPS.map(group => {
-                    const groupCount = READY_SERVICE_ROUTES.filter(route =>
-                      group.ids.includes(route.id as never)
-                    ).length;
+                    const groupCount = READY_ROUTE_GROUP_COUNTS.get(group.label) ?? 0;
                     return (
                       <button
                         key={group.label}
@@ -1742,6 +1766,17 @@ export default function PublicServices() {
                   {visibleReadyRoutes.length === 0 && (
                     <div className="w-[min(86vw,19rem)] shrink-0 rounded-2xl border border-dashed border-border/30 bg-muted/[.025] p-4 text-sm text-muted-foreground sm:col-span-2 sm:w-auto lg:col-span-5">
                       Nenhuma rota pronta corresponde a esta busca neste grupo.
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReadyRouteQuery("");
+                          setReadyRouteGroup("todos");
+                          setReadyRouteOfflineOnly(false);
+                        }}
+                        className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-primary/20 bg-background px-3 text-sm font-bold text-primary"
+                      >
+                        Ver todas as rotas prontas
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1802,6 +1837,9 @@ export default function PublicServices() {
           className="mt-4 text-sm text-foreground/70"
         >
           {results.length} serviços encontrados
+          {browsing && displayedServices.length < results.length && (
+            <span> · {displayedServices.length} exibidos</span>
+          )}
         </p>
         <section
           id="service-results"
@@ -1812,7 +1850,7 @@ export default function PublicServices() {
           }
           aria-label="Serviços públicos"
         >
-          {results.map(service => {
+          {displayedServices.map(service => {
             const Icon = categoryIcons[service.category];
             const contacts = publicServiceContacts(service);
             const primaryContact = contacts[0];
@@ -1841,7 +1879,7 @@ export default function PublicServices() {
                 Boolean(service.email && !showEmail) ||
                 (secondaryContacts.length > 0 && !showSecondaryContacts) ||
                 Boolean(primaryContact));
-            const saved = favorites.includes(service.id);
+            const saved = favoriteIds.has(service.id);
             return (
               <article
                 key={service.id}
@@ -2247,6 +2285,18 @@ export default function PublicServices() {
           })}
         </section>
 
+        {browsing && displayedServices.length < results.length && (
+          <button
+            type="button"
+            aria-controls="service-results"
+            onClick={() => setServiceLimit(limit => limit + SERVICE_BATCH_SIZE)}
+            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-card px-4 py-3 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            Mostrar mais {Math.min(SERVICE_BATCH_SIZE, results.length - displayedServices.length)} serviços
+            <ChevronRight className="size-4 shrink-0" />
+          </button>
+        )}
+
         {!results.length && (
           <section className="premium-card mt-5 rounded-3xl border border-border/8 bg-card p-6 text-center">
             <p className="text-sm font-black">
@@ -2259,6 +2309,19 @@ export default function PublicServices() {
                 ? "Veja o catálogo e toque no coração dos serviços que você mais usa."
                 : "Experimente outro termo ou veja todas as categorias."}
             </p>
+            {query.trim() && (category !== "todos" || resource !== "todos" || savedOnly) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCategory("todos");
+                  setResource("todos");
+                  applyFilters(query, "todos", false, false, "todos");
+                }}
+                className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-primary/20 bg-background px-3 text-sm font-bold text-primary"
+              >
+                Buscar este termo em todo o catálogo
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {

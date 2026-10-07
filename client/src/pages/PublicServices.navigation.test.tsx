@@ -8,6 +8,51 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   Element.prototype.scrollIntoView = vi.fn();
 });
+it("opens the directory in batches and keeps search results complete", async () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar mais 18 serviços" }));
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(36);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar serviços públicos" }), { target: { value: "ESF" } });
+  expect(screen.getByRole("heading", { name: "ESF Setor 09" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
+}, 15000);
+
+it("keeps the complete recovery directory available for an unknown service link", () => {
+  window.history.replaceState({}, "", "/servicos?servico=unknown");
+  render(<PublicServices />);
+  expect(screen.getByRole("heading", { name: "Ligue 180 · atendimento à mulher" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
+});
+
+it("reports the same destination count that each ready-route group displays", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  const groups = screen.getAllByRole("button", { name: /^Filtrar rotas:/ });
+  for (const group of groups) {
+    const expectedCount = Number(group.getAttribute("aria-label")?.match(/· (\d+) destinos/)?.[1]);
+    fireEvent.click(group);
+    expect(document.querySelectorAll("#ready-routes article")).toHaveLength(expectedCount);
+  }
+}, 15000);
+it("recovers a search hidden by category without losing the term", async () => {
+  window.history.replaceState({}, "", "/servicos?q=anatel&categoria=saude");
+  render(<PublicServices />);
+  fireEvent.click(screen.getByRole("button", { name: "Buscar este termo em todo o catálogo" }));
+  await waitFor(() => expect(window.location.search).toBe("?q=anatel"));
+  expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0);
+});
+
+it("restores ready routes after an empty search", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  const input = screen.getByRole("searchbox", { name: "Buscar rota pronta" });
+  fireEvent.change(input, { target: { value: "zzzzzzzzzz" } });
+  fireEvent.click(screen.getByRole("button", { name: "Ver todas as rotas prontas" }));
+  expect((input as HTMLInputElement).value).toBe("");
+  expect(screen.getAllByRole("button", { name: /Planejar rota para/ }).length).toBeGreaterThan(0);
+}, 15000);
 it("keeps the current resource filter when Escape clears the search", async () => {
   window.history.replaceState({}, "", "/servicos?q=anatel");
   render(<PublicServices />);
@@ -52,7 +97,8 @@ it("shows the new official higher education services in their category", () => {
   render(<PublicServices />);
   expect(screen.getByRole("heading", { name: "Sisu · vagas em universidades públicas" })).toBeTruthy();
   expect(screen.getByRole("heading", { name: "Prouni · bolsas em faculdades particulares" })).toBeTruthy();
-  expect(document.querySelectorAll("#service-results article")).toHaveLength(2);
+  expect(screen.getByRole("heading", { name: "Fies · financiamento estudantil" })).toBeTruthy();
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(3);
 });
 
 
