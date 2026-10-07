@@ -263,6 +263,18 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups services for older adults in a dedicated utility category", () => {
+    expect(searchPublicServices("idoso", "idoso").map(item => item.id)).toEqual(
+      expect.arrayContaining(["cmdi", "cci-idoso", "carteira-pessoa-idosa"])
+    );
+    for (const id of ["cmdi", "cci-idoso", "carteira-pessoa-idosa"])
+      expect(PUBLIC_SERVICES.find(item => item.id === id)?.category).toBe("idoso");
+    const cmdi = PUBLIC_SERVICES.find(item => item.id === "cmdi")!;
+    expect(cmdi.phone).toBe("(61) 99302-7803");
+    expect(cmdi.mapQuery).toContain("Quadra 53");
+    expect(cmdi.sourceUrl).toContain("conselho-municipal-do-direito-do-idoso-cmdi");
+  });
+
   it("groups animal care and zoonoses in a dedicated utility category", () => {
     expect(searchPublicServices("zoonoses", "animais").map(item => item.id)).toEqual(
       expect.arrayContaining(["bem-estar-animal-castracao", "vigilancia-saude-zoonoses"])
