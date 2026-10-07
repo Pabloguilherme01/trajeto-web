@@ -107,6 +107,8 @@ for (const service of cases) {
     page,
     context,
   }) => {
+    // Each case checks up to five queries through both search paths online and offline.
+    test.setTimeout(60_000);
     await page.setViewportSize({ width: 320, height: 568 });
     for (const query of service.queries) {
       await page.goto(`buscar?q=${encodeURIComponent(query)}`, {
