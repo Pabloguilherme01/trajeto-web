@@ -26,7 +26,8 @@ export type PublicServiceCategory =
   | "transparencia"
   | "agua-energia"
   | "telecom"
-  | "previdencia";
+  | "previdencia"
+  | "documentos";
 
 export type PublicService = {
   id: string;
@@ -105,6 +106,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "agua-energia", label: "Água e energia", shortLabel: "Água e energia" },
   { id: "telecom", label: "Internet e telefonia", shortLabel: "Internet e telefone" },
   { id: "previdencia", label: "INSS e benefícios", shortLabel: "INSS" },
+  { id: "documentos", label: "Documentos e certidões", shortLabel: "Documentos" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -1515,7 +1517,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "carteira-trabalho-digital",
     name: "Carteira de Trabalho Digital",
-    category: "trabalho",
+    category: "documentos",
     description:
       "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
     phone: "158",
@@ -2095,7 +2097,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "autoatendimento-eleitoral",
     name: "Autoatendimento Eleitoral · título e certidões",
-    category: "cidadania",
+    category: "documentos",
     description:
       "Canal do TSE para consultar serviços eleitorais, situação do título, local de votação e certidões.",
     keywords: [
