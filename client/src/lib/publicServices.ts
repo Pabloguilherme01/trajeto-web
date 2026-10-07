@@ -2351,6 +2351,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Saneago, Equatorial, Tarifa Social e ANEEL",
   },
   {
+    label: "Internet e telefonia",
+    query: "internet telefonia",
+    hint: "Anatel, linhas no CPF e bloqueio de telemarketing",
+  },
+  {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
     hint: "Bloqueio oficial pelo gov.br",
