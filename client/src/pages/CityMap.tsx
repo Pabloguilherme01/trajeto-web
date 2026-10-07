@@ -203,6 +203,18 @@ export default function CityMap() {
   }, [destinations, atlasDestinations, category, query, anpRows, onlyStreets]);
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
+  const jumpTo = (id: string) => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const reduceMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    target.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+    window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
+  };
   const emptyFallback = (
     <div className="grid min-h-[320px] place-items-center rounded-2xl bg-muted p-6 text-center">
       <div>
@@ -307,9 +319,32 @@ export default function CityMap() {
         ))}
         <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-warning bg-warning text-primary-foreground" : "border-border bg-muted/40 text-foreground/80")}>Ruas e avenidas</button>
       </div>
+      <nav
+        aria-label="Navegar entre mapa e resultados"
+        className="mb-3 grid grid-cols-2 gap-2"
+      >
+        <button
+          type="button"
+          aria-controls="city-map-surface"
+          onClick={() => jumpTo("city-map-surface")}
+          className="min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground"
+        >
+          Ver mapa
+        </button>
+        <button
+          type="button"
+          aria-controls="city-destinations"
+          onClick={() => jumpTo("city-destinations")}
+          className="min-h-11 rounded-xl border border-border/15 bg-card px-3 text-xs font-black text-foreground"
+        >
+          Ver resultados
+        </button>
+      </nav>
       <section
+        id="city-map-surface"
+        tabIndex={-1}
         aria-label="Mapa da cidade"
-        className="premium-card overflow-hidden rounded-3xl border border-border/15"
+        className="premium-card scroll-mt-4 overflow-hidden rounded-3xl border border-border/15 outline-none"
       >
         <MapExplorerFrame label="Mapa da cidade">
         {online && markers.length ? (
@@ -341,10 +376,25 @@ export default function CityMap() {
         localização. Somente destinos com coordenadas cadastradas aparecem como
         marcadores; os demais continuam na lista.
       </p>
-      <section aria-labelledby="city-destinations" className="mt-6">
-        <h2 id="city-destinations" className="text-lg font-black">
-          Escolha sua próxima parada
-        </h2>
+      <section
+        id="city-destinations"
+        tabIndex={-1}
+        aria-labelledby="city-destinations-title"
+        className="mt-6 scroll-mt-4 outline-none"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="city-destinations-title" className="text-lg font-black">
+            Escolha sua próxima parada
+          </h2>
+          <button
+            type="button"
+            aria-controls="city-map-surface"
+            onClick={() => jumpTo("city-map-surface")}
+            className="min-h-10 shrink-0 rounded-xl border border-border/15 px-3 text-xs font-black text-foreground/80"
+          >
+            Voltar ao mapa
+          </button>
+        </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {destinations.map(item => (
             <article
