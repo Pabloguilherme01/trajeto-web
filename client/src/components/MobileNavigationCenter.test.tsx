@@ -1,9 +1,11 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import MobileNavigationCenter from "./MobileNavigationCenter";
 
 describe("MobileNavigationCenter", () => {
+  afterEach(() => cleanup());
+
   it("offers Organic Maps when the integration callback is available", () => {
     const organic = vi.fn();
     render(
@@ -57,7 +59,7 @@ describe("MobileNavigationCenter", () => {
 
     expect(screen.getByRole("heading", { name: "Pronto para ir." })).toBeTruthy();
     expect(screen.getByText("→ Brasília, DF")).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: /Navegar agora/i })[0]).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Navegar agora/i })).toBeTruthy();
     expect(screen.getAllByText("Posto Exemplo")[0]).toBeTruthy();
     expect(screen.getByText(/R\$\s*28,50/)).toBeTruthy();
     expect(screen.getByText("Autonomia estimada:")).toBeTruthy();
@@ -85,7 +87,7 @@ describe("MobileNavigationCenter", () => {
       />,
     );
 
-    expect(screen.getAllByRole("button", { name: /Navegar agora/i })[1].getAttribute("disabled")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /Navegar agora/i }).getAttribute("disabled")).not.toBeNull();
     expect(screen.getByText(/A rota salva continua disponível/)).toBeTruthy();
   });
 });
