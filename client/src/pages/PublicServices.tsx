@@ -481,6 +481,18 @@ export default function PublicServices() {
     return () => window.removeEventListener("keydown", onKey);
   }, [category, savedOnly, setLocation]);
 
+  const offlineReadyRouteIds = useMemo(() => {
+    return new Set(
+      READY_SERVICE_ROUTES.filter(route => {
+        try {
+          return Boolean(resolveOfflineRoutePoint(route.destination));
+        } catch {
+          return false;
+        }
+      }).map(route => route.id)
+    );
+  }, []);
+
   const visibleReadyRoutes = useMemo(() => {
     const groupedRoutes =
       readyRouteGroup === "todos"
@@ -1435,6 +1447,27 @@ export default function PublicServices() {
                         </span>
                         <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
                           {route.detail}
+                        </span>
+                        <span
+                          data-route-readiness={offlineReadyRouteIds.has(route.id) ? "offline" : "online"}
+                          className={
+                            "mt-2 inline-flex min-h-7 max-w-full items-center gap-1 rounded-full border px-2 text-[0.68rem] font-black " +
+                            (offlineReadyRouteIds.has(route.id)
+                              ? "border-accent/20 bg-accent/[.06] text-accent"
+                              : "border-border/20 bg-muted/[.04] text-muted-foreground")
+                          }
+                        >
+                          {offlineReadyRouteIds.has(route.id) ? (
+                            <>
+                              <WifiOff className="size-3 shrink-0" />
+                              Destino offline
+                            </>
+                          ) : (
+                            <>
+                              <Globe2 className="size-3 shrink-0" />
+                              Localizar online
+                            </>
+                          )}
                         </span>
                       </div>
                       <div className="mt-3 grid grid-cols-2 gap-2">
