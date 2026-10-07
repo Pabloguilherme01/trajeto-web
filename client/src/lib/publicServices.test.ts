@@ -486,6 +486,33 @@ describe("public services catalog", () => {
     expect(funcionamento.actionUrl).toContain("portaldoempreendedorgoiano.go.gov.br");
   });
 
+  it("adds current municipal governance contacts without inventing locations", () => {
+    const ids = [
+      "gestao-estrategica-municipal",
+      "alternativas-penais-egresso",
+      "procuradoria-geral-municipio",
+      "controladoria-geral-interna",
+    ];
+    for (const id of ids) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service).toBeDefined();
+      expect(service.phone).toMatch(/^\(61\)/);
+      expect(service.verifiedAt).toBe("07/10/2026");
+      expect(service.sourceUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+    expect(searchPublicServices("apoio ao egresso").map(item => item.id)).toContain(
+      "alternativas-penais-egresso"
+    );
+    expect(searchPublicServices("controle interno").map(item => item.id)).toContain(
+      "controladoria-geral-interna"
+    );
+    expect(searchPublicServices("juridico prefeitura").map(item => item.id)).toContain(
+      "procuradoria-geral-municipio"
+    );
+  });
+
   it("groups death, burial and funeral-assistance guidance without inventing routes", () => {
     const aid = PUBLIC_SERVICES.find(item => item.id === "auxilio-funeral-municipal")!;
     const control = PUBLIC_SERVICES.find(item => item.id === "controle-obitos-sepultamentos")!;

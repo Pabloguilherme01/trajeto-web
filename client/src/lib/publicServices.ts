@@ -149,6 +149,62 @@ const HEAL = "https://goias.gov.br/saude/heal/";
 
 export const PUBLIC_SERVICES: PublicService[] = [
   {
+    id: "gestao-estrategica-municipal",
+    name: "Secretaria Municipal de Gestão Estratégica",
+    category: "cidadania",
+    description:
+      "Canal institucional da gestão estratégica municipal para orientação sobre assuntos e encaminhamentos ligados ao planejamento e à gestão da Prefeitura.",
+    phone: "(61) 98160-2034",
+    keywords: ["gestao estrategica", "gestão estratégica", "planejamento prefeitura", "gestao municipal", "gestão municipal"],
+    guidance:
+      "Use o contato oficial para confirmar qual setor atende sua demanda. O Trajeto não publica endereço de atendimento sem confirmação específica na fonte.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
+  },
+  {
+    id: "alternativas-penais-egresso",
+    name: "Alternativas Penais e Apoio ao Egresso",
+    category: "justica",
+    description:
+      "Canal municipal para políticas de alternativas penais e apoio a pessoas egressas do sistema de justiça.",
+    phone: "(61) 99688-4733",
+    keywords: ["alternativas penais", "apoio ao egresso", "egresso", "pena alternativa", "reinsercao", "reinserção"],
+    guidance:
+      "Entre em contato antes de se deslocar para confirmar o tipo de atendimento, documentos e local atual.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
+  },
+  {
+    id: "procuradoria-geral-municipio",
+    name: "Procuradoria Geral do Município",
+    category: "justica",
+    description:
+      "Órgão jurídico institucional do Município. Use o contato para orientação sobre encaminhamentos administrativos relacionados à Prefeitura.",
+    phone: "(61) 99503-1059",
+    keywords: ["procuradoria", "procuradoria geral", "juridico prefeitura", "jurídico prefeitura", "processo prefeitura"],
+    guidance:
+      "A Procuradoria representa juridicamente o Município; ela não substitui a Defensoria Pública para orientação jurídica individual do cidadão.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
+  },
+  {
+    id: "controladoria-geral-interna",
+    name: "Controladoria Geral Interna do Município",
+    category: "transparencia",
+    description:
+      "Canal institucional de controle interno municipal, útil para identificar o órgão responsável por assuntos de fiscalização e integridade administrativa.",
+    phone: "(61) 99304-6412",
+    keywords: ["controladoria", "controle interno", "integridade", "fiscalizacao prefeitura", "fiscalização prefeitura"],
+    guidance:
+      "Para pedidos de informação, reclamações, elogios, sugestões ou denúncias, prefira também os canais específicos de SIC e Ouvidoria disponíveis na Central.",
+    verifiedAt: "07/10/2026",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: PREFEITURA_CONTATOS,
+  },
+  {
     id: "auxilio-funeral-municipal",
     name: "Auxílio funeral · assistência social",
     category: "obitos",
