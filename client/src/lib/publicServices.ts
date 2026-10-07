@@ -18,7 +18,8 @@ export type PublicServiceCategory =
   | "inclusao"
   | "mulher"
   | "animais"
-  | "idoso";
+  | "idoso"
+  | "empreendedor";
 
 export type PublicService = {
   id: string;
@@ -62,7 +63,8 @@ export type PublicService = {
     | "Ibama"
     | "ANEEL"
     | "Detran-GO"
-    | "Defensoria Pública de Goiás";
+    | "Defensoria Pública de Goiás"
+    | "Empresas & Negócios";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -87,6 +89,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "mulher", label: "Mulher e proteção", shortLabel: "Mulher" },
   { id: "animais", label: "Animais e zoonoses", shortLabel: "Animais" },
   { id: "idoso", label: "Pessoa idosa", shortLabel: "Idoso" },
+  { id: "empreendedor", label: "Empreendedor e empresas", shortLabel: "Empreender" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -1133,14 +1136,64 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "desenvolvimento-economico",
     name: "Secretaria Municipal de Desenvolvimento Econômico",
-    category: "trabalho",
-    description:
-      "Atendimento e programas municipais para desenvolvimento econômico.",
+    category: "empreendedor",
+    description: "Atendimento municipal para desenvolvimento econômico, comércio, serviços, empresas e geração de renda.",
     phone: "(61) 99649-2690 / (61) 99310-6862",
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    email: "industria.comercio@aguaslindasdegoias.go.gov.br / desenvolvimento.economico21@gmail.com",
+    address: "Quadra 50, Lote 45, Conjunto A, Setor 01, Parque da Barragem, Águas Lindas de Goiás - GO",
+    keywords: ["desenvolvimento economico","empresa","comercio","industria","empreendedor","negocio","incentivo empresa"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-desenvolvimento-economico/",
+    actionLabel: "Abrir Secretaria de Desenvolvimento Econômico",
+    guidance: "Confirme com a Secretaria o atendimento adequado para abertura, expansão, regularização ou programas de desenvolvimento antes de sair.",
     sourceLabel: "Prefeitura de Águas Lindas",
-    sourceUrl: PREFEITURA_CONTATOS,
-    mapQuery:
-      "Secretaria Municipal de Desenvolvimento Econômico, Águas Lindas de Goiás, GO",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-desenvolvimento-economico/",
+    mapQuery: "Secretaria Municipal de Desenvolvimento Econômico, Quadra 50, Lote 45, Conjunto A, Setor 01, Parque da Barragem, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "sala-empreendedor",
+    name: "Sala do Empreendedor · Águas Lindas",
+    category: "empreendedor",
+    description: "Atendimento municipal para abertura, regularização e baixa de empresas, inclusive serviços para MEI.",
+    whatsappOnly: ["(61) 99248-6697"],
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    email: "saladoempreendedoraguaslindas@gmail.com / industria.comercio@aguaslindasdegoias.go.gov.br",
+    address: "Quadra 50, Conjunto A, 45, Setor 1, Parque da Barragem, Águas Lindas de Goiás - GO, 72911-199",
+    keywords: ["sala empreendedor","mei","abrir empresa","regularizar empresa","baixar empresa","microempreendedor","empreendedor"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/servico/sala-do-empreendedor/",
+    actionLabel: "Abrir serviço da Sala do Empreendedor",
+    guidance: "A página oficial informa que as demandas do serviço devem ser solicitadas via WhatsApp. Confirme requisitos e documentos antes do deslocamento.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/servico/sala-do-empreendedor/",
+    mapQuery: "Sala do Empreendedor, Quadra 50, Conjunto A, 45, Setor 1, Parque da Barragem, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "portal-empreendedor-mei",
+    name: "Portal do Empreendedor · MEI",
+    category: "empreendedor",
+    description: "Canal federal para formalização e serviços do MEI, incluindo CCMEI, DAS, declaração anual, alteração e baixa.",
+    keywords: ["mei","formalizar mei","abrir mei","das mei","ccmei","declaracao mei","baixar mei"],
+    actionUrl: "https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/",
+    actionLabel: "Abrir Portal do Empreendedor",
+    guidance: "Use somente o portal oficial. Alguns serviços exigem autenticação gov.br. A formalização do MEI é gratuita no canal oficial.",
+    sourceLabel: "Empresas & Negócios",
+    sourceUrl: "https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "abrir-cnpj-redesim",
+    name: "Abrir CNPJ · REDESIM",
+    category: "empreendedor",
+    description: "Fluxo oficial para abrir CNPJ de empresa, negócio ou associação, com viabilidade, registro e licenciamento.",
+    keywords: ["abrir cnpj","abrir empresa","redesim","viabilidade","registro empresa","licenciamento empresa"],
+    actionUrl: "https://www.gov.br/empresas-e-negocios/pt-br/redesim/abrir-cnpj",
+    actionLabel: "Abrir serviço de CNPJ",
+    guidance: "Antes de iniciar, confira a viabilidade do endereço e as exigências de licenciamento do município. Para MEI, use o Portal do Empreendedor.",
+    sourceLabel: "Empresas & Negócios",
+    sourceUrl: "https://www.gov.br/empresas-e-negocios/pt-br/redesim/abrir-cnpj",
+    verifiedAt: "06/10/2026",
   },
   {
     id: "ouvidoria-sus",
@@ -2017,6 +2070,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Emprego e trabalho",
     query: "emprego",
     hint: "SINE e canais oficiais",
+  },
+  {
+    label: "MEI e empresa",
+    query: "mei",
+    hint: "Sala do Empreendedor e canais oficiais",
   },
   { label: "Agendar atendimento", query: "vapt vupt", hint: "Vapt Vupt" },
   {
