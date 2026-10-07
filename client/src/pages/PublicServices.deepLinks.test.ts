@@ -90,7 +90,7 @@ describe("PublicServices deep links", () => {
   it("offers Organic Maps directly from ready-route cards without nesting actions", () => {
     expect(source).toContain("openOrganicDestination(route.destination, route.label)");
     expect(source).toContain('aria-label={"Abrir " + route.label + " no Organic Maps"}');
-    expect(source).toContain(">Organic Maps</span>");
+    expect(source).toContain("Organic · {navigationModeLabel}</span>");
     expect(source).toContain(">Planejar</span>");
     expect(source).toContain("snap-x snap-mandatory");
     expect(source).toContain("snap-start");
