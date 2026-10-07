@@ -64,6 +64,7 @@ import {
 } from "@/lib/publicServices";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
 import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
+import { matchesCatalogText } from "@/lib/catalogSearch";
 
 const categoryIcons = {
   saude: HeartPulse,
@@ -382,6 +383,7 @@ export default function PublicServices() {
     "todos" | "contato" | "rota" | "online"
   >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
+  const [readyRouteQuery, setReadyRouteQuery] = useState("");
   const [navigationMode, setNavigationMode] = useState<
     "drive" | "walk" | "bike"
   >("drive");
@@ -465,6 +467,25 @@ export default function PublicServices() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [category, savedOnly, setLocation]);
+
+  const visibleReadyRoutes = useMemo(() => {
+    const groupedRoutes =
+      readyRouteGroup === "todos"
+        ? READY_SERVICE_ROUTES
+        : READY_SERVICE_ROUTES.filter(route =>
+            READY_ROUTE_GROUPS.find(
+              group => group.label === readyRouteGroup
+            )?.ids.includes(route.id as never)
+          );
+    if (!readyRouteQuery.trim()) return groupedRoutes;
+    return groupedRoutes.filter(route =>
+      matchesCatalogText(readyRouteQuery, [
+        route.label,
+        route.detail,
+        route.destination,
+      ])
+    );
+  }, [readyRouteGroup, readyRouteQuery]);
 
   const results = useMemo(() => {
     if (selectedService) return [selectedService];
@@ -1272,6 +1293,33 @@ export default function PublicServices() {
                   </div>
                   <Route className="hidden size-6 text-primary sm:block" />
                 </div>
+                <div className="mt-3">
+                  <label className="relative block">
+                    <span className="sr-only">Buscar rota pronta</span>
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="search"
+                      value={readyRouteQuery}
+                      onChange={event => setReadyRouteQuery(event.target.value)}
+                      placeholder="Buscar UPA, biblioteca, escola..."
+                      aria-label="Buscar rota pronta"
+                      className="min-h-11 w-full min-w-0 rounded-xl border border-border/20 bg-background pl-9 pr-10 text-sm font-semibold text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/10"
+                    />
+                    {readyRouteQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setReadyRouteQuery("")}
+                        aria-label="Limpar busca de rotas"
+                        className="absolute right-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    )}
+                  </label>
+                  <p className="mt-1.5 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite">
+                    {visibleReadyRoutes.length} destinos neste filtro
+                  </p>
+                </div>
                 <div
                   className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1"
                   role="group"
@@ -1321,14 +1369,7 @@ export default function PublicServices() {
                   })}
                 </div>
                 <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
-                  {(readyRouteGroup === "todos"
-                    ? READY_SERVICE_ROUTES
-                    : READY_SERVICE_ROUTES.filter(route =>
-                        READY_ROUTE_GROUPS.find(
-                          group => group.label === readyRouteGroup
-                        )?.ids.includes(route.id as never)
-                      )
-                  ).map(route => (
+                  {visibleReadyRoutes.map(route => (
                     <article
                       key={route.id}
                       className="premium-card flex min-h-32 w-[min(86vw,19rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
@@ -1371,6 +1412,11 @@ export default function PublicServices() {
                       </div>
                     </article>
                   ))}
+                  {visibleReadyRoutes.length === 0 && (
+                    <div className="w-[min(86vw,19rem)] shrink-0 rounded-2xl border border-dashed border-border/30 bg-muted/[.025] p-4 text-sm text-muted-foreground sm:col-span-2 sm:w-auto lg:col-span-5">
+                      Nenhuma rota pronta corresponde a esta busca neste grupo.
+                    </div>
+                  )}
                 </div>
                 <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
                   <div>
