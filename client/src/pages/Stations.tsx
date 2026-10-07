@@ -894,12 +894,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 {!showSavedOnly && !mapFirst && showMap && (staticRuntime || broadAguasLindasQuery) && mapStations.length > 0 && (
                   <section id="aguas-lindas-map" className="scroll-mt-24 mt-3 overflow-hidden rounded-[1.35rem] border border-border/10 bg-background" aria-label="Mapa de todos os postos de Águas Lindas">
                     <div className="relative">
-                      <StationMap
-                        stations={mapStations}
-                        showTraffic={online}
-                       
-                       
-                      />
+                      <StationMap stations={mapStations} showTraffic={online} />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/10 px-3 py-2.5 text-xs text-muted-foreground">
                       <span>{mapPositionedCount} posicionados · {mapStations.length - mapPositionedCount} sem coordenada · {mapOfficialCount} ANP + {mapSecondaryCount} referências de mapa</span>
@@ -1060,7 +1055,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 onClick={() => setDirectoryVisibleCount(24)}
                 className="mt-2 min-h-11 w-full text-sm font-bold text-muted-foreground"
               >
-                Mostrar apenas os primeiros 48
+                Mostrar apenas os primeiros 24
               </button>
             )}
 
