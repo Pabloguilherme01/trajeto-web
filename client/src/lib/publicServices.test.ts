@@ -503,7 +503,7 @@ describe("public services catalog", () => {
     expect(searchPublicServices("sepultamento", "obitos").map(item => item.id)).toContain(
       "controle-obitos-sepultamentos"
     );
-    expect(searchPublicServices("perdi um familiar").length).toBeGreaterThanOrEqual(0);
+    expect(searchPublicServices("falecimento").map(item => item.id)).toEqual(\n      expect.arrayContaining(["auxilio-funeral-municipal", "controle-obitos-sepultamentos"])\n    );
   });
 
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
