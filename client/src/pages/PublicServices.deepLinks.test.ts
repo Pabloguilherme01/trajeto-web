@@ -102,8 +102,13 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("Mostrar somente destinos offline");
     expect(source).toContain("availabilityRoutes");
     expect(source).toContain('aria-label="Resumo da Central"');
-    expect(source).toContain('[READY_SERVICE_ROUTES.length, "rotas prontas"]');
-    expect(source).toContain('[offlineReadyRouteIds.size, "destinos offline"]');
+    expect(source).toContain("showAllServicesFromSummary");
+    expect(source).toContain("openCategoriesFromSummary");
+    expect(source).toContain("openReadyRoutesFromSummary");
+    expect(source).toContain('id="ready-routes"');
+    expect(source).toContain('id="service-results"');
+    expect(source).toContain("Ir para ${READY_SERVICE_ROUTES.length} rotas prontas");
+    expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} destinos offline");
   });
 
   it("offers the official Organic Maps install fallback without exposing GPS", () => {
