@@ -608,6 +608,38 @@ export default function PublicServices() {
     applyFilters(query, next);
   };
 
+  const scrollToSection = (id: string) => {
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(id);
+      if (!target) return;
+      const reduceMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  };
+
+  const showAllServicesFromSummary = () => {
+    setQuery("");
+    setCategory("todos");
+    setResource("todos");
+    applyFilters("", "todos", false, false, "todos");
+    scrollToSection("service-results");
+  };
+
+  const openCategoriesFromSummary = () => {
+    if (filterRef.current) filterRef.current.open = true;
+    scrollToSection("service-filters");
+  };
+
+  const openReadyRoutesFromSummary = (offlineOnly = false) => {
+    setReadyRouteOfflineOnly(offlineOnly);
+    scrollToSection("ready-routes");
+  };
+
   const openMaps = (service: (typeof PUBLIC_SERVICES)[number]) => {
     if (!service.mapQuery) return;
     setLocation(
@@ -727,24 +759,58 @@ export default function PublicServices() {
             tabIndex={0}
             className="mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
           >
-            {[
-              [PUBLIC_SERVICES.length, "serviços oficiais"],
-              [PUBLIC_SERVICE_CATEGORIES.length - 1, "categorias"],
-              [READY_SERVICE_ROUTES.length, "rotas prontas"],
-              [offlineReadyRouteIds.size, "destinos offline"],
-            ].map(([value, label]) => (
-              <div
-                key={label}
-                className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 sm:min-w-0"
-              >
-                <p className="text-xl font-black tracking-tight text-foreground">
-                  {value}
-                </p>
-                <p className="mt-0.5 text-xs font-bold text-muted-foreground">
-                  {label}
-                </p>
-              </div>
-            ))}
+            <button
+              type="button"
+              onClick={showAllServicesFromSummary}
+              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              aria-label={`Ver todos os ${PUBLIC_SERVICES.length} serviços oficiais`}
+            >
+              <span className="block text-xl font-black tracking-tight text-foreground">
+                {PUBLIC_SERVICES.length}
+              </span>
+              <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
+                serviços oficiais
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={openCategoriesFromSummary}
+              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              aria-label={`Abrir ${PUBLIC_SERVICE_CATEGORIES.length - 1} categorias de serviços`}
+            >
+              <span className="block text-xl font-black tracking-tight text-foreground">
+                {PUBLIC_SERVICE_CATEGORIES.length - 1}
+              </span>
+              <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
+                categorias
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openReadyRoutesFromSummary(false)}
+              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              aria-label={`Ir para ${READY_SERVICE_ROUTES.length} rotas prontas`}
+            >
+              <span className="block text-xl font-black tracking-tight text-foreground">
+                {READY_SERVICE_ROUTES.length}
+              </span>
+              <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
+                rotas prontas
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openReadyRoutesFromSummary(true)}
+              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              aria-label={`Mostrar ${offlineReadyRouteIds.size} destinos offline`}
+            >
+              <span className="block text-xl font-black tracking-tight text-foreground">
+                {offlineReadyRouteIds.size}
+              </span>
+              <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
+                destinos offline
+              </span>
+            </button>
           </div>
         </header>
 
@@ -1357,7 +1423,7 @@ export default function PublicServices() {
                   ))}
                 </div>
               </section>
-              <section className="mt-6" aria-labelledby="ready-routes-title">
+              <section id="ready-routes" className="mt-6 scroll-mt-4" aria-labelledby="ready-routes-title">
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
@@ -1611,6 +1677,7 @@ export default function PublicServices() {
           {results.length} serviços encontrados
         </p>
         <section
+          id="service-results"
           className={
             "mt-3 grid gap-3 " +
             (selectedService ? "max-w-2xl" : "sm:grid-cols-2 lg:grid-cols-3")
