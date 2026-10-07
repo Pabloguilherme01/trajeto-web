@@ -87,6 +87,7 @@ const categoryIcons = {
   empreendedor: Store,
   cultura: Sparkles,
   esporte: Trophy,
+  juventude: BadgeCheck,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -179,6 +180,11 @@ const NEED_GROUPS = [
     label: "Esporte e lazer",
     query: "esporte",
     hint: "Projetos, modalidades e atendimento da Secretaria",
+  },
+  {
+    label: "Juventude e primeiro emprego",
+    query: "jovem",
+    hint: "ID Jovem, aprendizagem profissional e orientação municipal",
   },
   {
     label: "Celular roubado ou perdido",

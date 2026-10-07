@@ -269,6 +269,22 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups youth services without inventing local routes or vacancies", () => {
+    expect(searchPublicServices("", "juventude").map(item => item.id)).toEqual(
+      expect.arrayContaining(["atendimento-juventude", "id-jovem", "aprendizagem-profissional-jovem"])
+    );
+    const idJovem = PUBLIC_SERVICES.find(item => item.id === "id-jovem")!;
+    expect(idJovem.actionUrl).toContain("idjovem.juventude.gov.br");
+    expect(idJovem.mapQuery).toBeUndefined();
+    expect(idJovem.address).toBeUndefined();
+    const aprendizagem = PUBLIC_SERVICES.find(item => item.id === "aprendizagem-profissional-jovem")!;
+    expect(aprendizagem.guidance).toMatch(/não representa vaga aberta garantida/i);
+    expect(aprendizagem.mapQuery).toBeUndefined();
+    const municipal = PUBLIC_SERVICES.find(item => item.id === "atendimento-juventude")!;
+    expect(municipal.phone).toBe("(61) 99291-2169");
+    expect(municipal.mapQuery).toBeUndefined();
+  });
+
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
     expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])

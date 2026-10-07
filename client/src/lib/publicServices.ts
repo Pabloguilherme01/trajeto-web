@@ -21,7 +21,8 @@ export type PublicServiceCategory =
   | "idoso"
   | "empreendedor"
   | "cultura"
-  | "esporte";
+  | "esporte"
+  | "juventude";
 
 export type PublicService = {
   id: string;
@@ -66,7 +67,8 @@ export type PublicService = {
     | "ANEEL"
     | "Detran-GO"
     | "Defensoria Pública de Goiás"
-    | "Empresas & Negócios";
+    | "Empresas & Negócios"
+    | "Secretaria Nacional de Juventude";
   sourceUrl: string;
   mapQuery?: string;
 };
@@ -94,6 +96,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "empreendedor", label: "Empreendedor e empresas", shortLabel: "Empreender" },
   { id: "cultura", label: "Cultura e turismo", shortLabel: "Cultura" },
   { id: "esporte", label: "Esporte e lazer", shortLabel: "Esporte" },
+  { id: "juventude", label: "Juventude", shortLabel: "Juventude" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -317,6 +320,45 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/leis/1606",
     mapQuery:
       "Vigilância em Saúde, Avenida Brasília, Quadra 109, Lote 30/32, Conjunto B, Setor 10, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "atendimento-juventude",
+    name: "Atendimento municipal à juventude",
+    category: "juventude",
+    description: "Canal municipal para orientação sobre políticas, direitos, participação social e inclusão de adolescentes e jovens.",
+    phone: "(61) 99291-2169",
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    keywords: ["juventude", "jovem", "direitos jovem", "conselho juventude", "participacao jovem", "inclusao jovem"],
+    guidance: "Use o contato institucional para confirmar qual equipe ou programa atende sua demanda. A página municipal atual vincula a juventude à estrutura de assistência social e cidadania; esta ficha não presume inscrição ou programa aberto.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "id-jovem",
+    name: "ID Jovem · meia-entrada e transporte interestadual",
+    category: "juventude",
+    description: "Carteira digital para jovens de baixa renda com benefícios de meia-entrada e vagas gratuitas ou com desconto no transporte interestadual.",
+    keywords: ["id jovem", "identidade jovem", "meia entrada jovem", "passagem jovem", "transporte interestadual jovem", "cadunico jovem"],
+    actionUrl: "https://idjovem.juventude.gov.br/emitir-id-jovem",
+    actionLabel: "Emitir ID Jovem",
+    guidance: "O programa atende jovens de 15 a 29 anos, com renda familiar de até dois salários mínimos e Cadastro Único atualizado. CPF ou NIS podem ser usados conforme as regras atuais do programa.",
+    sourceLabel: "Secretaria Nacional de Juventude",
+    sourceUrl: "https://idjovem.juventude.gov.br/emitir-id-jovem",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "aprendizagem-profissional-jovem",
+    name: "Aprendizagem Profissional · Jovem Aprendiz",
+    category: "juventude",
+    description: "Informações oficiais sobre contratos de aprendizagem e consulta de entidades e cursos autorizados para adolescentes e jovens.",
+    keywords: ["jovem aprendiz", "aprendiz", "primeiro emprego", "aprendizagem profissional", "curso aprendiz", "vaga aprendiz"],
+    actionUrl: "https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/aprendizagem-profissional",
+    actionLabel: "Consultar Aprendizagem Profissional",
+    guidance: "A política atende, em regra, jovens de 14 a 24 anos; para pessoas com deficiência não há limite máximo de idade. Consulte cursos autorizados na sua localidade. A página não representa vaga aberta garantida.",
+    sourceLabel: "Ministério do Trabalho e Emprego",
+    sourceUrl: "https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/aprendizagem-profissional",
     verifiedAt: "06/10/2026",
   },
   {
@@ -2248,6 +2290,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Esporte e lazer",
     query: "esporte",
     hint: "Secretaria e Projeto MultiEsportes",
+  },
+  {
+    label: "ID Jovem e primeiro emprego",
+    query: "jovem",
+    hint: "ID Jovem, aprendizagem e orientação municipal",
   },
   {
     label: "CNH e veículo",
