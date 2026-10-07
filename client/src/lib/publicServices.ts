@@ -26,7 +26,8 @@ export type PublicServiceCategory =
   | "transparencia"
   | "agua-energia"
   | "telecom"
-  | "previdencia";
+  | "previdencia"
+  | "documentos";
 
 export type PublicService = {
   id: string;
@@ -105,6 +106,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "agua-energia", label: "Água e energia", shortLabel: "Água e energia" },
   { id: "telecom", label: "Internet e telefonia", shortLabel: "Internet e telefone" },
   { id: "previdencia", label: "INSS e benefícios", shortLabel: "INSS" },
+  { id: "documentos", label: "Documentos e certidões", shortLabel: "Documentos" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -1515,7 +1517,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "carteira-trabalho-digital",
     name: "Carteira de Trabalho Digital",
-    category: "trabalho",
+    category: "documentos",
     description:
       "Acesso à carteira de trabalho e aos contratos registrados pelo portal oficial.",
     phone: "158",
@@ -1647,6 +1649,32 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "O pedido é feito pela internet no Meu INSS para os casos atendidos pelo INSS. Empregada de empresa deve observar a regra de pagamento pela empresa. Confira a documentação e a condição aplicável ao seu vínculo.",
     sourceLabel: "INSS",
     sourceUrl: "https://www.gov.br/pt-br/servicos/solicitar-salario-maternidade-urbano",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "cin-goias",
+    name: "Carteira de Identidade Nacional · CIN Goiás",
+    category: "documentos",
+    description: "Solicitação da Carteira de Identidade Nacional em Goiás, com agendamento pelo Expresso/Vapt Vupt e opções digitais quando elegível.",
+    keywords: ["cin", "carteira identidade", "nova identidade", "rg", "segunda via identidade", "identidade nacional"],
+    actionUrl: "https://www.go.gov.br/servicos/servico/solicitar-carteira-de-identidade-nacional--cin",
+    actionLabel: "Solicitar ou agendar CIN",
+    guidance: "Use o Portal Expresso para conferir documentos, regras e unidades disponíveis. Em situações elegíveis, a segunda via simplificada pode ser solicitada digitalmente. Confirme o local de atendimento no sistema antes de sair.",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: "https://goias.gov.br/policiacivil/instituto-de-identificacao/",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "antecedentes-criminais-goias",
+    name: "Atestado de antecedentes criminais · Goiás",
+    category: "documentos",
+    description: "Emissão online do atestado de antecedentes criminais pela Polícia Civil de Goiás.",
+    keywords: ["antecedentes", "antecedentes criminais", "certidao criminal", "atestado criminal", "policia civil"],
+    actionUrl: "https://www.go.gov.br/servicos/servico/obter-atestado-de-antecedentes-criminais-online",
+    actionLabel: "Emitir atestado de antecedentes",
+    guidance: "A emissão é online pelo Portal Expresso. Confira os dados informados e use apenas o documento gerado pelo serviço oficial.",
+    sourceLabel: "Polícia Civil de Goiás",
+    sourceUrl: "https://goias.gov.br/policiacivil/instituto-de-identificacao/",
     verifiedAt: "07/10/2026",
   },
   {
@@ -2095,7 +2123,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "autoatendimento-eleitoral",
     name: "Autoatendimento Eleitoral · título e certidões",
-    category: "cidadania",
+    category: "documentos",
     description:
       "Canal do TSE para consultar serviços eleitorais, situação do título, local de votação e certidões.",
     keywords: [
@@ -2452,6 +2480,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "INSS e benefícios",
     query: "inss beneficio",
     hint: "Meu INSS, BPC, incapacidade e salário-maternidade",
+  },
+  {
+    label: "Documentos e certidões",
+    query: "documento certidao",
+    hint: "CIN, título eleitoral, CTPS e antecedentes",
   },
   {
     label: "Celular roubado ou perdido",
