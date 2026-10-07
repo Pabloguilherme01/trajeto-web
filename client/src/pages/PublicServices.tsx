@@ -540,9 +540,11 @@ export default function PublicServices() {
     !query.trim() &&
     category === "todos" &&
     resource === "todos";
-  const favoriteCount = PUBLIC_SERVICES.filter(service =>
-    favorites.includes(service.id)
-  ).length;
+  const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
+  const favoriteCount = useMemo(
+    () => PUBLIC_SERVICES.reduce((count, service) => count + Number(favoriteIds.has(service.id)), 0),
+    [favoriteIds]
+  );
   const activeCategoryLabel =
     PUBLIC_SERVICE_CATEGORIES.find(item => item.id === category)?.shortLabel ??
     "Tudo";
@@ -655,7 +657,7 @@ export default function PublicServices() {
     if (selectedService) return [selectedService];
     const matches = searchPublicServices(query, category).filter(
       service =>
-        (!savedOnly || favorites.includes(service.id)) &&
+        (!savedOnly || favoriteIds.has(service.id)) &&
         (resource === "todos" ||
           (resource === "contato" &&
             publicServiceContacts(service).length > 0) ||
@@ -664,9 +666,9 @@ export default function PublicServices() {
     );
     return [...matches].sort(
       (a, b) =>
-        Number(favorites.includes(b.id)) - Number(favorites.includes(a.id))
+        Number(favoriteIds.has(b.id)) - Number(favoriteIds.has(a.id))
     );
-  }, [query, category, selectedService, savedOnly, favorites, resource]);
+  }, [query, category, selectedService, savedOnly, favoriteIds, resource]);
 
   useEffect(() => {
     const targetId = selectedService
@@ -1860,7 +1862,7 @@ export default function PublicServices() {
                 Boolean(service.email && !showEmail) ||
                 (secondaryContacts.length > 0 && !showSecondaryContacts) ||
                 Boolean(primaryContact));
-            const saved = favorites.includes(service.id);
+            const saved = favoriteIds.has(service.id);
             return (
               <article
                 key={service.id}
