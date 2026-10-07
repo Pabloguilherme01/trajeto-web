@@ -32,7 +32,7 @@ test("planner modes respond without fetching a closed location catalog", async (
   await cpu.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   const catalogRequests: string[] = [];
   page.on("request", request => {
-    if (/aguas-lindas-businesses-/.test(request.url())) catalogRequests.push(request.url());
+    if (/\/part-\d+-[^/]+\.js(?:\?|$)/.test(request.url())) catalogRequests.push(request.url());
   });
   try {
     await page.goto("./planejar");
@@ -56,6 +56,12 @@ test("planner modes respond without fetching a closed location catalog", async (
     console.log(JSON.stringify({ viewport: 320, cpuSlowdown: 4, modeTransitions: samples }));
     for (const sample of samples) expect(sample.responseMs).toBeLessThan(1500);
     expect(catalogRequests).toEqual([]);
+    // Prove the request observer detects the chunks when the selector is opened.
+    await page.getByText("Escolher destino no catálogo", { exact: true }).click();
+    await page.getByRole("button", { name: "Escolher destino no catálogo local", exact: true }).click();
+    await page.getByRole("textbox", { name: "Buscar destino local" }).fill("42.115.689/0001-40");
+    await expect(page.getByRole("button", { name: /Selecionar AMAG/ })).toBeVisible({ timeout: 60_000 });
+    expect(catalogRequests.length).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   } finally {
     await cpu.send("Emulation.setCPUThrottlingRate", { rate: 1 });
