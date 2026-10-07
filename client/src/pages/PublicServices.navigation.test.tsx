@@ -11,7 +11,7 @@ beforeEach(() => {
 it("keeps the current resource filter when Escape clears the search", async () => {
   window.history.replaceState({}, "", "/servicos?q=anatel");
   render(<PublicServices />);
-  fireEvent.click(screen.getByRole("button", { name: "Resolver online", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Resolver online" }));
   await waitFor(() => expect(window.location.search).toContain("recurso=online"));
   const input = screen.getByRole("textbox", { name: "Buscar serviços públicos" });
   input.focus();
