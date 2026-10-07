@@ -64,6 +64,7 @@ import {
 } from "@/lib/publicServices";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
 import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
+import { matchesCatalogText } from "@/lib/catalogSearch";
 
 const categoryIcons = {
   saude: HeartPulse,
@@ -382,6 +383,7 @@ export default function PublicServices() {
     "todos" | "contato" | "rota" | "online"
   >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
+  const [readyRouteQuery, setReadyRouteQuery] = useState("");
   const [navigationMode, setNavigationMode] = useState<
     "drive" | "walk" | "bike"
   >("drive");
@@ -465,6 +467,25 @@ export default function PublicServices() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [category, savedOnly, setLocation]);
+
+  const visibleReadyRoutes = useMemo(() => {
+    const groupedRoutes =
+      readyRouteGroup === "todos"
+        ? READY_SERVICE_ROUTES
+        : READY_SERVICE_ROUTES.filter(route =>
+            READY_ROUTE_GROUPS.find(
+              group => group.label === readyRouteGroup
+            )?.ids.includes(route.id as never)
+          );
+    if (!readyRouteQuery.trim()) return groupedRoutes;
+    return groupedRoutes.filter(route =>
+      matchesCatalogText(readyRouteQuery, [
+        route.label,
+        route.detail,
+        route.destination,
+      ])
+    );
+  }, [readyRouteGroup, readyRouteQuery]);
 
   const results = useMemo(() => {
     if (selectedService) return [selectedService];
