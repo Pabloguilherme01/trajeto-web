@@ -41,8 +41,9 @@ test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ 
   const categories = page.getByRole("group", { name: "Categorias de serviços" });
   await expect(categories).toBeVisible();
   expect(await categories.evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true);
-  await page.getByRole("button", { name: /Esporte e lazer/ }).scrollIntoViewIfNeeded();
-  await expect(page.getByRole("button", { name: /Esporte e lazer/ })).toBeVisible();
+  const sportCategory = categories.getByRole("button", { name: "Esporte e lazer", exact: true });
+  await sportCategory.scrollIntoViewIfNeeded();
+  await expect(sportCategory).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
