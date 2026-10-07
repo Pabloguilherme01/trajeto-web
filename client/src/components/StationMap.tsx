@@ -125,7 +125,7 @@ export function OfflineStationMap({ stations, onSelectStation, heightClassName =
   </div>;
 }
 
-export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void }) {
+export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
