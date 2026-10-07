@@ -162,6 +162,19 @@ test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("categoria de óbitos fica utilizável e sem overflow em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?categoria=obitos", { waitUntil: "domcontentloaded" });
+
+  await expect(
+    page.getByRole("heading", { name: "Auxílio funeral · assistência social" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Controle de óbitos e sepultamentos" })
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("central de serviços abre offline e filtra saúde", async ({ page }) => {
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Como podemos ajudar/i })).toBeVisible();
