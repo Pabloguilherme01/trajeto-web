@@ -397,6 +397,7 @@ export default function PublicServices() {
   >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
   const [readyRouteQuery, setReadyRouteQuery] = useState("");
+  const [readyRouteOfflineOnly, setReadyRouteOfflineOnly] = useState(false);
   const [navigationMode, setNavigationMode] = useState<
     "drive" | "walk" | "bike"
   >("drive");
@@ -502,15 +503,18 @@ export default function PublicServices() {
               group => group.label === readyRouteGroup
             )?.ids.includes(route.id as never)
           );
-    if (!readyRouteQuery.trim()) return groupedRoutes;
-    return groupedRoutes.filter(route =>
+    const availabilityRoutes = readyRouteOfflineOnly
+      ? groupedRoutes.filter(route => offlineReadyRouteIds.has(route.id))
+      : groupedRoutes;
+    if (!readyRouteQuery.trim()) return availabilityRoutes;
+    return availabilityRoutes.filter(route =>
       matchesCatalogText(readyRouteQuery, [
         route.label,
         route.detail,
         route.destination,
       ])
     );
-  }, [readyRouteGroup, readyRouteQuery]);
+  }, [readyRouteGroup, readyRouteQuery, readyRouteOfflineOnly, offlineReadyRouteIds]);
 
   const results = useMemo(() => {
     if (selectedService) return [selectedService];
@@ -1407,6 +1411,24 @@ export default function PublicServices() {
                     <span>Todas</span>
                     <span aria-hidden="true" className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.65rem] tabular-nums">
                       {READY_SERVICE_ROUTES.length}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Mostrar somente destinos offline · ${offlineReadyRouteIds.size} destinos`}
+                    aria-pressed={readyRouteOfflineOnly}
+                    onClick={() => setReadyRouteOfflineOnly(value => !value)}
+                    className={
+                      "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-xs font-black " +
+                      (readyRouteOfflineOnly
+                        ? "border-accent/35 bg-accent/10 text-accent"
+                        : "border-border/15 bg-card text-foreground/75")
+                    }
+                  >
+                    <WifiOff className="size-3.5 shrink-0" />
+                    <span>Offline</span>
+                    <span aria-hidden="true" className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.65rem] tabular-nums">
+                      {offlineReadyRouteIds.size}
                     </span>
                   </button>
                   {READY_ROUTE_GROUPS.map(group => {
