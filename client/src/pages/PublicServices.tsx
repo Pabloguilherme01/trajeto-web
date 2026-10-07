@@ -92,6 +92,7 @@ const categoryIcons = {
   juventude: BadgeCheck,
   transparencia: Globe2,
   "agua-energia": Zap,
+  telecom: Phone,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -199,6 +200,11 @@ const NEED_GROUPS = [
     label: "Água e energia",
     query: "agua energia",
     hint: "Saneago, Equatorial, Tarifa Social e ANEEL",
+  },
+  {
+    label: "Internet e telefonia",
+    query: "internet telefonia",
+    hint: "Anatel, linhas pré-pagas no CPF e bloqueio de telemarketing",
   },
   {
     label: "Celular roubado ou perdido",
