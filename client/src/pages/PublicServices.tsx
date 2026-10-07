@@ -1125,7 +1125,7 @@ export default function PublicServices() {
                 Encontre pela sua situação
               </h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {NEED_GROUPS.map(group => (
+                {NEED_GROUPS.slice(0, 6).map(group => (
                   <button
                     key={group.label}
                     type="button"
@@ -1144,6 +1144,32 @@ export default function PublicServices() {
                   </button>
                 ))}
               </div>
+              <details className="mobile-disclosure mt-2">
+                <summary className="min-h-11">
+                  Ver todas as situações ({NEED_GROUPS.length - 6})
+                  <ChevronRight className="size-4" />
+                </summary>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {NEED_GROUPS.slice(6).map(group => (
+                    <button
+                      key={group.label}
+                      type="button"
+                      onClick={() => {
+                        setQuery(group.query);
+                        applyFilters(group.query, "todos");
+                      }}
+                      className="premium-card min-h-20 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:border-accent/45 hover:shadow-md"
+                    >
+                      <span className="block text-sm font-black text-foreground">
+                        {group.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                        {group.hint}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </details>
               <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/[.04] p-4">
                 <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
                   Mapa e deslocamento
