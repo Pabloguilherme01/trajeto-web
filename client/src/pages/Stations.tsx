@@ -20,6 +20,7 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
+import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const toRad = (value: number) => value * Math.PI / 180;
@@ -547,7 +548,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       position => {
         setLocating(false);
         rememberIntent("nearby");
-        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const coords = coarsenCoordinatePoint(
+          { lat: position.coords.latitude, lng: position.coords.longitude },
+          3,
+        );
         setUserCoords(coords);
         setDirectorySort("distance");
         setShowMap(true);
@@ -567,7 +571,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         setLocating(false);
         toast.error("Não foi possível obter sua localização.");
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 },
     );
   };
 
