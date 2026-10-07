@@ -1,5 +1,7 @@
 import { normalizeCatalogText } from "./catalogSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
+import { prepareCityAtlasSearch } from "./cityAtlas";
+import { loadCatalogChunks } from "./catalogChunks";
 
 const parts = import.meta.glob("../data/businesses/part-*.json", { import: "default" });
 export const BUSINESS_CATALOG_TOTAL = 21486;
@@ -43,9 +45,12 @@ export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
 }
 
 export function loadBusinessCatalog(): Promise<CityAtlasItem[]> {
-  if (!pending) pending = Promise.all(Object.values(parts).map(load => load())).then(chunks => {
-    const byId = new Map(chunks.flatMap(normalizeBusinessRows).map(item => [item.id, item]));
-    catalog = [...byId.values()];
+  if (!pending) pending = loadCatalogChunks(Object.values(parts), chunk => {
+    const items = normalizeBusinessRows(chunk);
+    prepareCityAtlasSearch(items);
+    return items;
+  }, item => item.id).then(items => {
+    catalog = items;
     return catalog;
   }).catch(error => { pending = null; throw error; });
   return pending;
