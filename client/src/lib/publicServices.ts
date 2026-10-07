@@ -2163,11 +2163,11 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral",
     actionLabel: "Consultar serviços eleitorais",
     guidance:
-      "Selecione o serviço no portal oficial. A disponibilidade de alteração cadastral e os prazos variam com o calendário eleitoral; confira as regras atuais no TSE antes de iniciar o pedido.",
+      "Entre 07/05/2026 e 02/11/2026, primeiro título, transferência, atualização de dados e regularização de título cancelado estão suspensos por causa do calendário eleitoral. Os demais serviços e certidões continuam disponíveis no TSE.",
     sourceLabel: "Tribunal Superior Eleitoral",
     sourceUrl:
       "https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral",
-    verifiedAt: "06/10/2026",
+    verifiedAt: "07/10/2026",
   },
   {
     id: "consumidor-gov",
@@ -2507,9 +2507,9 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Meu INSS, BPC, incapacidade e salário-maternidade",
   },
   {
-    label: "Documentos e certidões",
-    query: "documento certidao",
-    hint: "CIN, título eleitoral, CTPS e antecedentes",
+    label: "Documentos pessoais",
+    query: "documentos",
+    hint: "CIN, CNH Digital, título, CTPS e antecedentes",
   },
   {
     label: "Celular roubado ou perdido",
