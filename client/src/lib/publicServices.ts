@@ -22,7 +22,8 @@ export type PublicServiceCategory =
   | "empreendedor"
   | "cultura"
   | "esporte"
-  | "juventude";
+  | "juventude"
+  | "transparencia";
 
 export type PublicService = {
   id: string;
@@ -97,6 +98,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "cultura", label: "Cultura e turismo", shortLabel: "Cultura" },
   { id: "esporte", label: "Esporte e lazer", shortLabel: "Esporte" },
   { id: "juventude", label: "Juventude", shortLabel: "Juventude" },
+  { id: "transparencia", label: "Transparência e participação", shortLabel: "Transparência" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -1492,7 +1494,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "sic",
     name: "Serviço de Informação ao Cidadão · SIC",
-    category: "cidadania",
+    category: "transparencia",
     description:
       "Solicite informações públicas e acompanhe a resposta pelo canal oficial.",
     address:
@@ -1515,7 +1517,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     id: "ouvidoria-municipal",
     keywords: ["reclamacao", "reclamar", "problema servico publico"],
     name: "Ouvidoria Municipal",
-    category: "cidadania",
+    category: "transparencia",
     description:
       "Canal para reclamações, sugestões, elogios e denúncias sobre serviços públicos.",
     address: "Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás - GO",
@@ -1533,6 +1535,45 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "01/10/2026",
     mapQuery:
       "Ouvidoria Municipal, Quadra 47, Lote 12, Jardim Brasília, Águas Lindas de Goiás, GO",
+  },
+  {
+    id: "portal-transparencia-municipal",
+    name: "Portal da Transparência · Prefeitura",
+    category: "transparencia",
+    description: "Consulta pública de receitas, despesas, contratos, licitações, obras, diárias, recursos humanos, planejamento e outras informações da Prefeitura.",
+    keywords: ["transparencia", "gastos publicos", "despesas", "receitas", "contratos", "licitacoes", "obras", "diarias", "prestacao contas"],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/transparencia/",
+    actionLabel: "Abrir Portal da Transparência",
+    guidance: "Use os filtros do portal oficial para localizar o assunto desejado. Informações do SIC e da Ouvidoria continuam disponíveis para pedidos, reclamações e acompanhamento.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/transparencia/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "portal-sei-processos",
+    name: "Portal SEI · pesquisar processos e autenticar documentos",
+    category: "transparencia",
+    description: "Portal municipal para pesquisa de processos eletrônicos, autenticação de documentos e acesso de usuário externo ao SEI.",
+    keywords: ["sei", "processo eletronico", "pesquisar processo", "autenticar documento", "usuario externo", "processo administrativo"],
+    actionUrl: "https://portalsei.aguaslindasdegoias.go.gov.br/",
+    actionLabel: "Abrir Portal SEI",
+    guidance: "Use Pesquisa de Processos para localizar informações públicas e Autenticar Documentos para conferir documentos emitidos no SEI. Algumas funções exigem cadastro de usuário externo.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://portalsei.aguaslindasdegoias.go.gov.br/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "legislacao-municipal",
+    name: "Legislação Municipal · leis e atos normativos",
+    category: "transparencia",
+    description: "Base oficial para consultar leis municipais e atos normativos de Águas Lindas de Goiás.",
+    keywords: ["lei municipal", "legislacao", "lei aguas lindas", "ato normativo", "norma municipal", "decreto"],
+    actionUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/",
+    actionLabel: "Consultar legislação municipal",
+    guidance: "Pesquise pelo número, ano ou assunto da norma. Para atos ou publicações específicas, confirme sempre o texto oficial disponível no sistema municipal.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://legislacao.aguaslindasdegoias.go.gov.br/",
+    verifiedAt: "06/10/2026",
   },
   {
     id: "procon",
@@ -2270,6 +2311,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "Reclamação municipal",
     query: "ouvidoria municipal",
     hint: "Ouvidoria e orientação",
+  },
+  {
+    label: "Transparência e SIC",
+    query: "transparencia",
+    hint: "Gastos, processos, leis e acesso à informação",
   },
   {
     label: "Vacina e UBS",

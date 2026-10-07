@@ -89,6 +89,7 @@ const categoryIcons = {
   cultura: Sparkles,
   esporte: Trophy,
   juventude: BadgeCheck,
+  transparencia: Globe2,
 } as const;
 
 const SERVICE_SUMMARY = {
@@ -186,6 +187,11 @@ const NEED_GROUPS = [
     label: "Juventude e primeiro emprego",
     query: "jovem",
     hint: "ID Jovem, aprendizagem profissional e orientação municipal",
+  },
+  {
+    label: "Transparência e participação",
+    query: "transparencia",
+    hint: "SIC, Ouvidoria, gastos públicos, processos e leis",
   },
   {
     label: "Celular roubado ou perdido",
