@@ -7,6 +7,19 @@ import {
 } from "./publicServices";
 
 describe("public services catalog", () => {
+  it("finds financial needs locally and keeps banking data in official external services", () => {
+    expect(searchPublicServices("dinheiro esquecido").map(service => service.id)).toContain("valores-a-receber-bc");
+    expect(searchPublicServices("conta desconhecida").map(service => service.id)).toContain("registrato-contas-ccs");
+    expect(searchPublicServices("dividas banco").map(service => service.id)).toContain("registrato-emprestimos-scr");
+    const services = searchPublicServices("", "financas");
+    expect(services).toHaveLength(4);
+    for (const service of services) {
+      expect(service.sourceLabel).toBe("Banco Central do Brasil");
+      expect(new URL(service.actionUrl!).hostname).toMatch(/(^|\.)bcb\.gov\.br$/);
+      expect(service.mapQuery).toBeUndefined();
+      expect(service.address).toBeUndefined();
+    }
+  });
   it.each([
     ["Receita Federal", "receita-federal-pav"],
     ["CPF", "receita-federal-pav"],
@@ -165,7 +178,7 @@ describe("public services catalog", () => {
         item => item.id === "upa-mansoes-odisseia"
       )
     ).toBe(true);
-    expect(searchPublicServices("nao existe", "todos")).toEqual([]);
+    expect(searchPublicServices("zzzzsemresultado", "todos")).toEqual([]);
   });
   it("covers verified federal tax help and emergency intent without inventing local details", () => {
     const receita = searchPublicServices("receita federal")[0];

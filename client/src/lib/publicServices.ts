@@ -32,7 +32,8 @@ export type PublicServiceCategory =
   | "agua-energia"
   | "telecom"
   | "previdencia"
-  | "documentos";
+  | "documentos"
+  | "financas";
 
 export type PublicService = {
   id: string;
@@ -57,6 +58,7 @@ export type PublicService = {
     | "SEDUC Goiás"
     | "Ministério da Educação"
     | "Enap"
+    | "Banco Central do Brasil"
     | "SES-GO"
     | "SEAD Goiás"
     | "Ministério das Mulheres"
@@ -101,6 +103,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "educacao", label: "Educação", shortLabel: "Educação" },
   { id: "ensino-superior", label: "Faculdade e bolsas", shortLabel: "Faculdade" },
   { id: "capacitacao", label: "Cursos e qualificação", shortLabel: "Cursos" },
+  { id: "financas", label: "Finanças e bancos", shortLabel: "Finanças" },
   { id: "cidadania", label: "Cidadania", shortLabel: "Cidadania" },
   { id: "trabalho", label: "Trabalho e renda", shortLabel: "Trabalho" },
   { id: "moradia", label: "Moradia", shortLabel: "Moradia" },
@@ -2862,9 +2865,67 @@ export const PUBLIC_SERVICES: PublicService[] = [
     sourceUrl: "https://www.gov.br/pt-br/servicos/inscrever-se-em-cursos-autoinstrucionais-na-escola-virtual-de-governo",
     verifiedAt: "07/10/2026",
   },
+  {
+    id: "valores-a-receber-bc",
+    name: "Valores a Receber · dinheiro esquecido",
+    category: "financas",
+    description: "Consulte no Banco Central se existem valores a receber de bancos, consórcios ou outras instituições, em seu nome, de sua empresa ou de pessoa falecida.",
+    keywords: ["valores a receber", "dinheiro esquecido", "saldo esquecido", "banco central", "svr"],
+    actionUrl: "https://valoresareceber.bcb.gov.br/",
+    actionLabel: "Consultar Valores a Receber",
+    guidance: "Faça a consulta somente no site oficial. Para acessar valores e solicitações, o sistema exige conta gov.br prata ou ouro com verificação em duas etapas. Confira no canal oficial as regras para empresas e pessoas falecidas. O Trajeto não solicita CPF, senha, Pix ou pagamento para liberar valores.",
+    sourceLabel: "Banco Central do Brasil",
+    sourceUrl: "https://www.bcb.gov.br/meubc/valores-a-receber",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "registrato-emprestimos-scr",
+    name: "Registrato · empréstimos e financiamentos",
+    category: "financas",
+    description: "Consulte o relatório SCR para conferir dívidas e operações de crédito registradas por bancos e financeiras, inclusive contratos que você não reconhece.",
+    keywords: ["registrato", "emprestimos", "financiamentos", "dividas banco", "scr", "credito", "banco central"],
+    actionUrl: "https://meubc.bcb.gov.br/",
+    actionLabel: "Consultar relatório SCR",
+    documents: ["Conta gov.br prata ou ouro com verificação em duas etapas; empresas devem conferir também o certificado digital exigido no canal oficial"],
+    guidance: "Acesse o relatório sigiloso diretamente no Meu BC. O Trajeto não recebe contratos nem dados bancários. Se encontrar uma operação que não reconhece, procure a instituição responsável e consulte as orientações oficiais do Banco Central.",
+    sourceLabel: "Banco Central do Brasil",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/obter-relatorio-do-sistema-de-informacoes-de-credito-scr",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "registrato-contas-ccs",
+    name: "Registrato · contas e relacionamentos bancários",
+    category: "financas",
+    description: "Emita o relatório CCS para consultar em quais bancos e instituições você tem ou teve relacionamento. O relatório não informa saldo nem movimentações.",
+    keywords: ["registrato", "contas bancarias", "conta desconhecida", "relacionamentos bancos", "ccs", "banco central"],
+    actionUrl: "https://meubc.bcb.gov.br/",
+    actionLabel: "Consultar relatório CCS",
+    guidance: "Consulte as condições de acesso no Meu BC e emita o relatório diretamente no serviço oficial. Se identificar relacionamento desconhecido, entre em contato com a instituição informada. Seus dados bancários não são coletados pelo Trajeto.",
+    sourceLabel: "Banco Central do Brasil",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/gerar-relatorio-de-contas-e-investimentos-ccs",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "reclamacao-bancos-bc",
+    name: "Banco Central · reclamar contra bancos",
+    category: "financas",
+    description: "Registre e acompanhe reclamação contra instituições supervisionadas pelo Banco Central, como bancos, financeiras e administradoras de consórcios.",
+    keywords: ["reclamacao banco", "reclamar banco", "cobranca bancaria", "consorcio", "banco central", "problema pix"],
+    actionUrl: "https://www.bcb.gov.br/meubc/registrar_reclamacao",
+    actionLabel: "Registrar reclamação no BC",
+    guidance: "Guarde os protocolos do atendimento e da ouvidoria da instituição. O acesso de pessoa física exige gov.br prata ou ouro com verificação em duas etapas. A resposta é enviada pela instituição reclamada; o Banco Central não resolve o contrato individual nem garante a solução do caso. Confira também Procon e Consumidor.gov.br.",
+    sourceLabel: "Banco Central do Brasil",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/registrar-reclamacao-contra-instituicao-supervisionada-pelo-banco-central",
+    verifiedAt: "07/10/2026",
+  },
 ];
 
 export const PUBLIC_SERVICE_SHORTCUTS = [
+  {
+    label: "Dinheiro esquecido",
+    query: "valores a receber",
+    hint: "Consulta oficial no Banco Central",
+  },
   {
     label: "Água e segunda via",
     query: "conta agua",

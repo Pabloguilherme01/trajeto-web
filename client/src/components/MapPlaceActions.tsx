@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Copy, Share2, Ruler, X, Navigation } from "lucide-react";
 import type { StationMapItem } from "./StationMap";
 import { buildDestinationPlannerUrl } from "@/lib/tripLinks";
-import { buildOrganicMapsNavigationUrl } from "@/lib/mobileTools";
+import { buildOrganicMapsNavigationUrl, buildOrganicMapsSearchUrl } from "@/lib/mobileTools";
 import OrganicMapsModeSelect, { type OrganicMapsMode } from "./OrganicMapsModeSelect";
 
 /** Share the named destination only; never append the user's GPS to a link. */
@@ -38,8 +38,9 @@ export default function MapPlaceActions({ place }: { place: StationMapItem }) {
     }
   };
   const openOrganicMaps = () => {
-    if (!validPoint(place)) return;
-    const url = buildOrganicMapsNavigationUrl({ lat: place.lat!, lng: place.lng! }, place.name, navigationMode);
+    const url = validPoint(place)
+      ? buildOrganicMapsNavigationUrl({ lat: place.lat!, lng: place.lng! }, place.name, navigationMode)
+      : buildOrganicMapsSearchUrl(destination);
     if (!url) return;
     window.location.href = url;
   };
@@ -53,7 +54,7 @@ export default function MapPlaceActions({ place }: { place: StationMapItem }) {
     <div className="flex flex-wrap gap-2 [&>button]:flex-1 [&>button]:basis-32">
       <button type="button" onClick={() => void share()} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.06] px-2 text-xs font-bold text-primary"><Share2 className="size-4 shrink-0" />Compartilhar</button>
       <button type="button" disabled={!place.address} onClick={() => void copy()} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-border/15 bg-background px-2 text-xs font-bold text-foreground/80 disabled:opacity-40"><Copy className="size-4 shrink-0" />Copiar endereço</button>
-      {validPoint(place) && <button type="button" onClick={openOrganicMaps} className="flex min-h-11 min-w-0 flex-1 basis-full items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-xs font-bold text-accent min-[360px]:basis-32"><Navigation className="size-4 shrink-0" />Organic Maps</button>}
+      <button type="button" onClick={openOrganicMaps} className="flex min-h-11 min-w-0 flex-1 basis-full items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-xs font-bold text-accent min-[360px]:basis-32"><Navigation className="size-4 shrink-0" />{validPoint(place) ? "Organic Maps" : "Buscar no Organic Maps"}</button>
     </div>
     {!measureFrom && validPoint(place) && <button type="button" onClick={() => setMeasureFrom(place)} className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border/15 bg-background px-2 text-xs font-bold text-foreground/80"><Ruler className="size-4" />Medir a partir daqui</button>}
     {measureFrom && <div className="mt-2 rounded-xl border border-border/10 bg-muted/[.04] p-3">

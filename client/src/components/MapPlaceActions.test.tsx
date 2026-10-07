@@ -46,3 +46,14 @@ it("uses the selected mode when opening a public place in Organic Maps", () => {
   fireEvent.click(screen.getByRole("button", { name: "Organic Maps" }));
   expect(build).toHaveBeenCalledWith({ lat: place.lat, lng: place.lng }, place.name, "bike");
 });
+
+it("offers a named Organic Maps search for a place without confirmed coordinates", () => {
+  const search = vi.spyOn(mobileTools, "buildOrganicMapsSearchUrl").mockReturnValue("");
+  const navigate = vi.spyOn(mobileTools, "buildOrganicMapsNavigationUrl");
+  render(<MapPlaceActions place={{ ...place, lat: undefined, lng: undefined }} />);
+  fireEvent.click(screen.getByRole("button", { name: "Buscar no Organic Maps" }));
+  expect(search).toHaveBeenCalledWith("UPA · Rua Pública");
+  expect(navigate).not.toHaveBeenCalled();
+  expect(screen.queryByRole("combobox")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Medir a partir daqui" })).toBeNull();
+});

@@ -78,6 +78,7 @@ const categoryIcons = {
   educacao: BookOpen,
   "ensino-superior": BookOpen,
   capacitacao: BookOpen,
+  financas: Landmark,
   cidadania: Landmark,
   trabalho: BriefcaseBusiness,
   moradia: Building2,
@@ -808,6 +809,7 @@ export default function PublicServices() {
       service.extraPhone && "Outros contatos: " + service.extraPhone,
       service.hours,
       service.guidance,
+      service.documents?.length && "Documentos: " + service.documents.join("; "),
       service.whatsappOnly?.length &&
         "Somente WhatsApp: " + service.whatsappOnly.join(" / "),
       "Fonte: " + service.sourceUrl,
@@ -1065,7 +1067,7 @@ export default function PublicServices() {
             </summary>
           <div
             role="group"
-            className="mobile-scroll-x -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
+            className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -1075,16 +1077,16 @@ export default function PublicServices() {
                 aria-pressed={category === item.id}
                 onClick={() => applyCategory(item.id)}
                 className={
-                  "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-sm font-black transition " +
+                  "inline-flex min-h-12 min-w-0 items-center justify-between gap-2 rounded-xl border px-2 py-2 text-left text-xs font-bold transition sm:px-3 sm:text-sm " +
                   (category === item.id
                     ? "border-primary/35 bg-primary/10 text-primary shadow-sm"
                     : "border-border/8 bg-muted/[.025] text-foreground/75 hover:border-border/15 hover:text-foreground")
                 }
               >
-                <span>{item.label}</span>
+                <span className="min-w-0 break-words">{item.label}</span>
                 <span
                   aria-hidden="true"
-                  className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.68rem] tabular-nums"
+                  className="shrink-0 rounded-full bg-background/70 px-1.5 py-0.5 text-[0.68rem] tabular-nums"
                 >
                   {item.id === "todos"
                     ? PUBLIC_SERVICES.length
@@ -1443,7 +1445,7 @@ export default function PublicServices() {
               </div>
               {PUBLIC_SERVICE_SHORTCUTS.length > 7 && (
                 <details className="mobile-disclosure mt-5">
-                  <summary id="citizen-shortcuts-title" className="min-h-11">
+                  <summary className="min-h-11">
                     Mais atalhos úteis ({PUBLIC_SERVICE_SHORTCUTS.length - 7})
                     <ChevronRight className="size-4" />
                   </summary>
@@ -2004,7 +2006,9 @@ export default function PublicServices() {
                 )}
                 {!service.mapQuery && (
                   <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                    Sem destino confirmado para rota neste catálogo.
+                    {service.actionUrl
+                      ? "Canal digital · acesse o serviço no site oficial."
+                      : "Sem destino confirmado para rota neste catálogo."}
                   </p>
                 )}
                 {service.hours && (
@@ -2019,8 +2023,8 @@ export default function PublicServices() {
                 >
                   <summary className="min-h-11">
                     <span className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-accent" /> Antes de
-                      sair
+                      <CheckCircle2 className="size-4 text-accent" />
+                      {!service.mapQuery && service.actionUrl ? "Antes de acessar" : "Antes de sair"}
                     </span>
                     <ChevronRight className="size-4" />
                   </summary>
