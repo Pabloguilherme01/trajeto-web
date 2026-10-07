@@ -143,6 +143,7 @@ export default function TileStationMap({
   );
   const [size, setSize] = useState({ width: 320, height: 520 });
   const [tileErrors, setTileErrors] = useState(0);
+  const [tileRetryGeneration, setTileRetryGeneration] = useState(0);
   const reportTileError = (key: string) => {
     if (failedTileKeys.current.has(key)) return;
     failedTileKeys.current.add(key);
@@ -155,6 +156,7 @@ export default function TileStationMap({
   const resetTileFailures = () => {
     failedTileKeys.current.clear();
     setTileErrors(0);
+    setTileRetryGeneration(value => value + 1);
   };
   const [dragging, setDragging] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
@@ -672,7 +674,7 @@ export default function TileStationMap({
           >
             {tiles.map(tile => (
               <img
-                key={tile.key}
+                key={`${tile.key}:${tileRetryGeneration}`}
                 src={tileUrl(tileZoom, tile.x, tile.y)}
                 referrerPolicy="origin"
                 decoding="async"
