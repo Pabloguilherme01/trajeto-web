@@ -2449,6 +2449,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Anatel, linhas no CPF e bloqueio de telemarketing",
   },
   {
+    label: "INSS e benefícios",
+    query: "inss beneficio",
+    hint: "Meu INSS, BPC, incapacidade e salário-maternidade",
+  },
+  {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
     hint: "Bloqueio oficial pelo gov.br",
