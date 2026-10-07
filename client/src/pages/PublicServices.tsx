@@ -115,6 +115,8 @@ const SERVICE_SUMMARY = {
     .length,
 } as const;
 
+const SERVICE_BATCH_SIZE = 18;
+
 const SERVICE_CATEGORY_COUNTS = PUBLIC_SERVICES.reduce<Record<string, number>>(
   (counts, service) => {
     counts[service.category] = (counts[service.category] ?? 0) + 1;
@@ -162,7 +164,7 @@ const NEED_GROUPS = [
   {
     label: "Faculdade e bolsas de estudo",
     query: "ensino superior",
-    hint: "Sisu, vagas públicas e bolsas do Prouni no canal do MEC",
+    hint: "Sisu, bolsas do Prouni e financiamento do Fies no MEC",
   },
   {
     label: "Transporte escolar",
@@ -540,6 +542,7 @@ export default function PublicServices() {
     "drive" | "walk" | "bike"
   >("drive");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
+  const [serviceLimit, setServiceLimit] = useState(SERVICE_BATCH_SIZE);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
     service => service.id === params.get("servico")
@@ -679,6 +682,13 @@ export default function PublicServices() {
         Number(favoriteIds.has(b.id)) - Number(favoriteIds.has(a.id))
     );
   }, [query, category, selectedService, savedOnly, favoriteIds, resource]);
+
+  useEffect(() => {
+    setServiceLimit(SERVICE_BATCH_SIZE);
+  }, [browsing]);
+  // Search, category filters, favorites and direct links expose every match.
+  // Only the unfiltered directory mounts cards in batches on first entry.
+  const displayedServices = browsing ? results.slice(0, serviceLimit) : results;
 
   useEffect(() => {
     const targetId = selectedService
@@ -1827,6 +1837,9 @@ export default function PublicServices() {
           className="mt-4 text-sm text-foreground/70"
         >
           {results.length} serviços encontrados
+          {browsing && displayedServices.length < results.length && (
+            <span> · {displayedServices.length} exibidos</span>
+          )}
         </p>
         <section
           id="service-results"
@@ -1837,7 +1850,7 @@ export default function PublicServices() {
           }
           aria-label="Serviços públicos"
         >
-          {results.map(service => {
+          {displayedServices.map(service => {
             const Icon = categoryIcons[service.category];
             const contacts = publicServiceContacts(service);
             const primaryContact = contacts[0];
@@ -2271,6 +2284,18 @@ export default function PublicServices() {
             );
           })}
         </section>
+
+        {browsing && displayedServices.length < results.length && (
+          <button
+            type="button"
+            aria-controls="service-results"
+            onClick={() => setServiceLimit(limit => limit + SERVICE_BATCH_SIZE)}
+            className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-card px-4 py-3 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            Mostrar mais {Math.min(SERVICE_BATCH_SIZE, results.length - displayedServices.length)} serviços
+            <ChevronRight className="size-4 shrink-0" />
+          </button>
+        )}
 
         {!results.length && (
           <section className="premium-card mt-5 rounded-3xl border border-border/8 bg-card p-6 text-center">

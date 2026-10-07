@@ -1,4 +1,4 @@
-import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
+import { createCatalogSearchIndex, matchesCatalogTerms, normalizeCatalogText } from "./catalogSearch";
 
 export type PublicServiceCategory =
   | "saude"
@@ -2813,6 +2813,32 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
 
   {
+    id: "pe-de-meia",
+    name: "Pé-de-Meia · consulta do estudante",
+    category: "educacao",
+    description: "Canal oficial do MEC para consultar a participação do estudante no programa Pé-de-Meia e acompanhar as informações disponíveis.",
+    keywords: ["pe de meia", "pé-de-meia", "incentivo estudante", "ensino medio", "pagamento estudante", "beneficio escolar"],
+    actionUrl: "https://estudante.pedemeia.mec.gov.br/",
+    actionLabel: "Consultar Pé-de-Meia",
+    guidance: "A consulta exige internet e acesso com a conta gov.br no portal do MEC. Confira a situação e os canais de atendimento oficiais; o Trajeto não coleta seus dados de estudante nem confirma elegibilidade ou pagamento.",
+    sourceLabel: "Ministério da Educação",
+    sourceUrl: "https://estudante.pedemeia.mec.gov.br/",
+    verifiedAt: "07/10/2026",
+  },
+  {
+    id: "fies",
+    name: "Fies · financiamento estudantil",
+    category: "ensino-superior",
+    description: "Informações oficiais do MEC sobre financiamento de cursos em instituições privadas de ensino superior e acesso ao processo seletivo.",
+    keywords: ["fies", "financiamento estudantil", "faculdade", "ensino superior", "universidade particular", "enem"],
+    actionUrl: "https://www.gov.br/pt-br/servicos/obter-financiamento-do-fies",
+    actionLabel: "Consultar financiamento do Fies",
+    guidance: "Fies é financiamento, com obrigações contratuais. Confira edital, prazos, requisitos e condições no canal oficial antes de solicitar. Para bolsas de estudo, consulte também o Prouni. O acesso ao processo seletivo precisa de internet.",
+    sourceLabel: "Ministério da Educação",
+    sourceUrl: "https://www.gov.br/pt-br/servicos/obter-financiamento-do-fies",
+    verifiedAt: "07/10/2026",
+  },
+  {
     id: "sisu",
     name: "Sisu · vagas em universidades públicas",
     category: "ensino-superior",
@@ -3175,6 +3201,23 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
   },
 ] as const;
 
+// The catalog is a bundled snapshot. Normalize its three search scopes once,
+// rather than rebuilding text and token sets for every service on each keypress.
+const SERVICE_SEARCH_INDEX = PUBLIC_SERVICES.map(service => {
+  const concise = [service.name, service.category, service.actionLabel, ...(service.keywords ?? [])];
+  const complete = [
+    service.name, service.description, service.address, service.phone,
+    service.extraPhone, service.guidance, service.actionLabel, service.hours,
+    ...(service.keywords ?? []),
+  ];
+  return {
+    service,
+    concise: createCatalogSearchIndex(concise),
+    complete: createCatalogSearchIndex(complete),
+    withCategory: createCatalogSearchIndex([...complete, service.category]),
+  };
+});
+
 export function searchPublicServices(
   query = "",
   category: PublicServiceCategory | "todos" = "todos"
@@ -3187,33 +3230,16 @@ export function searchPublicServices(
       term => !["de", "da", "do", "das", "dos", "e", "para"].includes(term)
     )
     .join(" ");
-  return PUBLIC_SERVICES.filter(service => {
+  const terms = search.replace(/[ºª]/g, "").split(" ").filter(Boolean);
+  const conciseIntent = /^[a-z0-9]{2,4}$/.test(search);
+  const includeCategoryIntent = terms.length <= 2;
+  return SERVICE_SEARCH_INDEX.filter(entry => {
+    const { service } = entry;
     if (category !== "todos" && service.category !== category) return false;
     // Exact agency searches should stay concise even when other services
     // mention the agency only as referral guidance.
     if (search === "cras" && !service.id.startsWith("cras-")) return false;
     if (search === "cpf" && service.id !== "receita-federal-pav") return false;
-    const conciseIntent = /^[a-z0-9]{2,4}$/.test(search);
-    if (conciseIntent) {
-      return matchesCatalogText(search, [
-        service.name,
-        service.category,
-        service.actionLabel,
-        ...(service.keywords ?? []),
-      ]);
-    }
-    const includeCategoryIntent = search.split(" ").filter(Boolean).length <= 2;
-    return matchesCatalogText(search, [
-      service.name,
-      service.description,
-      service.address,
-      service.phone,
-      service.extraPhone,
-      ...(includeCategoryIntent ? [service.category] : []),
-      service.guidance,
-      service.actionLabel,
-      service.hours,
-      ...(service.keywords ?? []),
-    ]);
-  });
+    return matchesCatalogTerms(terms, conciseIntent ? entry.concise : includeCategoryIntent ? entry.withCategory : entry.complete);
+  }).map(entry => entry.service);
 }

@@ -8,6 +8,27 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   Element.prototype.scrollIntoView = vi.fn();
 });
+it("opens the directory in batches and keeps search results complete", async () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar mais 18 serviços" }));
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(36);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar serviços públicos" }), { target: { value: "ESF" } });
+  expect(screen.getByRole("heading", { name: "ESF Setor 09" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
+}, 15000);
+
+it("reports the same destination count that each ready-route group displays", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  const groups = screen.getAllByRole("button", { name: /^Filtrar rotas:/ });
+  for (const group of groups) {
+    const expectedCount = Number(group.getAttribute("aria-label")?.match(/· (\d+) destinos/)?.[1]);
+    fireEvent.click(group);
+    expect(document.querySelectorAll("#ready-routes article")).toHaveLength(expectedCount);
+  }
+}, 15000);
 it("recovers a search hidden by category without losing the term", async () => {
   window.history.replaceState({}, "", "/servicos?q=anatel&categoria=saude");
   render(<PublicServices />);
@@ -69,7 +90,8 @@ it("shows the new official higher education services in their category", () => {
   render(<PublicServices />);
   expect(screen.getByRole("heading", { name: "Sisu · vagas em universidades públicas" })).toBeTruthy();
   expect(screen.getByRole("heading", { name: "Prouni · bolsas em faculdades particulares" })).toBeTruthy();
-  expect(document.querySelectorAll("#service-results article")).toHaveLength(2);
+  expect(screen.getByRole("heading", { name: "Fies · financiamento estudantil" })).toBeTruthy();
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(3);
 });
 
 

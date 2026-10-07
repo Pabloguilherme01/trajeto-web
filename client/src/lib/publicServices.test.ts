@@ -7,6 +7,17 @@ import {
 } from "./publicServices";
 
 describe("public services catalog", () => {
+  it.each([
+    ["pé de meia", "pe-de-meia", "estudante.pedemeia.mec.gov.br"],
+    ["financiamento estudantil", "fies", "www.gov.br"],
+  ])("finds %s offline and routes personal queries to the official channel", (query, id, hostname) => {
+    const service = searchPublicServices(query).find(item => item.id === id);
+    expect(service).toBeDefined();
+    expect(new URL(service!.actionUrl!).hostname).toBe(hostname);
+    expect(service!.sourceLabel).toBe("Ministério da Educação");
+    expect(service!.mapQuery).toBeUndefined();
+    expect(service!.phone).toBeUndefined();
+  });
   it("finds financial needs locally and keeps banking data in official external services", () => {
     expect(searchPublicServices("dinheiro esquecido").map(service => service.id)).toContain("valores-a-receber-bc");
     expect(searchPublicServices("conta desconhecida").map(service => service.id)).toContain("registrato-contas-ccs");
