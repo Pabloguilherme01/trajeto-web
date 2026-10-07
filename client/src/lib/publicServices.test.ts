@@ -22,6 +22,14 @@ describe("public services catalog", () => {
     expect(results[0].mapQuery).toBeUndefined();
     expect(results[0].address).toBeUndefined();
   });
+  it("keeps short acronym searches focused on explicit service metadata", () => {
+    expect(searchPublicServices("CPF").map(item => item.id)).toEqual(["receita-federal-pav"]);
+    expect(searchPublicServices("CPF").some(item => item.id === "id-jovem")).toBe(false);
+    expect(searchPublicServices("MEI").map(item => item.id)).toEqual(
+      expect.arrayContaining(["sala-empreendedor", "portal-empreendedor-mei"])
+    );
+  });
+
   it("finds both Receita Federal and REDESIM for CNPJ without inventing a local route", () => {
     const results = searchPublicServices("CNPJ");
     expect(results.map(item => item.id)).toEqual(
