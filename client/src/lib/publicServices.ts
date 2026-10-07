@@ -2722,6 +2722,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     hint: "Orientação jurídica gratuita",
   },
   {
+    label: "Processo e Justiça",
+    query: "processo justica",
+    hint: "Balcão Virtual, consulta processual e Defensoria",
+  },
+  {
     label: "Passe Livre PCD",
     query: "passe livre",
     hint: "Gratuidade intermunicipal em Goiás",
