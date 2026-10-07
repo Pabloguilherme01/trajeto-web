@@ -219,6 +219,11 @@ const NEED_GROUPS = [
     hint: "CIN, título eleitoral, CTPS e antecedentes",
   },
   {
+    label: "Processo e Justiça",
+    query: "processo justica",
+    hint: "Balcão Virtual, consulta processual e Defensoria",
+  },
+  {
     label: "Celular roubado ou perdido",
     query: "celular seguro",
     hint: "Bloqueio oficial, BO e proteção do aparelho",
