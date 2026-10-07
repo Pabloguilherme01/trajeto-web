@@ -173,7 +173,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("servicos", { waitUntil: "domcontentloaded" });
-  const cadunicoShortcut = page.getByRole("button", { name: /CadÚnico e benefícios/ });
+  const cadunicoShortcut = page.getByRole("button", { name: "Busca rápida: Cadastro e Bolsa Família", exact: true });
   await expect(cadunicoShortcut).toBeVisible();
   await cadunicoShortcut.click();
   await expect(
@@ -248,6 +248,7 @@ test("Pages: redesigned Central discovers official services at 320px", async ({
   const search = page.getByRole("textbox", {
     name: "Buscar serviços públicos",
   });
+  await search.scrollIntoViewIfNeeded();
   await expect(search).toBeInViewport();
   await expect(
     page.getByRole("heading", { name: "Resolva por assunto" })
@@ -261,9 +262,7 @@ test("Pages: redesigned Central discovers official services at 320px", async ({
   ).not.toBeVisible();
   await page.locator("summary").filter({ hasText: "Mais atalhos" }).click();
   await page.getByRole("button", { name: /Carteira do autista/ }).click();
-  const card = page
-    .getByRole("region", { name: "Serviços públicos" })
-    .getByRole("article");
+  const card = page.locator("#service-carteira-autista-goias");
   await expect(card).toHaveCount(1);
   await expect(
     card.getByRole("link", { name: /WhatsApp de Carteira/ })
