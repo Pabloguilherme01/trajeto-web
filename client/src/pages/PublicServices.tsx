@@ -415,7 +415,7 @@ const READY_ROUTE_GROUPS_BASE = [
   },
 ] as const;
 
-const READY_ROUTE_GROUPED_IDS = new Set(
+const READY_ROUTE_GROUPED_IDS = new Set<string>(
   READY_ROUTE_GROUPS_BASE.flatMap(group => [...group.ids])
 );
 
