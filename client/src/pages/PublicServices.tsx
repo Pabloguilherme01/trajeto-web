@@ -1469,88 +1469,7 @@ export default function PublicServices() {
                     />
                   </button>
                 </div>
-                <div
-                  className="mt-3 flex flex-wrap gap-1.5 text-xs font-bold text-muted-foreground"
-                  aria-label="Recursos deste serviço"
-                >
-                  {contacts.length > 0 && (
-                    <span className="rounded-lg bg-muted px-2 py-1">
-                      {contacts.length}{" "}
-                      {contacts.length === 1 ? "contato" : "contatos"}
-                    </span>
-                  )}
-                  {service.mapQuery && (
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
-                      <Navigation className="size-3.5" /> rota + navegadores
-                    </span>
-                  )}
-                  {service.actionUrl ? (
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
-                      <Globe2 className="size-3.5" /> canal externo exige
-                      internet
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
-                      <WifiOff className="size-3.5" /> ficha disponível offline
-                    </span>
-                  )}
-                  {service.verifiedAt && (
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-accent/[.06] px-2 py-1 text-accent">
-                      <BadgeCheck className="size-3.5" /> conferido{" "}
-                      {service.verifiedAt}
-                    </span>
-                  )}
-                </div>
-                {service.address && (
-                  <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-foreground/70">
-                    <MapPinned className="mt-0.5 size-4 shrink-0 text-accent" />
-                    <span>{service.address}</span>
-                  </p>
-                )}
-                {!service.mapQuery && (
-                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                    Sem destino confirmado para rota neste catálogo.
-                  </p>
-                )}
-                {service.hours && (
-                  <p className="mt-3 flex items-start gap-2 text-sm font-bold text-foreground/75">
-                    <Clock3 className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <span>{service.hours}</span>
-                  </p>
-                )}
-                <details
-                  className="mobile-disclosure mt-3"
-                  open={expandedActions || undefined}
-                >
-                  <summary className="min-h-11">
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-accent" /> Antes de
-                      sair
-                    </span>
-                    <ChevronRight className="size-4" />
-                  </summary>
-                  <div className="space-y-3 text-sm leading-relaxed text-foreground">
-                    <p>{servicePreparationHint(service)}</p>
-                    {service.documents?.length ? (
-                      <div>
-                        <p className="font-bold">
-                          Documentos informados para este serviço
-                        </p>
-                        <ul className="mt-2 list-disc space-y-1 pl-5">
-                          {service.documents.map(document => (
-                            <li key={document}>{document}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Esta ficha não presume documentos. Confira os requisitos
-                        no canal oficial antes do atendimento.
-                      </p>
-                    )}
-                  </div>
-                </details>
-                <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                <div aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                   {showOfficialAction && service.actionUrl && resource === "online" && (
                     <a
                       href={service.actionUrl}
@@ -1641,6 +1560,87 @@ export default function PublicServices() {
                     </button>
                   )}
                 </div>
+                <div
+                  className="mt-3 flex flex-wrap gap-1.5 text-xs font-bold text-muted-foreground"
+                  aria-label="Recursos deste serviço"
+                >
+                  {contacts.length > 0 && (
+                    <span className="rounded-lg bg-muted px-2 py-1">
+                      {contacts.length}{" "}
+                      {contacts.length === 1 ? "contato" : "contatos"}
+                    </span>
+                  )}
+                  {service.mapQuery && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
+                      <Navigation className="size-3.5" /> rota + navegadores
+                    </span>
+                  )}
+                  {service.actionUrl ? (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
+                      <Globe2 className="size-3.5" /> canal externo exige
+                      internet
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
+                      <WifiOff className="size-3.5" /> ficha disponível offline
+                    </span>
+                  )}
+                  {service.verifiedAt && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-accent/[.06] px-2 py-1 text-accent">
+                      <BadgeCheck className="size-3.5" /> conferido{" "}
+                      {service.verifiedAt}
+                    </span>
+                  )}
+                </div>
+                {service.address && (
+                  <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-foreground/70">
+                    <MapPinned className="mt-0.5 size-4 shrink-0 text-accent" />
+                    <span>{service.address}</span>
+                  </p>
+                )}
+                {!service.mapQuery && (
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                    Sem destino confirmado para rota neste catálogo.
+                  </p>
+                )}
+                {service.hours && (
+                  <p className="mt-3 flex items-start gap-2 text-sm font-bold text-foreground/75">
+                    <Clock3 className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span>{service.hours}</span>
+                  </p>
+                )}
+                <details
+                  className="mobile-disclosure mt-3"
+                  open={expandedActions || undefined}
+                >
+                  <summary className="min-h-11">
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 text-accent" /> Antes de
+                      sair
+                    </span>
+                    <ChevronRight className="size-4" />
+                  </summary>
+                  <div className="space-y-3 text-sm leading-relaxed text-foreground">
+                    <p>{servicePreparationHint(service)}</p>
+                    {service.documents?.length ? (
+                      <div>
+                        <p className="font-bold">
+                          Documentos informados para este serviço
+                        </p>
+                        <ul className="mt-2 list-disc space-y-1 pl-5">
+                          {service.documents.map(document => (
+                            <li key={document}>{document}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Esta ficha não presume documentos. Confira os requisitos
+                        no canal oficial antes do atendimento.
+                      </p>
+                    )}
+                  </div>
+                </details>
                 {showSecondaryContacts && (
                   <div className="mt-2 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                     {secondaryContacts.map(contact => (
