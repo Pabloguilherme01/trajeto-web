@@ -46,9 +46,8 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("const showSecondaryContacts");
     expect(source).toContain("expandedActions || emergencyDirect");
     expect(source).toContain("const showOfficialAction");
-    expect(source).toContain(
-      "expandedActions || (!primaryContact && !service.mapQuery)"
-    );
+    expect(source).toContain('resource === "online"');
+    expect(source).toContain("(!primaryContact && !service.mapQuery)");
     expect(source).toContain("const hasMoreOptions");
     expect(source).toContain("!showOfficialAction");
     expect(source).toContain("!showSecondaryContacts");
