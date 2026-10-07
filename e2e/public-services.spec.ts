@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+test("filtro de contato prioriza telefone no card mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?q=detran&recurso=contato", { waitUntil: "domcontentloaded" });
+  const card = page.locator("article").filter({ hasText: "Detran-GO · CNH, veículo e licenciamento" });
+  const actions = card.locator("a, button");
+  await expect(actions.filter({ hasText: /Ligar/i }).first()).toBeVisible();
+});
+
 test("filtro online expõe a ação digital principal no card", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos?q=detran&recurso=online", { waitUntil: "domcontentloaded" });

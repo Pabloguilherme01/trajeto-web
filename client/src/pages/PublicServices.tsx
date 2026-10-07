@@ -1581,6 +1581,7 @@ export default function PublicServices() {
                       }
                       className={
                         "inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " +
+                        (resource === "contato" ? "order-first min-[380px]:col-span-2 " : "") +
                         (!service.mapQuery ? "min-[380px]:col-span-2" : "")
                       }
                     >
