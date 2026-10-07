@@ -506,6 +506,17 @@ describe("public services catalog", () => {
     expect(searchPublicServices("falecimento").map(item => item.id)).toEqual(\n      expect.arrayContaining(["auxilio-funeral-municipal", "controle-obitos-sepultamentos"])\n    );
   });
 
+  it("keeps current Conselho Tutelar contacts and child-protection searches discoverable", () => {
+    const service = PUBLIC_SERVICES.find(item => item.id === "conselho-tutelar")!;
+    expect(service.phone).toBe("(61) 99303-8040");
+    expect(service.extraPhone).toBeUndefined();
+    expect(service.email).toBe("conselhotutelar@aguaslindasdegoias.go.gov.br");
+    expect(service.address).toContain("Quadra 11, Lote 13");
+    expect(service.verifiedAt).toBe("07/10/2026");
+    for (const query of ["maus tratos", "abandono", "violencia infantil", "violencia sexual"])
+      expect(searchPublicServices(query).map(item => item.id)).toContain("conselho-tutelar");
+  });
+
   it("groups current sport services without assuming open enrollment or inventing locations", () => {
     expect(searchPublicServices("", "esporte").map(item => item.id)).toEqual(
       expect.arrayContaining(["secretaria-esporte-lazer", "projeto-multiesportes"])
