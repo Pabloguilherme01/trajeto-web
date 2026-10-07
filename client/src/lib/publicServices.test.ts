@@ -39,10 +39,11 @@ describe("public services catalog", () => {
   });
   it("finds serviços without accents and retains category filtering", () => {
     expect(
-      searchPublicServices("informacao cidadao", "cidadania").map(
+      searchPublicServices("informacao cidadao", "transparencia").map(
         service => service.id
       )
     ).toContain("sic");
+    expect(searchPublicServices("informacao cidadao", "cidadania")).toEqual([]);
     expect(searchPublicServices("informacao cidadao", "saude")).toEqual([]);
   });
   it("finds everyday needs and all shortcut queries locally", () => {
