@@ -237,7 +237,7 @@ describe("public services catalog", () => {
       ["alto custo", "medicamentos-alto-custo-municipal", "saude"],
       ["estoque farmacias", "estoque-farmacias-publicas", "saude"],
       ["regulacao municipal", "regulacao-municipal-lista-espera", "saude"],
-      ["creche", "lista-espera-creches", "educacao"],
+      ["creche", "creches-lista-espera", "educacao"],
     ] as const) {
       const service = searchPublicServices(query).find(item => item.id === id)!;
       expect(service).toBeDefined();
