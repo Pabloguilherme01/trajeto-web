@@ -30,6 +30,16 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3"');
   });
 
+  it("puts primary actions before metadata and preparation details", () => {
+    expect(source.indexOf('aria-label="Ações principais do serviço"')).toBeGreaterThan(-1);
+    expect(source.indexOf('aria-label="Ações principais do serviço"')).toBeLessThan(
+      source.indexOf('aria-label="Recursos deste serviço"')
+    );
+    expect(source.indexOf('aria-label="Ações principais do serviço"')).toBeLessThan(
+      source.indexOf("Antes de sair")
+    );
+  });
+
   it("prioritizes route and the main contact while making daily shortcuts immediately discoverable", () => {
     expect(source).toContain("const primaryContact = contacts[0]");
     expect(source).toContain("const secondaryContacts = contacts.slice(1)");
