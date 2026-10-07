@@ -1423,11 +1423,11 @@ export default function PublicServices() {
                     );
                   })}
                 </div>
-                <div className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
+                <div className="mobile-scroll-x mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
                   {visibleReadyRoutes.map(route => (
                     <article
                       key={route.id}
-                      className="premium-card flex min-h-32 w-[min(86vw,19rem)] min-w-0 shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
+                      className="premium-card flex min-h-32 w-[min(86vw,19rem)] min-w-0 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
                     >
                       <div>
                         <span className="block text-sm font-black text-foreground">
@@ -1448,10 +1448,11 @@ export default function PublicServices() {
                                 "&auto=1"
                             )
                           }
+                          aria-label={"Planejar rota para " + route.label}
                           className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl bg-primary px-2 text-xs font-black text-primary-foreground"
                         >
                           <Route className="size-3.5 shrink-0" />
-                          <span className="truncate">Trajeto</span>
+                          <span className="truncate">Planejar</span>
                         </button>
                         <button
                           type="button"
@@ -1462,7 +1463,7 @@ export default function PublicServices() {
                           className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-primary/20 bg-primary/[.05] px-2 text-xs font-black text-primary"
                         >
                           <Navigation className="size-3.5 shrink-0" />
-                          <span className="truncate">Organic</span>
+                          <span className="truncate">Organic Maps</span>
                         </button>
                       </div>
                     </article>
