@@ -3,9 +3,11 @@ import { Copy, Share2, Ruler, X, Navigation } from "lucide-react";
 import type { StationMapItem } from "./StationMap";
 import { buildDestinationPlannerUrl } from "@/lib/tripLinks";
 import { buildOrganicMapsNavigationUrl } from "@/lib/mobileTools";
+import OrganicMapsModeSelect, { type OrganicMapsMode } from "./OrganicMapsModeSelect";
 
 /** Share the named destination only; never append the user's GPS to a link. */
 export default function MapPlaceActions({ place }: { place: StationMapItem }) {
+  const [navigationMode, setNavigationMode] = useState<OrganicMapsMode>("drive");
   const [notice, setNotice] = useState("");
   const [failed, setFailed] = useState(false);
   const [measureFrom, setMeasureFrom] = useState<StationMapItem | null>(null);
@@ -37,7 +39,7 @@ export default function MapPlaceActions({ place }: { place: StationMapItem }) {
   };
   const openOrganicMaps = () => {
     if (!validPoint(place)) return;
-    const url = buildOrganicMapsNavigationUrl({ lat: place.lat!, lng: place.lng! }, place.name, "drive");
+    const url = buildOrganicMapsNavigationUrl({ lat: place.lat!, lng: place.lng! }, place.name, navigationMode);
     if (!url) return;
     window.location.href = url;
   };
@@ -47,6 +49,7 @@ export default function MapPlaceActions({ place }: { place: StationMapItem }) {
     catch { setFailed(true); setNotice("Não foi possível copiar. Confira a permissão do navegador."); }
   };
   return <div className="mt-3">
+    {validPoint(place) && <OrganicMapsModeSelect value={navigationMode} onChange={setNavigationMode} />}
     <div className="flex flex-wrap gap-2 [&>button]:flex-1 [&>button]:basis-32">
       <button type="button" onClick={() => void share()} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.06] px-2 text-xs font-bold text-primary"><Share2 className="size-4 shrink-0" />Compartilhar</button>
       <button type="button" disabled={!place.address} onClick={() => void copy()} className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-border/15 bg-background px-2 text-xs font-bold text-foreground/80 disabled:opacity-40"><Copy className="size-4 shrink-0" />Copiar endereço</button>

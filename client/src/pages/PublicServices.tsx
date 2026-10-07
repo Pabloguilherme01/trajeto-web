@@ -66,7 +66,8 @@ import {
 } from "@/lib/publicServices";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
 import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
-import { matchesCatalogText } from "@/lib/catalogSearch";
+import { matchesPublicServiceRoute } from "@/lib/publicServiceRouteSearch";
+import OrganicMapsModeSelect from "@/components/OrganicMapsModeSelect";
 
 const categoryIcons = {
   saude: HeartPulse,
@@ -76,6 +77,7 @@ const categoryIcons = {
   transito: TrafficCone,
   educacao: BookOpen,
   "ensino-superior": BookOpen,
+  capacitacao: BookOpen,
   cidadania: Landmark,
   trabalho: BriefcaseBusiness,
   moradia: Building2,
@@ -157,6 +159,11 @@ const NEED_GROUPS = [
     label: "Transporte escolar",
     query: "transporte escolar",
     hint: "Rotas, pontos, horários e orientação da rede municipal",
+  },
+  {
+    label: "Aprender e se qualificar",
+    query: "cursos gratuitos",
+    hint: "Cursos online do MEC e da Escola Virtual de Governo",
   },
   {
     label: "Trabalho e renda",
@@ -627,11 +634,11 @@ export default function PublicServices() {
       : groupedRoutes;
     if (!readyRouteQuery.trim()) return availabilityRoutes;
     return availabilityRoutes.filter(route =>
-      matchesCatalogText(readyRouteQuery, [
-        route.label,
-        route.detail,
-        route.destination,
-      ])
+      matchesPublicServiceRoute(
+        readyRouteQuery,
+        route,
+        READY_ROUTE_SERVICE_BY_ROUTE_ID.get(route.id)
+      )
     );
   }, [readyRouteGroup, readyRouteQuery, readyRouteOfflineOnly, offlineReadyRouteIds]);
 
@@ -1163,26 +1170,7 @@ export default function PublicServices() {
                     demais abrem a busca no app. Baixe o mapa da região no
                     Organic Maps para continuar sem internet.
                   </p>
-                  <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-xl border border-primary/10 bg-background/70 px-3 py-2 text-xs font-black text-foreground">
-                    <span className="inline-flex min-w-0 items-center gap-2">
-                      <Navigation className="size-4 shrink-0 text-primary" />
-                      <span className="min-w-0">Modo no Organic Maps</span>
-                    </span>
-                    <select
-                      aria-label="Modo de navegação no Organic Maps"
-                      value={navigationMode}
-                      onChange={event =>
-                        setNavigationMode(
-                          event.target.value as "drive" | "walk" | "bike"
-                        )
-                      }
-                      className="min-h-11 max-w-[8.5rem] rounded-xl border border-border bg-background px-2 text-base text-foreground"
-                    >
-                      <option value="drive">Carro</option>
-                      <option value="walk">A pé</option>
-                      <option value="bike">Bicicleta</option>
-                    </select>
-                  </label>
+                  <OrganicMapsModeSelect value={navigationMode} onChange={setNavigationMode} />
                   <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                     <button
                       type="button"
@@ -1801,6 +1789,11 @@ export default function PublicServices() {
             disponíveis abaixo.
           </p>
         )}
+        {!browsing && results.some(service => Boolean(service.mapQuery)) && (
+          <div className="mt-4">
+            <OrganicMapsModeSelect value={navigationMode} onChange={setNavigationMode} />
+          </div>
+        )}
         <p
           role="status"
           aria-live="polite"
@@ -1871,9 +1864,6 @@ export default function PublicServices() {
                     <h2 className="mt-1 break-words text-base font-bold leading-snug">
                       {service.name}
                     </h2>
-                    <p className="mt-1.5 text-sm leading-relaxed text-foreground/70">
-                      {service.description}
-                    </p>
                   </div>
                   <button
                     type="button"
@@ -1891,6 +1881,9 @@ export default function PublicServices() {
                     />
                   </button>
                 </div>
+                <p className="mt-3 text-sm leading-relaxed text-foreground/75">
+                  {service.description}
+                </p>
                 <div role="group" aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                   {officialActionIsPrimary && service.actionUrl && (
                     <a
@@ -1986,14 +1979,13 @@ export default function PublicServices() {
                       <Navigation className="size-3.5" /> rota + navegadores
                     </span>
                   )}
-                  {service.actionUrl ? (
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
+                    <WifiOff className="size-3.5" /> ficha disponível offline
+                  </span>
+                  {service.actionUrl && (
                     <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-1">
                       <Globe2 className="size-3.5" /> canal externo exige
                       internet
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-primary/[.06] px-2 py-1 text-primary">
-                      <WifiOff className="size-3.5" /> ficha disponível offline
                     </span>
                   )}
                   {service.verifiedAt && (
@@ -2121,6 +2113,17 @@ export default function PublicServices() {
                   >
                     <Share2 className="size-3.5" />
                     Compartilhar
+                  </button>
+                )}
+                {expandedActions && service.mapQuery && (
+                  <button
+                    type="button"
+                    onClick={() => openOrganicMaps(service)}
+                    aria-label={"Abrir " + service.name + " no Organic Maps"}
+                    className="mt-2 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                  >
+                    <Navigation className="size-4 shrink-0" />
+                    Organic Maps · {navigationModeLabel}
                   </button>
                 )}
                 {hasMoreOptions && (
