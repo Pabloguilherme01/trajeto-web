@@ -57,6 +57,10 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('className="mt-3 flex flex-wrap gap-2"');
   });
 
+  it("does not promote Saneago as a ready destination without verified local routing data", () => {
+    expect(source).not.toContain('"saneago",');
+  });
+
   it("keeps ready-route counts dynamic and includes the full local destination catalog", () => {
     expect(source).toContain("ALL_LOCAL_ROUTE_DESTINATIONS.find");
     expect(source).toContain("{READY_SERVICE_ROUTES.length} destinos públicos");
