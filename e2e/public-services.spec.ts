@@ -47,6 +47,38 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   await expect(search).toHaveValue("");
 });
 
+test("descoberta inicial fica compacta sem esconder assuntos em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+
+  const topicsDisclosure = page.locator("details").filter({
+    has: page.getByText(/Ver todos os assuntos/),
+  });
+  const allTopics = topicsDisclosure.getByText(/Ver todos os assuntos/);
+  const transparencyCategory = topicsDisclosure.getByRole("button", {
+    name: /Transparência e participação/,
+  });
+  await expect(allTopics).toBeVisible();
+  await expect(transparencyCategory).not.toBeVisible();
+  await allTopics.click();
+  await expect(transparencyCategory).toBeVisible();
+
+  const needsDisclosure = page.locator("details").filter({
+    has: page.getByText(/Ver todas as situações/),
+  });
+  await needsDisclosure.getByText(/Ver todas as situações/).click();
+  await expect(
+    needsDisclosure.getByRole("button", { name: /Juventude e primeiro emprego/ })
+  ).toBeVisible();
+
+  const moreShortcuts = page.getByText(/Mais atalhos úteis/);
+  await expect(moreShortcuts).toBeVisible();
+  await moreShortcuts.click();
+  await expect(page.getByRole("button", { name: /Transparência e SIC/ })).toBeVisible();
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });

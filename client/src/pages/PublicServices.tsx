@@ -1018,33 +1018,73 @@ export default function PublicServices() {
               <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
                 {PUBLIC_SERVICE_CATEGORIES.filter(
                   item => item.id !== "todos"
-                ).map(item => {
-                  const Icon = categoryIcons[item.id as PublicServiceCategory];
-                  const count = PUBLIC_SERVICES.filter(
-                    service => service.category === item.id
-                  ).length;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => applyCategory(item.id)}
-                      className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md focus-visible:border-accent"
-                    >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
-                        <Icon className="size-5" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold">
-                          {item.label}
+                )
+                  .slice(0, 6)
+                  .map(item => {
+                    const Icon = categoryIcons[item.id as PublicServiceCategory];
+                    const count = PUBLIC_SERVICES.filter(
+                      service => service.category === item.id
+                    ).length;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => applyCategory(item.id)}
+                        className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-md focus-visible:border-accent"
+                      >
+                        <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
+                          <Icon className="size-5" />
                         </span>
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          {count} serviços
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-bold">
+                            {item.label}
+                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {count} serviços
+                          </span>
                         </span>
-                      </span>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
               </div>
+              <details className="mobile-disclosure mt-2">
+                <summary className="min-h-11">
+                  Ver todos os assuntos ({PUBLIC_SERVICE_CATEGORIES.length - 7})
+                  <ChevronRight className="size-4" />
+                </summary>
+                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
+                  {PUBLIC_SERVICE_CATEGORIES.filter(
+                    item => item.id !== "todos"
+                  )
+                    .slice(6)
+                    .map(item => {
+                      const Icon = categoryIcons[item.id as PublicServiceCategory];
+                      const count = PUBLIC_SERVICES.filter(
+                        service => service.category === item.id
+                      ).length;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => applyCategory(item.id)}
+                          className="premium-card group flex min-h-20 min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:border-accent/45 hover:shadow-md"
+                        >
+                          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-accent/15 bg-accent/[.07] text-accent">
+                            <Icon className="size-5" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-bold">
+                              {item.label}
+                            </span>
+                            <span className="mt-1 block text-xs text-muted-foreground">
+                              {count} serviços
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              </details>
               <div className="mt-5 grid gap-2 sm:grid-cols-3">
                 {[
                   {
@@ -1085,7 +1125,7 @@ export default function PublicServices() {
                 Encontre pela sua situação
               </h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {NEED_GROUPS.map(group => (
+                {NEED_GROUPS.slice(0, 6).map(group => (
                   <button
                     key={group.label}
                     type="button"
@@ -1104,6 +1144,32 @@ export default function PublicServices() {
                   </button>
                 ))}
               </div>
+              <details className="mobile-disclosure mt-2">
+                <summary className="min-h-11">
+                  Ver todas as situações ({NEED_GROUPS.length - 6})
+                  <ChevronRight className="size-4" />
+                </summary>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {NEED_GROUPS.slice(6).map(group => (
+                    <button
+                      key={group.label}
+                      type="button"
+                      onClick={() => {
+                        setQuery(group.query);
+                        applyFilters(group.query, "todos");
+                      }}
+                      className="premium-card min-h-20 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card p-3 text-left shadow-sm transition hover:border-accent/45 hover:shadow-md"
+                    >
+                      <span className="block text-sm font-black text-foreground">
+                        {group.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                        {group.hint}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </details>
               <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/[.04] p-4">
                 <p className="text-xs font-black uppercase tracking-[.14em] text-primary">
                   Mapa e deslocamento
@@ -1138,59 +1204,35 @@ export default function PublicServices() {
                   <Navigation className="size-4" /> Abrir mapa e destinos
                 </button>
               </div>
-              <h2
-                id="citizen-shortcuts-title"
-                className="mt-5 text-lg font-bold"
-              >
-                Atalhos do dia a dia
-              </h2>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-                {PUBLIC_SERVICE_SHORTCUTS.slice(0, 4).map(shortcut => (
-                  <button
-                    key={shortcut.query}
-                    type="button"
-                    onClick={() => {
-                      setQuery(shortcut.query);
-                      applyFilters(shortcut.query, "todos");
-                    }}
-                    className="premium-card min-h-24 min-w-0 rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary"
-                  >
-                    <span className="block text-sm font-bold text-foreground">
-                      {shortcut.label}
-                    </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-foreground/70">
-                      {shortcut.hint}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <details className="mobile-disclosure mt-2">
-                <summary className="min-h-11">
-                  Mais atalhos ({PUBLIC_SERVICE_SHORTCUTS.length - 4})
-                  <ChevronRight className="size-4" />
-                </summary>
-                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
-                  {PUBLIC_SERVICE_SHORTCUTS.slice(4).map(shortcut => (
-                    <button
-                      key={shortcut.query}
-                      type="button"
-                      onClick={() => {
-                        setQuery(shortcut.query);
-                        applyFilters(shortcut.query, "todos");
-                      }}
-                      className="premium-card min-h-24 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
-                    >
-                      <span className="block text-sm font-bold">
-                        {shortcut.label}
-                      </span>
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {shortcut.hint}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </details>
-            </section>
+              {PUBLIC_SERVICE_SHORTCUTS.length > 7 && (
+                <details className="mobile-disclosure mt-5">
+                  <summary id="citizen-shortcuts-title" className="min-h-11">
+                    Mais atalhos úteis ({PUBLIC_SERVICE_SHORTCUTS.length - 7})
+                    <ChevronRight className="size-4" />
+                  </summary>
+                  <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">
+                    {PUBLIC_SERVICE_SHORTCUTS.slice(7).map(shortcut => (
+                      <button
+                        key={shortcut.query}
+                        type="button"
+                        onClick={() => {
+                          setQuery(shortcut.query);
+                          applyFilters(shortcut.query, "todos");
+                        }}
+                        className="premium-card min-h-20 rounded-xl border border-border bg-card p-3 text-left hover:border-primary"
+                      >
+                        <span className="block text-sm font-bold">
+                          {shortcut.label}
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {shortcut.hint}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              )}
+                          </section>
           )}
         {!selectedService &&
           !savedOnly &&
