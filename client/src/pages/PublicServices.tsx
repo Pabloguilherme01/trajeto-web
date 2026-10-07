@@ -548,7 +548,7 @@ export default function PublicServices() {
     service => service.id === params.get("servico")
   );
   const browsing =
-    !selectedService &&
+    !params.has("servico") &&
     !savedOnly &&
     !query.trim() &&
     category === "todos" &&

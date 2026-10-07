@@ -19,6 +19,13 @@ it("opens the directory in batches and keeps search results complete", async () 
   expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
 }, 15000);
 
+it("keeps the complete recovery directory available for an unknown service link", () => {
+  window.history.replaceState({}, "", "/servicos?servico=unknown");
+  render(<PublicServices />);
+  expect(screen.getByRole("heading", { name: "Ligue 180 · atendimento à mulher" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
+});
+
 it("reports the same destination count that each ready-route group displays", () => {
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);
