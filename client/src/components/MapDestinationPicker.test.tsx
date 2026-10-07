@@ -2,12 +2,29 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import MapDestinationPicker from "./MapDestinationPicker";
+import * as catalogSearch from "@/lib/catalogSearch";
 afterEach(() => cleanup());
 const items = [
   { id: "a", name: "Avenida Brasília", address: "Setor Norte" },
   { id: "b", name: "Avenida Brasília", address: "Setor Sul" },
   { id: "c", name: "UPA", address: "Mansões Odisseia", category: "saude" },
 ];
+it("does no closed-picker indexing and reuses the index while typing", () => {
+  const index = vi.spyOn(catalogSearch, "createCatalogSearchIndex");
+  try {
+    const choose = vi.fn();
+    const { rerender } = render(<MapDestinationPicker items={items} value="a" label="Escolher lugar" onSelect={choose} />);
+    rerender(<MapDestinationPicker items={items} value="b" label="Escolher lugar" onSelect={choose} />);
+    expect(index).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Escolher lugar" }));
+    expect(index).toHaveBeenCalledTimes(items.length);
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "brasilia sul" } });
+    expect(screen.getAllByRole("option")).toHaveLength(1);
+    expect(index).toHaveBeenCalledTimes(items.length);
+  } finally {
+    index.mockRestore();
+  }
+});
 it("filters by category and clears an empty combined search", () => {
   render(<MapDestinationPicker items={items} value="a" label="Escolher lugar" onSelect={vi.fn()} />);
   fireEvent.click(screen.getByRole("button", { name: "Escolher lugar" }));

@@ -1,13 +1,13 @@
-import React, { useId, useMemo, useRef, useState } from "react";
+import React, { memo, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { matchesCatalogText } from "@/lib/catalogSearch";
+import { createCatalogSearchIndex, matchesCatalogTerms, normalizeCatalogText } from "@/lib/catalogSearch";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import { COMMON_DESTINATION_QUICK_FILTERS } from "@/lib/quickFilterPresets";
 
 type Place = { id: string; name: string; address: string; category?: string; source?: string; coordinateKind?: string };
-export default function MapDestinationPicker({ items, value, label, onSelect }: {
+function MapDestinationPicker({ items, value, label, onSelect }: {
   items: Place[]; value: string | null; label: string; onSelect: (id: string) => void;
 }) {
   const listId = useId();
@@ -17,15 +17,24 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
   const [limit, setLimit] = useState(40);
   const [active, setActive] = useState(0);
   const [category, setCategory] = useState("Todos");
-  const categories = useMemo(() => [...new Set(items.map(item => mapPlaceSegment(item).label))].sort(), [items]);
+  // The closed picker should do no catalog search work while the map is panning.
+  const indexedItems = useMemo(() => open ? items.map(item => ({
+    item, category: mapPlaceSegment(item).label,
+    search: createCatalogSearchIndex([item.name, item.address]),
+  })) : [], [items, open]);
+  const categories = useMemo(() => [...new Set(indexedItems.map(row => row.category))].sort(), [indexedItems]);
   const quickQueries = useMemo(
-    () => COMMON_DESTINATION_QUICK_FILTERS.filter(option =>
-      items.some(item => matchesCatalogText(option.value, [item.name, item.address]))
-    ),
-    [items]
+    () => COMMON_DESTINATION_QUICK_FILTERS.filter(option => {
+      const terms = normalizeCatalogText(option.value).replace(/[ºª]/g, "").split(" ").filter(Boolean);
+      return indexedItems.some(row => matchesCatalogTerms(terms, row.search));
+    }),
+    [indexedItems]
   );
   const selected = items.find(item => item.id === value);
-  const matches = useMemo(() => items.filter(item => (category === "Todos" || mapPlaceSegment(item).label === category) && matchesCatalogText(query, [item.name, item.address])), [items, query, category]);
+  const matches = useMemo(() => {
+    const terms = normalizeCatalogText(query).replace(/[ºª]/g, "").split(" ").filter(Boolean);
+    return indexedItems.filter(row => (category === "Todos" || row.category === category) && matchesCatalogTerms(terms, row.search)).map(row => row.item);
+  }, [indexedItems, query, category]);
   const visible = matches.slice(0, limit);
   const choose = (id: string) => { onSelect(id); setOpen(false); };
   return <Popover open={open} onOpenChange={next => { setOpen(next); if (next) { setQuery(""); setCategory("Todos"); setLimit(40); setActive(0); } }}>
@@ -81,3 +90,5 @@ export default function MapDestinationPicker({ items, value, label, onSelect }: 
     </PopoverContent>
   </Popover>;
 }
+
+export default memo(MapDestinationPicker);

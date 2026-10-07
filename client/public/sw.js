@@ -54,8 +54,12 @@ self.addEventListener("install", event => {
   );
 });
 
-function precacheFresh(cache, assets) {
-  return cache.addAll(assets.map(asset => new Request(new URL(asset, self.registration.scope), { cache: "reload" })));
+async function precacheFresh(cache, assets) {
+  // Avoid downloading every route/data chunk at once while a phone is opening
+  // the app. Installation still waits for the complete offline package.
+  for (let index = 0; index < assets.length; index += 3) {
+    await cache.addAll(assets.slice(index, index + 3).map(asset => new Request(new URL(asset, self.registration.scope), { cache: "reload" })));
+  }
 }
 
 self.addEventListener("activate", event => {

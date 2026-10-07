@@ -32,6 +32,25 @@ function recoverableWorker(missing: string[]) {
 }
 
 describe("service worker", () => {
+  it("bounds offline installation downloads and waits for every asset", async () => {
+    const worker = loadWorker();
+    let pending = 0;
+    let peak = 0;
+    const saved: string[] = [];
+    const cache = { addAll: vi.fn(async (requests: Request[]) => {
+      pending += requests.length;
+      peak = Math.max(peak, pending);
+      await Promise.resolve();
+      saved.push(...requests.map(request => request.url));
+      pending -= requests.length;
+    }) };
+    const assets = Array.from({ length: 11 }, (_, index) => `./assets/part-${index}.js`);
+    await worker.precacheFresh(cache, assets);
+    expect(peak).toBeLessThanOrEqual(3);
+    expect(saved).toEqual(assets.map(asset => new URL(asset, worker.self.registration.scope).href));
+    cache.addAll.mockRejectedValueOnce(new Error("network"));
+    await expect(worker.precacheFresh(cache, assets)).rejects.toThrow("network");
+  });
   it("registers lifecycle handlers", () => {
     const worker = loadWorker();
     expect(worker.self.addEventListener.mock.calls.map((call: any[]) => call[0])).toEqual(["install", "activate", "message", "fetch"]);

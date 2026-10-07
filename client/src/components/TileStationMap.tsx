@@ -23,6 +23,7 @@ const ROUTE_STYLES = {
 } as const;
 const TRAVEL_LABELS = { driving: "Carro", walking: "A pé", cycling: "Bicicleta", transit: "Transporte público" } as const;
 const TILE = 256;
+const EMPTY_ROUTE_POINTS: Array<{ lat: number; lng: number }> = [];
 const DEFAULT_CENTER = { lat: -15.7545, lng: -48.2816 };
 const TILE_URL_TEMPLATE =
   import.meta.env.VITE_PUBLIC_TILE_URL?.trim() ||
@@ -72,7 +73,7 @@ export default function TileStationMap({
   onSelectStation,
   fallback,
   selectionLabel = "Escolher posto no mapa",
-  routePoints = [],
+  routePoints = EMPTY_ROUTE_POINTS,
   onPlanDestination,
   travelMode = "driving",
 }: {
@@ -298,7 +299,9 @@ export default function TileStationMap({
       }
     }
     return result;
-  }, [tileBounds, tileZoom]);
+  // Sub-tile camera movement changes only the layer transform. Retain the tile
+  // list (and failure bookkeeping) until an actual grid boundary is crossed.
+  }, [tileBounds.minX, tileBounds.maxX, tileBounds.minY, tileBounds.maxY, tileZoom]);
   // Base fallback on tiles that actually cover the visible camera. The outer
   // overscan ring is only a prefetch buffer and must not take a healthy map down.
   const visibleTileKeys = useMemo(
