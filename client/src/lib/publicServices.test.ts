@@ -28,6 +28,8 @@ describe("public services catalog", () => {
     expect(searchPublicServices("MEI").map(item => item.id)).toEqual(
       expect.arrayContaining(["sala-empreendedor", "portal-empreendedor-mei"])
     );
+    expect(searchPublicServices("linha no cpf").map(item => item.id)).toContain("cadastro-pre-pago");
+    expect(phoneHref("1331")).toBe("tel:1331");
   });
 
   it("finds both Receita Federal and REDESIM for CNPJ without inventing a local route", () => {
