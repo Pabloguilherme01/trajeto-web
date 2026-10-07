@@ -289,10 +289,11 @@ describe("public services catalog", () => {
 
   it("groups documents and certificates without inventing local routes", () => {
     expect(searchPublicServices("", "documentos").map(item => item.id)).toEqual(
-      expect.arrayContaining(["cin-goias", "antecedentes-criminais-goias", "carteira-trabalho-digital", "autoatendimento-eleitoral"])
+      expect.arrayContaining(["cin-goias", "cnh-digital", "antecedentes-criminais-goias", "carteira-trabalho-digital", "autoatendimento-eleitoral"])
     );
     expect(searchPublicServices("CIN").map(item => item.id)).toContain("cin-goias");
-    for (const id of ["cin-goias", "antecedentes-criminais-goias", "carteira-trabalho-digital", "autoatendimento-eleitoral"]) {
+    expect(searchPublicServices("cnh digital").map(item => item.id)).toContain("cnh-digital");
+    for (const id of ["cin-goias", "cnh-digital", "antecedentes-criminais-goias", "carteira-trabalho-digital", "autoatendimento-eleitoral"]) {
       const service = PUBLIC_SERVICES.find(item => item.id === id)!;
       expect(service.category).toBe("documentos");
       expect(service.address).toBeUndefined();
