@@ -10,7 +10,6 @@ import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobil
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
-import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
 
 export type StationMapItem = {
   id?: string;
@@ -92,9 +91,8 @@ function offlineStationKey(station: StationMapItem) {
   return station.id ?? station.cnpj ?? station.placeId ?? `${station.name}|${station.lat}|${station.lng}`;
 }
 
-export function OfflineStationMap({ stations, onSelectStation, userCoords, heightClassName = "h-[min(60vh,480px)] min-h-[320px]", itemLabel = "posto", onPlanDestination }: {
-  stations: Array<StationMapItem & { lat: number; lng: number }>; onSelectStation?: (station: StationMapItem) => void;
-  userCoords?: { lat: number; lng: number } | null; heightClassName?: string; itemLabel?: string; onPlanDestination?: (station: StationMapItem) => void;
+export function OfflineStationMap({ stations, onSelectStation, heightClassName = "h-[min(60vh,480px)] min-h-[320px]", itemLabel = "posto", onPlanDestination }: {
+  stations: Array<StationMapItem & { lat: number; lng: number }>; onSelectStation?: (station: StationMapItem) => void; heightClassName?: string; itemLabel?: string; onPlanDestination?: (station: StationMapItem) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(stations[0] ? offlineStationKey(stations[0]) : null);
   const [zoom, setZoom] = useState(1);
@@ -102,7 +100,6 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
   const [focusRequest, setFocusRequest] = useState<{ point: { lat: number; lng: number }; key: number } | null>(null);
   const selected = stations.find(station => offlineStationKey(station) === selectedId) ?? stations[0] ?? null;
   const markers = stations.map((station, i) => ({ ...station, id: offlineStationKey(station), label: String(i + 1) }));
-  if (userCoords) markers.push({ ...userCoords, id: "device-location", name: "Sua posição local", address: "", label: "●" });
   const select = (id: string) => { setSelectedId(id); const station = stations.find(item => offlineStationKey(item) === id); if (station) { setFocusRequest(previous => ({ point: station, key: (previous?.key ?? 0) + 1 })); onSelectStation?.(station); } };
   return <div className="overflow-hidden rounded-[1.6rem] border border-white/70 bg-[#eef2eb] text-[#163840] shadow-[0_24px_70px_rgba(15,35,45,.22)]">
     <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[linear-gradient(110deg,#f8fbf9,#edf5f1)] p-3">
@@ -128,11 +125,10 @@ export function OfflineStationMap({ stations, onSelectStation, userCoords, heigh
   </div>;
 }
 
-export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation, userCoords = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void; userCoords?: { lat: number; lng: number } | null }) {
+export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(68vh,620px)]", showTraffic = false, onSelectStation = null }: { stations: StationMapItem[]; heightClassName?: string; showTraffic?: boolean; onSelectStation?: (station: StationMapItem) => void }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindow = useRef<google.maps.InfoWindow | null>(null);
-  const userMarker = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
   const [tiltEnabled, setTiltEnabled] = useState(false);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -140,7 +136,6 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
   const [resolvingCount, setResolvingCount] = useState(0);
-  const onlineUserCoords = userCoords ? coarsenCoordinatePoint(userCoords, 3) : null;
 
   useEffect(() => {
     setResolvedStations(stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
@@ -216,12 +211,6 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }, [resolvedStations]);
 
   useEffect(() => {
-    if (!ready || !mapRef.current || !window.google?.maps || offline || !onlineUserCoords) return;
-    mapRef.current.setCenter(onlineUserCoords);
-    mapRef.current.setZoom(14);
-  }, [ready, offline, onlineUserCoords?.lat, onlineUserCoords?.lng]);
-
-  useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps || offline) return;
     markers.current.forEach(marker => { marker.map = null; });
     markers.current = [];
@@ -260,41 +249,6 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
     return () => window.google?.maps?.event.removeListener(listener);
   }, [ready, resolvedStations, offline]);
 
-  const locateUser = () => {
-    if (offline || !mapRef.current || !navigator.geolocation) {
-      setMapMessage("Localização do aparelho não está disponível neste modo.");
-      return;
-    }
-    setMapMessage(null);
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const coords = coarsenCoordinatePoint({ lat: position.coords.latitude, lng: position.coords.longitude }, 3);
-        const map = mapRef.current;
-        if (!map) return;
-        map.setCenter(coords);
-        map.setZoom(15);
-        try {
-          userMarker.current?.map && (userMarker.current.map = null);
-          const pin = new window.google.maps.marker.PinElement({
-            background: "#3DE3FF",
-            borderColor: "#163840",
-            glyphColor: "#163840",
-            glyph: "•",
-            scale: 1.1,
-          });
-          userMarker.current = new window.google.maps.marker.AdvancedMarkerElement({
-            map,
-            position: coords,
-            title: "Sua localização",
-            content: pin.element,
-          });
-        } catch {}
-      },
-      () => setMapMessage("Não foi possível obter sua localização."),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 },
-    );
-  };
-
   const toggleTilt = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -308,20 +262,17 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   }
 
   if (isGitHubPagesRuntime()) {
-    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} userCoords={onlineUserCoords} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />} />;
+    return <TileStationMap stations={resolvedStations} heightClassName={heightClassName} onSelectStation={onSelectStation} fallback={<OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} />} />;
   }
 
   if (offline || mapUnavailable) {
-    return <OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} userCoords={userCoords} />;
+    return <OfflineStationMap stations={drawableStations} heightClassName={heightClassName} onSelectStation={onSelectStation} />;
   }
 
   return (
     <div className="relative overflow-hidden rounded-[1.6rem] border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,.24)]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#07191f]/35 to-transparent" />
       <div className="absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
-        <button type="button" onClick={locateUser} className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-white/10 bg-[#0B1014]/90 px-3 text-white shadow-lg backdrop-blur" aria-label="Centralizar na minha localização">
-          <LocateFixed className="size-4" />
-        </button>
         <button type="button" onClick={toggleTilt} className={"min-h-11 rounded-xl border px-3 text-xs font-black shadow-lg backdrop-blur " + (tiltEnabled ? "border-[#C7FF3C]/30 bg-[#C7FF3C] text-[#0B1014]" : "border-white/10 bg-[#0B1014]/90 text-white")}>
           {tiltEnabled ? "2.5D ativo" : "2.5D"}
         </button>
