@@ -15,7 +15,8 @@ export type PublicServiceCategory =
   | "ambiente"
   | "consumidor"
   | "tributos"
-  | "inclusao";
+  | "inclusao"
+  | "mulher";
 
 export type PublicService = {
   id: string;
@@ -81,6 +82,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "servicos-urbanos", label: "Cidade e serviços", shortLabel: "Cidade" },
   { id: "tributos", label: "Tributos e notas", shortLabel: "Tributos" },
   { id: "inclusao", label: "Inclusão e igualdade", shortLabel: "Inclusão" },
+  { id: "mulher", label: "Mulher e proteção", shortLabel: "Mulher" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -757,7 +759,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "deam-depai-dpca",
     name: "DEAM / DEPAI / DPCA · atendimento especializado",
-    category: "seguranca",
+    category: "mulher",
     description:
       "Atendimento especializado da Polícia Civil para mulheres, adolescentes e crianças.",
     address:
@@ -1019,7 +1021,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "secretaria-mulher",
     name: "Secretaria Municipal da Mulher",
-    category: "assistencia",
+    category: "mulher",
     description:
       "Atendimento municipal para políticas públicas da mulher e família.",
     phone: "(61) 99304-8456",
@@ -1428,7 +1430,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "ligue-180",
     name: "Ligue 180 · atendimento à mulher",
-    category: "assistencia",
+    category: "mulher",
     description:
       "Canal nacional gratuito de orientação e registro de denúncias de violência contra mulheres.",
     phone: "180",
