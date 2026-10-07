@@ -40,7 +40,11 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   const routes = page.locator('section[aria-labelledby="ready-routes-title"]');
   const search = routes.getByRole("searchbox", { name: "Buscar rota pronta" });
   await search.fill("biblioteca");
-  await expect(routes.getByText("Biblioteca Municipal · Jardim Barragem II", { exact: true })).toBeVisible();
+  const libraryCard = routes.locator("article").filter({ hasText: "Biblioteca Municipal · Jardim Barragem II" });
+  await expect(libraryCard).toBeVisible();
+  await expect(libraryCard.getByRole("button", { name: /Planejar rota para Biblioteca Municipal/ })).toBeVisible();
+  await expect(libraryCard.getByRole("button", { name: /no Organic Maps/ })).toBeVisible();
+  await expect(libraryCard.getByText("Organic Maps", { exact: true })).toBeVisible();
   await expect(routes.getByText("1 destinos neste filtro", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await routes.getByRole("button", { name: "Limpar busca de rotas" }).click();
