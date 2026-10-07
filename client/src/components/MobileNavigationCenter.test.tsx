@@ -4,6 +4,30 @@ import { describe, expect, it, vi } from "vitest";
 import MobileNavigationCenter from "./MobileNavigationCenter";
 
 describe("MobileNavigationCenter", () => {
+  it("offers Organic Maps when the integration callback is available", () => {
+    const organic = vi.fn();
+    render(
+      <MobileNavigationCenter
+        origin="Águas Lindas, GO"
+        destination="Brasília, DF"
+        distance="48 km"
+        duration="55 min"
+        offline={false}
+        onNavigate={vi.fn()}
+        onShare={vi.fn()}
+        onSave={vi.fn()}
+        onStations={vi.fn()}
+        onGoogleMaps={vi.fn()}
+        onWaze={vi.fn()}
+        onAppleMaps={vi.fn()}
+        onOrganicMaps={organic}
+        onGoogleMapsPreferred={vi.fn()}
+        onAppleMapsPreferred={vi.fn()}
+      />,
+    );
+    expect(screen.getAllByRole("button", { name: /Organic Maps/i }).length).toBeGreaterThanOrEqual(1);
+  });
+
   it("puts the destination, cost, stop and navigation action in one mobile surface", () => {
     render(
       <MobileNavigationCenter

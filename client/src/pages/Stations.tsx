@@ -4,7 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import { appUrl } from "@/lib/appUrl";
-import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
+import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
@@ -722,11 +722,23 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const provider = getPreferredNavigationProvider();
     if (typeof station.lat === "number" && typeof station.lng === "number") {
       const urls = openNavigation(station.lat, station.lng, station.name);
-      const url = provider === "waze" ? urls.waze : provider === "apple" ? urls.apple : urls.google;
+      const url =
+        provider === "organic"
+          ? urls.organic ?? urls.google
+          : provider === "waze"
+            ? urls.waze
+            : provider === "apple"
+              ? urls.apple
+              : urls.google;
       openExternalUrl(url);
       return;
     }
-    openExternalUrl(buildGoogleMapsSearchUrl([station.name, station.address].filter(Boolean).join(", ")));
+    const search = [station.name, station.address].filter(Boolean).join(", ");
+    openExternalUrl(
+      provider === "organic"
+        ? buildOrganicMapsSearchUrl(search)
+        : buildGoogleMapsSearchUrl(search)
+    );
   };
 
   const shareCurrent = async () => {
