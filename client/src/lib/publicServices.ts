@@ -25,7 +25,8 @@ export type PublicServiceCategory =
   | "juventude"
   | "transparencia"
   | "agua-energia"
-  | "telecom";
+  | "telecom"
+  | "previdencia";
 
 export type PublicService = {
   id: string;
@@ -103,6 +104,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "transparencia", label: "Transparência e participação", shortLabel: "Transparência" },
   { id: "agua-energia", label: "Água e energia", shortLabel: "Água e energia" },
   { id: "telecom", label: "Internet e telefonia", shortLabel: "Internet e telefone" },
+  { id: "previdencia", label: "INSS e benefícios", shortLabel: "INSS" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -1534,7 +1536,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   {
     id: "meu-inss",
     name: "Meu INSS · benefícios e extratos",
-    category: "assistencia",
+    category: "previdencia",
     description:
       "Canal oficial para pedidos, acompanhamento de benefícios e extratos previdenciários, como o CNIS.",
     phone: "135",
