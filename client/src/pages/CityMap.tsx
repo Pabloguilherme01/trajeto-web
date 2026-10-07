@@ -32,6 +32,7 @@ import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMap
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
 import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
+import { getPreferredNavigationProvider, setPreferredNavigationProvider, type NavigationProvider } from "@/lib/mobileTools";
 
 export default function CityMap() {
   const [, navigate] = useLocation();
@@ -39,6 +40,9 @@ export default function CityMap() {
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
   const businesses = useBusinessCatalog();
   const [visibleCount, setVisibleCount] = useState(24);
+  const [preferredMapProvider, setPreferredMapProvider] = useState<NavigationProvider>(() =>
+    getPreferredNavigationProvider()
+  );
 
   useEffect(() => {
     let active = true;
@@ -262,6 +266,24 @@ export default function CityMap() {
       <p className="mt-2 text-xs text-foreground/60" role="status" aria-live="polite">
         {query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
+      <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
+        <span className="min-w-0">Abrir destinos com</span>
+        <select
+          aria-label="Aplicativo de mapa preferido"
+          value={preferredMapProvider}
+          onChange={event => {
+            const provider = event.target.value as NavigationProvider;
+            setPreferredMapProvider(provider);
+            setPreferredNavigationProvider(provider);
+          }}
+          className="min-h-11 max-w-[9.5rem] rounded-xl border border-border bg-background px-2 text-base text-foreground"
+        >
+          <option value="google">Google Maps</option>
+          <option value="waze">Waze</option>
+          <option value="apple">Apple Maps</option>
+          <option value="organic">Organic Maps</option>
+        </select>
+      </label>
       <div
         role="group"
         className="my-3 -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
