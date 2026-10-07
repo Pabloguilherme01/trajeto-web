@@ -285,6 +285,22 @@ describe("public services catalog", () => {
     );
   });
 
+  it("groups internet and telephony services without inventing local routes", () => {
+    expect(searchPublicServices("", "telecom").map(item => item.id)).toEqual(
+      expect.arrayContaining(["anatel-consumidor", "cadastro-pre-pago", "nao-me-perturbe"])
+    );
+    const anatel = PUBLIC_SERVICES.find(item => item.id === "anatel-consumidor")!;
+    expect(anatel.phone).toBe("1331");
+    expect(anatel.hours).toMatch(/08h–20h/);
+    for (const id of ["anatel-consumidor", "cadastro-pre-pago", "nao-me-perturbe"]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.category).toBe("telecom");
+      expect(service.actionUrl).toMatch(/^https:\/\//);
+      expect(service.address).toBeUndefined();
+      expect(service.mapQuery).toBeUndefined();
+    }
+  });
+
   it("groups water and energy services without inventing local routes", () => {
     expect(searchPublicServices("", "agua-energia").map(item => item.id)).toEqual(
       expect.arrayContaining(["saneago", "energia", "tarifa-social-energia", "reclamar-distribuidora-aneel"])
