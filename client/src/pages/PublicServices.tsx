@@ -109,9 +109,9 @@ const SERVICE_SUMMARY = {
 
 const NEED_GROUPS = [
   {
-    label: "Documentos e direitos",
-    query: "cpf",
-    hint: "CPF, Receita, título, Defensoria e cidadania",
+    label: "Documentos pessoais",
+    query: "documentos",
+    hint: "CIN, CNH Digital, título, CTPS e antecedentes",
   },
   {
     label: "Família e benefícios",
