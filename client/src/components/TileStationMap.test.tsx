@@ -176,6 +176,39 @@ it("continues one-finger drag from the flushed pinch camera without jumping", ()
   sendPointer(map, "pointerup", 1, 120);
 });
 
+it("uses ResizeObserver without also registering a global resize listener", () => {
+  const add = vi.spyOn(window, "addEventListener");
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      constructor(_callback: () => void) {}
+      observe() {}
+      disconnect() {}
+    }
+  );
+  render(
+    <TileStationMap
+      stations={[
+        { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+      ]}
+    />
+  );
+  expect(add.mock.calls.some(([type]) => type === "resize")).toBe(false);
+});
+
+it("falls back to the global resize listener when ResizeObserver is unavailable", () => {
+  const add = vi.spyOn(window, "addEventListener");
+  vi.stubGlobal("ResizeObserver", undefined);
+  render(
+    <TileStationMap
+      stations={[
+        { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+      ]}
+    />
+  );
+  expect(add.mock.calls.some(([type]) => type === "resize")).toBe(true);
+});
+
 it("tracks the actual viewport and keeps the selected station after catalog updates", () => {
   let resize = () => {};
   let width = 320;

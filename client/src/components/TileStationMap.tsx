@@ -237,17 +237,14 @@ export default function TileStationMap({
       );
     };
     measure();
-    const observer =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(measure)
-        : null;
-    observer?.observe(target);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(measure);
+      observer.observe(target);
+      return () => observer.disconnect();
+    }
     window.addEventListener("resize", measure);
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, [drawable.length, tileErrors, offline, localLayer]);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
   const width = size.width;
   const height = size.height;
   const zoomScale = 2 ** zoom;
