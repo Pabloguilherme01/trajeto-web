@@ -320,7 +320,7 @@ export default function PublicServices() {
   );
   const [resource, setResource] = useState<
     "todos" | "contato" | "rota" | "online"
-  >("todos");
+  >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
   const [navigationMode, setNavigationMode] = useState<
     "drive" | "walk" | "bike"
@@ -372,6 +372,8 @@ export default function PublicServices() {
         ? (nextCategory as PublicServiceCategory | "todos")
         : "todos"
     );
+    const nextResource = params.get("recurso");
+    setResource(nextResource === "contato" || nextResource === "rota" || nextResource === "online" ? nextResource : "todos");
   }, [params]);
 
   useEffect(() => {
@@ -438,7 +440,8 @@ export default function PublicServices() {
     value: string,
     next: PublicServiceCategory | "todos",
     replace = false,
-    onlySaved = savedOnly
+    onlySaved = savedOnly,
+    nextResource = resource
   ) => {
     if (filterRef.current?.open) {
       if (filterRef.current.contains(document.activeElement)) {
@@ -450,6 +453,7 @@ export default function PublicServices() {
     if (value.trim()) search.set("q", value.trim());
     if (next !== "todos") search.set("categoria", next);
     if (onlySaved) search.set("salvos", "1");
+    if (nextResource !== "todos") search.set("recurso", nextResource);
     setLocation(
       appUrl("/servicos") + (search.size ? "?" + search.toString() : ""),
       { replace }
@@ -747,7 +751,7 @@ export default function PublicServices() {
                   aria-pressed={resource === value}
                   onClick={() => {
                     setResource(value);
-                    applyFilters(query, category);
+                    applyFilters(query, category, false, savedOnly, value);
                   }}
                   className={
                     "flex min-h-16 min-w-0 items-center gap-2 rounded-2xl border px-3 text-left text-sm font-bold transition " +
@@ -1757,7 +1761,7 @@ export default function PublicServices() {
                 setQuery("");
                 setCategory("todos");
                 setResource("todos");
-                applyFilters("", "todos", false, false);
+                applyFilters("", "todos", false, false, "todos");
               }}
               className="mt-3 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
             >
