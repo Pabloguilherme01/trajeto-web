@@ -698,16 +698,20 @@ export default function PublicServices() {
             </button>
           </div>
 
-          <div className="mt-5 hidden grid-cols-2 gap-2 sm:grid sm:grid-cols-4">
+          <div
+            role="group"
+            aria-label="Resumo da Central"
+            className="mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
+          >
             {[
-              [PUBLIC_SERVICES.length, "serviços"],
-              [SERVICE_SUMMARY.contacts, "com contato"],
-              [SERVICE_SUMMARY.routes, "com rota"],
-              [SERVICE_SUMMARY.online, "online"],
+              [PUBLIC_SERVICES.length, "serviços oficiais"],
+              [PUBLIC_SERVICE_CATEGORIES.length - 1, "categorias"],
+              [READY_SERVICE_ROUTES.length, "rotas prontas"],
+              [offlineReadyRouteIds.size, "destinos offline"],
             ].map(([value, label]) => (
               <div
                 key={label}
-                className="rounded-2xl border border-border/10 bg-background/55 p-3"
+                className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 sm:min-w-0"
               >
                 <p className="text-xl font-black tracking-tight text-foreground">
                   {value}

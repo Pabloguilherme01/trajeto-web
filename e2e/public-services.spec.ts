@@ -69,6 +69,20 @@ test("filtro Offline mostra apenas rotas resolvidas localmente em 320 px", async
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
+test("resumo da Central fica visível e sem overflow em 320 px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos", { waitUntil: "domcontentloaded" });
+
+  const summary = page.getByRole("group", { name: "Resumo da Central" });
+  await expect(summary).toBeVisible();
+  await expect(summary.getByText("serviços oficiais", { exact: true })).toBeVisible();
+  await expect(summary.getByText("categorias", { exact: true })).toBeVisible();
+  await expect(summary.getByText("rotas prontas", { exact: true })).toBeVisible();
+  await expect(summary.getByText("destinos offline", { exact: true })).toBeVisible();
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test("descoberta inicial fica compacta sem esconder assuntos em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
