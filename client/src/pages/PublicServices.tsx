@@ -125,6 +125,11 @@ const NEED_GROUPS = [
     hint: "UBS, ESF, urgência, vigilância e saúde digital",
   },
   {
+    label: "Vigilância e saúde pública",
+    query: "vigilancia sanitaria",
+    hint: "Dengue, surtos, fiscalização sanitária, ambiente e saúde do trabalhador",
+  },
+  {
     label: "Educação e creche",
     query: "creche",
     hint: "Creches, vagas, matrículas e escolas",
@@ -455,6 +460,13 @@ export default function PublicServices() {
         : resource === "online"
           ? "Online"
           : "Tudo";
+
+  const navigationModeLabel =
+    navigationMode === "walk"
+      ? "a pé"
+      : navigationMode === "bike"
+        ? "bicicleta"
+        : "carro";
 
   useEffect(() => {
     const refresh = () => setFavorites(listPublicServiceFavorites());
@@ -1656,7 +1668,7 @@ export default function PublicServices() {
                           className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-primary/20 bg-primary/[.05] px-2 text-xs font-black text-primary"
                         >
                           <Navigation className="size-3.5 shrink-0" />
-                          <span className="truncate">Organic Maps</span>
+                          <span className="truncate">Organic · {navigationModeLabel}</span>
                         </button>
                       </div>
                     </article>
@@ -1832,7 +1844,7 @@ export default function PublicServices() {
                       className="min-h-11 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
                     >
                       <Navigation className="mr-1.5 inline size-3.5" />
-                      Organic Maps
+                      Organic · {navigationModeLabel}
                     </button>
                   )}
                   {primaryContact ? (
