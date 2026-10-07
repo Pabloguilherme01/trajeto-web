@@ -71,6 +71,12 @@ describe("PublicServices deep links", () => {
     expect(source).not.toContain('"saneago",');
   });
 
+  it("shows dynamic counts in the ready-route filters", () => {
+    expect(source).toContain("Todas as rotas prontas · ${READY_SERVICE_ROUTES.length} destinos");
+    expect(source).toContain("const groupCount = READY_SERVICE_ROUTES.filter");
+    expect(source).toContain("Filtrar rotas: ${group.label} · ${groupCount} destinos");
+  });
+
   it("keeps ready-route counts dynamic and includes the full local destination catalog", () => {
     expect(source).toContain("ALL_LOCAL_ROUTE_DESTINATIONS.find");
     expect(source).toContain("{READY_SERVICE_ROUTES.length} destinos públicos");
