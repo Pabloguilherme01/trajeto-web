@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+test("resumo de filtros mostra estado ativo no mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/servicos?categoria=saude&recurso=rota", { waitUntil: "domcontentloaded" });
+  const summary = page.locator("#service-filters summary");
+  await expect(summary).toContainText("Saúde · Rota");
+});
+
 test("central de serviços abre offline e filtra saúde", async ({ page }) => {
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Como podemos ajudar/i })).toBeVisible();
