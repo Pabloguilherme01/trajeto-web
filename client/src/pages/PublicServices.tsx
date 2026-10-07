@@ -719,7 +719,8 @@ export default function PublicServices() {
           <div
             role="group"
             aria-label="Resumo da Central"
-            className="mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
+            tabIndex={0}
+            className="mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
           >
             {[
               [PUBLIC_SERVICES.length, "serviços oficiais"],
