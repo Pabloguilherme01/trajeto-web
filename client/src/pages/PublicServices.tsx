@@ -1534,6 +1534,17 @@ export default function PublicServices() {
                   </div>
                 </details>
                 <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                  {showOfficialAction && service.actionUrl && resource === "online" && (
+                    <a
+                      href={service.actionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="order-first flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/[.06] px-3 text-center text-sm font-bold text-accent min-[380px]:col-span-2"
+                    >
+                      <ExternalLink className="size-4 shrink-0" />
+                      {service.actionLabel} · online
+                    </a>
+                  )}
                   {service.mapQuery && (
                     <button
                       type="button"
@@ -1654,7 +1665,7 @@ export default function PublicServices() {
                     ))}
                   </div>
                 )}
-                {showOfficialAction && service.actionUrl && (
+                {showOfficialAction && service.actionUrl && resource !== "online" && (
                   <a
                     href={service.actionUrl}
                     target="_blank"
