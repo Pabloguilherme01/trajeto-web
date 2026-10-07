@@ -38,6 +38,7 @@ import {
   PawPrint,
   UsersRound,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -71,6 +72,7 @@ const categoryIcons = {
   saude: HeartPulse,
   seguranca: ShieldAlert,
   assistencia: Siren,
+  obitos: Heart,
   transito: TrafficCone,
   educacao: BookOpen,
   cidadania: Landmark,
@@ -97,7 +99,7 @@ const categoryIcons = {
   telecom: Phone,
   previdencia: ReceiptText,
   documentos: BadgeCheck,
-} as const;
+} satisfies Record<PublicServiceCategory, LucideIcon>;
 
 const SERVICE_SUMMARY = {
   contacts: PUBLIC_SERVICES.filter(
