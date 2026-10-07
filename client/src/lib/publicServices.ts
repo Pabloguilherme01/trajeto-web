@@ -229,6 +229,80 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "06/10/2026",
   },
   {
+    id: "emitir-taxas-municipais",
+    name: "Emitir impostos e taxas municipais",
+    category: "tributos",
+    description:
+      "Serviço oficial da Prefeitura para emissão de impostos e taxas municipais pelo sistema SIG.",
+    keywords: [
+      "emitir taxas",
+      "taxas municipais",
+      "impostos municipais",
+      "iptu",
+      "segunda via imposto",
+      "tributos",
+    ],
+    actionUrl: "https://aguaslindas.prodataweb.inf.br/sig/app.html",
+    actionLabel: "Abrir emissão de taxas",
+    guidance:
+      "A página oficial da Prefeitura direciona este serviço ao SIG municipal. Se o sistema solicitar autenticação ou não exibir o tributo procurado, confirme o atendimento com a Secretaria de Fazenda.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl: "https://aguaslindasdegoias.go.gov.br/servico/emitir-taxas/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "bem-estar-animal-castracao",
+    name: "Bem-Estar Animal · castração de cães e gatos",
+    category: "ambiente",
+    description:
+      "Projeto municipal voltado ao controle populacional de cães e gatos e à prevenção de doenças por meio de castração.",
+    keywords: [
+      "castracao",
+      "castração",
+      "bem estar animal",
+      "cao",
+      "cão",
+      "gato",
+      "zoonoses",
+      "animal",
+    ],
+    actionUrl: "https://aguaslindasdegoias.go.gov.br/servico/projeto-bem-estar-animal/",
+    actionLabel: "Abrir serviço de Bem-Estar Animal",
+    guidance:
+      "Use a página oficial para acessar o serviço e conferir as regras e a disponibilidade atuais antes de solicitar o atendimento.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/servico/projeto-bem-estar-animal/",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "biblioteca-municipal",
+    name: "Biblioteca Municipal · Jardim Barragem II",
+    category: "educacao",
+    description:
+      "Biblioteca municipal vinculada à Secretaria de Educação, com atendimento público informado pela Prefeitura.",
+    phone: "(61) 99160-8331",
+    email: "educacao@aguaslindasdegoias.go.gov.br",
+    hours: "Segunda a sexta, 08h–12h e 13h–17h",
+    address: "Qd 30, Lt 03, Jardim Barragem 02, Águas Lindas de Goiás - GO",
+    keywords: [
+      "biblioteca",
+      "livros",
+      "leitura",
+      "estudo",
+      "pesquisa",
+      "jardim barragem 2",
+    ],
+    guidance:
+      "Confirme o atendimento pelo canal informado pela Prefeitura antes de se deslocar, especialmente em feriados e datas com expediente alterado.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-educacao/biblioteca/",
+    mapQuery:
+      "Biblioteca Municipal, Qd 30, Lt 03, Jardim Barragem 02, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
     id: "medicamentos-sus-municipal",
     name: "Lista de Medicamentos SUS · Águas Lindas",
     category: "saude",
@@ -1872,6 +1946,16 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
     label: "ITBI",
     query: "itbi",
     hint: "Canal municipal por WhatsApp",
+  },
+  {
+    label: "IPTU e taxas",
+    query: "iptu",
+    hint: "Impostos e taxas municipais",
+  },
+  {
+    label: "Castração animal",
+    query: "castracao",
+    hint: "Projeto Bem-Estar Animal",
   },
   {
     label: "Inclusão e PCD",
