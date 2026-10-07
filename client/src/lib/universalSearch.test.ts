@@ -5,7 +5,6 @@ describe("universal citizen search", () => {
   it.each([
     ["Receita Federal", "receita-federal-pav"],
     ["CPF", "receita-federal-pav"],
-    ["CNPJ", "receita-federal-pav"],
     ["imposto de renda", "receita-federal-pav"],
     ["Defesa Civil", "defesa-civil"],
     ["alagamento", "defesa-civil"],
@@ -21,6 +20,14 @@ describe("universal citizen search", () => {
       expect(results.places).toEqual([]);
     }
   );
+  it("returns both official CNPJ services without route-only duplicates", () => {
+    const results = getUniversalSearchResults("CNPJ");
+    expect(results.services.map(item => item.id)).toEqual(
+      expect.arrayContaining(["receita-federal-pav", "abrir-cnpj-redesim"])
+    );
+    expect(results.routes).toEqual([]);
+    expect(results.places).toEqual([]);
+  });
   it("returns no fake matches for an empty or unknown search", () => {
     expect(getUniversalSearchResults(" ").total).toBe(0);
     expect(getUniversalSearchResults("servico-inexistente-xyz").total).toBe(0);
