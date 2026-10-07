@@ -486,6 +486,22 @@ describe("public services catalog", () => {
     expect(funcionamento.actionUrl).toContain("portaldoempreendedorgoiano.go.gov.br");
   });
 
+  it("keeps Portal SEI actionable for external users and physical support", () => {
+    const sei = PUBLIC_SERVICES.find(item => item.id === "portal-sei-processos")!;
+    expect(sei.phone).toBe("(61) 99303-5012");
+    expect(sei.email).toBe("seigestor@aguaslindasdegoias.go.gov.br");
+    expect(sei.address).toContain("Quadra 15");
+    expect(sei.mapQuery).toContain("Secretaria Municipal de Administração");
+    expect(sei.actionUrl).toContain("cadastro-de-usuario-externo");
+    expect(sei.verifiedAt).toBe("07/10/2026");
+    expect(searchPublicServices("acompanhar processo").map(item => item.id)).toContain(
+      "portal-sei-processos"
+    );
+    expect(searchPublicServices("gov.br").map(item => item.id)).toContain(
+      "portal-sei-processos"
+    );
+  });
+
   it("adds current municipal governance contacts without inventing locations", () => {
     const ids = [
       "gestao-estrategica-municipal",
