@@ -243,7 +243,7 @@ describe("public services catalog", () => {
   it("organizes the expanded premium utility categories without duplicate records", () => {
     for (const [query, id, category] of [
       ["celular seguro", "celular-seguro", "seguranca"],
-      ["tarifa social", "tarifa-social-energia", "assistencia"],
+      ["tarifa social", "tarifa-social-energia", "agua-energia"],
       ["nota fiscal iss", "nota-fiscal-iss", "tributos"],
       ["itbi", "itbi-municipal", "tributos"],
       ["pcd", "secretaria-pcd-igualdade", "inclusao"],
@@ -276,6 +276,13 @@ describe("public services catalog", () => {
     expect(searchPublicServices("ouvsus").some(service => service.id === "ouvsus-136")).toBe(true);
     expect(searchPublicServices("deam").some(service => service.id === "deam-depai-dpca")).toBe(true);
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
+  });
+
+  it("keeps detailed water queries specific while allowing short category discovery", () => {
+    expect(searchPublicServices("segunda via da conta de agua").map(item => item.id)).toEqual(["saneago"]);
+    expect(searchPublicServices("agua energia").map(item => item.id)).toEqual(
+      expect.arrayContaining(["saneago", "energia", "tarifa-social-energia", "reclamar-distribuidora-aneel"])
+    );
   });
 
   it("groups water and energy services without inventing local routes", () => {
