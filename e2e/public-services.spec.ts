@@ -214,13 +214,13 @@ test("descoberta inicial fica compacta sem esconder assuntos em 320 px", async (
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
-test("categorias usam faixa horizontal sem causar overflow em 320 px", async ({ page }) => {
+test("categorias usam grade sem rolagem horizontal em 320 px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
   await page.locator("#service-filters summary").click();
   const categories = page.getByRole("group", { name: "Categorias de serviços" });
   await expect(categories).toBeVisible();
-  expect(await categories.evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true);
+  expect(await categories.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
   const sportCategory = categories.getByRole("button", { name: "Esporte e lazer", exact: true });
   await sportCategory.scrollIntoViewIfNeeded();
   await expect(sportCategory).toBeVisible();

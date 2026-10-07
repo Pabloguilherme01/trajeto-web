@@ -269,7 +269,7 @@ test("Pages: redesigned Central discovers official services at 320px", async ({
   ).toHaveAttribute("href", "https://wa.me/5562981043652");
   await card
     .locator("summary")
-    .filter({ hasText: "Antes de sair" })
+    .filter({ hasText: "Antes de acessar" })
     .click();
   await expect(
     card.getByText("Comprovante de endereço em Goiás e foto digital", {
