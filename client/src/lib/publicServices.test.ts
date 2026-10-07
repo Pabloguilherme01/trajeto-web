@@ -278,6 +278,21 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups water and energy services without inventing local routes", () => {
+    expect(searchPublicServices("", "agua-energia").map(item => item.id)).toEqual(
+      expect.arrayContaining(["saneago", "energia", "tarifa-social-energia", "reclamar-distribuidora-aneel"])
+    );
+    for (const id of ["saneago", "energia", "tarifa-social-energia", "reclamar-distribuidora-aneel"]) {
+      const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+      expect(service.category).toBe("agua-energia");
+      expect(service.mapQuery).toBeUndefined();
+      expect(service.address).toBeUndefined();
+    }
+    const aneel = PUBLIC_SERVICES.find(item => item.id === "reclamar-distribuidora-aneel")!;
+    expect(aneel.phone).toBe("167");
+    expect(aneel.actionUrl).toContain("/reclame-da-distribuidora");
+  });
+
   it("groups transparency services and keeps digital portals route-free", () => {
     expect(searchPublicServices("", "transparencia").map(item => item.id)).toEqual(
       expect.arrayContaining(["sic", "ouvidoria-municipal", "portal-transparencia-municipal", "portal-sei-processos", "legislacao-municipal"])
