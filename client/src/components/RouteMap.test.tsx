@@ -261,7 +261,7 @@ it("focuses endpoints and pauses GPS following when the map is explored", () => 
       stops={[]}
     />
   );
-  fireEvent.click(screen.getByRole("button", { name: /Ver destino:/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Ver destino" }));
   expect(
     parseFloat(
       screen.getByRole("button", { name: "Selecionar Destino" }).style.left
@@ -586,6 +586,6 @@ it("lets the user declutter offline references and labels straight-line estimate
   expect(button.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(button);
   expect(screen.getByRole("button", { name: "Mostrar referências" }).getAttribute("aria-pressed")).toBe("false");
-  expect(screen.getByRole("button", { name: /Ver origem:/ })).toBeTruthy();
-  expect(screen.getByRole("button", { name: /Ver destino:/ })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver origem" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver destino" })).toBeTruthy();
 });
