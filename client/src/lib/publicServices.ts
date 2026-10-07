@@ -2435,6 +2435,15 @@ export function searchPublicServices(
     // Exact agency searches should stay concise even when other services
     // mention the agency only as referral guidance.
     if (search === "cras" && !service.id.startsWith("cras-")) return false;
+    const conciseIntent = /^[a-z0-9]{2,4}$/.test(search);
+    if (conciseIntent) {
+      return matchesCatalogText(search, [
+        service.name,
+        service.category,
+        service.actionLabel,
+        ...(service.keywords ?? []),
+      ]);
+    }
     return matchesCatalogText(search, [
       service.name,
       service.description,
