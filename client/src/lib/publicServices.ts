@@ -17,7 +17,8 @@ export type PublicServiceCategory =
   | "tributos"
   | "inclusao"
   | "mulher"
-  | "animais";
+  | "animais"
+  | "idoso";
 
 export type PublicService = {
   id: string;
@@ -85,6 +86,7 @@ export const PUBLIC_SERVICE_CATEGORIES: Array<{
   { id: "inclusao", label: "Inclusão e igualdade", shortLabel: "Inclusão" },
   { id: "mulher", label: "Mulher e proteção", shortLabel: "Mulher" },
   { id: "animais", label: "Animais e zoonoses", shortLabel: "Animais" },
+  { id: "idoso", label: "Pessoa idosa", shortLabel: "Idoso" },
   { id: "digital", label: "Serviços digitais", shortLabel: "Digital" },
   { id: "ambiente", label: "Meio ambiente", shortLabel: "Ambiente" },
   { id: "consumidor", label: "Defesa do consumidor", shortLabel: "Consumidor" },
@@ -1567,9 +1569,65 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "06/10/2026",
   },
   {
+    id: "cmdi",
+    name: "Conselho Municipal do Direito do Idoso · CMDI",
+    category: "idoso",
+    description:
+      "Conselho municipal de defesa e acompanhamento dos direitos da pessoa idosa, com atendimento divulgado pela Prefeitura.",
+    phone: "(61) 99302-7803",
+    hours: "Segunda a sexta, 09h30–16h para atendimento presencial",
+    email: "cmdiaguaslindas@gmail.com",
+    address:
+      "Quadra 53, Lote 1B, Avenida JK, dentro do CCI, Águas Lindas de Goiás - GO",
+    keywords: [
+      "idoso",
+      "idosa",
+      "direitos do idoso",
+      "conselho do idoso",
+      "cmdi",
+      "violacao direitos idoso",
+    ],
+    actionUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-municipal-do-direito-do-idoso-cmdi/",
+    actionLabel: "Abrir página do CMDI",
+    guidance:
+      "Use o contato oficial para confirmar o atendimento e o encaminhamento adequado. Em situação de violência ou violação de direitos, o Disque 100 também é um canal nacional de denúncia.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-municipal-do-direito-do-idoso-cmdi/",
+    mapQuery:
+      "Conselho Municipal do Direito do Idoso, Quadra 53, Lote 1B, Avenida JK, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
+    id: "cci-idoso",
+    name: "Centro de Convivência do Idoso · CCI",
+    category: "idoso",
+    description:
+      "Referência municipal para a pessoa idosa; a página atual do CMDI informa que o conselho funciona dentro do CCI.",
+    address:
+      "Quadra 53, Lote 1B, Avenida JK, Águas Lindas de Goiás - GO",
+    keywords: [
+      "cci",
+      "centro convivencia idoso",
+      "convivencia idoso",
+      "idoso",
+      "idosa",
+      "terceira idade",
+    ],
+    guidance:
+      "Confirme atividades, inscrição e atendimento com a Assistência Social ou com o CMDI antes de sair; esta ficha não presume programação ou vagas atuais.",
+    sourceLabel: "Prefeitura de Águas Lindas",
+    sourceUrl:
+      "https://aguaslindasdegoias.go.gov.br/estrutura/secretaria-de-assistencia-social-cidadania-e-juventude/conselho-municipal-do-direito-do-idoso-cmdi/",
+    mapQuery:
+      "Centro de Convivência do Idoso, Quadra 53, Lote 1B, Avenida JK, Águas Lindas de Goiás, GO",
+    verifiedAt: "06/10/2026",
+  },
+  {
     id: "carteira-pessoa-idosa",
     name: "Carteira da Pessoa Idosa · transporte interestadual",
-    category: "assistencia",
+    category: "idoso",
     description:
       "Documento para acesso aos benefícios de transporte interestadual, conforme as regras do programa.",
     keywords: [
