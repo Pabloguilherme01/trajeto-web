@@ -486,6 +486,24 @@ describe("public services catalog", () => {
     expect(funcionamento.actionUrl).toContain("portaldoempreendedorgoiano.go.gov.br");
   });
 
+  it("finds protection channels from common situation language", () => {
+    expect(searchPublicServices("violencia domestica").map(item => item.id)).toContain(
+      "ligue-180"
+    );
+    expect(searchPublicServices("feminicidio").map(item => item.id)).toContain(
+      "ligue-180"
+    );
+    expect(searchPublicServices("racismo").map(item => item.id)).toContain(
+      "disque-100"
+    );
+    expect(searchPublicServices("homofobia").map(item => item.id)).toContain(
+      "disque-100"
+    );
+    expect(searchPublicServices("abuso infantil").map(item => item.id)).toContain(
+      "disque-100"
+    );
+  });
+
   it("keeps Portal SEI actionable for external users and physical support", () => {
     const sei = PUBLIC_SERVICES.find(item => item.id === "portal-sei-processos")!;
     expect(sei.phone).toBe("(61) 99303-5012");

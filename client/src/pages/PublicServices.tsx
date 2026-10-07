@@ -186,6 +186,16 @@ const NEED_GROUPS = [
     hint: "Secretaria da Mulher, Ligue 180 e atendimento especializado",
   },
   {
+    label: "Violência doméstica ou ameaça",
+    query: "violencia domestica",
+    hint: "Ligue 180, atendimento especializado e emergência policial",
+  },
+  {
+    label: "Denunciar violação de direitos",
+    query: "direitos humanos",
+    hint: "Disque 100, abuso infantil, idosos, PCD, racismo e LGBT+",
+  },
+  {
     label: "Animais e zoonoses",
     query: "zoonoses",
     hint: "Castração, animais soltos e Vigilância em Saúde",
