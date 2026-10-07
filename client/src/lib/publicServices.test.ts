@@ -263,6 +263,18 @@ describe("public services catalog", () => {
     expect(searchPublicServices("2 delegacia").some(service => service.id === "policia-civil-2")).toBe(true);
   });
 
+  it("groups entrepreneurship and business services in a dedicated category", () => {
+    expect(searchPublicServices("mei", "empreendedor").map(item => item.id)).toEqual(
+      expect.arrayContaining(["desenvolvimento-economico", "sala-empreendedor", "portal-empreendedor-mei", "abrir-cnpj-redesim"])
+    );
+    for (const id of ["desenvolvimento-economico", "sala-empreendedor", "portal-empreendedor-mei", "abrir-cnpj-redesim"])
+      expect(PUBLIC_SERVICES.find(item => item.id === id)?.category).toBe("empreendedor");
+    const sala = PUBLIC_SERVICES.find(item => item.id === "sala-empreendedor")!;
+    expect(sala.whatsappOnly).toContain("(61) 99248-6697");
+    expect(sala.mapQuery).toContain("Parque da Barragem");
+    expect(sala.sourceUrl).toContain("/servico/sala-do-empreendedor/");
+  });
+
   it("groups services for older adults in a dedicated utility category", () => {
     expect(searchPublicServices("idoso", "idoso").map(item => item.id)).toEqual(
       expect.arrayContaining(["cmdi", "cci-idoso", "carteira-pessoa-idosa"])
