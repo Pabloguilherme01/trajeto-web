@@ -40,7 +40,10 @@ function announceUpdate(registration: ServiceWorkerRegistration) {
 export function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
-  const warmCurrentRoute = () => { void cacheCurrentRouteForOffline(); };
+  const warmCurrentRoute = () => {
+    void cacheCurrentRouteForOffline();
+    scheduleBackgroundOfflinePreparation();
+  };
   navigator.serviceWorker.addEventListener("controllerchange", warmCurrentRoute);
 
   const register = () => {
@@ -63,8 +66,16 @@ export function registerServiceWorker() {
       });
       void registration.update().catch(() => undefined);
       const update = () => { void registration.update().catch(() => undefined); };
-      window.addEventListener("online", update);
-      document.addEventListener("visibilitychange", () => { if (!document.hidden) update(); });
+      window.addEventListener("online", () => {
+        update();
+        scheduleBackgroundOfflinePreparation();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          update();
+          scheduleBackgroundOfflinePreparation();
+        }
+      });
     }).catch(() => {});
   };
   if (document.readyState === "complete") register();
@@ -101,6 +112,47 @@ export async function applyServiceWorkerUpdate() {
 }
 
 export const currentRouteOfflineEvent = "trajeto:current-route-offline-ready";
+export const offlinePackageReadyEvent = "trajeto:offline-package-ready";
+
+let backgroundOfflineScheduled = false;
+
+function publishOfflinePackageState(ready: boolean) {
+  document.documentElement.dataset.offlinePackageReady = ready ? "true" : "false";
+  if (ready) window.dispatchEvent(new Event(offlinePackageReadyEvent));
+}
+
+function canPrepareOfflineInBackground() {
+  const connection = (navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+  }).connection;
+  if (connection?.saveData) return false;
+  return !["slow-2g", "2g", "3g"].includes(connection?.effectiveType ?? "");
+}
+
+function scheduleBackgroundOfflinePreparation() {
+  if (backgroundOfflineScheduled || !navigator.onLine || !canPrepareOfflineInBackground()) return;
+  backgroundOfflineScheduled = true;
+
+  const run = async () => {
+    if (!navigator.serviceWorker?.controller) {
+      backgroundOfflineScheduled = false;
+      return;
+    }
+    document.documentElement.dataset.offlinePackageReady = "preparing";
+    const current = await requestOfflineStatus("OFFLINE_STATUS", 5000);
+    const result = current.ready
+      ? current
+      : await requestOfflineStatus("RESTORE_OFFLINE", 120000);
+    publishOfflinePackageState(result.ready);
+    if (!result.ready) backgroundOfflineScheduled = false;
+  };
+
+  const requestIdle = (window as Window & {
+    requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+  }).requestIdleCallback;
+  if (requestIdle) requestIdle(() => { void run(); }, { timeout: 3500 });
+  else window.setTimeout(() => { void run(); }, 1200);
+}
 
 export async function cacheCurrentRouteForOffline(): Promise<boolean> {
   const worker = navigator.serviceWorker?.controller;
@@ -193,7 +245,8 @@ export async function prepareOfflineAccess(): Promise<OfflinePreparation> {
     currentRegistration = registration;
     void registration.update().then(() => announceUpdate(registration)).catch(() => undefined);
     if (!navigator.serviceWorker.controller) return { ready: false, reason: "preparing" };
-    const result = await requestOfflineStatus("RESTORE_OFFLINE", 60000);
+    const result = await requestOfflineStatus("RESTORE_OFFLINE", 120000);
+    publishOfflinePackageState(result.ready);
     if (!result.ready && registration.waiting) announceUpdate(registration);
     return result;
   } catch {
