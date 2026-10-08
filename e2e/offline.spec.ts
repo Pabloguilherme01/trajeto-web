@@ -20,5 +20,5 @@ test("postos: continua navegável depois de perder a conexão", async ({ page, c
 
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await expect(page.getByText(/Diretório completo/i)).toBeVisible();
-  await expect(page.getByRole("textbox", { name: /filtrar diretório de postos/i })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /^Buscar postos$/i })).toBeVisible();
 });
