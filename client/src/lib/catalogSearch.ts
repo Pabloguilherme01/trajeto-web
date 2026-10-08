@@ -20,5 +20,6 @@ export function matchesCatalogTerms(
 
 export function matchesCatalogText(query: string, values: Array<string | undefined>) {
   const terms = normalizeCatalogText(query).replace(/[ºª]/g, "").split(" ").filter(Boolean);
+  if (!terms.length) return true;
   return matchesCatalogTerms(terms, createCatalogSearchIndex(values));
 }

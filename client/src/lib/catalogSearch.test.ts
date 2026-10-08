@@ -21,3 +21,8 @@ describe("catalog search", () => {
     expect(matchesCatalogText("regulariza", ["Regularização fundiária"])).toBe(true);
   });
 });
+
+ it("does not inspect catalog fields for an empty search", () => {
+  const fields = new Proxy([], { get() { throw new Error("unnecessary indexing"); } });
+  expect(matchesCatalogText("  ", fields)).toBe(true);
+ });
