@@ -2184,13 +2184,13 @@ export default function PublicServices() {
                               : "Compartilhar serviço"}
                       <ArrowRight className="size-4 shrink-0" />
                     </summary>
-                    <div className="grid gap-2">
+                    <div role="group" aria-label="Mais ações do serviço" className="grid grid-cols-2 gap-2">
                       {service.mapQuery && (
                         <button
                           type="button"
                           onClick={() => openOrganicMaps(service)}
                           aria-label={"Abrir " + service.name + " no Organic Maps"}
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-2 py-2 text-xs font-bold text-primary"
                         >
                           <Navigation className="size-4 shrink-0" />
                           Organic Maps · {navigationModeLabel}
@@ -2201,7 +2201,7 @@ export default function PublicServices() {
                           href={service.actionUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
+                          className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/30 px-2 py-2 text-xs font-bold text-accent"
                         >
                           <ExternalLink className="size-4" />
                           {service.actionLabel} · online
@@ -2210,7 +2210,7 @@ export default function PublicServices() {
                       {service.email && !showEmail && (
                         <a
                           href={"mailto:" + service.email}
-                          className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
+                          className="flex min-h-11 min-w-0 items-center justify-center break-all rounded-xl border border-border/10 px-2 py-2 text-xs text-foreground/75"
                         >
                           {service.email}
                         </a>
@@ -2239,14 +2239,14 @@ export default function PublicServices() {
                               ": " +
                               contact.number
                             }
-                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-sm font-bold text-accent"
+                            className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-2 py-2 text-xs font-bold text-accent"
                           >
                             {contact.channel === "whatsapp" ? (
                               <MessageCircle className="size-3.5 shrink-0" />
                             ) : (
                               <Phone className="size-3.5 shrink-0" />
                             )}
-                            <span className="break-words">
+                            <span className="min-w-0 break-words">
                               {contact.label || "Contato alternativo"} ·{" "}
                               {contact.number}
                               {contact.channel === "whatsapp"
@@ -2260,7 +2260,7 @@ export default function PublicServices() {
                           type="button"
                           onClick={() => void shareService(service)}
                           aria-label={"Compartilhar serviço: " + service.name}
-                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-2 py-2 text-xs font-bold text-foreground/80"
                         >
                           <Share2 className="size-3.5" />
                           Compartilhar

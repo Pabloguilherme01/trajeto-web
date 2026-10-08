@@ -32,6 +32,13 @@ for (const width of [320, 360, 390]) {
     await expectRow([resources.nth(0), resources.nth(1)]);
     await expectRow([resources.nth(2), resources.nth(3)]);
     await expectRow(["190", "192", "193"].map(number => page.locator("#emergency-strip").locator('a[href="tel:' + number + '"]')));
+    await page.goto("servicos?q=UPA&categoria=saude");
+    const card = page.locator("#service-upa-mansoes-odisseia");
+    await card.locator("summary").filter({ hasText: "Mais opções" }).click();
+    await expectRow([
+      card.getByRole("button", { name: "Abrir UPA Mansões Odisseia no Organic Maps", exact: true }),
+      card.getByRole("button", { name: "Compartilhar serviço: UPA Mansões Odisseia", exact: true }),
+    ]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 
