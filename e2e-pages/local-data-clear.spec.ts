@@ -12,6 +12,7 @@ test("Pages: clearing data resets the visible home and discards a pending GPS re
     } });
   });
   await page.goto("", { waitUntil: "domcontentloaded" });
+  await page.getByText("Planejar uma rota", { exact: true }).click();
   await page.getByPlaceholder("De onde você sai").fill("Casa de teste");
   await page.getByPlaceholder("Para onde você vai").fill("Hospital");
   await page.getByRole("button", { name: "Usar minha localização como origem" }).click();

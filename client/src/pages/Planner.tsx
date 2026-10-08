@@ -1202,6 +1202,7 @@ export default function Planner() {
               </div>
 
               {online && activeExperienceMode !== "offline" && <button type="button" onClick={() => openExternal("google")} className="mt-4 min-h-12 w-full rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground">Navegar agora · Google Maps</button>}
+                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               <details className="mobile-disclosure mt-3"><summary>Outros mapas, acompanhamento e offline <ChevronDown className="size-4" /></summary>
               <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 {online && activeExperienceMode !== "offline" && (
@@ -1241,7 +1242,7 @@ export default function Planner() {
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
-                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
+
               </div>
 
               <div className="mt-3">
