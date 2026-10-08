@@ -155,3 +155,12 @@ it("does not build hidden controls or search routes until the panel opens", () =
     expect((screen.getByRole("combobox", { name: "Como você vai?" }) as HTMLSelectElement).value).toBe("cycling");
   } finally { search.mockRestore(); }
 });
+
+it("opens destination details without collapsing the ready-route list", () => {
+  const view = render(<ReadyRouteShortcuts />); open();
+  const outer = view.container.querySelector("details")!;
+  expect(outer.open).toBe(true);
+  fireEvent.click(screen.getAllByText("Detalhes e opções do destino")[0]);
+  expect(outer.open).toBe(true);
+  expect(screen.getAllByRole("article")).toHaveLength(6);
+});

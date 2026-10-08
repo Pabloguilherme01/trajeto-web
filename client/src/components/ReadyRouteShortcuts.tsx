@@ -164,7 +164,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
             <button type="button" onClick={() => openRoute(route, true)} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-border px-2 text-xs font-bold text-foreground"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
           </div>
           <details className="mt-2 border-t border-border pt-2">
-            <summary onClick={event => { event.preventDefault(); setExpanded(value => !value); }} className="min-h-11 cursor-pointer text-xs font-bold text-foreground/70">Detalhes e opções do destino</summary>
+            <summary className="min-h-11 cursor-pointer text-xs font-bold text-foreground/70">Detalhes e opções do destino</summary>
             <p className="mb-3 break-words text-xs leading-relaxed text-foreground/65">De: {route.origin}<br />Até: {route.destination}</p>
             <DestinationActions destination={readyRouteDestination(route)} compact />
           </details>
