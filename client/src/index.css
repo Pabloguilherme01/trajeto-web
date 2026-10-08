@@ -717,7 +717,7 @@ html.a11y-compact .app-dock {
 
 /* Four destinations remain in one row, including narrow phones and enlarged text. */
 .app-dock-item { min-width: 0; padding: .5rem .25rem; }
-.app-dock-item span:not([aria-hidden]) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .6875rem; }
+.app-dock-item span:not([aria-hidden]) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem; }
 @media (max-width: 24rem) {
   .app-dock { grid-template-columns: repeat(4, minmax(44px, 1fr)); }
   .app-dock-item { flex-direction: column; flex-wrap: nowrap; gap: .2rem; min-height: 3.25rem; }
