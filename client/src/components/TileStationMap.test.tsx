@@ -35,6 +35,22 @@ it("keeps the selected marker above coincident catalogue points", () => {
   fireEvent.click(second);
   expect(Number(second.style.zIndex)).toBeGreaterThan(Number(first.style.zIndex));
 });
+it("removes filtered places from an open group and uses current place data", () => {
+  const select = vi.fn();
+  const stations = [
+    { id: "selected", name: "Selecionado", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Ponto B", address: "Rua B", lat: -15.75455, lng: -48.28165 },
+    { id: "c", name: "Ponto C", address: "Rua C", lat: -15.7546, lng: -48.2817 },
+  ];
+  const { rerender } = render(<TileStationMap stations={stations} onSelectStation={select} />);
+  fireEvent.click(screen.getByRole("button", { name: "Ampliar grupo de 2 lugares e escolher na lista" }));
+  const updated = { ...stations[2], name: "Ponto C atualizado" };
+  rerender(<TileStationMap stations={[stations[0], updated]} onSelectStation={select} />);
+  expect(screen.queryByRole("button", { name: "Ponto B" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Ponto C atualizado" }));
+  expect(select).toHaveBeenCalledWith(updated);
+});
+
 it("keeps marker clusters stable while panning the camera", () => {
   render(<TileStationMap stations={[
     { id: "selected", name: "Selecionado", address: "Rua A", lat: -15.7545, lng: -48.2816 },

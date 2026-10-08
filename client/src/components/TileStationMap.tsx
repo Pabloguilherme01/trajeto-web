@@ -134,7 +134,11 @@ export default function TileStationMap({
       window.removeEventListener("offline", update);
     };
   }, []);
-  const [groupItems, setGroupItems] = useState<StationMapItem[]>([]);
+  const [groupKeys, setGroupKeys] = useState<string[]>([]);
+  const groupItems = useMemo(() => groupKeys.flatMap(key => {
+    const item = drawableByKey.get(key);
+    return item ? [item] : [];
+  }), [groupKeys, drawableByKey]);
   const [routeStyle, setRouteStyle] = useState<keyof typeof ROUTE_STYLES>("blue");
   const [localLayer, setLocalLayer] = useState(false);
   const appearance = ROUTE_STYLES[routeStyle];
@@ -606,9 +610,9 @@ export default function TileStationMap({
   return (
     <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-border/70 bg-muted shadow-xl">
       {groupItems.length > 0 && <section aria-label="Lugares do grupo selecionado" className="relative z-20 border-b border-border bg-card p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold">Escolha um lugar</h2><button type="button" onClick={() => setGroupItems([])} className="min-h-11 rounded-xl border border-border px-3 text-sm">Fechar lista</button></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold">Escolha um lugar</h2><button type="button" onClick={() => setGroupKeys([])} className="min-h-11 rounded-xl border border-border px-3 text-sm">Fechar lista</button></div>
         <div className="grid max-h-52 gap-2 overflow-y-auto">
-          {groupItems.map(item => <button key={stationKey(item)} type="button" onClick={() => { setSelectedId(stationKey(item)); setGroupItems([]); onSelectStation?.(item); }} className="min-h-11 rounded-xl border border-border px-3 py-2 text-left text-sm">{item.name}</button>)}
+          {groupItems.map(item => <button key={stationKey(item)} type="button" onClick={() => { setSelectedId(stationKey(item)); setGroupKeys([]); onSelectStation?.(item); }} className="min-h-11 rounded-xl border border-border px-3 py-2 text-left text-sm">{item.name}</button>)}
         </div>
       </section>}
       <div data-map-surface className={"relative isolate " + heightClassName}>
@@ -730,7 +734,7 @@ export default function TileStationMap({
               const top = height / 2 + worldY - centerPx.y;
               if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
               return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares e escolher na lista`} onPointerDown={event => event.stopPropagation()} onClick={() => {
-                setGroupItems(group.items);
+                setGroupKeys(group.items.map(stationKey));
                 setFollowing(false);
                 setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
