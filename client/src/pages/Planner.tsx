@@ -1,3 +1,5 @@
+import SavedPublicServices from "@/components/SavedPublicServices";
+import { listPublicServiceFavorites, publicServiceFavoritesEvent } from "@/lib/publicServiceFavorites";
 import PlannerTravelPreferences from "@/components/PlannerTravelPreferences";
 import PlannerLocationPicker from "@/components/PlannerLocationPicker";
 import { useLiveTrip } from "@/hooks/useLiveTrip";
@@ -112,6 +114,18 @@ export default function Planner() {
   const [locating, setLocating] = useState(false);
   const [originPrivate, setOriginPrivate] = useState(false);
   const privateOriginRef = useRef<string | null>(null);
+  const [savedServiceIds, setSavedServiceIds] = useState(listPublicServiceFavorites);
+  useEffect(() => {
+    const refresh = () => setSavedServiceIds(listPublicServiceFavorites());
+    window.addEventListener(publicServiceFavoritesEvent, refresh);
+    window.addEventListener(localDataEvent, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(publicServiceFavoritesEvent, refresh);
+      window.removeEventListener(localDataEvent, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
   const [showMap, setShowMap] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
@@ -740,7 +754,7 @@ export default function Planner() {
         <header className="flex items-center justify-between gap-3">
           <div>
 
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">Planejar rota</h1>
+            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">{savedMode ? "Salvos" : "Planejar rota"}</h1>
           </div>
           <span className={"status-pill " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
@@ -1017,12 +1031,12 @@ export default function Planner() {
           </section>
         )}
 
-        {savedMode && <a href={appUrl("/servicos") + "?salvos=1"} className="task-action task-action-secondary mt-4"><Bookmark className="size-4" />Serviços salvos · fichas disponíveis offline</a>}
+        {savedMode && <SavedPublicServices ids={savedServiceIds} />}
         {savedMode && (
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedRoutes.length + savedStations.length + favoriteDestinations.length}</span>
+              <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas e destinos</h2></div>
+              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedRoutes.length + savedStations.length + favoriteDestinations.length + savedServiceIds.length}</span>
             </div>
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-border/15 px-3 py-2 text-xs text-foreground/70">{savedMessage}</p>}
             {savedRoutes.length > 0 && (
@@ -1036,7 +1050,7 @@ export default function Planner() {
                 />
               </label>
             )}
-            {savedRoutes.length === 0 && savedStations.length === 0 && favoriteDestinations.length === 0 ? (
+            {savedRoutes.length === 0 && savedStations.length === 0 && favoriteDestinations.length === 0 && savedServiceIds.length === 0 ? (
               <>
                 <div className="mt-4 rounded-3xl border border-warning/20 bg-card p-4">
                   <p className="text-xs font-black text-foreground">Biblioteca vazia, mas o modo offline continua útil.</p>
