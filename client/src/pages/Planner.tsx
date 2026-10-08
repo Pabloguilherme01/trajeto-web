@@ -880,7 +880,7 @@ export default function Planner() {
               </details>
               <details className="mobile-disclosure mt-3"><summary>Navegar com outro aplicativo <ChevronDown className="size-4" /></summary>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
-                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-1 min-[360px]:grid-cols-3" : "grid-cols-1")}>
+                <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
                     Google · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
                   </button>
@@ -1055,7 +1055,7 @@ export default function Planner() {
                 <div className="mt-4 rounded-3xl border border-warning/20 bg-card p-4">
                   <p className="text-xs font-black text-foreground">Biblioteca vazia, mas o modo offline continua útil.</p>
                   <p className="mt-1 text-xs leading-relaxed text-foreground/42">Os atalhos abaixo são destinos locais preparados no próprio app. Locais conhecidos permitem novas estimativas sem internet. Para guardar o trajeto pelas ruas e as instruções, calcule a viagem online uma vez; a cópia é salva automaticamente.</p>
-                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3">
+                  <div className="mt-3 grid grid-cols-3 gap-2">
                     <a href="tel:190" className="min-h-11 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-black">Polícia · 190</a>
                     <a href="tel:192" className="min-h-11 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-black">SAMU · 192</a>
                     <a href="tel:193" className="min-h-11 rounded-xl border border-border/10 bg-background px-2 py-2 text-center text-xs font-black">Bombeiros · 193</a>
@@ -1096,7 +1096,7 @@ export default function Planner() {
                             {stale ? "revisar" : "pronta"}
                           </span>
                         </div>
-                        <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                        <div className="mt-3 grid grid-cols-2 gap-2">
                           <button type="button" onClick={() => openSavedRoute(route)} className="min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-background">Abrir rota</button>
                           <button type="button" onClick={() => {
                             const savedMode = offlineRouteTravelMode(route);
@@ -1183,7 +1183,7 @@ export default function Planner() {
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{staticRuntime ? "Sua rota está pronta para abrir. O site público prepara a viagem sem fingir um cálculo próprio; o navegador escolhido recebe origem e destino e calcula distância, trânsito e chegada atualizados." : "O cálculo interno não está disponível para esta partida, mas sua viagem não ficou travada. Nenhuma distância, tempo ou pedágio foi inventado; o Trajeto encaminha a rota para um navegador que faz o cálculo atualizado."}</p>
               </div>
             </div>
-            <div className={"mt-4 grid grid-cols-1 gap-2 " + (mode === "driving" ? "sm:grid-cols-3" : "")}>
+            <div className={"mt-4 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
               <button type="button" aria-label="Abrir Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-xl bg-primary px-3 text-xs font-black text-background">
                 Abrir Google Maps · {mode === "walking" ? "a pé" : mode === "cycling" ? "bicicleta" : mode === "transit" ? "transporte" : "carro"}
               </button>
@@ -1224,10 +1224,12 @@ export default function Planner() {
 
               </div>
 
-              {online && activeExperienceMode !== "offline" && <button type="button" onClick={() => openExternal("google")} className="mt-4 min-h-12 w-full rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground">Navegar agora · Google Maps</button>}
+              <div role="group" aria-label="Ações da rota" className="mt-4 grid grid-cols-2 gap-2">
+              {online && activeExperienceMode !== "offline" && <button type="button" aria-label="Navegar agora · Google Maps" onClick={() => openExternal("google")} className="min-h-11 min-w-0 rounded-xl bg-primary px-2 py-2 text-sm font-bold text-primary-foreground">Navegar agora</button>}
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
+              </div>
               <details className="mobile-disclosure mt-3"><summary>Outros mapas, acompanhamento e offline <ChevronDown className="size-4" /></summary>
-              <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+              <div className="mt-4 grid grid-cols-2 gap-2">
                 {online && activeExperienceMode !== "offline" && (
                   <>
                     <button type="button" aria-label="Google Maps" onClick={() => openExternal("google")} className="min-h-12 rounded-2xl bg-primary px-3 text-xs font-black text-background">
