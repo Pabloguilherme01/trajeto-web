@@ -1098,7 +1098,7 @@ export default function PublicServices() {
             </summary>
           <div
             role="group"
-            className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+            className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
             aria-label="Categorias de serviços"
           >
             {PUBLIC_SERVICE_CATEGORIES.map(item => (
@@ -1133,7 +1133,7 @@ export default function PublicServices() {
             <div
               role="group"
               aria-label="Recursos disponíveis"
-              className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4"
+              className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4"
             >
               {(
                 [
@@ -1156,7 +1156,7 @@ export default function PublicServices() {
                     applyFilters(query, category, false, savedOnly, value);
                   }}
                   className={
-                    "flex min-h-16 min-w-0 items-center gap-2 rounded-2xl border px-3 text-left text-sm font-bold transition " +
+                    "flex min-h-11 min-w-0 items-center gap-2 rounded-2xl border px-2 py-2 text-left text-xs font-bold transition " +
                     (resource === value
                       ? "border-primary/35 bg-primary/10 text-primary"
                       : "border-border/10 bg-background text-foreground/80 hover:border-accent/30")
@@ -1204,7 +1204,7 @@ export default function PublicServices() {
                     Organic Maps para continuar sem internet.
                   </p>
                   <OrganicMapsModeSelect value={navigationMode} onChange={setNavigationMode} />
-                  <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setLocation(appUrl("/mapa"))}
@@ -1257,7 +1257,7 @@ export default function PublicServices() {
                   rede telefônica
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3">
+              <div className="mt-3 grid grid-cols-3 gap-2">
                 {[
                   { label: "Polícia", number: "190" },
                   { label: "SAMU", number: "192" },
@@ -1929,13 +1929,13 @@ export default function PublicServices() {
                 <p className="mt-3 text-sm leading-relaxed text-foreground/75">
                   {service.description}
                 </p>
-                <div role="group" aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                <div role="group" aria-label="Ações principais do serviço" className="mt-3 grid grid-cols-2 gap-2">
                   {officialActionIsPrimary && service.actionUrl && (
                     <a
                       href={service.actionUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="order-first flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/[.06] px-3 text-center text-sm font-bold text-accent min-[380px]:col-span-2"
+                      className="order-first flex min-h-11 min-w-0 break-words items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/[.06] px-3 text-center text-sm font-bold text-accent"
                     >
                       <ExternalLink className="size-4 shrink-0" />
                       {service.actionLabel} · online
@@ -1977,8 +1977,8 @@ export default function PublicServices() {
                       }
                       className={
                         "inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " +
-                        (resource === "contato" ? "order-first min-[380px]:col-span-2 " : "") +
-                        (!service.mapQuery ? "min-[380px]:col-span-2" : "")
+                        (resource === "contato" ? "order-first " : "") +
+                        (!service.mapQuery && !officialActionIsPrimary ? "col-span-2" : "")
                       }
                     >
                       {primaryContact.channel === "whatsapp" ? (
@@ -2000,8 +2000,8 @@ export default function PublicServices() {
                       onClick={() => void shareService(service)}
                       aria-label={"Compartilhar serviço: " + service.name}
                       className={
-                        "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " +
-                        (!service.mapQuery ? "min-[380px]:col-span-2" : "")
+                        "inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80 " +
+                        (!service.mapQuery && !officialActionIsPrimary ? "col-span-2" : "")
                       }
                     >
                       <Share2 className="size-3.5" />
@@ -2087,7 +2087,7 @@ export default function PublicServices() {
                   </div>
                 </details>
                 {showSecondaryContacts && (
-                  <div className="mt-2 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                  <div className="mt-2 grid grid-cols-2 gap-2">
                     {secondaryContacts.map(contact => (
                       <a
                         key={contact.href}
@@ -2146,12 +2146,13 @@ export default function PublicServices() {
                     {service.email}
                   </a>
                 )}
+                {expandedActions && (primaryContact || service.mapQuery) && <div role="group" aria-label="Outras ações do serviço" className="mt-2 grid grid-cols-2 gap-2">
                 {expandedActions && primaryContact && (
                   <button
                     type="button"
                     onClick={() => void shareService(service)}
                     aria-label={"Compartilhar serviço: " + service.name}
-                    className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-2 py-2 text-xs font-bold text-foreground/80"
                   >
                     <Share2 className="size-3.5" />
                     Compartilhar
@@ -2162,12 +2163,13 @@ export default function PublicServices() {
                     type="button"
                     onClick={() => openOrganicMaps(service)}
                     aria-label={"Abrir " + service.name + " no Organic Maps"}
-                    className="mt-2 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-primary/20 bg-primary/[.05] px-2 py-2 text-xs font-bold text-primary"
                   >
                     <Navigation className="size-4 shrink-0" />
                     Organic Maps · {navigationModeLabel}
                   </button>
                 )}
+                </div>}
                 {hasMoreOptions && (
                   <details className="mobile-disclosure mt-2">
                     <summary>
@@ -2182,13 +2184,13 @@ export default function PublicServices() {
                               : "Compartilhar serviço"}
                       <ArrowRight className="size-4 shrink-0" />
                     </summary>
-                    <div className="grid gap-2">
+                    <div role="group" aria-label="Mais ações do serviço" className="grid grid-cols-2 gap-2">
                       {service.mapQuery && (
                         <button
                           type="button"
                           onClick={() => openOrganicMaps(service)}
                           aria-label={"Abrir " + service.name + " no Organic Maps"}
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-2 py-2 text-xs font-bold text-primary"
                         >
                           <Navigation className="size-4 shrink-0" />
                           Organic Maps · {navigationModeLabel}
@@ -2199,7 +2201,7 @@ export default function PublicServices() {
                           href={service.actionUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 px-3 text-sm font-bold text-accent"
+                          className="flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/30 px-2 py-2 text-xs font-bold text-accent"
                         >
                           <ExternalLink className="size-4" />
                           {service.actionLabel} · online
@@ -2208,7 +2210,7 @@ export default function PublicServices() {
                       {service.email && !showEmail && (
                         <a
                           href={"mailto:" + service.email}
-                          className="flex min-h-11 items-center justify-center break-all rounded-xl border border-border/10 px-3 text-sm text-foreground/75"
+                          className="flex min-h-11 min-w-0 items-center justify-center break-all rounded-xl border border-border/10 px-2 py-2 text-xs text-foreground/75"
                         >
                           {service.email}
                         </a>
@@ -2237,14 +2239,14 @@ export default function PublicServices() {
                               ": " +
                               contact.number
                             }
-                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-sm font-bold text-accent"
+                            className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-2 py-2 text-xs font-bold text-accent"
                           >
                             {contact.channel === "whatsapp" ? (
                               <MessageCircle className="size-3.5 shrink-0" />
                             ) : (
                               <Phone className="size-3.5 shrink-0" />
                             )}
-                            <span className="break-words">
+                            <span className="min-w-0 break-words">
                               {contact.label || "Contato alternativo"} ·{" "}
                               {contact.number}
                               {contact.channel === "whatsapp"
@@ -2258,7 +2260,7 @@ export default function PublicServices() {
                           type="button"
                           onClick={() => void shareService(service)}
                           aria-label={"Compartilhar serviço: " + service.name}
-                          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-2 py-2 text-xs font-bold text-foreground/80"
                         >
                           <Share2 className="size-3.5" />
                           Compartilhar
