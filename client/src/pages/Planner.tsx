@@ -864,6 +864,7 @@ export default function Planner() {
               </div>
 
               </details>
+              <details className="mobile-disclosure mt-3"><summary>Navegar com outro aplicativo <ChevronDown className="size-4" /></summary>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-1 min-[360px]:grid-cols-3" : "grid-cols-1")}>
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
@@ -891,6 +892,7 @@ export default function Planner() {
                   </button>
                 </div>
               )}
+              </details>
             </form>
 
             {error && (
@@ -1015,6 +1017,7 @@ export default function Planner() {
           </section>
         )}
 
+        {savedMode && <a href={appUrl("/servicos") + "?salvos=1"} className="task-action task-action-secondary mt-4"><Bookmark className="size-4" />Serviços salvos · fichas disponíveis offline</a>}
         {savedMode && (
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
@@ -1198,15 +1201,8 @@ export default function Planner() {
                 <div data-route-card className="min-w-0 rounded-2xl border border-warning/10 bg-warning/[.035] p-3"><RefreshCw className="size-4 text-warning" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-muted-foreground">Chegada</p><p className="mt-1 break-words text-base font-black">{formatArrival(liveTrip.active ? remaining?.durationSeconds : planned.route.durationSeconds)}</p></div>
               </div>
 
-              <div className="mt-3">
-                <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
-                  <p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Trânsito</p>
-                  <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
-                </div>
-
-              </div>
-
+              {online && activeExperienceMode !== "offline" && <button type="button" onClick={() => openExternal("google")} className="mt-4 min-h-12 w-full rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground">Navegar agora · Google Maps</button>}
+              <details className="mobile-disclosure mt-3"><summary>Outros mapas, acompanhamento e offline <ChevronDown className="size-4" /></summary>
               <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 {online && activeExperienceMode !== "offline" && (
                   <>
@@ -1248,6 +1244,16 @@ export default function Planner() {
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               </div>
 
+              <div className="mt-3">
+                <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
+                  <p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Trânsito</p>
+                  <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
+                </div>
+
+              </div>
+
+              </details>
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-primary/[.05] px-3 py-2 text-xs font-bold text-primary">{savedMessage}</p>}
             </div>
 
@@ -1267,9 +1273,11 @@ export default function Planner() {
             )}
 
             <RoutePublicServiceCard destination={destination} online={online} />
+            <details className="mobile-disclosure mt-3"><summary>Horário de chegada e combustível <ChevronDown className="size-4" /></summary>
             {!liveTrip.active && <ArrivalTimePlannerCard durationSeconds={planned.route.durationSeconds} />}
             {mode === "driving" && <TripFuelBriefing distanceKm={(planned.route.distanceMeters ?? 0) / 1000} durationSeconds={planned.route.durationSeconds ?? undefined} />}
 
+            </details>
             {planned.recommendation && (
               <section className="mt-3 rounded-[1.5rem] border border-primary/15 bg-card p-4">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Parada sugerida</p>

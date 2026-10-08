@@ -714,3 +714,18 @@ html.a11y-compact .app-dock {
     backdrop-filter: none !important;
   }
 }
+
+/* Navigation remains readable at 200% text size without splitting words. */
+.app-dock-item { min-width: 0; padding: .5rem .25rem; }
+.app-dock-item span { overflow-wrap: normal; word-break: normal; hyphens: none; }
+@media (max-width: 24rem) {
+  .app-dock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-dock-item { flex-direction: row; flex-wrap: wrap; gap: .4rem; min-height: 2.75rem; }
+  main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
+  .home-utility-action { overflow-wrap: normal; }
+}
+
+@media (max-width: 24rem) {
+  .planner-premium .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .planner-choice, .task-action, .mobile-disclosure > summary { overflow-wrap: normal; word-break: normal; }
+}

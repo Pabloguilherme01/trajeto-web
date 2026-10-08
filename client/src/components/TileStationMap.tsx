@@ -134,6 +134,7 @@ export default function TileStationMap({
       window.removeEventListener("offline", update);
     };
   }, []);
+  const [groupItems, setGroupItems] = useState<StationMapItem[]>([]);
   const [routeStyle, setRouteStyle] = useState<keyof typeof ROUTE_STYLES>("blue");
   const [localLayer, setLocalLayer] = useState(false);
   const appearance = ROUTE_STYLES[routeStyle];
@@ -353,7 +354,6 @@ export default function TileStationMap({
         drawable,
         item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
         item =>
-          clusterZoom >= 17 ||
           stationKey(item) === selectedId ||
           ["origin", "destination"].includes(item.id ?? "")
       ),
@@ -564,6 +564,8 @@ export default function TileStationMap({
   if (tileFallback)
     return (
       <div>
+
+
         {localLayer && !offline && <button type="button" onClick={() => setLocalLayer(false)} className="m-3 flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-bold text-card-foreground shadow"><Layers className="size-4" />Voltar ao mapa de ruas</button>}
         {fallback}
         {!offline && !localLayer && (
@@ -603,6 +605,12 @@ export default function TileStationMap({
 
   return (
     <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-border/70 bg-muted shadow-xl">
+      {groupItems.length > 0 && <section aria-label="Lugares do grupo selecionado" className="relative z-20 border-b border-border bg-card p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold">Escolha um lugar</h2><button type="button" onClick={() => setGroupItems([])} className="min-h-11 rounded-xl border border-border px-3 text-sm">Fechar lista</button></div>
+        <div className="grid max-h-52 gap-2 overflow-y-auto">
+          {groupItems.map(item => <button key={stationKey(item)} type="button" onClick={() => { setSelectedId(stationKey(item)); setGroupItems([]); onSelectStation?.(item); }} className="min-h-11 rounded-xl border border-border px-3 py-2 text-left text-sm">{item.name}</button>)}
+        </div>
+      </section>}
       <div data-map-surface className={"relative isolate " + heightClassName}>
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-foreground/15 via-foreground/[.04] to-transparent" />
         <div aria-label="Escala do mapa" className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-xl border border-border bg-card/95 px-2.5 py-1.5 text-[0.68rem] font-black text-card-foreground shadow-lg backdrop-blur-md">
@@ -721,7 +729,8 @@ export default function TileStationMap({
               const left = width / 2 + worldX - centerPx.x;
               const top = height / 2 + worldY - centerPx.y;
               if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
-              return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+              return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares e escolher na lista`} onPointerDown={event => event.stopPropagation()} onClick={() => {
+                setGroupItems(group.items);
                 setFollowing(false);
                 setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
