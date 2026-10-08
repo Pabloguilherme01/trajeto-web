@@ -27,6 +27,7 @@ for (const width of [320, 360, 390]) {
     const resources = page.getByRole("group", { name: "Recursos disponíveis" }).getByRole("button");
     await expectRow([resources.nth(0), resources.nth(1)]);
     await expectRow([resources.nth(2), resources.nth(3)]);
+    await expectRow(["190", "192", "193"].map(number => page.locator("#emergency-strip").locator('a[href="tel:' + number + '"]')));
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 

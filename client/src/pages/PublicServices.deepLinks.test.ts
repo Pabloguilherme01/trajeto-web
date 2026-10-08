@@ -24,10 +24,9 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('className="mt-3 flex flex-wrap gap-2"');
   });
 
-  it("keeps the three emergency numbers visible without squeezing 320px screens", () => {
+  it("keeps the category summary available", () => {
     expect(source).toContain("PUBLIC_SERVICE_CATEGORIES.length - 1");
     expect(source).toContain("sm:inline-flex");
-    expect(source).toContain('className="mt-3 grid grid-cols-1 gap-2 min-[340px]:grid-cols-3"');
   });
 
   it("puts primary actions before metadata and preparation details", () => {
