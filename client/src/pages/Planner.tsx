@@ -217,9 +217,10 @@ export default function Planner() {
     refreshSavedRoutes();
   }, [savedMode]);
 
+  // Hydrate only when the URL changes; preference buttons update local trip state.
   useEffect(() => {
     const value = queryParams.get("modo");
-    setMode(drivingMode ? "driving" : (value === "walking" || value === "cycling" || value === "transit" ? value : "driving"));
+    setMode(resolvePlannerExperience(queryParams) === "driving" ? "driving" : (value === "walking" || value === "cycling" || value === "transit" ? value : "driving"));
     resetResult();
     const routeId = queryParams.get("rota");
     const privateHandoff =
@@ -258,7 +259,7 @@ export default function Planner() {
       setDestination(queryParams.get("destino") ?? "");
     }
     return () => { active = false; };
-  }, [queryParams, drivingMode]);
+  }, [queryParams]);
 
   useEffect(() => {
     const auto = queryParams.get("auto") === "1";

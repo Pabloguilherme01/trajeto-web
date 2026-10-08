@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { MapPin, ArrowUpRight, ArrowLeft, Search, Stethoscope, ShoppingBag, Landmark, Bus, GraduationCap, Fuel, Utensils } from "lucide-react";
 import { LOCAL_READY_ROUTES, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
-import { matchesCatalogText } from "@/lib/catalogSearch";
+import { filterReadyRoutes } from "@/lib/readyRouteSearch";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
@@ -50,11 +50,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   }, []);
   const offlineActive = offlineOnly || !online;
   const filtered = useMemo(
-    () => LOCAL_READY_ROUTES.filter(route =>
-      (originId === "todos" || originId === route.originId) &&
-      (category === "todos" || category === route.category) &&
-      matchesCatalogText(query, [route.label, route.origin, route.destination, route.detail])
-    ).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b)),
+    () => filterReadyRoutes(query, category, originId).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b)),
     [originId, category, query]
   );
   const visible = useMemo(

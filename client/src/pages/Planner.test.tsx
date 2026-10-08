@@ -481,3 +481,29 @@ it("continues local routing when saved route storage does not answer", async () 
   await waitFor(() => expect(state.offlineRoute).toHaveBeenCalledWith("Casa", "Trabalho", "driving"), { timeout: 2500 });
   await screen.findByTestId("route-map");
 });
+
+it("keeps edited trip fields when entering and leaving driving preferences", () => {
+  render(<Planner />);
+  fireEvent.change(screen.getByPlaceholderText("De onde você sai"), { target: { value: "Prefeitura" } });
+  changeDestination("HEAL");
+  fireEvent.click(screen.getByText("Preferências da viagem", { exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Condução" }));
+  expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Prefeitura");
+  expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("HEAL");
+  fireEvent.click(screen.getByRole("button", { name: "Inteligente" }));
+  expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("HEAL");
+  expect(state.mutate).not.toHaveBeenCalled();
+});
+
+it("keeps the private location handoff in memory when changing preferences", () => {
+  state.search = "local=1&destino=HEAL";
+  setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+  render(<Planner />);
+  fireEvent.click(screen.getByText("Preferências da viagem", { exact: true }));
+  for (const preference of ["Condução", "Inteligente"]) {
+    fireEvent.click(screen.getByRole("button", { name: preference }));
+    expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Minha localização");
+    expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("HEAL");
+  }
+  expect(state.search).not.toContain("-15.76123");
+});
