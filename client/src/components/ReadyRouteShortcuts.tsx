@@ -27,12 +27,13 @@ function readyRoutePriority(route: typeof LOCAL_READY_ROUTES[number]) {
 
 export default function ReadyRouteShortcuts({ compact = false, initialMode = "driving", summaryLabel }: { compact?: boolean; initialMode?: TravelMode; summaryLabel?: string }) {
   const [, navigate] = useLocation();
+  const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [originId, setOriginId] = useState("todos");
   const origins = useMemo(
-    () => Array.from(new Map(LOCAL_READY_ROUTES.map(route => [route.originId, route.originLabel])).entries()),
-    []
+    () => expanded ? Array.from(new Map(LOCAL_READY_ROUTES.map(route => [route.originId, route.originLabel])).entries()) : [],
+    [expanded]
   );
   const [mode, setMode] = useState(initialMode);
   const [visibleCount, setVisibleCount] = useState(6);
@@ -50,8 +51,8 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   }, []);
   const offlineActive = offlineOnly || !online;
   const filtered = useMemo(
-    () => filterReadyRoutes(query, category, originId).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b)),
-    [originId, category, query]
+    () => expanded ? filterReadyRoutes(query, category, originId).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b)) : [],
+    [expanded, originId, category, query]
   );
   const visible = useMemo(
     () => filtered.slice(0, visibleCount),
@@ -69,8 +70,9 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
-  return <details className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl" data-compact={compact || undefined}>
-    <summary className="min-h-11 cursor-pointer break-words text-sm font-bold text-foreground">{summaryLabel ?? `${LOCAL_READY_ROUTES.length} trajetos prontos pela cidade`}</summary>
+  return <details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)} className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl" data-compact={compact || undefined}>
+    <summary onClick={event => { event.preventDefault(); setExpanded(value => !value); }} className="min-h-11 cursor-pointer break-words text-sm font-bold text-foreground">{summaryLabel ?? `${LOCAL_READY_ROUTES.length} trajetos prontos pela cidade`}</summary>
+    {expanded && <>
     <p className="mt-2 text-xs leading-relaxed text-foreground/70">Busque um lugar, escolha como ir e toque em Ir até aqui. Origem e destino já vêm preenchidos; você pode ajustar no planejador.</p>
     <div className="mt-3" role="group" aria-label="O que você precisa fazer?">
       <p className="mb-2 text-xs font-bold text-foreground/80">O que você precisa fazer?</p>
@@ -162,7 +164,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
             <button type="button" onClick={() => openRoute(route, true)} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-border px-2 text-xs font-bold text-foreground"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
           </div>
           <details className="mt-2 border-t border-border pt-2">
-            <summary className="min-h-11 cursor-pointer text-xs font-bold text-foreground/70">Detalhes e opções do destino</summary>
+            <summary onClick={event => { event.preventDefault(); setExpanded(value => !value); }} className="min-h-11 cursor-pointer text-xs font-bold text-foreground/70">Detalhes e opções do destino</summary>
             <p className="mb-3 break-words text-xs leading-relaxed text-foreground/65">De: {route.origin}<br />Até: {route.destination}</p>
             <DestinationActions destination={readyRouteDestination(route)} compact />
           </details>
@@ -174,5 +176,6 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
       {visibleCount > 6 && <button type="button" onClick={() => setVisibleCount(6)} className="min-h-11 rounded-xl border border-border px-3 text-sm font-bold text-foreground/80">Mostrar menos trajetos</button>}
     </div>
     <p className="mt-3 text-xs leading-relaxed text-foreground/55">Sem internet, o caminho e a distância podem ser estimativas. Transporte público não informa horários em tempo real.</p>
+    </>}
   </details>;
 }
