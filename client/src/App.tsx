@@ -9,6 +9,7 @@ import { normalizeRouterTarget } from "@/lib/appUrl";
 import { consumeStationReturn } from "@/lib/authReturn";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import ErrorBoundary from "./components/ErrorBoundary";
+import RouteLoading from "./components/RouteLoading";
 import InstallAppPrompt from "./components/InstallAppPrompt";
 import MobileBottomNav from "./components/MobileBottomNav";
 import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
@@ -30,17 +31,6 @@ const PublicData = lazy(() => import("./pages/PublicData"));
 
 const routerBase = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
 
-function RouteLoading() {
-  return (
-    <div role="status" aria-live="polite" className="grid min-h-[70dvh] place-items-center bg-background px-5 text-foreground">
-      <div className="w-full max-w-sm rounded-3xl border border-border bg-card p-5">
-        <div className="size-2 animate-pulse rounded-full bg-primary" />
-        <p className="mt-4 text-sm font-black">Abrindo o Trajeto…</p>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Carregando somente a tela necessária.</p>
-      </div>
-    </div>
-  );
-}
 
 function AdminOnly({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth();

@@ -389,6 +389,7 @@ export default function CityMap() {
         {online && markers.length ? (
           <TileStationMap
             stations={markers}
+            showDestinationPicker={false}
             selectionLabel="Escolher destino no mapa"
             onPlanDestination={item => plan(plannerDestinationFromMapItem(item))}
             fallback={fallback}

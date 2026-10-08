@@ -27,6 +27,11 @@ export default function Help() {
           <h2 id="install-help-title" className="text-base font-bold">Instalar no celular</h2>
           <p className="mt-2 text-sm leading-relaxed">Android: abra este site no Chrome e use o menu ⋮ → Instalar app ou Adicionar à tela inicial. No iPhone: Safari → Compartilhar → Adicionar à Tela de Início.</p>
           <p className="mt-2 text-sm leading-relaxed">Se abriu por WhatsApp, Instagram ou outro aplicativo, use Abrir no navegador primeiro. Depois de instalar, prepare o acesso offline abaixo e aguarde a confirmação.</p>
+          <details className="mobile-disclosure mt-3">
+            <summary>O Chrome diz que está instalado, mas não abre?</summary>
+            <p className="mt-2 text-sm leading-relaxed">Abra o Trajeto pelo ícone na tela inicial ou pela lista de aplicativos do Android. Se o ícone antigo continuar falhando, use o site no Chrome, salve ou compartilhe suas rotas importantes e remova apenas o aplicativo antigo. Depois abra este endereço no Chrome para instalar novamente.</p>
+            <p className="mt-2 text-sm leading-relaxed">Não limpe os dados do site: suas rotas e a preparação offline ficam neste aparelho. Após reinstalar, confira o acesso offline abaixo antes de sair sem internet.</p>
+          </details>
         </section>
         <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
           <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e guarde seus atalhos neste aparelho. A central reúne serviços públicos de Águas Lindas e canais estaduais e nacionais de apoio.</p>

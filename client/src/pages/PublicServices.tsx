@@ -868,7 +868,7 @@ export default function PublicServices() {
     <main className="premium-surface visual-shell min-h-[100dvh] bg-background pb-28 text-foreground md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
         {!selectedService && <>
-        <header className="premium-card relative overflow-hidden rounded-[1.8rem] border border-primary/10 bg-gradient-to-br from-card via-card to-primary/[.045] p-4 shadow-sm sm:p-6">
+        <header className="central-intro premium-card relative overflow-hidden rounded-[1.8rem] border border-primary/10 bg-gradient-to-br from-card via-card to-primary/[.045] p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
               <span className="status-pill border-primary/20 bg-primary/10 text-primary">
@@ -877,12 +877,11 @@ export default function PublicServices() {
               <h1 className="section-heading mt-3 max-w-3xl font-display text-[1.85rem] font-semibold leading-tight tracking-tight sm:text-4xl">
                 Como podemos ajudar?
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base">
+              <p className="central-description mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base">
                 <span className="font-bold text-foreground">
                   Encontre o serviço certo sem perder tempo.
                 </span>{" "}
-                Pesquise por vacina, CNH, emprego, água, documentos ou
-                atendimento e veja contato, rota e canal oficial no mesmo lugar.
+                Contato, rota e canal oficial para saúde, documentos, emprego e serviços de Águas Lindas.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="status-pill text-foreground/80">
@@ -916,7 +915,7 @@ export default function PublicServices() {
             role="group"
             aria-label="Resumo da Central"
             tabIndex={0}
-            className="mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
+            className="central-metrics mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
           >
             <button
               type="button"
@@ -973,43 +972,7 @@ export default function PublicServices() {
           </div>
         </header>
 
-        <nav
-          aria-label="Ações principais da Central"
-          className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4"
-        >
-          <button
-            type="button"
-            onClick={() => inputRef.current?.focus()}
-            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <Search className="size-4 shrink-0 text-primary" />
-            <span className="min-w-0">Buscar serviço</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setLocation(appUrl("/mapa"))}
-            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <MapPinned className="size-4 shrink-0 text-primary" />
-            <span className="min-w-0">Mapa da cidade</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => openReadyRoutesFromSummary(false)}
-            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <Route className="size-4 shrink-0 text-primary" />
-            <span className="min-w-0">Rotas prontas</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => openReadyRoutesFromSummary(true)}
-            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-accent/35 focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <WifiOff className="size-4 shrink-0 text-accent" />
-            <span className="min-w-0">Usar offline</span>
-          </button>
-        </nav>
+
 
         <form
           onSubmit={event => {
@@ -1055,6 +1018,43 @@ export default function PublicServices() {
             Ctrl K
           </kbd>
         </form>
+        <nav
+          aria-label="Ações principais da Central"
+          className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4"
+        >
+          <button
+            type="button"
+            onClick={() => inputRef.current?.focus()}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <Search className="size-4 shrink-0 text-primary" />
+            <span className="min-w-0">Buscar serviço</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocation(appUrl("/mapa"))}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <MapPinned className="size-4 shrink-0 text-primary" />
+            <span className="min-w-0">Mapa da cidade</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => openReadyRoutesFromSummary(false)}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <Route className="size-4 shrink-0 text-primary" />
+            <span className="min-w-0">Rotas prontas</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => openReadyRoutesFromSummary(true)}
+            className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-accent/35 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <WifiOff className="size-4 shrink-0 text-accent" />
+            <span className="min-w-0">Usar offline</span>
+          </button>
+        </nav>
 
         {!selectedService && !query.trim() && (
           <div

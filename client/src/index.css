@@ -715,13 +715,13 @@ html.a11y-compact .app-dock {
   }
 }
 
-/* Navigation remains readable at 200% text size without splitting words. */
+/* Four destinations remain in one row, including narrow phones and enlarged text. */
 .app-dock-item { min-width: 0; padding: .5rem .25rem; }
-.app-dock-item span { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.app-dock-item span:not([aria-hidden]) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .6875rem; }
 @media (max-width: 24rem) {
-  .app-dock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .app-dock-item { flex-direction: row; flex-wrap: wrap; gap: .4rem; min-height: 2.75rem; }
-  main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
+  .app-dock { grid-template-columns: repeat(4, minmax(44px, 1fr)); }
+  .app-dock-item { flex-direction: column; flex-wrap: nowrap; gap: .2rem; min-height: 3.25rem; }
+  main { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
   .home-utility-action { overflow-wrap: normal; }
 }
 
@@ -736,4 +736,18 @@ html.a11y-compact .app-dock {
   .service-directory-card > .flex:first-child > .flex-1 { flex-basis: 100%; order: 2; }
   .service-directory-card > .flex:first-child > button { margin-inline-start: auto; }
   .service-directory-card h2 { overflow-wrap: normal; word-break: normal; }
+}
+
+/* Compact civic surfaces put useful actions ahead of decorative space. */
+@media (max-width: 767px) {
+  .visual-shell details:not([open]) { padding-block: .5rem; }
+  .visual-shell details:not([open]) > :not(summary) { display: none; }
+  .visual-shell details:not([open]) > summary { min-height: 44px; display: flex; align-items: center; gap: .5rem; }
+  .home-utility-action { min-height: 64px; gap: .35rem; border-radius: .85rem; }
+  .visual-shell .premium-card, .visual-shell .premium-panel { border-radius: 1rem; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+  .central-intro { padding: 1rem; }
+  .central-intro h1 { font-size: 1.5rem; margin-top: .5rem; }
+  .central-intro .central-description { max-width: 36rem; }
+  .central-intro .central-metrics { margin-top: .75rem; gap: .375rem; }
+  .central-metrics > button { padding: .5rem .625rem; min-width: 6.5rem; }
 }

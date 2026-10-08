@@ -195,6 +195,11 @@ export default function Home() {
           </form>
         </section>
 
+        <section className="mt-4" aria-label="Ações principais"><div className="grid grid-cols-3 gap-2">
+<button type="button" onClick={findNearby} className="home-utility-action"><Fuel className="size-5 text-primary" /><span>Postos</span></button>
+<button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="home-utility-action"><Landmark className="size-5 text-accent" /><span>Serviços</span></button>
+<button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="home-utility-action" aria-label="Abrir mapa da cidade"><Map className="size-5 text-accent" /><span>Mapa</span></button></div>
+{lastTrip && <button type="button" onClick={openLastTrip} className="mobile-disclosure mt-3 flex w-full items-center justify-between text-left"><span>{isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota"}</span><ArrowRight className="size-4" /></button>}</section>
         <details className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-border/15 bg-card p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
           <summary className="min-h-11 cursor-pointer text-sm font-bold">Planejar uma rota</summary>
           <form onSubmit={submit} className="space-y-3">
@@ -231,11 +236,7 @@ export default function Home() {
         </details>
 
 
-        <section className="mt-4" aria-label="Ações principais"><div className="grid grid-cols-3 gap-2">
-<button type="button" onClick={findNearby} className="home-utility-action"><Fuel className="size-5 text-primary" /><span>Postos</span></button>
-<button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="home-utility-action"><Landmark className="size-5 text-accent" /><span>Serviços</span></button>
-<button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="home-utility-action" aria-label="Abrir mapa da cidade"><Map className="size-5 text-accent" /><span>Mapa</span></button></div>
-{lastTrip && <button type="button" onClick={openLastTrip} className="mobile-disclosure mt-3 flex w-full items-center justify-between text-left"><span>{isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota"}</span><ArrowRight className="size-4" /></button>}</section>
+
 <ReadyRouteShortcuts summaryLabel="Rotas prontas" />
         <section className="premium-card mt-4 rounded-[1.35rem] border border-warning/18 bg-warning/[.04] p-3" aria-labelledby="home-utility-title">
           <h2 id="home-utility-title" className="sr-only">Emergência</h2>
