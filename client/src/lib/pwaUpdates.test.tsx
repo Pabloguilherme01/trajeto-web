@@ -62,7 +62,7 @@ it("does not hang or reload when no update is waiting", async () => {
 it("continues first offline preparation after the new worker takes control", async () => {
   const registration = { waiting: null, installing: null, update: vi.fn().mockResolvedValue(undefined) };
   class MockMessageChannel {
-    port1: { onmessage: ((event: { data: unknown }) => void) | null; close: ReturnType<typeof vi.fn>;
+    port1: { onmessage: ((event: { data: unknown }) => void) | null; close: ReturnType<typeof vi.fn> };
     port2: { postMessage: (data: unknown) => void; close: ReturnType<typeof vi.fn> };
     constructor() {
       this.port1 = { onmessage: null, close: vi.fn() };
