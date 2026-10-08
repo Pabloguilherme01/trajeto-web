@@ -1,6 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
+import * as routeSearch from "@/lib/readyRouteSearch";
 import ReadyRouteShortcuts from "./ReadyRouteShortcuts";
 import { LOCAL_READY_ROUTES, READY_ROUTE_STREET_POINTS } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
@@ -123,4 +124,26 @@ it("aligns quick route filters with their destination category", () => {
   expect(category.value).toBe("saude");
   fireEvent.change(category, { target: { value: "compras" } });
   expect(search.value).toBe("");
+});
+
+it("does not build hidden controls or search routes until the panel opens", () => {
+  const search = vi.spyOn(routeSearch, "filterReadyRoutes");
+  try {
+    const view = render(<ReadyRouteShortcuts />);
+    expect(view.container.querySelectorAll("article,input,select")).toHaveLength(0);
+    expect(search).not.toHaveBeenCalled();
+    open();
+    expect(screen.getAllByRole("article")).toHaveLength(6);
+    expect(search).toHaveBeenCalledOnce();
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "HEAL" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Como você vai?" }), { target: { value: "cycling" } });
+    open();
+    expect(view.container.querySelectorAll("article,input,select")).toHaveLength(0);
+    const calls = search.mock.calls.length;
+    view.rerender(<ReadyRouteShortcuts compact />);
+    expect(search).toHaveBeenCalledTimes(calls);
+    open();
+    expect((screen.getByRole("searchbox") as HTMLInputElement).value).toBe("HEAL");
+    expect((screen.getByRole("combobox", { name: "Como você vai?" }) as HTMLSelectElement).value).toBe("cycling");
+  } finally { search.mockRestore(); }
 });

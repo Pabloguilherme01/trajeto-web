@@ -86,3 +86,23 @@ test("keyboard intent prepares the planner without navigating until activation",
   await routes.press("Enter");
   await expect(page.getByRole("heading", { name: "Planejar rota", exact: true })).toBeVisible();
 });
+
+test("ready routes mount on keyboard opening and retain filters after closing", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("./");
+  const summary = page.getByText("Rotas prontas", { exact: true });
+  const panel = summary.locator("..");
+  await expect(panel.locator("input, select, article")).toHaveCount(0);
+  await summary.press("Enter");
+  await expect(panel.getByRole("article")).toHaveCount(6);
+  const search = panel.getByRole("searchbox");
+  await search.fill("HEAL");
+  await panel.getByRole("combobox", { name: "Como você vai?" }).selectOption("cycling");
+  await summary.press("Enter");
+  await expect(panel.locator("input, select, article")).toHaveCount(0);
+  await summary.press("Enter");
+  await expect(search).toHaveValue("HEAL");
+  await expect(panel.getByRole("combobox", { name: "Como você vai?" })).toHaveValue("cycling");
+  await expect(panel.getByRole("article").first()).toHaveAttribute("aria-label", /HEAL/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
