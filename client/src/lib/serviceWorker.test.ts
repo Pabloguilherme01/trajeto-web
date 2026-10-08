@@ -51,6 +51,42 @@ describe("service worker", () => {
     cache.addAll.mockRejectedValueOnce(new Error("network"));
     await expect(worker.precacheFresh(cache, assets)).rejects.toThrow("network");
   });
+  it("keeps first install lightweight and defers the full offline package", async () => {
+    const worker = loadWorker();
+    const saved: string[] = [];
+    const put = vi.fn();
+    const cache = {
+      addAll: vi.fn(async (requests: Request[]) => {
+        saved.push(...requests.map(request => request.url));
+      }),
+      put,
+      match: vi.fn(),
+    };
+    worker.caches.open.mockResolvedValue(cache);
+    worker.fetch.mockImplementation(async (input: string | Request) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url.includes("offline-assets.json")) {
+        return new Response(JSON.stringify({
+          main: { file: "assets/main.js", dynamicImports: ["lazy"] },
+          lazy: { file: "assets/lazy-route.js" },
+        }), { headers: { "Content-Type": "application/json" } });
+      }
+      return new Response('<script type="module" src="./assets/main.js"></script>', {
+        headers: { "Content-Type": "text/html" },
+      });
+    });
+
+    const install = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "install")[1];
+    let completion!: Promise<unknown>;
+    install({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
+    await completion;
+
+    expect(saved).toContain("https://example.com/trajeto-web/assets/main.js");
+    expect(saved).not.toContain("https://example.com/trajeto-web/assets/lazy-route.js");
+    expect(saved).not.toContain("https://example.com/trajeto-web/data/aguas-lindas-offline-map.json");
+    expect(put).toHaveBeenCalledWith("./offline-assets.json", expect.any(Response));
+  });
+
   it("registers lifecycle handlers", () => {
     const worker = loadWorker();
     expect(worker.self.addEventListener.mock.calls.map((call: any[]) => call[0])).toEqual(["install", "activate", "message", "fetch"]);
