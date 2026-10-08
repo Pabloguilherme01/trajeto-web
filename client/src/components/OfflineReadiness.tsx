@@ -107,15 +107,16 @@ export default function OfflineReadiness() {
                 : ready
                   ? "Pronto para usar sem internet neste aparelho."
                   : feedback ||
-                    "Abra o site com internet ou toque em Preparar acesso offline."}
+                    "O app mantém apenas o essencial para abrir rápido. Toque em Preparar acesso offline para baixar o pacote completo deste aparelho."}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/70">
-            Busca, serviços públicos, contatos, postos, ruas locais e rotas salvas
-            ficam disponíveis após a preparação. O novo modo Offline também
-            reaproveita automaticamente a rota salva exata e pode gerar estimativas
-            locais para pontos já preparados. Mapas externos, trânsito atualizado e
-            destinos ainda não preparados continuam dependendo de conexão; ligações
-            precisam de rede telefônica.
+            A instalação inicial fica leve para abrir e atualizar rápido no celular.
+            A preparação offline é opcional e baixa busca, serviços públicos,
+            contatos, postos, ruas locais e rotas salvas para este aparelho. O modo
+            Offline também reaproveita automaticamente a rota salva exata e pode
+            gerar estimativas locais para pontos já preparados. Mapas externos,
+            trânsito atualizado e destinos ainda não preparados continuam dependendo
+            de conexão; ligações precisam de rede telefônica.
           </p>
           <button
             type="button"
