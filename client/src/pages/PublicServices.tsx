@@ -2146,12 +2146,13 @@ export default function PublicServices() {
                     {service.email}
                   </a>
                 )}
+                {expandedActions && (primaryContact || service.mapQuery) && <div role="group" aria-label="Outras ações do serviço" className="mt-2 grid grid-cols-2 gap-2">
                 {expandedActions && primaryContact && (
                   <button
                     type="button"
                     onClick={() => void shareService(service)}
                     aria-label={"Compartilhar serviço: " + service.name}
-                    className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border/15 px-3 text-sm font-bold text-foreground/80"
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border/15 px-2 py-2 text-xs font-bold text-foreground/80"
                   >
                     <Share2 className="size-3.5" />
                     Compartilhar
@@ -2162,12 +2163,13 @@ export default function PublicServices() {
                     type="button"
                     onClick={() => openOrganicMaps(service)}
                     aria-label={"Abrir " + service.name + " no Organic Maps"}
-                    className="mt-2 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-3 text-sm font-bold text-primary"
+                    className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-primary/20 bg-primary/[.05] px-2 py-2 text-xs font-bold text-primary"
                   >
                     <Navigation className="size-4 shrink-0" />
                     Organic Maps · {navigationModeLabel}
                   </button>
                 )}
+                </div>}
                 {hasMoreOptions && (
                   <details className="mobile-disclosure mt-2">
                     <summary>

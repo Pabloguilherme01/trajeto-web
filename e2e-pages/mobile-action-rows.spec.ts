@@ -22,6 +22,9 @@ for (const width of [320, 360, 390]) {
     const actions = group.locator(":scope > button, :scope > a");
     await expect(actions).toHaveCount(2);
     await expectRow([actions.nth(0), actions.nth(1)]);
+    const more = page.locator("#service-upa-mansoes-odisseia").getByRole("group", { name: "Outras ações do serviço" }).getByRole("button");
+    await expect(more).toHaveCount(2);
+    await expectRow([more.nth(0), more.nth(1)]);
     await page.goto("servicos");
     await page.locator("#service-filters summary").click();
     const resources = page.getByRole("group", { name: "Recursos disponíveis" }).getByRole("button");
