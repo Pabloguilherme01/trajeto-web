@@ -6,6 +6,7 @@ const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
 
 const LOCAL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json", "./data/aguas-lindas-offline-map.json", "./data/aguas-lindas-city-atlas.json"];
+const INSTALL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"];
 
 const STATIC_SHELL = [
   "./",
@@ -36,19 +37,24 @@ self.addEventListener("install", event => {
         const assets = collectIndexAssets(html);
         await precacheFresh(cache, assets);
 
-        // Keep installation light on phones: save the version manifest now,
-        // but download secondary route chunks and large local snapshots only
-        // when the user explicitly prepares complete offline access.
+        // Route chunks remain part of the installed build so a screen opened
+        // online can be reloaded immediately after connectivity is lost.
+        // Large optional city snapshots are deferred to explicit offline prep.
         const manifestResponse = await fetch("./offline-assets.json?precache=" + VERSION, { cache: "no-store" });
         if (!manifestResponse.ok) throw new Error("Pacote offline indisponível");
         const manifest = await manifestResponse.json();
+        await precacheFresh(cache, collectManifestAssets(manifest));
         await cache.put("./offline-assets.json", new Response(JSON.stringify(manifest), {
           headers: { "Content-Type": "application/json" },
         }));
       })
-      // Create the versioned caches without forcing large downloads during
-      // service-worker installation. RESTORE_OFFLINE fills them on demand.
-      .then(() => Promise.all([caches.open(DATA_CACHE), caches.open(MAP_CACHE)]))
+      .then(() => caches.open(DATA_CACHE))
+      .then(async cache => {
+        // Keep the lightweight station directory ready for immediate offline
+        // reloads. The ~1.28 MB map/atlas snapshots are restored on demand.
+        await precacheFresh(cache, INSTALL_SNAPSHOTS);
+      })
+      .then(() => caches.open(MAP_CACHE))
   );
 });
 
