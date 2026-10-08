@@ -1,3 +1,4 @@
+import { waitForOfflinePackage } from "./offline-package";
 test("Pages: cliques principais funcionam dentro da base hospedada", async ({ page }, testInfo) => {
   const mobile = testInfo.project.name.includes("mobile");
   await page.goto("", { waitUntil: "domcontentloaded" });
@@ -128,8 +129,7 @@ test("Pages: public filters survive category changes, reload and back navigation
 
 test("Pages: first visit prepares unvisited public screens for offline use", async ({ page, context }) => {
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await waitForOfflinePackage(page);
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await context.setOffline(true);
