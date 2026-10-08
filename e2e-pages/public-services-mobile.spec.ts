@@ -32,7 +32,8 @@ for (const width of [320, 390]) {
     })).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(page.getByRole("button", { name: /Abrir .* no Organic Maps/ }).first()).toBeVisible();
-    const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
+    await page.locator("summary").filter({ hasText: /^Modo de navegação no Organic Maps$/ }).click();
+  const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
     await mode.selectOption("bike");
     await expect(mode).toHaveValue("bike");
     const filters = page.locator("#service-filters summary");
@@ -77,6 +78,7 @@ test("service needs and Organic Maps modes remain usable at 320px", async ({ pag
   await page.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("baixar empresa");
   await expect(page.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeVisible();
   await page.goto("servicos?servico=upa-mansoes-odisseia", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: /^Modo de navegação no Organic Maps$/ }).click();
   const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
   await mode.selectOption("walk");
   await expect(page.getByRole("button", { name: /Abrir .* no Organic Maps/ })).toContainText("a pé");

@@ -26,7 +26,7 @@ test("Pages: saved public services persist and reopen offline", async ({
       name: "Remover dos salvos: Serviço de Informação ao Cidadão · SIC",
     })
   ).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Ver todos os serviços" }).click();
+  await page.getByRole("button", { name: /Ver todos os \d+ serviços oficiais/ }).click();
   await page
     .getByRole("button", { name: "Serviços salvos (1)", exact: true })
     .click();

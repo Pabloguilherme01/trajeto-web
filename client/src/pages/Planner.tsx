@@ -1215,6 +1215,15 @@ export default function Planner() {
                 <div data-route-card className="min-w-0 rounded-2xl border border-warning/10 bg-warning/[.035] p-3"><RefreshCw className="size-4 text-warning" /><p className="mt-2 text-[11px] font-black uppercase tracking-[.1em] text-muted-foreground">Chegada</p><p className="mt-1 break-words text-base font-black">{formatArrival(liveTrip.active ? remaining?.durationSeconds : planned.route.durationSeconds)}</p></div>
               </div>
 
+              <div className="mt-3">
+                <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
+                  <p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Trânsito</p>
+                  <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
+                </div>
+
+              </div>
+
               {online && activeExperienceMode !== "offline" && <button type="button" onClick={() => openExternal("google")} className="mt-4 min-h-12 w-full rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground">Navegar agora · Google Maps</button>}
                 <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
               <details className="mobile-disclosure mt-3"><summary>Outros mapas, acompanhamento e offline <ChevronDown className="size-4" /></summary>
@@ -1259,14 +1268,6 @@ export default function Planner() {
 
               </div>
 
-              <div className="mt-3">
-                <div className="premium-card rounded-2xl border border-border/10 bg-muted/[.025] p-3">
-                  <p className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">Trânsito</p>
-                  <p className="mt-1 text-xs font-black">{planned.traffic?.label ?? "Não informado"}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{planned.traffic?.detail ?? "Sem detalhamento disponível."}</p>
-                </div>
-
-              </div>
 
               </details>
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-primary/[.05] px-3 py-2 text-xs font-bold text-primary">{savedMessage}</p>}
