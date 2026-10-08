@@ -1,17 +1,18 @@
 import { expect, test, type Locator } from "@playwright/test";
 
 async function expectRow(actions: Locator[]) {
-  const boxes = await Promise.all(actions.map(async action => {
-    await expect(action).toBeVisible();
-    return (await action.boundingBox())!;
-  }));
-  for (const box of boxes) {
-    expect(Math.abs(box.y - boxes[0].y)).toBeLessThanOrEqual(1);
-    expect(box.height).toBeGreaterThanOrEqual(44);
-  }
-  for (let i = 1; i < boxes.length; i++) {
-    expect(boxes[i].x).toBeGreaterThanOrEqual(boxes[i - 1].x + boxes[i - 1].width);
-  }
+  for (const action of actions) await expect(action).toBeVisible();
+  // Cards animate into place. Measure settled bounds without weakening touch targets.
+  await expect(async () => {
+    const boxes = await Promise.all(actions.map(async action => (await action.boundingBox())!));
+    for (const box of boxes) {
+      expect(Math.abs(box.y - boxes[0].y)).toBeLessThanOrEqual(1);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+    for (let i = 1; i < boxes.length; i++) {
+      expect(boxes[i].x).toBeGreaterThanOrEqual(boxes[i - 1].x + boxes[i - 1].width);
+    }
+  }).toPass({ timeout: 8_000 });
 }
 
 for (const width of [320, 360, 390]) {
@@ -37,7 +38,7 @@ for (const width of [320, 360, 390]) {
   test(`Planner navigation apps stay in one row at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("planejar?destino=Prefeitura");
-    await page.locator("summary").filter({ hasText: /^Navegar com outro aplicativo$/ }).click();
+    await page.locator("summary").filter({ hasText: "Navegar com outro aplicativo" }).click();
     await expectRow([
       page.getByRole("button", { name: "Abrir Google Maps agora", exact: true }),
       page.getByRole("button", { name: "Abrir Waze agora", exact: true }),
