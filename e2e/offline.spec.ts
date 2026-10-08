@@ -11,6 +11,7 @@ test("postos: continua navegável depois de perder a conexão", async ({ page, c
   });
 
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.offlineRouteReady)).toBe("true");
 
   await context.setOffline(true);
   const errors: string[] = [];
