@@ -35,8 +35,10 @@ test("planner modes respond without fetching a closed location catalog", async (
     if (/\/part-\d+-[^/]+\.js(?:\?|$)/.test(request.url())) catalogRequests.push(request.url());
   });
   try {
-    await page.goto("./planejar");
+    await page.goto("./planejar?origem=Centro&destino=HEAL");
     await expect(page.getByRole("heading", { name: "Planejar rota", exact: true })).toBeVisible();
+    await page.getByRole("textbox", { name: "Destino", exact: true }).fill("Prefeitura");
+    await page.getByPlaceholder("De onde você sai").fill("Rodoviária");
     const samples: Array<{ mode: string; responseMs: number }> = [];
     for (const mode of ["A pé", "Bicicleta", "Transporte", "Carro"]) {
       const button = page.getByRole("button", { name: mode, exact: true });
@@ -44,6 +46,8 @@ test("planner modes respond without fetching a closed location catalog", async (
       await button.click();
       await expect(button).toHaveAttribute("aria-pressed", "true");
       samples.push({ mode, responseMs: Date.now() - start });
+      await expect(page.getByRole("textbox", { name: "Destino", exact: true })).toHaveValue("Prefeitura");
+      await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Rodoviária");
     }
     await page.getByText("Preferências da viagem", { exact: true }).click();
     for (const mode of ["Offline", "Economia", "Condução", "Inteligente"]) {
@@ -52,6 +56,8 @@ test("planner modes respond without fetching a closed location catalog", async (
       await button.click();
       await expect(button).toHaveAttribute("aria-pressed", "true");
       samples.push({ mode, responseMs: Date.now() - start });
+      await expect(page.getByRole("textbox", { name: "Destino", exact: true })).toHaveValue("Prefeitura");
+      await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Rodoviária");
     }
     console.log(JSON.stringify({ viewport: 320, cpuSlowdown: 4, modeTransitions: samples }));
     for (const sample of samples) expect(sample.responseMs).toBeLessThan(1500);
