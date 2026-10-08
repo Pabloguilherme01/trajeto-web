@@ -36,27 +36,24 @@ self.addEventListener("install", event => {
         const assets = collectIndexAssets(html);
         await precacheFresh(cache, assets);
 
-        // A public filename keeps the manifest inside the Pages artifact.
-        // Installation only succeeds after all route chunks have been saved.
+        // Keep installation light on phones: save the version manifest now,
+        // but download secondary route chunks and large local snapshots only
+        // when the user explicitly prepares complete offline access.
         const manifestResponse = await fetch("./offline-assets.json?precache=" + VERSION, { cache: "no-store" });
         if (!manifestResponse.ok) throw new Error("Pacote offline indisponível");
         const manifest = await manifestResponse.json();
-        await precacheFresh(cache, collectManifestAssets(manifest));
         await cache.put("./offline-assets.json", new Response(JSON.stringify(manifest), {
           headers: { "Content-Type": "application/json" },
         }));
       })
-      .then(() => caches.open(DATA_CACHE))
-      .then(async cache => {
-        await precacheFresh(cache, LOCAL_SNAPSHOTS);
-      })
-      .then(() => caches.open(MAP_CACHE))
+      // Create the versioned caches without forcing large downloads during
+      // service-worker installation. RESTORE_OFFLINE fills them on demand.
+      .then(() => Promise.all([caches.open(DATA_CACHE), caches.open(MAP_CACHE)]))
   );
 });
 
 async function precacheFresh(cache, assets) {
-  // Avoid downloading every route/data chunk at once while a phone is opening
-  // the app. Installation still waits for the complete offline package.
+  // Bound parallel downloads to reduce CPU, memory and radio pressure on phones.
   for (let index = 0; index < assets.length; index += 3) {
     await cache.addAll(assets.slice(index, index + 3).map(asset => new Request(new URL(asset, self.registration.scope), { cache: "reload" })));
   }
