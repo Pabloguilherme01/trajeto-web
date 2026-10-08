@@ -120,31 +120,6 @@ export default function OfflineMapCanvas({
   gestureZoom.current = zoom;
   const gestureStarted = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
-  const gestureFrame = useRef<number | null>(null);
-  const pendingPanTransforms = useRef<
-    Array<(pan: { x: number; y: number }) => { x: number; y: number }>
-  >([]);
-  const pendingZoom = useRef<number | null>(null);
-  const queueGestureFrame = (
-    transform: (pan: { x: number; y: number }) => { x: number; y: number },
-    nextZoom?: number
-  ) => {
-    pendingPanTransforms.current.push(transform);
-    if (typeof nextZoom === "number") pendingZoom.current = nextZoom;
-    if (gestureFrame.current !== null) return;
-    gestureFrame.current = window.requestAnimationFrame(() => {
-      const transforms = pendingPanTransforms.current.splice(0);
-      const zoomValue = pendingZoom.current;
-      pendingZoom.current = null;
-      gestureFrame.current = null;
-      if (transforms.length) {
-        setPan(current =>
-          transforms.reduce((value, applyTransform) => applyTransform(value), current)
-        );
-      }
-      if (zoomValue !== null) onZoom(zoomValue);
-    });
-  };
   const validMarkers = useMemo(() => markers.filter(isMapPoint), [markers]);
   const validGeometry = useMemo(() => routePoints.filter(isMapPoint), [routePoints]);
   const geometry = useMemo(() => {
@@ -202,15 +177,6 @@ export default function OfflineMapCanvas({
     window.addEventListener("online", recover);
     return () => window.removeEventListener("online", recover);
   }, [pack]);
-  useEffect(
-    () => () => {
-      if (gestureFrame.current !== null) window.cancelAnimationFrame(gestureFrame.current);
-      gestureFrame.current = null;
-      pendingPanTransforms.current = [];
-      pendingZoom.current = null;
-    },
-    []
-  );
   useEffect(() => {
     const el = viewport.current;
     if (!el) return;
@@ -459,22 +425,17 @@ export default function OfflineMapCanvas({
         const oldY = (previous.y + other.y) / 2 - (rect?.top ?? 0);
         const nextX = (event.clientX + other.x) / 2 - (rect?.left ?? 0);
         const nextY = (event.clientY + other.y) / 2 - (rect?.top ?? 0);
-        queueGestureFrame(
-          p => ({
-            x: nextX - size.width / 2 - ratio * (oldX - size.width / 2 - p.x),
-            y: nextY - size.height / 2 - ratio * (oldY - size.height / 2 - p.y),
-          }),
-          nextZoom
-        );
+        setPan(p => ({
+          x: nextX - size.width / 2 - ratio * (oldX - size.width / 2 - p.x),
+          y: nextY - size.height / 2 - ratio * (oldY - size.height / 2 - p.y),
+        }));
+        onZoom(nextZoom);
       }
-    } else {
-      const deltaX = event.clientX - previous.x;
-      const deltaY = event.clientY - previous.y;
-      queueGestureFrame(p => ({
-        x: p.x + deltaX,
-        y: p.y + deltaY,
+    } else
+      setPan(p => ({
+        x: p.x + event.clientX - previous.x,
+        y: p.y + event.clientY - previous.y,
       }));
-    }
     pointers.current.set(event.pointerId, {
       x: event.clientX,
       y: event.clientY,
