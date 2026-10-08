@@ -1,18 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { waitForOfflinePackage } from "./offline-package";
 test("Pages: city streets and controls survive an offline reload without external map requests", async ({
   page,
   context,
 }) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("mapa");
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
-  await expect
-    .poll(() =>
-      page.evaluate(() => Boolean(navigator.serviceWorker.controller))
-    )
-    .toBe(true);
+  await waitForOfflinePackage(page);
   await context.setOffline(true);
   const external: string[] = [];
   page.on("request", request => {
@@ -58,8 +52,7 @@ test("Pages: city streets and controls survive an offline reload without externa
 
 test("Pages: calculate a new local trip after offline reload and resume online", async ({ page, context }) => {
   await page.goto("mapa");
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await waitForOfflinePackage(page);
   await context.setOffline(true);
   await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
   await page.getByTestId("planner-primary-action").click();
@@ -77,8 +70,7 @@ test("Pages: calculate a new local trip after offline reload and resume online",
 test("Pages: selects both endpoints and calculates every travel mode from the offline catalog", async ({ page, context }) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("mapa");
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await waitForOfflinePackage(page);
   await context.setOffline(true);
   await page.goto("planejar?experiencia=offline");
   await page.locator("summary").filter({ hasText: "Escolher origem no catálogo" }).click();
@@ -103,8 +95,7 @@ test("Pages: imported companies reload offline and plan all modes from their act
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("mapa");
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await waitForOfflinePackage(page);
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
