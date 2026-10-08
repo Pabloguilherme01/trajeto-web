@@ -54,6 +54,41 @@ export default function CityMap() {
     };
   }, []);
   useEffect(() => {
+    // The install stays light, but opening the city map should make its heavy
+    // offline fallback available for the next reload.
+    const controller = new AbortController();
+    let warmed = false;
+    const warm = () => {
+      if (warmed || controller.signal.aborted) return;
+      warmed = true;
+      void Promise.all([
+        "/data/aguas-lindas-offline-map.json",
+        "/data/aguas-lindas-city-atlas.json",
+      ].map(path =>
+        fetch(appUrl(path), { signal: controller.signal })
+          .then(response => {
+            if (!response.ok) throw new Error("offline snapshot");
+            return response.arrayBuffer();
+          })
+      )).catch(() => {
+        warmed = false;
+      });
+    };
+    const serviceWorker = navigator.serviceWorker;
+    const onControllerChange = () => warm();
+    if (serviceWorker?.controller) warm();
+    else {
+      serviceWorker?.addEventListener("controllerchange", onControllerChange, { once: true });
+      void serviceWorker?.ready.then(() => {
+        if (serviceWorker.controller) warm();
+      }).catch(() => {});
+    }
+    return () => {
+      controller.abort();
+      serviceWorker?.removeEventListener("controllerchange", onControllerChange);
+    };
+  }, []);
+  useEffect(() => {
     const controller = new AbortController();
     void fetch(appUrl("/data/aguas-lindas-anp.json"), {
       signal: controller.signal,

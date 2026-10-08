@@ -142,7 +142,7 @@ test("Pages: first visit prepares unvisited public screens for offline use", asy
   ]) {
     await page.goto(path, { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: new RegExp(title) }).first()).toBeVisible();
-    if (path === "ajuda") await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible();
+    if (path === "ajuda") await expect(page.getByRole("button", { name: "Preparar acesso offline" })).toBeVisible();
   }
   expect(errors).toEqual([]);
 });
