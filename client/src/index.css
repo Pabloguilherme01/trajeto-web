@@ -729,3 +729,11 @@ html.a11y-compact .app-dock {
   .planner-premium .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .planner-choice, .task-action, .mobile-disclosure > summary { overflow-wrap: normal; word-break: normal; }
 }
+
+/* Service names get a full row when enlarged controls compete for space. */
+@media (max-width: 24rem) {
+  .service-directory-card > .flex:first-child { flex-wrap: wrap; }
+  .service-directory-card > .flex:first-child > .flex-1 { flex-basis: 100%; order: 2; }
+  .service-directory-card > .flex:first-child > button { margin-inline-start: auto; }
+  .service-directory-card h2 { overflow-wrap: normal; word-break: normal; }
+}
