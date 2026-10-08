@@ -59,7 +59,7 @@ it("does not hang or reload when no update is waiting", async () => {
 });
 
 
-it("continues first offline preparation after the new worker takes control", async () => {
+it("continues first offline preparation when installation takes more than 15 seconds", async () => {
   const registration = { waiting: null, installing: null, update: vi.fn().mockResolvedValue(undefined) };
   class MockMessageChannel {
     port1: { onmessage: ((event: { data: unknown }) => void) | null; close: ReturnType<typeof vi.fn> };
@@ -89,7 +89,7 @@ it("continues first offline preparation after the new worker takes control", asy
 
   const { prepareOfflineAccess } = await import("./pwa");
   const preparing = prepareOfflineAccess();
-  await Promise.resolve();
+  await vi.advanceTimersByTimeAsync(20000);
   serviceWorker.controller = worker;
   serviceWorker.dispatchEvent(new Event("controllerchange"));
 
