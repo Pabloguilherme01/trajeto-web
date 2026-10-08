@@ -107,6 +107,9 @@ test("Pages: offline preparation recovers a missing chunk and survives a reload"
   context,
 }) => {
   await page.goto("ajuda", { waitUntil: "domcontentloaded" });
+  const initialPrepare = page.getByRole("button", { name: "Preparar acesso offline" });
+  await expect(initialPrepare).toBeEnabled();
+  await initialPrepare.click();
   await expect(
     page.getByText("Pronto para usar sem internet neste aparelho.")
   ).toBeVisible();
