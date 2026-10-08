@@ -32,3 +32,19 @@ test("Pages: standalone interface checks updates without losing saved data and r
   expect(await page.locator("main .container").evaluate(el => el.getBoundingClientRect().width)).toBeGreaterThanOrEqual(324);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
+
+for (const path of ["mapa/postos", "local/upa-mansoes-odisseia"]) {
+  test(`Pages: installation metadata stays at the app root on ${path}`, async ({ page }) => {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const manifestUrl = await page.locator('link[rel="manifest"]').evaluate((link: HTMLLinkElement) => link.href);
+    expect(new URL(manifestUrl).pathname).toBe("/trajeto-web/site.webmanifest");
+    const response = await page.request.get(manifestUrl);
+    expect(response.status()).toBe(200);
+    const manifest = await response.json();
+    expect(new URL(manifest.start_url, manifestUrl).pathname).toBe("/trajeto-web/");
+    expect(new URL(manifest.scope, manifestUrl).pathname).toBe("/trajeto-web/");
+    const appleIcon = await page.locator('link[rel="apple-touch-icon"]').evaluate((link: HTMLLinkElement) => link.href);
+    expect(new URL(appleIcon).pathname).toBe("/trajeto-web/icon-192.png");
+    expect((await page.request.get(appleIcon)).status()).toBe(200);
+  });
+}
