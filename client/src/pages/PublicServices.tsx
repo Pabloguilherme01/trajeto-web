@@ -867,6 +867,7 @@ export default function PublicServices() {
   return (
     <main className="premium-surface visual-shell min-h-[100dvh] bg-background pb-28 text-foreground md:pb-12">
       <div className="container max-w-5xl pt-5 sm:pt-8">
+        {!selectedService && <>
         <header className="premium-card relative overflow-hidden rounded-[1.8rem] border border-primary/10 bg-gradient-to-br from-card via-card to-primary/[.045] p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
@@ -1807,17 +1808,14 @@ export default function PublicServices() {
             </>
           )}
 
+        </>}
         {selectedService && (
           <button
             type="button"
-            onClick={() => {
-              setQuery("");
-              setCategory("todos");
-              applyFilters("", "todos", false, false);
-            }}
+            onClick={showAllServicesFromSummary}
             className="mt-4 min-h-11 rounded-xl border border-border/15 px-3 text-sm font-bold"
           >
-            Ver todos os serviços
+            Ver todos os {PUBLIC_SERVICES.length} serviços oficiais
           </button>
         )}
         {params.get("servico") && !selectedService && (
@@ -1826,7 +1824,7 @@ export default function PublicServices() {
             disponíveis abaixo.
           </p>
         )}
-        {!browsing && results.some(service => Boolean(service.mapQuery)) && (
+        {!selectedService && !browsing && results.some(service => Boolean(service.mapQuery)) && (
           <div className="mt-4">
             <OrganicMapsModeSelect value={navigationMode} onChange={setNavigationMode} />
           </div>
@@ -1902,7 +1900,7 @@ export default function PublicServices() {
                         )?.shortLabel
                       }
                     </p>
-                    <h2 className="mt-1 break-words text-base font-bold leading-snug">
+                    <h2 aria-level={expandedActions ? 1 : 2} className="mt-1 break-words text-base font-bold leading-snug">
                       {service.name}
                     </h2>
                   </div>
@@ -1922,6 +1920,12 @@ export default function PublicServices() {
                     />
                   </button>
                 </div>
+                {(service.hours || expandedActions) && (
+                  <p className="mt-3 flex items-start gap-2 text-sm font-bold text-foreground/75">
+                    <Clock3 className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span>{service.hours || "Horário não informado · confirme no canal oficial"}</span>
+                  </p>
+                )}
                 <p className="mt-3 text-sm leading-relaxed text-foreground/75">
                   {service.description}
                 </p>
@@ -2049,15 +2053,10 @@ export default function PublicServices() {
                       : "Sem destino confirmado para rota neste catálogo."}
                   </p>
                 )}
-                {service.hours && (
-                  <p className="mt-3 flex items-start gap-2 text-sm font-bold text-foreground/75">
-                    <Clock3 className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <span>{service.hours}</span>
-                  </p>
-                )}
+                {expandedActions && service.mapQuery && <details className="mobile-disclosure mt-3"><summary>Modo de navegação no Organic Maps</summary><OrganicMapsModeSelect value={navigationMode} onChange={setNavigationMode} /></details>}
                 <details
                   className="mobile-disclosure mt-3"
-                  open={expandedActions || undefined}
+                  open={undefined}
                 >
                   <summary className="min-h-11">
                     <span className="flex items-center gap-2">

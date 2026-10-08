@@ -62,6 +62,7 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
     db.close();
   });
   await planRoute(page);
+  await page.getByText("Outros mapas, acompanhamento e offline", { exact: true }).click();
   await page
     .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
@@ -120,6 +121,7 @@ test("Pages: an aborted IndexedDB transaction never announces a saved route", as
     };
   });
   await planRoute(page);
+  await page.getByText("Outros mapas, acompanhamento e offline", { exact: true }).click();
   await page
     .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();
@@ -218,6 +220,7 @@ test("Pages: recovers an exact saved trip when online geocoding fails", async ({
   await page.getByTestId("planner-primary-action").click();
   await expect(page.getByText(/Usando a melhor rota já salva/)).toBeVisible();
   await expect(page.getByText(/trânsito e horários podem estar desatualizados/)).toBeVisible();
+  await page.getByText("Outros mapas, acompanhamento e offline", { exact: true }).click();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
 });
 

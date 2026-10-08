@@ -65,12 +65,14 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await page.getByTestId("planner-primary-action").click();
   await expect(page.getByText(/Estimativa offline entre os locais escolhidos/)).toBeVisible();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
+  if (!(await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).isVisible())) await page.locator("summary").filter({ hasText: /^Outros mapas, acompanhamento e offline/ }).click();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.reload();
   await page.getByTestId("planner-primary-action").click();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   await context.setOffline(false);
   await expect(page.getByText("online", { exact: true }).first()).toBeVisible();
+  if (!(await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).isVisible())) await page.locator("summary").filter({ hasText: /^Outros mapas, acompanhamento e offline/ }).click();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
 });
 

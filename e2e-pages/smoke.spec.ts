@@ -1,7 +1,7 @@
 test("Pages: cliques principais funcionam dentro da base hospedada", async ({ page }, testInfo) => {
   const mobile = testInfo.project.name.includes("mobile");
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Para onde você vai/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre o que precisa em Águas Lindas/i })).toBeVisible();
 
   if (mobile) {
     await page.getByRole("navigation", { name: "Navegação móvel" }).getByRole("button", { name: "Serviços públicos", exact: true }).click();
@@ -23,7 +23,7 @@ test("Pages: cliques principais funcionam dentro da base hospedada", async ({ pa
   await primaryNav.getByRole("button", { name: "Explorar", exact: true }).click();
   await page.getByRole("dialog", { name: "Explorar o Trajeto" }).getByRole("button", { name: "Salvos", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/salvos$/);
-  await expect(page.getByRole("heading", { name: /Rotas salvas/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Salvos$/i })).toBeVisible();
 
   await primaryNav.getByRole("button", { name: "Início", exact: true }).click();
   await expect(page).toHaveURL(/\/trajeto-web\/$/);
@@ -33,11 +33,11 @@ import { expect, test } from "@playwright/test";
 
 test("Pages: abre a home e navega entre os fluxos públicos", async ({ page }) => {
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Para onde você vai/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre o que precisa em Águas Lindas/i })).toBeVisible();
   await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Encontre uma parada/i })).toBeVisible();
   await page.goto("salvos", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Rotas salvas/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Salvos$/i })).toBeVisible();
   await page.goto("ajuda", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Use o Trajeto em poucos passos/i })).toBeVisible();
 });
@@ -52,7 +52,7 @@ test("Pages: planejador público funciona com a base /trajeto-web/", async ({ pa
   await page.getByTestId("planner-primary-action").click();
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
   await expect(page.locator("[data-route-card]").getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Google Maps", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Navegar agora · Google Maps", exact: true })).toBeVisible();
   const currentUrl = new URL(page.url());
   expect(currentUrl.pathname).toBe("/trajeto-web/planejar");
   expect(currentUrl.search).toContain("origem=");
@@ -136,7 +136,7 @@ test("Pages: first visit prepares unvisited public screens for offline use", asy
   for (const [path, title] of [
     ["servicos", "Como podemos ajudar?"],
     ["buscar", "Encontre e vá."],
-    ["salvos", "Rotas salvas"],
+    ["salvos", "Salvos"],
     ["ajuda", "Use o Trajeto em poucos passos."],
     ["mapa", "A cidade no seu caminho"],
   ]) {

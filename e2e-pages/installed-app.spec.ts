@@ -13,7 +13,7 @@ test("Pages: standalone interface checks updates without losing saved data and r
     };
   });
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Para onde você vai/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre o que precisa em Águas Lindas/ })).toBeVisible();
   await expect(page.getByText("Baixe o Trajeto no celular")).toHaveCount(0);
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;

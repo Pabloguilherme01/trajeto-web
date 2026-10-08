@@ -19,6 +19,7 @@ import { localDataEvent } from "@/lib/localData";
 export default function Home() {
   const [, setLocation] = useLocation();
   const track = useProductEvents();
+  const [homeSearch, setHomeSearch] = useState("");
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [lastTrip, setLastTrip] = useState(getLastTrip);
@@ -184,24 +185,18 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="home-mobile-heading mt-6"><h1 className="font-display text-[clamp(1.65rem,6.5vw,3rem)] font-semibold leading-tight tracking-[-.055em]">Para onde você vai?</h1><p className="mt-2 text-sm text-muted-foreground">Rotas e serviços em Águas Lindas.</p></section>
+        <section className="home-mobile-heading mt-6"><h1 className="font-display text-[clamp(1.65rem,6.5vw,3rem)] font-semibold leading-tight tracking-[-.055em]">Encontre o que precisa em Águas Lindas</h1><p className="mt-2 text-sm text-muted-foreground">E saiba como chegar.</p></section>
         <section className="mt-5" aria-label="Busca universal">
-          <button
-            type="button"
-            onClick={() => setLocation(appUrl("/buscar"))}
-            className="premium-search flex min-h-14 w-full items-center gap-3 px-4 text-left active:scale-[.995]"
-          >
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><SearchIcon className="size-4" /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold text-foreground">O que você procura?</span>
-              <span className="mt-0.5 block truncate text-xs text-foreground/60">Serviço, posto, endereço ou bairro<span className="hidden sm:inline"> · Ctrl/⌘ K</span></span>
-            </span>
-            <ArrowRight className="size-4 shrink-0 text-foreground/60" />
-          </button>
+          <form role="search" onSubmit={event => { event.preventDefault(); setLocation(appUrl("/buscar") + (homeSearch.trim() ? "?q=" + encodeURIComponent(homeSearch.trim()) : "")); }} className="premium-search flex min-h-14 items-center gap-2 px-3">
+            <SearchIcon className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <label htmlFor="home-search" className="sr-only">O que você procura?</label>
+            <input id="home-search" value={homeSearch} onChange={event => setHomeSearch(event.target.value)} placeholder="Serviço, posto, endereço ou bairro" enterKeyHint="search" className="min-h-14 min-w-0 flex-1 bg-transparent text-base outline-none" />
+            <button type="submit" aria-label="Buscar no Trajeto" className="grid size-11 shrink-0 place-items-center rounded-xl text-primary"><ArrowRight className="size-5" /></button>
+          </form>
         </section>
 
-        <section className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-border/15 bg-card p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
-          <h2 className="sr-only">Rota rápida</h2>
+        <details className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-border/15 bg-card p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
+          <summary className="min-h-11 cursor-pointer text-sm font-bold">Planejar uma rota</summary>
           <form onSubmit={submit} className="space-y-3">
             <label className="block">
               <span className="mb-1.5 block text-xs font-bold uppercase tracking-[.12em] text-foreground/65">Origem</span>
@@ -233,7 +228,7 @@ export default function Home() {
             </p>
           )}
 
-        </section>
+        </details>
 
 
         <section className="mt-4" aria-label="Ações principais"><div className="grid grid-cols-3 gap-2">

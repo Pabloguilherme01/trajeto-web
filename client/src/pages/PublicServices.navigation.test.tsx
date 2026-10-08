@@ -112,6 +112,7 @@ it("searches ready routes by the public service need locally", () => {
 it("offers Organic Maps transport modes after selecting a physical service", () => {
   window.history.replaceState({}, "", "/servicos?servico=upa-mansoes-odisseia");
   render(<PublicServices />);
+  fireEvent.click(screen.getByText("Modo de navegação no Organic Maps", { selector: "summary" }));
   const mode = screen.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
   fireEvent.change(mode, { target: { value: "walk" } });
   expect((mode as HTMLSelectElement).value).toBe("walk");
@@ -124,4 +125,13 @@ it("finds both official course catalogs without assigning a local route", () => 
   expect(document.querySelectorAll("#service-results article")).toHaveLength(2);
   expect(screen.queryByRole("button", { name: "Planejar rota" })).toBeNull();
   expect(screen.getAllByText("ficha disponível offline")).toHaveLength(2);
+});
+
+it("opens only the selected service without catalog introduction", () => {
+  window.history.replaceState({}, "", "/servicos?servico=upa-mansoes-odisseia");
+  render(<PublicServices />);
+  expect(screen.queryByRole("heading", { name: "Como podemos ajudar?" })).toBeNull();
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(1);
+  expect(screen.getByText("24 horas")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Planejar rota" })).toBeTruthy();
 });

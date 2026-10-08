@@ -47,7 +47,9 @@ test("planejar: calcula rota pública sem backend e mantém o mapa utilizável",
 
   await expect(page.locator("[data-route-card]").getByText("12,3 km", { exact: true })).toBeVisible();
   await expect(page.locator("[data-route-card]").getByRole("paragraph").filter({ hasText: /^15 min$/ })).toBeVisible();
+  await page.getByText("Outros mapas, acompanhamento e offline", { exact: true }).click();
   await expect(page.getByText(/Trânsito ao vivo não disponível|Estimativa local/)).toBeVisible();
+  await page.getByText("Horário de chegada e combustível", { exact: true }).click();
   await page.getByText(/Precisa chegar em um horário/).click();
   await expect(page.getByLabel("Quero chegar às")).toBeVisible();
   await expect(page.getByLabel("Margem extra")).toBeVisible();
@@ -62,6 +64,7 @@ test("planejar: mantém a rota utilizável quando o OSRM está indisponível", a
   await page.goto("/planejar?origem=-15.7545,-48.2816&destino=-15.7942,-47.8822", { waitUntil: "domcontentloaded" });
   await page.getByTestId("planner-primary-action").click();
 
+  await page.getByText("Outros mapas, acompanhamento e offline", { exact: true }).click();
   await expect(page.getByText(/Estimativa local/)).toBeVisible();
   await expect(page.getByText(/km/).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /Google Maps/i }).first()).toBeVisible();

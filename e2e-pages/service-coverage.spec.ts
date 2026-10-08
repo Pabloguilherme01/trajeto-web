@@ -143,7 +143,7 @@ for (const service of cases) {
         .click();
       await checkCard(page, service.id, service.name);
       await page
-        .getByRole("button", { name: "Ver todos os serviços", exact: true })
+        .getByRole("button", { name: /Ver todos os \d+ serviços oficiais/ })
         .click();
       const input = page.getByRole("textbox", {
         name: "Buscar serviços públicos",

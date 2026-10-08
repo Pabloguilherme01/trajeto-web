@@ -10,8 +10,9 @@ test("Pages: home remains readable and touch-friendly at 320px", async ({ page }
     ),
   );
   await page.goto("", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Para onde você vai/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Encontre o que precisa em Águas Lindas/i })).toBeVisible();
 
+  await page.getByText("Planejar uma rota", { exact: true }).click();
   await page.locator("summary").filter({ hasText: "Explore a cidade" }).click();
   await page.getByRole("button", { name: "Trocar modo", exact: true }).click();
   await expect(page.locator("#daily-modes-options")).toBeVisible();

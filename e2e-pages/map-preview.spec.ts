@@ -52,6 +52,7 @@ test("Pages: route preview controls and real geometry remain available offline a
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(320);
+  await page.getByText("Outros mapas, acompanhamento e offline", { exact: true }).click();
   await page
     .getByRole("button", { name: "Preparar para offline", exact: true })
     .click();

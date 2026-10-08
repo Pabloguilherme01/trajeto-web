@@ -122,6 +122,7 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   await page.route("https://router.project-osrm.org/**", route => route.abort());
   await page.goto("planejar?origem=-15.7545,-48.2816&destino=-15.7345,-48.2816");
   await page.getByTestId("planner-primary-action").click();
+  if (!(await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).isVisible())) await page.locator("summary").filter({ hasText: /^Outros mapas, acompanhamento e offline/ }).click();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).click();
   await page.evaluate(() => {

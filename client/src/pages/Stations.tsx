@@ -956,11 +956,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
             </details>
             <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
-              <label className="premium-panel flex min-h-11 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-background px-3">
-                <Search className="size-4 shrink-0 text-accent" aria-hidden="true" />
-                <input type="text" value={directorySearch} onChange={event => setDirectorySearch(event.target.value)} enterKeyHint="search" placeholder="Filtrar por nome, bairro, CNPJ ou bandeira" className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground" aria-label="Filtrar diretório de postos" />
-                {directorySearch && <button type="button" onClick={() => setDirectorySearch("")} className="grid size-11 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted/[.04] hover:text-foreground" aria-label="Limpar filtro do diretório"><X className="size-3.5" aria-hidden="true" /></button>}
-              </label>
               <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-border/10 bg-background px-3 text-base font-black text-muted-foreground">
                 <option value="all">Combustível: todos</option>
                 <option value="gasolina-comum">Gasolina comum</option>
@@ -977,29 +972,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-primary">{userCoords ? "Mais perto" : "Ver todos"}</button>
-            </div>
-            <QuickFilterChips
-              label="Filtros rápidos do diretório"
-              options={[
-                { label: "Shell", value: "shell" },
-                { label: "Ipiranga", value: "ipiranga" },
-                { label: "BR", value: "petrobras" },
-                { label: "ZM", value: "zm" },
-                { label: "Jardim Brasília", value: "jardim brasilia" },
-                { label: "BR-070", value: "br-070" },
-              ]}
-              value={directorySearch}
-              onPick={value => setDirectorySearch(value)}
-              className="mt-2"
-            />
-            <div className="mt-2 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Combustíveis rápidos">
-              {[
-                ["all", "Todos"],
-                ["gasolina-comum", "Gasolina"],
-                ["etanol", "Etanol"],
-                ["diesel-s10", "Diesel S10"],
-                ["gnv", "GNV"],
-              ].map(([value, label]) => <button key={value} type="button" aria-pressed={fuelFilter === value} onClick={() => setFuelFilter(value as StationFuelFilter)} className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black " + (fuelFilter === value ? "border-primary/45 bg-primary/12 text-primary" : "border-border/15 bg-muted/[.03] text-foreground/70")}>{label}</button>)}
             </div>
             {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-warning">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground" role="status" aria-live="polite">

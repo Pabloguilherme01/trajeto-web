@@ -1,3 +1,5 @@
+import SavedPublicServices from "@/components/SavedPublicServices";
+import { listPublicServiceFavorites, publicServiceFavoritesEvent } from "@/lib/publicServiceFavorites";
 import PlannerTravelPreferences from "@/components/PlannerTravelPreferences";
 import PlannerLocationPicker from "@/components/PlannerLocationPicker";
 import { useLiveTrip } from "@/hooks/useLiveTrip";
@@ -112,6 +114,18 @@ export default function Planner() {
   const [locating, setLocating] = useState(false);
   const [originPrivate, setOriginPrivate] = useState(false);
   const privateOriginRef = useRef<string | null>(null);
+  const [savedServiceIds, setSavedServiceIds] = useState(listPublicServiceFavorites);
+  useEffect(() => {
+    const refresh = () => setSavedServiceIds(listPublicServiceFavorites());
+    window.addEventListener(publicServiceFavoritesEvent, refresh);
+    window.addEventListener(localDataEvent, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(publicServiceFavoritesEvent, refresh);
+      window.removeEventListener(localDataEvent, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
   const [showMap, setShowMap] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState<OfflineRoute[]>([]);
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
@@ -740,7 +754,7 @@ export default function Planner() {
         <header className="flex items-center justify-between gap-3">
           <div>
 
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">Planejar rota</h1>
+            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.06em]">{savedMode ? "Salvos" : "Planejar rota"}</h1>
           </div>
           <span className={"status-pill " + (online ? "border-primary/20 text-primary" : "border-warning/25 text-warning")}>
             {online ? <Wifi className="size-3" /> : <WifiOff className="size-3" />}
@@ -864,6 +878,7 @@ export default function Planner() {
               </div>
 
               </details>
+              <details className="mobile-disclosure mt-3"><summary>Navegar com outro aplicativo <ChevronDown className="size-4" /></summary>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-1 min-[360px]:grid-cols-3" : "grid-cols-1")}>
                   <button type="button" onClick={() => openExternal("google")} aria-label="Abrir Google Maps agora" className="min-h-11 rounded-xl border border-border/10 bg-muted/[.03] px-2 text-xs font-black text-foreground/75">
@@ -891,6 +906,7 @@ export default function Planner() {
                   </button>
                 </div>
               )}
+              </details>
             </form>
 
             {error && (
@@ -1015,11 +1031,12 @@ export default function Planner() {
           </section>
         )}
 
+        {savedMode && <SavedPublicServices ids={savedServiceIds} />}
         {savedMode && (
           <section className="mt-5">
             <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas salvas.</h2></div>
-              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedRoutes.length + savedStations.length + favoriteDestinations.length}</span>
+              <div><p className="text-xs font-black uppercase tracking-[.17em] text-accent">Biblioteca local</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-[-.055em]">Rotas e destinos</h2></div>
+              <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-muted-foreground">{savedRoutes.length + savedStations.length + favoriteDestinations.length + savedServiceIds.length}</span>
             </div>
             {savedMessage && <p role="status" className="mt-3 rounded-xl border border-border/15 px-3 py-2 text-xs text-foreground/70">{savedMessage}</p>}
             {savedRoutes.length > 0 && (
@@ -1033,7 +1050,7 @@ export default function Planner() {
                 />
               </label>
             )}
-            {savedRoutes.length === 0 && savedStations.length === 0 && favoriteDestinations.length === 0 ? (
+            {savedRoutes.length === 0 && savedStations.length === 0 && favoriteDestinations.length === 0 && savedServiceIds.length === 0 ? (
               <>
                 <div className="mt-4 rounded-3xl border border-warning/20 bg-card p-4">
                   <p className="text-xs font-black text-foreground">Biblioteca vazia, mas o modo offline continua útil.</p>
@@ -1207,6 +1224,9 @@ export default function Planner() {
 
               </div>
 
+              {online && activeExperienceMode !== "offline" && <button type="button" onClick={() => openExternal("google")} className="mt-4 min-h-12 w-full rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground">Navegar agora · Google Maps</button>}
+                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
+              <details className="mobile-disclosure mt-3"><summary>Outros mapas, acompanhamento e offline <ChevronDown className="size-4" /></summary>
               <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 {online && activeExperienceMode !== "offline" && (
                   <>
@@ -1245,9 +1265,11 @@ export default function Planner() {
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button type="button" onClick={() => void saveCurrentRoute()} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Bookmark className="mr-1.5 inline size-3.5" />Preparar para offline</button>
-                <button type="button" onClick={() => setShowMap(value => !value)} className="min-h-11 rounded-2xl border border-border/10 bg-muted/[.02] px-3 text-xs font-black text-foreground/60"><Map className="mr-1.5 inline size-3.5" />{showMap ? "Ocultar mapa" : "Ver mapa"}</button>
+
               </div>
 
+
+              </details>
               {savedMessage && <p role="status" className="mt-3 rounded-xl bg-primary/[.05] px-3 py-2 text-xs font-bold text-primary">{savedMessage}</p>}
             </div>
 
@@ -1267,9 +1289,11 @@ export default function Planner() {
             )}
 
             <RoutePublicServiceCard destination={destination} online={online} />
+            <details className="mobile-disclosure mt-3"><summary>Horário de chegada e combustível <ChevronDown className="size-4" /></summary>
             {!liveTrip.active && <ArrivalTimePlannerCard durationSeconds={planned.route.durationSeconds} />}
             {mode === "driving" && <TripFuelBriefing distanceKm={(planned.route.distanceMeters ?? 0) / 1000} durationSeconds={planned.route.durationSeconds ?? undefined} />}
 
+            </details>
             {planned.recommendation && (
               <section className="mt-3 rounded-[1.5rem] border border-primary/15 bg-card p-4">
                 <p className="text-xs font-black uppercase tracking-[.15em] text-primary">Parada sugerida</p>
