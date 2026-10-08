@@ -53,8 +53,8 @@ self.addEventListener("install", event => {
 });
 
 async function precacheFresh(cache, assets) {
-  // Avoid downloading every route/data chunk at once while a phone is opening
-  // the app. Installation still waits for the complete offline package.
+  // Bound concurrent downloads so shell installation and later recovery do not
+  // create avoidable CPU/network spikes on phones.
   for (let index = 0; index < assets.length; index += 3) {
     await cache.addAll(assets.slice(index, index + 3).map(asset => new Request(new URL(asset, self.registration.scope), { cache: "reload" })));
   }
@@ -63,8 +63,8 @@ async function precacheFresh(cache, assets) {
 self.addEventListener("activate", event => {
   event.waitUntil(
     Promise.all([
-      // Installation already prepared the complete package. Take control
-      // promptly; retiring old cache versions must not delay clients.claim().
+      // Take control as soon as the lightweight shell is installed. The full
+      // offline package can hydrate later without blocking activation.
       self.clients.claim(),
       caches.keys().then(keys => Promise.all(
         keys
@@ -259,8 +259,8 @@ async function restoreOfflinePackage() {
     }
     // Keep downloads bounded on phones. A missing old chunk may have been
     // removed by a deployment: never cache an HTML fallback as JavaScript.
-    for (let index = 0; index < missing.length; index += 6) {
-      await Promise.all(missing.slice(index, index + 6).map(async ({ cache: target, asset }) => {
+    for (let index = 0; index < missing.length; index += 3) {
+      await Promise.all(missing.slice(index, index + 3).map(async ({ cache: target, asset }) => {
         const url = new URL(asset, self.registration.scope);
         if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope) || url.pathname.includes("/api/")) throw new Error("update");
         const response = await fetchWithTimeout(new Request(url, { cache: "reload" }));
