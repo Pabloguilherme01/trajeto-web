@@ -3,6 +3,7 @@ import { CheckCircle2, HardDrive, RefreshCw, WifiOff } from "lucide-react";
 import { formatStorageBytes, getOfflineStorageStatus, requestOfflineStoragePersistence, type OfflineStorageStatus } from "@/lib/offlineStorageStatus";
 import {
   getOfflineReadiness,
+  offlinePackageReadyEvent,
   prepareOfflineAccess,
   type OfflinePreparation,
 } from "@/lib/pwa";
@@ -75,9 +76,11 @@ export default function OfflineReadiness() {
     };
     navigator.serviceWorker?.addEventListener("controllerchange", refresh);
     window.addEventListener("online", refresh);
+    window.addEventListener(offlinePackageReadyEvent, refresh);
     return () => {
       navigator.serviceWorker?.removeEventListener("controllerchange", refresh);
       window.removeEventListener("online", refresh);
+      window.removeEventListener(offlinePackageReadyEvent, refresh);
     };
   }, []);
   return (
@@ -107,16 +110,17 @@ export default function OfflineReadiness() {
                 : ready
                   ? "Pronto para usar sem internet neste aparelho."
                   : feedback ||
-                    "O app mantém apenas o essencial para abrir rápido. Toque em Preparar acesso offline para baixar o pacote completo deste aparelho."}
+                    "O app já abre com o essencial. Em conexão adequada, o restante é preparado em segundo plano; em rede lenta ou economia de dados, use Preparar acesso offline."}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/70">
             A instalação inicial fica leve para abrir e atualizar rápido no celular.
-            A preparação offline é opcional e baixa busca, serviços públicos,
-            contatos, postos, ruas locais e rotas salvas para este aparelho. O modo
-            Offline também reaproveita automaticamente a rota salva exata e pode
-            gerar estimativas locais para pontos já preparados. Mapas externos,
-            trânsito atualizado e destinos ainda não preparados continuam dependendo
-            de conexão; ligações precisam de rede telefônica.
+            Em uma conexão adequada, o Trajeto completa o pacote offline depois que
+            a tela já está utilizável, com downloads limitados para reduzir picos. Em
+            rede lenta ou economia de dados, a preparação completa fica sob seu
+            controle. Busca, serviços públicos, contatos, postos, ruas locais e rotas
+            salvas ficam disponíveis quando o pacote termina. Mapas externos, trânsito
+            atualizado e destinos ainda não preparados continuam dependendo de
+            conexão; ligações precisam de rede telefônica.
           </p>
           <button
             type="button"
