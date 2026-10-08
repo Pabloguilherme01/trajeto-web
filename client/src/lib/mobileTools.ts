@@ -172,6 +172,14 @@ export function buildAppleMapsDirectionsUrl(
 
 export function openExternalUrl(url: string) {
   if (typeof window === "undefined") return;
+  let target: URL;
+  try { target = new URL(url); } catch { return; }
+  if (target.username || target.password) return;
+  const web = target.protocol === "https:" || target.protocol === "http:";
+  const organicMaps = target.protocol === "om:" &&
+    ((target.hostname === "search" && !target.pathname) ||
+      (target.hostname === "v2" && target.pathname === "/nav"));
+  if (!web && !organicMaps) return;
   window.open(url, "_blank", "noopener,noreferrer");
 }
 

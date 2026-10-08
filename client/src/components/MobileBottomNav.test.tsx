@@ -8,7 +8,9 @@ const state = vi.hoisted(() => ({
   location: "/planejar",
   staticRuntime: true,
   navigate: vi.fn(),
+  prepare: vi.fn(),
 }));
+vi.mock("@/lib/primaryRoutes", () => ({ preparePrimaryRoute: state.prepare }));
 vi.mock("wouter", () => ({
   useLocation: () => [state.location, state.navigate],
   useSearch: () => state.search,
@@ -18,6 +20,7 @@ vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.
 beforeEach(() => {
   vi.stubGlobal("React", React);
   state.navigate.mockReset();
+  state.prepare.mockReset();
   state.search = "";
   state.location = "/planejar";
   state.staticRuntime = true;
@@ -106,4 +109,16 @@ it("returns focus to More after dismissing the menu", async () => {
   fireEvent.click(more);
   fireEvent.click(screen.getByRole("button", { name: "Fechar menu" }));
   await waitFor(() => expect(document.activeElement).toBe(more));
+});
+
+it("prepares the selected screen on touch or keyboard intent before navigating", () => {
+  render(<MobileBottomNav />);
+  const route = screen.getByRole("button", { name: "Rotas" });
+  fireEvent.pointerDown(route);
+  expect(state.prepare).toHaveBeenLastCalledWith("/planejar");
+  expect(state.navigate).not.toHaveBeenCalled();
+  fireEvent.focus(screen.getByRole("button", { name: "Serviços públicos" }));
+  expect(state.prepare).toHaveBeenLastCalledWith("/servicos");
+  fireEvent.click(route);
+  expect(state.navigate).toHaveBeenCalledWith("/planejar");
 });

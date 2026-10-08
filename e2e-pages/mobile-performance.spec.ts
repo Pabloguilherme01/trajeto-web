@@ -68,3 +68,15 @@ test("planner modes respond without fetching a closed location catalog", async (
     await cpu.detach();
   }
 });
+
+
+test("keyboard intent prepares the planner without navigating until activation", async ({ page }) => {
+  await page.goto("./");
+  const routes = page.getByRole("button", { name: "Rotas", exact: true });
+  const planner = page.waitForResponse(response => /\/Planner-[^/]+\.js(?:\?|$)/.test(response.url()));
+  await routes.focus();
+  expect((await planner).ok()).toBe(true);
+  await expect(page).not.toHaveURL(/\/planejar/);
+  await routes.press("Enter");
+  await expect(page.getByRole("heading", { name: "Planejar rota", exact: true })).toBeVisible();
+});

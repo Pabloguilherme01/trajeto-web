@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
+import { preparePrimaryRoute } from "@/lib/primaryRoutes";
 import { appUrl } from "@/lib/appUrl";
 import { OPEN_ACCESSIBILITY_EVENT } from "@/components/DailyCommandCenter";
 
@@ -47,7 +48,7 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
         {baseItems.map(item => {
           const active = isActive(item);
           const primary = item.key === "plan"; const Icon = item.icon;
-          return <button key={item.key} ref={item.key === "more" ? moreButton : undefined} type="button" onClick={() => go(item)}
+          return <button key={item.key} ref={item.key === "more" ? moreButton : undefined} type="button" onPointerDown={() => preparePrimaryRoute(item.href)} onPointerEnter={() => preparePrimaryRoute(item.href)} onFocus={() => preparePrimaryRoute(item.href)} onClick={() => go(item)}
             aria-label={item.label} aria-current={active && item.key !== "more" ? "page" : undefined} aria-haspopup={item.key === "more" ? "dialog" : undefined} aria-expanded={item.key === "more" ? moreOpen : undefined}
             data-active={active ? "true" : "false"} data-primary={primary ? "true" : "false"}
             className="app-dock-item relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 active:scale-[.97]">

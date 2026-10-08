@@ -176,3 +176,15 @@ describe("mobile tools", () => {
     await expect(shareText("Rota", "https://example.com/rota")).rejects.toThrow("Compartilhamento indisponível");
   });
 });
+
+it("rejects executable protocols, credentials and unknown application links", () => {
+  const open = vi.fn();
+  vi.stubGlobal("window", { open });
+  try {
+    for (const url of ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "file:///tmp/a", "https://user:secret@example.com", "om://unrecognized/action", "invalid", "intent://example"]) openExternalUrl(url);
+    expect(open).not.toHaveBeenCalled();
+    openExternalUrl(buildOrganicMapsSearchUrl("HEAL"));
+    openExternalUrl(buildOrganicMapsNavigationUrl({ lat: -15.86, lng: -48.03 }, "HEAL")!);
+    expect(open).toHaveBeenCalledTimes(2);
+  } finally { vi.unstubAllGlobals(); }
+});
