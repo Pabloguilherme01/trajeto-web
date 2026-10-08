@@ -836,10 +836,10 @@ export default function Planner() {
                         <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-10 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-primary/35 bg-primary/10 text-primary" : "border-border/10 bg-muted/[.02] text-muted-foreground")}>{label}</button>
                       ))}
                     </div>
-                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
+                    <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} role="region" aria-label="Lista de destinos disponíveis">
                       {availableDestinations.map(item => (
-                        <button key={item.id} type="button" onClick={() => setLocation(appUrl("/planejar") + "?destino=" + encodeURIComponent(item.destination) + "&auto=1")} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-border/10 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
+                        <button key={item.id} type="button" onClick={() => { resetResult(); setDestination(item.destination); setShowAllDestinations(false); queueMicrotask(() => plannerFormRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus()); }} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-border/10 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
                           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent transition-colors group-hover:bg-accent/15"><RouteIcon className="size-4" /></span>
                           <span className="min-w-0 flex-1">
                             <span className="flex flex-wrap items-center gap-1.5">
@@ -848,7 +848,7 @@ export default function Planner() {
                             </span>
                             <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</span>
                           </span>
-                          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-primary">Ir</span>
+                          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-primary">Escolher</span>
                         </button>
                       ))}
                       {availableDestinations.length === 0 && <p className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">Nenhum destino corresponde ao filtro.</p>}

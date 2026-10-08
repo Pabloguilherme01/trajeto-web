@@ -5,6 +5,17 @@ import * as atlas from "@/lib/cityAtlas";
 import PlannerLocationPicker from "./PlannerLocationPicker";
 afterEach(cleanup);
 
+it("keeps Enter in the local search from submitting a containing route form", () => {
+  const choose = vi.fn();
+  render(<form><PlannerLocationPicker kind="destino" value="" onChoose={choose} /></form>);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher destino no catálogo local" }));
+  const search = screen.getByRole("textbox", { name: "Buscar destino local" });
+  fireEvent.change(search, { target: { value: "HEAL" } });
+  expect(fireEvent.keyDown(search, { key: "Enter", code: "Enter" })).toBe(false);
+  expect(choose).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: /Selecionar HEAL/ })).toBeTruthy();
+});
+
 it("chooses a bundled point without a geocoder and marks approximate street locations", () => {
   const choose = vi.fn();
   const fetcher = vi.spyOn(globalThis, "fetch");

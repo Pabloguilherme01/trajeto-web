@@ -1,5 +1,5 @@
 import React from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Planner from "./Planner";
 import { localDataEvent } from "@/lib/localData";
@@ -41,6 +41,56 @@ beforeEach(() => {
   state.navigate.mockReset();
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+
+function selectAvailableDestination() {
+  fireEvent.click(screen.getByRole("button", { name: /Destinos disponíveis/ }));
+  const filter = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  fireEvent.change(filter, { target: { value: "HEAL" } });
+  fireEvent.click(within(screen.getByRole("region", { name: "Lista de destinos disponíveis" })).getAllByRole("button")[0]);
+}
+
+it("keeps Enter in the available-destination filter from calculating the current trip", () => {
+  render(<Planner />);
+  fireEvent.click(screen.getByRole("button", { name: /Destinos disponíveis/ }));
+  const filter = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  fireEvent.change(filter, { target: { value: "HEAL" } });
+  expect(fireEvent.keyDown(filter, { key: "Enter", code: "Enter" })).toBe(false);
+  expect(state.mutate).not.toHaveBeenCalled();
+});
+
+it("updates an available destination without replacing the edited origin or travel mode", () => {
+  render(<Planner />);
+  fireEvent.change(screen.getByPlaceholderText("De onde você sai"), { target: { value: "Rodoviária" } });
+  fireEvent.click(screen.getByRole("button", { name: "Bicicleta" }));
+  selectAvailableDestination();
+  expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Rodoviária");
+  expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toMatch(/HEAL/);
+  expect(screen.getByRole("button", { name: "Bicicleta" }).getAttribute("aria-pressed")).toBe("true");
+  expect(state.navigate).not.toHaveBeenCalled();
+  expect(state.publicRoute).not.toHaveBeenCalled();
+});
+
+it("retains a private GPS origin in memory when selecting an available destination", async () => {
+  state.search = "local=1&destino=Trabalho";
+  setPrivateLocationHandoff({ lat: -15.76123, lng: -48.28123 });
+  render(<Planner />);
+  selectAvailableDestination();
+  expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Minha localização");
+  expect(state.navigate).not.toHaveBeenCalled();
+  submit();
+  await waitFor(() => expect(state.privateRoute).toHaveBeenCalledWith("-15.76123, -48.28123", expect.stringMatching(/HEAL/), "driving"));
+  expect(state.publicRoute).not.toHaveBeenCalled();
+});
+
+it("focuses the calculation action after selecting the first destination of an empty trip", async () => {
+  state.search = "";
+  render(<Planner />);
+  expect(screen.getByTestId("planner-primary-action").hasAttribute("disabled")).toBe(true);
+  selectAvailableDestination();
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId("planner-primary-action")));
+  expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toMatch(/HEAL/);
+  expect(state.navigate).not.toHaveBeenCalled();
+});
 
 describe("Planner travel state", () => {
   it("shows whether the exact trip is prepared offline and how fresh it is", async () => {
