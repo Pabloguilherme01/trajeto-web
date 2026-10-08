@@ -121,6 +121,29 @@ describe("service worker", () => {
     worker.cache.put.mockRejectedValue(new Error("QuotaExceededError"));
     expect(await worker.networkFirst(new Request("https://example.com/data/test.json"), "data")).toBe(response);
   });
+  it("warms only same-scope current-route resources and keeps APIs private", async () => {
+    const worker = loadWorker();
+    worker.fetch.mockImplementation(async (request: Request) => {
+      const url = new URL(request.url);
+      return new Response(
+        url.pathname.endsWith(".json") ? "{}" : "code",
+        { headers: { "Content-Type": url.pathname.endsWith(".json") ? "application/json" : "text/javascript" } },
+      );
+    });
+
+    const result = await worker.cacheCurrentResources([
+      "https://example.com/trajeto-web/assets/Stations.js",
+      "https://example.com/trajeto-web/data/aguas-lindas-city-atlas.json?v=1",
+      "https://example.com/trajeto-web/api/trpc/private",
+      "https://other.example/assets/external.js",
+    ]);
+
+    expect(result).toEqual({ ready: true, saved: 2 });
+    expect(worker.fetch).toHaveBeenCalledTimes(2);
+    expect(worker.cache.put).toHaveBeenCalledTimes(2);
+    expect(worker.cache.put.mock.calls.map((call: any[]) => String(call[0]))).toContain("./data/aguas-lindas-city-atlas.json");
+  });
+
   it("never intercepts private API requests", () => {
     const worker = loadWorker();
     const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "fetch")[1];
