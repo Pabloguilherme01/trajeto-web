@@ -35,6 +35,7 @@ test("quick home form submits an automatic calculation", async ({ page }) => {
   await page.route("https://router.project-osrm.org/**", route => route.abort());
   await page.route("https://tile.openstreetmap.org/**", route => route.abort());
   await page.goto("");
+  await page.getByText("Planejar uma rota", { exact: true }).click();
   await page.getByPlaceholder("De onde você sai").fill("Prefeitura de Águas Lindas de Goiás");
   await page.getByPlaceholder("Para onde você vai").fill("UPA Mansões Odisseia");
   await page.getByRole("button", { name: "Ir até aqui", exact: true }).click();

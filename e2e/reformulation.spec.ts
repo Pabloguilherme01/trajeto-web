@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('editable home search opens the relevant results', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('textbox', { name: 'O que você procura?' }).fill('UPA');
   await page.getByRole('button', { name: 'Buscar no Trajeto' }).click();
   await expect(page).toHaveURL(/buscar\?q=UPA/);
@@ -11,7 +11,7 @@ test('editable home search opens the relevant results', async ({ page }) => {
 
 test('specific service prioritizes hours, contact and route at 200 percent text size', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
-  await page.goto('/servicos?servico=upa-mansoes-odisseia');
+  await page.goto('./servicos?servico=upa-mansoes-odisseia');
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
   await expect(page.getByRole('heading', { name: 'Como podemos ajudar?' })).toHaveCount(0);
   const card = page.locator('#service-upa-mansoes-odisseia');
