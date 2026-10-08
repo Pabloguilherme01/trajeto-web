@@ -83,6 +83,9 @@ test("mobile PWA prompts keep usable controls and no horizontal overflow", async
     expect(box?.height).toBeGreaterThanOrEqual(44);
     expect(box?.width).toBeGreaterThanOrEqual(44);
   }
+  const installBox = await install.boundingBox();
+  const closeInstallBox = await closeInstall.boundingBox();
+  expect(Math.abs(installBox!.y - closeInstallBox!.y)).toBeLessThanOrEqual(2);
   await closeInstall.click();
 
   await page.evaluate(() => window.dispatchEvent(new Event("trajeto:pwa-update")));
@@ -95,5 +98,8 @@ test("mobile PWA prompts keep usable controls and no horizontal overflow", async
     expect(box?.width).toBeGreaterThanOrEqual(44);
   }
 
+  const updateBox = await update.boundingBox();
+  const closeUpdateBox = await closeUpdate.boundingBox();
+  expect(Math.abs(updateBox!.y - closeUpdateBox!.y)).toBeLessThanOrEqual(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

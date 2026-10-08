@@ -18,7 +18,7 @@ it("uses semantic theme tokens for the update prompt controls", () => {
   render(<PwaUpdatePrompt />);
   const update = screen.getByRole("button", { name: /^Atualizar$/ });
   const close = screen.getByRole("button", { name: /Fechar aviso de atualização/i });
-  const panel = update.parentElement;
+  const panel = update.closest("aside")?.firstElementChild as HTMLElement;
   expect(panel?.className).toContain("border-border");
   expect(panel?.className).toContain("bg-card/95");
   expect(panel?.className).toContain("text-card-foreground");
