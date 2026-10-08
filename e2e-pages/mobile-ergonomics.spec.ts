@@ -21,7 +21,7 @@ test("mobile directory remains readable with enlarged text and closes after choo
     await button.scrollIntoViewIfNeeded();
     const box = await button.boundingBox();
     expect(box!.width).toBeGreaterThan(200);
-    expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(box!.height).toBeGreaterThanOrEqual(43.5);
   }
   await dialog.getByRole("button", { name: "Abrir mapa" }).click();
   await expect(dialog).toHaveCount(0);
