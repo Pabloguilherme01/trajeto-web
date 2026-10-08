@@ -106,3 +106,43 @@ test("ready routes mount on keyboard opening and retain filters after closing", 
   await expect(panel.getByRole("article").first()).toHaveAttribute("aria-label", /HEAL/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+test("planner searches do not submit a trip and selecting a destination retains its origin and mode", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("./planejar?origem=Centro&destino=Prefeitura");
+  const origin = page.getByPlaceholder("De onde você sai");
+  const destination = page.getByPlaceholder("Para onde você vai");
+  await origin.fill("Rodoviária");
+  await page.getByRole("group", { name: "2. Como ir", exact: true }).getByRole("button", { name: "Bicicleta", exact: true }).click();
+  const form = page.locator("form");
+  const assertUnsubmitted = async () => {
+    await expect(form.getByRole("button", { name: /Calculando rota/ })).toHaveCount(0);
+    await expect(page.getByText("Alterar viagem", { exact: true })).toHaveCount(0);
+    await expect(origin).toHaveValue("Rodoviária");
+    await expect(destination).toHaveValue("Prefeitura");
+  };
+  await page.getByText("Escolher destino no catálogo", { exact: true }).click();
+  await page.getByRole("button", { name: "Escolher destino no catálogo local", exact: true }).click();
+  const localSearch = page.getByRole("textbox", { name: "Buscar destino local" });
+  await localSearch.fill("HEAL");
+  await localSearch.press("Enter");
+  await assertUnsubmitted();
+  await page.getByText("Destinos e atalhos", { exact: true }).click();
+  await page.getByText(/trajetos prontos pela cidade/).click();
+  const readySearch = page.getByRole("searchbox", { name: "Buscar trajeto" });
+  await readySearch.fill("HEAL");
+  await readySearch.press("Enter");
+  await assertUnsubmitted();
+  await page.getByRole("button", { name: /Destinos disponíveis/ }).click();
+  const filter = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  await filter.fill("HEAL");
+  await filter.press("Enter");
+  await assertUnsubmitted();
+  await page.getByRole("region", { name: "Lista de destinos disponíveis" }).getByRole("button").first().click();
+  await expect(origin).toHaveValue("Rodoviária");
+  await expect(destination).toHaveValue(/HEAL/);
+  await expect(page.getByRole("group", { name: "2. Como ir", exact: true }).getByRole("button", { name: "Bicicleta", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/origem=Centro&destino=Prefeitura$/);
+  await expect(page.getByTestId("planner-primary-action")).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});

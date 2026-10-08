@@ -95,7 +95,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
     {selected?.coordinate === value && <p className="mt-1 break-words text-xs leading-relaxed text-white/60">{selected.label}</p>}
     {open && <div className="mt-2 rounded-xl border border-white/10 bg-[#0B1014] p-3">
       <label className="block text-xs font-bold text-white/65">Buscar {kind} local
-        <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Nome, rua ou bairro" className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-[#121B22] px-3 text-base text-white" autoComplete="off" enterKeyHint="search" />
+        <input value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} placeholder="Nome, rua ou bairro" className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-[#121B22] px-3 text-base text-white" autoComplete="off" enterKeyHint="search" />
       </label>
       <QuickFilterChips label={"Filtros rápidos para " + kind} options={quickQueries} value={query} onPick={value => { setQuery(value); setVisibleCount(8); }} className="mt-2" />
       <p className="mt-2 break-words text-xs text-white/55">{matches.length} lugares encontrados · {offlineReadyCount} com coordenadas para uso offline</p>

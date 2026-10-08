@@ -108,7 +108,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <div className="min-w-0">
         <label className="text-xs font-bold text-foreground/80"><span className="inline-flex items-center gap-1.5"><Search className="size-3.5" />Buscar trajeto</span>
-          <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-border bg-background px-3 text-base text-foreground" />
+          <input type="search" value={query} onChange={event => { setQuery(event.target.value); setVisibleCount(6); }} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} placeholder="UPA, Prefeitura, Shopping…" autoComplete="off" enterKeyHint="search" className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-border bg-background px-3 text-base text-foreground" />
         </label>
         <QuickFilterChips
           label="Atalhos de busca de trajetos"

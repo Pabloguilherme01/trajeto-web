@@ -10,6 +10,14 @@ afterEach(() => { cleanup(); navigate.mockReset(); });
 function open() {
   fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
 }
+it("keeps Enter in ready-route search from submitting the planner form", () => {
+  render(<form><ReadyRouteShortcuts /></form>); open();
+  const search = screen.getByRole("searchbox");
+  fireEvent.change(search, { target: { value: "HEAL" } });
+  expect(fireEvent.keyDown(search, { key: "Enter", code: "Enter" })).toBe(false);
+  expect(navigate).not.toHaveBeenCalled();
+  expect(screen.getAllByRole("article").length).toBeGreaterThan(0);
+});
 it("uses semantic tokens for ready-route filters and secondary actions", () => {
   render(<ReadyRouteShortcuts />); open();
   const health = screen.getByRole("button", { name: "Cuidar da saúde" });
