@@ -40,6 +40,9 @@ function announceUpdate(registration: ServiceWorkerRegistration) {
 export function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
+  const warmCurrentRoute = () => { void cacheCurrentRouteForOffline(); };
+  navigator.serviceWorker.addEventListener("controllerchange", warmCurrentRoute);
+
   const register = () => {
     void navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", {
       scope: import.meta.env.BASE_URL,
@@ -47,6 +50,7 @@ export function registerServiceWorker() {
     }).then(registration => {
       currentRegistration = registration;
       announceUpdate(registration);
+      if (navigator.serviceWorker.controller) warmCurrentRoute();
 
       registration.addEventListener("updatefound", () => {
         const worker = registration.installing;
@@ -93,6 +97,50 @@ export async function applyServiceWorkerUpdate() {
     const timer = window.setTimeout(() => finish(false), 5000);
     try { waiting.postMessage({ type: "SKIP_WAITING" }); }
     catch { finish(false); }
+  });
+}
+
+export const currentRouteOfflineEvent = "trajeto:current-route-offline-ready";
+
+export async function cacheCurrentRouteForOffline(): Promise<boolean> {
+  const worker = navigator.serviceWorker?.controller;
+  if (!worker) return false;
+
+  const base = new URL(import.meta.env.BASE_URL, window.location.origin);
+  const urls = performance.getEntriesByType("resource")
+    .map(entry => entry.name)
+    .filter(name => {
+      try {
+        const url = new URL(name, window.location.href);
+        return url.origin === window.location.origin &&
+          url.href.startsWith(base.href) &&
+          !url.pathname.includes("/api/");
+      } catch {
+        return false;
+      }
+    });
+
+  document.documentElement.dataset.offlineRouteReady = "preparing";
+  return await new Promise(resolve => {
+    const channel = new MessageChannel();
+    let finished = false;
+    const finish = (ready: boolean) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      channel.port1.close();
+      channel.port2.close();
+      document.documentElement.dataset.offlineRouteReady = ready ? "true" : "false";
+      if (ready) window.dispatchEvent(new Event(currentRouteOfflineEvent));
+      resolve(ready);
+    };
+    const timer = window.setTimeout(() => finish(false), 10000);
+    channel.port1.onmessage = event => finish(event.data?.ready === true);
+    try {
+      worker.postMessage({ type: "CACHE_CURRENT_RESOURCES", urls }, [channel.port2]);
+    } catch {
+      finish(false);
+    }
   });
 }
 
