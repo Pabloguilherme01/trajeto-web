@@ -13,6 +13,7 @@ import OfflineReadiness from "./OfflineReadiness";
 const state = vi.hoisted(() => ({ check: vi.fn(), prepare: vi.fn() }));
 vi.mock("@/lib/pwa", () => ({
   getOfflineReadiness: state.check,
+  offlinePackageReadyEvent: "trajeto:offline-package-ready",
   prepareOfflineAccess: state.prepare,
 }));
 beforeEach(() => {
