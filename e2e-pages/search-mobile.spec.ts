@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { waitForOfflinePackage } from "./offline-package";
 
 test("Pages: search uses the full mobile width and keeps results near the input", async ({
   page,
@@ -71,14 +72,7 @@ test("Pages: offline search preserves direct contacts and explains an unknown qu
   context,
 }) => {
   await page.goto("buscar", { waitUntil: "domcontentloaded" });
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
-  await expect
-    .poll(() =>
-      page.evaluate(() => Boolean(navigator.serviceWorker.controller))
-    )
-    .toBe(true);
+  await waitForOfflinePackage(page);
   await context.setOffline(true);
   await page.goto("buscar?q=cnis", { waitUntil: "domcontentloaded" });
   await page
@@ -107,6 +101,7 @@ test("Pages: offline preparation recovers a missing chunk and survives a reload"
   context,
 }) => {
   await page.goto("ajuda", { waitUntil: "domcontentloaded" });
+  await waitForOfflinePackage(page);
   await expect(
     page.getByText("Pronto para usar sem internet neste aparelho.")
   ).toBeVisible();
