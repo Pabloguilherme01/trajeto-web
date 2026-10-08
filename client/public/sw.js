@@ -83,6 +83,9 @@ self.addEventListener("message", event => {
   if (event.data?.type === "RESTORE_OFFLINE" && event.ports?.[0]) {
     event.waitUntil(restoreOfflinePackage().then(status => event.ports[0].postMessage(status)));
   }
+  if (event.data?.type === "CACHE_CURRENT_RESOURCES" && event.ports?.[0]) {
+    event.waitUntil(cacheCurrentResources(event.data.urls).then(status => event.ports[0].postMessage(status)));
+  }
 });
 
 function collectIndexAssets(html) {
@@ -274,6 +277,48 @@ async function restoreOfflinePackage() {
   } catch (error) {
     return { ready: false, reason: error?.name === "QuotaExceededError" ? "storage" : error?.message === "update" ? "update" : "connection" };
   }
+}
+
+
+async function cacheCurrentResources(urls) {
+  const input = Array.isArray(urls) ? urls : [];
+  const unique = [...new Set(input.filter(value => typeof value === "string"))].slice(0, 120);
+  let saved = 0;
+
+  for (let index = 0; index < unique.length; index += 4) {
+    await Promise.all(unique.slice(index, index + 4).map(async raw => {
+      let url;
+      try { url = new URL(raw, self.registration.scope); }
+      catch { return; }
+
+      if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope) || url.pathname.includes("/api/")) return;
+
+      const snapshot = LOCAL_SNAPSHOTS.find(path => new URL(path, self.registration.scope).pathname === url.pathname);
+      const cacheName = snapshot
+        ? DATA_CACHE
+        : url.pathname.includes("/maps/") || url.pathname.includes("/tiles/")
+          ? MAP_CACHE
+          : STATIC_CACHE;
+      const key = snapshot || url.toString();
+
+      try {
+        const response = await fetch(new Request(url, { cache: "force-cache" }));
+        const type = response.headers.get("Content-Type") || "";
+        if (!response.ok ||
+          (/\.js$/.test(url.pathname) && !/(?:javascript|ecmascript)/i.test(type)) ||
+          (/\.css$/.test(url.pathname) && !/text\/css/i.test(type)) ||
+          (/\.json$/.test(url.pathname) && !/json/i.test(type))) return;
+        const cache = await caches.open(cacheName);
+        await cache.put(key, response.clone());
+        saved += 1;
+      } catch {
+        // Warming the current route is opportunistic; a failed resource must
+        // never delay activation or make the online page unusable.
+      }
+    }));
+  }
+
+  return { ready: true, saved };
 }
 
 
