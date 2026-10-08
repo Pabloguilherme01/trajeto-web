@@ -24,6 +24,8 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(async cache => {
+        // Keep first install/update small on phones: cache only the app shell
+        // and the entry assets required by the current document.
         await precacheFresh(cache, STATIC_SHELL);
         const response = await fetch("./index.html?precache=" + VERSION, { cache: "no-store" });
         if (!response.ok) throw new Error("App indisponível");
@@ -33,24 +35,20 @@ self.addEventListener("install", event => {
         await cache.put("./index.html", response.clone());
         await cache.put("./404.html", response.clone());
         const html = await response.text();
-        const assets = collectIndexAssets(html);
-        await precacheFresh(cache, assets);
+        await precacheFresh(cache, collectIndexAssets(html));
 
-        // A public filename keeps the manifest inside the Pages artifact.
-        // Installation only succeeds after all route chunks have been saved.
+        // Pin this build's manifest without downloading every lazy route/data
+        // during installation. "Preparar acesso offline" completes this exact
+        // version later, avoiding mixed deployments while keeping updates fast.
         const manifestResponse = await fetch("./offline-assets.json?precache=" + VERSION, { cache: "no-store" });
         if (!manifestResponse.ok) throw new Error("Pacote offline indisponível");
         const manifest = await manifestResponse.json();
-        await precacheFresh(cache, collectManifestAssets(manifest));
         await cache.put("./offline-assets.json", new Response(JSON.stringify(manifest), {
           headers: { "Content-Type": "application/json" },
         }));
       })
-      .then(() => caches.open(DATA_CACHE))
-      .then(async cache => {
-        await precacheFresh(cache, LOCAL_SNAPSHOTS);
-      })
-      .then(() => caches.open(MAP_CACHE))
+      // Create the caches now so later requests can fill them progressively.
+      .then(() => Promise.all([caches.open(DATA_CACHE), caches.open(MAP_CACHE)]))
   );
 });
 
