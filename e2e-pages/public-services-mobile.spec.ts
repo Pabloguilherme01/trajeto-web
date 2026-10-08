@@ -32,8 +32,7 @@ for (const width of [320, 390]) {
     })).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(page.getByRole("button", { name: /Abrir .* no Organic Maps/ }).first()).toBeVisible();
-    await page.locator("summary").filter({ hasText: /^Modo de navegação no Organic Maps$/ }).click();
-  const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
+    const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
     await mode.selectOption("bike");
     await expect(mode).toHaveValue("bike");
     const filters = page.locator("#service-filters summary");
