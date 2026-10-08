@@ -63,8 +63,13 @@ export function registerServiceWorker() {
       document.addEventListener("visibilitychange", () => { if (!document.hidden) update(); });
     }).catch(() => {});
   };
-  if (document.readyState === "complete") register();
-  else window.addEventListener("load", register, { once: true });
+  // Register as soon as the document is interactive. Waiting for the full
+  // window load can postpone installability on slower phones.
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", register, { once: true });
+  } else {
+    register();
+  }
 }
 
 export async function applyServiceWorkerUpdate() {
@@ -130,6 +135,28 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
   });
 }
 
+async function waitForServiceWorkerControl(timeout = 15000): Promise<boolean> {
+  if (navigator.serviceWorker.controller) return true;
+  return await new Promise(resolve => {
+    let finished = false;
+    const finish = (controlled: boolean) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      resolve(controlled);
+    };
+    const onControllerChange = () => finish(Boolean(navigator.serviceWorker.controller));
+    const timer = setTimeout(() => finish(Boolean(navigator.serviceWorker.controller)), timeout);
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+    void navigator.serviceWorker.ready
+      .then(() => {
+        if (navigator.serviceWorker.controller) finish(true);
+      })
+      .catch(() => finish(false));
+  });
+}
+
 export async function getOfflineReadiness(): Promise<boolean> {
   if (!("serviceWorker" in navigator)) return false;
   return (await requestOfflineStatus("OFFLINE_STATUS", 5000)).ready;
@@ -144,7 +171,9 @@ export async function prepareOfflineAccess(): Promise<OfflinePreparation> {
       await navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL, updateViaCache: "none" });
     currentRegistration = registration;
     void registration.update().then(() => announceUpdate(registration)).catch(() => undefined);
-    if (!navigator.serviceWorker.controller) return { ready: false, reason: "preparing" };
+    if (!navigator.serviceWorker.controller && !await waitForServiceWorkerControl()) {
+      return { ready: false, reason: "preparing" };
+    }
     const result = await requestOfflineStatus("RESTORE_OFFLINE", 60000);
     if (!result.ready && registration.waiting) announceUpdate(registration);
     return result;

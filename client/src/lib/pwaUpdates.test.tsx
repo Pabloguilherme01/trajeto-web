@@ -57,3 +57,45 @@ it("does not hang or reload when no update is waiting", async () => {
   expect(await pwa.applyServiceWorkerUpdate()).toBe(false);
   expect(reload).not.toHaveBeenCalled();
 });
+
+
+it("continues first offline preparation after the new worker takes control", async () => {
+  const registration = { waiting: null, installing: null, update: vi.fn().mockResolvedValue(undefined) };
+  class MockMessageChannel {
+    port1: { onmessage: ((event: { data: unknown }) => void) | null; close: ReturnType<typeof vi.fn> };
+    port2: { postMessage: (data: unknown) => void; close: ReturnType<typeof vi.fn> };
+    constructor() {
+      this.port1 = { onmessage: null, close: vi.fn() };
+      this.port2 = {
+        postMessage: data => this.port1.onmessage?.({ data }),
+        close: vi.fn(),
+      };
+    }
+  }
+  const worker = {
+    postMessage: vi.fn((message: { type?: string }, ports?: Array<{ postMessage: (data: unknown) => void }>) => {
+      if (message.type === "RESTORE_OFFLINE") ports?.[0]?.postMessage({ ready: true });
+    }),
+  };
+  const serviceWorker = Object.assign(new EventTarget(), {
+    controller: null as typeof worker | null,
+    getRegistration: vi.fn().mockResolvedValue(registration),
+    register: vi.fn().mockResolvedValue(registration),
+    ready: Promise.resolve(registration),
+  });
+  vi.stubGlobal("navigator", { onLine: true, serviceWorker });
+  vi.stubGlobal("window", Object.assign(new EventTarget(), { setTimeout, clearTimeout, location: { reload: vi.fn() } }));
+  vi.stubGlobal("MessageChannel", MockMessageChannel);
+
+  const { prepareOfflineAccess } = await import("./pwa");
+  const preparing = prepareOfflineAccess();
+  await Promise.resolve();
+  serviceWorker.controller = worker;
+  serviceWorker.dispatchEvent(new Event("controllerchange"));
+
+  await expect(preparing).resolves.toEqual({ ready: true });
+  expect(worker.postMessage).toHaveBeenCalledWith(
+    { type: "RESTORE_OFFLINE" },
+    expect.any(Array)
+  );
+});
