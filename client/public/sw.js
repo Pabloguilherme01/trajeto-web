@@ -1,11 +1,13 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v28";
+const VERSION = CACHE_PREFIX + "v29";
 const NETWORK_TIMEOUT_MS = 4000;
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
 
-const LOCAL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json", "./data/aguas-lindas-offline-map.json", "./data/aguas-lindas-city-atlas.json"];
+const ESSENTIAL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"];
+const OPTIONAL_OFFLINE_SNAPSHOTS = ["./data/aguas-lindas-offline-map.json", "./data/aguas-lindas-city-atlas.json"];
+const LOCAL_SNAPSHOTS = [...ESSENTIAL_SNAPSHOTS, ...OPTIONAL_OFFLINE_SNAPSHOTS];
 
 const STATIC_SHELL = [
   "./",
@@ -48,7 +50,7 @@ self.addEventListener("install", event => {
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
-        await precacheFresh(cache, LOCAL_SNAPSHOTS);
+        await precacheFresh(cache, ESSENTIAL_SNAPSHOTS);
       })
       .then(() => caches.open(MAP_CACHE))
   );
