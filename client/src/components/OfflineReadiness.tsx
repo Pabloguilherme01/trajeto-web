@@ -14,7 +14,7 @@ const preparationMessages: Record<
   unsupported:
     "Este navegador não permitiu preparar o app. Tente abrir no Chrome ou Safari fora do modo privado.",
   preparing:
-    "O conteúdo está sendo preparado. Aguarde alguns instantes; a conferência será atualizada automaticamente.",
+    "A instalação ainda não terminou. Aguarde e toque em Preparar acesso offline novamente para completar o conteúdo.",
   connection:
     "Conecte-se à internet e tente preparar novamente. Seus favoritos e rotas continuam guardados.",
   storage:

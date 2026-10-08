@@ -135,7 +135,7 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
   });
 }
 
-async function waitForServiceWorkerControl(timeout = 15000): Promise<boolean> {
+async function waitForServiceWorkerControl(timeout = 60000): Promise<boolean> {
   if (navigator.serviceWorker.controller) return true;
   return await new Promise(resolve => {
     let finished = false;
