@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { waitForOfflinePackage } from "./offline-package";
 
 async function planRoute(page: Page) {
   await page.route("https://router.project-osrm.org/**", route =>
@@ -243,7 +244,7 @@ test("Pages: prepared endpoints support new offline trips in every mode and coor
       Object.keys(storage).filter(key => key.startsWith("trajeto:public-routing:")).forEach(key => storage.removeItem(key));
     }
   });
-  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBeTruthy();
+  await waitForOfflinePackage(page);
   let external = 0;
   page.on("request", request => { if (/nominatim|project-osrm|api.mapbox/.test(request.url())) external++; });
   await context.setOffline(true);
