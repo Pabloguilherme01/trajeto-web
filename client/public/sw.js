@@ -6,7 +6,6 @@ const DATA_CACHE = VERSION + "-data";
 const MAP_CACHE = VERSION + "-map";
 
 const LOCAL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json", "./data/aguas-lindas-offline-map.json", "./data/aguas-lindas-city-atlas.json"];
-const INSTALL_SNAPSHOTS = ["./data/aguas-lindas-anp.json", "./data/aguas-lindas-anp-precos.json"];
 
 const STATIC_SHELL = [
   "./",
@@ -37,9 +36,8 @@ self.addEventListener("install", event => {
         const assets = collectIndexAssets(html);
         await precacheFresh(cache, assets);
 
-        // Route chunks remain part of the installed build so a screen opened
-        // online can be reloaded immediately after connectivity is lost.
-        // Large optional city snapshots are deferred to explicit offline prep.
+        // A public filename keeps the manifest inside the Pages artifact.
+        // Installation only succeeds after all route chunks have been saved.
         const manifestResponse = await fetch("./offline-assets.json?precache=" + VERSION, { cache: "no-store" });
         if (!manifestResponse.ok) throw new Error("Pacote offline indisponível");
         const manifest = await manifestResponse.json();
@@ -50,16 +48,15 @@ self.addEventListener("install", event => {
       })
       .then(() => caches.open(DATA_CACHE))
       .then(async cache => {
-        // Keep the lightweight station directory ready for immediate offline
-        // reloads. The ~1.28 MB map/atlas snapshots are restored on demand.
-        await precacheFresh(cache, INSTALL_SNAPSHOTS);
+        await precacheFresh(cache, LOCAL_SNAPSHOTS);
       })
       .then(() => caches.open(MAP_CACHE))
   );
 });
 
 async function precacheFresh(cache, assets) {
-  // Bound parallel downloads to reduce CPU, memory and radio pressure on phones.
+  // Avoid downloading every route/data chunk at once while a phone is opening
+  // the app. Installation still waits for the complete offline package.
   for (let index = 0; index < assets.length; index += 3) {
     await cache.addAll(assets.slice(index, index + 3).map(asset => new Request(new URL(asset, self.registration.scope), { cache: "reload" })));
   }
