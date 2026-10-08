@@ -60,3 +60,40 @@ for (const path of ["planejar", "postos", "servicos", "ajuda", "mapa"]) {
     ).toBeLessThanOrEqual(320);
   });
 }
+
+
+test("mobile PWA prompts keep usable controls and no horizontal overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("", { waitUntil: "domcontentloaded" });
+
+  await page.evaluate(() => {
+    const installEvent = new Event("beforeinstallprompt", { cancelable: true });
+    Object.assign(installEvent, {
+      prompt: async () => undefined,
+      userChoice: Promise.resolve({ outcome: "dismissed", platform: "web" }),
+    });
+    window.dispatchEvent(installEvent);
+  });
+
+  const install = page.getByRole("button", { name: "Instalar app" });
+  const closeInstall = page.getByRole("button", { name: "Fechar aviso de instalação" });
+  for (const control of [install, closeInstall]) {
+    await expect(control).toBeVisible();
+    const box = await control.boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+  }
+  await closeInstall.click();
+
+  await page.evaluate(() => window.dispatchEvent(new Event("trajeto:pwa-update")));
+  const update = page.getByRole("button", { name: "Atualizar", exact: true });
+  const closeUpdate = page.getByRole("button", { name: "Fechar aviso de atualização" });
+  for (const control of [update, closeUpdate]) {
+    await expect(control).toBeVisible();
+    const box = await control.boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+  }
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
