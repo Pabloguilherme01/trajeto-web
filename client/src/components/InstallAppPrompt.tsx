@@ -61,16 +61,18 @@ export default function InstallAppPrompt() {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-extrabold">Baixe o Trajeto no celular</p>
           <p className="mt-1 text-xs leading-relaxed text-[#A9BAC2]">
-            Instale como aplicativo para abrir mais rápido e continuar acessando o que já foi salvo mesmo sem conexão.
+            Abra pela tela inicial. Prepare o acesso offline em Ajuda.
           </p>
           {isIOS && !event && <p className="mt-2 text-xs font-semibold text-[#DFFF9D]">No iPhone: Compartilhar → Adicionar à Tela de Início.</p>}
-          {event && <button type="button" onClick={install} disabled={installing} className="mt-3 min-h-12 w-full rounded-xl bg-[#C7FF3C] px-4 py-2 text-sm font-extrabold text-[#0B1014] disabled:opacity-60 active:scale-[.98] sm:w-auto">{installing ? "Abrindo instalação…" : "Instalar app"}</button>}
-          {feedback && <p role="status" className="mt-2 text-xs leading-relaxed text-[#DFFF9D]">{feedback}</p>}
         </div>
+      </div>
+      <div className="mt-3 flex items-center gap-2" data-testid="install-actions">
+          {event && <button type="button" onClick={install} disabled={installing} className="min-h-11 min-w-0 flex-1 rounded-xl bg-[#C7FF3C] px-4 py-2 text-sm font-extrabold text-[#0B1014] disabled:opacity-60 active:scale-[.98]">{installing ? "Abrindo instalação…" : "Instalar app"}</button>}
         <button type="button" onClick={() => { setVisible(false); try { localStorage.setItem("trajeto-install-dismissed-until", String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch {} }} className="grid size-11 shrink-0 place-items-center rounded-xl border border-white/10 text-[#B8C5CB]" aria-label="Fechar aviso de instalação">
           <X className="size-4" />
         </button>
       </div>
+          {feedback && <p role="status" className="mt-2 text-xs leading-relaxed text-[#DFFF9D]">{feedback}</p>}
     </aside>
   );
 }

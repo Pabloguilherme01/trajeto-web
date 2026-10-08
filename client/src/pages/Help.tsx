@@ -23,6 +23,11 @@ export default function Help() {
         </header>
 
         <AppUpdateCheck />
+        <section className="mt-4 rounded-2xl border border-border bg-card p-4 text-card-foreground" aria-labelledby="install-help-title">
+          <h2 id="install-help-title" className="text-base font-bold">Instalar no celular</h2>
+          <p className="mt-2 text-sm leading-relaxed">Android: abra este site no Chrome e use o menu ⋮ → Instalar app ou Adicionar à tela inicial. No iPhone: Safari → Compartilhar → Adicionar à Tela de Início.</p>
+          <p className="mt-2 text-sm leading-relaxed">Se abriu por WhatsApp, Instagram ou outro aplicativo, use Abrir no navegador primeiro. Depois de instalar, prepare o acesso offline abaixo e aguarde a confirmação.</p>
+        </section>
         <section className="mt-6 rounded-[1.7rem] border border-white/10 bg-[#121B22] p-5 sm:p-7">
           <p className="text-sm leading-relaxed text-white/75">Encontre o atendimento que precisa, veja como chegar e guarde seus atalhos neste aparelho. A central reúne serviços públicos de Águas Lindas e canais estaduais e nacionais de apoio.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">

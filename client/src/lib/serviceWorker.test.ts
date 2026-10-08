@@ -51,6 +51,28 @@ describe("service worker", () => {
     cache.addAll.mockRejectedValueOnce(new Error("network"));
     await expect(worker.precacheFresh(cache, assets)).rejects.toThrow("network");
   });
+  it("installs route chunks and ANP but defers the heavy map snapshots", async () => {
+    const worker = loadWorker();
+    const saved: string[] = [];
+    worker.cache.addAll = vi.fn(async (requests: Request[]) => {
+      saved.push(...requests.map(request => request.url));
+    });
+    worker.fetch.mockImplementation(async (input: string | Request) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url.includes("offline-assets.json")) return new Response(JSON.stringify({
+        entry: { file: "assets/main.js" }, stations: { file: "assets/stations.js" },
+      }));
+      return new Response('<script type="module" src="./assets/main.js"></script>');
+    });
+    const install = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "install")[1];
+    let completion!: Promise<unknown>;
+    install({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
+    await completion;
+    for (const path of ["assets/stations.js", "data/aguas-lindas-anp.json", "data/aguas-lindas-anp-precos.json"])
+      expect(saved).toContain(new URL(path, worker.self.registration.scope).href);
+    for (const path of ["data/aguas-lindas-offline-map.json", "data/aguas-lindas-city-atlas.json"])
+      expect(saved).not.toContain(new URL(path, worker.self.registration.scope).href);
+  });
   it("registers lifecycle handlers", () => {
     const worker = loadWorker();
     expect(worker.self.addEventListener.mock.calls.map((call: any[]) => call[0])).toEqual(["install", "activate", "message", "fetch"]);
