@@ -284,6 +284,7 @@ async function cacheCurrentResources(urls) {
   const input = Array.isArray(urls) ? urls : [];
   const unique = [...new Set(input.filter(value => typeof value === "string"))].slice(0, 120);
   let saved = 0;
+  let eligible = 0;
 
   for (let index = 0; index < unique.length; index += 4) {
     await Promise.all(unique.slice(index, index + 4).map(async raw => {
@@ -293,6 +294,7 @@ async function cacheCurrentResources(urls) {
 
       if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope) || url.pathname.includes("/api/")) return;
 
+      eligible += 1;
       const snapshot = LOCAL_SNAPSHOTS.find(path => new URL(path, self.registration.scope).pathname === url.pathname);
       const cacheName = snapshot
         ? DATA_CACHE
@@ -318,7 +320,7 @@ async function cacheCurrentResources(urls) {
     }));
   }
 
-  return { ready: true, saved };
+  return { ready: saved === eligible, saved };
 }
 
 
