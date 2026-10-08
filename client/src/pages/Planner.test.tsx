@@ -82,6 +82,16 @@ it("retains a private GPS origin in memory when selecting an available destinati
   expect(state.publicRoute).not.toHaveBeenCalled();
 });
 
+it("focuses the calculation action after selecting the first destination of an empty trip", async () => {
+  state.search = "";
+  render(<Planner />);
+  expect(screen.getByTestId("planner-primary-action").hasAttribute("disabled")).toBe(true);
+  selectAvailableDestination();
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId("planner-primary-action")));
+  expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toMatch(/HEAL/);
+  expect(state.navigate).not.toHaveBeenCalled();
+});
+
 describe("Planner travel state", () => {
   it("shows whether the exact trip is prepared offline and how fresh it is", async () => {
     state.listOffline.mockResolvedValueOnce([
