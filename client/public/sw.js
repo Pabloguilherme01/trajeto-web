@@ -1,5 +1,7 @@
 const CACHE_PREFIX = "trajeto-" + encodeURIComponent(new URL(self.registration.scope).pathname) + "-";
-const VERSION = CACHE_PREFIX + "v29";
+// Changing the worker while reusing the old cache name can overwrite the live
+// installation before the new build is fully cached. Reserve a fresh namespace.
+const VERSION = CACHE_PREFIX + "v30";
 const NETWORK_TIMEOUT_MS = 4000;
 const STATIC_CACHE = VERSION + "-static";
 const DATA_CACHE = VERSION + "-data";
