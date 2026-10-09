@@ -1,0 +1,34 @@
+name: Mobile QA
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: mobile-qa-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Mobile layout, map selection, installation and prepared update
+        run: >-
+          npx playwright test --config=playwright.pages.config.ts --workers=2
+          --grep 'dock has|map controls|city streets and controls|mobile home calculates|installation metadata|prepared map and atlas'
+      - name: Mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: mobile-qa-screens
+          path: test-results/**/home-*.png
+          retention-days: 7
+          if-no-files-found: warn
