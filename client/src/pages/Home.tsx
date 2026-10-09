@@ -240,7 +240,7 @@ export default function Home() {
 <ReadyRouteShortcuts summaryLabel="Rotas prontas" />
         <section className="premium-card mt-4 rounded-[1.35rem] border border-warning/18 bg-warning/[.04] p-2" aria-labelledby="home-utility-title">
           <h2 id="home-utility-title" className="sr-only">Emergência</h2>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-[1fr_1fr_1.4fr] gap-1">
             {[
               { label: "Polícia", number: "190", href: "tel:190" },
               { label: "SAMU", number: "192", href: "tel:192" },

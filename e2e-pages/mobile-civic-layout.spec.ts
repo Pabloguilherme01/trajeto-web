@@ -28,10 +28,12 @@ for (const width of [320, 360, 390]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       const emergency = page.getByRole("link", { name: "Bombeiros 193" });
       await expect(emergency).toBeVisible();
-      expect(await emergency.evaluate(element => {
+      const labelBox = await emergency.evaluate(element => {
         const label = element.querySelector("span")!;
-        return label.scrollWidth <= label.clientWidth && getComputedStyle(label).whiteSpace === "nowrap";
-      })).toBe(true);
+        return { content: label.scrollWidth, available: label.clientWidth, whiteSpace: getComputedStyle(label).whiteSpace };
+      });
+      expect(labelBox.whiteSpace).toBe("nowrap");
+      expect(labelBox.content).toBeLessThanOrEqual(labelBox.available);
       await page.screenshot({ path: testInfo.outputPath(`home-${width}-${large}.png`) });
     });
   }
