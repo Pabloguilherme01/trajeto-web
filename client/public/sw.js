@@ -43,7 +43,8 @@ self.addEventListener("install", event => {
         const manifestResponse = await fetch("./offline-assets.json?precache=" + VERSION, { cache: "no-store" });
         if (!manifestResponse.ok) throw new Error("Pacote offline indisponível");
         const manifest = await manifestResponse.json();
-        await precacheFresh(cache, collectManifestAssets(manifest));
+        await precacheFresh(cache, collectManifestAssets(manifest, false));
+        await preservePreparedBusinesses(cache, manifest);
         await cache.put("./offline-assets.json", new Response(JSON.stringify(manifest), {
           headers: { "Content-Type": "application/json" },
         }));
@@ -72,6 +73,27 @@ async function preservePreparedSnapshots(cache) {
     if (saved.every(Boolean)) {
       // A failure rejects install, leaving the active version and its caches intact.
       await precacheFresh(cache, OPTIONAL_OFFLINE_SNAPSHOTS);
+      return;
+    }
+  }
+}
+
+// A prepared older installation keeps its commercial coverage through updates.
+// Match source identities in its own manifest; hashed filenames change per build.
+async function preservePreparedBusinesses(cache, manifest) {
+  const previous = (await caches.keys()).filter(key =>
+    key.startsWith(CACHE_PREFIX) && key.endsWith("-static") && key !== STATIC_CACHE
+  );
+  for (const key of previous) {
+    const old = await caches.open(key);
+    const response = await old.match("./offline-assets.json", { ignoreVary: true });
+    if (!response) continue;
+    const entries = Object.entries(await response.json()).filter(([key, entry]) => isBusinessEntry(key, entry));
+    if (!entries.length) continue;
+    const saved = await Promise.all(entries.map(([, entry]) => old.match("./" + entry.file, { ignoreVary: true })));
+    if (saved.every(Boolean)) {
+      const core = new Set(collectManifestAssets(manifest, false));
+      await precacheFresh(cache, collectManifestAssets(manifest).filter(asset => !core.has(asset)));
       return;
     }
   }
@@ -125,7 +147,11 @@ function collectIndexAssets(html) {
   return [...assets];
 }
 
-function collectManifestAssets(manifest) {
+function isBusinessEntry(key, entry) {
+  return /^src\/data\/businesses\/part-.*\.json$/.test(entry?.src || key);
+}
+
+function collectManifestAssets(manifest, includeBusinesses = true) {
   const assets = new Set();
   const visited = new Set();
   const visit = entry => {
@@ -141,11 +167,13 @@ function collectManifestAssets(manifest) {
     for (const key of ["imports", "dynamicImports"]) {
       for (const imported of Array.isArray(entry[key]) ? entry[key] : []) {
         const target = manifest[imported];
-        if (target) visit(target);
+        if (target && (includeBusinesses || !isBusinessEntry(imported, target))) visit(target);
       }
     }
   };
-  for (const entry of Object.values(manifest)) visit(entry);
+  for (const [key, entry] of Object.entries(manifest)) {
+    if (includeBusinesses || !isBusinessEntry(key, entry)) visit(entry);
+  }
   return [...assets];
 }
 
@@ -251,16 +279,28 @@ async function fetchWithTimeout(request) {
   }
 }
 
+// A Pages fallback can be an HTML document with HTTP 200. Cache presence
+// alone is not proof that an offline JSON snapshot is usable.
+function isCachedJsonSnapshot(response) {
+  return Boolean(response?.ok && /(?:\/json|\+json)(?:;|$)/i.test(
+    (response.headers.get("Content-Type") || "").trim()
+  ));
+}
+
 async function offlineStatus() {
   try {
     const cache = await caches.open(STATIC_CACHE);
     const response = await cache.match("./offline-assets.json", { ignoreVary: true });
     if (!response) return { ready: false };
-    const assets = [...STATIC_SHELL, ...collectManifestAssets(await response.json())];
+    const manifest = await response.json();
+    const assets = [...STATIC_SHELL, ...collectManifestAssets(manifest)];
     const saved = await Promise.all(assets.map(asset => cache.match(asset, { ignoreVary: true })));
     const data = await caches.open(DATA_CACHE);
     const snapshots = await Promise.all(LOCAL_SNAPSHOTS.map(asset => data.match(asset, { ignoreVary: true })));
-    return { ready: saved.every(Boolean) && snapshots.every(Boolean), version: VERSION };
+    const coreAssets = collectManifestAssets(manifest, false);
+    const businessAssets = assets.filter(asset => !STATIC_SHELL.includes(asset) && !coreAssets.includes(asset));
+    const businessSaved = await Promise.all(businessAssets.map(asset => cache.match(asset, { ignoreVary: true })));
+    return { ready: saved.every(Boolean) && snapshots.every(isCachedJsonSnapshot), businessesReady: businessSaved.every(Boolean), version: VERSION };
   } catch {
     return { ready: false };
   }
@@ -286,7 +326,7 @@ async function restoreOfflinePackage() {
     }
     const data = await caches.open(DATA_CACHE);
     for (const asset of LOCAL_SNAPSHOTS) {
-      if (!await data.match(asset, { ignoreVary: true })) missing.push({ cache: data, asset });
+      if (!isCachedJsonSnapshot(await data.match(asset, { ignoreVary: true }))) missing.push({ cache: data, asset });
     }
     // Keep downloads bounded on phones. A missing old chunk may have been
     // removed by a deployment: never cache an HTML fallback as JavaScript.

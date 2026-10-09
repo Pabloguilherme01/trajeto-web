@@ -45,5 +45,8 @@ test("Pages: a prepared map and atlas remain available after a real worker updat
       return Promise.all(["aguas-lindas-offline-map.json", "aguas-lindas-city-atlas.json"].map(async name => Boolean(await cache.match(`/trajeto-web/data/${name}`))));
     });
     expect(snapshots).toEqual([true, true]);
+    await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
+    await page.getByRole("textbox", { name: "Buscar destino no mapa" }).fill("42.115.689/0001-40");
+    await expect(page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) })).toHaveCount(1);
   } finally { await unlink(file); }
 });

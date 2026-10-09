@@ -99,6 +99,9 @@ test("Pages: selects both endpoints and calculates every travel mode from the of
 
 test("Pages: imported companies reload offline and plan all modes from their actual catalog coordinates", async ({ page, context }) => {
   await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("ajuda");
+  await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();
+  await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible({ timeout: 65000 });
   await page.goto("mapa");
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });

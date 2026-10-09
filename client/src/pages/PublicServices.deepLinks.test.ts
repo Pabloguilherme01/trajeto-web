@@ -5,7 +5,8 @@ describe("PublicServices deep links", () => {
   const source = readFileSync(
     new URL("./PublicServices.tsx", import.meta.url),
     "utf8"
-  );
+  ) + readFileSync(new URL("../components/PublicServiceCard.tsx", import.meta.url), "utf8")
+    + readFileSync(new URL("../lib/publicServicesPresentation.ts", import.meta.url), "utf8");
 
   it("moves focus to a selected service or emergency strip", () => {
     expect(source).toContain('"service-" + selectedService.id');
@@ -51,7 +52,7 @@ describe("PublicServices deep links", () => {
 
   it("keeps essential actions visible even when offline navigation loses deep-link expansion", () => {
     expect(source).toContain(
-      "const expandedActions = selectedService?.id === service.id"
+      "expandedActions={selectedService?.id === service.id}"
     );
     expect(source).toContain("const emergencyDirect = contacts.some");
     expect(source).toContain("const showSecondaryContacts");

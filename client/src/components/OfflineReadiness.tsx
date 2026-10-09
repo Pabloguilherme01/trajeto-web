@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, HardDrive, RefreshCw, WifiOff } from "lucide-react";
 import { formatStorageBytes, getOfflineStorageStatus, requestOfflineStoragePersistence, type OfflineStorageStatus } from "@/lib/offlineStorageStatus";
 import {
-  getOfflineReadiness,
+  getOfflinePackageStatus,
   prepareOfflineAccess,
   type OfflinePreparation,
 } from "@/lib/pwa";
@@ -25,6 +25,7 @@ const preparationMessages: Record<
 
 export default function OfflineReadiness() {
   const [ready, setReady] = useState(false);
+  const [businessesReady, setBusinessesReady] = useState(false);
   const [checking, setChecking] = useState(true);
   const [preparing, setPreparing] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -33,7 +34,9 @@ export default function OfflineReadiness() {
   const check = async () => {
     setChecking(true);
     try {
-      setReady(await getOfflineReadiness());
+      const status = await getOfflinePackageStatus();
+      setReady(status.ready);
+      setBusinessesReady(status.businessesReady === true);
       setStorageStatus(await getOfflineStorageStatus());
     } catch {
       setReady(false);
@@ -48,6 +51,7 @@ export default function OfflineReadiness() {
     try {
       const result = await prepareOfflineAccess();
       setReady(result.ready);
+      setBusinessesReady(result.businessesReady === true || result.ready);
       if (!result.ready)
         setFeedback(preparationMessages[result.reason ?? "connection"]);
     } catch {
@@ -110,13 +114,16 @@ export default function OfflineReadiness() {
                     "Abra o site com internet ou toque em Preparar acesso offline."}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/70">
-            Busca, serviços públicos, contatos, postos, ruas locais e rotas salvas
+            Busca, empresas por nome ou CNPJ, serviços públicos, contatos, postos, ruas locais e rotas salvas
             ficam disponíveis após a preparação. O novo modo Offline também
             reaproveita automaticamente a rota salva exata e pode gerar estimativas
             locais para pontos já preparados. Mapas externos, trânsito atualizado e
             destinos ainda não preparados continuam dependendo de conexão; ligações
             precisam de rede telefônica.
           </p>
+          {!checking && <p className="mt-2 text-sm text-white/75" role="status">
+            {businessesReady ? "Catálogo de empresas disponível offline neste aparelho." : "Catálogo de empresas ainda não preparado para offline. Use Preparar acesso offline para salvar todas as empresas."}
+          </p>}
           <button
             type="button"
             disabled={checking || preparing}

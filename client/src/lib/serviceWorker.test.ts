@@ -237,6 +237,28 @@ it("includes the local street map in offline readiness and recovery", async () =
 });
 
 
+it("does not report a cached HTML fallback as an offline snapshot and repairs it", async () => {
+  const { worker, saved } = recoverableWorker([]);
+  const originalMatch = worker.cache.match.getMockImplementation()!;
+  const atlas = "./data/aguas-lindas-city-atlas.json";
+  worker.cache.match.mockImplementation(async (request: string | Request, options?: CacheQueryOptions) => {
+    if (request === atlas && !saved.has(atlas)) {
+      return new Response("<html>Not a JSON snapshot</html>", {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    return originalMatch(request, options);
+  });
+
+  expect(await worker.offlineStatus()).toMatchObject({ ready: false });
+  worker.fetch.mockResolvedValue(new Response("{}", { headers: { "Content-Type": "application/json" } }));
+  expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
+  expect(worker.fetch).toHaveBeenCalledTimes(1);
+  expect(worker.fetch.mock.calls[0][0].url).toContain("aguas-lindas-city-atlas.json");
+  expect(saved.has(atlas)).toBe(true);
+});
+
+
 it("serves installed snapshots immediately without a network request", async () => {
   const cached = new Response('{"version":"installed"}');
   const worker = loadWorker(cached);
@@ -302,4 +324,56 @@ it("does not replace installed HTML after a direct document fetch", async () => 
   expect(await response).toBe(cached);
   expect(worker.fetch).not.toHaveBeenCalled();
   expect(worker.cache.put).not.toHaveBeenCalled();
+});
+
+it("excludes only commercial data from installation while retaining shared dependencies", () => {
+  const worker = loadWorker();
+  const manifest = {
+    main: { file: "assets/main.js", dynamicImports: ["business", "stations"] },
+    business: { src: "src/data/businesses/part-00.json", file: "assets/business.js" },
+    stations: { file: "assets/stations.js", imports: ["shared"] },
+    shared: { file: "assets/shared.js" },
+  };
+  expect(Array.from(worker.collectManifestAssets(manifest, false))).toEqual([
+    "./assets/main.js", "./assets/stations.js", "./assets/shared.js",
+  ]);
+  expect(Array.from(worker.collectManifestAssets(manifest))).toContain("./assets/business.js");
+});
+
+it("keeps commercial readiness false until explicit preparation commits every part", async () => {
+  const { worker, saved } = recoverableWorker(["./assets/business.js"]);
+  const match = worker.cache.match.getMockImplementation()!;
+  worker.cache.match.mockImplementation(async (request: string | Request, options?: CacheQueryOptions) => {
+    if (request === "./offline-assets.json") return new Response(JSON.stringify({
+      main: { file: "assets/installed.js" },
+      business: { src: "src/data/businesses/part-00.json", file: "assets/business.js" },
+    }));
+    return match(request, options);
+  });
+  expect(await worker.offlineStatus()).toMatchObject({ ready: false, businessesReady: false });
+  worker.fetch.mockResolvedValue(new Response("business code", { headers: { "Content-Type": "text/javascript" } }));
+  expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true, businessesReady: true });
+  expect(saved.has("./assets/business.js")).toBe(true);
+});
+
+it("refreshes a previously prepared commercial catalog before retiring its old build", async () => {
+  const worker = loadWorker();
+  worker.caches.keys.mockResolvedValue(["trajeto-%2Ftrajeto-web%2F-v28-static"]);
+  worker.caches.open.mockResolvedValue({ match: vi.fn(async (asset: string) =>
+    asset === "./offline-assets.json" ? new Response(JSON.stringify({
+      business: { src: "src/data/businesses/part-00.json", file: "assets/old-business.js" },
+    })) : new Response("old business")
+  ) });
+  const addAll = vi.fn(async (_requests: Request[]) => undefined);
+  const manifest = {
+    main: { file: "assets/main.js" },
+    business: { src: "src/data/businesses/part-00.json", file: "assets/new-business.js" },
+  };
+  await worker.preservePreparedBusinesses({ addAll }, manifest);
+  expect(addAll.mock.calls.flatMap(call => call[0].map(request => new URL(request.url).pathname))).toEqual([
+    "/trajeto-web/assets/new-business.js",
+  ]);
+  addAll.mockRejectedValueOnce(new Error("offline"));
+  await expect(worker.preservePreparedBusinesses({ addAll }, manifest)).rejects.toThrow("offline");
+  expect(worker.caches.delete).not.toHaveBeenCalled();
 });
