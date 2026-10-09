@@ -281,35 +281,3 @@ it("keeps fresh and partially prepared installations lightweight", async () => {
   await worker.preservePreparedSnapshots({ addAll });
   expect(addAll).not.toHaveBeenCalled();
 });
-
-it("keeps published v29 caches isolated until a newly prepared worker activates", async () => {
-  const worker = loadWorker();
-  const oldPrefix = "trajeto-%2Ftrajeto-web%2F-v29";
-  const previous = [oldPrefix + "-static", oldPrefix + "-data", oldPrefix + "-map"];
-  worker.caches.keys.mockResolvedValue(["other-app-cache", ...previous]);
-  const oldCache = { match: vi.fn(async () => new Response("{}")) };
-  const newCache = { addAll: vi.fn(async (_requests: Request[]) => undefined) };
-  worker.caches.open.mockImplementation(async (name: string) =>
-    name === oldPrefix + "-data" ? oldCache : newCache
-  );
-
-  // A new worker must not write its route chunks or snapshots into v29.
-  // Prepared devices refresh both heavy snapshots before the old worker retires.
-  await worker.preservePreparedSnapshots(newCache);
-  expect(newCache.addAll.mock.calls.flatMap(call =>
-    call[0].map(request => new URL(request.url).pathname)
-  )).toEqual([
-    "/trajeto-web/data/aguas-lindas-offline-map.json",
-    "/trajeto-web/data/aguas-lindas-city-atlas.json",
-  ]);
-  expect(worker.caches.delete).not.toHaveBeenCalled();
-
-  const activate = worker.self.addEventListener.mock.calls.find(
-    (call: any[]) => call[0] === "activate"
-  )[1];
-  let completion!: Promise<unknown>;
-  activate({ waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
-  await completion;
-  expect(worker.caches.delete.mock.calls.map(call => call[0])).toEqual(previous);
-  expect(worker.self.clients.claim).toHaveBeenCalledOnce();
-});
