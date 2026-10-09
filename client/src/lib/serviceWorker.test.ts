@@ -281,3 +281,25 @@ it("keeps fresh and partially prepared installations lightweight", async () => {
   await worker.preservePreparedSnapshots({ addAll });
   expect(addAll).not.toHaveBeenCalled();
 });
+
+it("serves installed static assets without repeated network downloads", async () => {
+  const cached = new Response("installed code");
+  const worker = loadWorker(cached);
+  const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "fetch")[1];
+  let response!: Promise<Response>;
+  handler({ request: new Request("https://example.com/trajeto-web/assets/installed.js"), respondWith: (value: Promise<Response>) => { response = value; }, waitUntil: vi.fn() });
+  expect(await response).toBe(cached);
+  expect(worker.fetch).not.toHaveBeenCalled();
+});
+
+it("does not replace installed HTML after a direct document fetch", async () => {
+  const cached = new Response("installed document");
+  const worker = loadWorker(cached);
+  worker.fetch.mockResolvedValue(new Response("new incompatible document"));
+  const handler = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "fetch")[1];
+  let response!: Promise<Response>;
+  handler({ request: new Request("https://example.com/trajeto-web/index.html"), respondWith: (value: Promise<Response>) => { response = value; }, waitUntil: vi.fn() });
+  expect(await response).toBe(cached);
+  expect(worker.fetch).not.toHaveBeenCalled();
+  expect(worker.cache.put).not.toHaveBeenCalled();
+});
