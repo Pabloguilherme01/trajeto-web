@@ -9,10 +9,12 @@
 
 ## Fonte dos preços ANP
 
+- O sincronizador escolhe a planilha datada de revendas mais recente, ignorando os resumos agregados, e localiza o cabeçalho após as linhas de apresentação. Reconhece GO/GOIAS e restaura zeros iniciais de CNPJs numéricos do Excel.
 - O sincronizador escolhe a planilha datada mais recente e extrai seu período do próprio nome de arquivo. Um título de outra semana na página não será usado como período.
 - Somente linhas explicitamente identificadas como Águas Lindas de Goiás/GO podem entrar na base municipal. Colunas ausentes não autorizam importar registros nacionais.
 - Arquivos sem período verificável são rejeitados antes de alterar o snapshot. Não foram inventados preços nem atualizadas datas de coleta sem consulta válida.
-- Regressões do seletor e do filtro rodam no CI.
+- A consulta real de 09/10/2026 recuperou 46 registros de preços de 21 estabelecimentos de Águas Lindas de Goiás, da semana de 27/09 a 03/10/2026. O snapshot inclui fonte, período e datas reais de coleta; não são preços em tempo real.
+- Nove regressões do seletor, filtro e formato da planilha rodam no CI.
 
 ## Limites deste pacote
 

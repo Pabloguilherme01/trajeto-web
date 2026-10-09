@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import * as XLSX from "xlsx";
-import { selectWeeklyPriceSource, isAguasLindasPriceRow } from "./anp-price-source.mjs";
+import { selectWeeklyPriceSource, isAguasLindasPriceRow, findWeeklyPriceHeader, normalizeAnpCnpj } from "./anp-price-source.mjs";
 
 const PAGE_URL = "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/levantamento-de-precos-de-combustiveis-ultimas-semanas-pesquisadas";
 const OUTPUT = new URL("../client/public/data/aguas-lindas-anp-precos.json", import.meta.url);
@@ -26,7 +26,7 @@ function unitFor(productKey) {
 }
 
 function parseNumber(value) {
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "number") return Number.isFinite(value) && value > 0 ? value : null;
   const text = String(value ?? "").trim().replace(/R\$\s*/gi, "").replace(/\./g, "").replace(",", ".");
   const number = Number(text);
   return Number.isFinite(number) && number > 0 ? number : null;
@@ -61,9 +61,11 @@ const workbook = XLSX.read(new Uint8Array(await workbookResponse.arrayBuffer()),
 const output = [];
 for (const sheetName of workbook.SheetNames) {
   const sheet = workbook.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null, raw: true });
+  const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: true });
+  const headerRow = findWeeklyPriceHeader(matrix);
+  const rows = XLSX.utils.sheet_to_json(sheet, { range: headerRow, defval: null, raw: true });
   for (const row of rows) {
-    const cnpj = String(pick(row, ["cnpj"]) ?? "").replace(/\D/g, "");
+    const cnpj = normalizeAnpCnpj(pick(row, ["cnpj"]));
     const uf = String(pick(row, ["uf", "estado"]) ?? "").trim().toUpperCase();
     const municipality = String(pick(row, ["municipio", "município", "municipio do posto"]) ?? "").trim();
     if (cnpj.length !== 14 || !isAguasLindasPriceRow(uf, municipality)) continue;
@@ -76,11 +78,11 @@ for (const sheetName of workbook.SheetNames) {
     const collectionDate = dateToIso(pick(row, ["data da coleta", "data coleta", "data coleta preço"]));
     output.push({
       cnpj,
-      razaoSocial: String(pick(row, ["razao social", "razão social"]) ?? "").trim() || null,
+      razaoSocial: String(pick(row, ["razao social", "razão social", "razão"]) ?? "").trim() || null,
       endereco: String(pick(row, ["endereco", "endereço", "logradouro"]) ?? "").trim() || null,
       bairro: String(pick(row, ["bairro"]) ?? "").trim() || null,
       municipio: municipality || null,
-      uf: uf || null,
+      uf: "GO",
       produto: product,
       productKey,
       salePrice: price,
