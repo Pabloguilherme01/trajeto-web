@@ -137,6 +137,14 @@ test("Pages: ANP identity enrichment survives formatted local CNPJ and fuel filt
 });
 
 test("Pages: price ordering is disabled when the ANP price snapshot is empty", async ({ page }) => {
+  await page.route("**/data/aguas-lindas-anp-precos.json*", route => route.fulfill({
+    contentType: "application/json",
+    body: JSON.stringify({
+      source: "ANP", retrievedAt: "2026-10-09T00:00:00.000Z",
+      referencePeriod: "27/09/2026 a 03/10/2026", totalRows: 0, totalStations: 0,
+      data: [], warning: "Nenhum registro municipal reconhecido nesta coleta.",
+    }),
+  }));
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
   const sort = page.getByRole("combobox", { name: "Ordenar diretório de postos" });
