@@ -26,6 +26,12 @@ for (const width of [320, 360, 390]) {
       await expect(panel).not.toHaveAttribute("open");
       expect((await panel.boundingBox())!.height).toBeLessThan(85);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      const emergency = page.getByRole("link", { name: "Bombeiros 193" });
+      await expect(emergency).toBeVisible();
+      expect(await emergency.evaluate(element => {
+        const label = element.querySelector("span")!;
+        return label.scrollWidth <= label.clientWidth && getComputedStyle(label).whiteSpace === "nowrap";
+      })).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`home-${width}-${large}.png`) });
     });
   }

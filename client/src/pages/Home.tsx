@@ -246,9 +246,9 @@ export default function Home() {
               { label: "SAMU", number: "192", href: "tel:192" },
               { label: "Bombeiros", number: "193", href: "tel:193" },
             ].map(item => (
-              <a key={item.label} href={item.href} className="inline-flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-border/10 bg-background px-1.5 py-2 text-center text-xs font-bold text-foreground/75 transition hover:border-warning/25 active:scale-[.98]">
+              <a key={item.label} href={item.href} className="inline-flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-border/10 bg-background px-0.5 py-2 text-center text-xs font-bold text-foreground/75 transition hover:border-warning/25 active:scale-[.98]">
                 <Phone className="size-3.5 text-warning" />
-                <span className="max-w-full break-words">{item.label}</span>
+                <span className="max-w-full whitespace-nowrap">{item.label}</span>
                 <span className="text-foreground/60">{item.number}</span>
               </a>
             ))}
