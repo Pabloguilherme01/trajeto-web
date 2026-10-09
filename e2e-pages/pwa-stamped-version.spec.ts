@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 test("Pages: installed worker revision follows route, data, icon and manifest content", async ({ page }) => {
   const output = path.resolve("dist/public");
   const workerSource = readFileSync(path.resolve("client/public/sw.js"), "utf8");
-  const baseVersion = workerSource.match(/CACHE_PREFIX \\+ "(v\\d+)"/)?.[1];
+  const baseVersion = workerSource.match(/CACHE_PREFIX \+ "(v\d+)"/)?.[1];
   expect(baseVersion).toBeTruthy();
 
   const hash = createHash("sha256")
