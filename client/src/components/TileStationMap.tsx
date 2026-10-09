@@ -76,7 +76,9 @@ export default function TileStationMap({
   routePoints = EMPTY_ROUTE_POINTS,
   onPlanDestination,
   travelMode = "driving",
+  showDestinationPicker = true,
 }: {
+  showDestinationPicker?: boolean;
   stations: StationMapItem[];
   userCoords?: { lat: number; lng: number } | null;
   heightClassName?: string;
@@ -226,8 +228,14 @@ export default function TileStationMap({
   }, [userCoords?.lat, userCoords?.lng, following]);
 
   useEffect(() => {
-    if (!selectedId || !drawableByKey.has(selectedId))
-      setSelectedId(drawable[0] ? stationKey(drawable[0]) : null);
+    if (!selectedId || !drawableByKey.has(selectedId)) {
+      const next = drawable[0];
+      setSelectedId(next ? stationKey(next) : null);
+      if (next) {
+        setFollowing(false);
+        setCenter({ lat: next.lat, lng: next.lng });
+      }
+    }
   }, [drawable, drawableByKey, selectedId]);
 
   useEffect(() => {
@@ -351,14 +359,14 @@ export default function TileStationMap({
     }
     return result;
   }, [drawable, drawableWorld, clusterScale]);
-  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
+  const selected = (selectedId ? drawableByKey.get(selectedId) : null) ?? drawable[0] ?? null;
   const markerGroups = useMemo(
     () =>
       mapMarkerGroups(
         drawable,
         item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
         item =>
-          stationKey(item) === selectedId ||
+          stationKey(item) === (selected ? stationKey(selected) : null) ||
           ["origin", "destination"].includes(item.id ?? "")
       ),
     [drawable, markerClusterPixels, selectedId, clusterZoom]
@@ -738,7 +746,7 @@ export default function TileStationMap({
                 setFollowing(false);
                 setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
-              }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-background bg-primary/10 text-sm font-black text-primary shadow-md ring-4 ring-primary/10" style={{ left, top }}>{group.items.length}</button>;
+              }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-background bg-primary text-sm font-black text-primary-foreground shadow-md" style={{ left, top }}>{group.items.length}</button>;
             })}
             {markerGroups.singles.map(station => {
               const position = markerPositions.get(stationKey(station));
@@ -864,7 +872,7 @@ export default function TileStationMap({
 
         {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"><Layers className="size-4" /></button>}
 
-        <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
+        {showDestinationPicker && <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}
             items={pickerItems}
             onSelect={id => {
@@ -876,7 +884,7 @@ export default function TileStationMap({
               setCenter({ lat: station.lat, lng: station.lng });
               setZoom(value => Math.max(13, value));
             }} />
-        </div>
+        </div>}
       </div>
 
       <div className="relative min-w-0 border-t border-border bg-card p-3.5 text-card-foreground sm:p-4">

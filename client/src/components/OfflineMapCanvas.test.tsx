@@ -460,3 +460,14 @@ it("remembers the chosen map theme without saving location", async () => {
   render(<Canvas {...props} />);
   expect(screen.getByRole("button", { name: "Usar mapa escuro" })).toBeTruthy();
 });
+
+it("keeps place labels off the dense map until a place is selected, even when zoomed", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const markers = [{ id: "clinic", name: "Unidade de saúde", label: "S", lat: -15.75, lng: -48.29 }];
+  const view = render(<Canvas markers={markers} zoom={3} onZoom={() => {}} />);
+  const marker = screen.getByRole("button", { name: "Selecionar Unidade de saúde" });
+  expect(marker.querySelector('[title="Unidade de saúde"]')).toBeNull();
+  view.rerender(<Canvas markers={markers} selectedMarkerId="clinic" zoom={3} onZoom={() => {}} />);
+  expect(marker.querySelector('[title="Unidade de saúde"]')).toBeTruthy();
+});

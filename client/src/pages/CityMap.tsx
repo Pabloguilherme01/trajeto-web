@@ -266,7 +266,7 @@ export default function CityMap() {
       </div>
     </div>
   );
-  const fallback = markers.length ? <OfflineStationMap stations={markers} itemLabel="destino" onPlanDestination={item => plan(plannerDestinationFromMapItem(item))} /> : emptyFallback;
+  const fallback = markers.length ? <OfflineStationMap stations={markers} showDestinationPicker={false} itemLabel="destino" onPlanDestination={item => plan(plannerDestinationFromMapItem(item))} /> : emptyFallback;
   return (
     <main className="visual-shell mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-foreground sm:px-6">
       <p className="text-xs font-black uppercase tracking-[.16em] text-primary">
@@ -389,6 +389,7 @@ export default function CityMap() {
         {online && markers.length ? (
           <TileStationMap
             stations={markers}
+            showDestinationPicker={false}
             selectionLabel="Escolher destino no mapa"
             onPlanDestination={item => plan(plannerDestinationFromMapItem(item))}
             fallback={fallback}

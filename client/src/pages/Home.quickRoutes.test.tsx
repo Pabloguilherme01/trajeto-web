@@ -10,10 +10,10 @@ vi.mock("@/components/TripReadinessCard", () => ({ default: () => null }));
 vi.mock("@/components/DailyModeSelector", () => ({ default: () => null }));
 Object.assign(globalThis, { React });
 afterEach(() => { cleanup(); localStorage.clear(); navigate.mockClear(); });
-it("puts the quick form before service cards and starts calculation in one submit", () => {
+it("prioritizes civic shortcuts and still starts route calculation in one submit", () => {
   render(<Home />);
   const origin = screen.getByPlaceholderText("De onde você sai");
-  expect(origin.compareDocumentPosition(within(screen.getByRole("region", { name: "Ações principais" })).getByRole("button", { name: "Postos" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(origin.compareDocumentPosition(within(screen.getByRole("region", { name: "Ações principais" })).getByRole("button", { name: "Postos" })) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
   fireEvent.change(origin, { target: { value: "Prefeitura de Águas Lindas de Goiás" } });
   fireEvent.change(screen.getByPlaceholderText("Para onde você vai"), { target: { value: "UPA Mansões Odisseia" } });
   fireEvent.click(screen.getByRole("button", { name: "Ir até aqui" }));

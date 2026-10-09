@@ -648,3 +648,13 @@ it("offers a list for overlapping places and selects each destination", () => {
   expect(select).toHaveBeenCalledWith(expect.objectContaining({ id: "c" }));
   expect(screen.queryByRole("region", { name: "Lugares do grupo selecionado" })).toBeNull();
 });
+
+it("preserves distance measurement and recenters when a filtered selection disappears", () => {
+  const first = { id: "upa", name: "UPA", address: "Rua A", lat: -15.75, lng: -48.28 };
+  const second = { id: "heal", name: "HEAL", address: "Rua B", lat: -15.76, lng: -48.29 };
+  const view = render(<TileStationMap stations={[first]} showDestinationPicker={false} />);
+  fireEvent.click(screen.getByRole("button", { name: "Medir a partir daqui" }));
+  view.rerender(<TileStationMap stations={[second, { ...second, id: "alias", name: "Hospital estadual" }]} showDestinationPicker={false} />);
+  expect(screen.getByText(/em linha reta/)).toBeTruthy();
+  expect(parseFloat(screen.getByRole("button", { name: "Abrir HEAL" }).style.left)).toBeCloseTo(160);
+});

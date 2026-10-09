@@ -11,7 +11,10 @@ test("mobile home calculates directly and exposes ready trips without overflow",
   await page.goto("");
   const origin = page.getByPlaceholder("De onde você sai");
   const services = page.getByRole("region", { name: "Ações principais" }).getByRole("button", { name: "Serviços", exact: true });
-  expect((await origin.boundingBox())!.y).toBeLessThan((await services.boundingBox())!.y);
+  await expect(origin).toBeHidden();
+  await page.getByText("Planejar uma rota", { exact: true }).click();
+  await expect(origin).toBeVisible();
+  expect((await services.boundingBox())!.y).toBeLessThan((await origin.boundingBox())!.y);
   const shortcuts = page.locator("details").filter({ has: page.locator("summary", { hasText: /^Rotas prontas$/ }) });
   await shortcuts.locator("summary").first().click();
   await expect(shortcuts.locator("article")).toHaveCount(6);

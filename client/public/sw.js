@@ -54,10 +54,28 @@ self.addEventListener("install", event => {
         // the ~1.28 MB map + atlas package. Heavy snapshots are cached on first
         // use or by RESTORE_OFFLINE when the user explicitly prepares offline access.
         await precacheFresh(cache, CORE_SNAPSHOTS);
+        await preservePreparedSnapshots(cache);
       })
       .then(() => caches.open(MAP_CACHE))
   );
 });
+
+// Updating a prepared device must not discard its offline map when old caches retire.
+// Refresh into this build; never label an older snapshot as newly prepared.
+async function preservePreparedSnapshots(cache) {
+  const previous = (await caches.keys()).filter(key =>
+    key.startsWith(CACHE_PREFIX) && key.endsWith("-data") && key !== DATA_CACHE
+  );
+  for (const key of previous) {
+    const old = await caches.open(key);
+    const saved = await Promise.all(OPTIONAL_OFFLINE_SNAPSHOTS.map(path => old.match(path)));
+    if (saved.every(Boolean)) {
+      // A failure rejects install, leaving the active version and its caches intact.
+      await precacheFresh(cache, OPTIONAL_OFFLINE_SNAPSHOTS);
+      return;
+    }
+  }
+}
 
 async function precacheFresh(cache, assets) {
   // Avoid downloading every route/data chunk at once while a phone is opening

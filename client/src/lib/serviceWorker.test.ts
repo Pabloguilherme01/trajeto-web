@@ -252,3 +252,32 @@ it("uses the installed snapshot for query URLs instead of mixing live data", asy
   expect(await (await response).text()).toContain("installed");
   expect(worker.fetch).not.toHaveBeenCalled();
 });
+
+it("refreshes previously prepared map snapshots before an update retires old caches", async () => {
+  const worker = loadWorker();
+  const oldKey = "trajeto-%2Ftrajeto-web%2F-v28-previous-data";
+  worker.caches.keys.mockResolvedValue(["other-app-data", oldKey]);
+  worker.caches.open.mockResolvedValue({ match: vi.fn(async () => new Response("old snapshot")) });
+  const addAll = vi.fn(async (_requests: Request[]) => undefined);
+  await worker.preservePreparedSnapshots({ addAll });
+  expect(worker.caches.open).toHaveBeenCalledTimes(1);
+  expect(worker.caches.open).toHaveBeenCalledWith(oldKey);
+  expect(addAll.mock.calls.flatMap(call => call[0].map(request => new URL(request.url).pathname))).toEqual([
+    "/trajeto-web/data/aguas-lindas-offline-map.json", "/trajeto-web/data/aguas-lindas-city-atlas.json",
+  ]);
+  expect(worker.caches.delete).not.toHaveBeenCalled();
+  addAll.mockRejectedValueOnce(new Error("network"));
+  await expect(worker.preservePreparedSnapshots({ addAll })).rejects.toThrow("network");
+  expect(worker.caches.delete).not.toHaveBeenCalled();
+});
+
+it("keeps fresh and partially prepared installations lightweight", async () => {
+  const worker = loadWorker();
+  const addAll = vi.fn();
+  await worker.preservePreparedSnapshots({ addAll });
+  expect(addAll).not.toHaveBeenCalled();
+  worker.caches.keys.mockResolvedValue(["trajeto-%2Ftrajeto-web%2F-v28-previous-data"]);
+  worker.caches.open.mockResolvedValue({ match: vi.fn(async (path: string) => path.includes("atlas") ? undefined : new Response("map")) });
+  await worker.preservePreparedSnapshots({ addAll });
+  expect(addAll).not.toHaveBeenCalled();
+});

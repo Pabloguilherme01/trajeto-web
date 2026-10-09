@@ -602,7 +602,7 @@ export default function OfflineMapCanvas({
               const width = text.length * 6.5 + 12;
               if (
                 labels.has(road.name) ||
-                labels.size >= (showAllStreetNames ? 140 : 60) ||
+                labels.size >= (showAllStreetNames ? 40 : 18) ||
                 x < width / 2 + 8 ||
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
@@ -701,7 +701,7 @@ export default function OfflineMapCanvas({
               {(marker.id === "origin" ||
                 marker.id === "destination" ||
                 marker.id === "live-position" ||
-                selectedMarkerId === marker.id || zoom >= 2) && (
+                selectedMarkerId === marker.id) && (
                 <span
                   className={
                     "pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
