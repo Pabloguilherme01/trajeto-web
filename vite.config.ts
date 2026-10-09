@@ -47,7 +47,7 @@ export default defineConfig({
         hash.update(asset).update(readFileSync(path.join(output, asset)));
       }
       const revision = hash.digest("hex").slice(0, 12);
-      const stamped = source.replace(/CACHE_PREFIX \\+ "(v\\d+)"/, (_match, version) => `CACHE_PREFIX + "${version}-${revision}"`);
+      const stamped = source.replace(/CACHE_PREFIX \+ "(v\d+)"/, (_match, version) => `CACHE_PREFIX + "${version}-${revision}"`);
       if (stamped === source) throw new Error("Service worker cache revision marker was not found");
       writeFileSync(worker, stamped);
     },
