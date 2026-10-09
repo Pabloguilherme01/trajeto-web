@@ -48,13 +48,15 @@ export default function DashboardLayout({
 }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_WIDTH;
-    const saved = Number.parseInt(window.localStorage.getItem(SIDEBAR_WIDTH_KEY) ?? "", 10);
-    return Number.isFinite(saved) ? Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, saved)) : DEFAULT_WIDTH;
+    try {
+      const saved = Number.parseInt(window.localStorage.getItem(SIDEBAR_WIDTH_KEY) ?? "", 10);
+      return Number.isFinite(saved) ? Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, saved)) : DEFAULT_WIDTH;
+    } catch { return DEFAULT_WIDTH; }
   });
   const { loading, user } = useAuth();
 
   useEffect(() => {
-    if (typeof window !== "undefined") window.localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
+    try { window.localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString()); } catch { /* Keep navigation usable without persistence. */ }
   }, [sidebarWidth]);
 
   if (loading) {

@@ -44,8 +44,10 @@ function AuthenticatedReturnHandler() {
   const [location, setLocation] = useLocation();
   useEffect(() => {
     if (loading || !isAuthenticated) return;
-    const returnPath = consumeStationReturn(sessionStorage, location);
-    if (returnPath) setLocation(returnPath);
+    try {
+      const returnPath = consumeStationReturn(sessionStorage, location);
+      if (returnPath) setLocation(returnPath);
+    } catch { /* Storage restrictions must not interrupt authenticated navigation. */ }
   }, [isAuthenticated, loading, location, setLocation]);
   return null;
 }
