@@ -177,8 +177,17 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request, STATIC_CACHE, event));
+  event.respondWith(installedStaticAsset(request));
 });
+
+async function installedStaticAsset(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  // The build revision changes whenever bundled content changes. Revalidating
+  // saved assets wastes mobile data and can replace the pinned installed HTML.
+  const cached = await cache.match(request, { ignoreVary: true });
+  if (cached) return cached;
+  return networkFirst(request, STATIC_CACHE);
+}
 
 async function appNavigation(request) {
   const cache = await caches.open(STATIC_CACHE);
