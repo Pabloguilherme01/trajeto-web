@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import * as XLSX from "xlsx";
+import { selectWeeklyPriceSource, isAguasLindasPriceRow, findWeeklyPriceHeader, normalizeAnpCnpj } from "./anp-price-source.mjs";
 
 const PAGE_URL = "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/levantamento-de-precos-de-combustiveis-ultimas-semanas-pesquisadas";
 const OUTPUT = new URL("../client/public/data/aguas-lindas-anp-precos.json", import.meta.url);
@@ -25,7 +26,7 @@ function unitFor(productKey) {
 }
 
 function parseNumber(value) {
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "number") return Number.isFinite(value) && value > 0 ? value : null;
   const text = String(value ?? "").trim().replace(/R\$\s*/gi, "").replace(/\./g, "").replace(",", ".");
   const number = Number(text);
   return Number.isFinite(number) && number > 0 ? number : null;
@@ -41,18 +42,6 @@ function pick(row, aliases) {
   return key ? row[key] : null;
 }
 
-function extractPeriod(html) {
-  const match = String(html).match(/(\d{2}\/\d{2}\/\d{4})\s+a\s+(\d{2}\/\d{2}\/\d{4})/);
-  return match ? match[1] + " a " + match[2] : "última semana publicada";
-}
-
-function latestSpreadsheetUrl(html) {
-  const hrefs = [...String(html).matchAll(/href=["']([^"']+)["']/gi)].map(match => match[1].replace(/&amp;/g, "&"));
-  const candidates = hrefs.filter(href => /\.(xlsx?|xlsm)(?:[/?#]|$)/i.test(href) && /posto|revendedor|preco/i.test(href));
-  if (!candidates.length) throw new Error("Planilha semanal da ANP não localizada na página.");
-  return new URL(candidates[0], PAGE_URL).href;
-}
-
 function dateToIso(value) {
   if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
   const text = String(value ?? "").trim();
@@ -63,8 +52,7 @@ function dateToIso(value) {
 const pageResponse = await fetch(PAGE_URL, { headers: { "user-agent": "Trajeto-ANP-Price-Sync/1.0", accept: "text/html" } });
 if (!pageResponse.ok) throw new Error("ANP preços HTTP " + pageResponse.status);
 const html = await pageResponse.text();
-const referencePeriod = extractPeriod(html);
-const sourceUrl = latestSpreadsheetUrl(html);
+const { referencePeriod, sourceUrl } = selectWeeklyPriceSource(html, PAGE_URL);
 
 const workbookResponse = await fetch(sourceUrl, { headers: { "user-agent": "Trajeto-ANP-Price-Sync/1.0", accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" } });
 if (!workbookResponse.ok) throw new Error("Planilha ANP HTTP " + workbookResponse.status);
@@ -73,13 +61,14 @@ const workbook = XLSX.read(new Uint8Array(await workbookResponse.arrayBuffer()),
 const output = [];
 for (const sheetName of workbook.SheetNames) {
   const sheet = workbook.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null, raw: true });
+  const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: true });
+  const headerRow = findWeeklyPriceHeader(matrix);
+  const rows = XLSX.utils.sheet_to_json(sheet, { range: headerRow, defval: null, raw: true });
   for (const row of rows) {
-    const cnpj = String(pick(row, ["cnpj"]) ?? "").replace(/\D/g, "");
+    const cnpj = normalizeAnpCnpj(pick(row, ["cnpj"]));
     const uf = String(pick(row, ["uf", "estado"]) ?? "").trim().toUpperCase();
     const municipality = String(pick(row, ["municipio", "município", "municipio do posto"]) ?? "").trim();
-    const municipalityNorm = norm(municipality);
-    if (cnpj.length !== 14 || (uf && uf !== "GO") || (municipalityNorm && !municipalityNorm.includes("aguas lindas de goias"))) continue;
+    if (cnpj.length !== 14 || !isAguasLindasPriceRow(uf, municipality)) continue;
 
     const product = String(pick(row, ["produto", "combustivel", "combustível"]) ?? "").trim();
     const price = parseNumber(pick(row, ["preco de revenda", "preco revenda", "preço de revenda", "valor de venda", "preco"]));
@@ -89,11 +78,11 @@ for (const sheetName of workbook.SheetNames) {
     const collectionDate = dateToIso(pick(row, ["data da coleta", "data coleta", "data coleta preço"]));
     output.push({
       cnpj,
-      razaoSocial: String(pick(row, ["razao social", "razão social"]) ?? "").trim() || null,
+      razaoSocial: String(pick(row, ["razao social", "razão social", "razão"]) ?? "").trim() || null,
       endereco: String(pick(row, ["endereco", "endereço", "logradouro"]) ?? "").trim() || null,
       bairro: String(pick(row, ["bairro"]) ?? "").trim() || null,
       municipio: municipality || null,
-      uf: uf || null,
+      uf: "GO",
       produto: product,
       productKey,
       salePrice: price,

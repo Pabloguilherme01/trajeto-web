@@ -45,6 +45,9 @@ jobs:
       - name: Typecheck
         run: npm run check
 
+      - name: ANP source validation tests
+        run: npm run test:anp-source
+
       - name: Server tests
         run: npm run test:server
 

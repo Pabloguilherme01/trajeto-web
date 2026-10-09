@@ -1,5 +1,5 @@
 import { openIndexedDatabase } from "./indexedDbAccess";
-import { PRIVATE_LOCATION_LABEL, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
+import { isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
 const STORE = "routes";
@@ -96,27 +96,76 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-async function withStore<T>(
+const TRANSACTION_TIMEOUT_MS = 5000;
+
+async function withStore<T, R = T>(
   mode: IDBTransactionMode,
   operation: (store: IDBObjectStore) => IDBRequest<T>,
-): Promise<T> {
+  transform: (value: T, store: IDBObjectStore) => R = value => value as unknown as R,
+): Promise<R> {
   const db = await openDb();
   try {
-    return await new Promise<T>((resolve, reject) => {
-      const tx = db.transaction(STORE, mode);
-      const request = operation(tx.objectStore(STORE));
-      let result: T;
-      // Success of one request does not mean its transaction was committed.
-      // Preserve callbacks supplied by a batch operation (such as pruning).
-      request.addEventListener("success", () => { result = request.result; });
-      tx.oncomplete = () => resolve(result);
-      request.onerror = () => reject(request.error ?? new Error("Operação offline falhou."));
-      tx.onerror = () => reject(tx.error ?? new Error("Transação offline falhou."));
-      tx.onabort = () => reject(tx.error ?? new Error("Transação offline foi interrompida."));
+    return await new Promise<R>((resolve, reject) => {
+      let tx: IDBTransaction | undefined;
+      let finished = false;
+      let result: R;
+      const fail = (error: unknown, abort = false) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        if (abort) {
+          try { tx?.abort(); } catch { /* Already completed or aborted. */ }
+        }
+        reject(error);
+      };
+      const timer = setTimeout(() => fail(
+        new Error("O armazenamento das rotas não respondeu. Tente novamente."), true,
+      ), TRANSACTION_TIMEOUT_MS);
+      try {
+        tx = db.transaction(STORE, mode);
+        tx.oncomplete = () => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timer);
+          resolve(result);
+        };
+        tx.onerror = () => fail(tx?.error ?? new Error("Transação offline falhou."), true);
+        tx.onabort = () => fail(tx?.error ?? new Error("Transação offline foi interrompida."));
+        const store = tx.objectStore(STORE);
+        const request = operation(store);
+        request.addEventListener("success", () => {
+          if (finished) return;
+          try { result = transform(request.result, store); }
+          catch (error) { fail(error, true); }
+        });
+        request.onerror = () => fail(request.error ?? new Error("Operação offline falhou."), true);
+      } catch (error) {
+        fail(error, true);
+      }
     });
   } finally {
     db.close();
   }
+}
+
+function migrateRoutes(candidates: unknown[], store: IDBObjectStore): OfflineRoute[] {
+  const validById = new Map<string, OfflineRoute>();
+  for (const candidate of candidates) {
+    if (isValidRoute(candidate)) {
+      const safeRoute = sanitizeOfflineRoute(candidate);
+      const existing = validById.get(safeRoute.id);
+      if (!existing || Date.parse(safeRoute.savedAt) > Date.parse(existing.savedAt)) {
+        validById.set(safeRoute.id, safeRoute);
+      }
+      if (safeRoute.id !== candidate.id || safeRoute.origin !== candidate.origin) {
+        store.delete(candidate.id);
+      }
+    } else if (isRecord(candidate) && typeof candidate.id === "string") {
+      store.delete(candidate.id);
+    }
+  }
+  for (const safeRoute of validById.values()) store.put(safeRoute);
+  return [...validById.values()].sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
 }
 
 export async function saveOfflineRoute(route: OfflineRoute) {
@@ -128,64 +177,22 @@ export async function saveOfflineRoute(route: OfflineRoute) {
     throw new Error("Não foi possível salvar: o armazenamento offline não está disponível neste navegador.");
   }
 
-  await withStore("readwrite", store => store.put(safeRoute));
-  const routes = await listOfflineRoutes();
-  if (routes.length > MAX_SAVED_ROUTES) {
-    const excessIds = routes.slice(MAX_SAVED_ROUTES).map(item => item.id);
-    await withStore("readwrite", store => {
-      const request = store.getAllKeys();
-      request.onsuccess = () => {
-        for (const key of request.result) {
-          if (excessIds.includes(String(key))) store.delete(key);
-        }
-      };
-      return request;
-    });
-  }
+  // Migration, replacement and pruning commit together. Concurrent saves cannot
+  // exceed the limit, and a failed write cannot delete previously saved routes.
+  await withStore("readwrite", store => store.getAll(), (candidates, store) => {
+    const routes = migrateRoutes(candidates, store).filter(item => item.id !== safeRoute.id);
+    store.put(safeRoute);
+    routes.push(safeRoute);
+    routes.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
+    for (const excess of routes.slice(MAX_SAVED_ROUTES)) store.delete(excess.id);
+  });
   notifyOfflineRouteChange();
   return true;
 }
 
 export async function listOfflineRoutes(): Promise<OfflineRoute[]> {
   if (!hasIndexedDb()) return [];
-
-  const db = await openDb();
-  try {
-    return await new Promise<OfflineRoute[]>((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      const store = tx.objectStore(STORE);
-      const request = store.getAll();
-      const validById = new Map<string, OfflineRoute>();
-
-      request.onsuccess = () => {
-        for (const candidate of request.result as unknown[]) {
-          if (isValidRoute(candidate)) {
-            const safeRoute = sanitizeOfflineRoute(candidate);
-            const existing = validById.get(safeRoute.id);
-            if (!existing || Date.parse(safeRoute.savedAt) > Date.parse(existing.savedAt)) {
-              validById.set(safeRoute.id, safeRoute);
-            }
-            if (safeRoute.id !== candidate.id || safeRoute.origin !== candidate.origin) {
-              store.delete(candidate.id);
-            }
-          } else if (isRecord(candidate) && typeof candidate.id === "string") {
-            store.delete(candidate.id);
-          }
-        }
-
-        for (const safeRoute of validById.values()) store.put(safeRoute);
-      };
-
-      tx.oncomplete = () => resolve(
-        [...validById.values()].sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt)),
-      );
-      request.onerror = () => reject(request.error ?? new Error("Não foi possível ler as rotas salvas."));
-      tx.onerror = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
-      tx.onabort = () => reject(tx.error ?? new Error("Não foi possível validar as rotas salvas."));
-    });
-  } finally {
-    db.close();
-  }
+  return withStore("readwrite", store => store.getAll(), migrateRoutes);
 }
 
 export async function removeOfflineRoute(id: string) {
@@ -204,12 +211,9 @@ export async function countOfflineRoutes() {
 export async function clearOfflineRoutes() {
   if (!hasIndexedDb()) return 0;
 
-  const keys = await withStore<IDBValidKey[]>("readwrite", store => {
-    const request = store.getAllKeys();
-    request.addEventListener("success", () => {
-      store.clear();
-    });
-    return request;
+  const keys = await withStore("readwrite", store => store.getAllKeys(), (keys, store) => {
+    store.clear();
+    return keys;
   });
   if (keys.length > 0) notifyOfflineRouteChange();
   return keys.length;
