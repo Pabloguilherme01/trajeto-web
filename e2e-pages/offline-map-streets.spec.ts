@@ -26,9 +26,7 @@ test("Pages: city streets and controls survive an offline reload without externa
       page.evaluate(() => Boolean(navigator.serviceWorker.controller))
     )
     .toBe(true);
-  // First use warms the optional street/map snapshots. Switching to airplane
-  // mode before this has finished is an installation race, not an offline reload.
-  await expect(page.getByText(/Ruas locais disponíveis/)).toBeVisible({ timeout: 15000 });
+  // Online uses the tile map; confirm the fallback snapshots committed before airplane mode.
   await waitForMapPackage(page);
   await context.setOffline(true);
   const external: string[] = [];
