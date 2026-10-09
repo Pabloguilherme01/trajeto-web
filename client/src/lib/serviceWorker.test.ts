@@ -237,6 +237,28 @@ it("includes the local street map in offline readiness and recovery", async () =
 });
 
 
+it("does not report a cached HTML fallback as an offline snapshot and repairs it", async () => {
+  const { worker, saved } = recoverableWorker([]);
+  const originalMatch = worker.cache.match.getMockImplementation()!;
+  const atlas = "./data/aguas-lindas-city-atlas.json";
+  worker.cache.match.mockImplementation(async (request: string | Request, options?: CacheQueryOptions) => {
+    if (request === atlas && !saved.has(atlas)) {
+      return new Response("<html>Not a JSON snapshot</html>", {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    return originalMatch(request, options);
+  });
+
+  expect(await worker.offlineStatus()).toMatchObject({ ready: false });
+  worker.fetch.mockResolvedValue(new Response("{}", { headers: { "Content-Type": "application/json" } }));
+  expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
+  expect(worker.fetch).toHaveBeenCalledTimes(1);
+  expect(worker.fetch.mock.calls[0][0].url).toContain("aguas-lindas-city-atlas.json");
+  expect(saved.has(atlas)).toBe(true);
+});
+
+
 it("serves installed snapshots immediately without a network request", async () => {
   const cached = new Response('{"version":"installed"}');
   const worker = loadWorker(cached);

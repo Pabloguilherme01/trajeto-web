@@ -251,6 +251,14 @@ async function fetchWithTimeout(request) {
   }
 }
 
+// A Pages fallback can be an HTML document with HTTP 200. Cache presence
+// alone is not proof that an offline JSON snapshot is usable.
+function isCachedJsonSnapshot(response) {
+  return Boolean(response?.ok && /(?:\/json|\+json)(?:;|$)/i.test(
+    (response.headers.get("Content-Type") || "").trim()
+  ));
+}
+
 async function offlineStatus() {
   try {
     const cache = await caches.open(STATIC_CACHE);
@@ -260,7 +268,7 @@ async function offlineStatus() {
     const saved = await Promise.all(assets.map(asset => cache.match(asset, { ignoreVary: true })));
     const data = await caches.open(DATA_CACHE);
     const snapshots = await Promise.all(LOCAL_SNAPSHOTS.map(asset => data.match(asset, { ignoreVary: true })));
-    return { ready: saved.every(Boolean) && snapshots.every(Boolean), version: VERSION };
+    return { ready: saved.every(Boolean) && snapshots.every(isCachedJsonSnapshot), version: VERSION };
   } catch {
     return { ready: false };
   }
@@ -286,7 +294,7 @@ async function restoreOfflinePackage() {
     }
     const data = await caches.open(DATA_CACHE);
     for (const asset of LOCAL_SNAPSHOTS) {
-      if (!await data.match(asset, { ignoreVary: true })) missing.push({ cache: data, asset });
+      if (!isCachedJsonSnapshot(await data.match(asset, { ignoreVary: true }))) missing.push({ cache: data, asset });
     }
     // Keep downloads bounded on phones. A missing old chunk may have been
     // removed by a deployment: never cache an HTML fallback as JavaScript.
