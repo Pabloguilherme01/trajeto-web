@@ -1,3 +1,5 @@
+import { forProcedure } from "./procedureMiddleware";
+import { productionContentSecurityPolicy } from "./securityHeaders";
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
@@ -50,7 +52,7 @@ async function startServer() {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
       res.setHeader(
         "Content-Security-Policy",
-        "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com; connect-src 'self' https://forge.butterfly-effect.dev https://*.googleapis.com https://*.gstatic.com https://*.google.com https://nominatim.openstreetmap.org https://router.project-osrm.org data: blob:; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com; frame-src https://*.google.com; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com;",
+        productionContentSecurityPolicy,
       );
     }
     next();
@@ -81,21 +83,22 @@ async function startServer() {
     res.setHeader("Cache-Control", "no-store");
     next();
   });
-  app.use("/api/trpc/routes.plan", createMemoryRateLimiter({ windowMs: 60_000, max: 30, name: "planejamento de rotas" }));
+  app.use("/api/trpc", forProcedure("routes.plan", createMemoryRateLimiter({ windowMs: 60_000, max: 30, name: "planejamento de rotas" })));
   // Bulkheads cap expensive in-flight work. Under a traffic spike the API
   // sheds excess load quickly instead of exhausting sockets/memory and taking
   // unrelated public-service endpoints down with it.
-  app.use("/api/trpc/routes.plan", createConcurrencyLimiter({ maxConcurrent: 24, name: "Planejamento de rotas" }));
-  app.use("/api/trpc/stationDirectory.search", createConcurrencyLimiter({ maxConcurrent: 40, name: "Busca de postos" }));
-  app.use("/api/trpc/stationDirectory.details", createConcurrencyLimiter({ maxConcurrent: 60, name: "Detalhes de posto" }));
-  app.use("/api/trpc/stationDirectory.search", createMemoryRateLimiter({ windowMs: 60_000, max: 45, name: "busca de postos" }));
-  app.use("/api/trpc/stationDirectory.details", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "detalhes de posto" }));
-  app.use("/api/trpc/analytics.track", createMemoryRateLimiter({ windowMs: 60_000, max: 120, name: "telemetria" }));
+  app.use("/api/trpc", forProcedure("routes.plan", createConcurrencyLimiter({ maxConcurrent: 24, name: "Planejamento de rotas" })));
+  app.use("/api/trpc", forProcedure("stationDirectory.search", createConcurrencyLimiter({ maxConcurrent: 40, name: "Busca de postos" })));
+  app.use("/api/trpc", forProcedure("stationDirectory.details", createConcurrencyLimiter({ maxConcurrent: 60, name: "Detalhes de posto" })));
+  app.use("/api/trpc", forProcedure("stationDirectory.search", createMemoryRateLimiter({ windowMs: 60_000, max: 45, name: "busca de postos" })));
+  app.use("/api/trpc", forProcedure("stationDirectory.details", createMemoryRateLimiter({ windowMs: 60_000, max: 60, name: "detalhes de posto" })));
+  app.use("/api/trpc", forProcedure("analytics.track", createMemoryRateLimiter({ windowMs: 60_000, max: 120, name: "telemetria" })));
 
   app.use(
     "/api/trpc",
     createExpressMiddleware({
       router: appRouter,
+      maxBatchSize: 10,
       createContext,
     })
   );

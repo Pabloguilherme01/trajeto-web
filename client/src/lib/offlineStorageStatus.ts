@@ -58,7 +58,7 @@ export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
 export async function requestOfflineStoragePersistence() {
   const storage = typeof navigator !== "undefined" ? navigator.storage : undefined;
   if (!storage || typeof storage.persist !== "function") return false;
-  return storage.persist();
+  return storage.persist().catch(() => false);
 }
 
 export function formatStorageBytes(value: number | null) {

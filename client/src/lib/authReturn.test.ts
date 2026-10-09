@@ -37,3 +37,14 @@ describe("consumeStationReturn", () => {
     expect(values.has(AUTH_RETURN_KEY)).toBe(false);
   });
 });
+
+it("does not interrupt login when session storage is restricted", () => {
+  const storage = { getItem: () => { throw new Error("SecurityError"); }, removeItem: () => {} };
+  expect(consumeStationReturn(storage, "/")).toBeNull();
+});
+
+it("accepts only the stations route rather than arbitrary path prefixes", () => {
+  expect(isSafeStationReturnPath("/postos-falso")).toBe(false);
+  expect(isSafeStationReturnPath("/postos/../minha-conta")).toBe(false);
+  expect(isSafeStationReturnPath("/postos?salvos=1")).toBe(true);
+});

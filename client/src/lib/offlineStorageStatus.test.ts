@@ -31,3 +31,8 @@ it("formats storage sizes for people instead of raw bytes", () => {
   expect(formatStorageBytes(5 * 1024 * 1024)).toBe("5.0 MB");
   expect(formatStorageBytes(null)).toBe("indisponível");
 });
+
+it("keeps persistence refusal from becoming an unhandled action error", async () => {
+  vi.stubGlobal("navigator", { storage: { persist: vi.fn().mockRejectedValue(new Error("SecurityError")) } });
+  expect(await requestOfflineStoragePersistence()).toBe(false);
+});

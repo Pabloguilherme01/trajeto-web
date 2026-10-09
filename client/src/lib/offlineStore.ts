@@ -1,3 +1,4 @@
+import { openIndexedDatabase } from "./indexedDbAccess";
 import { PRIVATE_LOCATION_LABEL, isPreciseLocationText, privateOriginForExternalNavigation, privateOriginForHistory, privateOriginForUrl, privateRouteShareOrigin } from "@/lib/locationPrivacy";
 const DB_NAME = "trajeto-offline";
 const DB_VERSION = 2;
@@ -88,22 +89,10 @@ function isValidRoute(value: unknown): value is OfflineRoute {
 }
 
 function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (!hasIndexedDb()) {
-      reject(new Error("IndexedDB indisponível neste navegador."));
-      return;
+  return openIndexedDatabase(DB_NAME, DB_VERSION, db => {
+    if (!db.objectStoreNames.contains(STORE)) {
+      db.createObjectStore(STORE, { keyPath: "id" });
     }
-
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error ?? new Error("Não foi possível abrir o armazenamento offline."));
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE, { keyPath: "id" });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
   });
 }
 

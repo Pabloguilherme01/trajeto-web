@@ -40,7 +40,7 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
   const [corridorId, setCorridorId] = useState<CorridorPreset["id"]>(corridorPresets[0]?.id ?? "aguas-lindas");
   const [timeSlot, setTimeSlot] = useState<(typeof slots)[number]["value"]>("morning");
   const [minimumDelayMinutes, setMinimumDelayMinutes] = useState<(typeof delayLimits)[number]["value"]>(0);
-  const [browserAlertsEnabled, setBrowserAlertsEnabled] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("trajeto-traffic-browser-alerts") === "enabled");
+  const [browserAlertsEnabled, setBrowserAlertsEnabled] = useState(() => { try { return window.localStorage.getItem("trajeto-traffic-browser-alerts") === "enabled"; } catch { return false; } });
   const [notificationStatus, setNotificationStatus] = useState<BrowserNotificationStatus>(initialNotificationStatus);
   const [permissionAttempted, setPermissionAttempted] = useState(false);
   const utils = trpc.useUtils();
@@ -62,7 +62,7 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
   useEffect(() => {
     if (!browserAlertsEnabled || !browserNotificationAvailable() || window.Notification.permission !== "granted") return;
     liveAlerts.data?.newNotifications.forEach(notification => {
-      new window.Notification(notification.title, { body: notification.detail, tag: `trajeto-${notification.corridorId}-${notification.incidentId}` });
+      try { new window.Notification(notification.title, { body: notification.detail, tag: `trajeto-${notification.corridorId}-${notification.incidentId}` }); } catch { /* In-app alerts remain available when this browser rejects desktop notifications. */ }
     });
   }, [browserAlertsEnabled, liveAlerts.data?.newNotifications]);
 
@@ -75,7 +75,7 @@ export function RouteAlertPreferences({ alerts }: { alerts: AlertPreference[] })
     const permission = await window.Notification.requestPermission();
     setNotificationStatus(permission);
     if (permission === "granted") {
-      window.localStorage.setItem("trajeto-traffic-browser-alerts", "enabled");
+      try { window.localStorage.setItem("trajeto-traffic-browser-alerts", "enabled"); } catch { /* Enable for this session even if persistence is unavailable. */ }
       setBrowserAlertsEnabled(true);
     }
   }

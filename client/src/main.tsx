@@ -22,6 +22,7 @@ const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: `${apiBase}api/trpc`,
+      maxItems: 10,
       transformer: superjson,
       headers() {
         try {
