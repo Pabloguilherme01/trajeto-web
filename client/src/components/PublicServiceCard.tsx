@@ -270,9 +270,6 @@ export default function PublicServiceCard({
       {service.verificationNote && (
         <p className="mt-2 break-words text-xs leading-relaxed text-warning">{service.verificationNote}</p>
       )}
-      {service.sourceCheckedAt && (
-        <p className="mt-2 text-xs text-foreground/60">Fonte consultada em {service.sourceCheckedAt}; confirme o atendimento antes de sair.</p>
-      )}
       {service.address && (
         <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-foreground/70">
           <MapPinned className="mt-0.5 size-4 shrink-0 text-accent" />
@@ -518,7 +515,9 @@ export default function PublicServiceCard({
         Fonte: {service.sourceLabel}
         {service.verifiedAt
           ? " · conferido em " + service.verifiedAt
-          : " · data de conferência não informada"}
+          : service.sourceCheckedAt
+            ? " · fonte consultada em " + service.sourceCheckedAt
+            : " · data de conferência não informada"}
       </a>
     </article>
   );
