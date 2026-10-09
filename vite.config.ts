@@ -32,8 +32,24 @@ export default defineConfig({
       };
       include(path.join(output, "data"));
       hash.update(readFileSync(path.join(output, "index.html")));
+      // Files from publicDir are not part of the Vite asset manifest. If only
+      // an install icon or PWA metadata changes, the installed shell must still
+      // receive a new worker revision instead of retaining the cached old file.
+      for (const asset of [
+        "site.webmanifest",
+        "favicon.svg",
+        "icon-192.png",
+        "icon-512.png",
+        "icon-512-maskable.png",
+        "icon-1024.png",
+        "robots.txt",
+      ]) {
+        hash.update(asset).update(readFileSync(path.join(output, asset)));
+      }
       const revision = hash.digest("hex").slice(0, 12);
-      writeFileSync(worker, source.replace(/CACHE_PREFIX \+ "(v\d+)"/, (_match, version) => `CACHE_PREFIX + "${version}-${revision}"`));
+      const stamped = source.replace(/CACHE_PREFIX \\+ "(v\\d+)"/, (_match, version) => `CACHE_PREFIX + "${version}-${revision}"`);
+      if (stamped === source) throw new Error("Service worker cache revision marker was not found");
+      writeFileSync(worker, stamped);
     },
   }],
   resolve: {
