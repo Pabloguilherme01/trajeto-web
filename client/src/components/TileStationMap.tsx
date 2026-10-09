@@ -228,8 +228,14 @@ export default function TileStationMap({
   }, [userCoords?.lat, userCoords?.lng, following]);
 
   useEffect(() => {
-    if (!selectedId || !drawableByKey.has(selectedId))
-      setSelectedId(drawable[0] ? stationKey(drawable[0]) : null);
+    if (!selectedId || !drawableByKey.has(selectedId)) {
+      const next = drawable[0];
+      setSelectedId(next ? stationKey(next) : null);
+      if (next) {
+        setFollowing(false);
+        setCenter({ lat: next.lat, lng: next.lng });
+      }
+    }
   }, [drawable, drawableByKey, selectedId]);
 
   useEffect(() => {
@@ -353,14 +359,14 @@ export default function TileStationMap({
     }
     return result;
   }, [drawable, drawableWorld, clusterScale]);
-  const selected = selectedId ? drawableByKey.get(selectedId) ?? null : null;
+  const selected = (selectedId ? drawableByKey.get(selectedId) : null) ?? drawable[0] ?? null;
   const markerGroups = useMemo(
     () =>
       mapMarkerGroups(
         drawable,
         item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
         item =>
-          stationKey(item) === selectedId ||
+          stationKey(item) === (selected ? stationKey(selected) : null) ||
           ["origin", "destination"].includes(item.id ?? "")
       ),
     [drawable, markerClusterPixels, selectedId, clusterZoom]

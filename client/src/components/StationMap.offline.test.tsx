@@ -1,7 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { StationMap } from "./StationMap";
+import { StationMap, OfflineStationMap } from "./StationMap";
 
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => true }));
 beforeEach(() => vi.stubGlobal("React", React));
@@ -20,4 +20,13 @@ it("keeps stations without ids selectable when background tiles fail", () => {
   fireEvent.click(screen.getByRole("option", { name: "Posto B · Rua B" }));
   expect(screen.getByText("Rua B")).toBeTruthy();
   expect(screen.queryByText("Rua A")).toBeNull();
+});
+
+it("keeps the current filtered place outside overlapping clusters", () => {
+  const view = render(<OfflineStationMap stations={[{ id: "upa", name: "UPA", address: "Rua A", lat: -15.75, lng: -48.28 }]} showDestinationPicker={false} />);
+  view.rerender(<OfflineStationMap stations={[
+    { id: "heal", name: "HEAL", address: "Rua B", lat: -15.76, lng: -48.29 },
+    { id: "alias", name: "Hospital estadual", address: "Rua B", lat: -15.76, lng: -48.29 },
+  ]} showDestinationPicker={false} />);
+  expect(screen.getByRole("button", { name: "Selecionar HEAL" })).toBeTruthy();
 });
