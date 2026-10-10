@@ -68,6 +68,7 @@ import {
   type PublicServiceCategory,
 } from "@/lib/publicServices";
 import { matchesPublicServiceRoute } from "@/lib/publicServiceRouteSearch";
+import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import OrganicMapsModeSelect from "@/components/OrganicMapsModeSelect";
 
 import { categoryIcons, SERVICE_SUMMARY, SERVICE_BATCH_SIZE, SERVICE_CATEGORY_COUNTS, NEED_GROUPS, READY_SERVICE_ROUTES, READY_ROUTE_SERVICE_BY_ROUTE_ID, READY_ROUTE_GROUPS, READY_ROUTE_GROUP_COUNTS } from "@/lib/publicServicesPresentation";
@@ -382,7 +383,7 @@ export default function PublicServices() {
   const openOrganicDestination = (destination: string, label: string) => {
     // This must remain synchronous with the tap for external app handoff.
     // Search is a safe fallback until verified offline coordinates are ready.
-    const point = offlineRoutePoints.current.get(destination);
+    const point = offlineRoutePoints.current.get(destination) ?? resolveLocalGeocodePoint(destination);
     const url = point
       ? buildOrganicMapsNavigationUrl(point, label, navigationMode)
       : buildOrganicMapsSearchUrl(destination);
