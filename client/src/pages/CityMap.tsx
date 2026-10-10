@@ -251,8 +251,11 @@ export default function CityMap() {
         <MapPin className="mx-auto size-8 text-primary" />
         <p className="mt-3 font-black">Destinos disponíveis neste aparelho</p>
         <p className="mt-2 max-w-sm text-sm text-foreground/70">
-          O mapa de ruas precisa de conexão. Use a lista abaixo para preparar
-          sua viagem offline.
+          {destinations.length + atlasDestinations.length > 0
+            ? "Esta camada tem destinos sem coordenadas verificadas. Consulte as fichas abaixo e confirme o endereço antes de sair."
+            : online
+              ? "Não há posições cadastradas para esta busca. Tente outro nome ou camada."
+              : "O mapa de ruas precisa de conexão. Use a lista abaixo para preparar sua viagem offline."}
         </p>
       </div>
     </div>
