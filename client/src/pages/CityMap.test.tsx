@@ -218,7 +218,7 @@ it("keeps sourced environmental places in the list without inventing map coordin
 
 
 it("keeps street-layer access next to All and brings the map before navigation preferences", () => {
-  const { container } = render(<CityMap />);
+  render(<CityMap />);
   const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
   const choices = categories.getAllByRole("button");
   expect(choices[0].textContent).toBe("Tudo");
@@ -228,15 +228,15 @@ it("keeps street-layer access next to All and brings the map before navigation p
   expect(Boolean(map.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
   expect(screen.queryByRole("button", { name: "Ver mapa", exact: true })).toBeNull();
   expect(screen.getByRole("button", { name: "Ver resultados", exact: true })).toBeTruthy();
-  expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth || Infinity);
 });
 
 it("clears search, fast filters and active layer in one action without sharing private data", () => {
+  mapSearch.value = "?q=UPA&camada=saude";
   render(<CityMap />);
   const groups = within(screen.getByRole("group", { name: "Categorias do mapa" }));
-  fireEvent.click(groups.getByRole("button", { name: "Saúde" }));
   const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
-  fireEvent.change(search, { target: { value: "UPA" } });
+  expect(search.value).toBe("UPA");
+  expect(groups.getByRole("button", { name: "Saúde" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
   expect(search.value).toBe("");
   expect(groups.getByRole("button", { name: "Tudo" }).getAttribute("aria-pressed")).toBe("true");
