@@ -4,7 +4,7 @@ import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 import React from "react";
-import { useEffect, useMemo, useState, useDeferredValue } from "react";
+import { useEffect, useMemo, useState, useDeferredValue, useRef } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
@@ -52,6 +52,25 @@ export default function CityMap() {
   const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
   const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
   const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
+  const categoryRailRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const rail = categoryRailRef.current;
+    const selected = rail?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
+    if (!rail || !selected) return;
+    // Do not scroll the whole page: reveal only the selected chip inside the
+    // horizontal rail, including for links to deep layers on a 320px phone.
+    const viewport = rail.getBoundingClientRect();
+    const item = selected.getBoundingClientRect();
+    const inset = 8;
+    const offset = item.left < viewport.left + inset
+      ? item.left - viewport.left - inset
+      : item.right > viewport.right - inset
+        ? item.right - viewport.right + inset
+        : 0;
+    if (offset && typeof rail.scrollBy === "function") {
+      rail.scrollBy({ left: offset, behavior: "auto" });
+    }
+  }, [activeLayer]);
   const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
@@ -184,6 +203,12 @@ export default function CityMap() {
     setCategory(next);
     setQuery(updatedQuery);
     syncMapUrl(updatedQuery, next);
+  };
+  const resetMapFilters = () => {
+    setQuery("");
+    setCategory("todos");
+    setOnlyStreets(false);
+    syncMapUrl("", "todos");
   };
   const showOnlyStreets = () => {
     const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) ? "" : query;
@@ -339,12 +364,7 @@ export default function CityMap() {
           {(query.trim() || activeLayer !== "todos") && (
             <button
               type="button"
-              onClick={() => {
-                setQuery("");
-                setCategory("todos");
-                setOnlyStreets(false);
-                syncMapUrl("", "todos");
-              }}
+              onClick={resetMapFilters}
               className="min-h-11 shrink-0 rounded-xl border border-border/15 bg-card px-3 font-black text-primary focus-visible:outline-2 focus-visible:outline-ring"
               aria-label="Limpar todos os filtros do mapa"
             >
@@ -370,6 +390,7 @@ export default function CityMap() {
         {query !== deferredQuery ? "Atualizando resultados…" : query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
       <div
+        ref={categoryRailRef}
         role="group"
         className="my-3 -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-label="Categorias do mapa"
@@ -516,9 +537,35 @@ export default function CityMap() {
               Os resultados encontrados estão no mapa acima. Toque em um ponto para planejar a rota.
             </p>
           ) : (
-            <p role="status" className="mt-3 text-sm text-foreground/70">
-              Nenhum destino encontrado. Tente outro nome ou categoria.
-            </p>
+            <div className="mt-3 rounded-2xl border border-border/15 bg-card p-4">
+              <p role="status" className="text-sm font-semibold text-foreground">
+                Nenhum destino encontrado. Tente outro nome ou categoria.
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-foreground/65">
+                Você pode voltar à visão geral ou procurar outro lugar sem perder sua posição no mapa.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={resetMapFilters}
+                  className="min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  Ver todos os destinos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById("city-map-search");
+                    input?.scrollIntoView({ block: "center", behavior: "auto" });
+                    input?.focus({ preventScroll: true });
+                  }}
+                  className="min-h-11 rounded-xl border border-border/20 px-4 text-sm font-bold text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  Corrigir busca
+                </button>
+              </div>
+            </div>
+
           )
         )}
       </section>
