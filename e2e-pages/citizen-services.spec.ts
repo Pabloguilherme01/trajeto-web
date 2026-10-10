@@ -162,6 +162,10 @@ test("Pages: national support opens directly from universal search", async ({
       "Este serviço não está no catálogo atual. Consulte os serviços disponíveis abaixo."
     )
   ).toBeVisible();
+  await expect(page.locator("#service-results article")).toHaveCount(18);
+  await page.getByRole("button", { name: "Mostrar mais 18 serviços", exact: true }).click();
+  await expect(page.locator("#service-results article")).toHaveCount(36);
+  await page.getByRole("textbox", { name: "Buscar serviços públicos", exact: true }).fill("180");
   await expect(
     page.getByRole("heading", { name: "Ligue 180 · atendimento à mulher" })
   ).toBeVisible();
