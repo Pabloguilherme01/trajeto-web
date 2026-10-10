@@ -486,11 +486,16 @@ export const READY_ROUTE_GROUPS = READY_ROUTE_GROUPS_BASE.map(group => ({
   ],
 }));
 
+// Shared O(1) membership for group filters and displayed group counts.
+export const READY_ROUTE_GROUP_IDS = new Map(
+  READY_ROUTE_GROUPS.map(group => [group.label, new Set<string>(group.ids)])
+);
+
 export const READY_ROUTE_GROUP_COUNTS = new Map(
   READY_ROUTE_GROUPS.map(group => [
     group.label,
     READY_SERVICE_ROUTES.reduce(
-      (count, route) => count + Number(group.ids.includes(route.id as never)),
+      (count, route) => count + Number(READY_ROUTE_GROUP_IDS.get(group.label)?.has(route.id) ?? false),
       0
     ),
   ])
