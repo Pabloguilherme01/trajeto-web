@@ -73,3 +73,28 @@ describe("offline route reuse", () => {
     expect(isOfflineRouteStale("2026-09-25T12:00:00.000Z", now)).toBe(false);
   });
 });
+
+describe("shared distance calculation for offline routes and nearby stations", () => {
+  it("matches the former station haversine distance across local destinations", () => {
+    const stations = [
+      { lat: -15.7545, lng: -48.2816 },
+      { lat: -15.77665, lng: -48.27935 },
+      { lat: -15.71459, lng: -48.28851 },
+      { lat: -15.7545, lng: -48.2816 },
+    ];
+    const origin = { lat: -15.7545, lng: -48.2816 };
+    const oldStationDistance = (a: typeof origin, b: typeof origin) => {
+      const rad = (value: number) => value * Math.PI / 180;
+      const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 +
+        Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) *
+        Math.sin(rad(b.lng - a.lng) / 2) ** 2;
+      return 2 * 6371 * Math.asin(Math.sqrt(h));
+    };
+    for (const station of stations) {
+      expect(distanceKm(origin, station)).toBeCloseTo(oldStationDistance(origin, station), 9);
+    }
+    const sorted = [...stations].sort((a, b) => distanceKm(origin, a) - distanceKm(origin, b));
+    expect(sorted[0]).toEqual(origin);
+    expect(sorted.at(-1)).toEqual(stations[2]);
+  });
+});
