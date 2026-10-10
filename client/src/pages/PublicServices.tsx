@@ -43,6 +43,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { cityMapLayerUrl, publicServiceMapLayer } from "@/lib/cityMapLayers";
 import { readPublicServiceListFilters, publicServiceListUrl, type PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
 import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
 import {
@@ -562,7 +563,7 @@ export default function PublicServices() {
           </button>
           <button
             type="button"
-            onClick={() => setLocation(appUrl("/mapa"))}
+            onClick={() => setLocation(cityMapLayerUrl("", publicServiceMapLayer(category)))}
             className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-primary/35 focus-visible:outline-2 focus-visible:outline-ring"
           >
             <MapPinned className="size-4 shrink-0 text-primary" />
@@ -740,7 +741,7 @@ export default function PublicServices() {
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => setLocation(appUrl("/mapa"))}
+                      onClick={() => setLocation(cityMapLayerUrl("", publicServiceMapLayer(category)))}
                       className="min-h-11 min-w-0 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground"
                     >
                       Explorar mapa
