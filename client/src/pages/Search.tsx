@@ -465,7 +465,7 @@ export default function SearchPage() {
         )}
 
         {query ? (
-          <div className="mt-5 space-y-5" aria-label="Resultados da busca">
+          <div className="mt-3 space-y-2" aria-label="Resultados da busca">
             <div role="group" aria-label="Tipos de resultado" className="mobile-scroll-x flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1">
               {searchTypes.map(type => <button key={type.value} type="button" aria-pressed={searchType === type.value}
                 onClick={() => selectType(type.value)}
