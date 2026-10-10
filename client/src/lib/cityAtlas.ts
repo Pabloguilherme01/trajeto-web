@@ -407,6 +407,38 @@ export function buildCityAtlas(snapshot: CityAtlasSnapshot | null) {
   return [...merged.values()];
 }
 
+// Public snapshots are immutable after loading. Keep a separate, weakly-held
+// normalized point index for route resolution; buildCityAtlas still returns a
+// fresh independent array to callers of the map/catalogue API.
+type AtlasPointCandidate = {
+  item: CityAtlasItem;
+  fields: string[];
+  exactOnly: boolean;
+};
+const atlasPointIndexes = new WeakMap<CityAtlasSnapshot, AtlasPointCandidate[]>();
+let baseAtlasPointIndex: AtlasPointCandidate[] | undefined;
+
+function atlasPointCandidates(snapshot: CityAtlasSnapshot | null): AtlasPointCandidate[] {
+  const cached = snapshot ? atlasPointIndexes.get(snapshot) : baseAtlasPointIndex;
+  if (cached) return cached;
+
+  const indexed = buildCityAtlas(snapshot).flatMap(item => {
+    if (!finiteCoordinate(item.lat, 90) || !finiteCoordinate(item.lng, 180)) return [];
+    const fields = [item.name, item.address, item.destination]
+      .filter((field): field is string => Boolean(field))
+      .map(normalizeCatalogText);
+    return [{
+      item,
+      fields,
+      // A named street midpoint is not a geocoder for numbered addresses.
+      exactOnly: item.coordinateKind === "street-midpoint" || item.sourceLabel.includes("referência aproximada"),
+    }];
+  });
+  if (snapshot) atlasPointIndexes.set(snapshot, indexed);
+  else baseAtlasPointIndex = indexed;
+  return indexed;
+}
+
 export function resolveCityAtlasPoint(
   snapshot: CityAtlasSnapshot | null,
   value: string,
@@ -414,29 +446,14 @@ export function resolveCityAtlasPoint(
   const query = normalizeCatalogText(value);
   if (!query) return null;
 
-  const candidates = buildCityAtlas(snapshot).filter(item => {
-    if (!finiteCoordinate(item.lat, 90) || !finiteCoordinate(item.lng, 180)) return false;
-    const fields = [item.name, item.address, item.destination]
-      .filter((field): field is string => Boolean(field))
-      .map(normalizeCatalogText);
-    // A street midpoint cannot locate a specific house, quadra or lote.
-    if (item.coordinateKind === "street-midpoint" || item.sourceLabel.includes("referência aproximada")) {
-      return fields.some(field => field === query);
-    }
-    return fields.some(field =>
-      field === query ||
-      field.includes(query) ||
-      query.includes(field)
-    );
-  });
-
-  const exactMatches = candidates.filter(item =>
-    [item.name, item.address, item.destination]
-      .filter((field): field is string => Boolean(field))
-      .some(field => normalizeCatalogText(field) === query)
+  const candidates = atlasPointCandidates(snapshot).filter(({ fields, exactOnly }) =>
+    fields.some(field => exactOnly
+      ? field === query
+      : field === query || field.includes(query) || query.includes(field))
   );
-  const match = exactMatches.length === 1 ? exactMatches[0] :
-    exactMatches.length === 0 && candidates.length === 1 ? candidates[0] : null;
+  const exactMatches = candidates.filter(({ fields }) => fields.some(field => field === query));
+  const match = exactMatches.length === 1 ? exactMatches[0].item :
+    exactMatches.length === 0 && candidates.length === 1 ? candidates[0].item : null;
   return match && typeof match.lat === "number" && typeof match.lng === "number"
     ? { lat: match.lat, lng: match.lng }
     : null;
