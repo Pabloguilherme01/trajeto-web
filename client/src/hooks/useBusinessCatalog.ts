@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { loadBusinessCatalog } from "@/lib/businessCatalog";
+import { loadBusinessCatalog, getLoadedBusinessCatalog } from "@/lib/businessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 
 export function useBusinessCatalog(enabled = true) {
-  const [items, setItems] = useState<CityAtlasItem[]>([]);
+  const [items, setItems] = useState<CityAtlasItem[]>(() => getLoadedBusinessCatalog());
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => enabled && !getLoadedBusinessCatalog().length);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!enabled) return;

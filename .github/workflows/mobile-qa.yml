@@ -23,7 +23,7 @@ jobs:
       - name: Mobile layout, map selection, installation and prepared update
         run: >-
           npx playwright test --config=playwright.pages.config.ts --workers=2
-          --grep 'dock has|map controls|city streets and controls|mobile home calculates|installation metadata|prepared map and atlas'
+          --grep 'dock has|map controls|city streets and controls|mobile home calculates|installation metadata|prepared map and atlas|food, commerce'
       - name: Mobile screenshots
         if: always()
         uses: actions/upload-artifact@v7.0.2

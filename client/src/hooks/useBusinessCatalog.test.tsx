@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useBusinessCatalog } from "./useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 const load = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/businessCatalog", () => ({ loadBusinessCatalog: load }));
+vi.mock("@/lib/businessCatalog", () => ({ loadBusinessCatalog: load, getLoadedBusinessCatalog: () => [] }));
 beforeEach(() => { load.mockReset(); });
 afterEach(cleanup);
 it("finishes loading an empty catalog instead of showing an endless spinner", async () => {

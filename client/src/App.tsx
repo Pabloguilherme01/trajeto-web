@@ -16,18 +16,18 @@ import PwaUpdatePrompt from "./components/PwaUpdatePrompt";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import { loadPlannerPage, loadServicesPage } from "@/lib/primaryRoutes";
+import { loadPlannerPage, loadServicesPage, loadSearchPage, loadCityMapPage, loadStationsPage, loadDataPage, loadHelpPage } from "@/lib/primaryRoutes";
 
-const SearchPage = lazy(() => import("./pages/Search"));
+const SearchPage = lazy(loadSearchPage);
 const Planner = lazy(loadPlannerPage);
 const Operations = lazy(() => import("./pages/Operations"));
-const CityMap = lazy(() => import("./pages/CityMap"));
-const Stations = lazy(() => import("./pages/Stations"));
+const CityMap = lazy(loadCityMapPage);
+const Stations = lazy(loadStationsPage);
 const Local = lazy(() => import("./pages/Local"));
-const Help = lazy(() => import("./pages/Help"));
+const Help = lazy(loadHelpPage);
 const Personal = lazy(() => import("./pages/Personal"));
 const PublicServices = lazy(loadServicesPage);
-const PublicData = lazy(() => import("./pages/PublicData"));
+const PublicData = lazy(loadDataPage);
 
 const routerBase = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
 

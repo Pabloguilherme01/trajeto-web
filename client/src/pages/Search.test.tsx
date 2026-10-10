@@ -10,6 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import SearchPage from "./Search";
 import { localDataEvent } from "@/lib/localData";
 
+vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: () => ({ items: [], loading: false, error: false, retry: vi.fn() }) }));
+
 beforeEach(() => {
   vi.stubGlobal("React", React);
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);

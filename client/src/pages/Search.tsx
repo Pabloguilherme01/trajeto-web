@@ -39,6 +39,8 @@ import {
   getLocalRoutePresets,
 } from "@/lib/localRoutePresets";
 import { localDataEvent } from "@/lib/localData";
+import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
+import { searchBusinesses } from "@/lib/businessSearch";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
 
 const quickActions = [
@@ -197,7 +199,7 @@ function ResultCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block break-words text-sm font-bold">{title}</span>
-        <span className="mt-1 block break-words text-sm leading-relaxed text-foreground/75">
+        <span className="mt-1 block line-clamp-2 break-words text-sm leading-relaxed text-foreground/75">
           {detail}
         </span>
         {source && (
@@ -255,6 +257,8 @@ export default function SearchPage() {
     setResultLimit(6);
   }, [params]);
 
+  const companies = useBusinessCatalog(query.trim().length >= 2);
+  const businessResults = useMemo(() => searchBusinesses(companies.items, query), [companies.items, query]);
   const results = useMemo(() => getUniversalSearchResults(query), [query]);
   const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
   const search = (value: string) => {
@@ -424,8 +428,10 @@ export default function SearchPage() {
               aria-live="polite"
               className="break-words text-sm text-foreground/80"
             >
-              {results.total
-                ? results.total + " resultado(s) para “" + query + "”"
+              {companies.loading && !results.total
+                ? "Buscando no catálogo de empresas…"
+                : (results.total + businessResults.length)
+                ? (results.total + businessResults.length) + " resultado(s) para “" + query + "”"
                 : "Nenhum resultado local para “" + query + "”."}
             </p>
             {results.services.length > 0 && (
@@ -469,6 +475,18 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
+            {query.trim().length >= 2 && (
+              <section aria-labelledby="search-businesses-title">
+                <h2 id="search-businesses-title" className="text-lg font-bold">Empresas do catálogo <span className="text-sm font-normal text-foreground/75">({businessResults.length})</span></h2>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Arquivo importado · situação informada no cadastro, sem confirmação de funcionamento atual. Consulte a ficha e confirme o endereço.</p>
+                {companies.loading && <p role="status" className="mt-2 text-sm">Carregando empresas sem interromper a busca…</p>}
+                {companies.error && <button type="button" onClick={companies.retry} className="mt-2 min-h-11 rounded-xl border border-border px-3 text-sm">Tentar carregar empresas novamente</button>}
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {businessResults.slice(0, resultLimit).map(item => <ResultCard key={item.id} icon={item.category === "alimentacao" ? Utensils : Store} title={item.name} detail={item.business?.sector + " · " + (item.address ?? "Endereço não informado")} source={"CNPJ " + item.business?.cnpj} onClick={() => setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(item.business?.cnpj ?? item.name))} />)}
+                </div>
+                {!companies.loading && !companies.error && !businessResults.length && <p className="mt-2 text-sm text-muted-foreground">Nenhuma empresa correspondente no arquivo. Os demais resultados continuam disponíveis.</p>}
+              </section>
+            )}
             {results.transitFares.length > 0 && (
               <section aria-labelledby="search-transit-title">
                 <h2 id="search-transit-title" className="text-lg font-bold">
@@ -496,34 +514,6 @@ export default function SearchPage() {
                       source={item.sourceLabel}
                       onClick={() =>
                         setLocation(appUrl("/dados") + "#transporte")
-                      }
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-            {results.dataResources.length > 0 && (
-              <section aria-labelledby="search-data-title">
-                <h2 id="search-data-title" className="text-lg font-bold">
-                  Dados e fontes{" "}
-                  <span className="text-sm font-normal text-foreground/75">
-                    ({results.dataResources.length})
-                  </span>
-                </h2>
-                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
-                  {results.dataResources.slice(0, resultLimit).map(item => (
-                    <ResultCard
-                      key={item.id}
-                      icon={Database}
-                      title={item.title}
-                      detail={item.description}
-                      source={item.sourceLabel}
-                      onClick={() =>
-                        setLocation(
-                          appUrl("/dados") +
-                            "?recurso=" +
-                            encodeURIComponent(item.id)
-                        )
                       }
                     />
                   ))}
@@ -613,7 +603,35 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
-            {[results.stations, results.places, results.routes, results.dataResources, results.transitFares].some(
+            {results.dataResources.length > 0 && (
+              <section aria-labelledby="search-data-title">
+                <h2 id="search-data-title" className="text-lg font-bold">
+                  Dados e fontes{" "}
+                  <span className="text-sm font-normal text-foreground/75">
+                    ({results.dataResources.length})
+                  </span>
+                </h2>
+                <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {results.dataResources.slice(0, resultLimit).map(item => (
+                    <ResultCard
+                      key={item.id}
+                      icon={Database}
+                      title={item.title}
+                      detail={item.description}
+                      source={item.sourceLabel}
+                      onClick={() =>
+                        setLocation(
+                          appUrl("/dados") +
+                            "?recurso=" +
+                            encodeURIComponent(item.id)
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {[businessResults, results.stations, results.places, results.routes, results.dataResources, results.transitFares].some(
               items => items.length > resultLimit
             ) && (
               <button

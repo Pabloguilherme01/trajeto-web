@@ -11,7 +11,7 @@ let pending: Promise<CityAtlasItem[]> | null = null;
 function categoryForSector(sector: string): CityAtlasLayer {
   if (sector === "Saúde e assistência social") return "saude";
   if (sector === "Educação") return "educacao";
-  if (sector === "Alimentação (bares e restaurantes)" || sector === "Hospedagem") return "alimentacao";
+  if (sector === "Alimentação (bares e restaurantes)") return "alimentacao";
   if (sector === "Transporte e logística") return "transporte";
   if (sector.startsWith("Comércio")) return "compras";
   if (sector === "Água, esgoto e resíduos" || sector === "Agropecuária") return "meio-ambiente";
@@ -55,6 +55,8 @@ export function loadBusinessCatalog(): Promise<CityAtlasItem[]> {
   }).catch(error => { pending = null; throw error; });
   return pending;
 }
+
+export function getLoadedBusinessCatalog() { return catalog; }
 
 /** Exact unique business identity only: a shared street/CEP never identifies an entrance. */
 export function resolveBusinessPoint(value: string) {

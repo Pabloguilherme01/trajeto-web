@@ -1,7 +1,7 @@
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import React from "react";
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useEffect, useMemo, useState, useDeferredValue } from "react";
+import { Link, useLocation, useSearch } from "wouter";
 import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import { OfflineStationMap } from "@/components/StationMap";
 import MapExplorerFrame from "@/components/MapExplorerFrame";
@@ -36,6 +36,7 @@ import { getPreferredNavigationProvider, setPreferredNavigationProvider, type Na
 
 export default function CityMap() {
   const [, navigate] = useLocation();
+  const rawSearch = useSearch();
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
   const businesses = useBusinessCatalog();
@@ -112,7 +113,9 @@ export default function CityMap() {
     return () => controller.abort();
   }, []);
   const [onlyStreets, setOnlyStreets] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
+  useEffect(() => { setQuery(new URLSearchParams(rawSearch).get("q") ?? ""); }, [rawSearch]);
+  const deferredQuery = useDeferredValue(query);
   const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const applyCategory = (next: RouteDestinationCategoryFilter) => {
     setOnlyStreets(false);
@@ -138,14 +141,14 @@ export default function CityMap() {
     };
   }, []);
   const destinations = useMemo(
-    () => onlyStreets ? [] : getLocalRoutePresets(query, category),
-    [query, category, onlyStreets]
+    () => onlyStreets ? [] : getLocalRoutePresets(deferredQuery, category),
+    [deferredQuery, category, onlyStreets]
   );
   const [destinationLimit, setDestinationLimit] = useState(18);
   useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets]);
-  const displayedDestinations = !query.trim() && category === "todos"
-    ? destinations.slice(0, destinationLimit) : destinations;
-  const atlas = useMemo(() => [...buildCityAtlas(atlasSnapshot), ...businesses.items], [atlasSnapshot, businesses.items]);
+  const displayedDestinations = destinations.slice(0, destinationLimit);
+  const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
+  const atlas = useMemo(() => [...baseAtlas, ...businesses.items], [baseAtlas, businesses.items]);
   useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
     if (category === "todos") return "todos";
@@ -159,13 +162,13 @@ export default function CityMap() {
     const routeKeys = new Set(
       destinations.map(item => normalizeCatalogText(item.destination))
     );
-    return filterCityAtlas(atlas, query, atlasLayer).filter(item => {
+    return filterCityAtlas(atlas, deferredQuery, atlasLayer).filter(item => {
       if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
       const target = item.destination ?? item.address ?? "";
       const key = normalizeCatalogText(target);
       return Boolean(target) && (!key || !routeKeys.has(key));
     });
-  }, [atlas, atlasLayer, destinations, query, onlyStreets]);
+  }, [atlas, atlasLayer, destinations, deferredQuery, onlyStreets]);
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
   const markers = useMemo(() => {
@@ -205,7 +208,7 @@ export default function CityMap() {
               lng = station.longitude;
             return typeof lat === "number" &&
               typeof lng === "number" &&
-              matchesCatalogText(query, [
+              matchesCatalogText(deferredQuery, [
                 station.razaoSocial ?? "Posto",
                 station.endereco ?? undefined,
               ])
@@ -239,7 +242,7 @@ export default function CityMap() {
     const landmarks = all.filter(item => !item.id?.startsWith("business-")).slice(0, 80);
     const slots = Math.min(200 - landmarks.length, companies.length);
     return [...landmarks, ...Array.from({ length: slots }, (_, index) => companies[Math.floor(index * companies.length / slots)])];
-  }, [destinations, atlasDestinations, category, query, anpRows, onlyStreets]);
+  }, [destinations, atlasDestinations, category, deferredQuery, anpRows, onlyStreets]);
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
   const jumpTo = (id: string) => {
