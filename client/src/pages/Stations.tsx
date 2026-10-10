@@ -70,11 +70,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
   const [localVisibleCount, setLocalVisibleCount] = useState(12);
-  const initialOfflineAnp = getOfflineAnpSnapshot();
-  const initialOfflineMap = getOfflineMapStations();
+  // Read potentially large cached snapshots only on mount, not on every
+  // keystroke, filter change or map gesture that re-renders this screen.
+  const [initialOfflineAnp] = useState(getOfflineAnpSnapshot);
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
-  const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
+  const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(() => getOfflineMapStations().stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
 
