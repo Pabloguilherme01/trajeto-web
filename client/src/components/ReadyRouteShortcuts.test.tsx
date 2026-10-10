@@ -8,7 +8,10 @@ vi.mock("@/lib/primaryRoutes", () => ({ preparePrimaryRoute: plannerPreload }));
 
 import { LOCAL_READY_ROUTES, READY_ROUTE_STREET_POINTS } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
-vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
+vi.mock("wouter", () => ({
+  useLocation: () => ["/", navigate],
+  Link: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a>,
+}));
 afterEach(() => { cleanup(); navigate.mockReset(); });
 function open() {
   fireEvent.click(screen.getByText(/trajetos prontos pela cidade/));
