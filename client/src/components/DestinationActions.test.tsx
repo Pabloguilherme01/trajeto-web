@@ -141,3 +141,11 @@ it("preloads the planner only on intent to navigate to or from a destination", (
   expect(plannerPreload).toHaveBeenCalledTimes(2);
   expect(plannerPreload).toHaveBeenCalledWith("/planejar");
 });
+
+it("navigates internally through the SPA router instead of a full page load", () => {
+  const push = vi.spyOn(window.history, "pushState");
+  render(<DestinationActions destination={destination} />);
+  fireEvent.click(screen.getByRole("link", { name: /Ir até aqui/i }));
+  expect(push).toHaveBeenCalled();
+  push.mockRestore();
+});
