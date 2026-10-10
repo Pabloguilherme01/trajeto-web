@@ -4,13 +4,14 @@ import path from "node:path";
 import { existsSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { defineConfig } from "vite";
+import { namedRoadsPlugin } from "./scripts/namedRoadsPlugin";
 
 const root = import.meta.dirname;
 const base = process.env.VITE_BASE_PATH || "/";
 
 export default defineConfig({
   base,
-  plugins: [react(), tailwindcss(), {
+  plugins: [namedRoadsPlugin(), react(), tailwindcss(), {
     name: "version-offline-package",
     apply: "build",
     closeBundle() {
@@ -69,6 +70,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.endsWith("aguas-lindas-city-atlas.json")) return "data-city-atlas";
+          if (id.endsWith("aguas-lindas-anp.json")) return "data-stations";
           if (!id.includes("node_modules")) return;
           if (id.includes("@trpc") || id.includes("@tanstack/react-query") || id.includes("superjson")) return "vendor-data";
           if (id.includes("lucide-react")) return "vendor-icons";

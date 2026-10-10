@@ -115,6 +115,8 @@ test("Pages: selects both endpoints and calculates every travel mode from the of
 });
 
 test("Pages: imported companies reload offline and plan all modes from their actual catalog coordinates", async ({ page, context }) => {
+  // Complete preparation may take 65 seconds, followed by offline route checks.
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("ajuda");
   await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();

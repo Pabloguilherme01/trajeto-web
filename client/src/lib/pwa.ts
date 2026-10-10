@@ -107,8 +107,9 @@ export function installOfflinePersistence() {
 }
 
 export type OfflinePreparation = { ready: boolean; businessesReady?: boolean; reason?: "unsupported" | "preparing" | "connection" | "storage" | "update" };
+export type OfflineProgress = { stage: "waiting" | "downloading" | "verifying"; completed?: number; total?: number };
 
-function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeout: number): Promise<OfflinePreparation> {
+function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeout: number, onProgress?: (progress: OfflineProgress) => void): Promise<OfflinePreparation> {
   const worker = navigator.serviceWorker?.controller;
   if (!worker) return Promise.resolve({ ready: false, reason: "preparing" });
   return new Promise(resolve => {
@@ -124,11 +125,19 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
     };
     const timer = setTimeout(() => finish({ ready: false, reason: "connection" }), timeout);
     channel.port1.onmessage = event => {
+      if (event.data?.type === "OFFLINE_PROGRESS") {
+        const { stage, completed, total } = event.data;
+        if (stage === "verifying") onProgress?.({ stage });
+        else if (stage === "downloading" && Number.isInteger(completed) && Number.isInteger(total) && completed >= 0 && total > 0 && completed <= total) {
+          onProgress?.({ stage, completed, total });
+        }
+        return;
+      }
       const reason = event.data?.reason;
       finish({ ready: event.data?.ready === true, ...(typeof event.data?.businessesReady === "boolean" ? { businessesReady: event.data.businessesReady } : {}), ...(["update", "storage", "connection"].includes(reason) ? { reason } : {}) });
     };
     try {
-      worker.postMessage({ type }, [channel.port2]);
+      worker.postMessage({ type, ...(onProgress ? { progress: true } : {}) }, [channel.port2]);
     } catch {
       finish({ ready: false, reason: "unsupported" });
     }
@@ -167,7 +176,8 @@ export async function getOfflineReadiness(): Promise<boolean> {
   return (await requestOfflineStatus("OFFLINE_STATUS", 5000)).ready;
 }
 
-export async function prepareOfflineAccess(): Promise<OfflinePreparation> {
+export async function prepareOfflineAccess(onProgress?: (progress: OfflineProgress) => void): Promise<OfflinePreparation> {
+  onProgress?.({ stage: "verifying" });
   if (!("serviceWorker" in navigator)) return { ready: false, reason: "unsupported" };
   if (await getOfflineReadiness()) return { ready: true };
   if (!navigator.onLine) return { ready: false, reason: "connection" };
@@ -176,10 +186,11 @@ export async function prepareOfflineAccess(): Promise<OfflinePreparation> {
       await navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL, updateViaCache: "none" });
     currentRegistration = registration;
     void registration.update().then(() => announceUpdate(registration)).catch(() => undefined);
-    if (!navigator.serviceWorker.controller && !await waitForServiceWorkerControl()) {
-      return { ready: false, reason: "preparing" };
+    if (!navigator.serviceWorker.controller) {
+      onProgress?.({ stage: "waiting" });
+      if (!await waitForServiceWorkerControl()) return { ready: false, reason: "preparing" };
     }
-    const result = await requestOfflineStatus("RESTORE_OFFLINE", 60000);
+    const result = await requestOfflineStatus("RESTORE_OFFLINE", 60000, onProgress);
     if (!result.ready && registration.waiting) announceUpdate(registration);
     return result;
   } catch {

@@ -128,7 +128,12 @@ self.addEventListener("message", event => {
     event.waitUntil(offlineStatus().then(status => event.ports[0].postMessage(status)));
   }
   if (event.data?.type === "RESTORE_OFFLINE" && event.ports?.[0]) {
-    event.waitUntil(restoreOfflinePackage().then(status => event.ports[0].postMessage(status)));
+    const port = event.ports[0];
+    // Older pages expect one final response; progress requires explicit opt-in.
+    const notify = event.data.progress === true
+      ? progress => port.postMessage({ type: "OFFLINE_PROGRESS", ...progress })
+      : undefined;
+    event.waitUntil(restoreOfflinePackage(notify).then(status => port.postMessage(status)));
   }
 });
 
@@ -306,7 +311,7 @@ async function offlineStatus() {
   }
 }
 
-async function restoreOfflinePackage() {
+async function restoreOfflinePackage(onProgress = () => {}) {
   try {
     const cache = await caches.open(STATIC_CACHE);
     const manifest = await cache.match("./offline-assets.json", { ignoreVary: true });
@@ -330,6 +335,8 @@ async function restoreOfflinePackage() {
     }
     // Keep downloads bounded on phones. A missing old chunk may have been
     // removed by a deployment: never cache an HTML fallback as JavaScript.
+    let completed = 0;
+    if (missing.length) onProgress({ stage: "downloading", completed, total: missing.length });
     for (let index = 0; index < missing.length; index += 6) {
       await Promise.all(missing.slice(index, index + 6).map(async ({ cache: target, asset }) => {
         const url = new URL(asset, self.registration.scope);
@@ -342,8 +349,10 @@ async function restoreOfflinePackage() {
           (/\.json$/.test(url.pathname) && !/json/i.test(type))) throw new Error("update");
         if (/\.json$/.test(url.pathname)) await response.clone().json();
         await target.put(asset, response);
+        onProgress({ stage: "downloading", completed: ++completed, total: missing.length });
       }));
     }
+    onProgress({ stage: "verifying" });
     return await offlineStatus();
   } catch (error) {
     return { ready: false, reason: error?.name === "QuotaExceededError" ? "storage" : error?.message === "update" ? "update" : "connection" };

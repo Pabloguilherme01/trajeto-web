@@ -101,18 +101,21 @@ export default function PublicServices() {
     "drive" | "walk" | "bike"
   >("drive");
   const [favorites, setFavorites] = useState(listPublicServiceFavorites);
-  const [serviceLimit, setServiceLimit] = useState(SERVICE_BATCH_SIZE);
+  const [servicePage, setServicePage] = useState<{ key: string; limit: number } | null>(null);
   const savedOnly = params.get("salvos") === "1";
   const selectedService = PUBLIC_SERVICES.find(
     service => service.id === params.get("servico")
   );
-  const batching =
+  const unfiltered =
     !selectedService &&
     !savedOnly &&
     !query.trim() &&
     category === "todos" &&
     resource === "todos";
-  const browsing = !params.has("servico") && batching;
+  const browsing = !params.has("servico") && unfiltered;
+  const batching = !selectedService;
+  const servicePageKey = JSON.stringify([query.trim(), category, resource, savedOnly, params.get("servico")]);
+  const serviceLimit = servicePage?.key === servicePageKey ? servicePage.limit : SERVICE_BATCH_SIZE;
   const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
   const favoriteCount = useMemo(
     () => PUBLIC_SERVICES.reduce((count, service) => count + Number(favoriteIds.has(service.id)), 0),
@@ -243,11 +246,8 @@ export default function PublicServices() {
     );
   }, [query, category, selectedService, savedOnly, favoriteIds, resource]);
 
-  useEffect(() => {
-    setServiceLimit(SERVICE_BATCH_SIZE);
-  }, [batching]);
-  // Search, category filters, favorites and direct links expose every match.
-  // Only the unfiltered directory mounts cards in batches on first entry.
+  // Every filter searches the complete catalog; mounting cards stays bounded.
+  // Key pagination to the criteria so no delayed effect can undo Show more.
   const displayedServices = batching ? results.slice(0, serviceLimit) : results;
 
   useEffect(() => {
@@ -1421,7 +1421,7 @@ export default function PublicServices() {
           <button
             type="button"
             aria-controls="service-results"
-            onClick={() => setServiceLimit(limit => limit + SERVICE_BATCH_SIZE)}
+            onClick={() => setServicePage({ key: servicePageKey, limit: serviceLimit + SERVICE_BATCH_SIZE })}
             className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-card px-4 py-3 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring"
           >
             Mostrar mais {Math.min(SERVICE_BATCH_SIZE, results.length - displayedServices.length)} serviços

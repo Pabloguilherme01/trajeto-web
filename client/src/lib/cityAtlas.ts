@@ -1,5 +1,5 @@
 import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
-import offlineMapData from "../../public/data/aguas-lindas-offline-map.json";
+import offlineMapData from "../../public/data/aguas-lindas-offline-map.json?named-roads";
 import { appUrl } from "@/lib/appUrl";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
