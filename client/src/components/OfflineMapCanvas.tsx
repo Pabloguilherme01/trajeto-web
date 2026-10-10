@@ -1,6 +1,7 @@
 import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
 import { groundMetresPerPixel, roadPriority } from "@/lib/mapPresentation";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
+import { declutterMapReferences } from "@/lib/mapReferenceDeclutter";
 import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
@@ -23,6 +24,7 @@ type Road = {
 };
 type MapPack = { schema: number; retrievedAt: string; roads: Road[] };
 const ROAD_GRID = 4096;
+const EMPTY_ROUTE_POINTS: MapPoint[] = [];
 let packPromise: Promise<MapPack> | undefined;
 export function loadOfflineMapPack() {
   if (!packPromise)
@@ -69,7 +71,7 @@ function world(point: MapPoint) {
 export default function OfflineMapCanvas({
   markers,
   selectedMarkerId,
-  routePoints = [],
+  routePoints = EMPTY_ROUTE_POINTS,
   estimated = false,
   initialDark = true,
   controls,
@@ -262,24 +264,12 @@ export default function OfflineMapCanvas({
       y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
     };
   };
-  // Only supporting references are suppressed; trip endpoints and GPS remain selectable.
-  const displayedMarkers = useMemo(() => {
-    const occupied = validMarkers
-      .filter(marker => !marker.isReference)
-      .map(baseProject);
-    return validMarkers.filter(marker => {
-      if (!marker.isReference) return true;
-      const point = baseProject(marker);
-      if (
-        occupied.some(
-          other => Math.hypot(point.x - other.x, point.y - other.y) < 44
-        )
-      )
-        return false;
-      occupied.push(point);
-      return true;
-    });
-  }, [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]);
+  // Route endpoints and GPS always take priority. A 44px spatial grid
+  // avoids scanning every previously accepted marker for each reference.
+  const displayedMarkers = useMemo(
+    () => declutterMapReferences(validMarkers, baseProject, marker => Boolean(marker.isReference)),
+    [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
+  );
   const markerGroups = useMemo(
     () =>
       mapMarkerGroups(
