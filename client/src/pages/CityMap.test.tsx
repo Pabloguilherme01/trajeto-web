@@ -233,3 +233,23 @@ it("skips ANP in the security layer and loads it when fuel markers are requested
   fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Postos" }));
   expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(true);
 });
+
+it("does not load the 21k-company catalog for safety, fuel, city references or streets", () => {
+  for (const layer of ["seguranca", "combustivel", "centro", "ruas"]) {
+    cleanup();
+    catalogEnabled.values = [];
+    mapSearch.value = "?camada=" + layer;
+    render(<CityMap />);
+    expect(catalogEnabled.values).toContain(false);
+    expect(catalogEnabled.values).not.toContain(true);
+    expect(screen.getByText(/sem carregar o catálogo de empresas/i)).toBeTruthy();
+  }
+});
+
+it("loads companies when switching from a local-only map layer to a business category", () => {
+  mapSearch.value = "?camada=seguranca";
+  render(<CityMap />);
+  expect(catalogEnabled.values).not.toContain(true);
+  fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Compras" }));
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+});
