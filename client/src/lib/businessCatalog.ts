@@ -1,6 +1,7 @@
 import { normalizeCatalogText } from "./catalogSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
-import { prepareCityAtlasSearch } from "./cityAtlas";
+import { prepareCityAtlasSearch } from "./cityAtlasSearch";
+import { setLoadedBusinessCatalog } from "./businessCatalogState";
 import { loadCatalogChunks } from "./catalogChunks";
 
 const parts = import.meta.glob("../data/businesses/part-*.json", { import: "default" });
@@ -51,12 +52,13 @@ export function loadBusinessCatalog(): Promise<CityAtlasItem[]> {
     return items;
   }, item => item.id).then(items => {
     catalog = items;
+    setLoadedBusinessCatalog(catalog);
     return catalog;
   }).catch(error => { pending = null; throw error; });
   return pending;
 }
 
-export function getLoadedBusinessCatalog() { return catalog; }
+export { getLoadedBusinessCatalog } from "./businessCatalogState";
 
 /** Exact unique business identity only: a shared street/CEP never identifies an entrance. */
 export function resolveBusinessPoint(value: string) {

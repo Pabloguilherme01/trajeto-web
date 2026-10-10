@@ -1,4 +1,5 @@
-import { filterCityAtlas, type CityAtlasItem, type CityAtlasLayer } from "./cityAtlas";
+import { filterCityAtlas } from "./cityAtlasSearch";
+import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 import { normalizeCatalogText } from "./catalogSearch";
 
 const categories: Record<string, CityAtlasLayer> = {

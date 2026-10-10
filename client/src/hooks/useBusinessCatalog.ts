@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { loadBusinessCatalog, getLoadedBusinessCatalog } from "@/lib/businessCatalog";
+import { getLoadedBusinessCatalog } from "@/lib/businessCatalogState";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 
 export function useBusinessCatalog(enabled = true) {
@@ -12,7 +12,7 @@ export function useBusinessCatalog(enabled = true) {
     let active = true;
     setError(false);
     setLoading(true);
-    void loadBusinessCatalog().then(data => {
+    void import("@/lib/businessCatalog").then(module => module.loadBusinessCatalog()).then(data => {
       if (active) { setItems(data); setLoading(false); }
     }).catch(() => {
       if (active) { setError(true); setLoading(false); }
