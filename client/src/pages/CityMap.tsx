@@ -294,8 +294,8 @@ export default function CityMap() {
           />
           {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => { setQuery(""); syncMapUrl("", activeLayer); }} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
         </div>
-        <div id="city-search-help" className="mt-2 flex min-w-0 items-center justify-between gap-2 text-xs text-foreground/60">
-          <span className="min-w-0">Busca em serviços, empresas e vias cadastradas.</span>
+        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">Busca em serviços, empresas e vias cadastradas.</p>
+        <div className="flex justify-end">
           {(query.trim() || activeLayer !== "todos") && (
             <button
               type="button"
