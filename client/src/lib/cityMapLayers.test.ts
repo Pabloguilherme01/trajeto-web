@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
   it("exposes the sourced security and environment layers without changing preset categories", () => {
@@ -59,5 +59,13 @@ it("opens the correct map layer for a service filter without exposing search or 
     expect(url.searchParams.has("q")).toBe(false);
     expect(url.searchParams.has("lat")).toBe(false);
     expect(url.searchParams.has("lng")).toBe(false);
+  }
+});
+
+it("does not require ANP catalog for streets, safety, environment or public services", () => {
+  expect(cityMapNeedsAnp("todos")).toBe(true);
+  expect(cityMapNeedsAnp("combustivel")).toBe(true);
+  for (const layer of ["ruas", "seguranca", "meio-ambiente", "saude", "educacao", "transporte", "compras"] as const) {
+    expect(cityMapNeedsAnp(layer)).toBe(false);
   }
 });
