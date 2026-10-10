@@ -9,6 +9,15 @@ export function useBusinessCatalog(enabled = true) {
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!enabled) return;
+    // A completed catalog is already shared in memory across the main screens.
+    // Reuse it instead of briefly showing loading and re-importing the chunks.
+    const cached = getLoadedBusinessCatalog();
+    if (cached.length) {
+      setItems(cached);
+      setError(false);
+      setLoading(false);
+      return;
+    }
     let active = true;
     setError(false);
     setLoading(true);
