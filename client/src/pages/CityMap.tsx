@@ -293,8 +293,8 @@ export default function CityMap() {
         }}
         className="mt-3"
       />
-      <p className="mt-2 text-xs text-foreground/60" role="status" aria-live="polite">
-        {query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
+      <p className="mt-2 text-xs text-foreground/60" role="status" aria-live="polite" aria-busy={query !== deferredQuery}>
+        {query !== deferredQuery ? "Atualizando resultados…" : query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
       <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
         <span className="min-w-0">Abrir destinos com</span>

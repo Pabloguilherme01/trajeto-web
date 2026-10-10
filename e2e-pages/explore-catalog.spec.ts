@@ -24,11 +24,27 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "test-results/home-map-pharmacies.png", fullPage: false });
+  await page.evaluate(() => {
+    const observations: Array<{ query: string; text: string }> = [];
+    const status = document.querySelector<HTMLElement>('main [role="status"]')!;
+    const input = document.querySelector<HTMLInputElement>("#city-map-search")!;
+    const observer = new MutationObserver(() => observations.push({ query: input.value, text: status.textContent ?? "" }));
+    observer.observe(status, { subtree: true, childList: true, characterData: true });
+    (window as any).mapFilterObservations = { observations, observer };
+  });
   for (const [label, activity] of [["Roupas", /vestuário/i], ["Beleza", /cabeleireiro|manicure|tratamento de beleza/i], ["Materiais", /materiais de construção|ferragens|tintas e materiais para pintura|material elétrico/i]] as const) {
     await page.getByRole("group", { name: "Filtros rápidos do mapa" }).getByRole("button", { name: label, exact: true }).click();
     await expect(pharmacyCatalog.getByRole("article").first()).toContainText(activity);
+    const finalStatus = await page.locator('main [role="status"]').first().textContent();
+    const countsForQuery = await page.evaluate(query => (window as any).mapFilterObservations.observations
+      .filter((sample: { query: string; text: string }) => sample.query === query && sample.text.includes("“" + query + "”"))
+      .map((sample: { text: string }) => sample.text), label.toLowerCase());
+    expect(countsForQuery.length).toBeGreaterThan(0);
+    expect(countsForQuery.every((text: string) => text === finalStatus)).toBe(true);
+
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
+  await page.evaluate(() => (window as any).mapFilterObservations.observer.disconnect());
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "test-results/home-map-more-filters.png", fullPage: false });
   await page.getByRole("button", { name: "Explorar", exact: true }).click();
