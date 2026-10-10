@@ -215,3 +215,31 @@ it("keeps sourced environmental places in the list without inventing map coordin
   expect(screen.getByText(/camada tem destinos sem coordenadas verificadas/i)).toBeTruthy();
   expect(screen.queryByText(/O mapa de ruas precisa de conexão/)).toBeNull();
 });
+
+
+it("keeps street-layer access next to All and brings the map before navigation preferences", () => {
+  const { container } = render(<CityMap />);
+  const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  const choices = categories.getAllByRole("button");
+  expect(choices[0].textContent).toBe("Tudo");
+  expect(choices[1].textContent).toBe("Ruas e avenidas");
+  const map = screen.getByRole("region", { name: "Mapa da cidade" });
+  const provider = screen.getByRole("combobox", { name: "Aplicativo de mapa preferido" });
+  expect(Boolean(map.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  expect(screen.queryByRole("button", { name: "Ver mapa", exact: true })).toBeNull();
+  expect(screen.getByRole("button", { name: "Ver resultados", exact: true })).toBeTruthy();
+  expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth || Infinity);
+});
+
+it("clears search, fast filters and active layer in one action without sharing private data", () => {
+  render(<CityMap />);
+  const groups = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  fireEvent.click(groups.getByRole("button", { name: "Saúde" }));
+  const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
+  fireEvent.change(search, { target: { value: "UPA" } });
+  fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
+  expect(search.value).toBe("");
+  expect(groups.getByRole("button", { name: "Tudo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/mapa$/), { replace: true });
+  expect(String(navigate.mock.lastCall?.[0])).not.toMatch(/lat=|lng=|origem=/);
+});
