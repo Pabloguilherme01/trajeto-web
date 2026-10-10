@@ -1,9 +1,9 @@
 {
   "source": "ANP",
-  "sourceUrl": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/arquivos-lpc/2026/revendas_lpc_2026-09-27_2026-10-03.xlsx",
-  "retrievedAt": "2026-10-09T14:05:24.657Z",
-  "referencePeriod": "27/09/2026 a 03/10/2026",
-  "totalRows": 46,
+  "sourceUrl": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/arquivos-lpc/2026/revendas_lpc_2026-10-04_2026-10-10.xlsx",
+  "retrievedAt": "2026-10-10T17:08:21.744Z",
+  "referencePeriod": "04/10/2026 a 10/10/2026",
+  "totalRows": 47,
   "totalStations": 21,
   "data": [
     {
@@ -17,8 +17,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -32,8 +32,8 @@
       "productKey": "diesel-s500",
       "salePrice": 6.99,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -47,8 +47,8 @@
       "productKey": "diesel-s10",
       "salePrice": 7.99,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -62,8 +62,8 @@
       "productKey": "etanol",
       "salePrice": 4.59,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -75,10 +75,10 @@
       "uf": "GO",
       "produto": "GLP",
       "productKey": "glp-p13",
-      "salePrice": 118,
+      "salePrice": 110,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -92,8 +92,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -107,8 +107,8 @@
       "productKey": "gasolina-aditivada",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -122,8 +122,8 @@
       "productKey": "diesel-s500",
       "salePrice": 7.29,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -137,8 +137,8 @@
       "productKey": "diesel-s10",
       "salePrice": 7.59,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -152,8 +152,8 @@
       "productKey": "etanol",
       "salePrice": 4.59,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -167,8 +167,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -182,8 +182,8 @@
       "productKey": "gasolina-aditivada",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -197,8 +197,8 @@
       "productKey": "diesel-s500",
       "salePrice": 7.29,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -212,8 +212,8 @@
       "productKey": "diesel-s10",
       "salePrice": 7.59,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -227,83 +227,8 @@
       "productKey": "etanol",
       "salePrice": 4.59,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
-      "source": "ANP"
-    },
-    {
-      "cnpj": "11030816000184",
-      "razaoSocial": "AUTO POSTO PONTEIO LTDA",
-      "endereco": "QUADRA 02",
-      "bairro": "VIVENDAS PARAISO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "uf": "GO",
-      "produto": "GASOLINA COMUM",
-      "productKey": "gasolina-comum",
-      "salePrice": 6.79,
-      "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
-      "source": "ANP"
-    },
-    {
-      "cnpj": "11030816000184",
-      "razaoSocial": "AUTO POSTO PONTEIO LTDA",
-      "endereco": "QUADRA 02",
-      "bairro": "VIVENDAS PARAISO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "uf": "GO",
-      "produto": "GASOLINA ADITIVADA",
-      "productKey": "gasolina-aditivada",
-      "salePrice": 6.89,
-      "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
-      "source": "ANP"
-    },
-    {
-      "cnpj": "11030816000184",
-      "razaoSocial": "AUTO POSTO PONTEIO LTDA",
-      "endereco": "QUADRA 02",
-      "bairro": "VIVENDAS PARAISO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "uf": "GO",
-      "produto": "DIESEL S500",
-      "productKey": "diesel-s500",
-      "salePrice": 6.99,
-      "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
-      "source": "ANP"
-    },
-    {
-      "cnpj": "11030816000184",
-      "razaoSocial": "AUTO POSTO PONTEIO LTDA",
-      "endereco": "QUADRA 02",
-      "bairro": "VIVENDAS PARAISO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "uf": "GO",
-      "produto": "DIESEL S10",
-      "productKey": "diesel-s10",
-      "salePrice": 7.39,
-      "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
-      "source": "ANP"
-    },
-    {
-      "cnpj": "11030816000184",
-      "razaoSocial": "AUTO POSTO PONTEIO LTDA",
-      "endereco": "QUADRA 02",
-      "bairro": "VIVENDAS PARAISO",
-      "municipio": "AGUAS LINDAS DE GOIAS",
-      "uf": "GO",
-      "produto": "ETANOL",
-      "productKey": "etanol",
-      "salePrice": 4.59,
-      "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -317,8 +242,8 @@
       "productKey": "glp-p13",
       "salePrice": 100,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -332,8 +257,8 @@
       "productKey": "glp-p13",
       "salePrice": 115,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -347,8 +272,8 @@
       "productKey": "glp-p13",
       "salePrice": 115,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-07",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -362,8 +287,8 @@
       "productKey": "glp-p13",
       "salePrice": 105,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -377,8 +302,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -392,8 +317,8 @@
       "productKey": "diesel-s10",
       "salePrice": 7.39,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -407,8 +332,8 @@
       "productKey": "etanol",
       "salePrice": 4.59,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -422,8 +347,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -437,8 +362,23 @@
       "productKey": "gasolina-aditivada",
       "salePrice": 6.89,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
+      "source": "ANP"
+    },
+    {
+      "cnpj": "07347238000218",
+      "razaoSocial": "AUTO POSTO DF 180 LTDA",
+      "endereco": "QUADRA 08",
+      "bairro": "JARDIM QUERENCIA",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "uf": "GO",
+      "produto": "DIESEL S10",
+      "productKey": "diesel-s10",
+      "salePrice": 7.39,
+      "unit": "L",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -452,8 +392,8 @@
       "productKey": "etanol",
       "salePrice": 4.59,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -467,8 +407,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -482,8 +422,8 @@
       "productKey": "gasolina-aditivada",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -497,8 +437,8 @@
       "productKey": "diesel-s500",
       "salePrice": 7.19,
       "unit": "L",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -510,10 +450,10 @@
       "uf": "GO",
       "produto": "GLP",
       "productKey": "glp-p13",
-      "salePrice": 110,
+      "salePrice": 100,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -527,8 +467,8 @@
       "productKey": "gasolina-comum",
       "salePrice": 6.79,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -542,8 +482,8 @@
       "productKey": "gasolina-aditivada",
       "salePrice": 7.04,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -557,8 +497,8 @@
       "productKey": "diesel-s500",
       "salePrice": 6.99,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -572,8 +512,8 @@
       "productKey": "diesel-s10",
       "salePrice": 7.39,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -587,8 +527,83 @@
       "productKey": "etanol",
       "salePrice": 4.59,
       "unit": "L",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
+      "source": "ANP"
+    },
+    {
+      "cnpj": "17571211000187",
+      "razaoSocial": "AUTO POSTO MORAIS LTDA",
+      "endereco": "QUADRA 25",
+      "bairro": "PARQUE AGUAS BONITAS I",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "uf": "GO",
+      "produto": "GASOLINA COMUM",
+      "productKey": "gasolina-comum",
+      "salePrice": 6.79,
+      "unit": "L",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
+      "source": "ANP"
+    },
+    {
+      "cnpj": "17571211000187",
+      "razaoSocial": "AUTO POSTO MORAIS LTDA",
+      "endereco": "QUADRA 25",
+      "bairro": "PARQUE AGUAS BONITAS I",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "uf": "GO",
+      "produto": "GASOLINA ADITIVADA",
+      "productKey": "gasolina-aditivada",
+      "salePrice": 6.79,
+      "unit": "L",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
+      "source": "ANP"
+    },
+    {
+      "cnpj": "17571211000187",
+      "razaoSocial": "AUTO POSTO MORAIS LTDA",
+      "endereco": "QUADRA 25",
+      "bairro": "PARQUE AGUAS BONITAS I",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "uf": "GO",
+      "produto": "DIESEL S500",
+      "productKey": "diesel-s500",
+      "salePrice": 6.99,
+      "unit": "L",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
+      "source": "ANP"
+    },
+    {
+      "cnpj": "17571211000187",
+      "razaoSocial": "AUTO POSTO MORAIS LTDA",
+      "endereco": "QUADRA 25",
+      "bairro": "PARQUE AGUAS BONITAS I",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "uf": "GO",
+      "produto": "DIESEL S10",
+      "productKey": "diesel-s10",
+      "salePrice": 7.99,
+      "unit": "L",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
+      "source": "ANP"
+    },
+    {
+      "cnpj": "17571211000187",
+      "razaoSocial": "AUTO POSTO MORAIS LTDA",
+      "endereco": "QUADRA 25",
+      "bairro": "PARQUE AGUAS BONITAS I",
+      "municipio": "AGUAS LINDAS DE GOIAS",
+      "uf": "GO",
+      "produto": "ETANOL",
+      "productKey": "etanol",
+      "salePrice": 4.59,
+      "unit": "L",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -602,8 +617,8 @@
       "productKey": "glp-p13",
       "salePrice": 99.99,
       "unit": "13kg",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -617,8 +632,8 @@
       "productKey": "glp-p13",
       "salePrice": 115,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -632,8 +647,8 @@
       "productKey": "glp-p13",
       "salePrice": 102.99,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-07",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -647,8 +662,8 @@
       "productKey": "glp-p13",
       "salePrice": 115,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -662,8 +677,8 @@
       "productKey": "glp-p13",
       "salePrice": 99.99,
       "unit": "13kg",
-      "collectionDate": "2026-09-27",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -677,8 +692,8 @@
       "productKey": "glp-p13",
       "salePrice": 110,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-05",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     },
     {
@@ -692,8 +707,8 @@
       "productKey": "glp-p13",
       "salePrice": 104.99,
       "unit": "13kg",
-      "collectionDate": "2026-09-28",
-      "referencePeriod": "27/09/2026 a 03/10/2026",
+      "collectionDate": "2026-10-06",
+      "referencePeriod": "04/10/2026 a 10/10/2026",
       "source": "ANP"
     }
   ]
