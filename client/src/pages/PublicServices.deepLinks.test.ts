@@ -111,6 +111,8 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('id="service-results"');
     expect(source).toContain("Ir para ${READY_SERVICE_ROUTES.length} rotas prontas");
     expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} destinos offline");
+    expect(source).toContain("Verificar destinos offline");
+    expect(source).toContain('{offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}');
   });
 
   it("offers the official Organic Maps install fallback without exposing GPS", () => {
