@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
   it("exposes the sourced security and environment layers without changing preset categories", () => {
@@ -43,4 +43,21 @@ it("links map layers to matching services without copying a private search", () 
   expect(cityMapRelatedServicesUrl("meio-ambiente")).toContain("categoria=ambiente");
   expect(cityMapRelatedServicesUrl("transporte")).toContain("categoria=transito");
   expect(new URL(cityMapRelatedServicesUrl("ruas"), "https://example.org").search).toBe("");
+});
+
+it("opens the correct map layer for a service filter without exposing search or GPS", () => {
+  for (const [service, map] of [
+    ["saude", "saude"],
+    ["educacao", "educacao"],
+    ["seguranca", "seguranca"],
+    ["transito", "transporte"],
+    ["ambiente", "meio-ambiente"],
+    ["documentos", "todos"],
+  ] as const) {
+    const url = new URL(cityMapLayerUrl("", publicServiceMapLayer(service)), "https://example.org");
+    expect(readCityMapLayer(url.searchParams.get("camada"))).toBe(map);
+    expect(url.searchParams.has("q")).toBe(false);
+    expect(url.searchParams.has("lat")).toBe(false);
+    expect(url.searchParams.has("lng")).toBe(false);
+  }
 });

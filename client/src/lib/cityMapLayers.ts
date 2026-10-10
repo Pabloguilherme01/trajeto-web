@@ -1,5 +1,6 @@
 import { appUrl } from "./appUrl";
 import type { CityAtlasLayer } from "./cityAtlas";
+import type { PublicServiceCategory } from "./publicServices";
 import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "./localRoutePresets";
 
 /** The atlas has additional layers that the ready-route presets do not. */
@@ -55,4 +56,18 @@ export function cityMapRelatedServicesUrl(layer: CityMapLayer): string {
         ? "transito"
         : null;
   return appUrl("/servicos") + (category ? "?categoria=" + encodeURIComponent(category) : "");
+}
+
+
+/**
+ * Reverse navigation from the official service directory to the matching
+ * map layer. Unknown or administrative-only categories show the full map
+ * rather than inventing a geographic layer.
+ */
+export function publicServiceMapLayer(category: PublicServiceCategory | "todos"): CityMapCategory {
+  if (category === "seguranca") return "seguranca";
+  if (category === "ambiente") return "meio-ambiente";
+  if (category === "transito") return "transporte";
+  if (category === "saude" || category === "educacao") return category;
+  return "todos";
 }
