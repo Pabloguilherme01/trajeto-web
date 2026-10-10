@@ -658,3 +658,17 @@ it("preserves distance measurement and recenters when a filtered selection disap
   expect(screen.getByText(/em linha reta/)).toBeTruthy();
   expect(parseFloat(screen.getByRole("button", { name: "Abrir HEAL" }).style.left)).toBeCloseTo(160);
 });
+
+
+it("shares one online/offline subscription between separate tiled map instances", () => {
+  const add = vi.spyOn(window, "addEventListener");
+  const stations = [
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+  ];
+  render(<>
+    <TileStationMap stations={stations} showDestinationPicker={false} />
+    <TileStationMap stations={stations} showDestinationPicker={false} />
+  </>);
+  expect(add.mock.calls.filter(([type]) => type === "online")).toHaveLength(1);
+  expect(add.mock.calls.filter(([type]) => type === "offline")).toHaveLength(1);
+});
