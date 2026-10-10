@@ -193,7 +193,27 @@ function offlineRoadReferenceItems(): CityAtlasItem[] {
   });
 }
 
-const OFFLINE_ROAD_ITEMS = offlineRoadReferenceItems();
+// Construct road references only when an atlas is first requested. Importing
+// cityAtlas for types, data, or lookup helpers must not group all road segments.
+type OfflineRoadIndex = {
+  items: CityAtlasItem[];
+  byName: Map<string, CityAtlasItem[]>;
+};
+let offlineRoadIndex: OfflineRoadIndex | undefined;
+
+function getOfflineRoadIndex(): OfflineRoadIndex {
+  if (offlineRoadIndex) return offlineRoadIndex;
+  const items = offlineRoadReferenceItems();
+  const byName = new Map<string, CityAtlasItem[]>();
+  for (const item of items) {
+    const name = normalizeCatalogText(item.name);
+    const group = byName.get(name) ?? [];
+    group.push(item);
+    byName.set(name, group);
+  }
+  offlineRoadIndex = { items, byName };
+  return offlineRoadIndex;
+}
 
 const BASE_ITEMS: CityAtlasItem[] = ALL_LOCAL_ROUTE_DESTINATIONS.map(item => ({
   id: "catalog-" + item.id,
@@ -370,20 +390,14 @@ export function buildCityAtlas(snapshot: CityAtlasSnapshot | null) {
   // Keep connected street references and sourced points at distinct positions;
   // homonymous streets must stay selectable instead of being merged by name.
   const representedComponents = new Set<string>();
-  const roadGroups = new Map<string, CityAtlasItem[]>();
-  for (const item of OFFLINE_ROAD_ITEMS) {
-    const name = normalizeCatalogText(item.name);
-    const group = roadGroups.get(name) ?? [];
-    group.push(item);
-    roadGroups.set(name, group);
-  }
+  const { items: offlineRoadItems, byName: roadGroups } = getOfflineRoadIndex();
   for (const known of merged.values()) {
     if (known.coordinateKind !== "street-midpoint") continue;
     const matches = (roadGroups.get(normalizeCatalogText(known.name)) ?? [])
       .filter(item => pointTouchesRoad(known, offlineRoadComponents.get(item.id) ?? []));
     if (matches.length === 1) representedComponents.add(matches[0].id);
   }
-  for (const item of OFFLINE_ROAD_ITEMS) {
+  for (const item of offlineRoadItems) {
     if (representedComponents.has(item.id)) continue;
     // Preserve the sourced reference at the same name and position, while
     // retaining disconnected same-name streets as explicit alternatives.
