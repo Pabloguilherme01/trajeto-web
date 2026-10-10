@@ -71,3 +71,9 @@ export function publicServiceMapLayer(category: PublicServiceCategory | "todos")
   if (category === "saude" || category === "educacao") return category;
   return "todos";
 }
+
+
+/** Only the complete map and fuel layer need the ANP station directory. */
+export function cityMapNeedsAnp(layer: CityMapLayer): boolean {
+  return layer === "todos" || layer === "combustivel";
+}
