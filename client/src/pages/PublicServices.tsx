@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
 import {
   buildOrganicMapsNavigationUrl,
@@ -87,9 +88,7 @@ export default function PublicServices() {
         : "todos";
     }
   );
-  const [online, setOnline] = useState(
-    () => typeof navigator === "undefined" || navigator.onLine
-  );
+  const online = useOnlineStatus();
   const [resource, setResource] = useState<
     "todos" | "contato" | "rota" | "online"
   >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
@@ -153,16 +152,6 @@ export default function PublicServices() {
     };
   }, []);
 
-  useEffect(() => {
-    const onOnline = () => setOnline(true);
-    const onOffline = () => setOnline(false);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => {
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
-    };
-  }, []);
 
   useEffect(() => {
     const nextQuery = params.get("q") ?? "";
