@@ -226,8 +226,8 @@ it("keeps street-layer access next to All and brings the map before navigation p
   const map = screen.getByRole("region", { name: "Mapa da cidade" });
   const provider = screen.getByRole("combobox", { name: "Aplicativo de mapa preferido" });
   expect(Boolean(map.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
-  expect(screen.queryByRole("button", { name: "Ver mapa", exact: true })).toBeNull();
-  expect(screen.getByRole("button", { name: "Ver resultados", exact: true })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /^Ver mapa$/ })).toBeNull();
+  expect(screen.getByRole("button", { name: /^Ver resultados$/ })).toBeTruthy();
 });
 
 it("clears search, fast filters and active layer in one action without sharing private data", () => {
