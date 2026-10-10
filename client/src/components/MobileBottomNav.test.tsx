@@ -133,3 +133,10 @@ it("groups new public and commercial options and prepares their screen on intent
   fireEvent.click(pharmacy);
   expect(state.navigate).toHaveBeenLastCalledWith("/buscar?q=farmacias");
 });
+
+
+it("opens Explore without downloading the map on menu intent", () => {
+  render(<MobileBottomNav />);
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Explorar" }));
+  expect(state.prepare).not.toHaveBeenCalledWith("/mapa");
+});
