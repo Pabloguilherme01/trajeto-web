@@ -107,7 +107,9 @@ export default function PublicServices() {
     resource === "todos";
   const browsing = !params.has("servico") && unfiltered;
   const batching = !selectedService;
-  const servicePageKey = JSON.stringify([query.trim(), category, resource, savedOnly, params.get("servico")]);
+  // Only an actual selected service changes the result set. An unknown deep-link
+  // flag must not reset a paginated directory while URLs are reconciled.
+  const servicePageKey = JSON.stringify([query.trim(), category, resource, savedOnly, selectedService?.id ?? null]);
   const serviceLimit = servicePage?.key === servicePageKey ? servicePage.limit : SERVICE_BATCH_SIZE;
   const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
   const favoriteCount = useMemo(
