@@ -1,3 +1,4 @@
+import { csvCell } from "./csvSerialization";
 import { inferredBrand, type StationListItem, type StationSort } from "./stationListControls";
 
 export type StationExportItem = StationListItem & {
@@ -17,18 +18,15 @@ export type StationExportContext = {
   hoursFilter: string;
 };
 
-function cell(value: string | number | boolean | null | undefined) {
-  const text = value === null || value === undefined ? "" : String(value);
-  return `"${text.replaceAll('"', '""')}"`;
-}
+
 
 export function buildStationExportCsv(stations: StationExportItem[], context: StationExportContext, generatedAt = new Date()) {
   const lines = [
-    ["Trajeto — paradas carregadas", "gerado em", generatedAt.toISOString()].map(cell).join(";"),
-    ["Consulta", context.query].map(cell).join(";"),
-    ["Origem", "Google Maps Places e Distance Matrix; somente paradas carregadas nesta consulta"].map(cell).join(";"),
-    ["Critérios", `ordem: ${context.sortBy}; bandeira: ${context.brandFilter}; horário: ${context.hoursFilter}`].map(cell).join(";"),
-    ["Posição", "Posto", "Endereço", "Bandeira inferida", "Distância (m)", "Distância exibida", "Aberto agora", "Telefone", "Site", "Latitude", "Longitude", "Place ID"].map(cell).join(";"),
+    ["Trajeto — paradas carregadas", "gerado em", generatedAt.toISOString()].map(csvCell).join(";"),
+    ["Consulta", context.query].map(csvCell).join(";"),
+    ["Origem", "Google Maps Places e Distance Matrix; somente paradas carregadas nesta consulta"].map(csvCell).join(";"),
+    ["Critérios", `ordem: ${context.sortBy}; bandeira: ${context.brandFilter}; horário: ${context.hoursFilter}`].map(csvCell).join(";"),
+    ["Posição", "Posto", "Endereço", "Bandeira inferida", "Distância (m)", "Distância exibida", "Aberto agora", "Telefone", "Site", "Latitude", "Longitude", "Place ID"].map(csvCell).join(";"),
     ...stations.map((station, index) => [
       index + 1,
       station.name,
@@ -42,7 +40,7 @@ export function buildStationExportCsv(stations: StationExportItem[], context: St
       station.lat,
       station.lng,
       station.placeId,
-    ].map(cell).join(";")),
+    ].map(csvCell).join(";")),
   ];
   return `\uFEFF${lines.join("\n")}`;
 }
