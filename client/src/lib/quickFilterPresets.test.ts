@@ -17,3 +17,10 @@ it("detects when a quick filter conflicts with the selected category", () => {
   expect(quickFilterMatchesCategory("posto", "saude", CITY_MAP_QUICK_FILTERS)).toBe(false);
   expect(quickFilterMatchesCategory("busca digitada", "saude", CITY_MAP_QUICK_FILTERS)).toBe(true);
 });
+
+it("keeps company-only aliases out of prepared-route catalogs", () => {
+  for (const value of ["alimentacao", "farmacias", "oficinas", "padarias"]) {
+    expect(isQuickFilterValue(value, CITY_MAP_QUICK_FILTERS)).toBe(true);
+    expect(isQuickFilterValue(value, ROUTE_QUICK_FILTERS)).toBe(false);
+  }
+});

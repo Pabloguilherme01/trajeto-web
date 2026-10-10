@@ -27,11 +27,15 @@ function plain(options: CategorizedQuickFilterPreset[]): QuickFilterPreset[] {
   return options.map(({ label, value }) => ({ label, value }));
 }
 
+// Business aliases need the full company catalog, not only prepared routes.
+const businessOnlyFilters = new Set(["alimentacao", "farmacias", "oficinas", "padarias"]);
+const routeFilters = CITY_MAP_QUICK_FILTERS.filter(item => !businessOnlyFilters.has(item.value));
+
 export const COMMON_DESTINATION_QUICK_FILTERS = plain(
-  CITY_MAP_QUICK_FILTERS.filter(item => item.label !== "Rodoviária")
+  routeFilters.filter(item => item.label !== "Rodoviária")
 );
 
-export const ROUTE_QUICK_FILTERS = plain(CITY_MAP_QUICK_FILTERS);
+export const ROUTE_QUICK_FILTERS = plain(routeFilters);
 
 export const PLANNER_LOCATION_QUICK_FILTERS: QuickFilterPreset[] = [
   ...ROUTE_QUICK_FILTERS,
