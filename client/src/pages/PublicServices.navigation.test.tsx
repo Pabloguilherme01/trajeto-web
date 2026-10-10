@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import PublicServices from "./PublicServices";
 
@@ -167,4 +167,14 @@ it("batches ready destinations while searching routes beyond the first batch", (
   fireEvent.change(screen.getByRole("searchbox", { name: "Buscar rota pronta" }), { target: { value: "baixar empresa" } });
   expect(screen.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeTruthy();
   expect(document.querySelectorAll("#ready-routes article").length).toBeLessThanOrEqual(12);
+});
+
+it("opens a matching filtered map from the Central instead of dropping the selected category", async () => {
+  window.history.replaceState({}, "", "/servicos?categoria=ambiente");
+  render(<PublicServices />);
+  const actions = screen.getByRole("navigation", { name: "Ações principais da Central" });
+  fireEvent.click(within(actions).getByRole("button", { name: "Mapa da cidade" }));
+  await waitFor(() => expect(window.location.pathname).toBe("/mapa"));
+  expect(new URLSearchParams(window.location.search).get("camada")).toBe("meio-ambiente");
+  expect(new URLSearchParams(window.location.search).has("lat")).toBe(false);
 });
