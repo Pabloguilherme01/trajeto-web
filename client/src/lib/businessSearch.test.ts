@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { loadBusinessCatalog } from "./businessCatalog";
-import { searchBusinesses } from "./businessSearch";
+import { businessesForMapLayer, searchBusinesses } from "./businessSearch";
 
 it("opens the full imported food and shopping categories rather than only curated places", async () => {
   const items = await loadBusinessCatalog();
@@ -44,4 +44,23 @@ it("matches a CNPJ by identity rather than another company's descriptive text", 
   const unrelated = { ...items[1], name: "Referência " + digits, keywords: [digits] };
   expect(searchBusinesses([unrelated, company], digits)).toEqual([company]);
   expect(searchBusinesses([unrelated], digits)).toEqual([]);
+});
+
+it("reuses stable map category lists without changing order or excluding distinct businesses sharing a point", () => {
+  const items = [
+    { id: "business-1", name: "A", category: "compras", destination: "A", lat: -15.7, lng: -48.2 },
+    { id: "business-2", name: "B", category: "servicos", destination: "B", lat: -15.7, lng: -48.2 },
+    { id: "business-3", name: "C", category: "compras", destination: "C", lat: -15.7, lng: -48.2 },
+    { id: "business-4", name: "Sem local", category: "compras", destination: "" },
+  ] as import("./cityAtlas").CityAtlasItem[];
+  const all = businessesForMapLayer(items, "todos");
+  const shops = businessesForMapLayer(items, "compras");
+  expect(all.map(item => item.id)).toEqual(["business-1", "business-2", "business-3"]);
+  expect(shops.map(item => item.id)).toEqual(["business-1", "business-3"]);
+  expect(businessesForMapLayer(items, "compras")).toBe(shops);
+  expect(businessesForMapLayer(items, "todos")).toBe(all);
+  expect(businessesForMapLayer(items, "saude")).toEqual([]);
+  expect(items).toHaveLength(4); // The original catalog is never modified.
+  const validItems = items.slice(0, 3);
+  expect(businessesForMapLayer(validItems, "todos")).toBe(validItems); // No needless full copy.
 });

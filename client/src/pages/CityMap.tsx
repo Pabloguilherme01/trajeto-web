@@ -1,4 +1,4 @@
-import { searchBusinesses } from "@/lib/businessSearch";
+import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import React from "react";
@@ -40,6 +40,7 @@ export default function CityMap() {
   const [, navigate] = useLocation();
   const rawSearch = useSearch();
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
+  const groupedAnpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
   const businesses = useBusinessCatalog();
   const [visibleCount, setVisibleCount] = useState(24);
@@ -163,13 +164,18 @@ export default function CityMap() {
     const routeKeys = new Set(
       destinations.map(item => normalizeCatalogText(item.destination))
     );
-    const companyMatches = onlyStreets ? [] : deferredQuery.trim() ? searchBusinesses(businesses.items, deferredQuery) : businesses.items;
-    return [...filterCityAtlas(baseAtlas, deferredQuery, atlasLayer), ...companyMatches.filter(item => atlasLayer === "todos" || item.category === atlasLayer)].filter(item => {
+    const publicAtlas = filterCityAtlas(baseAtlas, deferredQuery, atlasLayer).filter(item => {
       if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
       const target = item.destination ?? item.address ?? "";
       const key = cachedDestinationKey(item);
       return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
     });
+    const companies = onlyStreets ? [] : deferredQuery.trim()
+      ? searchBusinesses(businesses.items, deferredQuery).filter(item =>
+          (atlasLayer === "todos" || item.category === atlasLayer) && Boolean(item.destination ?? item.address ?? "")
+        )
+      : businessesForMapLayer(businesses.items, atlasLayer);
+    return [...publicAtlas, ...companies];
   }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets]);
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
@@ -190,7 +196,7 @@ export default function CityMap() {
     });
     const stations =
       !onlyStreets && (category === "todos" || category === "combustivel")
-        ? groupAnpFuelRows(anpRows).flatMap(station => {
+        ? groupedAnpStations.flatMap(station => {
             const lat = station.latitude,
               lng = station.longitude;
             return typeof lat === "number" &&
@@ -220,7 +226,7 @@ export default function CityMap() {
       coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
       lat: item.lat!, lng: item.lng!,
     })) };
-  }, [destinations, atlasDestinations, category, deferredQuery, anpRows, onlyStreets]);
+  }, [destinations, atlasDestinations, category, deferredQuery, groupedAnpStations, onlyStreets]);
   const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
