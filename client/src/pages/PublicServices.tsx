@@ -96,6 +96,7 @@ export default function PublicServices() {
   const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
   const [readyRouteQuery, setReadyRouteQuery] = useState("");
+  const [readyRoutePage, setReadyRoutePage] = useState<{ key: string; limit: number } | null>(null);
   const [readyRouteOfflineOnly, setReadyRouteOfflineOnly] = useState(false);
   const [navigationMode, setNavigationMode] = useState<
     "drive" | "walk" | "bike"
@@ -228,6 +229,10 @@ export default function PublicServices() {
       )
     );
   }, [readyRouteGroup, readyRouteQuery, readyRouteOfflineOnly, offlineReadyRouteIds]);
+
+  const readyRoutePageKey = JSON.stringify([readyRouteGroup, readyRouteQuery.trim(), readyRouteOfflineOnly]);
+  const readyRouteLimit = readyRoutePage?.key === readyRoutePageKey ? readyRoutePage.limit : 12;
+  const displayedReadyRoutes = visibleReadyRoutes.slice(0, readyRouteLimit);
 
   const results = useMemo(() => {
     if (selectedService) return [selectedService];
@@ -438,10 +443,7 @@ export default function PublicServices() {
                 Como podemos ajudar?
               </h1>
               <p className="central-description mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-3 sm:text-base">
-                <span className="font-bold text-foreground">
-                  Encontre o serviço certo sem perder tempo.
-                </span>{" "}
-                Contato, rota e canal oficial para saúde, documentos, emprego e serviços de Águas Lindas.
+                Contatos, rotas e canais oficiais para resolver o dia a dia em Águas Lindas.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="status-pill text-foreground/80">
@@ -473,13 +475,12 @@ export default function PublicServices() {
           <div
             role="group"
             aria-label="Resumo da Central"
-            tabIndex={0}
-            className="central-metrics mobile-scroll-x mt-5 flex gap-2 overflow-x-auto pb-1 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0"
+            className="central-metrics mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4"
           >
             <button
               type="button"
               onClick={showAllServicesFromSummary}
-              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
               aria-label={`Ver todos os ${PUBLIC_SERVICES.length} serviços oficiais`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
@@ -492,7 +493,7 @@ export default function PublicServices() {
             <button
               type="button"
               onClick={openCategoriesFromSummary}
-              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
               aria-label={`Abrir ${PUBLIC_SERVICE_CATEGORIES.length - 1} categorias de serviços`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
@@ -505,7 +506,7 @@ export default function PublicServices() {
             <button
               type="button"
               onClick={() => openReadyRoutesFromSummary(false)}
-              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
               aria-label={`Ir para ${READY_SERVICE_ROUTES.length} rotas prontas`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
@@ -518,7 +519,7 @@ export default function PublicServices() {
             <button
               type="button"
               onClick={() => openReadyRoutesFromSummary(true)}
-              className="min-w-[7.75rem] shrink-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
+              className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
               aria-label={`Mostrar ${offlineReadyRouteIds.size} destinos offline`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
@@ -1193,7 +1194,7 @@ export default function PublicServices() {
                     )}
                   </label>
                   <p className="mt-1.5 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite">
-                    {visibleReadyRoutes.length} destinos neste filtro
+                    {visibleReadyRoutes.length} destinos neste filtro · {displayedReadyRoutes.length} exibidos
                   </p>
                 </div>
                 <div
@@ -1261,7 +1262,7 @@ export default function PublicServices() {
                   })}
                 </div>
                 <div className="mobile-scroll-x mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
-                  {visibleReadyRoutes.map(route => (
+                  {displayedReadyRoutes.map(route => (
                     <article
                       key={route.id}
                       className="premium-card flex min-h-32 w-[min(86vw,19rem)] min-w-0 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition hover:border-primary sm:w-auto"
@@ -1343,6 +1344,9 @@ export default function PublicServices() {
                     </div>
                   )}
                 </div>
+                {visibleReadyRoutes.length > displayedReadyRoutes.length && <button type="button" onClick={() => setReadyRoutePage({ key: readyRoutePageKey, limit: readyRouteLimit + 12 })} className="mt-3 min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm font-bold">
+                  Mostrar mais rotas ({displayedReadyRoutes.length} de {visibleReadyRoutes.length})
+                </button>}
                 <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
                   <div>
                     <p className="text-sm font-black text-foreground">

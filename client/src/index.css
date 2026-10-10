@@ -749,5 +749,5 @@ html.a11y-compact .app-dock {
   .central-intro h1 { font-size: 1.5rem; margin-top: .5rem; }
   .central-intro .central-description { max-width: 36rem; }
   .central-intro .central-metrics { margin-top: .75rem; gap: .375rem; }
-  .central-metrics > button { padding: .5rem .625rem; min-width: 6.5rem; }
+  .central-metrics > button { padding: .5rem .625rem; min-width: 0; min-height: 64px; }
 }

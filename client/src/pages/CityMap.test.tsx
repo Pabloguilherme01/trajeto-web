@@ -3,6 +3,8 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
 const navigate = vi.hoisted(() => vi.fn());
+const catalog = vi.hoisted(() => ({ items: [] as any[], loading: false, error: false, retry: vi.fn() }));
+vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: () => catalog }));
 vi.mock("wouter", () => ({
   useSearch: () => "",
   useLocation: () => ["/mapa", navigate],
@@ -19,6 +21,7 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   navigate.mockClear();
+  catalog.items = [];
 });
 it("mounts initial stops in batches and still searches the full catalog", () => {
   render(<CityMap />);
@@ -124,4 +127,20 @@ it("keeps quick filters compatible when switching categories and street mode", (
   fireEvent.click(screen.getByRole("button", { name: "Ruas e avenidas" }));
   expect(search.value).toBe("");
   expect(screen.getByRole("button", { name: "Ruas e avenidas" }).getAttribute("aria-pressed")).toBe("true");
+});
+
+it("uses the same pharmacy and workshop aliases as search without mixing map categories", () => {
+  catalog.items = [
+    { id: "business-1", name: "Drogaria teste", category: "compras", detail: "Comércio de produtos farmacêuticos", destination: "Drogaria teste, Águas Lindas", sourceLabel: "Arquivo importado", lat: -15.77, lng: -48.28 },
+    { id: "business-2", name: "Mecânica teste", category: "servicos", detail: "Reparação mecânica", destination: "Mecânica teste, Águas Lindas", sourceLabel: "Arquivo importado", lat: -15.77, lng: -48.28 },
+  ];
+  render(<CityMap />);
+  const shortcuts = screen.getByRole("group", { name: "Filtros rápidos do mapa" });
+  fireEvent.click(within(shortcuts).getByRole("button", { name: "Farmácias" }));
+  expect(screen.getByText("Drogaria teste", { selector: "article p" })).toBeTruthy();
+  expect(screen.queryByText("Mecânica teste", { selector: "article p" })).toBeNull();
+  fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Tudo" }));
+  fireEvent.click(within(shortcuts).getByRole("button", { name: "Oficinas" }));
+  expect(screen.getByText("Mecânica teste", { selector: "article p" })).toBeTruthy();
+  expect(screen.queryByText("Drogaria teste", { selector: "article p" })).toBeNull();
 });

@@ -1,3 +1,5 @@
+import { searchBusinesses } from "@/lib/businessSearch";
+import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
@@ -148,7 +150,6 @@ export default function CityMap() {
   useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
   const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
-  const atlas = useMemo(() => [...baseAtlas, ...businesses.items], [baseAtlas, businesses.items]);
   useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
     if (category === "todos") return "todos";
@@ -162,16 +163,17 @@ export default function CityMap() {
     const routeKeys = new Set(
       destinations.map(item => normalizeCatalogText(item.destination))
     );
-    return filterCityAtlas(atlas, deferredQuery, atlasLayer).filter(item => {
+    const companyMatches = onlyStreets ? [] : deferredQuery.trim() ? searchBusinesses(businesses.items, deferredQuery) : businesses.items;
+    return [...filterCityAtlas(baseAtlas, deferredQuery, atlasLayer), ...companyMatches.filter(item => atlasLayer === "todos" || item.category === atlasLayer)].filter(item => {
       if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
       const target = item.destination ?? item.address ?? "";
-      const key = normalizeCatalogText(target);
+      const key = cachedDestinationKey(item);
       return Boolean(target) && (!key || !routeKeys.has(key));
     });
-  }, [atlas, atlasLayer, destinations, deferredQuery, onlyStreets]);
+  }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets]);
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
-  const markers = useMemo(() => {
+  const markerSelection = useMemo(() => {
     const publicPoints = destinations.flatMap(item => {
       const point = resolveLocalGeocodePoint(item.destination);
       return point
@@ -186,21 +188,6 @@ export default function CityMap() {
           ]
         : [];
     });
-    const atlasPoints = atlasDestinations.flatMap(item =>
-      typeof item.lat === "number" && typeof item.lng === "number"
-        ? [{
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            address: item.destination ?? item.address ?? item.name,
-            source: "local" as const,
-            coordinateKind: item.coordinateKind,
-            coordinateLabel: item.coordinateLabel,
-            lat: item.lat,
-            lng: item.lng,
-          }]
-        : []
-    );
     const stations =
       !onlyStreets && (category === "todos" || category === "combustivel")
         ? groupAnpFuelRows(anpRows).flatMap(station => {
@@ -225,24 +212,16 @@ export default function CityMap() {
               : [];
           })
         : [];
-    const unique = new Map(
-      [...publicPoints, ...atlasPoints, ...stations].map(point => [
-        point.name.toLocaleLowerCase("pt-BR") +
-          "|" +
-          point.lat +
-          "|" +
-          point.lng,
-        point,
-      ])
-    );
-    const all = [...unique.values()];
-    if (all.length <= 200) return all;
-    const companies = all.filter(item => item.id?.startsWith("business-"));
-    if (!companies.length) return all.slice(0, 200);
-    const landmarks = all.filter(item => !item.id?.startsWith("business-")).slice(0, 80);
-    const slots = Math.min(200 - landmarks.length, companies.length);
-    return [...landmarks, ...Array.from({ length: slots }, (_, index) => companies[Math.floor(index * companies.length / slots)])];
+    const selection = selectCityMapItems<CityMapCandidate>([publicPoints, atlasDestinations, stations]);
+    return { total: selection.total, points: selection.items.map(item => ({
+      id: item.id, name: item.name, category: item.category,
+      address: item.destination ?? item.address ?? item.name,
+      source: item.source ?? "local" as const,
+      coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
+      lat: item.lat!, lng: item.lng!,
+    })) };
   }, [destinations, atlasDestinations, category, deferredQuery, anpRows, onlyStreets]);
+  const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
   const jumpTo = (id: string) => {
@@ -279,10 +258,9 @@ export default function CityMap() {
         A cidade no seu caminho
       </h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
-        Saúde, serviços, compras e paradas. Escolha um destino e veja sua rota
-        no planejador.
+        Busque um destino e veja sua rota no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo disponíveis por nome, CNPJ, atividade ou bairro · consulta local"}</p>
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <section className="mt-5" aria-labelledby="city-search-label">
         <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-foreground/65">Buscar na cidade</label>
@@ -297,12 +275,12 @@ export default function CityMap() {
             onChange={event => setQuery(event.target.value)}
             enterKeyHint="search"
             autoComplete="off"
-            placeholder="Lugar, bairro, rua ou serviço"
+            placeholder="Nome, CNPJ, bairro ou rua"
             className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/55"
           />
           {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
         </div>
-        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">A busca ignora acentos e combina nome, bairro, rua, serviço e dados cadastrados.</p>
+        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">Nome, CNPJ, bairro, rua ou atividade.</p>
       </section>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
@@ -330,7 +308,7 @@ export default function CityMap() {
             setPreferredMapProvider(provider);
             setPreferredNavigationProvider(provider);
           }}
-          className="min-h-11 max-w-[9.5rem] rounded-xl border border-border bg-background px-2 text-base text-foreground"
+          className="min-h-11 min-w-0 w-36 shrink-0 rounded-xl border border-border bg-background px-2 text-sm text-foreground"
         >
           <option value="google">Google Maps</option>
           <option value="waze">Waze</option>
@@ -404,8 +382,8 @@ export default function CityMap() {
       </section>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-foreground/65">
         <span>
-          {markers.length} posições exibidas (até 200) · {destinations.length + atlasDestinations.length} destinos
-          na lista
+          {markers.length} de {markerSelection.total} posições disponíveis · {destinations.length + atlasDestinations.length} destinos na lista
+          {markerSelection.total > markers.length && " · amostra no mapa: filtre ou busque para ver um destino específico"}
         </span>
         <Link
           href={appUrl("/mapa/postos")}

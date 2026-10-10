@@ -53,6 +53,8 @@ it("reports the same destination count that each ready-route group displays", ()
   for (const group of groups) {
     const expectedCount = Number(group.getAttribute("aria-label")?.match(/· (\d+) destinos/)?.[1]);
     fireEvent.click(group);
+    expect(document.querySelectorAll("#ready-routes article")).toHaveLength(Math.min(12, expectedCount));
+    while (screen.queryByRole("button", { name: /Mostrar mais rotas/ })) fireEvent.click(screen.getByRole("button", { name: /Mostrar mais rotas/ }));
     expect(document.querySelectorAll("#ready-routes article")).toHaveLength(expectedCount);
   }
 }, 15000);
@@ -154,4 +156,15 @@ it("opens only the selected service without catalog introduction", () => {
   expect(document.querySelectorAll("#service-results article")).toHaveLength(1);
   expect(screen.getByText("24 horas")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Planejar rota" })).toBeTruthy();
+});
+
+it("batches ready destinations while searching routes beyond the first batch", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#ready-routes article")).toHaveLength(12);
+  fireEvent.click(screen.getByRole("button", { name: /Mostrar mais rotas/ }));
+  expect(document.querySelectorAll("#ready-routes article")).toHaveLength(24);
+  fireEvent.change(screen.getByRole("searchbox", { name: "Buscar rota pronta" }), { target: { value: "baixar empresa" } });
+  expect(screen.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeTruthy();
+  expect(document.querySelectorAll("#ready-routes article").length).toBeLessThanOrEqual(12);
 });

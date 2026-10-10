@@ -6,7 +6,7 @@ export type QuickFilterPreset = {
 };
 
 export type CategorizedQuickFilterPreset = QuickFilterPreset & {
-  category: "saude" | "combustivel" | "compras" | "educacao" | "servicos" | "transporte";
+  category: "alimentacao" | "saude" | "combustivel" | "compras" | "educacao" | "servicos" | "transporte";
 };
 
 export const CITY_MAP_QUICK_FILTERS: CategorizedQuickFilterPreset[] = [
@@ -16,6 +16,10 @@ export const CITY_MAP_QUICK_FILTERS: CategorizedQuickFilterPreset[] = [
   { label: "Escolas", value: "escola", category: "educacao" },
   { label: "Prefeitura", value: "prefeitura", category: "servicos" },
   { label: "Shopping", value: "shopping", category: "compras" },
+  { label: "Comer", value: "alimentacao", category: "alimentacao" },
+  { label: "Farmácias", value: "farmacias", category: "compras" },
+  { label: "Oficinas", value: "oficinas", category: "servicos" },
+  { label: "Padarias", value: "padarias", category: "compras" },
   { label: "Rodoviária", value: "rodoviaria", category: "transporte" },
 ];
 
@@ -23,11 +27,15 @@ function plain(options: CategorizedQuickFilterPreset[]): QuickFilterPreset[] {
   return options.map(({ label, value }) => ({ label, value }));
 }
 
+// Business aliases need the full company catalog, not only prepared routes.
+const businessOnlyFilters = new Set(["alimentacao", "farmacias", "oficinas", "padarias"]);
+const routeFilters = CITY_MAP_QUICK_FILTERS.filter(item => !businessOnlyFilters.has(item.value));
+
 export const COMMON_DESTINATION_QUICK_FILTERS = plain(
-  CITY_MAP_QUICK_FILTERS.filter(item => item.label !== "Rodoviária")
+  routeFilters.filter(item => item.label !== "Rodoviária")
 );
 
-export const ROUTE_QUICK_FILTERS = plain(CITY_MAP_QUICK_FILTERS);
+export const ROUTE_QUICK_FILTERS = plain(routeFilters);
 
 export const PLANNER_LOCATION_QUICK_FILTERS: QuickFilterPreset[] = [
   ...ROUTE_QUICK_FILTERS,
