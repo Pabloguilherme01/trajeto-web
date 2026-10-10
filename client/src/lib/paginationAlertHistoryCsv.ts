@@ -6,10 +6,10 @@ export type PaginationAlertHistoryCsvRow = { region: string; previousThreshold: 
 export function buildPaginationAlertHistoryCsv(rows: PaginationAlertHistoryCsvRow[], filters: { startDate: string; endDate: string; region: string }, generatedAt = new Date()) {
   const lines = [
     "sep=;",
-    `${cell("Histórico de limites regionais")};${cell(`Gerado em ${generatedAt.toLocaleString("pt-BR")}`)}`,
-    `${cell("Período inicial")};${cell(filters.startDate || "Todo o histórico")}`,
-    `${cell("Período final")};${cell(filters.endDate || "Hoje")}`,
-    `${cell("Região")};${cell(filters.region || "Todas")}`,
+    `${csvCell("Histórico de limites regionais")};${csvCell(`Gerado em ${generatedAt.toLocaleString("pt-BR")}`)}`,
+    `${csvCell("Período inicial")};${csvCell(filters.startDate || "Todo o histórico")}`,
+    `${csvCell("Período final")};${csvCell(filters.endDate || "Hoje")}`,
+    `${csvCell("Região")};${csvCell(filters.region || "Todas")}`,
     "",
     ["Região", "Limite anterior", "Novo limite", "Variação", "Alterado em"].map(csvCell).join(";"),
     ...rows.map(row => [row.region, row.previousThreshold == null ? "Configuração inicial" : row.previousThreshold, row.threshold, row.previousThreshold == null ? "" : row.threshold - row.previousThreshold, new Date(row.changedAt).toLocaleString("pt-BR")].map(csvCell).join(";")),
