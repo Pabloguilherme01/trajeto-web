@@ -1,6 +1,7 @@
 import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { matchesCatalogText } from "@/lib/catalogSearch";
 import { appUrl } from "@/lib/appUrl";
@@ -51,7 +52,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const [input, setInput] = useState(getInitialQuery);
   const [query, setQuery] = useState(getInitialQuery);
-  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const online = useOnlineStatus();
   const [nearby, setNearby] = useState(false);
   const [showMap, setShowMap] = useState(mapFirst);
   const [onlyOpen, setOnlyOpen] = useState(false);
@@ -436,15 +437,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [staticRuntime, broadAguasLindasQuery, showSavedOnly]);
 
   useEffect(() => {
-    const onOnline = () => setOnline(true);
-    const onOffline = () => setOnline(false);
     const refreshSaved = () => setSaved(listMobileStationFavorites());
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
     window.addEventListener("focus", refreshSaved);
     return () => {
-      window.removeEventListener("online", onOnline);
-      window.removeEventListener("offline", onOffline);
       window.removeEventListener("focus", refreshSaved);
     };
   }, []);
