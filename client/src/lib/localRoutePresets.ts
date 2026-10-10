@@ -1,5 +1,6 @@
 import cityAtlasData from "../../public/data/aguas-lindas-city-atlas.json";
-import { matchesCatalogText, normalizeCatalogText } from "./catalogSearch";
+import { normalizeCatalogText } from "./catalogSearch";
+import { filterLocalRoutePresets } from "./localRouteSearch";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import { LOCAL_PLACES } from "@/lib/localPlaces";
 import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
@@ -186,10 +187,7 @@ export function getLocalRoutePresets(
   query = "",
   category: RouteDestinationCategoryFilter = "todos",
 ) {
-  return ALL_LOCAL_ROUTE_DESTINATIONS.filter(item =>
-    (category === "todos" || item.category === category) &&
-    matchesCatalogText(query, [item.label, item.detail, item.destination, item.category])
-  );
+  return filterLocalRoutePresets(ALL_LOCAL_ROUTE_DESTINATIONS, query, category);
 }
 
 export type ReadyCityRoute = { id: string; origin: string; destination: string; label: string; detail: string; category: RouteDestinationCategory; originId: string; originLabel: string; destinationLabel: string };
