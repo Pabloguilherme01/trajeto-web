@@ -106,7 +106,7 @@ export function installOfflinePersistence() {
   window.addEventListener("offline", () => window.dispatchEvent(new Event("trajeto:offline")));
 }
 
-export type OfflinePreparation = { ready: boolean; reason?: "unsupported" | "preparing" | "connection" | "storage" | "update" };
+export type OfflinePreparation = { ready: boolean; businessesReady?: boolean; reason?: "unsupported" | "preparing" | "connection" | "storage" | "update" };
 
 function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeout: number): Promise<OfflinePreparation> {
   const worker = navigator.serviceWorker?.controller;
@@ -125,7 +125,7 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
     const timer = setTimeout(() => finish({ ready: false, reason: "connection" }), timeout);
     channel.port1.onmessage = event => {
       const reason = event.data?.reason;
-      finish({ ready: event.data?.ready === true, ...(["update", "storage", "connection"].includes(reason) ? { reason } : {}) });
+      finish({ ready: event.data?.ready === true, ...(typeof event.data?.businessesReady === "boolean" ? { businessesReady: event.data.businessesReady } : {}), ...(["update", "storage", "connection"].includes(reason) ? { reason } : {}) });
     };
     try {
       worker.postMessage({ type }, [channel.port2]);
@@ -155,6 +155,11 @@ async function waitForServiceWorkerControl(timeout = 60000): Promise<boolean> {
       })
       .catch(() => finish(false));
   });
+}
+
+export async function getOfflinePackageStatus(): Promise<OfflinePreparation> {
+  if (!("serviceWorker" in navigator)) return { ready: false };
+  return requestOfflineStatus("OFFLINE_STATUS", 5000);
 }
 
 export async function getOfflineReadiness(): Promise<boolean> {
