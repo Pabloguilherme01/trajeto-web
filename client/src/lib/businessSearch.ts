@@ -86,17 +86,22 @@ const mapLayerIndexes = new WeakMap<CityAtlasItem[], {
 export function businessesForMapLayer(items: CityAtlasItem[], layer: "todos" | CityAtlasLayer): CityAtlasItem[] {
   let index = mapLayerIndexes.get(items);
   if (!index) {
-    const all: CityAtlasItem[] = [];
+    // Most imported catalogs have a destination for every row. In that case
+    // reuse the original array instead of allocating another large copy.
+    let valid: CityAtlasItem[] | null = null;
     const byLayer = new Map<CityAtlasLayer, CityAtlasItem[]>();
-    for (const item of items) {
-      // The map has never presented a record without a destination/address.
-      if (!(item.destination ?? item.address ?? "")) continue;
-      all.push(item);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!(item.destination ?? item.address ?? "")) {
+        if (!valid) valid = items.slice(0, i);
+        continue;
+      }
+      if (valid) valid.push(item);
       const group = byLayer.get(item.category) ?? [];
       group.push(item);
       byLayer.set(item.category, group);
     }
-    index = { all, byLayer };
+    index = { all: valid ?? items, byLayer };
     mapLayerIndexes.set(items, index);
   }
   return layer === "todos" ? index.all : index.byLayer.get(layer) ?? [];
