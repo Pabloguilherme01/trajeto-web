@@ -67,11 +67,11 @@ import {
   searchPublicServices,
   type PublicServiceCategory,
 } from "@/lib/publicServices";
-import { matchesPublicServiceRoute } from "@/lib/publicServiceRouteSearch";
+import { filterPublicServiceRoutes } from "@/lib/publicServiceRouteSearch";
 import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import OrganicMapsModeSelect from "@/components/OrganicMapsModeSelect";
 
-import { categoryIcons, SERVICE_SUMMARY, SERVICE_BATCH_SIZE, SERVICE_CATEGORY_COUNTS, NEED_GROUPS, READY_SERVICE_ROUTES, READY_ROUTE_SERVICE_BY_ROUTE_ID, READY_ROUTE_GROUPS, READY_ROUTE_GROUP_COUNTS } from "@/lib/publicServicesPresentation";
+import { categoryIcons, SERVICE_SUMMARY, SERVICE_BATCH_SIZE, SERVICE_CATEGORY_COUNTS, NEED_GROUPS, READY_SERVICE_ROUTES, READY_ROUTE_SERVICE_BY_ROUTE_ID, READY_ROUTE_GROUPS, READY_ROUTE_GROUP_IDS, READY_ROUTE_GROUP_COUNTS } from "@/lib/publicServicesPresentation";
 import PublicServiceCard from "@/components/PublicServiceCard";
 
 export default function PublicServices() {
@@ -228,24 +228,19 @@ export default function PublicServices() {
   // Once the optional local resolver finishes, the offline filter updates
   // automatically instead of reporting a false zero on initial paint.
   const visibleReadyRoutes = useMemo(() => {
+    const selectedGroupIds = READY_ROUTE_GROUP_IDS.get(readyRouteGroup);
     const groupedRoutes =
       readyRouteGroup === "todos"
         ? READY_SERVICE_ROUTES
-        : READY_SERVICE_ROUTES.filter(route =>
-            READY_ROUTE_GROUPS.find(
-              group => group.label === readyRouteGroup
-            )?.ids.includes(route.id as never)
-          );
+        : READY_SERVICE_ROUTES.filter(route => selectedGroupIds?.has(route.id));
     const availabilityRoutes = readyRouteOfflineOnly
       ? groupedRoutes.filter(route => offlineReadyRouteIds.has(route.id))
       : groupedRoutes;
     if (!readyRouteQuery.trim()) return availabilityRoutes;
-    return availabilityRoutes.filter(route =>
-      matchesPublicServiceRoute(
-        readyRouteQuery,
-        route,
-        READY_ROUTE_SERVICE_BY_ROUTE_ID.get(route.id)
-      )
+    return filterPublicServiceRoutes(
+      availabilityRoutes,
+      readyRouteQuery,
+      READY_ROUTE_SERVICE_BY_ROUTE_ID
     );
   }, [readyRouteGroup, readyRouteQuery, readyRouteOfflineOnly, offlineReadyRouteIds]);
 
