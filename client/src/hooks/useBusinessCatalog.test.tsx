@@ -5,8 +5,9 @@ import { useBusinessCatalog } from "./useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 const load = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/businessCatalog", () => ({ loadBusinessCatalog: load }));
-vi.mock("@/lib/businessCatalogState", () => ({ getLoadedBusinessCatalog: () => [] }));
-beforeEach(() => { load.mockReset(); });
+const cached = vi.hoisted(() => ({ items: [] as CityAtlasItem[] }));
+vi.mock("@/lib/businessCatalogState", () => ({ getLoadedBusinessCatalog: () => cached.items }));
+beforeEach(() => { load.mockReset(); cached.items = []; });
 afterEach(cleanup);
 it("finishes loading an empty catalog instead of showing an endless spinner", async () => {
   load.mockResolvedValue([]);
@@ -60,4 +61,14 @@ it("waits for an enabled consumer and ignores completion after it closes", async
   expect(result.current.error).toBe(false);
   await act(async () => complete([{ id: "late" } as CityAtlasItem]));
   expect(result.current.items).toEqual([]);
+});
+
+it("reuses the in-memory catalog without a loading flash or repeated chunk import", () => {
+  const items = [{ id: "cached-business", name: "Empresa pronta", category: "servicos", sourceLabel: "local" }] as CityAtlasItem[];
+  cached.items = items;
+  const { result } = renderHook(() => useBusinessCatalog());
+  expect(result.current.items).toBe(items);
+  expect(result.current.loading).toBe(false);
+  expect(result.current.error).toBe(false);
+  expect(load).not.toHaveBeenCalled();
 });
