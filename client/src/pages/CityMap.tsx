@@ -294,7 +294,24 @@ export default function CityMap() {
           />
           {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => { setQuery(""); syncMapUrl("", activeLayer); }} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
         </div>
-        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">Nome, CNPJ, bairro, rua ou atividade.</p>
+        <div id="city-search-help" className="mt-2 flex min-w-0 items-center justify-between gap-2 text-xs text-foreground/60">
+          <span className="min-w-0">Busca em serviços, empresas e vias cadastradas.</span>
+          {(query.trim() || activeLayer !== "todos") && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setCategory("todos");
+                setOnlyStreets(false);
+                syncMapUrl("", "todos");
+              }}
+              className="min-h-11 shrink-0 rounded-xl border border-border/15 bg-card px-3 font-black text-primary focus-visible:outline-2 focus-visible:outline-ring"
+              aria-label="Limpar todos os filtros do mapa"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
       </section>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
@@ -312,29 +329,12 @@ export default function CityMap() {
       <p className="mt-2 text-xs text-foreground/60" role="status" aria-live="polite" aria-busy={query !== deferredQuery}>
         {query !== deferredQuery ? "Atualizando resultados…" : query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
-      <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
-        <span className="min-w-0">Abrir destinos com</span>
-        <select
-          aria-label="Aplicativo de mapa preferido"
-          value={preferredMapProvider}
-          onChange={event => {
-            const provider = event.target.value as NavigationProvider;
-            setPreferredMapProvider(provider);
-            setPreferredNavigationProvider(provider);
-          }}
-          className="min-h-11 min-w-0 w-36 shrink-0 rounded-xl border border-border bg-background px-2 text-sm text-foreground"
-        >
-          <option value="google">Google Maps</option>
-          <option value="waze">Waze</option>
-          <option value="apple">Apple Maps</option>
-          <option value="organic">Organic Maps</option>
-        </select>
-      </label>
       <div
         role="group"
         className="my-3 -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-label="Categorias do mapa"
       >
+        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-warning bg-warning text-primary-foreground" : "border-border bg-muted/40 text-foreground/80")}>Ruas e avenidas</button>
         {CITY_MAP_CATEGORIES.map(({ value, label }) => (
           <button
             key={value}
@@ -351,29 +351,17 @@ export default function CityMap() {
             {label}
           </button>
         ))}
-        <button type="button" aria-pressed={onlyStreets} onClick={showOnlyStreets} className={"min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold " + (onlyStreets ? "border-warning bg-warning text-primary-foreground" : "border-border bg-muted/40 text-foreground/80")}>Ruas e avenidas</button>
       </div>
-      <nav
-        aria-label="Navegar entre mapa e resultados"
-        className="mb-3 grid grid-cols-2 gap-2"
-      >
-        <button
-          type="button"
-          aria-controls="city-map-surface"
-          onClick={() => jumpTo("city-map-surface")}
-          className="min-h-11 rounded-xl bg-primary px-3 text-xs font-black text-primary-foreground"
-        >
-          Ver mapa
-        </button>
+      <div className="mb-2 flex justify-end">
         <button
           type="button"
           aria-controls="city-destinations"
           onClick={() => jumpTo("city-destinations")}
-          className="min-h-11 rounded-xl border border-border/15 bg-card px-3 text-xs font-black text-foreground"
+          className="min-h-11 rounded-xl border border-border/15 bg-card px-4 text-xs font-black text-foreground focus-visible:outline-2 focus-visible:outline-ring"
         >
           Ver resultados
         </button>
-      </nav>
+      </div>
       <section
         id="city-map-surface"
         tabIndex={-1}
@@ -394,6 +382,24 @@ export default function CityMap() {
         )}
         </MapExplorerFrame>
       </section>
+      <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
+        <span className="min-w-0">Abrir destinos com</span>
+        <select
+          aria-label="Aplicativo de mapa preferido"
+          value={preferredMapProvider}
+          onChange={event => {
+            const provider = event.target.value as NavigationProvider;
+            setPreferredMapProvider(provider);
+            setPreferredNavigationProvider(provider);
+          }}
+          className="min-h-11 min-w-0 w-36 shrink-0 rounded-xl border border-border bg-background px-2 text-sm text-foreground"
+        >
+          <option value="google">Google Maps</option>
+          <option value="waze">Waze</option>
+          <option value="apple">Apple Maps</option>
+          <option value="organic">Organic Maps</option>
+        </select>
+      </label>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-foreground/65">
         <span>
           {markers.length} de {markerSelection.total} posições disponíveis · {destinations.length + atlasDestinations.length} destinos na lista
