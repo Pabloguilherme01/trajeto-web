@@ -3,6 +3,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import * as routeSearch from "@/lib/readyRouteSearch";
 import ReadyRouteShortcuts from "./ReadyRouteShortcuts";
+const plannerPreload = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/primaryRoutes", () => ({ preparePrimaryRoute: plannerPreload }));
+
 import { LOCAL_READY_ROUTES, READY_ROUTE_STREET_POINTS } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
@@ -163,4 +166,14 @@ it("opens destination details without collapsing the ready-route list", () => {
   fireEvent.click(screen.getAllByText("Detalhes e opções do destino")[0]);
   expect(outer.open).toBe(true);
   expect(screen.getAllByRole("article")).toHaveLength(6);
+});
+
+it("preloads the planner from route cards without navigating until click", () => {
+  plannerPreload.mockClear();
+  render(<ReadyRouteShortcuts />);
+  open();
+  expect(plannerPreload).not.toHaveBeenCalled();
+  fireEvent.pointerEnter(screen.getAllByRole("button", { name: /^Calcular Centro/ })[0]);
+  expect(plannerPreload).toHaveBeenCalledWith("/planejar");
+  expect(navigate).not.toHaveBeenCalled();
 });
