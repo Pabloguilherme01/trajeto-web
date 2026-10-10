@@ -27,3 +27,32 @@ test("map is reachable sooner, with one clear reset at 320px", async ({ page }) 
   await expect(page.locator("#city-destinations")).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+
+test("deep-linked layers stay visible in the horizontal rail at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("mapa?camada=meio-ambiente", { waitUntil: "domcontentloaded" });
+  const rail = page.getByRole("group", { name: "Categorias do mapa" });
+  const active = rail.getByRole("button", { name: "Meio ambiente" });
+  await expect(active).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(async () => {
+    const bar = await rail.boundingBox();
+    const chip = await active.boundingBox();
+    if (!bar || !chip) return false;
+    return chip.x >= bar.x - 2 && chip.x + chip.width <= bar.x + bar.width + 2;
+  }).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test("empty search offers a one-tap way to reset or edit, without leaking position", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("mapa?camada=seguranca&q=zzz-destino-inexistente-123", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("Nenhum destino encontrado. Tente outro nome ou categoria.")).toBeVisible();
+  await page.getByRole("button", { name: "Corrigir busca" }).click();
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toBeFocused();
+  await page.getByRole("button", { name: "Ver todos os destinos" }).click();
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("");
+  await expect(page.getByRole("group", { name: "Categorias do mapa" }).getByRole("button", { name: "Tudo" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/\/mapa\/?$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});

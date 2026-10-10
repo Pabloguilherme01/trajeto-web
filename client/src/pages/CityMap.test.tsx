@@ -336,3 +336,32 @@ it("discards pending idle map warmup when the screen is closed", () => {
     else Reflect.deleteProperty(navigator, "serviceWorker");
   }
 });
+
+
+it("offers direct recovery and edit actions when a map search finds nothing", () => {
+  mapSearch.value = "?camada=seguranca&q=zzz-destino-inexistente-123";
+  render(<CityMap />);
+  expect(screen.getByText("Nenhum destino encontrado. Tente outro nome ou categoria.")).toBeTruthy();
+  const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
+  fireEvent.click(screen.getByRole("button", { name: "Ver todos os destinos" }));
+  expect(search.value).toBe("");
+  const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  expect(categories.getByRole("button", { name: "Tudo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/mapa$/), { replace: true });
+  expect(String(navigate.mock.lastCall?.[0])).not.toMatch(/lat=|lng=|origem=/);
+});
+
+it("focuses the editable search field from the no-results guidance", () => {
+  mapSearch.value = "?camada=seguranca&q=zzz-destino-inexistente-123";
+  render(<CityMap />);
+  const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" });
+  const original = search.scrollIntoView;
+  search.scrollIntoView = vi.fn();
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Corrigir busca" }));
+    expect(document.activeElement).toBe(search);
+    expect(search.scrollIntoView).toHaveBeenCalled();
+  } finally {
+    search.scrollIntoView = original;
+  }
+});
