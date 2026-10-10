@@ -192,6 +192,17 @@ it("adds every named road available in the bundled offline map without replacing
 });
 
 
+it("preserves road identities on repeated atlas builds with the shared lazy road index", async () => {
+  const { BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
+  const roadIds = () => buildCityAtlas(BUNDLED_CITY_ATLAS)
+    .filter(item => item.coordinateKind === "street-midpoint" && item.name === "Rua B")
+    .map(item => item.id)
+    .sort();
+  const first = roadIds();
+  expect(first).toHaveLength(2);
+  expect(roadIds()).toEqual(first);
+});
+
 it("retains disconnected Rua B locations instead of choosing one by name", async () => {
   const { BUNDLED_CITY_ATLAS } = await import("./cityAtlas");
   const roads = buildCityAtlas(BUNDLED_CITY_ATLAS).filter(item => item.name === "Rua B" && item.coordinateKind === "street-midpoint");
