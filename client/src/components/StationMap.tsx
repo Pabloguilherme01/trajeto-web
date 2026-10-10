@@ -11,6 +11,7 @@ import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
 import { stationMapKey } from "@/lib/stationMapKey";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export type StationMapItem = {
   id?: string;
@@ -145,21 +146,13 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [mapUnavailable, setMapUnavailable] = useState(false);
-  const [offline, setOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
+  const offline = !useOnlineStatus();
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
   const [resolvingCount, setResolvingCount] = useState(0);
 
   useEffect(() => {
     setResolvedStations(stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
   }, [stations]);
-
-  useEffect(() => {
-    const onOnline = () => setOffline(false);
-    const onOffline = () => setOffline(true);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
-  }, []);
 
   useEffect(() => {
     if (!ready || offline || !mapRef.current || !window.google?.maps?.places) return;
