@@ -230,6 +230,6 @@ it("skips ANP in the security layer and loads it when fuel markers are requested
   const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline test"));
   render(<CityMap />);
   expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(false);
-  fireEvent.click(screen.getByRole("button", { name: "Postos" }));
+  fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Postos" }));
   expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(true);
 });
