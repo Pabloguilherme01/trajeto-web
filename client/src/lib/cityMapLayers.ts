@@ -40,3 +40,16 @@ export function cityMapLayerUrl(query: string, layer: CityMapLayer): string {
   const suffix = params.toString();
   return appUrl("/mapa") + (suffix ? "?" + suffix : "");
 }
+
+
+/** Link atlas categories to the corresponding official service directory. */
+export function cityMapRelatedServicesUrl(layer: CityMapLayer): string {
+  const category = layer === "saude" || layer === "educacao" || layer === "seguranca"
+    ? layer
+    : layer === "meio-ambiente"
+      ? "ambiente"
+      : layer === "transporte"
+        ? "transito"
+        : null;
+  return appUrl("/servicos") + (category ? "?categoria=" + encodeURIComponent(category) : "");
+}
