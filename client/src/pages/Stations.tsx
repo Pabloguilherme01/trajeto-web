@@ -20,6 +20,7 @@ import { cacheOfflineAnpSnapshot, cacheOfflineMapStations, getOfflineAnpSnapshot
 import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices";
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
+import { serializeSemicolonCsv, downloadCsvFile } from "@/lib/csvSerialization";
 import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -671,10 +672,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       "qualidade_dado","origem_dado","observacao_cadastro","telefone_mapa","avaliacao_mapa","avaliacoes_mapa",
       "horario_mapa","bandeira_observada_mapa"
     ];
-    const csvValue = (value: unknown) => {
-      const text = value == null ? "" : String(value);
-      return '"' + text.replace(/"/g, '""') + '"';
-    };
     const rows = localDirectory.map(station => [
       station.id,
       station.displayName,
@@ -694,13 +691,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       station.mapData?.hours ?? "",
       station.mapData?.observedBrand ?? "",
     ]);
-    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "trajeto-postos-aguas-lindas-2026-09-30.csv";
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const csv = serializeSemicolonCsv([headers, ...rows]);
+    downloadCsvFile(csv, "trajeto-postos-aguas-lindas-2026-09-30.csv");
     toast.message(localDirectory.length + " cadastro(s) exportado(s).");
   };
 
@@ -713,14 +705,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const rows = anpRows.map(row => [
       row.codigoSimp,row.autorizacao,row.dataPublicacao,row.razaoSocial,row.cnpj,row.endereco,row.complemento,row.bairro,row.cep,row.uf,row.municipio,row.distribuidora,row.dataVinculacao,row.classe,row.produto,row.tancagem,row.unidadeMedidaTancagem,row.quantidadeBicos,row.latitude,row.longitude,row.latitudeAnp4c,row.longitudeAnp4c,row.validacao,row.estimativaAcuraciaM,row.srid,row.sistemaReferenciaCoordenadas,row.dataObtencao,row.origemInformacao,row.situacaoConstatada,row.observacao,row.statusSigaf
     ]);
-    const csvValue = (value: unknown) => '"' + (value == null ? "" : String(value)).replace(/"/g, '""') + '"';
-    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvValue).join(";")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "trajeto-aguas-lindas-anp-2026.csv";
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const csv = serializeSemicolonCsv([headers, ...rows]);
+    downloadCsvFile(csv, "trajeto-aguas-lindas-anp-2026.csv");
     toast.message(anpRows.length + " registro(s) ANP exportado(s).");
   };
 
