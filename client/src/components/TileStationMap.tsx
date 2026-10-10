@@ -15,6 +15,7 @@ import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import { stationMapKey } from "@/lib/stationMapKey";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { limitPolylinePoints, viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
@@ -114,23 +115,16 @@ export default function TileStationMap({
     return result;
   }, [drawable]);
 
-  const [offline, setOffline] = useState(() => !navigator.onLine);
+  const online = useOnlineStatus();
+  const offline = !online;
   const failedTileKeys = useRef(new Set<string>());
   useEffect(() => {
-    const update = () => {
-      setOffline(!navigator.onLine);
-      if (navigator.onLine) {
-        failedTileKeys.current.clear();
-        setTileErrors(0);
-      }
-    };
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
+    // The single shared subscription also clears transient tile errors when
+    // connectivity returns without forcing the map camera to remount.
+    if (!online) return;
+    failedTileKeys.current.clear();
+    setTileErrors(0);
+  }, [online]);
   const [groupKeys, setGroupKeys] = useState<string[]>([]);
   const groupItems = useMemo(() => groupKeys.flatMap(key => {
     const item = drawableByKey.get(key);
