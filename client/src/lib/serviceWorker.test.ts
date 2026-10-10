@@ -32,6 +32,19 @@ function recoverableWorker(missing: string[]) {
 }
 
 describe("service worker", () => {
+  it.each([false, true])("keeps preparation compatible with clients requesting progress: %s", async progress => {
+    const { worker } = recoverableWorker(["./assets/installed.js"]);
+    worker.fetch.mockResolvedValue(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    const receive = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "message")[1];
+    const postMessage = vi.fn();
+    let completion!: Promise<unknown>;
+    receive({ data: { type: "RESTORE_OFFLINE", ...(progress ? { progress } : {}) }, ports: [{ postMessage }], waitUntil: (promise: Promise<unknown>) => { completion = promise; } });
+    await completion;
+    expect(postMessage).toHaveBeenLastCalledWith(expect.objectContaining({ ready: true }));
+    if (progress) {
+      expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: "OFFLINE_PROGRESS", completed: 1, total: 1 }));
+    } else expect(postMessage).toHaveBeenCalledTimes(1);
+  });
   it("bounds offline installation downloads and waits for every asset", async () => {
     const worker = loadWorker();
     let pending = 0;

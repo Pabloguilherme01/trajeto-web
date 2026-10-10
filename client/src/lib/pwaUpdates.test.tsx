@@ -101,7 +101,7 @@ it("continues first offline preparation when installation takes more than 15 sec
   await expect(preparing).resolves.toEqual({ ready: true });
   expect(progress).toHaveBeenCalledWith({ stage: "downloading", completed: 1, total: 2 });
   expect(worker.postMessage).toHaveBeenCalledWith(
-    { type: "RESTORE_OFFLINE" },
+    { type: "RESTORE_OFFLINE", progress: true },
     expect.any(Array)
   );
 });

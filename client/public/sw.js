@@ -129,7 +129,11 @@ self.addEventListener("message", event => {
   }
   if (event.data?.type === "RESTORE_OFFLINE" && event.ports?.[0]) {
     const port = event.ports[0];
-    event.waitUntil(restoreOfflinePackage(progress => port.postMessage({ type: "OFFLINE_PROGRESS", ...progress })).then(status => port.postMessage(status)));
+    // Older pages expect one final response; progress requires explicit opt-in.
+    const notify = event.data.progress === true
+      ? progress => port.postMessage({ type: "OFFLINE_PROGRESS", ...progress })
+      : undefined;
+    event.waitUntil(restoreOfflinePackage(notify).then(status => port.postMessage(status)));
   }
 });
 

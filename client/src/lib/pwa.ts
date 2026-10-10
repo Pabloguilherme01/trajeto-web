@@ -137,7 +137,7 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
       finish({ ready: event.data?.ready === true, ...(typeof event.data?.businessesReady === "boolean" ? { businessesReady: event.data.businessesReady } : {}), ...(["update", "storage", "connection"].includes(reason) ? { reason } : {}) });
     };
     try {
-      worker.postMessage({ type }, [channel.port2]);
+      worker.postMessage({ type, ...(onProgress ? { progress: true } : {}) }, [channel.port2]);
     } catch {
       finish({ ready: false, reason: "unsupported" });
     }
