@@ -14,6 +14,7 @@ import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
+import { stationMapKey } from "@/lib/stationMapKey";
 import { limitPolylinePoints, viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
@@ -33,15 +34,6 @@ function tileUrl(z: number, x: number, y: number) {
   return TILE_URL_TEMPLATE.replace("{z}", String(z))
     .replace("{x}", String(x))
     .replace("{y}", String(y));
-}
-
-function stationKey(station: StationMapItem) {
-  return (
-    station.id ??
-    station.cnpj ??
-    station.placeId ??
-    `${station.name}|${station.lat}|${station.lng}`
-  );
 }
 
 function clampLat(lat: number) {
@@ -105,17 +97,20 @@ export default function TileStationMap({
 
   const singlePointKey = drawable.length === 1 ? `${drawable[0].lat},${drawable[0].lng}` : "";
   const drawableByKey = useMemo(
-    () => new Map(drawable.map(item => [stationKey(item), item] as const)),
+    () => new Map(drawable.map(item => [stationMapKey(item), item] as const)),
     [drawable]
   );
+  // Most city-map views disable the picker. Avoid copying every marker there.
   const pickerItems = useMemo(
-    () => drawable.map(station => ({ ...station, id: stationKey(station) })),
-    [drawable]
+    () => showDestinationPicker
+      ? drawable.map(station => ({ ...station, id: stationMapKey(station) }))
+      : [],
+    [drawable, showDestinationPicker]
   );
   const drawableWorld = useMemo(() => {
     const result = new Map<string, { x: number; y: number }>();
     for (const station of drawable)
-      result.set(stationKey(station), projectBase(station.lat, station.lng));
+      result.set(stationMapKey(station), projectBase(station.lat, station.lng));
     return result;
   }, [drawable]);
 
@@ -147,7 +142,7 @@ export default function TileStationMap({
   const [zoom, setZoom] = useState(13);
   const [center, setCenter] = useState(() => userCoords ?? DEFAULT_CENTER);
   const [selectedId, setSelectedId] = useState<string | null>(
-    drawable[0] ? stationKey(drawable[0]) : null
+    drawable[0] ? stationMapKey(drawable[0]) : null
   );
   const [size, setSize] = useState({ width: 320, height: 520 });
   const [tileErrors, setTileErrors] = useState(0);
@@ -230,7 +225,7 @@ export default function TileStationMap({
   useEffect(() => {
     if (!selectedId || !drawableByKey.has(selectedId)) {
       const next = drawable[0];
-      setSelectedId(next ? stationKey(next) : null);
+      setSelectedId(next ? stationMapKey(next) : null);
       if (next) {
         setFollowing(false);
         setCenter({ lat: next.lat, lng: next.lng });
@@ -350,9 +345,9 @@ export default function TileStationMap({
   const markerClusterPixels = useMemo(() => {
     const result = new Map<string, { x: number; y: number }>();
     for (const station of drawable) {
-      const base = drawableWorld.get(stationKey(station));
+      const base = drawableWorld.get(stationMapKey(station));
       if (!base) continue;
-      result.set(stationKey(station), {
+      result.set(stationMapKey(station), {
         x: base.x * clusterScale,
         y: base.y * clusterScale,
       });
@@ -364,9 +359,9 @@ export default function TileStationMap({
     () =>
       mapMarkerGroups(
         drawable,
-        item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
+        item => markerClusterPixels.get(stationMapKey(item)) ?? { x: -100000, y: -100000 },
         item =>
-          stationKey(item) === (selected ? stationKey(selected) : null) ||
+          stationMapKey(item) === (selected ? stationMapKey(selected) : null) ||
           ["origin", "destination"].includes(item.id ?? ""),
         width <= 480 ? 96 : 64
       ),
@@ -375,9 +370,9 @@ export default function TileStationMap({
   const markerPositions = useMemo(() => {
     const result = new Map<string, { left: number; top: number }>();
     for (const station of markerGroups.singles) {
-      const base = drawableWorld.get(stationKey(station));
+      const base = drawableWorld.get(stationMapKey(station));
       if (!base) continue;
-      result.set(stationKey(station), {
+      result.set(stationMapKey(station), {
         left: width / 2 + base.x * zoomScale - centerPx.x,
         top: height / 2 + base.y * zoomScale - centerPx.y,
       });
@@ -565,7 +560,7 @@ export default function TileStationMap({
   );
   const focusEndpoint = (point: (typeof drawable)[number]) => {
     setFollowing(false);
-    setSelectedId(stationKey(point));
+    setSelectedId(stationMapKey(point));
     setCenter({ lat: point.lat, lng: point.lng });
     setZoom(value => Math.max(15, value));
   };
@@ -621,7 +616,7 @@ export default function TileStationMap({
       {groupItems.length > 0 && <section aria-label="Lugares do grupo selecionado" className="relative z-20 border-b border-border bg-card p-3">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold">Escolha um lugar</h2><button type="button" onClick={() => setGroupKeys([])} className="min-h-11 rounded-xl border border-border px-3 text-sm">Fechar lista</button></div>
         <div className="grid max-h-52 gap-2 overflow-y-auto">
-          {groupItems.map(item => <button key={stationKey(item)} type="button" onClick={() => { setSelectedId(stationKey(item)); setGroupKeys([]); onSelectStation?.(item); }} className="min-h-11 rounded-xl border border-border px-3 py-2 text-left text-sm">{item.name}</button>)}
+          {groupItems.map(item => <button key={stationMapKey(item)} type="button" onClick={() => { setSelectedId(stationMapKey(item)); setGroupKeys([]); onSelectStation?.(item); }} className="min-h-11 rounded-xl border border-border px-3 py-2 text-left text-sm">{item.name}</button>)}
         </div>
       </section>}
       <div data-map-surface className={"relative isolate " + heightClassName}>
@@ -743,14 +738,14 @@ export default function TileStationMap({
               const top = height / 2 + worldY - centerPx.y;
               if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
               return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares e escolher na lista`} onPointerDown={event => event.stopPropagation()} onClick={() => {
-                setGroupKeys(group.items.map(stationKey));
+                setGroupKeys(group.items.map(stationMapKey));
                 setFollowing(false);
                 setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
               }} className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[3px] border-background bg-primary text-sm font-black text-primary-foreground shadow-md" style={{ left, top }}>{group.items.length}</button>;
             })}
             {markerGroups.singles.map(station => {
-              const position = markerPositions.get(stationKey(station));
+              const position = markerPositions.get(stationMapKey(station));
               if (!position) return null;
               if (
                 position.left < -30 ||
@@ -759,16 +754,16 @@ export default function TileStationMap({
                 position.top > height + 40
               )
                 return null;
-              const active = stationKey(station) === selectedId;
+              const active = stationMapKey(station) === selectedId;
               return (
                 <button
-                  key={stationKey(station)}
+                  key={stationMapKey(station)}
                   type="button"
                   className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   style={{ left: position.left, top: position.top, zIndex: active ? 10 : 1 }}
                   onPointerDown={event => event.stopPropagation()}
                   onClick={() => {
-                    setSelectedId(stationKey(station));
+                    setSelectedId(stationMapKey(station));
                     onSelectStation?.(station);
                   }}
                   aria-label={"Abrir " + station.name}
@@ -820,7 +815,7 @@ export default function TileStationMap({
           >
             {routeEndpoints.map(point => (
               <button
-                key={stationKey(point)}
+                key={stationMapKey(point)}
                 type="button"
                 onClick={() => focusEndpoint(point)}
                 aria-label={`${point.id === "origin" ? "Ver origem" : "Ver destino"}: ${point.name}`}
