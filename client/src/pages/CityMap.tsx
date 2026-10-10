@@ -2,7 +2,7 @@ import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import { Link, useLocation, useSearch } from "wouter";
@@ -44,8 +44,15 @@ export default function CityMap() {
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
   const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
   const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
-  const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
-  const groupedAnpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
+  // An atlas-only layer must not read, parse or fetch the ANP station catalog.
+  const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
+    cityMapNeedsAnp(initialLayer) ? getOfflineAnpSnapshot().rows : []
+  );
+  const needsAnp = !onlyStreets && cityMapNeedsAnp(category);
+  const groupedAnpStations = useMemo(
+    () => needsAnp ? groupAnpFuelRows(anpRows) : [],
+    [needsAnp, anpRows]
+  );
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
   // An atlas-only street deep link does not need the heavy business chunk.
   const businesses = useBusinessCatalog(!onlyStreets);
@@ -99,6 +106,10 @@ export default function CityMap() {
     };
   }, []);
   useEffect(() => {
+    if (!needsAnp) return;
+    // Restore the cached local directory when switching back from streets
+    // or a non-fuel layer. No network or storage access is needed otherwise.
+    if (!anpRows.length) setAnpRows(getOfflineAnpSnapshot().rows);
     const controller = new AbortController();
     void fetch(appUrl("/data/aguas-lindas-anp.json"), {
       signal: controller.signal,
@@ -120,7 +131,7 @@ export default function CityMap() {
       })
       .catch(() => {});
     return () => controller.abort();
-  }, []);
+  }, [needsAnp]);
   const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
   useEffect(() => {
     const params = new URLSearchParams(rawSearch);

@@ -215,3 +215,21 @@ it("keeps sourced environmental places in the list without inventing map coordin
   expect(screen.getByText(/camada tem destinos sem coordenadas verificadas/i)).toBeTruthy();
   expect(screen.queryByText(/O mapa de ruas precisa de conexão/)).toBeNull();
 });
+
+it("skips ANP network loading when opening the streets map directly", () => {
+  mapSearch.value = "?camada=ruas&q=Avenida+Bras%C3%ADlia";
+  const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline test"));
+  render(<CityMap />);
+  expect(screen.getByRole("button", { name: "Ruas e avenidas" }).getAttribute("aria-pressed")).toBe("true");
+  expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(false);
+  expect(screen.getAllByText("Avenida Brasília", { selector: "article p" }).length).toBeGreaterThan(0);
+});
+
+it("skips ANP in the security layer and loads it when fuel markers are requested", () => {
+  mapSearch.value = "?camada=seguranca";
+  const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline test"));
+  render(<CityMap />);
+  expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(false);
+  fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Postos" }));
+  expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(true);
+});
