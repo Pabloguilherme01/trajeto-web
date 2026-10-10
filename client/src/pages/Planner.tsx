@@ -36,35 +36,12 @@ import { PRIVATE_LOCATION_LABEL, consumePrivateLocationHandoff, isCurrentLocatio
 import { buildReusableTripPlannerUrl, buildSavedRoutePlannerUrl } from "@/lib/tripLinks";
 import { PLANNER_EXPERIENCE_OPTIONS, plannerExperienceDetail, resolvePlannerExperience, type PlannerExperienceMode } from "@/lib/plannerModes";
 import { effectivePlannerMode, plannerActionLabel, routeFreshness, shouldAutoRefreshSavedRoute } from "@/lib/routeExperience";
+import { formatArrival, formatDistance, formatDuration } from "@/lib/routeDisplay";
 
 type ServerPlannedRoute = NonNullable<ReturnType<typeof trpc.routes.plan.useMutation>["data"]>;
 type PlannedRoute = Omit<ServerPlannedRoute, "route"> & {
   route: ServerPlannedRoute["route"] & { destinationReference?: { name: string; sourceLabel: string; precision: string } };
 };
-
-function formatDuration(seconds: number | null | undefined) {
-  if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
-  if (seconds === 0) return "0 min";
-  const total = Math.max(1, Math.round(seconds / 60));
-  if (total >= 60) {
-    const hours = Math.floor(total / 60);
-    const minutes = total % 60;
-    return minutes ? hours + "h " + minutes + "min" : hours + "h";
-  }
-  return total + " min";
-}
-
-function formatDistance(meters: number | null | undefined) {
-  if (meters == null || !Number.isFinite(meters)) return "—";
-  return meters >= 1000
-    ? (meters / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km"
-    : Math.round(meters).toLocaleString("pt-BR") + " m";
-}
-
-function formatArrival(seconds: number | null | undefined) {
-  if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—";
-  return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(Date.now() + seconds * 1000));
-}
 
 const PLANNER_QUICK_PLACES = LOCAL_ROUTE_PRESETS.filter(item =>
   ["centro", "rodoviaria", "prefeitura", "upa", "heal", "aguas-lindas-shopping", "posto-ponteio"].includes(item.id)
