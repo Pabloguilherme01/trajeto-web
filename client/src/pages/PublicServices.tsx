@@ -222,6 +222,8 @@ export default function PublicServices() {
     };
   }, [browsing, selectedService, offlineRoutesChecked]);
 
+  // Once the optional local resolver finishes, the offline filter updates
+  // automatically instead of reporting a false zero on initial paint.
   const visibleReadyRoutes = useMemo(() => {
     const groupedRoutes =
       readyRouteGroup === "todos"
@@ -526,10 +528,10 @@ export default function PublicServices() {
               type="button"
               onClick={() => openReadyRoutesFromSummary(true)}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={`Mostrar ${offlineReadyRouteIds.size} destinos offline`}
+              aria-label={offlineRoutesChecked ? `Mostrar ${offlineReadyRouteIds.size} destinos offline` : "Verificar destinos offline"}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
-                {offlineReadyRouteIds.size}
+                {offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}
               </span>
               <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
                 destinos offline
