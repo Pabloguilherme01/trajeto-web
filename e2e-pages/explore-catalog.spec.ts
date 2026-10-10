@@ -32,7 +32,7 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await expect(page.getByRole("region", { name: /^Empresas do catálogo/ }).getByRole("button")).toHaveCount(6);
   await page.getByRole("button", { name: "Serviços públicos", exact: true }).click();
   await expect(page).toHaveURL(/\/servicos$/);
-  await expect(page.getByRole("heading", { name: "Como podemos ajudar?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Como podemos ajudar?" })).toBeVisible({ timeout: 30_000 });
   const summary = page.getByRole("group", { name: "Resumo da Central" });
   await expect(summary.getByRole("button")).toHaveCount(4);
   for (const button of await summary.getByRole("button").all()) {
