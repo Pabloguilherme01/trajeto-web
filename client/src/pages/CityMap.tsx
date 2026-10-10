@@ -28,10 +28,10 @@ import {
 } from "@/lib/localGeocoding";
 import { getLocalRoutePresets } from "@/lib/localRoutePresets";
 import {
-  groupAnpFuelRows,
   normalizeAnpFuelRow,
   type AnpFuelRow,
 } from "@shared/anpRevendedores";
+import { cachedGroupAnpFuelRows } from "@/lib/anpGroupCache";
 import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { appUrl } from "@/lib/appUrl";
 import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
@@ -78,7 +78,7 @@ export default function CityMap() {
   );
   const needsAnp = !onlyStreets && cityMapNeedsAnp(category);
   const groupedAnpStations = useMemo(
-    () => needsAnp ? groupAnpFuelRows(anpRows) : [],
+    () => needsAnp ? cachedGroupAnpFuelRows(anpRows) : [],
     [needsAnp, anpRows]
   );
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
