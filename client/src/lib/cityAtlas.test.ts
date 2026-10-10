@@ -224,3 +224,48 @@ it("covers every normalized offline street name and records the OSM way and date
   expect(added.sourceUrl).toMatch(/^https:\/\/www.openstreetmap.org\/way\/\d+$/);
   expect(added.coordinateVerifiedAt).toBe(pack.retrievedAt);
 });
+
+it("reuses snapshot-based route lookups without leaking state across atlas versions", () => {
+  const first = snapshot();
+  Object.assign(first.items[0], {
+    lat: -15.75, lng: -48.28,
+    coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02",
+  });
+  const second = snapshot();
+  Object.assign(second.items[0], {
+    lat: -15.76, lng: -48.29,
+    coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02",
+  });
+  expect(resolveCityAtlasPoint(first, "Escola Municipal Teste")).toEqual({ lat: -15.75, lng: -48.28 });
+  expect(resolveCityAtlasPoint(first, "Escola Municipal Teste")).toEqual({ lat: -15.75, lng: -48.28 });
+  expect(resolveCityAtlasPoint(second, "Escola Municipal Teste")).toEqual({ lat: -15.76, lng: -48.29 });
+  expect(resolveCityAtlasPoint(first, "Escola Municipal Teste")).toEqual({ lat: -15.75, lng: -48.28 });
+});
+
+it("keeps approximate roads exact-only and ambiguity safe after repeated cached queries", () => {
+  const value = snapshot();
+  Object.assign(value.items[0], {
+    id: "road-one", name: "Rua Nova Teste", address: "Rua Nova Teste",
+    destination: "Rua Nova Teste", lat: -15.75, lng: -48.28,
+    coordinateKind: "street-midpoint",
+    coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02",
+  });
+  value.items.push({ ...value.items[0], id: "road-two", lat: -15.78 });
+  for (let n = 0; n < 3; n++) {
+    expect(resolveCityAtlasPoint(value, "Rua Nova Teste")).toBeNull();
+    expect(resolveCityAtlasPoint(value, "Rua Nova Teste, 250")).toBeNull();
+  }
+});
+
+it("does not let a separate caller's atlas array mutation change route resolution", () => {
+  const value = snapshot();
+  Object.assign(value.items[0], {
+    lat: -15.75, lng: -48.28,
+    coordinateSourceId: "official", coordinateVerifiedAt: "2026-10-02",
+  });
+  expect(resolveCityAtlasPoint(value, "Escola Municipal Teste")).toEqual({ lat: -15.75, lng: -48.28 });
+  const independentList = buildCityAtlas(value);
+  independentList.splice(0, independentList.length);
+  expect(buildCityAtlas(value).length).toBeGreaterThan(0);
+  expect(resolveCityAtlasPoint(value, "Escola Municipal Teste")).toEqual({ lat: -15.75, lng: -48.28 });
+});
