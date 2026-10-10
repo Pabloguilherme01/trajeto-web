@@ -5,6 +5,7 @@ import {
   getOfflinePackageStatus,
   prepareOfflineAccess,
   type OfflinePreparation,
+  type OfflineProgress,
 } from "@/lib/pwa";
 
 const preparationMessages: Record<
@@ -28,6 +29,7 @@ export default function OfflineReadiness() {
   const [businessesReady, setBusinessesReady] = useState(false);
   const [checking, setChecking] = useState(true);
   const [preparing, setPreparing] = useState(false);
+  const [progress, setProgress] = useState<OfflineProgress | null>(null);
   const [feedback, setFeedback] = useState("");
   const [storageStatus, setStorageStatus] = useState<OfflineStorageStatus | null>(null);
   const [requestingPersistence, setRequestingPersistence] = useState(false);
@@ -47,9 +49,10 @@ export default function OfflineReadiness() {
   };
   const prepare = async () => {
     setPreparing(true);
+    setProgress(null);
     setFeedback("");
     try {
-      const result = await prepareOfflineAccess();
+      const result = await prepareOfflineAccess(setProgress);
       setReady(result.ready);
       setBusinessesReady(result.businessesReady === true || result.ready);
       if (!result.ready)
@@ -58,6 +61,7 @@ export default function OfflineReadiness() {
       setFeedback(preparationMessages.connection);
     } finally {
       setPreparing(false);
+      setProgress(null);
     }
   };
   const keepOfflineData = async () => {
@@ -105,7 +109,13 @@ export default function OfflineReadiness() {
             className="mt-2 text-sm text-white/80"
           >
             {preparing
-              ? "Preparando o conteúdo para usar sem internet…"
+              ? progress?.stage === "waiting"
+                ? "Concluindo a instalação do app…"
+                : progress?.stage === "downloading"
+                  ? `Salvando arquivos: ${progress.completed} de ${progress.total}…`
+                  : progress?.stage === "verifying"
+                    ? "Conferindo os arquivos para usar sem internet…"
+                    : "Preparando o conteúdo para usar sem internet…"
               : checking
                 ? "Conferindo o conteúdo salvo…"
                 : ready
@@ -113,6 +123,9 @@ export default function OfflineReadiness() {
                   : feedback ||
                     "Abra o site com internet ou toque em Preparar acesso offline."}
           </p>
+          {preparing && progress?.stage === "downloading" && (
+            <progress aria-label="Arquivos preparados para uso offline" value={progress.completed} max={progress.total} className="mt-3 h-2 w-full max-w-full accent-[#C7FF3C]" />
+          )}
           <p className="mt-2 text-sm leading-relaxed text-white/70">
             Busca, empresas por nome ou CNPJ, serviços públicos, contatos, postos, ruas locais e rotas salvas
             ficam disponíveis após a preparação. O novo modo Offline também

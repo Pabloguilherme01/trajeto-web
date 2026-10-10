@@ -1,9 +1,11 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
+import { namedRoadsPlugin } from "./scripts/namedRoadsPlugin";
 
 const templateRoot = path.resolve(import.meta.dirname);
 
 export default defineConfig({
+  plugins: [namedRoadsPlugin()],
   root: templateRoot,
   resolve: {
     alias: {

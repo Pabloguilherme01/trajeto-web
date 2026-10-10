@@ -34,6 +34,21 @@ async function prepareButton() {
 }
 
 describe("offline preparation feedback", () => {
+  it("shows real download progress and waits for final verification", async () => {
+    let complete!: (value: { ready: boolean }) => void;
+    state.prepare.mockImplementation(async (notify: (progress: unknown) => void) => {
+      notify({ stage: "downloading", completed: 3, total: 10 });
+      return new Promise(resolve => { complete = resolve; });
+    });
+    render(<OfflineReadiness />);
+    fireEvent.click(await prepareButton());
+    await screen.findByText("Salvando arquivos: 3 de 10…");
+    expect(screen.getByRole("progressbar").getAttribute("value")).toBe("3");
+    expect(screen.queryByText("Pronto para usar sem internet neste aparelho.")).toBeNull();
+    await act(async () => complete({ ready: true }));
+    await screen.findByText("Pronto para usar sem internet neste aparelho.");
+    expect(screen.queryByRole("progressbar")).toBeNull();
+  });
   it("reports ready only after successful preparation", async () => {
     state.prepare.mockResolvedValue({ ready: true });
     render(<OfflineReadiness />);

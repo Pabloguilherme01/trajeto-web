@@ -8,15 +8,30 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   Element.prototype.scrollIntoView = vi.fn();
 });
-it("opens the directory in batches and keeps search results complete", async () => {
+it("opens the directory in batches and keeps all search matches accessible", async () => {
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);
   expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
   fireEvent.click(screen.getByRole("button", { name: "Mostrar mais 18 serviços" }));
   expect(document.querySelectorAll("#service-results article")).toHaveLength(36);
   fireEvent.change(screen.getByRole("textbox", { name: "Buscar serviços públicos" }), { target: { value: "ESF" } });
+  while (screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })) {
+    fireEvent.click(screen.getByRole("button", { name: /Mostrar mais .* serviços/ }));
+  }
   expect(screen.getByRole("heading", { name: "ESF Setor 09" })).toBeTruthy();
   expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
+}, 15000);
+
+it("batches broad filters and retains expansion across delayed effects", async () => {
+  window.history.replaceState({}, "", "/servicos?recurso=contato");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar mais 18 serviços" }));
+  await waitFor(() => expect(document.querySelectorAll("#service-results article")).toHaveLength(36));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar serviços públicos" }), { target: { value: "ESF" } });
+  expect(document.querySelectorAll("#service-results article").length).toBeLessThanOrEqual(18);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar serviços públicos" }), { target: { value: "" } });
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(36);
 }, 15000);
 
 it("batches recovery for an unknown service link and searches the complete directory", () => {

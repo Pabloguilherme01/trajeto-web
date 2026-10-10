@@ -74,7 +74,11 @@ it("continues first offline preparation when installation takes more than 15 sec
   }
   const worker = {
     postMessage: vi.fn((message: { type?: string }, ports?: Array<{ postMessage: (data: unknown) => void }>) => {
-      if (message.type === "RESTORE_OFFLINE") ports?.[0]?.postMessage({ ready: true });
+      if (message.type === "RESTORE_OFFLINE") {
+        ports?.[0]?.postMessage({ type: "OFFLINE_PROGRESS", stage: "downloading", completed: 1, total: 2 });
+        ports?.[0]?.postMessage({ type: "OFFLINE_PROGRESS", stage: "verifying" });
+        ports?.[0]?.postMessage({ ready: true });
+      }
     }),
   };
   const serviceWorker = Object.assign(new EventTarget(), {
@@ -88,12 +92,14 @@ it("continues first offline preparation when installation takes more than 15 sec
   vi.stubGlobal("MessageChannel", MockMessageChannel);
 
   const { prepareOfflineAccess } = await import("./pwa");
-  const preparing = prepareOfflineAccess();
+  const progress = vi.fn();
+  const preparing = prepareOfflineAccess(progress);
   await vi.advanceTimersByTimeAsync(20000);
   serviceWorker.controller = worker;
   serviceWorker.dispatchEvent(new Event("controllerchange"));
 
   await expect(preparing).resolves.toEqual({ ready: true });
+  expect(progress).toHaveBeenCalledWith({ stage: "downloading", completed: 1, total: 2 });
   expect(worker.postMessage).toHaveBeenCalledWith(
     { type: "RESTORE_OFFLINE" },
     expect.any(Array)
