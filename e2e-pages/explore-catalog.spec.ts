@@ -16,6 +16,14 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await expect(page).toHaveURL(/mapa\?q=/);
   await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).not.toHaveValue("");
   await expect(page.getByRole("article")).toHaveCount(1, { timeout: 30_000 });
+  await page.getByRole("group", { name: "Filtros rápidos do mapa" }).getByRole("button", { name: "Farmácias", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("farmacias");
+  const pharmacyCatalog = page.getByRole("region", { name: "Mais lugares de Águas Lindas" });
+  await expect(pharmacyCatalog.getByRole("article")).toHaveCount(24);
+  await expect(pharmacyCatalog.getByText(/Dados da empresa/, { exact: true }).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: "test-results/home-map-pharmacies.png", fullPage: false });
   await page.getByRole("button", { name: "Explorar", exact: true }).click();
   const menu = page.getByRole("dialog");
   await expect(menu.getByRole("region", { name: "Lugares e comércio" })).toBeVisible();
@@ -23,6 +31,11 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await expect(page).toHaveURL(/buscar\?q=mercados$/);
   await expect(page.getByRole("region", { name: /^Empresas do catálogo/ }).getByRole("button")).toHaveCount(6);
   await page.getByRole("button", { name: "Serviços públicos", exact: true }).click();
+  await expect(page.locator("#ready-routes article")).toHaveCount(12);
+  await page.getByRole("button", { name: /Mostrar mais rotas/ }).click();
+  await expect(page.locator("#ready-routes article")).toHaveCount(24);
+  await page.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("baixar empresa");
+  await expect(page.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeVisible();
   await page.getByRole("button", { name: "Filtrar por Documentos", exact: true }).click();
   await expect(page).toHaveURL(/categoria=documentos/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);

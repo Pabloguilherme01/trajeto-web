@@ -6,7 +6,7 @@ export type QuickFilterPreset = {
 };
 
 export type CategorizedQuickFilterPreset = QuickFilterPreset & {
-  category: "saude" | "combustivel" | "compras" | "educacao" | "servicos" | "transporte";
+  category: "alimentacao" | "saude" | "combustivel" | "compras" | "educacao" | "servicos" | "transporte";
 };
 
 export const CITY_MAP_QUICK_FILTERS: CategorizedQuickFilterPreset[] = [
@@ -16,6 +16,10 @@ export const CITY_MAP_QUICK_FILTERS: CategorizedQuickFilterPreset[] = [
   { label: "Escolas", value: "escola", category: "educacao" },
   { label: "Prefeitura", value: "prefeitura", category: "servicos" },
   { label: "Shopping", value: "shopping", category: "compras" },
+  { label: "Comer", value: "alimentacao", category: "alimentacao" },
+  { label: "Farmácias", value: "farmacias", category: "compras" },
+  { label: "Oficinas", value: "oficinas", category: "servicos" },
+  { label: "Padarias", value: "padarias", category: "compras" },
   { label: "Rodoviária", value: "rodoviaria", category: "transporte" },
 ];
 

@@ -1,3 +1,5 @@
+import { searchBusinesses } from "@/lib/businessSearch";
+import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
@@ -148,7 +150,6 @@ export default function CityMap() {
   useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
   const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
-  const atlas = useMemo(() => [...baseAtlas, ...businesses.items], [baseAtlas, businesses.items]);
   useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
   const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
     if (category === "todos") return "todos";
@@ -162,16 +163,17 @@ export default function CityMap() {
     const routeKeys = new Set(
       destinations.map(item => normalizeCatalogText(item.destination))
     );
-    return filterCityAtlas(atlas, deferredQuery, atlasLayer).filter(item => {
+    const companyMatches = onlyStreets ? [] : deferredQuery.trim() ? searchBusinesses(businesses.items, deferredQuery) : businesses.items;
+    return [...filterCityAtlas(baseAtlas, deferredQuery, atlasLayer), ...companyMatches.filter(item => atlasLayer === "todos" || item.category === atlasLayer)].filter(item => {
       if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
       const target = item.destination ?? item.address ?? "";
-      const key = normalizeCatalogText(target);
+      const key = cachedDestinationKey(item);
       return Boolean(target) && (!key || !routeKeys.has(key));
     });
-  }, [atlas, atlasLayer, destinations, deferredQuery, onlyStreets]);
+  }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets]);
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
-  const markers = useMemo(() => {
+  const markerSelection = useMemo(() => {
     const publicPoints = destinations.flatMap(item => {
       const point = resolveLocalGeocodePoint(item.destination);
       return point
@@ -186,21 +188,6 @@ export default function CityMap() {
           ]
         : [];
     });
-    const atlasPoints = atlasDestinations.flatMap(item =>
-      typeof item.lat === "number" && typeof item.lng === "number"
-        ? [{
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            address: item.destination ?? item.address ?? item.name,
-            source: "local" as const,
-            coordinateKind: item.coordinateKind,
-            coordinateLabel: item.coordinateLabel,
-            lat: item.lat,
-            lng: item.lng,
-          }]
-        : []
-    );
     const stations =
       !onlyStreets && (category === "todos" || category === "combustivel")
         ? groupAnpFuelRows(anpRows).flatMap(station => {
@@ -225,24 +212,16 @@ export default function CityMap() {
               : [];
           })
         : [];
-    const unique = new Map(
-      [...publicPoints, ...atlasPoints, ...stations].map(point => [
-        point.name.toLocaleLowerCase("pt-BR") +
-          "|" +
-          point.lat +
-          "|" +
-          point.lng,
-        point,
-      ])
-    );
-    const all = [...unique.values()];
-    if (all.length <= 200) return all;
-    const companies = all.filter(item => item.id?.startsWith("business-"));
-    if (!companies.length) return all.slice(0, 200);
-    const landmarks = all.filter(item => !item.id?.startsWith("business-")).slice(0, 80);
-    const slots = Math.min(200 - landmarks.length, companies.length);
-    return [...landmarks, ...Array.from({ length: slots }, (_, index) => companies[Math.floor(index * companies.length / slots)])];
+    const selection = selectCityMapItems<CityMapCandidate>([publicPoints, atlasDestinations, stations]);
+    return { total: selection.total, points: selection.items.map(item => ({
+      id: item.id, name: item.name, category: item.category,
+      address: item.destination ?? item.address ?? item.name,
+      source: item.source ?? "local" as const,
+      coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
+      lat: item.lat!, lng: item.lng!,
+    })) };
   }, [destinations, atlasDestinations, category, deferredQuery, anpRows, onlyStreets]);
+  const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
   const jumpTo = (id: string) => {
@@ -404,8 +383,8 @@ export default function CityMap() {
       </section>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-foreground/65">
         <span>
-          {markers.length} posições exibidas (até 200) · {destinations.length + atlasDestinations.length} destinos
-          na lista
+          {markers.length} de {markerSelection.total} posições disponíveis · {destinations.length + atlasDestinations.length} destinos na lista
+          {markerSelection.total > markers.length && " · amostra no mapa: filtre ou busque para ver um destino específico"}
         </span>
         <Link
           href={appUrl("/mapa/postos")}

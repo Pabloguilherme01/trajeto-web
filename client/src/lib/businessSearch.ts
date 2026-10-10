@@ -25,7 +25,7 @@ function categoryItems(items: CityAtlasItem[], category: CityAtlasLayer) {
 }
 const terms: Record<string, string[]> = {
   farmacia: ["farmaceutic"], farmacias: ["farmaceutic"], mercado: ["supermercado", "minimercado", "mercearia"],
-  mercados: ["supermercado", "minimercado", "mercearia"], oficinas: ["reparacao mecanica"], padarias: ["padaria"],
+  mercados: ["supermercado", "minimercado", "mercearia"], oficina: ["reparacao mecanica"], oficinas: ["reparacao mecanica"], padaria: ["padaria"], padarias: ["padaria"],
 };
 export function searchBusinesses(items: CityAtlasItem[], query: string) {
   const value = normalizeCatalogText(query);
