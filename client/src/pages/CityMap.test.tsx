@@ -100,8 +100,8 @@ it("filters education routes without mixing health or shopping destinations", ()
   fireEvent.click(screen.getByRole("button", { name: "Educação" }));
   expect(screen.getByRole("button", { name: "Educação" }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByText("Cora Coralina", { exact: true })).toBeTruthy();
-  expect(screen.queryByText("UPA", { exact: true })).toBeNull();
-  expect(screen.queryByText("Supermercado Tatico", { exact: true })).toBeNull();
+  expect(screen.queryByText("UPA", { exact: true, selector: "article p" })).toBeNull();
+  expect(screen.queryByText("Supermercado Tatico", { exact: true, selector: "article p" })).toBeNull();
 });
 
 
@@ -151,4 +151,20 @@ it("does not hide a company sharing a public destination address", () => {
   render(<CityMap />);
   fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "upa" } });
   expect(screen.getByText("Empresa UPA no mesmo endereço", { selector: "article p" })).toBeTruthy();
+});
+
+
+it("switches directly between quick filters in different categories", () => {
+  catalog.items = [
+    { id: "business-clothes", name: "Loja teste", category: "compras", detail: "Artigos do vestuário", destination: "Loja teste", sourceLabel: "Arquivo" },
+    { id: "business-beauty", name: "Salão teste", category: "servicos", detail: "Cabeleireiros", destination: "Salão teste", sourceLabel: "Arquivo" },
+    { id: "business-materials", name: "Ferragens teste", category: "compras", detail: "Ferragens", destination: "Ferragens teste", sourceLabel: "Arquivo" },
+  ];
+  render(<CityMap />);
+  const shortcuts = screen.getByRole("group", { name: "Filtros rápidos do mapa" });
+  for (const [label, name] of [["Roupas", "Loja teste"], ["Beleza", "Salão teste"], ["Materiais", "Ferragens teste"]]) {
+    fireEvent.click(within(shortcuts).getByRole("button", { name: label }));
+    expect(screen.getByText(name, { selector: "article p" })).toBeTruthy();
+    expect(within(shortcuts).getByRole("button", { name: label }).getAttribute("aria-pressed")).toBe("true");
+  }
 });

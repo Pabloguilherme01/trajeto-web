@@ -29,6 +29,8 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
     await expect(pharmacyCatalog.getByRole("article").first()).toContainText(activity);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: "test-results/home-map-more-filters.png", fullPage: false });
   await page.getByRole("button", { name: "Explorar", exact: true }).click();
   const menu = page.getByRole("dialog");
   await expect(menu.getByRole("region", { name: "Lugares e comércio" })).toBeVisible();
