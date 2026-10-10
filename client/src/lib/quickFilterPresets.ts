@@ -11,6 +11,10 @@ export type CategorizedQuickFilterPreset = QuickFilterPreset & {
 
 export const CITY_MAP_QUICK_FILTERS: CategorizedQuickFilterPreset[] = [
   { label: "UPA", value: "upa", category: "saude" },
+  { label: "UBS", value: "ubs", category: "saude" },
+  { label: "Hospitais", value: "hospital", category: "saude" },
+  { label: "Creches", value: "creche", category: "educacao" },
+  { label: "CRAS", value: "cras", category: "servicos" },
   { label: "Postos", value: "posto", category: "combustivel" },
   { label: "Mercados", value: "mercado", category: "compras" },
   { label: "Escolas", value: "escola", category: "educacao" },
