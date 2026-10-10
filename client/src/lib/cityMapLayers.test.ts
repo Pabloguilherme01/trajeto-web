@@ -5,6 +5,8 @@ describe("city map layers shared by the atlas and navigation", () => {
   it("exposes the sourced security and environment layers without changing preset categories", () => {
     expect(CITY_MAP_CATEGORIES.some(item => item.value === "seguranca")).toBe(true);
     expect(CITY_MAP_CATEGORIES.some(item => item.value === "meio-ambiente")).toBe(true);
+    expect(CITY_MAP_CATEGORIES.findIndex(item => item.value === "seguranca")).toBeLessThan(CITY_MAP_CATEGORIES.findIndex(item => item.value === "educacao"));
+    expect(CITY_MAP_CATEGORIES.findIndex(item => item.value === "meio-ambiente")).toBeLessThan(CITY_MAP_CATEGORIES.findIndex(item => item.value === "combustivel"));
     expect(cityMapAtlasLayer("seguranca")).toBe("seguranca");
     expect(cityMapAtlasLayer("meio-ambiente")).toBe("meio-ambiente");
     expect(cityMapAtlasLayer("centro")).toBe("referencia");
