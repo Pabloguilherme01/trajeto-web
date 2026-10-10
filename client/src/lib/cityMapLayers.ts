@@ -77,3 +77,14 @@ export function publicServiceMapLayer(category: PublicServiceCategory | "todos")
 export function cityMapNeedsAnp(layer: CityMapLayer): boolean {
   return layer === "todos" || layer === "combustivel";
 }
+
+
+/**
+ * Imported companies exist only in these atlas categories. Security, fuel,
+ * city references and street-only views are served from official/local
+ * datasets, so they should never download the 21k-record business catalog.
+ */
+export function cityMapNeedsBusinessCatalog(layer: CityMapLayer): boolean {
+  return layer !== "ruas" && layer !== "seguranca" &&
+    layer !== "combustivel" && layer !== "centro";
+}
