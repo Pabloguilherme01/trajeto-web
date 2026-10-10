@@ -4,6 +4,7 @@ import { MapPin, ArrowUpRight, ArrowLeft, Search, Stethoscope, ShoppingBag, Land
 import { LOCAL_READY_ROUTES, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { filterReadyRoutes } from "@/lib/readyRouteSearch";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
+import { preparePrimaryRoute } from "@/lib/primaryRoutes";
 import { DestinationActions } from "@/components/DestinationActions";
 import { readyRouteDestination } from "@/lib/unifiedDestination";
 import QuickFilterChips from "@/components/QuickFilterChips";
@@ -68,6 +69,7 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
     setVisibleCount(6);
   };
   const openRoute = (route: typeof LOCAL_READY_ROUTES[number], reverse = false) => {
+    preparePrimaryRoute("/planejar");
     navigate(buildReusableTripPlannerUrl(reverse ? { origin: route.destination, destination: route.origin } : route, { auto: true }) + "&modo=" + mode + (offlineActive ? "&experiencia=offline" : ""));
   };
   return <details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)} className="premium-panel mt-4 min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl" data-compact={compact || undefined}>
@@ -160,8 +162,8 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
             </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => openRoute(route)} aria-label={"Calcular " + route.label} className="min-h-11 min-w-0 break-words rounded-xl bg-primary px-2 text-xs font-black text-primary-foreground"><span className="inline-flex items-center justify-center gap-1">Ir até aqui<ArrowUpRight className="size-3.5 shrink-0" /></span></button>
-            <button type="button" onClick={() => openRoute(route, true)} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-border px-2 text-xs font-bold text-foreground"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
+            <button type="button" onClick={() => openRoute(route)} onPointerEnter={() => preparePrimaryRoute("/planejar")} onFocus={() => preparePrimaryRoute("/planejar")} onPointerDown={() => preparePrimaryRoute("/planejar")} aria-label={"Calcular " + route.label} className="min-h-11 min-w-0 break-words rounded-xl bg-primary px-2 text-xs font-black text-primary-foreground"><span className="inline-flex items-center justify-center gap-1">Ir até aqui<ArrowUpRight className="size-3.5 shrink-0" /></span></button>
+            <button type="button" onClick={() => openRoute(route, true)} onPointerEnter={() => preparePrimaryRoute("/planejar")} onFocus={() => preparePrimaryRoute("/planejar")} onPointerDown={() => preparePrimaryRoute("/planejar")} aria-label={`Calcular volta: ${to} → ${from}`} className="min-h-11 min-w-0 break-words rounded-xl border border-border px-2 text-xs font-bold text-foreground"><span className="inline-flex items-center justify-center gap-1"><ArrowLeft className="size-3.5 shrink-0" />Fazer a volta</span></button>
           </div>
           <details className="mt-2 border-t border-border pt-2">
             <summary className="min-h-11 cursor-pointer text-xs font-bold text-foreground/70">Detalhes e opções do destino</summary>
