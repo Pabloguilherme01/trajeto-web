@@ -1,4 +1,4 @@
-import { createCatalogSearchIndex, matchesCatalogTerms, normalizeCatalogText } from "./catalogSearch";
+import { searchPublicServicesIn } from "./publicServiceSearch";
 
 export type PublicServiceCategory =
   | "saude"
@@ -3251,45 +3251,11 @@ export const PUBLIC_SERVICE_SHORTCUTS = [
   },
 ] as const;
 
-// The catalog is a bundled snapshot. Normalize its three search scopes once,
-// rather than rebuilding text and token sets for every service on each keypress.
-const SERVICE_SEARCH_INDEX = PUBLIC_SERVICES.map(service => {
-  const concise = [service.name, service.category, service.actionLabel, ...(service.keywords ?? [])];
-  const complete = [
-    service.name, service.description, service.address, service.phone,
-    service.extraPhone, service.guidance, service.actionLabel, service.hours,
-    ...(service.keywords ?? []),
-  ];
-  return {
-    service,
-    concise: createCatalogSearchIndex(concise),
-    complete: createCatalogSearchIndex(complete),
-    withCategory: createCatalogSearchIndex([...complete, service.category]),
-  };
-});
-
+// Keep the public API stable for other pages, while deferring text indexing
+// until someone actually searches in the offline public-services directory.
 export function searchPublicServices(
   query = "",
   category: PublicServiceCategory | "todos" = "todos"
 ) {
-  // Citizens search for a need rather than an agency name. Ignore only linking
-  // words; keep every substantive word so specific needs remain specific.
-  const search = normalizeCatalogText(query)
-    .split(" ")
-    .filter(
-      term => !["de", "da", "do", "das", "dos", "e", "para"].includes(term)
-    )
-    .join(" ");
-  const terms = search.replace(/[ºª]/g, "").split(" ").filter(Boolean);
-  const conciseIntent = /^[a-z0-9]{2,4}$/.test(search);
-  const includeCategoryIntent = terms.length <= 2;
-  return SERVICE_SEARCH_INDEX.filter(entry => {
-    const { service } = entry;
-    if (category !== "todos" && service.category !== category) return false;
-    // Exact agency searches should stay concise even when other services
-    // mention the agency only as referral guidance.
-    if (search === "cras" && !service.id.startsWith("cras-")) return false;
-    if (search === "cpf" && service.id !== "receita-federal-pav") return false;
-    return matchesCatalogTerms(terms, conciseIntent ? entry.concise : includeCategoryIntent ? entry.withCategory : entry.complete);
-  }).map(entry => entry.service);
+  return searchPublicServicesIn(PUBLIC_SERVICES, query, category);
 }
