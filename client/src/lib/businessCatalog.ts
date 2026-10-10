@@ -1,8 +1,8 @@
-import { normalizeCatalogText } from "./catalogSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 import { prepareCityAtlasSearch } from "./cityAtlasSearch";
 import { setLoadedBusinessCatalog, hasBusinessName } from "./businessCatalogState";
 import { loadCatalogChunks } from "./catalogChunks";
+import { resolveBusinessPointFromCatalog } from "./businessPointIndex";
 
 const parts = import.meta.glob("../data/businesses/part-*.json", { import: "default" });
 export const BUSINESS_CATALOG_TOTAL = 21486;
@@ -62,13 +62,5 @@ export { getLoadedBusinessCatalog } from "./businessCatalogState";
 
 /** Exact unique business identity only: a shared street/CEP never identifies an entrance. */
 export function resolveBusinessPoint(value: string) {
-  const query = normalizeCatalogText(value);
-  if (!query) return null;
-  const digits = value.replace(/\D/g, "");
-  const matches = catalog.filter(item => item.business && (
-    (digits.length === 14 && digits === item.business.cnpj.replace(/\D/g, "")) ||
-    [item.name, item.business.legalName, item.business.tradeName].filter(hasBusinessName).some(name => name && normalizeCatalogText(name) === query)
-  ));
-  if (matches.length !== 1 || typeof matches[0].lat !== "number" || typeof matches[0].lng !== "number") return null;
-  return { lat: matches[0].lat, lng: matches[0].lng };
+  return resolveBusinessPointFromCatalog(catalog, value);
 }
