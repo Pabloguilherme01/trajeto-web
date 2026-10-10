@@ -19,5 +19,5 @@ export function useBusinessCatalog(enabled = true) {
     });
     return () => { active = false; };
   }, [attempt, enabled]);
-  return { items, loading, error, retry: () => setAttempt(v => v + 1) };
+  return { items, loading: enabled && loading, error: enabled && error, retry: () => setAttempt(v => v + 1) };
 }

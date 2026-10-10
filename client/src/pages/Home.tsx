@@ -19,6 +19,8 @@ import { localDataEvent } from "@/lib/localData";
 export default function Home() {
   const [, setLocation] = useLocation();
   const track = useProductEvents();
+  const [exploreMounted, setExploreMounted] = useState(false);
+  const [resourcesMounted, setResourcesMounted] = useState(false);
   const [homeSearch, setHomeSearch] = useState("");
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -256,7 +258,7 @@ export default function Home() {
 
         </section>
 
-        <details className="mobile-disclosure mt-4"><summary>Explore a cidade <ArrowRight className="size-4" /></summary><div className="mt-3"><DailyModeSelector /></div>
+        <details className="mobile-disclosure mt-4" onToggle={event => { if (event.currentTarget.open) setExploreMounted(true); }}><summary>Explore a cidade <ArrowRight className="size-4" /></summary>{exploreMounted && <><div className="mt-3"><DailyModeSelector /></div>
         <section className="mt-5" aria-labelledby="local-routes-title">
           <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 sm:flex-nowrap sm:gap-3">
             <div>
@@ -341,13 +343,14 @@ export default function Home() {
           </div>
         </section>
 
+        </>}
         </details>
-        <details className="mt-4 rounded-[1.35rem] border border-border/10 bg-card p-4">
+        <details onToggle={event => { if (event.currentTarget.open) setResourcesMounted(true); }} className="mt-4 rounded-[1.35rem] border border-border/10 bg-card p-4">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm font-bold">
             <span>Recursos do aparelho</span>
             <span className="text-xs font-bold uppercase tracking-[.12em] text-foreground/60">opcional</span>
           </summary>
-          <div className="mt-3"><TripReadinessCard /></div>
+          {resourcesMounted && <div className="mt-3"><TripReadinessCard /></div>}
         </details>
 
         {recentSearches.length > 0 && (

@@ -216,10 +216,25 @@ function ResultCard({
   );
 }
 
+const searchTypes = [
+  { value: "todos", label: "Tudo" },
+  { value: "services", label: "Serviços" },
+  { value: "businesses", label: "Empresas" },
+  { value: "stations", label: "Postos" },
+  { value: "places", label: "Lugares" },
+  { value: "routes", label: "Rotas" },
+  { value: "data", label: "Dados e transporte" },
+] as const;
+type SearchType = typeof searchTypes[number]["value"];
+function readSearchType(value: string | null): SearchType {
+  return searchTypes.find(item => item.value === value)?.value ?? "todos";
+}
+
 export default function SearchPage() {
   const [, setLocation] = useLocation();
   const rawSearch = useSearch();
   const params = useMemo(() => new URLSearchParams(rawSearch), [rawSearch]);
+  const [searchType, setSearchType] = useState<SearchType>(() => readSearchType(params.get("tipo")));
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState(() => params.get("q") || "");
   const [query, setQuery] = useState(() => (params.get("q") || "").trim());
@@ -255,19 +270,44 @@ export default function SearchPage() {
 
   useEffect(() => {
     const next = params.get("q") || "";
+    setSearchType(readSearchType(params.get("tipo")));
     setInput(next);
     setQuery(next.trim());
     setResultLimit(6);
   }, [params]);
 
   const companies = useBusinessCatalog(query.trim().length >= 2);
-  const businessResults = useMemo(() => searchBusinesses(companies.items, query), [companies.items, query]);
-  const results = useMemo(() => getUniversalSearchResults(query), [query]);
+  const allBusinesses = useMemo(() => searchBusinesses(companies.items, query), [companies.items, query]);
+  const allResults = useMemo(() => getUniversalSearchResults(query), [query]);
+  const businessResults = searchType === "todos" || searchType === "businesses" ? allBusinesses : [];
+  const results = {
+    services: searchType === "todos" || searchType === "services" ? allResults.services : [],
+    stations: searchType === "todos" || searchType === "stations" ? allResults.stations : [],
+    places: searchType === "todos" || searchType === "places" ? allResults.places : [],
+    routes: searchType === "todos" || searchType === "routes" ? allResults.routes : [],
+    dataResources: searchType === "todos" || searchType === "data" ? allResults.dataResources : [],
+    transitFares: searchType === "todos" || searchType === "data" ? allResults.transitFares : [],
+    total: searchType === "todos" ? allResults.total : searchType === "businesses" ? 0
+      : searchType === "data" ? allResults.dataResources.length + allResults.transitFares.length
+      : allResults[searchType].length,
+  };
+  const typeCounts = { todos: allResults.total + allBusinesses.length, businesses: allBusinesses.length,
+    services: allResults.services.length, stations: allResults.stations.length, places: allResults.places.length,
+    routes: allResults.routes.length, data: allResults.dataResources.length + allResults.transitFares.length };
+  const selectType = (type: SearchType) => {
+    setSearchType(type);
+    setResultLimit(6);
+    const nextParams = new URLSearchParams();
+    if (query) nextParams.set("q", query);
+    if (type !== "todos") nextParams.set("tipo", type);
+    setLocation(appUrl("/buscar") + (nextParams.size ? "?" + nextParams.toString() : ""));
+  };
   const defaultRoutes = useMemo(() => getLocalRoutePresets().slice(0, 4), []);
   const search = (value: string) => {
     const next = value.trim();
     setInput(next);
     setQuery(next);
+    setSearchType("todos");
     setResultLimit(6);
     if (next) rememberSearch(next);
     setLocation(
@@ -425,7 +465,14 @@ export default function SearchPage() {
         )}
 
         {query ? (
-          <div className="mt-5 space-y-5" aria-label="Resultados da busca">
+          <div className="mt-3 space-y-2" aria-label="Resultados da busca">
+            <div role="group" aria-label="Tipos de resultado" className="mobile-scroll-x flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1">
+              {searchTypes.map(type => <button key={type.value} type="button" aria-pressed={searchType === type.value}
+                onClick={() => selectType(type.value)}
+                className={"min-h-11 shrink-0 rounded-xl border px-3 text-sm font-bold " + (searchType === type.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-foreground")}>
+                {type.label} <span className="text-xs">({typeCounts[type.value]})</span>
+              </button>)}
+            </div>
             <p
               role="status"
               aria-live="polite"
