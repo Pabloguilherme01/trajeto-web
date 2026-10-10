@@ -1,7 +1,7 @@
 import { normalizeCatalogText } from "./catalogSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 import { prepareCityAtlasSearch } from "./cityAtlasSearch";
-import { setLoadedBusinessCatalog } from "./businessCatalogState";
+import { setLoadedBusinessCatalog, hasBusinessName } from "./businessCatalogState";
 import { loadCatalogChunks } from "./catalogChunks";
 
 const parts = import.meta.glob("../data/businesses/part-*.json", { import: "default" });
@@ -32,7 +32,7 @@ export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
     if (![cnpj, name, legalName, tradeName, sector, cnae, activity, address, precision, opened, statusDate, size, mei, simples, nature].every(v => typeof v === "string") || !/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(cnpj) || !name.trim()) return [];
     const hasPoint = typeof lat === "number" && Number.isFinite(lat) && lat > -16.1 && lat < -15.3 && typeof lng === "number" && Number.isFinite(lng) && lng > -48.7 && lng < -47.9;
     return [{
-      id: "business-" + cnpj.replace(/\D/g, ""), name, category: categoryForSector(sector),
+      id: "business-" + cnpj.replace(/\D/g, ""), name: [tradeName, name, legalName].find(hasBusinessName)?.trim() ?? "Empresa sem nome informado", category: categoryForSector(sector),
       address, destination: address,
       detail: sector + " · " + activity + " · CNPJ " + cnpj + " · Ativa no arquivo importado",
       sourceLabel: "CSV fornecido · coordenadas atribuídas ao CNEFE no arquivo",
@@ -67,7 +67,7 @@ export function resolveBusinessPoint(value: string) {
   const digits = value.replace(/\D/g, "");
   const matches = catalog.filter(item => item.business && (
     (digits.length === 14 && digits === item.business.cnpj.replace(/\D/g, "")) ||
-    [item.name, item.business.legalName, item.business.tradeName].some(name => name && normalizeCatalogText(name) === query)
+    [item.name, item.business.legalName, item.business.tradeName].filter(hasBusinessName).some(name => name && normalizeCatalogText(name) === query)
   ));
   if (matches.length !== 1 || typeof matches[0].lat !== "number" || typeof matches[0].lng !== "number") return null;
   return { lat: matches[0].lat, lng: matches[0].lng };

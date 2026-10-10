@@ -1,5 +1,6 @@
 import { filterCityAtlas } from "./cityAtlasSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
+import { hasBusinessName } from "./businessCatalogState";
 import { normalizeCatalogText } from "./catalogSearch";
 
 const categories: Record<string, CityAtlasLayer> = {
@@ -17,6 +18,7 @@ function categoryItems(items: CityAtlasItem[], category: CityAtlasLayer) {
       group.push(item);
       index.set(item.category, group);
     }
+    for (const group of index.values()) group.sort((a, b) => Number(hasBusinessName(b.business?.tradeName ?? "")) - Number(hasBusinessName(a.business?.tradeName ?? "")));
     categoryIndex.set(items, index);
   }
   return index.get(category) ?? [];
