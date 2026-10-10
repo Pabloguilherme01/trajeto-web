@@ -40,6 +40,7 @@ import {
 } from "@/lib/localRoutePresets";
 import { localDataEvent } from "@/lib/localData";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { searchBusinesses } from "@/lib/businessSearch";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
 
@@ -241,7 +242,7 @@ export default function SearchPage() {
   const [recents, setRecents] = useState(getRecentSearches);
   const [expanded, setExpanded] = useState(false);
   const [resultLimit, setResultLimit] = useState(6);
-  const [online, setOnline] = useState(() => navigator.onLine);
+  const online = useOnlineStatus();
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -253,18 +254,13 @@ export default function SearchPage() {
         inputRef.current?.blur();
     };
     const refreshRecents = () => setRecents(getRecentSearches());
-    const refreshNetwork = () => setOnline(navigator.onLine);
     window.addEventListener("keydown", onKey);
     window.addEventListener(mobilePreferenceEvent, refreshRecents);
     window.addEventListener(localDataEvent, refreshRecents);
-    window.addEventListener("online", refreshNetwork);
-    window.addEventListener("offline", refreshNetwork);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener(mobilePreferenceEvent, refreshRecents);
       window.removeEventListener(localDataEvent, refreshRecents);
-      window.removeEventListener("online", refreshNetwork);
-      window.removeEventListener("offline", refreshNetwork);
     };
   }, []);
 

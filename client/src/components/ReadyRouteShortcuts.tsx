@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { MapPin, ArrowUpRight, ArrowLeft, Search, Stethoscope, ShoppingBag, Landmark, Bus, GraduationCap, Fuel, Utensils } from "lucide-react";
 import { LOCAL_READY_ROUTES, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
 import { filterReadyRoutes } from "@/lib/readyRouteSearch";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { buildReusableTripPlannerUrl } from "@/lib/tripLinks";
 import { preparePrimaryRoute } from "@/lib/primaryRoutes";
 import { DestinationActions } from "@/components/DestinationActions";
@@ -39,17 +40,8 @@ export default function ReadyRouteShortcuts({ compact = false, initialMode = "dr
   const [mode, setMode] = useState(initialMode);
   const [visibleCount, setVisibleCount] = useState(6);
   const [offlineOnly, setOfflineOnly] = useState(false);
-  const [online, setOnline] = useState(() => typeof navigator === "undefined" ? true : navigator.onLine !== false);
+  const online = useOnlineStatus();
   useEffect(() => setMode(initialMode), [initialMode]);
-  useEffect(() => {
-    const refreshConnection = () => setOnline(navigator.onLine !== false);
-    window.addEventListener("online", refreshConnection);
-    window.addEventListener("offline", refreshConnection);
-    return () => {
-      window.removeEventListener("online", refreshConnection);
-      window.removeEventListener("offline", refreshConnection);
-    };
-  }, []);
   const offlineActive = offlineOnly || !online;
   const filtered = useMemo(
     () => expanded ? filterReadyRoutes(query, category, originId).sort((a, b) => readyRoutePriority(a) - readyRoutePriority(b)) : [],

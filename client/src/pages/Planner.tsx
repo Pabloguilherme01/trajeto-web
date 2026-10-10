@@ -11,6 +11,7 @@ import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { localDataEvent } from "@/lib/localData";
@@ -110,7 +111,7 @@ export default function Planner() {
   const liveTrip = useLiveTrip(planned?.route ?? null);
   const remaining = liveTrip.active && liveTrip.progress && !liveTrip.progress.offRoute ? liveTrip.progress : null;
   const [error, setError] = useState<string | null>(null);
-  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const online = useOnlineStatus();
   const [locating, setLocating] = useState(false);
   const [originPrivate, setOriginPrivate] = useState(false);
   const privateOriginRef = useRef<string | null>(null);
@@ -188,15 +189,6 @@ export default function Planner() {
     };
   }, []);
 
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
 
   useEffect(() => {
     const refreshFavorites = () =>
