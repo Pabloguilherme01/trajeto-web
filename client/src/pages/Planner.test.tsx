@@ -10,7 +10,11 @@ const state = vi.hoisted(() => ({
   navigate: vi.fn(), mutate: vi.fn(), lookup: vi.fn(), publicRoute: vi.fn(), privateRoute: vi.fn(), offlineRoute: vi.fn(),
   saveOffline: vi.fn(), listOffline: vi.fn(),
 }));
-vi.mock("wouter", () => ({ useLocation: () => [state.path, state.navigate], useSearch: () => state.search }));
+vi.mock("wouter", () => ({
+  useLocation: () => [state.path, state.navigate],
+  useSearch: () => state.search,
+  Link: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a>,
+}));
 vi.mock("@/lib/trpc", () => ({ trpc: { routes: { plan: { useMutation: () => ({ mutateAsync: state.mutate, isPending: false }) } } } }));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
 vi.mock("@/lib/runtimeCapabilities", () => ({ isGitHubPagesRuntime: () => state.staticRuntime, supportsLiveRouting: () => !state.staticRuntime }));

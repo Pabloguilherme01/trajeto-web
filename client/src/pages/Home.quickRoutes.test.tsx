@@ -4,7 +4,10 @@ import { afterEach, expect, it, vi } from "vitest";
 import Home from "./Home";
 import { LOCAL_READY_ROUTES } from "@/lib/localRoutePresets";
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
-vi.mock("wouter", () => ({ useLocation: () => ["/", navigate] }));
+vi.mock("wouter", () => ({
+  useLocation: () => ["/", navigate],
+  Link: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a>,
+}));
 vi.mock("@/hooks/useProductEvents", () => ({ useProductEvents: () => vi.fn() }));
 vi.mock("@/components/TripReadinessCard", () => ({ default: () => null }));
 vi.mock("@/components/DailyModeSelector", () => ({ default: () => null }));

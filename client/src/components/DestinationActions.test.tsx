@@ -3,6 +3,9 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DestinationActions } from "./DestinationActions";
+const plannerPreload = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/primaryRoutes", () => ({ preparePrimaryRoute: plannerPreload }));
+
 import { setPreferredNavigationProvider } from "@/lib/mobileTools";
 import { toggleGenericDestinationFavorite } from "@/lib/unifiedDestinationStore";
 
@@ -127,4 +130,22 @@ it("reports blocked storage without claiming a save and clears the warning after
   fireEvent.click(screen.getByRole("button", { name: /salvar destino/i }));
   expect(screen.queryByRole("alert")).toBeNull();
   expect(screen.getByRole("button", { name: /destino salvo/i }).getAttribute("aria-pressed")).toBe("true");
+});
+
+it("preloads the planner only on intent to navigate to or from a destination", () => {
+  plannerPreload.mockClear();
+  render(<DestinationActions destination={destination} />);
+  expect(plannerPreload).not.toHaveBeenCalled();
+  fireEvent.pointerEnter(screen.getByRole("link", { name: /Ir até aqui/i }));
+  fireEvent.focus(screen.getByRole("link", { name: /Ir daqui/i }));
+  expect(plannerPreload).toHaveBeenCalledTimes(2);
+  expect(plannerPreload).toHaveBeenCalledWith("/planejar");
+});
+
+it("navigates internally through the SPA router instead of a full page load", () => {
+  const push = vi.spyOn(window.history, "pushState");
+  render(<DestinationActions destination={destination} />);
+  fireEvent.click(screen.getByRole("link", { name: /Ir até aqui/i }));
+  expect(push).toHaveBeenCalled();
+  push.mockRestore();
 });
