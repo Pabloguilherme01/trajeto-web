@@ -2,7 +2,7 @@ import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import { Link, useLocation, useSearch } from "wouter";
@@ -44,6 +44,8 @@ export default function CityMap() {
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
   const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
   const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
+  const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
+  const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
     cityMapNeedsAnp(initialLayer) ? getOfflineAnpSnapshot().rows : []
@@ -54,8 +56,8 @@ export default function CityMap() {
     [needsAnp, anpRows]
   );
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
-  // An atlas-only street deep link does not need the heavy business chunk.
-  const businesses = useBusinessCatalog(!onlyStreets);
+  // Keep the 21k-company chunk out of layers that cannot display it.
+  const businesses = useBusinessCatalog(needsBusinessCatalog);
   const [visibleCount, setVisibleCount] = useState(24);
   const [preferredMapProvider, setPreferredMapProvider] = useState<NavigationProvider>(() =>
     getPreferredNavigationProvider()
@@ -141,7 +143,6 @@ export default function CityMap() {
     setCategory(selected === "ruas" ? "todos" : selected);
   }, [rawSearch]);
   const deferredQuery = useDeferredValue(query);
-  const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
   const syncMapUrl = (nextQuery: string, layer: CityMapLayer) => {
     const previous = new URLSearchParams(rawSearch);
     const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")));
@@ -184,13 +185,13 @@ export default function CityMap() {
       const key = cachedDestinationKey(item);
       return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
     });
-    const companies = onlyStreets ? [] : deferredQuery.trim()
+    const companies = !needsBusinessCatalog ? [] : deferredQuery.trim()
       ? searchBusinesses(businesses.items, deferredQuery).filter(item =>
           (atlasLayer === "todos" || item.category === atlasLayer) && Boolean(item.destination ?? item.address ?? "")
         )
       : businessesForMapLayer(businesses.items, atlasLayer);
     return [...publicAtlas, ...companies];
-  }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets]);
+  }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets, needsBusinessCatalog]);
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
   const markerSelection = useMemo(() => {
@@ -283,8 +284,8 @@ export default function CityMap() {
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
         Busque um destino e veja sua rota no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{onlyStreets ? "Camada de ruas · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
-      {!onlyStreets && businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{!needsBusinessCatalog ? "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      {needsBusinessCatalog && businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <section className="mt-5" aria-labelledby="city-search-label">
         <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-foreground/65">Buscar na cidade</label>
         <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-border/10 bg-card px-3">
