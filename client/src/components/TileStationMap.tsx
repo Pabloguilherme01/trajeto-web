@@ -17,6 +17,7 @@ import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import { stationMapKey } from "@/lib/stationMapKey";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { limitPolylinePoints, viewportTileBounds } from "@/lib/mapPresentation";
+import { mapPointBounds } from "@/lib/mapGeometry";
 
 const ROUTE_STYLES = {
   teal: { label: "Verde petróleo", color: "#147b88", width: 5 },
@@ -499,16 +500,10 @@ export default function TileStationMap({
 
   const fitStations = () => {
     if (!drawable.length && !routePoints.length) return;
-    const points = [
-      ...(routePoints.length > 1 ? routePoints : drawable),
-      ...(userCoords ? [userCoords] : []),
-    ];
-    const minLat = Math.min(...points.map(p => p.lat)),
-      maxLat = Math.max(...points.map(p => p.lat));
-    const minLng = Math.min(...points.map(p => p.lng)),
-      maxLng = Math.max(...points.map(p => p.lng));
-    const a = projectBase(minLat, minLng);
-    const b = projectBase(maxLat, maxLng);
+    const bounds = mapPointBounds(routePoints.length > 1 ? routePoints : drawable, userCoords);
+    if (!bounds) return;
+    const a = projectBase(bounds.minLat, bounds.minLng);
+    const b = projectBase(bounds.maxLat, bounds.maxLng);
     const spanX = Math.max(Number.EPSILON, Math.abs(b.x - a.x));
     const spanY = Math.max(Number.EPSILON, Math.abs(b.y - a.y));
     const availableX = Math.max(80, width - 80);

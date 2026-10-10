@@ -56,3 +56,36 @@ export function isAguasLindasRoutePoint(point?: MapPoint | null): point is MapPo
     point.lng < -47.9
   );
 }
+
+
+export type MapPointBounds = {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+};
+
+/**
+ * Scan any route length with constant auxiliary memory. Avoid Math.min(...arr)
+ * and four temporary arrays: the spread can overflow the JS argument limit
+ * when imported route geometry has tens of thousands of points.
+ */
+export function mapPointBounds(
+  points: readonly MapPoint[],
+  extraPoint?: MapPoint | null,
+): MapPointBounds | null {
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  const include = (point: MapPoint) => {
+    if (!isMapPoint(point)) return;
+    minLat = Math.min(minLat, point.lat);
+    maxLat = Math.max(maxLat, point.lat);
+    minLng = Math.min(minLng, point.lng);
+    maxLng = Math.max(maxLng, point.lng);
+  };
+  for (const point of points) include(point);
+  if (extraPoint) include(extraPoint);
+  return Number.isFinite(minLat) ? { minLat, maxLat, minLng, maxLng } : null;
+}
