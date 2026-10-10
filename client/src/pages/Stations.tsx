@@ -4,6 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { matchesCatalogText } from "@/lib/catalogSearch";
+import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
@@ -22,16 +23,6 @@ import { loadAguasLindasAnpPrices, indexAnpPricesByCnpj } from "@/lib/anpPrices"
 import type { AnpPriceSnapshot } from "@/lib/anpPrices";
 import { stationCatalogStatusLabel } from "@/lib/stationEntity";
 import { coarsenCoordinatePoint } from "@/lib/locationPrivacy";
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const toRad = (value: number) => value * Math.PI / 180;
-  const earthKm = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * earthKm * Math.asin(Math.sqrt(a));
-}
 
 function isBroadAguasLindasQuery(value: string) {
   const normalized = value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -205,8 +196,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
           stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
         const aCoords = getCoords(a);
         const bCoords = getCoords(b);
-        const aDistance = aCoords ? haversineKm(userCoords.lat, userCoords.lng, aCoords.lat, aCoords.lng) : Number.POSITIVE_INFINITY;
-        const bDistance = bCoords ? haversineKm(userCoords.lat, userCoords.lng, bCoords.lat, bCoords.lng) : Number.POSITIVE_INFINITY;
+        const aDistance = aCoords ? distanceKm(userCoords, aCoords) : Number.POSITIVE_INFINITY;
+        const bDistance = bCoords ? distanceKm(userCoords, bCoords) : Number.POSITIVE_INFINITY;
         return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
       }
       if (directorySort === "price") {
@@ -378,8 +369,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
   const stations = userCoords && nearby
     ? [...stationBase].sort((a, b) => {
-        const aDistance = haversineKm(userCoords.lat, userCoords.lng, a.lat, a.lng);
-        const bDistance = haversineKm(userCoords.lat, userCoords.lng, b.lat, b.lng);
+        const aDistance = distanceKm(userCoords, a);
+        const bDistance = distanceKm(userCoords, b);
         return aDistance - bDistance;
       })
     : stationBase;
@@ -993,7 +984,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   distanceKm={(() => {
                     if (!userCoords) return null;
                     const point = stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
-                    return point ? haversineKm(userCoords.lat, userCoords.lng, point.lat, point.lng) : null;
+                    return point ? distanceKm(userCoords, point) : null;
                   })()}
                   onToggleSaved={stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude) ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
