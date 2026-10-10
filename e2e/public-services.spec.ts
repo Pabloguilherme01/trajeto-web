@@ -59,7 +59,8 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   const organic = libraryCard.getByRole("button", { name: /no Organic Maps/ });
   await expect(organic).toBeVisible();
   await expect(organic).toContainText("Organic · carro");
-  await expect(routes.getByText("1 destinos neste filtro", { exact: true })).toBeVisible();
+  await expect(routes.getByRole("status")).toContainText("1 destinos neste filtro · 1 exibidos");
+  await expect(routes.locator("article")).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await routes.getByRole("button", { name: "Limpar busca de rotas" }).click();
   await expect(search).toHaveValue("");
