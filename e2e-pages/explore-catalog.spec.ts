@@ -10,6 +10,7 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await page.getByRole("button", { name: "Mostrar mais resultados" }).click();
   await expect(companies.getByRole("button")).toHaveCount(18);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "test-results/home-food-catalog.png", fullPage: false });
   await companies.getByRole("button").first().click();
   await expect(page).toHaveURL(/mapa\?q=/);

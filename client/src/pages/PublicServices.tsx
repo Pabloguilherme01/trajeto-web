@@ -642,7 +642,7 @@ export default function PublicServices() {
           aria-label="Filtrar catálogo"
           className="premium-card mt-3 scroll-mt-4 rounded-[1.6rem] border border-border bg-card p-3 sm:p-4"
         >
-          <div role="group" aria-label="Categorias mais usadas" className="mb-2 grid grid-cols-3 gap-2">
+          <div role="group" aria-label="Categorias mais usadas" className="mb-2 grid grid-cols-2 gap-2 min-[420px]:grid-cols-3">
             {PUBLIC_SERVICE_CATEGORIES.filter(item => ["todos", "saude", "documentos", "trabalho", "assistencia", "agua-energia"].includes(item.id)).map(item => <button key={item.id} type="button" aria-label={"Filtrar por " + item.shortLabel} aria-pressed={category === item.id} onClick={() => applyCategory(item.id)} className={"min-h-11 min-w-0 rounded-xl px-2 py-2 text-xs font-bold break-words " + (category === item.id ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}>{item.shortLabel}</button>)}
           </div>
           <details ref={filterRef} className="service-filter-disclosure">

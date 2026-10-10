@@ -199,7 +199,7 @@ function ResultCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block break-words text-sm font-bold">{title}</span>
-        <span className="mt-1 block line-clamp-2 break-words text-sm leading-relaxed text-foreground/75">
+        <span className="mt-1 line-clamp-2 break-words text-sm leading-relaxed text-foreground/75">
           {detail}
         </span>
         {source && (
