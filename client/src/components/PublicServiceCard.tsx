@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ArrowRight,
   Search,
@@ -90,11 +91,11 @@ export default function PublicServiceCard({
     Boolean(service.actionUrl) &&
     (expandedActions ||
       resource === "online" ||
-      (!primaryContact && !service.mapQuery));
+      !primaryContact);
   const officialActionIsPrimary =
     showOfficialAction &&
     Boolean(service.actionUrl) &&
-    (resource === "online" || (!primaryContact && !service.mapQuery));
+    (resource === "online" || !primaryContact);
   const showEmail = Boolean(service.email) && expandedActions;
   const hasMoreOptions =
     !expandedActions &&
@@ -102,7 +103,8 @@ export default function PublicServiceCard({
       Boolean(service.actionUrl && !showOfficialAction) ||
       Boolean(service.email && !showEmail) ||
       (secondaryContacts.length > 0 && !showSecondaryContacts) ||
-      Boolean(primaryContact));
+      Boolean(primaryContact) ||
+      Boolean(officialActionIsPrimary));
   const saved = favorite;
   return (
     <article
@@ -175,7 +177,7 @@ export default function PublicServiceCard({
           <button
             type="button"
             onClick={() => openMaps(service)}
-            className="min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground"
+            className="min-h-11 min-w-0 break-words rounded-xl bg-primary px-2 text-sm font-bold text-primary-foreground"
           >
             <MapPinned className="mr-1.5 inline size-3.5" />
             Planejar rota
@@ -222,7 +224,7 @@ export default function PublicServiceCard({
               · {primaryContact.number}
             </span>
           </a>
-        ) : (
+        ) : !officialActionIsPrimary ? (
           <button
             type="button"
             onClick={() => void shareService(service)}
@@ -237,7 +239,7 @@ export default function PublicServiceCard({
             <Share2 className="size-3.5" />
             Compartilhar
           </button>
-        )}
+        ) : null}
       </div>
       <div
         className="mt-3 flex flex-wrap gap-1.5 text-xs font-bold text-muted-foreground"
@@ -379,13 +381,13 @@ export default function PublicServiceCard({
           {service.email}
         </a>
       )}
-      {expandedActions && (primaryContact || service.mapQuery) && (
+      {expandedActions && (primaryContact || service.mapQuery || officialActionIsPrimary) && (
         <div
           role="group"
           aria-label="Outras ações do serviço"
           className="mt-2 grid grid-cols-2 gap-2"
         >
-          {expandedActions && primaryContact && (
+          {expandedActions && (primaryContact || officialActionIsPrimary) && (
             <button
               type="button"
               onClick={() => void shareService(service)}
@@ -491,7 +493,7 @@ export default function PublicServiceCard({
                   </span>
                 </a>
               ))}
-            {primaryContact && (
+            {(primaryContact || officialActionIsPrimary) && (
               <button
                 type="button"
                 onClick={() => void shareService(service)}
@@ -511,7 +513,9 @@ export default function PublicServiceCard({
         rel="noopener noreferrer"
         className="mt-2 flex min-h-10 items-center justify-center text-center text-xs font-bold text-foreground/65 hover:text-foreground"
       >
-        <BadgeCheck className="mr-1.5 inline size-3.5 text-accent" />
+        {service.verifiedAt
+          ? <BadgeCheck className="mr-1.5 inline size-3.5 text-accent" />
+          : <ExternalLink className="mr-1.5 inline size-3.5 text-muted-foreground" />}
         Fonte: {service.sourceLabel}
         {service.verifiedAt
           ? " · conferido em " + service.verifiedAt
