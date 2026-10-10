@@ -35,3 +35,13 @@ it("reuses bounded alias results and keeps identities isolated across catalogs",
   expect(searchBusinesses(items, digits)).toEqual([company]);
   expect(searchBusinesses(items, company.business!.cnpj.replace(/[./-]/g, " "))).toEqual([company]);
 });
+
+
+it("matches a CNPJ by identity rather than another company's descriptive text", async () => {
+  const items = await loadBusinessCatalog();
+  const company = items[0];
+  const digits = company.business!.cnpj.replace(/\D/g, "");
+  const unrelated = { ...items[1], name: "Referência " + digits, keywords: [digits] };
+  expect(searchBusinesses([unrelated, company], digits)).toEqual([company]);
+  expect(searchBusinesses([unrelated], digits)).toEqual([]);
+});

@@ -36,6 +36,17 @@ const terms: Record<string, readonly string[]> = {
 };
 // Only finite, predefined filters are cached; free-text searches do not grow a cache.
 const aliasResults = new WeakMap<CityAtlasItem[], Map<string, CityAtlasItem[]>>();
+const cnpjIndexes = new WeakMap<CityAtlasItem[], Map<string, CityAtlasItem>>();
+function companyByCnpj(items: CityAtlasItem[], digits: string) {
+  let index = cnpjIndexes.get(items);
+  if (!index) {
+    index = new Map();
+    for (const item of items) if (item.business) index.set(item.business.cnpj.replace(/\D/g, ""), item);
+    cnpjIndexes.set(items, index);
+  }
+  const company = index.get(digits);
+  return company ? [company] : [];
+}
 export function searchBusinesses(items: CityAtlasItem[], query: string) {
   const value = normalizeCatalogText(query);
   if (!value) return [];
@@ -45,7 +56,7 @@ export function searchBusinesses(items: CityAtlasItem[], query: string) {
   if (!alias) {
     const digits = value.replace(/\D/g, "");
     const exactCnpj = /^[\d\s./-]+$/.test(value) && digits.length === 14;
-    return filterCityAtlas(items, exactCnpj ? digits : value, "todos");
+    return exactCnpj ? companyByCnpj(items, digits) : filterCityAtlas(items, value, "todos");
   }
   let cache = aliasResults.get(items);
   if (!cache) { cache = new Map(); aliasResults.set(items, cache); }
