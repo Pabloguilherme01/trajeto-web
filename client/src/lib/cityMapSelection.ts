@@ -15,13 +15,38 @@ export function selectCityMapItems<T extends CityMapCandidate>(groups: readonly 
     const key = item.id.startsWith("business-") ? item.id : item.name.toLocaleLowerCase("pt-BR") + "|" + item.lat + "|" + item.lng;
     unique.set(key, item);
   }
-  const all = [...unique.values()];
-  if (all.length <= 200) return { items: all, total: all.length };
-  const companies = all.filter(item => item.id.startsWith("business-"));
-  if (!companies.length) return { items: all.slice(0, 200), total: all.length };
-  const landmarks = all.filter(item => !item.id.startsWith("business-")).slice(0, 80);
-  const slots = Math.min(200 - landmarks.length, companies.length);
-  return { items: [...landmarks, ...Array.from({ length: slots }, (_, index) => companies[Math.floor(index * companies.length / slots)])], total: all.length };
+  const total = unique.size;
+  if (total <= 200) return { items: [...unique.values()], total };
+  // The old sampler materialized up to 21k records twice (all + companies)
+  // even though the visible map is limited to 200 markers.
+  let companyCount = 0;
+  const landmarks: T[] = [];
+  for (const item of unique.values()) {
+    if (item.id.startsWith("business-")) companyCount++;
+    else if (landmarks.length < 80) landmarks.push(item);
+  }
+  if (!companyCount) {
+    const items: T[] = [];
+    for (const item of unique.values()) {
+      if (items.length === 200) break;
+      items.push(item);
+    }
+    return { items, total };
+  }
+  const slots = Math.min(200 - landmarks.length, companyCount);
+  const items = [...landmarks];
+  let companyIndex = 0;
+  let slotIndex = 0;
+  for (const item of unique.values()) {
+    if (!item.id.startsWith("business-")) continue;
+    if (slotIndex < slots && companyIndex === Math.floor(slotIndex * companyCount / slots)) {
+      items.push(item);
+      slotIndex++;
+      if (slotIndex === slots) break;
+    }
+    companyIndex++;
+  }
+  return { items, total };
 }
 
 const destinationKeys = new WeakMap<CityAtlasItem, string>();
