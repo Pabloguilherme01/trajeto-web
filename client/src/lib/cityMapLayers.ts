@@ -7,7 +7,7 @@ export type CityMapCategory = RouteDestinationCategoryFilter | "seguranca" | "me
 export type CityMapLayer = CityMapCategory | "ruas";
 
 export const CITY_MAP_CATEGORIES: ReadonlyArray<{ value: CityMapCategory; label: string }> =
-  ROUTE_DESTINATION_CATEGORIES.flatMap(item =>
+  ROUTE_DESTINATION_CATEGORIES.flatMap<{ value: CityMapCategory; label: string }>(item =>
     item.value === "saude"
       ? [item, { value: "seguranca" as const, label: "Segurança" }]
       : item.value === "transporte"
