@@ -56,6 +56,8 @@ it("waits for an enabled consumer and ignores completion after it closes", async
   rerender({ enabled: true });
   await waitFor(() => expect(load).toHaveBeenCalledOnce());
   rerender({ enabled: false });
+  expect(result.current.loading).toBe(false);
+  expect(result.current.error).toBe(false);
   await act(async () => complete([{ id: "late" } as CityAtlasItem]));
   expect(result.current.items).toEqual([]);
 });

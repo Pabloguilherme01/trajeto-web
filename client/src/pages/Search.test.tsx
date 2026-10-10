@@ -119,3 +119,29 @@ describe("mobile search organization", () => {
     expect(screen.queryByRole("button", { name: "Teste antigo" })).toBeNull();
   });
 });
+
+it("filters by result type, preserves the query and restores the selection from the URL", () => {
+  window.history.replaceState(null, "", "/buscar?q=cras");
+  render(<SearchPage />);
+  fireEvent.click(screen.getByRole("button", { name: "Postos (0)" }));
+  expect(new URLSearchParams(window.location.search).get("q")).toBe("cras");
+  expect(new URLSearchParams(window.location.search).get("tipo")).toBe("stations");
+  expect(screen.queryByRole("heading", { name: /Serviços públicos/ })).toBeNull();
+  expect(screen.getByRole("status").textContent).toContain("Nenhum resultado local");
+  cleanup();
+  render(<SearchPage />);
+  expect(screen.getByRole("button", { name: "Postos (0)" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Tudo (3)" }));
+  expect(screen.getAllByRole("button", { name: /CRAS/ })).toHaveLength(3);
+  expect(new URLSearchParams(window.location.search).has("tipo")).toBe(false);
+});
+it("uses all results for an unsupported type and resets filters on a new search", () => {
+  window.history.replaceState(null, "", "/buscar?q=cras&tipo=unknown");
+  render(<SearchPage />);
+  expect(screen.getByRole("button", { name: "Tudo (3)" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Postos (0)" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar locais e serviços" }), { target: { value: "upa" } });
+  fireEvent.click(screen.getByRole("button", { name: "Pesquisar" }));
+  expect(new URLSearchParams(window.location.search).has("tipo")).toBe(false);
+  expect(screen.getByRole("button", { name: /^Tudo/ }).getAttribute("aria-pressed")).toBe("true");
+});
