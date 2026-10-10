@@ -67,9 +67,8 @@ import {
   searchPublicServices,
   type PublicServiceCategory,
 } from "@/lib/publicServices";
-import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
-import { resolveOfflineRoutePoint } from "@/lib/publicRouting";
 import { matchesPublicServiceRoute } from "@/lib/publicServiceRouteSearch";
+import { resolveLocalGeocodePoint } from "@/lib/localGeocoding";
 import OrganicMapsModeSelect from "@/components/OrganicMapsModeSelect";
 
 import { categoryIcons, SERVICE_SUMMARY, SERVICE_BATCH_SIZE, SERVICE_CATEGORY_COUNTS, NEED_GROUPS, READY_SERVICE_ROUTES, READY_ROUTE_SERVICE_BY_ROUTE_ID, READY_ROUTE_GROUPS, READY_ROUTE_GROUP_COUNTS } from "@/lib/publicServicesPresentation";
@@ -172,18 +171,60 @@ export default function PublicServices() {
     return () => window.removeEventListener("keydown", onKey);
   }, [category, savedOnly, resource, setLocation]);
 
-  const offlineReadyRouteIds = useMemo(() => {
-    return new Set(
-      READY_SERVICE_ROUTES.filter(route => {
-        try {
-          return Boolean(resolveOfflineRoutePoint(route.destination));
-        } catch {
-          return false;
+  // Render the directory before pulling in the optional routing/geocoding
+  // graph. Only the ready-routes section needs these local coordinate checks.
+  const [offlineReadyRouteIds, setOfflineReadyRouteIds] = useState<Set<string>>(() => new Set());
+  const [offlineRoutesChecked, setOfflineRoutesChecked] = useState(false);
+  const offlineRoutePoints = useRef(new Map<string, { lat: number; lng: number }>());
+  useEffect(() => {
+    if ((!browsing && !selectedService) || offlineRoutesChecked) return;
+    let cancelled = false;
+    let timer: number | undefined;
+    let idleId: number | undefined;
+    const prepare = () => {
+      void import("@/lib/publicRouting").then(({ resolveOfflineRoutePoint }) => {
+        if (cancelled) return;
+        const points = new Map<string, { lat: number; lng: number }>();
+        const ids = new Set<string>();
+        for (const route of READY_SERVICE_ROUTES) {
+          try {
+            const point = resolveOfflineRoutePoint(route.destination);
+            if (point) {
+              ids.add(route.id);
+              points.set(route.destination, point);
+            }
+          } catch {
+            // Unverified or ambiguous routes must not claim offline readiness.
+          }
         }
-      }).map(route => route.id)
-    );
-  }, []);
+        if (selectedService?.mapQuery) {
+          try {
+            const point = resolveOfflineRoutePoint(selectedService.mapQuery);
+            if (point) points.set(selectedService.mapQuery, point);
+          } catch {}
+        }
+        if (cancelled) return;
+        offlineRoutePoints.current = points;
+        setOfflineReadyRouteIds(ids);
+        setOfflineRoutesChecked(true);
+      }).catch(() => {
+        if (!cancelled) setOfflineRoutesChecked(true);
+      });
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(prepare, { timeout: 1500 });
+    } else {
+      timer = window.setTimeout(prepare, 250);
+    }
+    return () => {
+      cancelled = true;
+      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [browsing, selectedService, offlineRoutesChecked]);
 
+  // Once the optional local resolver finishes, the offline filter updates
+  // automatically instead of reporting a false zero on initial paint.
   const visibleReadyRoutes = useMemo(() => {
     const groupedRoutes =
       readyRouteGroup === "todos"
@@ -340,12 +381,9 @@ export default function PublicServices() {
     );
   };
   const openOrganicDestination = (destination: string, label: string) => {
-    let point: ReturnType<typeof resolveOfflineRoutePoint> = null;
-    try {
-      point = resolveOfflineRoutePoint(destination);
-    } catch {
-      point = null;
-    }
+    // This must remain synchronous with the tap for external app handoff.
+    // Search is a safe fallback until verified offline coordinates are ready.
+    const point = offlineRoutePoints.current.get(destination) ?? resolveLocalGeocodePoint(destination);
     const url = point
       ? buildOrganicMapsNavigationUrl(point, label, navigationMode)
       : buildOrganicMapsSearchUrl(destination);
@@ -491,10 +529,10 @@ export default function PublicServices() {
               type="button"
               onClick={() => openReadyRoutesFromSummary(true)}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={`Mostrar ${offlineReadyRouteIds.size} destinos offline`}
+              aria-label={offlineRoutesChecked ? `Mostrar ${offlineReadyRouteIds.size} destinos offline` : "Verificar destinos offline"}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
-                {offlineReadyRouteIds.size}
+                {offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}
               </span>
               <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
                 destinos offline
@@ -1126,7 +1164,10 @@ export default function PublicServices() {
                   </button>
                   <button
                     type="button"
-                    aria-label={`Mostrar somente destinos offline · ${offlineReadyRouteIds.size} destinos`}
+                    disabled={!offlineRoutesChecked}
+                    aria-label={offlineRoutesChecked
+                      ? `Mostrar somente destinos offline · ${offlineReadyRouteIds.size} destinos`
+                      : "Verificando destinos offline"}
                     aria-pressed={readyRouteOfflineOnly}
                     onClick={() => setReadyRouteOfflineOnly(value => !value)}
                     className={
@@ -1137,7 +1178,7 @@ export default function PublicServices() {
                     }
                   >
                     <WifiOff className="size-3.5 shrink-0" />
-                    <span>Offline</span>
+                    <span>{offlineRoutesChecked ? "Offline" : "Verificando…"}</span>
                     <span aria-hidden="true" className="rounded-full bg-background/70 px-1.5 py-0.5 text-[0.65rem] tabular-nums">
                       {offlineReadyRouteIds.size}
                     </span>
@@ -1180,7 +1221,7 @@ export default function PublicServices() {
                           {route.detail}
                         </span>
                         <span
-                          data-route-readiness={offlineReadyRouteIds.has(route.id) ? "offline" : "online"}
+                          data-route-readiness={!offlineRoutesChecked ? "checking" : offlineReadyRouteIds.has(route.id) ? "offline" : "online"}
                           className={
                             "mt-2 inline-flex min-h-7 max-w-full items-center gap-1 rounded-full border px-2 text-[0.68rem] font-black " +
                             (offlineReadyRouteIds.has(route.id)
@@ -1188,7 +1229,9 @@ export default function PublicServices() {
                               : "border-border/20 bg-muted/[.04] text-muted-foreground")
                           }
                         >
-                          {offlineReadyRouteIds.has(route.id) ? (
+                          {!offlineRoutesChecked ? (
+                            <><Clock3 className="size-3 shrink-0" /> Verificando rota</>
+                          ) : offlineReadyRouteIds.has(route.id) ? (
                             <>
                               <WifiOff className="size-3 shrink-0" />
                               Destino offline
@@ -1234,7 +1277,9 @@ export default function PublicServices() {
                   ))}
                   {visibleReadyRoutes.length === 0 && (
                     <div className="w-[min(86vw,19rem)] shrink-0 rounded-2xl border border-dashed border-border/30 bg-muted/[.025] p-4 text-sm text-muted-foreground sm:col-span-2 sm:w-auto lg:col-span-5">
-                      Nenhuma rota pronta corresponde a esta busca neste grupo.
+                      {readyRouteOfflineOnly && !offlineRoutesChecked
+                        ? "Verificando quais destinos estão preparados offline neste aparelho…"
+                        : "Nenhuma rota pronta corresponde a esta busca neste grupo."}
                       <button
                         type="button"
                         onClick={() => {

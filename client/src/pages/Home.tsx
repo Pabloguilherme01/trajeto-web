@@ -3,6 +3,7 @@ import { ArrowRight, Fuel, HeartPulse, Landmark, LocateFixed, Map, MapPin, Phone
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { appUrl } from "@/lib/appUrl";
+import { preparePrimaryRoute } from "@/lib/primaryRoutes";
 import { getLastTrip, getRecentSearches, getRecentTrips, mobilePreferenceEvent, rememberIntent, rememberSearch, type RecentTrip } from "@/lib/mobilePreferences";
 import { getMobileDestinations, rememberDestinationUsage, type MobileDestination } from "@/lib/mobileDestinations";
 import { LOCAL_ROUTE_PRESETS } from "@/lib/localRoutePresets";
@@ -199,7 +200,7 @@ export default function Home() {
 
         <section className="mt-4" aria-label="Ações principais"><div className="grid grid-cols-3 gap-2">
 <button type="button" onClick={findNearby} className="home-utility-action"><Fuel className="size-5 text-primary" /><span>Postos</span></button>
-<button type="button" onClick={() => setLocation(appUrl("/servicos"))} className="home-utility-action"><Landmark className="size-5 text-accent" /><span>Serviços</span></button>
+<button type="button" onPointerDown={() => preparePrimaryRoute("/servicos")} onPointerEnter={() => preparePrimaryRoute("/servicos")} onFocus={() => preparePrimaryRoute("/servicos")} onClick={() => setLocation(appUrl("/servicos"))} className="home-utility-action"><Landmark className="size-5 text-accent" /><span>Serviços</span></button>
 <button type="button" onClick={() => setLocation(appUrl("/mapa"))} className="home-utility-action" aria-label="Abrir mapa da cidade"><Map className="size-5 text-accent" /><span>Mapa</span></button></div>
 {lastTrip && <button type="button" onClick={openLastTrip} className="mobile-disclosure mt-3 flex w-full items-center justify-between text-left"><span>{isCurrentLocationLabel(lastTrip.origin) ? "Retomar último destino" : "Continuar última rota"}</span><ArrowRight className="size-4" /></button>}</section>
         <details className="premium-panel mt-4 min-w-0 overflow-hidden rounded-[1.45rem] border border-border/15 bg-card p-4 shadow-[0_18px_48px_rgba(0,0,0,.24)] sm:mt-6 sm:p-5">
@@ -332,6 +333,9 @@ export default function Home() {
                 key={item.label}
                 type="button"
                 aria-label={item.label}
+                onPointerDown={() => { if (item.label !== "Centro") preparePrimaryRoute("/servicos"); }}
+                onPointerEnter={() => { if (item.label !== "Centro") preparePrimaryRoute("/servicos"); }}
+                onFocus={() => { if (item.label !== "Centro") preparePrimaryRoute("/servicos"); }}
                 onClick={item.action}
                 className="min-h-[5.25rem] rounded-2xl border border-border/10 bg-card p-3 text-left transition hover:-translate-y-0.5 hover:border-border/15 active:scale-[.985]"
               >

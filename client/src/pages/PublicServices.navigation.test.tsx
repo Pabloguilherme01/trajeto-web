@@ -110,7 +110,7 @@ it.each([
   fireEvent.click(screen.getByRole("button", { name: label }));
   await waitFor(() => expect(window.location.search).toBe(""));
   await waitFor(() => expect(document.activeElement?.id).toBe("ready-routes"));
-  expect(screen.getByRole("button", { name: /Mostrar somente destinos offline/ }).getAttribute("aria-pressed")).toBe(String(offlineOnly));
+  expect(screen.getByRole("button", { name: /(?:Mostrar somente|Verificando) destinos offline/ }).getAttribute("aria-pressed")).toBe(String(offlineOnly));
   expect((screen.getByRole("searchbox", { name: "Buscar rota pronta" }) as HTMLInputElement).value).toBe("");
 }, 15000);
 
@@ -177,4 +177,20 @@ it("opens a matching filtered map from the Central instead of dropping the selec
   await waitFor(() => expect(window.location.pathname).toBe("/mapa"));
   expect(new URLSearchParams(window.location.search).get("camada")).toBe("meio-ambiente");
   expect(new URLSearchParams(window.location.search).has("lat")).toBe(false);
+});
+
+it("renders the service directory before optionally checking local route readiness", () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
+  const filter = screen.getByRole("button", { name: "Verificando destinos offline" });
+  expect((filter as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.getAllByText("Verificando rota").length).toBeGreaterThan(0);
+});
+
+it("does not start the offline route engine when the user only opens a filtered contact list", () => {
+  window.history.replaceState({}, "", "/servicos?categoria=telecom");
+  render(<PublicServices />);
+  expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0);
+  expect(screen.queryByRole("button", { name: "Verificando destinos offline" })).toBeNull();
 });

@@ -95,7 +95,9 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("snap-x snap-mandatory");
     expect(source).toContain("snap-start");
     expect(source).toContain("offlineReadyRouteIds");
-    expect(source).toContain('data-route-readiness={offlineReadyRouteIds.has(route.id) ? "offline" : "online"}');
+    expect(source).toContain('data-route-readiness={!offlineRoutesChecked ? "checking" : offlineReadyRouteIds.has(route.id) ? "offline" : "online"}');
+    expect(source).toContain('import("@/lib/publicRouting")');
+    expect(source).not.toContain('import { resolveOfflineRoutePoint } from "@/lib/publicRouting"');
     expect(source).toContain("Destino offline");
     expect(source).toContain("Localizar online");
     expect(source).toContain("readyRouteOfflineOnly");
@@ -109,6 +111,8 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('id="service-results"');
     expect(source).toContain("Ir para ${READY_SERVICE_ROUTES.length} rotas prontas");
     expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} destinos offline");
+    expect(source).toContain("Verificar destinos offline");
+    expect(source).toContain('{offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}');
   });
 
   it("offers the official Organic Maps install fallback without exposing GPS", () => {
