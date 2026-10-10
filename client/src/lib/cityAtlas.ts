@@ -428,31 +428,7 @@ export function resolveCityAtlasPoint(
     : null;
 }
 
-const searchIndex = new WeakMap<CityAtlasItem, string>();
-
-export function prepareCityAtlasSearch(items: CityAtlasItem[]) {
-  // Exercise the same search path in small background batches. This also
-  // materializes normalized strings before the user's first keystroke.
-  filterCityAtlas(items, "__prepare_catalog__", "todos");
-}
-
-export function filterCityAtlas(
-  items: CityAtlasItem[],
-  query: string,
-  category: "todos" | CityAtlasLayer,
-) {
-  const terms = normalizeCatalogText(query).split(" ").filter(Boolean);
-  return items.filter(item => {
-    if (category !== "todos" && item.category !== category) return false;
-    if (!terms.length) return true;
-    let text = searchIndex.get(item);
-    if (text === undefined) {
-      text = normalizeCatalogText([item.name, item.detail, item.address, item.destination, item.category, ...(item.keywords ?? [])].filter(Boolean).join(" "));
-      searchIndex.set(item, text);
-    }
-    return terms.every(term => text.includes(term));
-  });
-}
+export { filterCityAtlas, prepareCityAtlasSearch } from "./cityAtlasSearch";
 
 export function cityAtlasCounts(items: CityAtlasItem[]) {
   const counts: Partial<Record<CityAtlasLayer, number>> = {};

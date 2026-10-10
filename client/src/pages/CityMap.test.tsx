@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
 const navigate = vi.hoisted(() => vi.fn());
 vi.mock("wouter", () => ({
+  useSearch: () => "",
   useLocation: () => ["/mapa", navigate],
   Link: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));

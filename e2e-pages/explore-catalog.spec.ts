@@ -1,0 +1,30 @@
+import { expect, test } from "@playwright/test";
+
+test("Pages: food, commerce and grouped shortcuts use the imported catalog at 320px", async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("buscar?q=alimentacao");
+  const companies = page.getByRole("region", { name: /^Empresas do catálogo/ });
+  await expect(companies.getByRole("button")).toHaveCount(6, { timeout: 30_000 });
+  await expect(companies.getByText(/sem confirmação de funcionamento atual/)).toBeVisible();
+  await page.getByRole("button", { name: "Mostrar mais resultados" }).click();
+  await expect(companies.getByRole("button")).toHaveCount(18);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: "test-results/home-food-catalog.png", fullPage: false });
+  await companies.getByRole("button").first().click();
+  await expect(page).toHaveURL(/mapa\?q=/);
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).not.toHaveValue("");
+  await expect(page.getByRole("article")).toHaveCount(1, { timeout: 30_000 });
+  await page.getByRole("button", { name: "Explorar", exact: true }).click();
+  const menu = page.getByRole("dialog");
+  await expect(menu.getByRole("region", { name: "Lugares e comércio" })).toBeVisible();
+  await menu.getByRole("button", { name: "Mercados", exact: true }).click();
+  await expect(page).toHaveURL(/buscar\?q=mercados$/);
+  await expect(page.getByRole("region", { name: /^Empresas do catálogo/ }).getByRole("button")).toHaveCount(6);
+  await page.getByRole("button", { name: "Serviços públicos", exact: true }).click();
+  await page.getByRole("button", { name: "Filtrar por Documentos", exact: true }).click();
+  await expect(page).toHaveURL(/categoria=documentos/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.screenshot({ path: "test-results/home-services-options.png", fullPage: false });
+});

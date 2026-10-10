@@ -152,7 +152,7 @@ export default function PublicServiceCard({
           </span>
         </p>
       )}
-      <p className="mt-3 text-sm leading-relaxed text-foreground/75">
+      <p className={"mt-3 text-sm leading-relaxed text-foreground/75 " + (expandedActions ? "" : "line-clamp-2")}>
         {service.description}
       </p>
       <div

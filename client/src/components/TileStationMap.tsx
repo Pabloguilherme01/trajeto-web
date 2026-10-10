@@ -367,9 +367,10 @@ export default function TileStationMap({
         item => markerClusterPixels.get(stationKey(item)) ?? { x: -100000, y: -100000 },
         item =>
           stationKey(item) === (selected ? stationKey(selected) : null) ||
-          ["origin", "destination"].includes(item.id ?? "")
+          ["origin", "destination"].includes(item.id ?? ""),
+        width <= 480 ? 96 : 64
       ),
-    [drawable, markerClusterPixels, selectedId, clusterZoom]
+    [drawable, markerClusterPixels, selectedId, clusterZoom, width <= 480]
   );
   const markerPositions = useMemo(() => {
     const result = new Map<string, { left: number; top: number }>();

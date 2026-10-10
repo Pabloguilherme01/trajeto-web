@@ -5,6 +5,7 @@ import { useBusinessCatalog } from "./useBusinessCatalog";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 const load = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/businessCatalog", () => ({ loadBusinessCatalog: load }));
+vi.mock("@/lib/businessCatalogState", () => ({ getLoadedBusinessCatalog: () => [] }));
 beforeEach(() => { load.mockReset(); });
 afterEach(cleanup);
 it("finishes loading an empty catalog instead of showing an endless spinner", async () => {
@@ -32,6 +33,7 @@ it("ignores responses from superseded attempts", async () => {
   let resolveFirst!: (items: CityAtlasItem[]) => void;
   load.mockImplementationOnce(() => new Promise(resolve => { resolveFirst = resolve; })).mockResolvedValueOnce([]);
   const { result } = renderHook(() => useBusinessCatalog());
+  await waitFor(() => expect(load).toHaveBeenCalledOnce());
   act(() => result.current.retry());
   await waitFor(() => expect(result.current.loading).toBe(false));
   await act(async () => resolveFirst([{ id: "old" } as CityAtlasItem]));
@@ -41,6 +43,7 @@ it("allows unmounting before the request finishes", async () => {
   let reject!: (reason: Error) => void;
   load.mockImplementationOnce(() => new Promise((_, fail) => { reject = fail; }));
   const { unmount } = renderHook(() => useBusinessCatalog());
+  await waitFor(() => expect(load).toHaveBeenCalledOnce());
   unmount();
   await act(async () => reject(new Error("late")));
 });
@@ -51,7 +54,7 @@ it("waits for an enabled consumer and ignores completion after it closes", async
   const { result, rerender } = renderHook(({ enabled }) => useBusinessCatalog(enabled), { initialProps: { enabled: false } });
   expect(load).not.toHaveBeenCalled();
   rerender({ enabled: true });
-  expect(load).toHaveBeenCalledOnce();
+  await waitFor(() => expect(load).toHaveBeenCalledOnce());
   rerender({ enabled: false });
   await act(async () => complete([{ id: "late" } as CityAtlasItem]));
   expect(result.current.items).toEqual([]);

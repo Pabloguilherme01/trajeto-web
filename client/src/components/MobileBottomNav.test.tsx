@@ -122,3 +122,21 @@ it("prepares the selected screen on touch or keyboard intent before navigating",
   fireEvent.click(route);
   expect(state.navigate).toHaveBeenCalledWith("/planejar");
 });
+
+it("groups new public and commercial options and prepares their screen on intent", () => {
+  render(<MobileBottomNav />);
+  fireEvent.click(screen.getByRole("button", { name: "Explorar" }));
+  expect(screen.getByRole("region", { name: "Lugares e comércio" })).toBeTruthy();
+  const pharmacy = screen.getByRole("button", { name: "Farmácias" });
+  fireEvent.pointerDown(pharmacy);
+  expect(state.prepare).toHaveBeenLastCalledWith("/buscar?q=farmacias");
+  fireEvent.click(pharmacy);
+  expect(state.navigate).toHaveBeenLastCalledWith("/buscar?q=farmacias");
+});
+
+
+it("opens Explore without downloading the map on menu intent", () => {
+  render(<MobileBottomNav />);
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Explorar" }));
+  expect(state.prepare).not.toHaveBeenCalledWith("/mapa");
+});

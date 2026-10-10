@@ -1,4 +1,4 @@
-import { Bookmark, Database, Fuel, Home, Navigation, UserRound, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, ShoppingBag, Utensils } from "lucide-react";
+import { Bookmark, Database, Fuel, Home, Navigation, UserRound, HelpCircle, Search, X, MapPinned, HeartPulse, Landmark, Siren, ShoppingBag, Utensils, ShoppingCart, BriefcaseBusiness, BookOpen, UsersRound, Store, Wrench } from "lucide-react";
 import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -48,7 +48,7 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
         {baseItems.map(item => {
           const active = isActive(item);
           const primary = item.key === "plan"; const Icon = item.icon;
-          return <button key={item.key} ref={item.key === "more" ? moreButton : undefined} type="button" onPointerDown={() => preparePrimaryRoute(item.href)} onPointerEnter={() => preparePrimaryRoute(item.href)} onFocus={() => preparePrimaryRoute(item.href)} onClick={() => go(item)}
+          return <button key={item.key} ref={item.key === "more" ? moreButton : undefined} type="button" onPointerDown={() => { if (item.key !== "more") preparePrimaryRoute(item.href); }} onPointerEnter={() => { if (item.key !== "more") preparePrimaryRoute(item.href); }} onFocus={() => { if (item.key !== "more") preparePrimaryRoute(item.href); }} onClick={() => go(item)}
             aria-label={item.label} aria-current={active && item.key !== "more" ? "page" : undefined} aria-haspopup={item.key === "more" ? "dialog" : undefined} aria-expanded={item.key === "more" ? moreOpen : undefined}
             data-active={active ? "true" : "false"} data-primary={primary ? "true" : "false"}
             className="app-dock-item relative flex min-h-[3.45rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] px-1 active:scale-[.97]">
@@ -63,20 +63,37 @@ export default function MobileBottomNav({ variant = "mobile" }: { variant?: "mob
         <DialogClose aria-label="Fechar menu" className="absolute right-2 top-2 grid size-11 place-items-center rounded-xl text-muted-foreground"><X className="size-5 shrink-0" /></DialogClose>
         <DialogTitle className="pr-10">Explorar o Trajeto</DialogTitle>
         <DialogDescription>Encontre lugares, abra o mapa ou acesse seus recursos salvos.</DialogDescription>
-        <div className="mobile-explore-grid grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Search className="size-5 shrink-0" /> Buscar no Trajeto</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/mapa")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><MapPinned className="size-5 shrink-0" /> Abrir mapa</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/servicos") + "?categoria=saude"); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><HeartPulse className="size-5 shrink-0" /> Saúde</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/servicos") + "?emergencia=1#emergency-strip-title"); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Siren className="size-5 shrink-0" /> Emergência</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/postos")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Fuel className="size-5 shrink-0" /> Encontrar postos</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=alimentacao"); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Utensils className="size-5 text-warning" /> Comer</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/buscar") + "?q=compras"); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><ShoppingBag className="size-5 text-accent" /> Compras e lojas</button>
-
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/dados")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Database className="size-5 shrink-0" /> Dados da cidade</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/salvos")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><Bookmark className="size-5 shrink-0" /> Salvos</button>
-          <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/ajuda")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><HelpCircle className="size-5 shrink-0" /> Ajuda e offline</button>
-          <button type="button" onClick={() => { setMoreOpen(false); window.requestAnimationFrame(() => window.dispatchEvent(new Event(OPEN_ACCESSIBILITY_EVENT))); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight" aria-label="Abrir acessibilidade"><UserRound className="size-5 shrink-0" /> Acessibilidade e aparelho</button>
-        </div>
+        {[
+          { title: "Lugares e comércio", items: [
+            { label: "Buscar no Trajeto", icon: Search, path: "/buscar" },
+            { label: "Abrir mapa", icon: MapPinned, path: "/mapa" },
+            { label: "Encontrar postos", icon: Fuel, path: "/postos" },
+            { label: "Comer", icon: Utensils, path: "/buscar?q=alimentacao" },
+            { label: "Compras e lojas", icon: ShoppingBag, path: "/buscar?q=compras" },
+            { label: "Mercados", icon: ShoppingCart, path: "/buscar?q=mercados" },
+            { label: "Farmácias", icon: Store, path: "/buscar?q=farmacias" },
+            { label: "Oficinas", icon: Wrench, path: "/buscar?q=oficinas" },
+          ] },
+          { title: "Atendimento público", items: [
+            { label: "Saúde", icon: HeartPulse, path: "/servicos?categoria=saude" },
+            { label: "Emergência", icon: Siren, path: "/servicos?emergencia=1#emergency-strip-title" },
+            { label: "Educação", icon: BookOpen, path: "/servicos?categoria=educacao" },
+            { label: "Trabalho e renda", icon: BriefcaseBusiness, path: "/servicos?categoria=trabalho" },
+            { label: "Assistência social", icon: UsersRound, path: "/servicos?categoria=assistencia" },
+            { label: "Documentos", icon: Landmark, path: "/servicos?categoria=documentos" },
+          ] },
+          { title: "Seus recursos", items: [
+            { label: "Dados da cidade", icon: Database, path: "/dados" },
+            { label: "Salvos", icon: Bookmark, path: "/salvos" },
+            { label: "Ajuda e offline", icon: HelpCircle, path: "/ajuda" },
+          ] },
+        ].map(group => <section key={group.title} aria-label={group.title}>
+          <h3 className="mb-2 mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{group.title}</h3>
+          <div className="mobile-explore-grid grid grid-cols-2 gap-2">
+            {group.items.map(item => <button key={item.path} type="button" onPointerEnter={() => preparePrimaryRoute(item.path)} onPointerDown={() => preparePrimaryRoute(item.path)} onFocus={() => preparePrimaryRoute(item.path)} onClick={() => { setMoreOpen(false); preparePrimaryRoute(item.path); const split = item.path.search(/[?#]/); setLocation(split < 0 ? appUrl(item.path) : appUrl(item.path.slice(0, split)) + item.path.slice(split)); }} className="task-action task-action-secondary min-h-12 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><item.icon className="size-4 shrink-0 text-primary" />{item.label}</button>)}
+          </div>
+        </section>)}
+        <button type="button" onClick={() => { setMoreOpen(false); window.requestAnimationFrame(() => window.dispatchEvent(new Event(OPEN_ACCESSIBILITY_EVENT))); }} className="task-action task-action-secondary min-h-12 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight" aria-label="Abrir acessibilidade"><UserRound className="size-4 shrink-0" /> Acessibilidade e aparelho</button>
         {!isGitHubPagesRuntime() && <button type="button" onClick={() => { setMoreOpen(false); setLocation(appUrl("/minha-conta")); }} className="task-action task-action-secondary min-h-16 min-w-0 justify-start break-words rounded-xl px-3 text-left text-[13px] leading-tight"><UserRound className="size-5 shrink-0" /> Minha conta</button>}
       </DialogContent>
     </Dialog>
