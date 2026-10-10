@@ -46,6 +46,25 @@ it("batches recovery for an unknown service link and searches the complete direc
   expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
 }, 15000);
 
+it("retains expanded results when an unrecognized service link is normalized to the directory", async () => {
+  window.history.replaceState({}, "", "/servicos?servico=unknown");
+  const { rerender } = render(<PublicServices />);
+  const cards = () => document.querySelectorAll("#service-results article");
+  expect(cards()).toHaveLength(18);
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar mais 18 serviços" }));
+  expect(cards()).toHaveLength(36);
+
+  // An unknown deep link is not an actual result filter: replacing that flag
+  // must not collapse a batch the person explicitly opened.
+  window.history.replaceState({}, "", "/servicos");
+  window.dispatchEvent(new PopStateEvent("popstate"));
+  rerender(<PublicServices />);
+  await waitFor(() => expect(screen.queryByText(
+    "Este serviço não está no catálogo atual. Consulte os serviços disponíveis abaixo."
+  )).toBeNull());
+  expect(cards()).toHaveLength(36);
+}, 15000);
+
 it("reports the same destination count that each ready-route group displays", () => {
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);
