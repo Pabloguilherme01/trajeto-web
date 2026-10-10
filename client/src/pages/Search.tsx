@@ -279,7 +279,8 @@ export default function SearchPage() {
   const companies = useBusinessCatalog(query.trim().length >= 2);
   const allBusinesses = useMemo(() => searchBusinesses(companies.items, query), [companies.items, query]);
   const allResults = useMemo(() => getUniversalSearchResults(query), [query]);
-  const businessResults = searchType === "todos" || searchType === "businesses" ? allBusinesses : [];
+  const showBusinesses = searchType === "todos" || searchType === "businesses";
+  const businessResults = showBusinesses ? allBusinesses : [];
   const results = {
     services: searchType === "todos" || searchType === "services" ? allResults.services : [],
     stations: searchType === "todos" || searchType === "stations" ? allResults.stations : [],
@@ -478,7 +479,7 @@ export default function SearchPage() {
               aria-live="polite"
               className="break-words text-sm text-foreground/80"
             >
-              {companies.loading && !results.total
+              {showBusinesses && companies.loading && !results.total
                 ? "Buscando no catálogo de empresas…"
                 : (results.total + businessResults.length)
                 ? (results.total + businessResults.length) + " resultado(s) para “" + query + "”"
@@ -525,7 +526,7 @@ export default function SearchPage() {
                 </div>
               </section>
             )}
-            {query.trim().length >= 2 && (
+            {showBusinesses && query.trim().length >= 2 && (
               <section aria-labelledby="search-businesses-title">
                 <h2 id="search-businesses-title" className="text-lg font-bold">Empresas do catálogo <span className="text-sm font-normal text-foreground/75">({businessResults.length})</span></h2>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Arquivo importado · situação informada no cadastro, sem confirmação de funcionamento atual. Consulte a ficha e confirme o endereço.</p>
@@ -697,7 +698,7 @@ export default function SearchPage() {
               aria-label="Ajuda para encontrar"
             >
               <p className="text-sm leading-relaxed text-foreground/80">
-                {results.total
+                {results.total + businessResults.length > 0
                   ? "Ainda não encontrou o que precisa?"
                   : "Tente o nome do serviço ou do bairro, ou consulte a central."}
               </p>
