@@ -43,6 +43,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { readPublicServiceListFilters, publicServiceListUrl, type PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
 import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
 import {
   buildOrganicMapsNavigationUrl,
@@ -79,19 +80,11 @@ export default function PublicServices() {
   const params = useMemo(() => new URLSearchParams(rawSearch), [rawSearch]);
   const inputRef = useRef<HTMLInputElement>(null);
   const filterRef = useRef<HTMLDetailsElement>(null);
-  const [query, setQuery] = useState(() => params.get("q") ?? "");
-  const [category, setCategory] = useState<PublicServiceCategory | "todos">(
-    () => {
-      const value = params.get("categoria");
-      return PUBLIC_SERVICE_CATEGORIES.some(item => item.id === value)
-        ? (value as PublicServiceCategory | "todos")
-        : "todos";
-    }
-  );
+  const initialFilters = useMemo(() => readPublicServiceListFilters(params), [params]);
+  const [query, setQuery] = useState(() => initialFilters.query);
+  const [category, setCategory] = useState<PublicServiceCategory | "todos">(() => initialFilters.category);
   const online = useOnlineStatus();
-  const [resource, setResource] = useState<
-    "todos" | "contato" | "rota" | "online"
-  >(() => { const value = params.get("recurso"); return value === "contato" || value === "rota" || value === "online" ? value : "todos"; });
+  const [resource, setResource] = useState<PublicServiceResourceFilter>(() => initialFilters.resource);
   const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
   const [readyRouteQuery, setReadyRouteQuery] = useState("");
@@ -154,17 +147,10 @@ export default function PublicServices() {
 
 
   useEffect(() => {
-    const nextQuery = params.get("q") ?? "";
-    const nextCategory = params.get("categoria");
-    setQuery(nextQuery);
-    setCategory(
-      PUBLIC_SERVICE_CATEGORIES.some(item => item.id === nextCategory)
-        ? (nextCategory as PublicServiceCategory | "todos")
-        : "todos"
-    );
-    const nextResource = params.get("recurso");
-    setResource(nextResource === "contato" || nextResource === "rota" || nextResource === "online" ? nextResource : "todos");
-  }, [params]);
+    setQuery(initialFilters.query);
+    setCategory(initialFilters.category);
+    setResource(initialFilters.resource);
+  }, [initialFilters]);
 
   useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
@@ -281,13 +267,8 @@ export default function PublicServices() {
       }
       filterRef.current.open = false;
     }
-    const search = new URLSearchParams();
-    if (value.trim()) search.set("q", value.trim());
-    if (next !== "todos") search.set("categoria", next);
-    if (onlySaved) search.set("salvos", "1");
-    if (nextResource !== "todos") search.set("recurso", nextResource);
     setLocation(
-      appUrl("/servicos") + (search.size ? "?" + search.toString() : ""),
+      publicServiceListUrl({ query: value, category: next, savedOnly: onlySaved, resource: nextResource }),
       { replace }
     );
   };
