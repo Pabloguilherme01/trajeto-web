@@ -1,6 +1,7 @@
 import { searchBusinesses } from "@/lib/businessSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import { Link, useLocation, useSearch } from "wouter";
@@ -132,16 +133,7 @@ export default function CityMap() {
     setOnlyStreets(true);
     if (isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS)) setQuery("");
   };
-  const [online, setOnline] = useState(() => navigator.onLine);
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
+  const online = useOnlineStatus();
   const destinations = useMemo(
     () => onlyStreets ? [] : getLocalRoutePresets(deferredQuery, category),
     [deferredQuery, category, onlyStreets]
