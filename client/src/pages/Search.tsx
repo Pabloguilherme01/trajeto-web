@@ -173,6 +173,9 @@ const quickActions = [
     kind: "places",
     query: "mercado",
   },
+  { label: "Roupas", hint: "Vestuário no catálogo local", icon: Store, kind: "places", query: "roupas" },
+  { label: "Beleza", hint: "Cabeleireiros e cuidados pessoais", icon: Store, kind: "places", query: "beleza" },
+  { label: "Materiais", hint: "Construção, ferragens e pintura", icon: Store, kind: "places", query: "materiais" },
 ] as const;
 
 function ResultCard({

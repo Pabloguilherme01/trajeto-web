@@ -19,7 +19,7 @@ it("detects when a quick filter conflicts with the selected category", () => {
 });
 
 it("keeps company-only aliases out of prepared-route catalogs", () => {
-  for (const value of ["alimentacao", "farmacias", "oficinas", "padarias"]) {
+  for (const value of ["alimentacao", "farmacias", "oficinas", "padarias", "roupas", "beleza", "materiais"]) {
     expect(isQuickFilterValue(value, CITY_MAP_QUICK_FILTERS)).toBe(true);
     expect(isQuickFilterValue(value, ROUTE_QUICK_FILTERS)).toBe(false);
   }

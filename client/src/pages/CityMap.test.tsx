@@ -144,3 +144,11 @@ it("uses the same pharmacy and workshop aliases as search without mixing map cat
   expect(screen.getByText("Mecânica teste", { selector: "article p" })).toBeTruthy();
   expect(screen.queryByText("Drogaria teste", { selector: "article p" })).toBeNull();
 });
+
+
+it("does not hide a company sharing a public destination address", () => {
+  catalog.items = [{ id: "business-test", name: "Empresa UPA no mesmo endereço", category: "saude", destination: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO", sourceLabel: "Arquivo importado", lat: -15.77, lng: -48.28 }];
+  render(<CityMap />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "upa" } });
+  expect(screen.getByText("Empresa UPA no mesmo endereço", { selector: "article p" })).toBeTruthy();
+});

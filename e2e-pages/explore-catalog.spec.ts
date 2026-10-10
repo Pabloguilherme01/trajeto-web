@@ -24,6 +24,11 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "test-results/home-map-pharmacies.png", fullPage: false });
+  for (const [label, activity] of [["Roupas", /vestuário/i], ["Beleza", /cabeleireiro|manicure|tratamento de beleza/i], ["Materiais", /materiais de construção|ferragens|tintas e materiais para pintura|material elétrico/i]] as const) {
+    await page.getByRole("group", { name: "Filtros rápidos do mapa" }).getByRole("button", { name: label, exact: true }).click();
+    await expect(pharmacyCatalog.getByRole("article").first()).toContainText(activity);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  }
   await page.getByRole("button", { name: "Explorar", exact: true }).click();
   const menu = page.getByRole("dialog");
   await expect(menu.getByRole("region", { name: "Lugares e comércio" })).toBeVisible();
@@ -33,6 +38,7 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await page.getByRole("button", { name: "Serviços públicos", exact: true }).click();
   await expect(page).toHaveURL(/\/servicos$/);
   await expect(page.getByRole("heading", { name: "Como podemos ajudar?" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Resolva em poucos toques" })).toHaveCount(0);
   const summary = page.getByRole("group", { name: "Resumo da Central" });
   await expect(summary.getByRole("button")).toHaveCount(4);
   for (const button of await summary.getByRole("button").all()) {
