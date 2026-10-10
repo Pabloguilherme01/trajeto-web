@@ -2,6 +2,7 @@ import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import { Link, useLocation, useSearch } from "wouter";
@@ -18,14 +19,14 @@ import {
   buildCityAtlas,
   filterCityAtlas,
   loadCityAtlasSnapshot,
-  type CityAtlasLayer,
+
   type CityAtlasSnapshot,
 } from "@/lib/cityAtlas";
 import {
   LOCAL_GEOCODE_POINTS,
   resolveLocalGeocodePoint,
 } from "@/lib/localGeocoding";
-import { getLocalRoutePresets, ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "@/lib/localRoutePresets";
+import { getLocalRoutePresets } from "@/lib/localRoutePresets";
 import {
   groupAnpFuelRows,
   normalizeAnpFuelRow,
@@ -40,10 +41,14 @@ import { getPreferredNavigationProvider, setPreferredNavigationProvider, type Na
 export default function CityMap() {
   const [, navigate] = useLocation();
   const rawSearch = useSearch();
+  const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
+  const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
+  const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
   const [anpRows, setAnpRows] = useState(() => getOfflineAnpSnapshot().rows);
   const groupedAnpStations = useMemo(() => groupAnpFuelRows(anpRows), [anpRows]);
   const [atlasSnapshot, setAtlasSnapshot] = useState<CityAtlasSnapshot | null>(BUNDLED_CITY_ATLAS);
-  const businesses = useBusinessCatalog();
+  // An atlas-only street deep link does not need the heavy business chunk.
+  const businesses = useBusinessCatalog(!onlyStreets);
   const [visibleCount, setVisibleCount] = useState(24);
   const [preferredMapProvider, setPreferredMapProvider] = useState<NavigationProvider>(() =>
     getPreferredNavigationProvider()
@@ -116,42 +121,48 @@ export default function CityMap() {
       .catch(() => {});
     return () => controller.abort();
   }, []);
-  const [onlyStreets, setOnlyStreets] = useState(false);
   const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
-  useEffect(() => { setQuery(new URLSearchParams(rawSearch).get("q") ?? ""); }, [rawSearch]);
+  useEffect(() => {
+    const params = new URLSearchParams(rawSearch);
+    const selected = readCityMapLayer(params.get("camada"));
+    setQuery(params.get("q") ?? "");
+    setOnlyStreets(selected === "ruas");
+    setCategory(selected === "ruas" ? "todos" : selected);
+  }, [rawSearch]);
   const deferredQuery = useDeferredValue(query);
-  const [category, setCategory] = useState<RouteDestinationCategoryFilter>("todos");
-  const applyCategory = (next: RouteDestinationCategoryFilter) => {
+  const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
+  const syncMapUrl = (nextQuery: string, layer: CityMapLayer) => {
+    const previous = new URLSearchParams(rawSearch);
+    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")));
+    const next = cityMapLayerUrl(nextQuery, layer);
+    if (next !== current) navigate(next, { replace: true });
+  };
+  const applyCategory = (next: CityMapCategory) => {
+    const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) &&
+      !quickFilterMatchesCategory(query, next) ? "" : query;
     setOnlyStreets(false);
     setCategory(next);
-    if (
-      isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) &&
-      !quickFilterMatchesCategory(query, next)
-    ) setQuery("");
+    setQuery(updatedQuery);
+    syncMapUrl(updatedQuery, next);
   };
   const showOnlyStreets = () => {
+    const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) ? "" : query;
     setCategory("todos");
     setOnlyStreets(true);
-    if (isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS)) setQuery("");
+    setQuery(updatedQuery);
+    syncMapUrl(updatedQuery, "ruas");
   };
   const online = useOnlineStatus();
   const destinations = useMemo(
-    () => onlyStreets ? [] : getLocalRoutePresets(deferredQuery, category),
-    [deferredQuery, category, onlyStreets]
+    () => isReadyRouteLayer(activeLayer) ? getLocalRoutePresets(deferredQuery, activeLayer) : [],
+    [deferredQuery, activeLayer]
   );
   const [destinationLimit, setDestinationLimit] = useState(18);
   useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
   const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
   useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
-  const atlasLayer = useMemo<"todos" | CityAtlasLayer>(() => {
-    if (category === "todos") return "todos";
-    if (category === "centro") return "referencia";
-    if (category === "educacao" || category === "saude" || category === "transporte" || category === "combustivel" || category === "compras" || category === "alimentacao") {
-      return category;
-    }
-    return "servicos";
-  }, [category]);
+  const atlasLayer = cityMapAtlasLayer(activeLayer);
   const atlasDestinations = useMemo(() => {
     const routeKeys = new Set(
       destinations.map(item => normalizeCatalogText(item.destination))
@@ -258,8 +269,8 @@ export default function CityMap() {
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
         Busque um destino e veja sua rota no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
-      {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{onlyStreets ? "Camada de ruas · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      {!onlyStreets && businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <section className="mt-5" aria-labelledby="city-search-label">
         <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-foreground/65">Buscar na cidade</label>
         <div className="premium-panel mt-2 flex min-w-0 items-center gap-2 rounded-2xl border border-border/10 bg-card px-3">
@@ -271,12 +282,14 @@ export default function CityMap() {
             aria-describedby="city-search-help"
             value={query}
             onChange={event => setQuery(event.target.value)}
+            onBlur={event => syncMapUrl(event.currentTarget.value, activeLayer)}
+            onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } }}
             enterKeyHint="search"
             autoComplete="off"
             placeholder="Nome, CNPJ, bairro ou rua"
             className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/55"
           />
-          {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
+          {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => { setQuery(""); syncMapUrl("", activeLayer); }} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
         </div>
         <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">Nome, CNPJ, bairro, rua ou atividade.</p>
       </section>
@@ -287,7 +300,9 @@ export default function CityMap() {
         onPick={value => {
           setOnlyStreets(false);
           setQuery(value);
-          setCategory(quickFilterCategory(value) ?? "todos");
+          const next = quickFilterCategory(value) ?? "todos";
+          setCategory(next);
+          syncMapUrl(value, next);
         }}
         className="mt-3"
       />
@@ -317,7 +332,7 @@ export default function CityMap() {
         className="my-3 -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-label="Categorias do mapa"
       >
-        {ROUTE_DESTINATION_CATEGORIES.map(({ value, label }) => (
+        {CITY_MAP_CATEGORIES.map(({ value, label }) => (
           <button
             key={value}
             type="button"
