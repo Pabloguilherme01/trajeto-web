@@ -1,6 +1,7 @@
+import { csvCell } from "./csvSerialization";
 export type GoogleMapsStabilityCsvDay = { key: string; label: string; samples: number; successRate: number | null; p95Ms: number | null; tokensWaiting: number };
 
-const csvCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`;
+
 
 export function buildGoogleMapsStabilityCsv(trend: GoogleMapsStabilityCsvDay[], generatedAt = new Date()) {
   const lines = [
