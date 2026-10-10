@@ -24,6 +24,7 @@ type Road = {
 };
 type MapPack = { schema: number; retrievedAt: string; roads: Road[] };
 const ROAD_GRID = 4096;
+const EMPTY_ROUTE_POINTS: MapPoint[] = [];
 let packPromise: Promise<MapPack> | undefined;
 export function loadOfflineMapPack() {
   if (!packPromise)
@@ -70,7 +71,7 @@ function world(point: MapPoint) {
 export default function OfflineMapCanvas({
   markers,
   selectedMarkerId,
-  routePoints = [],
+  routePoints = EMPTY_ROUTE_POINTS,
   estimated = false,
   initialDark = true,
   controls,
