@@ -168,7 +168,7 @@ export default function CityMap() {
       if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
       const target = item.destination ?? item.address ?? "";
       const key = cachedDestinationKey(item);
-      return Boolean(target) && (!key || !routeKeys.has(key));
+      return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
     });
   }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets]);
   const visibleAtlasDestinations =
@@ -284,9 +284,7 @@ export default function CityMap() {
       </section>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
-        options={CITY_MAP_QUICK_FILTERS
-          .filter(item => category === "todos" || item.category === category)
-          .map(({ label, value }) => ({ label, value }))}
+        options={CITY_MAP_QUICK_FILTERS}
         value={query}
         onPick={value => {
           setOnlyStreets(false);

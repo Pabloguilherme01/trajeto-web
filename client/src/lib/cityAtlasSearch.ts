@@ -3,10 +3,17 @@ import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 
 const searchIndex = new WeakMap<CityAtlasItem, string>();
 
+export function cityAtlasSearchText(item: CityAtlasItem) {
+  let text = searchIndex.get(item);
+  if (text === undefined) {
+    text = normalizeCatalogText([item.name, item.detail, item.address, item.destination, item.category, ...(item.keywords ?? [])].filter(Boolean).join(" "));
+    searchIndex.set(item, text);
+  }
+  return text;
+}
+
 export function prepareCityAtlasSearch(items: CityAtlasItem[]) {
-  // Exercise the same search path in small background batches. This also
-  // materializes normalized strings before the user's first keystroke.
-  filterCityAtlas(items, "__prepare_catalog__", "todos");
+  for (const item of items) cityAtlasSearchText(item);
 }
 
 export function filterCityAtlas(
@@ -18,11 +25,7 @@ export function filterCityAtlas(
   return items.filter(item => {
     if (category !== "todos" && item.category !== category) return false;
     if (!terms.length) return true;
-    let text = searchIndex.get(item);
-    if (text === undefined) {
-      text = normalizeCatalogText([item.name, item.detail, item.address, item.destination, item.category, ...(item.keywords ?? [])].filter(Boolean).join(" "));
-      searchIndex.set(item, text);
-    }
+    const text = cityAtlasSearchText(item);
     return terms.every(term => text.includes(term));
   });
 }

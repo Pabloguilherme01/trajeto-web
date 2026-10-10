@@ -18,3 +18,30 @@ it("opens the full imported food and shopping categories rather than only curate
   expect(searchBusinesses(items, "oficinas").length).toBeGreaterThan(0);
   expect(searchBusinesses(items, "inexistente-xyz")).toEqual([]);
 });
+
+
+it("reuses bounded alias results and keeps identities isolated across catalogs", async () => {
+  const items = await loadBusinessCatalog();
+  const markets = searchBusinesses(items, "mercados");
+  expect(markets.length).toBeGreaterThan(0);
+  expect(searchBusinesses(items, "mercado")).toBe(markets);
+  expect(new Set(markets.map(item => item.id)).size).toBe(markets.length);
+  expect(searchBusinesses([], "mercados")).toEqual([]);
+  for (const filter of ["roupas", "beleza", "materiais"]) {
+    expect(searchBusinesses(items, filter).length).toBeGreaterThan(0);
+  }
+  const company = items[0];
+  const digits = company.business!.cnpj.replace(/\D/g, "");
+  expect(searchBusinesses(items, digits)).toEqual([company]);
+  expect(searchBusinesses(items, company.business!.cnpj.replace(/[./-]/g, " "))).toEqual([company]);
+});
+
+
+it("matches a CNPJ by identity rather than another company's descriptive text", async () => {
+  const items = await loadBusinessCatalog();
+  const company = items[0];
+  const digits = company.business!.cnpj.replace(/\D/g, "");
+  const unrelated = { ...items[1], name: "Referência " + digits, keywords: [digits] };
+  expect(searchBusinesses([unrelated, company], digits)).toEqual([company]);
+  expect(searchBusinesses([unrelated], digits)).toEqual([]);
+});
