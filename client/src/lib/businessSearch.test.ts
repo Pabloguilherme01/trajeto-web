@@ -61,4 +61,6 @@ it("reuses stable map category lists without changing order or excluding distinc
   expect(businessesForMapLayer(items, "todos")).toBe(all);
   expect(businessesForMapLayer(items, "saude")).toEqual([]);
   expect(items).toHaveLength(4); // The original catalog is never modified.
+  const validItems = items.slice(0, 3);
+  expect(businessesForMapLayer(validItems, "todos")).toBe(validItems); // No needless full copy.
 });
