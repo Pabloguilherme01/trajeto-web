@@ -4,9 +4,11 @@ import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
 const navigate = vi.hoisted(() => vi.fn());
 const catalog = vi.hoisted(() => ({ items: [] as any[], loading: false, error: false, retry: vi.fn() }));
-vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: () => catalog }));
+const mapSearch = vi.hoisted(() => ({ value: "" }));
+const catalogEnabled = vi.hoisted(() => ({ values: [] as boolean[] }));
+vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: (enabled = true) => { catalogEnabled.values.push(enabled); return catalog; } }));
 vi.mock("wouter", () => ({
-  useSearch: () => "",
+  useSearch: () => mapSearch.value,
   useLocation: () => ["/mapa", navigate],
   Link: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));
@@ -22,6 +24,8 @@ afterEach(() => {
   vi.restoreAllMocks();
   navigate.mockClear();
   catalog.items = [];
+  mapSearch.value = "";
+  catalogEnabled.values = [];
 });
 it("mounts initial stops in batches and still searches the full catalog", () => {
   render(<CityMap />);
@@ -167,4 +171,37 @@ it("switches directly between quick filters in different categories", () => {
     expect(screen.getByText(name, { selector: "article p" })).toBeTruthy();
     expect(within(shortcuts).getByRole("button", { name: label }).getAttribute("aria-pressed")).toBe("true");
   }
+});
+
+it("restores a direct offline street-layer link without requesting the business catalog", () => {
+  mapSearch.value = "?q=Avenida+Bras%C3%ADlia&camada=ruas";
+  vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+  render(<CityMap />);
+  expect(screen.getByRole("button", { name: "Ruas e avenidas" }).getAttribute("aria-pressed")).toBe("true");
+  expect((screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement).value).toBe("Avenida Brasília");
+  expect(catalogEnabled.values.every(value => value === false)).toBe(true);
+  expect(screen.getByText(/Camada de ruas · sem carregar o catálogo/)).toBeTruthy();
+  expect(screen.getAllByText("Avenida Brasília", { selector: "article p" }).length).toBeGreaterThan(0);
+});
+
+it("makes security and environment layers selectable and shareable without GPS", () => {
+  mapSearch.value = "?camada=seguranca";
+  render(<CityMap />);
+  const categories = screen.getByRole("group", { name: "Categorias do mapa" });
+  expect(within(categories).getByRole("button", { name: "Segurança" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(within(categories).getByRole("button", { name: "Meio ambiente" }));
+  expect(within(categories).getByRole("button", { name: "Meio ambiente" }).getAttribute("aria-pressed")).toBe("true");
+  expect(navigate).toHaveBeenCalledWith(expect.stringContaining("camada=meio-ambiente"), { replace: true });
+  const url = new URL(String(navigate.mock.lastCall?.[0]), "https://example.org");
+  expect(url.searchParams.has("lat")).toBe(false);
+  expect(url.searchParams.has("lng")).toBe(false);
+});
+
+it("keeps a typed map search on the selected layer when the input loses focus", () => {
+  render(<CityMap />);
+  fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
+  const input = screen.getByRole("textbox", { name: "Buscar destino no mapa" });
+  fireEvent.change(input, { target: { value: "UPA" } });
+  fireEvent.blur(input);
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("q=UPA&camada=saude"), { replace: true });
 });
