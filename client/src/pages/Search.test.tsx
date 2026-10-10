@@ -145,3 +145,15 @@ it("uses all results for an unsupported type and resets filters on a new search"
   expect(new URLSearchParams(window.location.search).has("tipo")).toBe(false);
   expect(screen.getByRole("button", { name: /^Tudo/ }).getAttribute("aria-pressed")).toBe("true");
 });
+
+it("hides the commercial section when a noncommercial result filter is selected", () => {
+  window.history.replaceState(null, "", "/buscar?q=cras&tipo=services");
+  render(<SearchPage />);
+  expect(screen.getAllByRole("button", { name: /CRAS/ })).toHaveLength(3);
+  expect(screen.queryByRole("heading", { name: /Empresas do catálogo/ })).toBeNull();
+  expect(screen.queryByText(/Nenhuma empresa correspondente no arquivo/)).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Postos (0)" }));
+  expect(screen.queryByRole("heading", { name: /Empresas do catálogo/ })).toBeNull();
+  expect(screen.queryByText(/Nenhuma empresa correspondente no arquivo/)).toBeNull();
+  expect(screen.getByRole("status").textContent).toContain("Nenhum resultado local");
+});
