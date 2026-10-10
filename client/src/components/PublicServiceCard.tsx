@@ -51,6 +51,7 @@ import {
   servicePreparationHint,
 } from "@/lib/publicServicesPresentation";
 import { appUrl } from "@/lib/appUrl";
+import { preparePrimaryRoute } from "@/lib/primaryRoutes";
 import OrganicMapsModeSelect from "./OrganicMapsModeSelect";
 type Props = {
   service: PublicService;
@@ -177,6 +178,9 @@ export default function PublicServiceCard({
           <button
             type="button"
             onClick={() => openMaps(service)}
+            onPointerEnter={() => preparePrimaryRoute("/planejar")}
+            onPointerDown={() => preparePrimaryRoute("/planejar")}
+            onFocus={() => preparePrimaryRoute("/planejar")}
             className="min-h-11 min-w-0 break-words rounded-xl bg-primary px-2 text-sm font-bold text-primary-foreground"
           >
             <MapPinned className="mr-1.5 inline size-3.5" />
