@@ -205,3 +205,13 @@ it("keeps a typed map search on the selected layer when the input loses focus", 
   fireEvent.blur(input);
   expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("q=UPA&camada=saude"), { replace: true });
 });
+
+it("keeps sourced environmental places in the list without inventing map coordinates", () => {
+  mapSearch.value = "?camada=meio-ambiente";
+  vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+  render(<CityMap />);
+  expect(screen.getByRole("button", { name: "Meio ambiente" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Parque Estadual Águas Lindas", { selector: "article p" })).toBeTruthy();
+  expect(screen.getByText(/camada tem destinos sem coordenadas verificadas/i)).toBeTruthy();
+  expect(screen.queryByText(/O mapa de ruas precisa de conexão/)).toBeNull();
+});
