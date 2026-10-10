@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
   it("exposes the sourced security and environment layers without changing preset categories", () => {
@@ -33,4 +33,12 @@ describe("city map layers shared by the atlas and navigation", () => {
     expect([...parsed.searchParams.keys()].sort()).toEqual(["camada", "q"]);
     expect(cityMapLayerUrl("", "todos")).toMatch(/\/mapa$/);
   });
+});
+
+it("links map layers to matching services without copying a private search", () => {
+  expect(cityMapRelatedServicesUrl("saude")).toContain("categoria=saude");
+  expect(cityMapRelatedServicesUrl("seguranca")).toContain("categoria=seguranca");
+  expect(cityMapRelatedServicesUrl("meio-ambiente")).toContain("categoria=ambiente");
+  expect(cityMapRelatedServicesUrl("transporte")).toContain("categoria=transito");
+  expect(new URL(cityMapRelatedServicesUrl("ruas"), "https://example.org").search).toBe("");
 });
