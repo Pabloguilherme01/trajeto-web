@@ -10,6 +10,7 @@ import { buildAppleMapsDirectionsUrl, buildWazeNavigationUrl } from "@/lib/mobil
 import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
+import { stationMapKey } from "@/lib/stationMapKey";
 
 export type StationMapItem = {
   id?: string;
@@ -87,30 +88,40 @@ function sourceLabel(source?: StationMapItem["source"]) {
   return "LOCAL";
 }
 
-function offlineStationKey(station: StationMapItem) {
-  return station.id ?? station.cnpj ?? station.placeId ?? `${station.name}|${station.lat}|${station.lng}`;
-}
-
 export function OfflineStationMap({ stations, onSelectStation, heightClassName = "h-[min(60vh,480px)] min-h-[320px]", itemLabel = "posto", onPlanDestination, showDestinationPicker = true }: {
   showDestinationPicker?: boolean;
   stations: Array<StationMapItem & { lat: number; lng: number }>;  onSelectStation?: (station: StationMapItem) => void; heightClassName?: string; itemLabel?: string; onPlanDestination?: (station: StationMapItem) => void;
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(stations[0] ? offlineStationKey(stations[0]) : null);
+  const [selectedId, setSelectedId] = useState<string | null>(stations[0] ? stationMapKey(stations[0]) : null);
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [focusRequest, setFocusRequest] = useState<{ point: { lat: number; lng: number }; key: number } | null>(null);
-  const selected = stations.find(station => offlineStationKey(station) === selectedId) ?? stations[0] ?? null;
-  const markers = stations.map((station, i) => ({ ...station, id: offlineStationKey(station), label: String(i + 1) }));
-  const select = (id: string) => { setSelectedId(id); const station = stations.find(item => offlineStationKey(item) === id); if (station) { setFocusRequest(previous => ({ point: station, key: (previous?.key ?? 0) + 1 })); onSelectStation?.(station); } };
+  // Map markers and picker choices are pure derivatives of the catalog.
+  // Keep their identity stable while zooming, panning or selecting an item:
+  // OfflineMapCanvas caches expensive world projections by marker identity.
+  const markers = useMemo(
+    () => stations.map((station, i) => ({ ...station, id: stationMapKey(station), label: String(i + 1) })),
+    [stations]
+  );
+  const pickerItems = useMemo(
+    () => showDestinationPicker ? markers : [],
+    [markers, showDestinationPicker]
+  );
+  const stationsByKey = useMemo(
+    () => new Map(stations.map(station => [stationMapKey(station), station] as const)),
+    [stations]
+  );
+  const selected = (selectedId ? stationsByKey.get(selectedId) : null) ?? stations[0] ?? null;
+  const select = (id: string) => { setSelectedId(id); const station = stationsByKey.get(id); if (station) { setFocusRequest(previous => ({ point: station, key: (previous?.key ?? 0) + 1 })); onSelectStation?.(station); } };
   return <div className="overflow-hidden rounded-[1.6rem] border border-white/70 bg-[#eef2eb] text-[#163840] shadow-[0_24px_70px_rgba(15,35,45,.22)]">
     <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-[linear-gradient(110deg,#f8fbf9,#edf5f1)] p-3">
       <button type="button" onClick={() => setZoom(v => Math.min(6, v + .5))} disabled={zoom >= 6} className="grid size-11 place-items-center rounded-2xl border border-white bg-white/95 shadow-lg disabled:opacity-40" aria-label="Aumentar zoom"><Plus className="size-4" /></button>
       <button type="button" onClick={() => setZoom(v => Math.max(1, v - .5))} disabled={zoom <= 1} className="grid size-11 place-items-center rounded-2xl border border-white bg-white/95 shadow-lg disabled:opacity-40" aria-label="Diminuir zoom"><Minus className="size-4" /></button>
       <button type="button" onClick={() => { setFocusRequest(null); setZoom(1); setResetKey(v => v + 1); }} className="grid size-11 place-items-center rounded-2xl border border-white bg-white/95 shadow-lg" aria-label="Recentrar mapa"><RotateCcw className="size-4" /></button>
       <span className="text-xs font-black">Disponível sem conexão</span>
-      <div className="w-full">{showDestinationPicker && <MapDestinationPicker label={`Escolher ${itemLabel} no mapa offline`} value={selected ? offlineStationKey(selected) : null} items={stations.map(station => ({ ...station, id: offlineStationKey(station) }))} onSelect={select} />}</div>
+      <div className="w-full">{showDestinationPicker && <MapDestinationPicker label={`Escolher ${itemLabel} no mapa offline`} value={selected ? stationMapKey(selected) : null} items={pickerItems} onSelect={select} />}</div>
     </div>
-    <OfflineMapCanvas markers={markers} selectedMarkerId={selected ? offlineStationKey(selected) : null} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
+    <OfflineMapCanvas markers={markers} selectedMarkerId={selected ? stationMapKey(selected) : null} zoom={zoom} onZoom={setZoom} resetKey={resetKey} focusRequest={focusRequest} className={heightClassName} ariaLabel={"Mapa offline vetorial com " + stations.length + " destinos"} onSelect={marker => select(marker.id)} />
     <div className="border-t border-black/10 bg-white p-4">
       <p className="break-words text-base font-black">{selected?.name ?? "Nenhum ponto nesta categoria"}</p><p className="mt-1 break-words text-sm leading-relaxed text-[#607169]">{selected?.address}</p>
       {selected?.coordinateLabel && <p className="mt-2 break-words text-xs text-[#765100]">{selected.coordinateLabel}</p>}
