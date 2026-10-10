@@ -1276,7 +1276,9 @@ export default function PublicServices() {
                   ))}
                   {visibleReadyRoutes.length === 0 && (
                     <div className="w-[min(86vw,19rem)] shrink-0 rounded-2xl border border-dashed border-border/30 bg-muted/[.025] p-4 text-sm text-muted-foreground sm:col-span-2 sm:w-auto lg:col-span-5">
-                      Nenhuma rota pronta corresponde a esta busca neste grupo.
+                      {readyRouteOfflineOnly && !offlineRoutesChecked
+                        ? "Verificando quais destinos estão preparados offline neste aparelho…"
+                        : "Nenhuma rota pronta corresponde a esta busca neste grupo."}
                       <button
                         type="button"
                         onClick={() => {
