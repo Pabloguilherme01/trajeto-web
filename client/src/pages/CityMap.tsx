@@ -68,7 +68,7 @@ export default function CityMap() {
         ? item.right - viewport.right + inset
         : 0;
     if (offset && typeof rail.scrollBy === "function") {
-      rail.scrollBy({ left: offset, behavior: "instant" });
+      rail.scrollBy({ left: offset, behavior: "auto" });
     }
   }, [activeLayer]);
   const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
