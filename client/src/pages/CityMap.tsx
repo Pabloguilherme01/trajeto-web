@@ -258,10 +258,9 @@ export default function CityMap() {
         A cidade no seu caminho
       </h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
-        Saúde, serviços, compras e paradas. Escolha um destino e veja sua rota
-        no planejador.
+        Busque um destino e veja sua rota no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo disponíveis por nome, CNPJ, atividade ou bairro · consulta local"}</p>
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <section className="mt-5" aria-labelledby="city-search-label">
         <label id="city-search-label" htmlFor="city-map-search" className="block text-xs font-black uppercase tracking-[.14em] text-foreground/65">Buscar na cidade</label>
@@ -276,12 +275,12 @@ export default function CityMap() {
             onChange={event => setQuery(event.target.value)}
             enterKeyHint="search"
             autoComplete="off"
-            placeholder="Lugar, bairro, rua ou serviço"
+            placeholder="Nome, CNPJ, bairro ou rua"
             className="min-h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-foreground/55"
           />
           {query && <button type="button" aria-label="Limpar busca do mapa" onClick={() => setQuery("")} className="grid size-11 shrink-0 place-items-center rounded-xl text-foreground/65 hover:bg-muted/[.04] hover:text-foreground"><X className="size-4" aria-hidden="true" /></button>}
         </div>
-        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">A busca ignora acentos e combina nome, bairro, rua, serviço e dados cadastrados.</p>
+        <p id="city-search-help" className="mt-2 text-xs leading-relaxed text-foreground/60">Nome, CNPJ, bairro, rua ou atividade.</p>
       </section>
       <QuickFilterChips
         label="Filtros rápidos do mapa"
@@ -309,7 +308,7 @@ export default function CityMap() {
             setPreferredMapProvider(provider);
             setPreferredNavigationProvider(provider);
           }}
-          className="min-h-11 max-w-[9.5rem] rounded-xl border border-border bg-background px-2 text-base text-foreground"
+          className="min-h-11 min-w-0 w-36 shrink-0 rounded-xl border border-border bg-background px-2 text-sm text-foreground"
         >
           <option value="google">Google Maps</option>
           <option value="waze">Waze</option>

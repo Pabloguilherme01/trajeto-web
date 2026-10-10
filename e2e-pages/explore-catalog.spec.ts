@@ -33,6 +33,13 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await page.getByRole("button", { name: "Serviços públicos", exact: true }).click();
   await expect(page).toHaveURL(/\/servicos$/);
   await expect(page.getByRole("heading", { name: "Como podemos ajudar?" })).toBeVisible();
+  const summary = page.getByRole("group", { name: "Resumo da Central" });
+  await expect(summary.getByRole("button")).toHaveCount(4);
+  for (const button of await summary.getByRole("button").all()) {
+    const bounds = await button.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320);
+  }
   await page.screenshot({ path: "test-results/home-services-entry.png", fullPage: false });
   await page.getByRole("button", { name: "Rotas prontas", exact: true }).click();
   await expect(page.locator("#ready-routes article")).toHaveCount(12);
