@@ -6,11 +6,14 @@ import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } fro
 export type CityMapCategory = RouteDestinationCategoryFilter | "seguranca" | "meio-ambiente";
 export type CityMapLayer = CityMapCategory | "ruas";
 
-export const CITY_MAP_CATEGORIES: ReadonlyArray<{ value: CityMapCategory; label: string }> = [
-  ...ROUTE_DESTINATION_CATEGORIES,
-  { value: "seguranca", label: "Segurança" },
-  { value: "meio-ambiente", label: "Meio ambiente" },
-];
+export const CITY_MAP_CATEGORIES: ReadonlyArray<{ value: CityMapCategory; label: string }> =
+  ROUTE_DESTINATION_CATEGORIES.flatMap(item =>
+    item.value === "saude"
+      ? [item, { value: "seguranca" as const, label: "Segurança" }]
+      : item.value === "transporte"
+        ? [item, { value: "meio-ambiente" as const, label: "Meio ambiente" }]
+        : [item]
+  );
 
 const allowedLayers = new Set<CityMapLayer>([
   ...CITY_MAP_CATEGORIES.map(item => item.value),
