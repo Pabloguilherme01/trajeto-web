@@ -365,3 +365,24 @@ it("focuses the editable search field from the no-results guidance", () => {
     search.scrollIntoView = original;
   }
 });
+
+it("toggles an active quick filter off while keeping its map layer selected", () => {
+  render(<CityMap />);
+  const shortcuts = within(screen.getByRole("group", { name: "Filtros rápidos do mapa" }));
+  const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  const input = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
+
+  fireEvent.click(shortcuts.getByRole("button", { name: "Postos" }));
+  expect(input.value).toBe("posto");
+  expect(shortcuts.getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("true");
+
+  fireEvent.click(shortcuts.getByRole("button", { name: "Postos" }));
+  expect(input.value).toBe("");
+  expect(shortcuts.getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("false");
+  expect(categories.getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("true");
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("camada=combustivel"), { replace: true });
+  const url = String(navigate.mock.lastCall?.[0]);
+  expect(url).not.toContain("q=");
+  expect(url).not.toMatch(/lat=|lng=|origem=/);
+});
+
