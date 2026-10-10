@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 
 export type QuickFilterOption = { label: string; value: string };
@@ -18,15 +18,35 @@ export default function QuickFilterChips({
   variant?: "dark" | "light";
   className?: string;
 }) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const normalizedValue = normalizeCatalogText(value);
+  useEffect(() => {
+    const rail = railRef.current;
+    const selected = rail?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
+    if (!rail || !selected || typeof rail.scrollBy !== "function") return;
+    // Reveal the active filter inside its own horizontal row, never scroll
+    // the page (important on small phones and on filtered deep links).
+    const viewport = rail.getBoundingClientRect();
+    const item = selected.getBoundingClientRect();
+    const inset = 8;
+    const offset = item.left < viewport.left + inset
+      ? item.left - viewport.left - inset
+      : item.right > viewport.right - inset
+        ? item.right - viewport.right + inset
+        : 0;
+    if (offset) rail.scrollBy({ left: offset, behavior: "auto" });
+  }, [normalizedValue, options]);
+
   if (!options.length) return null;
   return (
     <div
+      ref={railRef}
       role="group"
       aria-label={label}
       className={"mobile-scroll-x flex max-w-full gap-2 overflow-x-auto pb-1 " + className}
     >
       {options.map(option => {
-        const active = normalizeCatalogText(value) === normalizeCatalogText(option.value);
+        const active = Boolean(normalizedValue) && normalizedValue === normalizeCatalogText(option.value);
         return (
           <button
             key={option.label + "|" + option.value}
