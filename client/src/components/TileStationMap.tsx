@@ -14,6 +14,7 @@ import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { limitPolylinePoints, viewportTileBounds } from "@/lib/mapPresentation";
 
 const ROUTE_STYLES = {
@@ -119,23 +120,16 @@ export default function TileStationMap({
     return result;
   }, [drawable]);
 
-  const [offline, setOffline] = useState(() => !navigator.onLine);
+  const online = useOnlineStatus();
+  const offline = !online;
   const failedTileKeys = useRef(new Set<string>());
   useEffect(() => {
-    const update = () => {
-      setOffline(!navigator.onLine);
-      if (navigator.onLine) {
-        failedTileKeys.current.clear();
-        setTileErrors(0);
-      }
-    };
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
+    // Retry healthy tiles after reconnection, using the same shared network
+    // status consumed by CityMap and StationMap.
+    if (!online) return;
+    failedTileKeys.current.clear();
+    setTileErrors(0);
+  }, [online]);
   const [groupKeys, setGroupKeys] = useState<string[]>([]);
   const groupItems = useMemo(() => groupKeys.flatMap(key => {
     const item = drawableByKey.get(key);
