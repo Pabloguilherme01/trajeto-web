@@ -72,3 +72,32 @@ export function searchBusinesses(items: CityAtlasItem[], query: string) {
   }
   return matches;
 }
+
+
+/**
+ * Keep map category lists keyed by the immutable loaded catalog identity.
+ * This avoids filtering thousands of records on every category transition,
+ * while preserving imported order, addresses, and all CNPJ records.
+ */
+const mapLayerIndexes = new WeakMap<CityAtlasItem[], {
+  all: CityAtlasItem[];
+  byLayer: Map<CityAtlasLayer, CityAtlasItem[]>;
+}>();
+export function businessesForMapLayer(items: CityAtlasItem[], layer: "todos" | CityAtlasLayer): CityAtlasItem[] {
+  let index = mapLayerIndexes.get(items);
+  if (!index) {
+    const all: CityAtlasItem[] = [];
+    const byLayer = new Map<CityAtlasLayer, CityAtlasItem[]>();
+    for (const item of items) {
+      // The map has never presented a record without a destination/address.
+      if (!(item.destination ?? item.address ?? "")) continue;
+      all.push(item);
+      const group = byLayer.get(item.category) ?? [];
+      group.push(item);
+      byLayer.set(item.category, group);
+    }
+    index = { all, byLayer };
+    mapLayerIndexes.set(items, index);
+  }
+  return layer === "todos" ? index.all : index.byLayer.get(layer) ?? [];
+}
