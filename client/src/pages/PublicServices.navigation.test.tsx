@@ -22,6 +22,7 @@ it("opens the directory in batches and keeps search results complete", async () 
 it("batches recovery for an unknown service link and searches the complete directory", () => {
   window.history.replaceState({}, "", "/servicos?servico=unknown");
   render(<PublicServices />);
+  expect(screen.queryByText("Mapa e navegação offline")).toBeNull();
   expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
   fireEvent.click(screen.getByRole("button", { name: "Mostrar mais 18 serviços" }));
   expect(document.querySelectorAll("#service-results article")).toHaveLength(36);

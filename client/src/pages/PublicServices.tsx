@@ -106,12 +106,13 @@ export default function PublicServices() {
   const selectedService = PUBLIC_SERVICES.find(
     service => service.id === params.get("servico")
   );
-  const browsing =
+  const batching =
     !selectedService &&
     !savedOnly &&
     !query.trim() &&
     category === "todos" &&
     resource === "todos";
+  const browsing = !params.has("servico") && batching;
   const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
   const favoriteCount = useMemo(
     () => PUBLIC_SERVICES.reduce((count, service) => count + Number(favoriteIds.has(service.id)), 0),
@@ -244,10 +245,10 @@ export default function PublicServices() {
 
   useEffect(() => {
     setServiceLimit(SERVICE_BATCH_SIZE);
-  }, [browsing]);
+  }, [batching]);
   // Search, category filters, favorites and direct links expose every match.
   // Only the unfiltered directory mounts cards in batches on first entry.
-  const displayedServices = browsing ? results.slice(0, serviceLimit) : results;
+  const displayedServices = batching ? results.slice(0, serviceLimit) : results;
 
   useEffect(() => {
     const targetId = selectedService
@@ -1394,7 +1395,7 @@ export default function PublicServices() {
           className="mt-4 text-sm text-foreground/70"
         >
           {results.length} serviços encontrados
-          {browsing && displayedServices.length < results.length && (
+          {batching && displayedServices.length < results.length && (
             <span> · {displayedServices.length} exibidos</span>
           )}
         </p>
@@ -1416,7 +1417,7 @@ export default function PublicServices() {
           ))}
         </section>
 
-        {browsing && displayedServices.length < results.length && (
+        {batching && displayedServices.length < results.length && (
           <button
             type="button"
             aria-controls="service-results"
