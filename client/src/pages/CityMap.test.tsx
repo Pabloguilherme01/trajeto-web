@@ -253,3 +253,31 @@ it("loads companies when switching from a local-only map layer to a business cat
   fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Compras" }));
   expect(catalogEnabled.values.at(-1)).toBe(true);
 });
+
+
+it("keeps street-layer access next to All and brings the map before navigation preferences", () => {
+  render(<CityMap />);
+  const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  const choices = categories.getAllByRole("button");
+  expect(choices[0].textContent).toBe("Tudo");
+  expect(choices[1].textContent).toBe("Ruas e avenidas");
+  const map = screen.getByRole("region", { name: "Mapa da cidade" });
+  const provider = screen.getByRole("combobox", { name: "Aplicativo de mapa preferido" });
+  expect(Boolean(map.compareDocumentPosition(provider) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  expect(screen.queryByRole("button", { name: /^Ver mapa$/ })).toBeNull();
+  expect(screen.getByRole("button", { name: /^Ver resultados$/ })).toBeTruthy();
+});
+
+it("clears search, fast filters and active layer in one action without sharing private data", () => {
+  mapSearch.value = "?q=UPA&camada=saude";
+  render(<CityMap />);
+  const groups = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;
+  expect(search.value).toBe("UPA");
+  expect(groups.getByRole("button", { name: "Saúde" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
+  expect(search.value).toBe("");
+  expect(groups.getByRole("button", { name: "Tudo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/mapa$/), { replace: true });
+  expect(String(navigate.mock.lastCall?.[0])).not.toMatch(/lat=|lng=|origem=/);
+});
