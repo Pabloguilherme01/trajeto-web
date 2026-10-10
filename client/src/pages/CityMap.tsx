@@ -2,7 +2,7 @@ import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import { Link, useLocation, useSearch } from "wouter";
@@ -396,12 +396,20 @@ export default function CityMap() {
           {markers.length} de {markerSelection.total} posições disponíveis · {destinations.length + atlasDestinations.length} destinos na lista
           {markerSelection.total > markers.length && " · amostra no mapa: filtre ou busque para ver um destino específico"}
         </span>
-        <Link
-          href={appUrl("/mapa/postos")}
-          className="flex min-h-11 items-center rounded-xl border border-border/15 px-3 font-bold"
-        >
-          Mapa e consulta de postos
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={cityMapRelatedServicesUrl(activeLayer)}
+            className="flex min-h-11 items-center rounded-xl border border-border/15 px-3 font-bold"
+          >
+            Serviços relacionados
+          </Link>
+          <Link
+            href={appUrl("/mapa/postos")}
+            className="flex min-h-11 items-center rounded-xl border border-border/15 px-3 font-bold"
+          >
+            Mapa e consulta de postos
+          </Link>
+        </div>
       </div>
       <p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-foreground/60">
         <ShieldCheck className="size-4 shrink-0" />O mapa não solicita sua
