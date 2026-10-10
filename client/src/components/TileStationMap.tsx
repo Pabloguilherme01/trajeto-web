@@ -738,7 +738,7 @@ export default function TileStationMap({
               const top = height / 2 + worldY - centerPx.y;
               if (left < -30 || left > width + 30 || top < -30 || top > height + 30) return null;
               return <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares e escolher na lista`} onPointerDown={event => event.stopPropagation()} onClick={() => {
-                setGroupKeys(group.items.map(stationKey));
+                setGroupKeys(group.items.map(stationMapKey));
                 setFollowing(false);
                 setCenter(unproject(worldX, worldY, zoom));
                 setZoom(value => Math.min(17, value + 2));
