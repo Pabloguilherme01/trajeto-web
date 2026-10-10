@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
   it("exposes the sourced security and environment layers without changing preset categories", () => {
@@ -68,4 +68,11 @@ it("does not require ANP catalog for streets, safety, environment or public serv
   for (const layer of ["ruas", "seguranca", "meio-ambiente", "saude", "educacao", "transporte", "compras"] as const) {
     expect(cityMapNeedsAnp(layer)).toBe(false);
   }
+});
+
+it("loads companies only in layers backed by the imported business categories", () => {
+  for (const layer of ["ruas", "seguranca", "centro", "combustivel"] as const)
+    expect(cityMapNeedsBusinessCatalog(layer)).toBe(false);
+  for (const layer of ["todos", "saude", "educacao", "servicos", "compras", "transporte", "alimentacao", "meio-ambiente"] as const)
+    expect(cityMapNeedsBusinessCatalog(layer)).toBe(true);
 });
