@@ -723,3 +723,12 @@ it("validates every catalog identity, source URL and recorded review date withou
     }
   }
 });
+
+it("distinguishes source consultation from verification and discloses conflicting official contacts", () => {
+  for (const id of ["secretaria-mulher", "secretaria-meio-ambiente", "funpreval", "prefeitura"]) {
+    const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+    expect(service.sourceCheckedAt).toBe("09/10/2026");
+    expect(service.verificationNote).toMatch(/Confirme/);
+  }
+  expect(PUBLIC_SERVICES.find(item => item.id === "secretaria-mulher")!.verificationNote).toContain("99695-8255");
+});

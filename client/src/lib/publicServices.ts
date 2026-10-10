@@ -52,6 +52,8 @@ export type PublicService = {
   keywords?: string[];
   whatsappOnly?: string[];
   verifiedAt?: string;
+  sourceCheckedAt?: string;
+  verificationNote?: string;
   sourceLabel:
     | "Prefeitura de Águas Lindas"
     | "Polícia Civil de Goiás"
@@ -170,6 +172,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "07/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
   },
   {
     id: "alternativas-penais-egresso",
@@ -184,6 +187,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "07/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
   },
   {
     id: "procuradoria-geral-municipio",
@@ -198,6 +202,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "07/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
   },
   {
     id: "controladoria-geral-interna",
@@ -212,6 +217,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "07/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
   },
   {
     id: "auxilio-funeral-municipal",
@@ -989,6 +995,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "01/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Secretaria Municipal de Saúde, Águas Lindas de Goiás, GO",
   },
   {
@@ -1007,6 +1014,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Diversas unidades na cidade",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "UBS Águas Lindas de Goiás, GO",
   },
   {
@@ -1017,6 +1025,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Rua 08, Quadra 33, Lote 27, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Águas Bonitas, Águas Lindas de Goiás, GO",
   },
   {
@@ -1027,6 +1036,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Rua J, Setor 06, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Águas Lindas II, Águas Lindas de Goiás, GO",
   },
   {
@@ -1037,6 +1047,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 17, Lote 31/32, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF América, Águas Lindas de Goiás, GO",
   },
   {
@@ -1047,6 +1058,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 58, Lote 03/05, Barragem II, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "UBS Barragem II, Águas Lindas de Goiás, GO",
   },
   {
@@ -1057,6 +1069,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Barragem IV, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "UBS Barragem IV, Águas Lindas de Goiás, GO",
   },
   {
@@ -1067,6 +1080,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Avenida Goiás, Quadra 06, Lote 20, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Barragem V, Águas Lindas de Goiás, GO",
   },
   {
@@ -1077,6 +1091,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Rua 17, Quadra 19, Lote 20, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Camping Club, Águas Lindas de Goiás, GO",
   },
   {
@@ -1087,6 +1102,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 50, Lote 48, Casa 02, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Cidade do Entorno, Águas Lindas de Goiás, GO",
   },
   {
@@ -1098,6 +1114,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
       "Quadra P, Lote 01, Chácara 10, Casa 03, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Coimbra, Águas Lindas de Goiás, GO",
   },
   {
@@ -1108,6 +1125,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 5, Área Especial, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Guaíra, Águas Lindas de Goiás, GO",
   },
   {
@@ -1118,6 +1136,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 13, Área Especial, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "UBS Jardim Paraíso, Águas Lindas de Goiás, GO",
   },
   {
@@ -1128,6 +1147,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra B3, Lote 21, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Laranjeiras, Águas Lindas de Goiás, GO",
   },
   {
@@ -1138,6 +1158,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Área Especial P. Militar, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Padre Lúcio, Águas Lindas de Goiás, GO",
   },
   {
@@ -1148,6 +1169,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Área Especial Setor Village, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Pérola II, Águas Lindas de Goiás, GO",
   },
   {
@@ -1158,6 +1180,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 07, Lote 13, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Pinheiro I, Águas Lindas de Goiás, GO",
   },
   {
@@ -1168,6 +1191,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 33, Conjunto B, Lote 33B, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Setor II, Águas Lindas de Goiás, GO",
   },
   {
@@ -1178,6 +1202,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     address: "Quadra 72, Lote 37, Setor 09, Águas Lindas de Goiás - GO",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: UNIDADES_SAUDE,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "ESF Setor 09, Águas Lindas de Goiás, GO",
   },
   {
@@ -1254,6 +1279,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "(61) 3613-2517 / (61) 3613-1190",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Polícia Militar, Águas Lindas de Goiás, GO",
   },
   {
@@ -1265,6 +1291,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "(61) 3618-2069",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Corpo de Bombeiros, Águas Lindas de Goiás, GO",
   },
   {
@@ -1493,6 +1520,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "(61) 92002-3774",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     verifiedAt: "07/10/2026",
     mapQuery: "Secretaria Municipal de Educação, Águas Lindas de Goiás, GO",
   },
@@ -1519,6 +1547,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     verifiedAt: "07/10/2026",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
   },
   {
     id: "secretaria-assistencia-social",
@@ -1528,11 +1557,13 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99291-2169 / (61) 99297-9283",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery:
       "Secretaria Municipal de Assistência Social, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-mulher",
+    verificationNote: "A Prefeitura publica contatos diferentes para este órgão: a tabela de Contatos informa (61) 99695-8255, enquanto Canais de Atendimentos informa (61) 99304-8456. Confirme o canal antes de sair.",
     name: "Secretaria Municipal da Mulher",
     category: "mulher",
     description:
@@ -1540,6 +1571,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99304-8456",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Secretaria Municipal da Mulher, Águas Lindas de Goiás, GO",
   },
   {
@@ -1552,6 +1584,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "ITBI: (61) 92005-3453 · Nota Fiscal/ISS: (61) 99305-7551",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery:
       "Secretaria Municipal de Fazenda e Planejamento, Águas Lindas de Goiás, GO",
   },
@@ -1563,6 +1596,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99306-5878",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery:
       "Secretaria Municipal de Administração, Águas Lindas de Goiás, GO",
   },
@@ -1574,17 +1608,20 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99303-4608",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery:
       "Secretaria Municipal de Infraestrutura e Obras, Águas Lindas de Goiás, GO",
   },
   {
     id: "secretaria-meio-ambiente",
+    verificationNote: "As páginas municipais divergem: Contatos informa (61) 99451-0844 e Canais de Atendimentos informa (61) 3616-1140. Confirme o canal antes de sair.",
     name: "Secretaria Municipal de Meio Ambiente",
     category: "ambiente",
     description: "Atendimento municipal relacionado ao meio ambiente.",
     phone: "(61) 99451-0844",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery:
       "Secretaria Municipal de Meio Ambiente, Águas Lindas de Goiás, GO",
   },
@@ -1596,6 +1633,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99303-6552",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Secretaria Municipal de Habitação, Águas Lindas de Goiás, GO",
   },
   {
@@ -1606,6 +1644,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 99310-0216",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Regularização Fundiária, Águas Lindas de Goiás, GO",
   },
   {
@@ -1679,6 +1718,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 3902-1097",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Ouvidoria SUS Águas Lindas de Goiás, GO",
   },
   {
@@ -1689,6 +1729,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 3618-2512",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Câmara Municipal de Águas Lindas de Goiás, GO",
   },
   {
@@ -1699,16 +1740,19 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 3617-2600",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Fórum de Águas Lindas de Goiás, GO",
   },
   {
     id: "funpreval",
+    verificationNote: "A página municipal informa (61) 3618-5814 na tabela de canais e (61) 98580-1747 na lista de órgãos. Confirme o canal antes de sair.",
     name: "FUNPREVAL",
     category: "cidadania",
     description: "Fundo de Previdência Municipal de Águas Lindas de Goiás.",
     phone: "(61) 3618-5814",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "FUNPREVAL Águas Lindas de Goiás, GO",
   },
   {
@@ -1720,6 +1764,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 3902-1135",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "SEBRAE Águas Lindas de Goiás, GO",
   },
   {
@@ -1789,6 +1834,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "190",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
   },
   {
     id: "carteira-trabalho-digital",
@@ -1979,6 +2025,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
   },
   {
     id: "prefeitura",
+    verificationNote: "As páginas municipais divergem: Contatos informa (61) 3618-4007 e Canais de Atendimentos informa (61) 3616-1058. Confirme o canal na fonte oficial.",
     name: "Prefeitura de Águas Lindas de Goiás",
     category: "cidadania",
     description:
@@ -1988,6 +2035,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 3618-4007",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: PREFEITURA_CONTATOS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Prefeitura de Águas Lindas de Goiás",
   },
   {
@@ -2086,6 +2134,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     phone: "(61) 3616-1133",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "Procon Águas Lindas de Goiás, GO",
   },
   {
@@ -2200,6 +2249,7 @@ export const PUBLIC_SERVICES: PublicService[] = [
     extraPhone: "(61) 3618-2013",
     sourceLabel: "Prefeitura de Águas Lindas",
     sourceUrl: TELEFONES_UTEIS,
+    sourceCheckedAt: "09/10/2026",
     mapQuery: "SAMU, Águas Lindas de Goiás, GO",
   },
   {
