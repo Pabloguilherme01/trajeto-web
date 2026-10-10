@@ -704,3 +704,31 @@ describe("public services catalog", () => {
   });
 
 });
+
+it("validates every catalog identity, source URL and recorded review date without inventing dates", () => {
+  const identities = new Set<string>();
+  for (const service of PUBLIC_SERVICES) {
+    expect(identities.has(service.id), service.id).toBe(false);
+    identities.add(service.id);
+    for (const value of [service.sourceUrl, service.actionUrl].filter(Boolean) as string[]) {
+      const url = new URL(value);
+      expect(url.protocol, service.id).toBe("https:");
+      expect(url.username + url.password, service.id).toBe("");
+    }
+    if (service.verifiedAt) {
+      const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(service.verifiedAt);
+      expect(match, service.id).not.toBeNull();
+      const iso = match![3] + "-" + match![2] + "-" + match![1];
+      expect(new Date(iso).toISOString().slice(0, 10), service.id).toBe(iso);
+    }
+  }
+});
+
+it("distinguishes source consultation from verification and discloses conflicting official contacts", () => {
+  for (const id of ["secretaria-mulher", "secretaria-meio-ambiente", "funpreval", "prefeitura"]) {
+    const service = PUBLIC_SERVICES.find(item => item.id === id)!;
+    expect(service.sourceCheckedAt).toBe("09/10/2026");
+    expect(service.verificationNote).toMatch(/Confirme/);
+  }
+  expect(PUBLIC_SERVICES.find(item => item.id === "secretaria-mulher")!.verificationNote).toContain("99695-8255");
+});

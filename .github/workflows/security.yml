@@ -23,10 +23,13 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: package-lock.json
-      - name: Install production dependencies from lock
-        run: npm ci --omit=dev --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - name: Install dependencies from lock
+        run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - name: Audit all dependencies including build and test tools
+        run: npm audit --audit-level=moderate
+
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+        run: npm audit --omit=dev --audit-level=moderate
 
       - name: Check tracked files for private-key material
         shell: bash

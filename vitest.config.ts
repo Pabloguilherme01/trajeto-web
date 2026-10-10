@@ -13,11 +13,23 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "node",
-    environmentMatchGlobs: [
-      ["client/src/**/*.test.tsx", "jsdom"],
-      ["client/src/**/*.spec.tsx", "jsdom"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "node",
+          environment: "node",
+          include: ["server/**/*.test.ts", "server/**/*.spec.ts", "shared/**/*.test.ts", "shared/**/*.spec.ts", "client/src/**/*.test.ts", "client/src/**/*.spec.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "dom",
+          environment: "jsdom",
+          include: ["client/src/**/*.test.tsx", "client/src/**/*.spec.tsx"],
+        },
+      },
     ],
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts", "shared/**/*.test.ts", "shared/**/*.spec.ts", "client/src/**/*.test.ts", "client/src/**/*.spec.ts", "client/src/**/*.test.tsx", "client/src/**/*.spec.tsx"],
   },
 });

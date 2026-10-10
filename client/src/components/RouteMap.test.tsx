@@ -21,9 +21,9 @@ afterEach(() => { cleanup(); vi.mocked(isGitHubPagesRuntime).mockReturnValue(fal
 Object.defineProperty(window, "google", {
   value: {
     maps: {
-      TrafficLayer: vi.fn(() => ({ setMap: vi.fn() })),
-      Polyline: vi.fn(() => ({ setMap: vi.fn() })),
-      LatLngBounds: vi.fn(() => ({ extend: vi.fn() })),
+      TrafficLayer: vi.fn(function () { return { setMap: vi.fn() }; }),
+      Polyline: vi.fn(function () { return { setMap: vi.fn() }; }),
+      LatLngBounds: vi.fn(function () { return { extend: vi.fn() }; }),
     },
   },
   configurable: true,
