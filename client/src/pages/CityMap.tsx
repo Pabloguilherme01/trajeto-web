@@ -84,6 +84,8 @@ export default function CityMap() {
     // offline fallback available for the next reload.
     const controller = new AbortController();
     let warmed = false;
+    let idleId: number | null = null;
+    let timerId: number | null = null;
     const warm = () => {
       if (warmed || controller.signal.aborted) return;
       warmed = true;
@@ -100,17 +102,36 @@ export default function CityMap() {
         warmed = false;
       });
     };
+    // The visible map, search and tile requests take priority over caching
+    // the large offline pack in the background. Keep the same eventual warmup
+    // for returning visitors and cancel it if the page is left.
+    const scheduleWarm = () => {
+      if (controller.signal.aborted || warmed || idleId !== null || timerId !== null) return;
+      if (typeof window.requestIdleCallback === "function") {
+        idleId = window.requestIdleCallback(() => {
+          idleId = null;
+          warm();
+        }, { timeout: 4000 });
+      } else {
+        timerId = window.setTimeout(() => {
+          timerId = null;
+          warm();
+        }, 1200);
+      }
+    };
     const serviceWorker = navigator.serviceWorker;
-    const onControllerChange = () => warm();
-    if (serviceWorker?.controller) warm();
+    const onControllerChange = () => scheduleWarm();
+    if (serviceWorker?.controller) scheduleWarm();
     else {
       serviceWorker?.addEventListener("controllerchange", onControllerChange, { once: true });
       void serviceWorker?.ready.then(() => {
-        if (serviceWorker.controller) warm();
+        if (serviceWorker.controller) scheduleWarm();
       }).catch(() => {});
     }
     return () => {
       controller.abort();
+      if (idleId !== null) window.cancelIdleCallback?.(idleId);
+      if (timerId !== null) window.clearTimeout(timerId);
       serviceWorker?.removeEventListener("controllerchange", onControllerChange);
     };
   }, []);

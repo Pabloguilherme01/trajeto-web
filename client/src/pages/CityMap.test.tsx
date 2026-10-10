@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
 const navigate = vi.hoisted(() => vi.fn());
@@ -280,4 +280,59 @@ it("clears search, fast filters and active layer in one action without sharing p
   expect(groups.getByRole("button", { name: "Tudo" }).getAttribute("aria-pressed")).toBe("true");
   expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/mapa$/), { replace: true });
   expect(String(navigate.mock.lastCall?.[0])).not.toMatch(/lat=|lng=|origem=/);
+});
+
+it("defers heavy offline-map warmup until browser idle and cancels on unmount", async () => {
+  const previousServiceWorker = Object.getOwnPropertyDescriptor(navigator, "serviceWorker");
+  const worker = {
+    controller: {},
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    ready: Promise.resolve({}),
+  };
+  Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: worker });
+  let idleTask: (() => void) | undefined;
+  const idle = vi.fn((task: () => void) => {
+    idleTask = task;
+    return 117;
+  });
+  const cancelIdle = vi.fn();
+  vi.stubGlobal("requestIdleCallback", idle);
+  vi.stubGlobal("cancelIdleCallback", cancelIdle);
+  const requests = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline test"));
+  try {
+    const view = render(<CityMap />);
+    expect(idle).toHaveBeenCalled();
+    expect(requests.mock.calls.some(([input]) => String(input).includes("aguas-lindas-offline-map.json"))).toBe(false);
+    await act(async () => { idleTask?.(); });
+    expect(requests.mock.calls.some(([input]) => String(input).includes("aguas-lindas-offline-map.json"))).toBe(true);
+    view.unmount();
+  } finally {
+    cleanup();
+    vi.unstubAllGlobals();
+    if (previousServiceWorker) Object.defineProperty(navigator, "serviceWorker", previousServiceWorker);
+    else Reflect.deleteProperty(navigator, "serviceWorker");
+  }
+});
+
+it("discards pending idle map warmup when the screen is closed", () => {
+  const previousServiceWorker = Object.getOwnPropertyDescriptor(navigator, "serviceWorker");
+  Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: {
+    controller: {}, addEventListener: vi.fn(), removeEventListener: vi.fn(), ready: Promise.resolve({}),
+  } });
+  const idle = vi.fn(() => 123);
+  const cancel = vi.fn();
+  vi.stubGlobal("requestIdleCallback", idle);
+  vi.stubGlobal("cancelIdleCallback", cancel);
+  try {
+    const view = render(<CityMap />);
+    expect(idle).toHaveBeenCalled();
+    view.unmount();
+    expect(cancel).toHaveBeenCalledWith(123);
+  } finally {
+    cleanup();
+    vi.unstubAllGlobals();
+    if (previousServiceWorker) Object.defineProperty(navigator, "serviceWorker", previousServiceWorker);
+    else Reflect.deleteProperty(navigator, "serviceWorker");
+  }
 });
