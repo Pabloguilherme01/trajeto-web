@@ -9,7 +9,7 @@ import RoutePublicServiceCard from "@/components/RoutePublicServiceCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
@@ -109,6 +109,10 @@ export default function Planner() {
   const [savedRouteQuery, setSavedRouteQuery] = useState("");
   const [showAllDestinations, setShowAllDestinations] = useState(() => queryParams.get("destinos") === "1");
   const [destinationFilter, setDestinationFilter] = useState("");
+  // Keep the destination search field responsive on slower mobile devices.
+  const deferredDestinationFilter = useDeferredValue(destinationFilter);
+  const destinationSearchUpdating = destinationFilter !== deferredDestinationFilter;
+  const [destinationPage, setDestinationPage] = useState<{ key: string; limit: number } | null>(null);
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [favoriteDestinations, setFavoriteDestinations] = useState(() =>
@@ -635,9 +639,15 @@ export default function Planner() {
 
   const destinationCount = useMemo(() => getLocalRoutePresets().length, []);
   const availableDestinations = useMemo(
-    () => getLocalRoutePresets(destinationFilter, destinationCategory),
-    [destinationFilter, destinationCategory]
+    () => getLocalRoutePresets(deferredDestinationFilter, destinationCategory),
+    [deferredDestinationFilter, destinationCategory]
   );
+  // Filtering always covers the complete catalog. Only render the first page
+  // of cards until the user requests more; reset the visible window whenever
+  // the search text or selected category changes.
+  const destinationPageKey = JSON.stringify([deferredDestinationFilter.trim(), destinationCategory]);
+  const destinationLimit = destinationPage?.key === destinationPageKey ? destinationPage.limit : 24;
+  const displayedDestinations = availableDestinations.slice(0, destinationLimit);
 
   const filteredSavedRoutes = useMemo(() => {
     const query = savedRouteQuery.trim().toLocaleLowerCase("pt-BR");
@@ -820,8 +830,11 @@ export default function Planner() {
                       ))}
                     </div>
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
-                    <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} role="region" aria-label="Lista de destinos disponíveis">
-                      {availableDestinations.map(item => (
+                    <p className="mt-2 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite" aria-busy={destinationSearchUpdating}>
+                      {destinationSearchUpdating ? "Atualizando destinos…" : `${availableDestinations.length} destinos encontrados · ${displayedDestinations.length} exibidos`}
+                    </p>
+                    <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} role="region" aria-label="Lista de destinos disponíveis" aria-busy={destinationSearchUpdating}>
+                      {displayedDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => { resetResult(); setDestination(item.destination); setShowAllDestinations(false); queueMicrotask(() => plannerFormRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus()); }} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-border/10 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
                           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent transition-colors group-hover:bg-accent/15"><RouteIcon className="size-4" /></span>
                           <span className="min-w-0 flex-1">
@@ -834,8 +847,17 @@ export default function Planner() {
                           <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-primary">Escolher</span>
                         </button>
                       ))}
-                      {availableDestinations.length === 0 && <p className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">Nenhum destino corresponde ao filtro.</p>}
+                      {!destinationSearchUpdating && availableDestinations.length === 0 && <p className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">Nenhum destino corresponde ao filtro.</p>}
                     </div>
+                    {!destinationSearchUpdating && availableDestinations.length > displayedDestinations.length && (
+                      <button
+                        type="button"
+                        onClick={() => setDestinationPage({ key: destinationPageKey, limit: destinationLimit + 24 })}
+                        className="mt-3 min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm font-bold text-foreground"
+                      >
+                        Mostrar mais destinos ({displayedDestinations.length} de {availableDestinations.length})
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
