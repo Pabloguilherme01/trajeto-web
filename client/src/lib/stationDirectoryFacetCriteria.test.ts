@@ -61,6 +61,12 @@ describe("shared station facet criteria", () => {
       .toBeLessThan(matching.indexOf(".filter(item => {"));
     expect(matching).toContain("matchesStationDirectoryFacet(facet, facetFilters)");
     expect(matching).toContain("directoryFuelMatches.has(item)");
+    // Default view should not walk the indexed results a second time.
+    expect(matching).toContain('neighborhoodFilter === "all" && brandFilter === "all"');
+    expect(matching).toContain("!addressOnly && !verifiedOnly && !mappedOnly && !directoryFuelMatches");
+    expect(matching).toContain("return textMatches;");
+    expect(matching.indexOf("return textMatches;"))
+      .toBeLessThan(matching.indexOf("textMatches.filter(item => {"));
     expect(matching).not.toContain("sortStationDirectoryRows(");
     // The filter memo must not depend on sort mode, geolocation or prices
     // directly. Fuel matching already encapsulates any snapshot changes.
