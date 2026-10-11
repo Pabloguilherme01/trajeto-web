@@ -2,6 +2,7 @@ import React, { memo, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { createCatalogSearchIndex, matchesCatalogTerms, normalizeCatalogText } from "@/lib/catalogSearch";
+import { availableMapPickerQuickFilters } from "@/lib/mapPickerQuickFilters";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import { COMMON_DESTINATION_QUICK_FILTERS } from "@/lib/quickFilterPresets";
@@ -24,13 +25,12 @@ function MapDestinationPicker({ items, value, label, onSelect }: {
   })) : [], [items, open]);
   const categories = useMemo(() => [...new Set(indexedItems.map(row => row.category))].sort(), [indexedItems]);
   const quickQueries = useMemo(
-    () => COMMON_DESTINATION_QUICK_FILTERS.filter(option => {
-      const terms = normalizeCatalogText(option.value).replace(/[ºª]/g, "").split(" ").filter(Boolean);
-      return indexedItems.some(row => matchesCatalogTerms(terms, row.search));
-    }),
+    () => availableMapPickerQuickFilters(indexedItems, COMMON_DESTINATION_QUICK_FILTERS),
     [indexedItems]
   );
-  const selected = items.find(item => item.id === value);
+  // Keyboard input changes the picker state, not its selected place. Avoid
+  // rescanning a large destination list on each keystroke or category click.
+  const selected = useMemo(() => items.find(item => item.id === value), [items, value]);
   const matches = useMemo(() => {
     const terms = normalizeCatalogText(query).replace(/[ºª]/g, "").split(" ").filter(Boolean);
     return indexedItems.filter(row => (category === "Todos" || row.category === category) && matchesCatalogTerms(terms, row.search)).map(row => row.item);
