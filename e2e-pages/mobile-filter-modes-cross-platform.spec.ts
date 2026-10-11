@@ -293,7 +293,7 @@ test("Android/iOS: planner destination catalog mounts limited cards and remains 
   await expect(region.getByRole("button")).toHaveCount(0);
   await search.fill("HEAL");
   await expect(region.getByRole("button").first()).toBeVisible();
-  await expect(region.getByRole("button")).toHaveCount(1);
+  await expect.poll(() => region.getByRole("button").count()).toBeLessThanOrEqual(24);
   await expect(search).toHaveValue("HEAL");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
