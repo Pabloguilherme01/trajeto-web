@@ -49,6 +49,31 @@ describe("offline preparation feedback", () => {
     await screen.findByText("Pronto para usar sem internet neste aparelho.");
     expect(screen.queryByRole("progressbar")).toBeNull();
   });
+  it("keeps a successful result when controllerchange fires during preparation", async () => {
+    const worker = new EventTarget();
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: worker,
+    });
+    let finish!: (result: { ready: boolean }) => void;
+    state.prepare.mockImplementation(() =>
+      new Promise(resolve => { finish = resolve; })
+    );
+    // A concurrent status probe never finishes: the UI must not wait for it.
+    state.check.mockResolvedValueOnce(false)
+      .mockImplementationOnce(() => new Promise(() => {}));
+    try {
+      render(<OfflineReadiness />);
+      fireEvent.click(await prepareButton());
+      act(() => { worker.dispatchEvent(new Event("controllerchange")); });
+      await act(async () => finish({ ready: true }));
+      expect(await screen.findByText("Pronto para usar sem internet neste aparelho.")).toBeTruthy();
+      expect(state.check).toHaveBeenCalledTimes(1);
+    } finally {
+      delete (navigator as unknown as { serviceWorker?: EventTarget }).serviceWorker;
+    }
+  });
+
   it("reports ready only after successful preparation", async () => {
     state.prepare.mockResolvedValue({ ready: true });
     render(<OfflineReadiness />);
