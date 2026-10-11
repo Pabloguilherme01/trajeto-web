@@ -22,18 +22,43 @@ function categoryForSector(sector: string): CityAtlasLayer {
 export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
   const input = value as { schema?: unknown; strings?: unknown; rows?: unknown };
-  if (input.schema !== 1 || !Array.isArray(input.strings) || !input.strings.every(v => typeof v === "string") || !Array.isArray(input.rows)) return [];
+  if (input.schema !== 1 || !Array.isArray(input.strings) ||
+      !input.strings.every(v => typeof v === "string") || !Array.isArray(input.rows)) return [];
   const strings = input.strings as string[];
-  return input.rows.flatMap((encoded: unknown) => {
-    if (!Array.isArray(encoded) || encoded.length !== 17) return [];
-    const row = encoded.map((v, i) => i === 8 || i === 9 ? v : typeof v === "number" && Number.isInteger(v) ? strings[v] : undefined);
-    if (!Array.isArray(row) || row.length !== 17) return [];
-    const [cnpj, name, legalName, tradeName, sector, cnae, activity, address, lat, lng, precision, opened, statusDate, size, mei, simples, nature] = row;
-    if (![cnpj, name, legalName, tradeName, sector, cnae, activity, address, precision, opened, statusDate, size, mei, simples, nature].every(v => typeof v === "string") || !/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(cnpj) || !name.trim()) return [];
-    const hasPoint = typeof lat === "number" && Number.isFinite(lat) && lat > -16.1 && lat < -15.3 && typeof lng === "number" && Number.isFinite(lng) && lng > -48.7 && lng < -47.9;
-    return [{
-      id: "business-" + cnpj.replace(/\D/g, ""), name: [tradeName, name, legalName].find(hasBusinessName)?.trim() ?? "Empresa sem nome informado", category: categoryForSector(sector),
-      address, destination: address,
+  const result: CityAtlasItem[] = [];
+  // Decode each row directly. Avoid flatMap's per-row arrays, a temporary
+  // 17-column decoded array and a second validation array for 21k records.
+  for (const encoded of input.rows) {
+    if (!Array.isArray(encoded) || encoded.length !== 17) continue;
+    const field = (index: number): string | undefined => {
+      const key: unknown = encoded[index];
+      return typeof key === "number" && Number.isInteger(key) ? strings[key] : undefined;
+    };
+    const cnpj = field(0), name = field(1), legalName = field(2);
+    const tradeName = field(3), sector = field(4), cnae = field(5);
+    const activity = field(6), address = field(7);
+    const lat: unknown = encoded[8], lng: unknown = encoded[9];
+    const precision = field(10), opened = field(11), statusDate = field(12);
+    const size = field(13), mei = field(14), simples = field(15), nature = field(16);
+    if (typeof cnpj !== "string" || typeof name !== "string" ||
+        typeof legalName !== "string" || typeof tradeName !== "string" ||
+        typeof sector !== "string" || typeof cnae !== "string" ||
+        typeof activity !== "string" || typeof address !== "string" ||
+        typeof precision !== "string" || typeof opened !== "string" ||
+        typeof statusDate !== "string" || typeof size !== "string" ||
+        typeof mei !== "string" || typeof simples !== "string" ||
+        typeof nature !== "string" ||
+        !/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(cnpj) || !name.trim()) continue;
+
+    const hasPoint = typeof lat === "number" && Number.isFinite(lat) && lat > -16.1 && lat < -15.3 &&
+      typeof lng === "number" && Number.isFinite(lng) && lng > -48.7 && lng < -47.9;
+    const displayName = hasBusinessName(tradeName) ? tradeName.trim()
+      : hasBusinessName(name) ? name.trim()
+      : hasBusinessName(legalName) ? legalName.trim()
+      : "Empresa sem nome informado";
+    result.push({
+      id: "business-" + cnpj.replace(/\D/g, ""), name: displayName,
+      category: categoryForSector(sector), address, destination: address,
       detail: sector + " · " + activity + " · CNPJ " + cnpj + " · Ativa no arquivo importado",
       sourceLabel: "CSV fornecido · coordenadas atribuídas ao CNEFE no arquivo",
       keywords: [cnpj, cnpj.replace(/\D/g, ""), legalName, tradeName, cnae, sector],
@@ -41,8 +66,9 @@ export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
       coordinateKind: hasPoint ? "area-reference" as const : undefined,
       coordinateLabel: hasPoint ? "Referência aproximada: " + precision + "; confirme a entrada" : "Sem coordenadas no arquivo",
       business: { cnpj, legalName, tradeName, sector, cnae, opened, statusDate, size, mei, simples, nature },
-    }];
-  });
+    });
+  }
+  return result;
 }
 
 export function loadBusinessCatalog(): Promise<CityAtlasItem[]> {
