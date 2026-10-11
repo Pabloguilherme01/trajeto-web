@@ -1,5 +1,5 @@
 import { Apple, LocateFixed, Navigation, Minus, Plus, Layers, Scan } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildAppleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrl,
@@ -13,6 +13,7 @@ import type { StationMapItem } from "@/components/StationMap";
 import MapDestinationPicker from "@/components/MapDestinationPicker";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
+import MapTileImage from "@/components/MapTileImage";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import { stationMapKey } from "@/lib/stationMapKey";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -142,15 +143,15 @@ export default function TileStationMap({
   const [size, setSize] = useState({ width: 320, height: 520 });
   const [tileErrors, setTileErrors] = useState(0);
   const [tileRetryGeneration, setTileRetryGeneration] = useState(0);
-  const reportTileError = (key: string) => {
+  const reportTileError = useCallback((key: string) => {
     if (failedTileKeys.current.has(key)) return;
     failedTileKeys.current.add(key);
     setTileErrors(failedTileKeys.current.size);
-  };
-  const reportTileLoad = (key: string) => {
+  }, []);
+  const reportTileLoad = useCallback((key: string) => {
     if (!failedTileKeys.current.delete(key)) return;
     setTileErrors(failedTileKeys.current.size);
-  };
+  }, []);
   const resetTileFailures = () => {
     failedTileKeys.current.clear();
     setTileErrors(0);
@@ -276,9 +277,8 @@ export default function TileStationMap({
   );
   const tiles = useMemo(() => {
     const result: Array<{
-      x: number;
-      y: number;
       key: string;
+      url: string;
       left: number;
       top: number;
       prefetch: boolean;
@@ -288,9 +288,8 @@ export default function TileStationMap({
       if (y < 0 || y >= maxTile) continue;
       for (let rawX = tileBounds.minX; rawX <= tileBounds.maxX; rawX++) {
         result.push({
-          x: wrapTile(rawX, tileZoom),
-          y,
           key: `${tileZoom}:${rawX}:${y}`,
+          url: tileUrl(tileZoom, wrapTile(rawX, tileZoom), y),
           left: (rawX - tileBounds.minX) * TILE,
           top: (y - tileBounds.minY) * TILE,
           prefetch:
@@ -683,18 +682,15 @@ export default function TileStationMap({
             }}
           >
             {tiles.map(tile => (
-              <img
+              <MapTileImage
                 key={`${tile.key}:${tileRetryGeneration}`}
-                src={tileUrl(tileZoom, tile.x, tile.y)}
-                referrerPolicy="origin"
-                decoding="async"
-                loading={tile.prefetch ? "lazy" : "eager"}
-                alt=""
-                onError={() => reportTileError(tile.key)}
-                onLoad={() => reportTileLoad(tile.key)}
-                draggable={false}
-                className="absolute size-64 max-w-none"
-                style={{ left: tile.left, top: tile.top }}
+                tileKey={tile.key}
+                url={tile.url}
+                left={tile.left}
+                top={tile.top}
+                prefetch={tile.prefetch}
+                onTileError={reportTileError}
+                onTileLoad={reportTileLoad}
               />
             ))}
           </div>

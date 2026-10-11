@@ -123,3 +123,37 @@ test("Android/iOS: advanced category stays visible and clears without resetting 
     .toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: map reuses overlapping street tiles and preserves offline controls at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  // Public tile network conditions must not affect map interaction testing.
+  await page.route("https://tile.openstreetmap.org/**", route =>
+    route.fulfill({
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    }),
+  );
+  await page.goto("mapa", { waitUntil: "domcontentloaded" });
+  const map = page.getByRole("region", { name: "Mapa de destinos", exact: true });
+  await expect(map).toBeVisible();
+  const tiles = map.locator('[data-map-tile-layer] img');
+  await expect.poll(() => tiles.count()).toBeGreaterThan(0);
+  const initial = await tiles.evaluateAll(images => images.map(image => image.getAttribute("src")));
+  await map.focus();
+  await map.press("ArrowRight");
+  const next = await tiles.evaluateAll(images => images.map(image => image.getAttribute("src")));
+  expect(next.some(src => initial.includes(src))).toBe(true);
+  expect(next.length).toBeLessThanOrEqual(30);
+  await page.getByRole("button", { name: "Abrir mapa local offline" }).click();
+  await expect(page.getByRole("button", { name: "Voltar ao mapa de ruas" })).toBeVisible();
+  await page.getByRole("button", { name: "Voltar ao mapa de ruas" }).click();
+  await expect(map).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});

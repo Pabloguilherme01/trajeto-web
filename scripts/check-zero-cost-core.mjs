@@ -6,6 +6,7 @@ const required = [
   "client/public/data/aguas-lindas-anp-precos.json",
   "client/src/lib/publicRouting.ts",
   "client/src/components/TileStationMap.tsx",
+  "client/src/components/MapTileImage.tsx",
 ];
 
 for (const file of required) {
@@ -35,10 +36,21 @@ const tileMap = fs.readFileSync("client/src/components/TileStationMap.tsx", "utf
 for (const marker of [
   "tile.openstreetmap.org/{z}/{x}/{y}.png",
   "VITE_PUBLIC_TILE_URL",
-  'referrerPolicy="origin"',
+  'import MapTileImage from "@/components/MapTileImage"',
 ]) {
   if (!tileMap.includes(marker)) {
     console.error("Zero-cost core: integração sustentável de tiles ausente:", marker);
+    process.exitCode = 1;
+  }
+}
+
+// The tile image lives in a memoized child so camera pan/zoom does not
+// rerender all unchanged images. Keep the origin-only referrer policy
+// mandatory at the actual network <img> element.
+const tileImage = fs.readFileSync("client/src/components/MapTileImage.tsx", "utf8");
+for (const marker of ['referrerPolicy="origin"', 'decoding="async"']) {
+  if (!tileImage.includes(marker)) {
+    console.error("Zero-cost core: proteção ou decodificação dos tiles ausente:", marker);
     process.exitCode = 1;
   }
 }
