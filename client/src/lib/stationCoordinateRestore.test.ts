@@ -21,7 +21,7 @@ it("recovers only unresolved positions, preserving the original order and source
   const invalid = { ...point(3), lat: Number.NaN };
   const noCache = { id: "not-found", name: "Sem cache", address: "Centro" };
   const stations = [known, unknown, invalid, noCache];
-  const readCached = vi.fn(station => station.id === "not-found"
+  const readCached = vi.fn((station: StationMapItem) => station.id === "not-found"
     ? null
     : { lat: -15.75, lng: -48.28, source: "local" as const });
   const actual = restoreStationCoordinates(stations, readCached);
