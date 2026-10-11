@@ -21,6 +21,10 @@ test("Android/iOS: station Premium modes remain touchable at 320px", async ({ pa
   await route.click();
   await expect(route).toHaveAttribute("aria-pressed", "true");
   await expect(all).toHaveAttribute("aria-pressed", "false");
+  // "Com rota" must show actually navigable cards, not invalid 0,0 points.
+  const routeCard = page.locator('article[id^="posto-"]').first();
+  await expect(routeCard).toBeVisible();
+  await expect(routeCard.getByRole("link", { name: "Ir até aqui" })).toBeVisible();
   await anp.click();
   await expect(anp).toHaveAttribute("aria-pressed", "true");
   await expect(route).toHaveAttribute("aria-pressed", "false");
