@@ -45,7 +45,8 @@ import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { cityMapLayerUrl, publicServiceMapLayer } from "@/lib/cityMapLayers";
 import { readPublicServiceListFilters, publicServiceListUrl, type PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
-import { publicServiceContacts, phoneHref } from "@/lib/contactActions";
+import { phoneHref } from "@/lib/contactActions";
+import { filterPublicServiceResults } from "@/lib/publicServiceListResults";
 import {
   buildOrganicMapsNavigationUrl,
   buildOrganicMapsSearchUrl,
@@ -64,7 +65,6 @@ import {
   PUBLIC_SERVICE_CATEGORIES,
   PUBLIC_SERVICE_SHORTCUTS,
   PUBLIC_SERVICES,
-  searchPublicServices,
   type PublicServiceCategory,
 } from "@/lib/publicServices";
 import { matchesPublicServiceRoute } from "@/lib/publicServiceRouteSearch";
@@ -253,22 +253,9 @@ export default function PublicServices() {
   const readyRouteLimit = readyRoutePage?.key === readyRoutePageKey ? readyRoutePage.limit : 12;
   const displayedReadyRoutes = visibleReadyRoutes.slice(0, readyRouteLimit);
 
-  const results = useMemo(() => {
-    if (selectedService) return [selectedService];
-    const matches = searchPublicServices(query, category).filter(
-      service =>
-        (!savedOnly || favoriteIds.has(service.id)) &&
-        (resource === "todos" ||
-          (resource === "contato" &&
-            publicServiceContacts(service).length > 0) ||
-          (resource === "rota" && Boolean(service.mapQuery)) ||
-          (resource === "online" && Boolean(service.actionUrl)))
-    );
-    return [...matches].sort(
-      (a, b) =>
-        Number(favoriteIds.has(b.id)) - Number(favoriteIds.has(a.id))
-    );
-  }, [query, category, selectedService, savedOnly, favoriteIds, resource]);
+  const results = useMemo(() => filterPublicServiceResults({
+    query, category, selectedService, savedOnly, favoriteIds, resource,
+  }), [query, category, selectedService, savedOnly, favoriteIds, resource]);
 
   // Every filter searches the complete catalog; mounting cards stays bounded.
   // Key pagination to the criteria so no delayed effect can undo Show more.
