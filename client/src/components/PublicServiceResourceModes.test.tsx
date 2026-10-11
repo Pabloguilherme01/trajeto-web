@@ -10,6 +10,7 @@ describe("premium modes in the public services directory", () => {
   it("shows all four resources visibly with accessible pressed states at phone widths", () => {
     const onChange = vi.fn();
     const { rerender } = render(<PublicServiceResourceModes resource="todos" onChange={onChange} />);
+    expect(screen.getByRole("heading", { level: 2, name: "Como você quer resolver?" })).toBeTruthy();
     const group = screen.getByRole("group", { name: "Recursos disponíveis" });
     const modes = within(group).getAllByRole("button");
     expect(modes).toHaveLength(4);
