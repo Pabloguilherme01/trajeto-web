@@ -22,17 +22,34 @@ export function inferredBrand(name: string) {
   return "Outras / não declarada";
 }
 
-export function filterAndSortStations<T extends StationListItem>(stations: T[], brandFilter: string, hoursFilter: StationHoursFilter, sortBy: StationSort) {
-  return stations
-    .filter(station => (brandFilter === "all" || inferredBrand(station.name) === brandFilter) && (hoursFilter === "all" || (hoursFilter === "open" && station.isOpen === true) || (hoursFilter === "closed" && station.isOpen === false) || (hoursFilter === "unknown" && station.isOpen === null)))
-    .map((station, index) => ({ station, index }))
-    .sort((a, b) => {
-      if (sortBy === "relevance") return a.index - b.index;
-      if (sortBy === "brand") return inferredBrand(a.station.name).localeCompare(inferredBrand(b.station.name), "pt-BR") || a.station.name.localeCompare(b.station.name, "pt-BR");
-      if (sortBy === "hours") return Number(b.station.isOpen === true) - Number(a.station.isOpen === true) || Number(a.station.isOpen === false) - Number(b.station.isOpen === false) || a.station.name.localeCompare(b.station.name, "pt-BR");
-      return (a.station.distanceMeters ?? Number.MAX_SAFE_INTEGER) - (b.station.distanceMeters ?? Number.MAX_SAFE_INTEGER);
-    })
-    .map(({ station }) => station);
+export function filterAndSortStations<T extends StationListItem>(stations: T[], brandFilter: string, hoursFilter: StationHoursFilter, sortBy: StationSort): T[] {
+  // Evaluate the brand once per station only when a filter or sort needs it.
+  // Sorting used to normalize the same name on every comparator call.
+  const needBrand = brandFilter !== "all" || sortBy === "brand";
+  const selected: Array<{ station: T; index: number; brand: string }> = [];
+  for (const station of stations) {
+    const brand = needBrand ? inferredBrand(station.name) : "";
+    if (brandFilter !== "all" && brand !== brandFilter) continue;
+    if (hoursFilter !== "all" && !(
+      (hoursFilter === "open" && station.isOpen === true) ||
+      (hoursFilter === "closed" && station.isOpen === false) ||
+      (hoursFilter === "unknown" && station.isOpen === null)
+    )) continue;
+    // Index is relative to the filtered list to preserve relevance ordering.
+    selected.push({ station, index: selected.length, brand });
+  }
+  selected.sort((a, b) => {
+    if (sortBy === "relevance") return a.index - b.index;
+    if (sortBy === "brand") return a.brand.localeCompare(b.brand, "pt-BR") ||
+      a.station.name.localeCompare(b.station.name, "pt-BR");
+    if (sortBy === "hours") return Number(b.station.isOpen === true) -
+      Number(a.station.isOpen === true) ||
+      Number(a.station.isOpen === false) - Number(b.station.isOpen === false) ||
+      a.station.name.localeCompare(b.station.name, "pt-BR");
+    return (a.station.distanceMeters ?? Number.MAX_SAFE_INTEGER) -
+      (b.station.distanceMeters ?? Number.MAX_SAFE_INTEGER);
+  });
+  return selected.map(({ station }) => station);
 }
 
 
