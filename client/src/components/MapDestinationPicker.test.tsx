@@ -95,3 +95,28 @@ it("keeps the map picker semantic and readable on narrow layouts", () => {
   expect(screen.getByText("Setor Norte").className).toContain("break-words");
 });
 
+
+
+it("does not rescan the selected destination on keystrokes or category filters", () => {
+  const list = [...items];
+  const find = vi.spyOn(list, "find");
+  const onSelect = vi.fn();
+  try {
+    const { rerender } = render(
+      <MapDestinationPicker items={list} value="a" label="Escolher destino" onSelect={onSelect} />
+    );
+    const initialReads = find.mock.calls.length;
+    expect(initialReads).toBe(1);
+    fireEvent.click(screen.getByRole("button", { name: "Escolher destino" }));
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "brasilia" } });
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "brasilia sul" } });
+    expect(find.mock.calls.length).toBe(initialReads);
+    rerender(
+      <MapDestinationPicker items={list} value="b" label="Escolher destino" onSelect={onSelect} />
+    );
+    expect(find.mock.calls.length).toBe(initialReads + 1);
+    expect(screen.getByRole("button", { name: "Escolher destino" }).textContent).toContain("Avenida Brasília");
+  } finally {
+    find.mockRestore();
+  }
+});
