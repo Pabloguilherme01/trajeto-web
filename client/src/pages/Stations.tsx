@@ -4,6 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
+import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
@@ -151,37 +152,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     [aguasLindasCatalog]
   );
 
-  const anpByCnpj = useMemo(() => new Map(anpStations.map(station => [normalizeStationCnpj(station.cnpj), station])), [anpStations]);
-  const directoryCards = useMemo(() => {
-    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => {
-      const key = normalizeStationCnpj(local.cnpj) || local.cnpj;
-      return {
-        key,
-        local,
-        anp: anpByCnpj.get(key) ?? null,
-      };
-    });
-    for (const anp of anpStations) {
-      const key = normalizeStationCnpj(anp.cnpj) || anp.cnpj;
-      const alreadyRepresented = cards.some(item => sameStationIdentity(
-        {
-          cnpj: item.anp?.cnpj || item.local?.cnpj,
-          address: [item.anp?.endereco || item.local?.address, item.anp?.bairro || item.local?.neighborhood].filter(Boolean).join(" "),
-          lat: Number(item.anp?.latitude ?? item.local?.anp?.latitude),
-          lng: Number(item.anp?.longitude ?? item.local?.anp?.longitude),
-        },
-        {
-          cnpj: anp.cnpj,
-          address: [anp.endereco, anp.bairro].filter(Boolean).join(" "),
-          lat: Number(anp.latitude),
-          lng: Number(anp.longitude),
-        },
-      ));
-      if (alreadyRepresented) continue;
-      cards.push({ key, local: null, anp });
-    }
-    return cards;
-  }, [aguasLindasCatalog, anpStations, anpByCnpj]);
+  // Match CNPJs using a single index; only incomplete records need the
+  // address/coordinate fallback used by the original reconciliation.
+  const directoryCards = useMemo(
+    () => mergeStationDirectoryRows(aguasLindasCatalog, anpStations),
+    [aguasLindasCatalog, anpStations],
+  );
 
   // Build text tokens only when the ANP/local snapshot changes, not on each
   // letter typed in the mobile search box or fuel/sort selection.
