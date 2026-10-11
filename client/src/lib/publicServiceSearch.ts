@@ -5,36 +5,38 @@ import type { PublicService, PublicServiceCategory } from "./publicServices";
 // from official service records, and do not build text indexes on module import.
 type SearchIndex = ReturnType<typeof createCatalogSearchIndex>;
 type SearchScope = "concise" | "complete" | "withCategory";
-type ServiceSearchEntry = { service: PublicService; index: SearchIndex };
-// Keep only the scopes that were actually requested. A short acronym needs
-// names/keywords, not three normalized copies of every public service record.
-const indexes = new WeakMap<readonly PublicService[], Map<SearchScope, ServiceSearchEntry[]>>();
+// Services and loaded catalog snapshots are immutable. A category-scoped query
+// should not build a normalized text index for every other public service.
+// Keep a weak, per-snapshot cache for each of the three search intentions.
+const indexes = new WeakMap<readonly PublicService[], Map<SearchScope, WeakMap<PublicService, SearchIndex>>>();
 const LINKING_WORDS = new Set(["de", "da", "do", "das", "dos", "e", "para"]);
 
-function indexedServices(items: readonly PublicService[], scope: SearchScope): ServiceSearchEntry[] {
+function indexedService(items: readonly PublicService[], service: PublicService, scope: SearchScope): SearchIndex {
   let byScope = indexes.get(items);
   if (!byScope) {
     byScope = new Map();
     indexes.set(items, byScope);
   }
-  let indexed = byScope.get(scope);
-  if (!indexed) {
-    indexed = items.map(service => {
-      const values = scope === "concise"
-        ? [service.name, service.category, service.actionLabel, ...(service.keywords ?? [])]
-        : [
-          service.name, service.description, service.address, service.phone,
-          service.extraPhone, service.guidance, service.actionLabel, service.hours,
-          ...(service.keywords ?? []),
-          ...(scope === "withCategory" ? [service.category] : []),
-        ];
-      return { service, index: createCatalogSearchIndex(values) };
-    });
-    byScope.set(scope, indexed);
+  let entries = byScope.get(scope);
+  if (!entries) {
+    entries = new WeakMap();
+    byScope.set(scope, entries);
   }
-  return indexed;
+  let index = entries.get(service);
+  if (!index) {
+    const values = scope === "concise"
+      ? [service.name, service.category, service.actionLabel, ...(service.keywords ?? [])]
+      : [
+        service.name, service.description, service.address, service.phone,
+        service.extraPhone, service.guidance, service.actionLabel, service.hours,
+        ...(service.keywords ?? []),
+        ...(scope === "withCategory" ? [service.category] : []),
+      ];
+    index = createCatalogSearchIndex(values);
+    entries.set(service, index);
+  }
+  return index;
 }
-
 /**
  * Category browsing needs no normalized text index. Build one only on the
  * first actual text search and reuse it for subsequent keystrokes, preserving
@@ -60,10 +62,10 @@ export function searchPublicServicesIn(
   const includeCategoryIntent = terms.length <= 2;
   const scope: SearchScope = conciseIntent ? "concise"
     : includeCategoryIntent ? "withCategory" : "complete";
-  return indexedServices(items, scope).filter(({ service, index }) => {
+  return items.filter(service => {
     if (category !== "todos" && service.category !== category) return false;
     if (search === "cras" && !service.id.startsWith("cras-")) return false;
     if (search === "cpf" && service.id !== "receita-federal-pav") return false;
-    return matchesCatalogTerms(terms, index);
-  }).map(entry => entry.service);
+    return matchesCatalogTerms(terms, indexedService(items, service, scope));
+  });
 }
