@@ -4,6 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
+import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { distanceKm } from "@/lib/offlineRouteMath";
@@ -144,37 +145,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     );
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
-  const anpByCnpj = useMemo(() => new Map(anpStations.map(station => [normalizeStationCnpj(station.cnpj), station])), [anpStations]);
-  const directoryCards = useMemo(() => {
-    const cards: Array<{ key: string; local: typeof aguasLindasCatalog[number] | null; anp: typeof anpStations[number] | null }> = aguasLindasCatalog.map(local => {
-      const key = normalizeStationCnpj(local.cnpj) || local.cnpj;
-      return {
-        key,
-        local,
-        anp: anpByCnpj.get(key) ?? null,
-      };
-    });
-    for (const anp of anpStations) {
-      const key = normalizeStationCnpj(anp.cnpj) || anp.cnpj;
-      const alreadyRepresented = cards.some(item => sameStationIdentity(
-        {
-          cnpj: item.anp?.cnpj || item.local?.cnpj,
-          address: [item.anp?.endereco || item.local?.address, item.anp?.bairro || item.local?.neighborhood].filter(Boolean).join(" "),
-          lat: Number(item.anp?.latitude ?? item.local?.anp?.latitude),
-          lng: Number(item.anp?.longitude ?? item.local?.anp?.longitude),
-        },
-        {
-          cnpj: anp.cnpj,
-          address: [anp.endereco, anp.bairro].filter(Boolean).join(" "),
-          lat: Number(anp.latitude),
-          lng: Number(anp.longitude),
-        },
-      ));
-      if (alreadyRepresented) continue;
-      cards.push({ key, local: null, anp });
-    }
-    return cards;
-  }, [aguasLindasCatalog, anpStations, anpByCnpj]);
+  // Identify known CNPJs in one indexed pass. The isolated helper keeps
+  // the existing address/coordinate fallback for incomplete ANP records.
+  const directoryCards = useMemo(
+    () => mergeStationDirectoryRows(aguasLindasCatalog, anpStations),
+    [aguasLindasCatalog, anpStations],
+  );
 
   // Options, ANP status and coordinate flags change only when this snapshot does.
   const directoryFacets = useMemo(() => buildStationDirectoryFacets(directoryCards), [directoryCards]);
