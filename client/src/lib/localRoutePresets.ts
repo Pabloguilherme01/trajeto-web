@@ -7,8 +7,10 @@ import { AGUAS_LINDAS_STATIONS } from "@/lib/aguasLindasStations";
 import anpSnapshot from "../../public/data/aguas-lindas-anp.json";
 import { isAguasLindasRoutePoint } from "./mapGeometry";
 
-export type RouteDestinationCategory = "saude" | "educacao" | "servicos" | "transporte" | "compras" | "combustivel" | "centro" | "alimentacao";
-export type RouteDestinationCategoryFilter = "todos" | RouteDestinationCategory;
+import type { RouteDestinationCategory, RouteDestinationCategoryFilter } from "./routeDestinationCategories";
+// Preserve public imports used by existing planner and UI consumers.
+export { ROUTE_DESTINATION_CATEGORIES } from "./routeDestinationCategories";
+export type { RouteDestinationCategory, RouteDestinationCategoryFilter } from "./routeDestinationCategories";
 
 export type LocalRoutePreset = {
   id: string;
@@ -17,18 +19,6 @@ export type LocalRoutePreset = {
   destination: string;
   category: RouteDestinationCategory;
 };
-
-export const ROUTE_DESTINATION_CATEGORIES: ReadonlyArray<{ value: RouteDestinationCategoryFilter; label: string }> = [
-  { value: "todos", label: "Tudo" },
-  { value: "saude", label: "Saúde" },
-  { value: "educacao", label: "Educação" },
-  { value: "servicos", label: "Serviços" },
-  { value: "compras", label: "Compras" },
-  { value: "transporte", label: "Transporte" },
-  { value: "combustivel", label: "Postos" },
-  { value: "alimentacao", label: "Alimentação" },
-  { value: "centro", label: "Cidade" },
-];
 
 const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
   { id: "upa", label: "UPA", detail: "Urgência e emergência · 24h", destination: "UPA Mansões Odisseia, Águas Lindas de Goiás, GO", category: "saude" },

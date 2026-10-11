@@ -1,7 +1,7 @@
 import { appUrl } from "./appUrl";
 import type { CityAtlasLayer } from "./cityAtlas";
 import type { PublicServiceCategory } from "./publicServices";
-import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "./localRoutePresets";
+import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "./routeDestinationCategories";
 
 /** The atlas has additional layers that the ready-route presets do not. */
 export type CityMapCategory = RouteDestinationCategoryFilter | "seguranca" | "meio-ambiente";
