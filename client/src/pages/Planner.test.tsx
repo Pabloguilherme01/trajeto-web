@@ -85,6 +85,7 @@ it("keeps focused and selected destination categories visible without moving the
     expect(screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" })).toBeTruthy();
   } finally {
     HTMLElement.prototype.scrollBy = originalScrollBy;
+    vi.restoreAllMocks();
   }
 }, 15000);
 
