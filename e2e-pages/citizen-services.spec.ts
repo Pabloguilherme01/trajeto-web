@@ -1,6 +1,21 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+/** A newly activated SW may be ready without controlling the current
+ * document yet. A normal online reload crosses that lifecycle boundary;
+ * the following assertion still requires a real controlling worker.
+ */
+async function ensureControlledOfflinePage(page: import("@playwright/test").Page) {
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) {
+    await page.reload({ waitUntil: "domcontentloaded" });
+  }
+  await expect.poll(
+    () => page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
+    { timeout: 20000 },
+  ).toBe(true);
+}
+
 test("Pages: saved public services persist and reopen offline", async ({
   page,
   context,
@@ -31,14 +46,7 @@ test("Pages: saved public services persist and reopen offline", async ({
     .getByRole("button", { name: "Serviços salvos (1)", exact: true })
     .click();
   await expect(page).toHaveURL(/servicos\?salvos=1$/);
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
-  await expect
-    .poll(() =>
-      page.evaluate(() => Boolean(navigator.serviceWorker.controller))
-    )
-    .toBe(true);
+  await ensureControlledOfflinePage(page);
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(
@@ -189,14 +197,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
   await expect(
     page.getByRole("link", { name: /Ligar para Cadastro Único/ })
   ).toHaveAttribute("href", "tel:61993029284");
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
-  await expect
-    .poll(() =>
-      page.evaluate(() => Boolean(navigator.serviceWorker.controller))
-    )
-    .toBe(true);
+  await ensureControlledOfflinePage(page);
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(
