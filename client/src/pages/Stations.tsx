@@ -10,7 +10,6 @@ import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { deduplicateStationMapItems } from "@/lib/stationMapDedupe";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { createStationDirectoryFuelMatcher } from "@/lib/stationDirectoryFuelMatcher";
-import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
@@ -18,7 +17,7 @@ import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMob
 import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
-import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
+import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
 import { inferredBrand, normalizeStationCnpj, stationCoordinatePoint, stationCoordinateWithFallback, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
@@ -69,7 +68,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [addressOnly, setAddressOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
-  const [localVisibleCount, setLocalVisibleCount] = useState(12);
   // Read potentially large cached snapshots only on mount, not on every
   // keystroke, filter change or map gesture that re-renders this screen.
   const [initialOfflineAnp] = useState(getOfflineAnpSnapshot);
@@ -133,21 +131,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     return indexAnpPricesByCnpj(records);
   }, [priceSnapshot]);
   const hasIndividualPrices = pricesByCnpj.size > 0;
-  const localDirectory = useMemo(() => {
-    if (!staticRuntime || showSavedOnly) return [];
-    const matches = searchAguasLindasStations(query);
-    const filtered = matches.filter(station =>
-      (neighborhoodFilter === "all" || normalizeCatalogText(station.neighborhood ?? "") === neighborhoodFilter) &&
-      (brandFilter === "all" || normalizeCatalogText(station.brand ?? "Sem bandeira") === brandFilter) &&
-      (!addressOnly || Boolean(station.address)) &&
-      (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP") &&
-      (!mappedOnly || Boolean(stationCoordinatePoint(station.anp?.latitude, station.anp?.longitude)))
-    );
-    return [...filtered].sort((a, b) =>
-      (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
-      a.displayName.localeCompare(b.displayName, "pt-BR")
-    );
-  }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
   // Identify known CNPJs in one indexed pass. The isolated helper keeps
   // the existing address/coordinate fallback for incomplete ANP records.
@@ -251,9 +234,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     toast.message(result.saved ? "Posto salvo neste aparelho." : "Posto removido dos salvos.");
   };
 
-
-  const visibleLocalDirectory = localDirectory.slice(0, localVisibleCount);
-  const hasMoreLocalStations = visibleLocalDirectory.length < localDirectory.length;
 
   const stationPages = trpc.stationDirectory.search.useInfiniteQuery(
     { query },
@@ -488,7 +468,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [directoryCards.length, location]);
 
   useEffect(() => {
-    setLocalVisibleCount(12);
     setDirectoryVisibleCount(24);
   }, [query, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
@@ -499,15 +478,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   useEffect(() => {
     document.title = query.trim() ? "Postos em " + query.trim() + " · Trajeto" : "Postos · Trajeto";
   }, [query]);
-
-  const resetLocalFilters = () => {
-    setNeighborhoodFilter("all");
-    setBrandFilter("all");
-    setAddressOnly(false);
-    setVerifiedOnly(false);
-    setMappedOnly(false);
-    setLocalVisibleCount(12);
-  };
 
   const applyStationSearch = (value: string) => {
     const trimmed = value.trim();
@@ -617,60 +587,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     } catch {
       toast.error("Não foi possível atualizar agora. O último cache continua disponível.");
     }
-  };
-
-  const copyCnpj = async (cnpj: string) => {
-    try {
-      await navigator.clipboard.writeText(cnpj);
-      vibration();
-      toast.message("CNPJ copiado.");
-    } catch {
-      toast.error("Não foi possível copiar o CNPJ.");
-    }
-  };
-
-  const copyAddress = async (station: typeof localDirectory[number]) => {
-    if (!station.address) {
-      toast.message("Este cadastro não possui endereço consolidado.");
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(`${station.address}, ${station.neighborhood ?? ""}, Águas Lindas de Goiás - GO`);
-      toast.message("Endereço copiado.");
-    } catch {
-      toast.error("Não foi possível copiar o endereço.");
-    }
-  };
-
-
-  const exportLocalCsv = () => {
-    const headers = [
-      "id","nome_comercial","razao_social","cnpj","bairro","endereco","bandeira","situacao","aliases",
-      "qualidade_dado","origem_dado","observacao_cadastro","telefone_mapa","avaliacao_mapa","avaliacoes_mapa",
-      "horario_mapa","bandeira_observada_mapa"
-    ];
-    const rows = localDirectory.map(station => [
-      station.id,
-      station.displayName,
-      station.legalName,
-      station.cnpj,
-      station.neighborhood ?? "",
-      station.address ?? "",
-      station.brand ?? "",
-      station.status,
-      station.aliases.join(" | "),
-      getStationDataQualityLabel(station),
-      station.dataOrigin ?? "",
-      station.sourceNote,
-      station.mapData?.phone ?? "",
-      station.mapData?.rating ?? "",
-      station.mapData?.reviewCount ?? "",
-      station.mapData?.hours ?? "",
-      station.mapData?.observedBrand ?? "",
-    ]);
-    const csv = serializeSemicolonCsv([headers, ...rows]);
-    downloadCsvFile(csv, "trajeto-postos-aguas-lindas-2026-09-30.csv");
-    toast.message(localDirectory.length + " cadastro(s) exportado(s).");
   };
 
   const exportAnpCsv = () => {

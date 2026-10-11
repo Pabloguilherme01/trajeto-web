@@ -46,6 +46,31 @@ describe("progressive station directory search parity", () => {
     }
   });
 
+  it("keeps repeat searches independent when only non-text filters change", () => {
+    const search = buildIndexedStationDirectorySearch(source, fields);
+    const cases: Array<[string, string]> = [
+      ["posto", "Jardim"], ["POSTO", "jardim"], ["posto", "Jardim"],
+      ["posto", "Centro"], ["posto", "Jardim"], ["posto", ""],
+      ["12.345", ""], ["12345", ""], ["", ""], ["posto", "Jardim"],
+    ];
+    for (const [query, secondary] of cases) {
+      const first = search(query, secondary);
+      const expected = fullScan(source, query, secondary).map(item => item.id);
+      expect(first.map(item => item.id)).toEqual(expected);
+      const repeated = search(query, secondary);
+      expect(repeated.map(item => item.id)).toEqual(expected);
+      expect(repeated).not.toBe(first);
+      repeated.pop();
+      expect(search(query, secondary).map(item => item.id)).toEqual(expected);
+    }
+    // A replaced immutable snapshot must not inherit the old match list.
+    const updated = source.map((item, index) => index === 0
+      ? { ...item, title: "Novo posto do Centro" } : item);
+    const nextSnapshot = buildIndexedStationDirectorySearch(updated, fields);
+    expect(nextSnapshot("novo").map(item => item.id)).toEqual([0]);
+    expect(search("novo").map(item => item.id)).toEqual([]);
+  });
+
   it("does not accidentally narrow when a short or numeric term becomes longer", () => {
     const data = [
       { id: 1, title: "POS", district: "", cnpj: "1234", detail: "" },
