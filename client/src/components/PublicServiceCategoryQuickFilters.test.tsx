@@ -14,8 +14,8 @@ describe("quick Premium service categories", () => {
     const buttons = within(group).getAllByRole("button");
     expect(buttons).toHaveLength(6);
     expect(buttons.map(button => button.getAttribute("aria-label"))).toEqual([
-      "Filtrar por Tudo", "Filtrar por Saúde", "Filtrar por Documentos",
-      "Filtrar por Trabalho", "Filtrar por Assistência", "Filtrar por Água e energia",
+      "Filtrar por Tudo", "Filtrar por Saúde", "Filtrar por Assistência",
+      "Filtrar por Trabalho", "Filtrar por Água e energia", "Filtrar por Documentos",
     ]);
     expect(within(group).getByRole("button", { name: "Filtrar por Saúde" }).getAttribute("aria-pressed"))
       .toBe("true");
