@@ -41,7 +41,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { publicServiceContacts } from "@/lib/contactActions";
+import { cachedPublicServiceContacts } from "@/lib/publicServiceContactCache";
 import {
   PUBLIC_SERVICE_CATEGORIES,
   type PublicService,
@@ -80,7 +80,7 @@ export default function PublicServiceCard({
   shareService,
 }: Props) {
   const Icon = categoryIcons[service.category];
-  const contacts = publicServiceContacts(service);
+  const contacts = cachedPublicServiceContacts(service);
   const primaryContact = contacts[0];
   const secondaryContacts = contacts.slice(1);
   const emergencyDirect = contacts.some(contact =>
