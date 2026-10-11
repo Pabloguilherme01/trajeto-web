@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createStationDirectoryFuelMatcher } from "./stationDirectoryFuelMatcher";
 import { stationSupportsFuel, type StationFuelFilter } from "./stationListControls";
 
@@ -68,6 +68,49 @@ describe("station fuel matcher per directory snapshot", () => {
     const refreshed = createStationDirectoryFuelMatcher(changed, new Map());
     expect([...refreshed("gasolina-comum")!]).toEqual([...previous("gasolina-comum", changed, new Map())!]);
     expect(original("gasolina-comum")).toBe(originalGas);
+  });
+
+  it("normalizes each distinct ANP label once across fuel changes without eager work", () => {
+    const sample: Card[] = [
+      { key: "a", local: null, anp: { products: [{ produto: "Gás Natural Veicular" }, { produto: "Etanol" }] } },
+      { key: "b", local: null, anp: { products: [{ produto: "Etanol" }] } },
+      { key: "c", local: null, anp: { products: [{ produto: "Gás Natural Veicular" }] } },
+    ];
+    const match = createStationDirectoryFuelMatcher(sample, new Map());
+    const normalize = vi.spyOn(String.prototype, "normalize");
+    try {
+      expect(match("all")).toBeNull();
+      expect(normalize).not.toHaveBeenCalled();
+      const natural = match("gnv");
+      expect([...natural!]).toEqual([sample[0], sample[2]]);
+      const firstQueries = normalize.mock.calls.length;
+      expect(firstQueries).toBe(2);
+      expect([...match("etanol")!]).toEqual([sample[0], sample[1]]);
+      expect([...match("gasolina-comum")!]).toEqual([]);
+      expect(normalize).toHaveBeenCalledTimes(firstQueries);
+      expect(match("gnv")).toBe(natural);
+    } finally {
+      normalize.mockRestore();
+    }
+  });
+
+  it("does not normalize ANP labels when official price evidence matches first", () => {
+    const source: Card[] = [
+      { key: "a", local: null, anp: { products: [{ produto: "Gasolina Aditivada" }] } },
+    ];
+    const pricing = new Map<string, Price[]>([[
+      "a", [{ productKey: "gasolina-comum", salePrice: 5 }],
+    ]]);
+    const match = createStationDirectoryFuelMatcher(source, pricing);
+    const normalize = vi.spyOn(String.prototype, "normalize");
+    try {
+      expect([...match("gasolina-comum")!]).toEqual(source);
+      expect(normalize).not.toHaveBeenCalled();
+      expect([...match("etanol")!]).toEqual([]);
+      expect(normalize).toHaveBeenCalledTimes(1);
+    } finally {
+      normalize.mockRestore();
+    }
   });
 
   it("wires the finite cache to the current page and keeps the reset behavior", () => {
