@@ -10,7 +10,7 @@ type SearchScope = "concise" | "complete" | "withCategory";
 // Keep a weak, per-snapshot cache for each of the three search intentions.
 const indexes = new WeakMap<readonly PublicService[], Map<SearchScope, WeakMap<PublicService, SearchIndex>>>();
 // Keep just the last query per immutable catalog snapshot. Changing favorites,
- // resource chips or their display order should not rescan the same text.
+// resource chips or their display order should not rescan the same text.
 const lastMatches = new WeakMap<readonly PublicService[], {
   search: string;
   category: PublicServiceCategory | "todos";
