@@ -49,15 +49,31 @@ export const PLANNER_LOCATION_QUICK_FILTERS: QuickFilterPreset[] = [
   { label: "Bairros", value: "jardim" },
 ];
 
+// Quick-filter lists are immutable during a render. Index the normalized
+// option values only once per list identity instead of repeating Unicode
+// normalization over every chip when the user types or switches categories.
+const normalizedOptionIndexes = new WeakMap<readonly QuickFilterPreset[], Map<string, QuickFilterPreset>>();
+
+function indexQuickFilterOptions<T extends QuickFilterPreset>(options: readonly T[]): ReadonlyMap<string, T> {
+  let index = normalizedOptionIndexes.get(options) as Map<string, T> | undefined;
+  if (!index) {
+    index = new Map<string, T>();
+    for (const option of options) {
+      const normalized = normalizeCatalogText(option.value);
+      // Array.find returned the first matching option; preserve that rule.
+      if (!index.has(normalized)) index.set(normalized, option);
+    }
+    normalizedOptionIndexes.set(options, index);
+  }
+  return index;
+}
+
 export function isQuickFilterValue(
   value: string,
   options: readonly QuickFilterPreset[]
 ) {
   const normalized = normalizeCatalogText(value);
-  return Boolean(
-    normalized &&
-      options.some(option => normalizeCatalogText(option.value) === normalized)
-  );
+  return Boolean(normalized && indexQuickFilterOptions(options).has(normalized));
 }
 
 export function quickFilterMatchesCategory(
@@ -66,10 +82,7 @@ export function quickFilterMatchesCategory(
   options: readonly CategorizedQuickFilterPreset[] = CITY_MAP_QUICK_FILTERS
 ) {
   if (category === "todos") return true;
-  const normalized = normalizeCatalogText(value);
-  const match = options.find(
-    option => normalizeCatalogText(option.value) === normalized
-  );
+  const match = indexQuickFilterOptions(options).get(normalizeCatalogText(value));
   return !match || match.category === category;
 }
 
@@ -77,8 +90,5 @@ export function quickFilterCategory(
   value: string,
   options: readonly CategorizedQuickFilterPreset[] = CITY_MAP_QUICK_FILTERS
 ) {
-  const normalized = normalizeCatalogText(value);
-  return options.find(
-    option => normalizeCatalogText(option.value) === normalized
-  )?.category;
+  return indexQuickFilterOptions(options).get(normalizeCatalogText(value))?.category;
 }
