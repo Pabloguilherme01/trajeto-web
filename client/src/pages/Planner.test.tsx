@@ -57,6 +57,7 @@ it("renders planner destination cards progressively and searches every destinati
   state.search = "destinos=1";
   render(<Planner />);
   const region = screen.getByRole("region", { name: "Lista de destinos disponíveis" });
+  expect((region.closest("details") as HTMLDetailsElement).open).toBe(true);
   const cards = () => within(region).queryAllByRole("button");
   expect(cards()).toHaveLength(24);
   const showMore = screen.getByRole("button", { name: /Mostrar mais destinos/ });
