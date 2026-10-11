@@ -298,3 +298,34 @@ test("Android/iOS: planner destination catalog mounts limited cards and remains 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: planner category filters reveal keyboard focus without moving the page at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
+  const rail = page.getByRole("group", { name: "Categorias dos destinos" });
+  const all = rail.getByRole("button", { name: "Todos" });
+  const last = rail.getByRole("button", { name: "Centro" });
+  await expect(all).toHaveAttribute("aria-pressed", "true");
+  const search = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  await search.fill("HEAL");
+  await rail.scrollIntoViewIfNeeded();
+  const beforeScroll = await page.evaluate(() => window.scrollY);
+  await last.evaluate(element => (element as HTMLElement).focus({ preventScroll: true }));
+  const inRail = () => last.evaluate(element => {
+    const railBounds = element.closest('[aria-label="Categorias dos destinos"]')!.getBoundingClientRect();
+    const button = element.getBoundingClientRect();
+    return button.left >= railBounds.left - 2 && button.right <= railBounds.right + 2;
+  });
+  await expect.poll(inRail).toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBe(beforeScroll);
+  await last.click();
+  await expect(last).toHaveAttribute("aria-pressed", "true");
+  await expect(all).toHaveAttribute("aria-pressed", "false");
+  await expect(search).toHaveValue("HEAL");
+  await expect(page.locator("#all-destinations-panel").getByRole("status")).toContainText("0 destinos encontrados");
+  await expect.poll(inRail).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
