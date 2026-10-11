@@ -52,8 +52,10 @@ export function buildStationDirectoryFacets<T extends StationFacetSource>(cards:
   const neighborhoodLabels = new Map<string, string>();
   const brandLabels = new Map<string, string>();
   for (const card of cards) {
-    const neighborhoodLabel = (card.local?.neighborhood || card.anp?.bairro || "").trim();
-    const brandLabel = (card.local?.brand || card.anp?.distribuidora || "Sem bandeira").trim();
+    // Facets use the same ANP-first value shown in each directory card.
+    // Local values remain the fallback for entries without ANP details.
+    const neighborhoodLabel = (card.anp?.bairro || card.local?.neighborhood || "").trim();
+    const brandLabel = (card.anp?.distribuidora || card.local?.brand || "Sem bandeira").trim();
     const neighborhood = normalizeCatalogText(neighborhoodLabel);
     const brand = normalizeCatalogText(brandLabel);
     if (neighborhood && !neighborhoodLabels.has(neighborhood)) neighborhoodLabels.set(neighborhood, neighborhoodLabel);
