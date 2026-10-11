@@ -1,4 +1,5 @@
 import React from "react";
+import PremiumFilterModeOption from "@/components/PremiumFilterModeOption";
 import { Globe2, Phone, Route, SlidersHorizontal } from "lucide-react";
 import type { PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
 
@@ -30,33 +31,18 @@ export default function PublicServiceResourceModes({
         )}
       </div>
       <div role="group" aria-label="Recursos disponíveis" className="mt-3 grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
-        {modes.map(({ value, label, detail, icon: Icon }) => {
-          const selected = resource === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              aria-label={label}
-              aria-pressed={selected}
-              onClick={() => onChange(value)}
-              className={
-                "flex min-h-[4.5rem] min-w-0 items-center gap-2 rounded-2xl border px-2.5 py-2 text-left outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring sm:px-3 " +
-                (selected
-                  ? "border-primary/45 bg-primary/15 text-foreground shadow-sm"
-                  : "border-border/15 bg-background/80 text-foreground hover:border-primary/30")
-              }
-            >
-              <span aria-hidden="true" className={"grid size-8 shrink-0 place-items-center rounded-xl " +
-                (selected ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground")}>
-                <Icon className="size-4" />
-              </span>
-              <span className="min-w-0">
-                <span className="block break-words text-xs font-black leading-tight sm:text-sm">{label}</span>
-                <span className="mt-1 block break-words text-[11px] leading-tight text-muted-foreground">{detail}</span>
-              </span>
-            </button>
-          );
-        })}
+        {modes.map(({ value, label, detail, icon }) => (
+          <PremiumFilterModeOption
+            key={value}
+            layout="grid"
+            ariaLabel={label}
+            label={label}
+            detail={detail}
+            icon={icon}
+            selected={resource === value}
+            onSelect={() => onChange(value)}
+          />
+        ))}}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
         Combine o modo com a categoria e a busca. A seleção mostra apenas os serviços com esse recurso disponível no cadastro.
