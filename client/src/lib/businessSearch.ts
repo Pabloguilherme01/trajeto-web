@@ -8,20 +8,37 @@ const categories: Record<string, CityAtlasLayer> = {
   compras: "compras", lojas: "compras", educacao: "educacao", saude: "saude",
   transporte: "transporte", servicos: "servicos",
 };
-const categoryIndex = new WeakMap<CityAtlasItem[], Map<CityAtlasLayer, CityAtlasItem[]>>();
+const categoryIndex = new WeakMap<CityAtlasItem[], {
+  groups: Map<CityAtlasLayer, CityAtlasItem[]>;
+  ranked: Set<CityAtlasLayer>;
+}>();
 function categoryItems(items: CityAtlasItem[], category: CityAtlasLayer) {
   let index = categoryIndex.get(items);
   if (!index) {
-    index = new Map();
+    const groups = new Map<CityAtlasLayer, CityAtlasItem[]>();
     for (const item of items) {
-      const group = index.get(item.category) ?? [];
+      const group = groups.get(item.category) ?? [];
       group.push(item);
-      index.set(item.category, group);
+      groups.set(item.category, group);
     }
-    for (const group of index.values()) group.sort((a, b) => Number(hasBusinessName(b.business?.tradeName ?? "")) - Number(hasBusinessName(a.business?.tradeName ?? "")));
+    index = { groups, ranked: new Set() };
     categoryIndex.set(items, index);
   }
-  return index.get(category) ?? [];
+  const group = index.groups.get(category);
+  if (!group) return [];
+  if (!index.ranked.has(category)) {
+    // The old comparator ranked businesses with a readable trade name first.
+    // Stable partition has the exact same order without sorting O(n log n),
+    // and we only do it for the category someone actually opened.
+    const named: CityAtlasItem[] = [];
+    const unnamed: CityAtlasItem[] = [];
+    for (const item of group) {
+      (hasBusinessName(item.business?.tradeName ?? "") ? named : unnamed).push(item);
+    }
+    index.groups.set(category, named.concat(unnamed));
+    index.ranked.add(category);
+  }
+  return index.groups.get(category)!;
 }
 const aliases: Record<string, string> = {
   farmacia: "farmacias", farmacias: "farmacias", mercado: "mercados", mercados: "mercados",
