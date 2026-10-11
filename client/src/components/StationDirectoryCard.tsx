@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
-import { motion, useReducedMotion } from "framer-motion";
 import { Fuel, Heart, MapPin, Navigation, Phone, Route } from "lucide-react";
 import type { AnpStation } from "@shared/anpRevendedores";
 import type { AnpPriceRecord } from "@shared/anpPrices";
@@ -75,7 +74,6 @@ export function StationDirectoryCard({
   const [copied, setCopied] = useState(false);
   const [actionError, setActionError] = useState("");
   const [preferredProvider, setPreferredProviderState] = useState(() => getPreferredNavigationProvider());
-  const reduceMotion = useReducedMotion();
   const stationName = local?.displayName || anp?.razaoSocial || ("Posto " + (anp?.cnpj || index));
   const legalName = anp?.razaoSocial || local?.legalName || "não informada";
   const cnpj = anp?.cnpj || local?.cnpj || "";
@@ -153,16 +151,12 @@ export function StationDirectoryCard({
   };
 
   return (
-    <motion.article
+    // Native cards avoid an in-view animation observer for each result, while
+    // retaining CSS hover feedback and honoring reduced-motion preferences.
+    <article
       id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
       tabIndex={-1}
-      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={reduceMotion ? undefined : { duration: 0.42, delay: Math.min((index - 1) * 0.025, 0.18), ease: [0.22, 1, 0.36, 1] }}
-      whileHover={reduceMotion ? undefined : { y: -3 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.997 }}
-      className="task-surface group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-shadow duration-300 hover:border-accent/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] [content-visibility:auto] [contain-intrinsic-size:320px]"
+      className="task-surface group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-[border-color,box-shadow] duration-200 hover:border-accent/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] motion-reduce:transition-none [content-visibility:auto] [contain-intrinsic-size:320px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-accent/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start gap-3">
@@ -323,6 +317,6 @@ export function StationDirectoryCard({
         <span>{coords ? "Rota por coordenada disponível" : "Rota por endereço"}</span>
         <span>Sem conta · uso direto</span>
       </div>
-    </motion.article>
+    </article>
   );
 }
