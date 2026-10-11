@@ -19,6 +19,10 @@ type StationDirectorySortable = {
 type PriceRecord = { productKey: string; salePrice: number };
 export type StationDirectorySort = "name" | "brand" | "price" | "distance";
 
+// Reuse one locale-aware comparator rather than resolving pt-BR collation
+// on every O(n log n) comparison during name, brand and tie-break sorting.
+const stationCollator = new Intl.Collator("pt-BR");
+
 /**
  * Preserve original sorting and tie-breaks, but prepare expensive price
  * lookups, coordinate validation and Haversine distances exactly once per
@@ -53,10 +57,10 @@ export function sortStationDirectoryRows<T extends StationDirectorySortable>(
   });
   prepared.sort((a, b) => {
     if (effectiveSort === "distance" || effectiveSort === "price")
-      return a.metric - b.metric || a.label.localeCompare(b.label, "pt-BR");
+      return a.metric - b.metric || stationCollator.compare(a.label, b.label);
     if (effectiveSort === "brand")
-      return a.brand.localeCompare(b.brand, "pt-BR") || a.label.localeCompare(b.label, "pt-BR");
-    return a.label.localeCompare(b.label, "pt-BR");
+      return stationCollator.compare(a.brand, b.brand) || stationCollator.compare(a.label, b.label);
+    return stationCollator.compare(a.label, b.label);
   });
   return prepared.map(entry => entry.row);
 }
