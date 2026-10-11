@@ -314,7 +314,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       ...official, ...local, ...directory, ...live, ...offlineMap,
     ]);
   }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
-  const anpWithCoordinates = anpStations.filter(station => Boolean(stationCoordinatePoint(station.latitude, station.longitude))).length;
+  // Official positions are immutable within an ANP snapshot. Filter chips,
+  // keystrokes and map gestures must not recount them on every render.
+  const anpWithCoordinates = useMemo(
+    () => anpStations.filter(station => Boolean(stationCoordinatePoint(station.latitude, station.longitude))).length,
+    [anpStations],
+  );
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
   const mapPositionedCount = useMemo(
     () => mapStations.reduce((count, station) => count + Number(Boolean(stationCoordinatePoint(station.lat, station.lng))), 0),
@@ -336,7 +341,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     ),
     [directoryCards]
   );
-  const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt);
+  // Reading offline map metadata can touch synchronous browser storage.
+  // Refresh the label when the offline map snapshot changes, not per keypress.
+  const offlineMapAge = useMemo(
+    () => getOfflineMapAgeLabel(getOfflineMapStations().savedAt),
+    [offlineMap],
+  );
   const cachedSnapshot = getCachedStations(query);
   const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
   const stations = userCoords && nearby
