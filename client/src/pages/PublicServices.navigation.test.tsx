@@ -22,6 +22,22 @@ it("opens the directory in batches and keeps all search matches accessible", asy
   expect(screen.queryByRole("button", { name: /Mostrar mais .* serviços/ })).toBeNull();
 }, 15000);
 
+it("keeps the Premium service search editable while reporting only completed results", async () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  const input = screen.getByRole("textbox", { name: "Buscar serviços públicos" }) as HTMLInputElement;
+  fireEvent.change(input, { target: { value: "zzzx-nenhum-servico-2026" } });
+  expect(input.value).toBe("zzzx-nenhum-servico-2026");
+  await waitFor(() => expect(screen.getByText("0 serviços encontrados")).toBeTruthy());
+  expect(document.querySelectorAll("#service-results article")).toHaveLength(0);
+  fireEvent.change(input, { target: { value: "anatel" } });
+  await waitFor(() => expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0));
+  fireEvent.click(screen.getByRole("button", { name: "Resolver online" }));
+  await waitFor(() => expect(window.location.search).toContain("recurso=online"));
+  expect(input.value).toBe("anatel");
+  expect(screen.getByRole("button", { name: "Resolver online" }).getAttribute("aria-pressed")).toBe("true");
+}, 15000);
+
 it("batches broad filters and retains expansion across delayed effects", async () => {
   window.history.replaceState({}, "", "/servicos?recurso=contato");
   render(<PublicServices />);
