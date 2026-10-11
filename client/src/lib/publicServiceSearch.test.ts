@@ -89,3 +89,47 @@ it("does not reuse a previous catalog snapshot after official records change", (
   expect(searchPublicServicesIn(fresh, "matricula").map(s => s.id))
     .toEqual(previousSearch(fresh, "matricula").map(s => s.id));
 });
+
+
+it("does not read or index unrelated categories while searching a narrow category", () => {
+  const allowed = service("escola-nova", "Escola Municipal Central", "educacao", "Matrícula escolar");
+  const unrelated = service("secretaria", "Secretaria Pública", "cidadania", "Atendimento");
+  const forbidden = Object.defineProperty({ ...unrelated }, "description", {
+    get: () => { throw new Error("Nonmatching category must not be indexed"); },
+    enumerable: true,
+  }) as PublicService;
+  expect(searchPublicServicesIn([allowed, forbidden], "matricula", "educacao").map(s => s.id))
+    .toEqual(["escola-nova"]);
+});
+
+it("reuses the same normalized fields on repeated category searches without rebuilding indexes", () => {
+  let descriptions = 0;
+  const inspected = Object.defineProperty(
+    service("escola-2", "Escola do Centro", "educacao", "Matrícula pública"),
+    "description",
+    { get: () => { descriptions++; return "Matrícula pública"; }, enumerable: true },
+  ) as PublicService;
+  const catalog: PublicService[] = [inspected, service("cras-3", "CRAS", "assistencia")];
+  for (const query of ["matricula", "matricul", "MATRÍCULA", "matricula"]) {
+    expect(searchPublicServicesIn(catalog, query, "educacao").map(s => s.id)).toEqual(["escola-2"]);
+  }
+  expect(descriptions).toBe(1);
+});
+
+it("preserves every category and intention when switching scope and catalog snapshots", () => {
+  const categories = ["todos", "saude", "assistencia", "educacao", "cidadania"] as const;
+  const queries = ["", "cras", "cpf", "cnpj", "assistencia", "educacao", "matricula",
+    "MATRÍCULA ESCOLAR", "São José", "informacoes de cras e cpf", "ouvidoria"];
+  for (const category of categories) {
+    for (const query of queries) {
+      expect(searchPublicServicesIn(records, query, category).map(s => s.id))
+        .toEqual(previousSearch(records, query, category).map(s => s.id));
+    }
+  }
+  const fresh = records.map(s => s.id === "escola"
+    ? { ...s, description: "Formação tecnológica", keywords: ["tecnologia"] }
+    : s);
+  expect(searchPublicServicesIn(fresh, "tecnologia", "educacao").map(s => s.id))
+    .toEqual(["escola"]);
+  expect(searchPublicServicesIn(records, "tecnologia", "educacao")).toEqual([]);
+});
