@@ -150,6 +150,13 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   const offline = !useOnlineStatus();
   const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => restoreStationCoordinates(stations, readCachedCoordinate));
   const [resolvingCount, setResolvingCount] = useState(0);
+  // Resolving a Google Place updates coordinates without changing identity.
+  // This dependency key only needs recomputing when the station list changes,
+  // never for a popup, status message, marker selection or zoom render.
+  const resolveStationKeys = useMemo(
+    () => resolvedStations.map(item => item.cnpj || item.id || item.name).join("|"),
+    [resolvedStations],
+  );
 
   useEffect(() => {
     setResolvedStations(restoreStationCoordinates(stations, readCachedCoordinate));
@@ -208,7 +215,7 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
     setResolvingCount(pending.length);
     void Promise.all(Array.from({ length: workers }, () => worker())).finally(() => { if (!cancelled) setResolvingCount(0); });
     return () => { cancelled = true; };
-  }, [ready, offline, resolvedStations.map(item => item.cnpj || item.id || item.name).join("|")]);
+  }, [ready, offline, resolveStationKeys]);
 
   const drawableStations = useMemo(() => resolvedStations.filter(hasCoordinates), [resolvedStations]);
 
