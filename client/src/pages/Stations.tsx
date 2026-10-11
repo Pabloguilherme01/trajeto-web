@@ -5,6 +5,8 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
+import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
+import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
@@ -131,11 +133,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     if (!staticRuntime || showSavedOnly) return [];
     const matches = searchAguasLindasStations(query);
     const filtered = matches.filter(station =>
-      (neighborhoodFilter === "all" || station.neighborhood === neighborhoodFilter) &&
-      (brandFilter === "all" || (station.brand ?? "Sem bandeira") === brandFilter) &&
+      (neighborhoodFilter === "all" || normalizeCatalogText(station.neighborhood ?? "") === neighborhoodFilter) &&
+      (brandFilter === "all" || normalizeCatalogText(station.brand ?? "Sem bandeira") === brandFilter) &&
       (!addressOnly || Boolean(station.address)) &&
       (!verifiedOnly || station.dataQuality === "anp-confirmed" || station.dataOrigin === "ANP") &&
-      (!mappedOnly || Boolean(station.mapData))
+      (!mappedOnly || Boolean(stationCoordinatePoint(station.anp?.latitude, station.anp?.longitude)))
     );
     return [...filtered].sort((a, b) =>
       (a.neighborhood ?? "").localeCompare(b.neighborhood ?? "", "pt-BR") ||
@@ -143,21 +145,26 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     );
   }, [query, showSavedOnly, staticRuntime, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
   const aguasLindasCatalog = useMemo(() => searchAguasLindasStations("postos"), []);
-  const localBrands = useMemo(
-    () => Array.from(new Set(aguasLindasCatalog.map(station => station.brand ?? "Sem bandeira"))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    [aguasLindasCatalog]
-  );
-  const localNeighborhoods = useMemo(
-    () => Array.from(new Set(aguasLindasCatalog.map(station => station.neighborhood).filter((value): value is string => Boolean(value)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
-    [aguasLindasCatalog]
-  );
-
-  // Match CNPJs using a single index; only incomplete records need the
-  // address/coordinate fallback used by the original reconciliation.
+  // Identify known CNPJs in one indexed pass. The isolated helper keeps
+  // the existing address/coordinate fallback for incomplete ANP records.
   const directoryCards = useMemo(
     () => mergeStationDirectoryRows(aguasLindasCatalog, anpStations),
     [aguasLindasCatalog, anpStations],
   );
+
+  // Options, ANP status and coordinate flags change only when this snapshot does.
+  const directoryFacets = useMemo(() => buildStationDirectoryFacets(directoryCards), [directoryCards]);
+
+  // The selected fuel filter is independent of the search text. Prepare its
+  // matching cards once when the fuel or price snapshot changes.
+  const directoryFuelMatches = useMemo(() => {
+    if (fuelFilter === "all") return null;
+    return new Set(directoryCards.filter(item => stationSupportsFuel(
+      pricesByCnpj.get(item.key)?.map(price => price.productKey) ?? [],
+      item.anp?.products?.map(product => product.produto || "") ?? [],
+      fuelFilter,
+    )));
+  }, [directoryCards, pricesByCnpj, fuelFilter]);
 
   // Build text tokens only when the ANP/local snapshot changes, not on each
   // letter typed in the mobile search box or fuel/sort selection.
@@ -183,11 +190,16 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     const matches = directoryTextSearch(
       directorySearch,
       staticRuntime && !broadAguasLindasQuery ? query : "",
-    ).filter(item => stationSupportsFuel(
-      pricesByCnpj.get(item.key)?.map(price => price.productKey) ?? [],
-      item.anp?.products?.map(product => product.produto || "") ?? [],
-      fuelFilter,
-    ));
+    ).filter(item => {
+      const facet = directoryFacets.byCard.get(item);
+      return Boolean(facet && matchesStationDirectoryFacet(facet, {
+        neighborhood: neighborhoodFilter,
+        brand: brandFilter,
+        addressOnly,
+        anpOnly: verifiedOnly,
+        coordinatesOnly: mappedOnly,
+      }) && (!directoryFuelMatches || directoryFuelMatches.has(item)));
+    });
 
     return matches.sort((a, b) => {
       const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
@@ -212,7 +224,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery]);
+  }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery, directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const point = stationCoordinatePoint(anp?.latitude ?? local?.anp?.latitude, anp?.longitude ?? local?.anp?.longitude);
@@ -959,6 +971,49 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
               <button type="button" onClick={resetDirectoryFilters} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-primary">{userCoords ? "Mais perto" : "Ver todos"}</button>
+            </div>
+            <div className="mt-3 rounded-2xl border border-border/10 bg-background/70 p-3" aria-label="Refinar postos">
+              <div className="grid grid-cols-2 gap-2">
+                <label className="min-w-0 text-xs font-bold text-muted-foreground">
+                  Bairro
+                  <select aria-label="Filtrar diretório por bairro" value={neighborhoodFilter}
+                    onChange={event => setNeighborhoodFilter(event.target.value)}
+                    className="mt-1 min-h-11 min-w-0 w-full rounded-xl border border-border/15 bg-background px-2 text-base text-foreground">
+                    <option value="all">Todos os bairros</option>
+                    {directoryFacets.neighborhoods.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="min-w-0 text-xs font-bold text-muted-foreground">
+                  Bandeira
+                  <select aria-label="Filtrar diretório por bandeira" value={brandFilter}
+                    onChange={event => setBrandFilter(event.target.value)}
+                    className="mt-1 min-h-11 min-w-0 w-full rounded-xl border border-border/15 bg-background px-2 text-base text-foreground">
+                    <option value="all">Todas as bandeiras</option>
+                    {directoryFacets.brands.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="mobile-scroll-x mt-2 flex max-w-full gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtros adicionais dos postos">
+                <button type="button" aria-pressed={verifiedOnly} onClick={() => setVerifiedOnly(value => !value)}
+                  className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-bold " +
+                    (verifiedOnly ? "border-primary bg-primary/10 text-primary" : "border-border/15 text-foreground/80")}>
+                  Com dados ANP
+                </button>
+                <button type="button" aria-pressed={addressOnly} onClick={() => setAddressOnly(value => !value)}
+                  className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-bold " +
+                    (addressOnly ? "border-primary bg-primary/10 text-primary" : "border-border/15 text-foreground/80")}>
+                  Com endereço
+                </button>
+                <button type="button" aria-pressed={mappedOnly} onClick={() => setMappedOnly(value => !value)}
+                  className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-bold " +
+                    (mappedOnly ? "border-primary bg-primary/10 text-primary" : "border-border/15 text-foreground/80")}>
+                  Com coordenadas
+                </button>
+              </div>
             </div>
             {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-warning">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground" role="status" aria-live="polite">

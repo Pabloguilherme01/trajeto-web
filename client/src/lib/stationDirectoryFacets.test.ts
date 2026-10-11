@@ -1,0 +1,100 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import {
+  buildStationDirectoryFacets, matchesStationDirectoryFacet,
+  type StationDirectoryFacetFilters,
+} from "./stationDirectoryFacets";
+
+type Card = {
+  local?: {
+    neighborhood?: string | null;
+    brand?: string | null;
+    address?: string | null;
+    dataQuality?: string | null;
+    dataOrigin?: string | null;
+    anp?: { latitude?: number | null; longitude?: number | null } | null;
+  } | null;
+  anp?: {
+    bairro?: string | null;
+    distribuidora?: string | null;
+    endereco?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+  } | null;
+};
+
+const all: StationDirectoryFacetFilters = {
+  neighborhood: "all", brand: "all", addressOnly: false,
+  anpOnly: false, coordinatesOnly: false,
+};
+const matches = (cards: Card[], filters: Partial<StationDirectoryFacetFilters>) => {
+  const index = buildStationDirectoryFacets(cards);
+  return cards.filter(card => matchesStationDirectoryFacet(index.byCard.get(card)!, { ...all, ...filters }));
+};
+
+describe("station directory facet filters", () => {
+  const cards: Card[] = [
+    {
+      local: {
+        neighborhood: "Jardim Brasília", brand: "Shell", address: "BR-070",
+        dataOrigin: "ANP", anp: { latitude: -15.78, longitude: -48.28 },
+      },
+      anp: { bairro: "JARDIM BRASILIA", distribuidora: "Shell", endereco: "BR-070", latitude: -15.78, longitude: -48.28 },
+    },
+    {
+      local: { neighborhood: "JARDIM BRASILIA", brand: "Shell", address: null },
+      anp: null,
+    },
+    {
+      local: { neighborhood: "Setor São José", brand: null, address: "Rua 3" },
+      anp: null,
+    },
+    {
+      local: null,
+      anp: { bairro: "Setor São José", distribuidora: "Ipiranga", endereco: null, latitude: 0, longitude: 0 },
+    },
+  ];
+
+  it("deduplicates accent and case variants in bairro/brand options without discarding records", () => {
+    const facets = buildStationDirectoryFacets(cards);
+    expect(facets.neighborhoods).toHaveLength(2);
+    expect(facets.brands).toHaveLength(3);
+    expect(facets.neighborhoods.map(x => x.value)).toContain("jardim brasilia");
+    expect(facets.neighborhoods.map(x => x.value)).toContain("setor sao jose");
+    expect(matches(cards, {})).toEqual(cards);
+    expect(matches(cards, { neighborhood: "jardim brasilia" })).toEqual([cards[0], cards[1]]);
+    expect(matches(cards, { brand: "shell" })).toEqual([cards[0], cards[1]]);
+  });
+
+  it("combines ANP, address and coordinate filters without inventing coordinates", () => {
+    expect(matches(cards, { anpOnly: true })).toEqual([cards[0], cards[3]]);
+    expect(matches(cards, { addressOnly: true })).toEqual([cards[0], cards[2]]);
+    expect(matches(cards, { coordinatesOnly: true })).toEqual([cards[0]]);
+    expect(matches(cards, { anpOnly: true, addressOnly: true, coordinatesOnly: true })).toEqual([cards[0]]);
+    expect(matches(cards, { brand: "ipiranga", coordinatesOnly: true })).toEqual([]);
+    expect(matches(cards, { neighborhood: "missing" })).toEqual([]);
+  });
+
+  it("does not change loaded records and refreshes options when catalog snapshots change", () => {
+    const original = JSON.stringify(cards);
+    const before = buildStationDirectoryFacets(cards);
+    const updated: Card[] = cards.map((item, index) => index === 0 ?
+      { ...item, local: { ...item.local, brand: "ALE" } } : item);
+    const after = buildStationDirectoryFacets(updated);
+    expect(before.byCard.get(cards[0])?.brand).toBe("shell");
+    expect(after.byCard.get(updated[0])?.brand).toBe("ale");
+    expect(before.brands.some(item => item.value === "ale")).toBe(false);
+    expect(JSON.stringify(cards)).toBe(original);
+  });
+
+  it("wires all advanced filters to the same directory and reset action", () => {
+    const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
+    for (const term of ['aria-label="Filtrar diretório por bairro"',
+      'aria-label="Filtrar diretório por bandeira"', 'aria-pressed={verifiedOnly}',
+      'aria-pressed={addressOnly}', 'aria-pressed={mappedOnly}', "matchesStationDirectoryFacet",
+      "directoryFuelMatches", "buildStationDirectoryFacets(directoryCards)"]) {
+      expect(source).toContain(term);
+    }
+    expect(source.match(/onClick=\{resetDirectoryFilters\}/g)).toHaveLength(2);
+  });
+});
