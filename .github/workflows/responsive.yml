@@ -22,3 +22,16 @@ jobs:
       - run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npx playwright test --config=playwright.responsive.config.ts --workers=3
+  mobile-platform-filters:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Android Chrome and iPhone Safari filter modes
+        run: npx playwright test --config=playwright.mobile-platform.config.ts --workers=2
