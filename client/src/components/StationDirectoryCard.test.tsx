@@ -11,6 +11,26 @@ beforeEach(() => { localStorage.clear(); vi.stubGlobal("IntersectionObserver", c
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("StationDirectoryCard practical actions", () => {
+  it("renders stable native cards without per-card motion observers or entrance transforms", () => {
+    const observe = vi.fn();
+    vi.stubGlobal("IntersectionObserver", class {
+      observe = observe;
+      unobserve() {}
+      disconnect() {}
+    });
+    render(<div>{Array.from({ length: 24 }, (_, index) => (
+      <StationDirectoryCard key={index} index={index + 1} local={{ ...local, id: String(index), cnpj: "" }} />
+    ))}</div>);
+    const cards = document.querySelectorAll('article[id^="posto-"]');
+    expect(cards).toHaveLength(24);
+    expect(observe).not.toHaveBeenCalled();
+    for (const card of cards) {
+      expect(card.getAttribute("style")).not.toMatch(/opacity|transform/);
+      expect(card.className).toContain("[content-visibility:auto]");
+      expect(card.className).toContain("motion-reduce:transition-none");
+    }
+  });
+
   it("routes by address without inventing coordinates or WhatsApp and keeps technical data collapsed", () => {
     render(<StationDirectoryCard index={1} local={local} />);
     const href = screen.getByRole("link", { name: "Ir até aqui" }).getAttribute("href")!;
