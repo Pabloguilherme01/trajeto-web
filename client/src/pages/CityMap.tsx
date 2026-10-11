@@ -1,4 +1,5 @@
 import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
+import { filterCityAtlasStreets } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -232,8 +233,10 @@ export default function CityMap() {
     const routeKeys = new Set(
       destinations.map(item => normalizeCatalogText(item.destination))
     );
-    const publicAtlas = filterCityAtlas(baseAtlas, deferredQuery, atlasLayer).filter(item => {
-      if (onlyStreets && item.coordinateKind !== "street-midpoint") return false;
+    const publicAtlas = (onlyStreets
+      ? filterCityAtlasStreets(baseAtlas, deferredQuery)
+      : filterCityAtlas(baseAtlas, deferredQuery, atlasLayer)).filter(item => {
+      // Street mode is already restricted by the cross-category street index.
       const target = item.destination ?? item.address ?? "";
       const key = cachedDestinationKey(item);
       return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
@@ -378,11 +381,14 @@ export default function CityMap() {
         options={CITY_MAP_QUICK_FILTERS}
         value={query}
         onPick={value => {
-          setOnlyStreets(false);
-          setQuery(value);
           const next = quickFilterCategory(value) ?? "todos";
+          // A second tap removes the quick search without losing its category.
+          const updatedQuery = !onlyStreets && category === next &&
+            normalizeCatalogText(query) === normalizeCatalogText(value) ? "" : value;
+          setOnlyStreets(false);
+          setQuery(updatedQuery);
           setCategory(next);
-          syncMapUrl(value, next);
+          syncMapUrl(updatedQuery, next);
         }}
         className="mt-3"
       />

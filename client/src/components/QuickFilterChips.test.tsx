@@ -49,3 +49,27 @@ it("uses semantic theme tokens in light and dark variants", () => {
   expect(dark.className).not.toContain("#");
 });
 
+
+it("brings a deep-linked active filter into the horizontal rail without page scrolling", () => {
+  const originalRect = HTMLElement.prototype.getBoundingClientRect;
+  const scroll = vi.fn();
+  const originalScrollBy = HTMLElement.prototype.scrollBy;
+  HTMLElement.prototype.scrollBy = scroll;
+  HTMLElement.prototype.getBoundingClientRect = function () {
+    const bounds = { left: 0, right: 320, width: 320, top: 0, bottom: 40, height: 40 };
+    if (this.tagName === "BUTTON" && this.textContent === "Postos")
+      return { ...bounds, left: 390, right: 470 } as DOMRect;
+    return bounds as DOMRect;
+  };
+  try {
+    render(<QuickFilterChips
+      options={[{ label: "Saúde", value: "upa" }, { label: "Postos", value: "posto" }]}
+      value="posto" onPick={vi.fn()}
+    />);
+    expect(scroll).toHaveBeenCalledWith({ left: 158, behavior: "auto" });
+    expect(screen.getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("true");
+  } finally {
+    HTMLElement.prototype.getBoundingClientRect = originalRect;
+    HTMLElement.prototype.scrollBy = originalScrollBy;
+  }
+});

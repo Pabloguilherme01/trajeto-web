@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterCityAtlas } from "./cityAtlasSearch";
+import { filterCityAtlas, filterCityAtlasStreets } from "./cityAtlasSearch";
 import { normalizeCatalogText } from "./catalogSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 
@@ -50,5 +50,39 @@ describe("indexed local atlas filters", () => {
     const updated = [{ ...entries[0], id: "new-catalog" }, ...entries];
     expect(filterCityAtlas(updated, "", "saude")).toHaveLength(first.length + 1);
     expect(filterCityAtlas(entries, "", "saude")).toHaveLength(first.length);
+  });
+});
+
+describe("indexed street-only filters", () => {
+  const mixed: CityAtlasItem[] = entries.map((item, i) =>
+    i % 4 === 0 ? { ...item, coordinateKind: "street-midpoint" as const } : item
+  );
+
+  it("returns exactly the streets from the previous full-atlas filter for every query", () => {
+    for (const query of ["", " ", "Avenida Brasília", "brasilia", "saude", "MANSÕES ODISSEIA", "posto especial", "zzzz"]) {
+      const previous = filterCityAtlas(mixed, query, "todos").filter(item => item.coordinateKind === "street-midpoint");
+      const current = filterCityAtlasStreets(mixed, query);
+      expect(current.map(item => item.id)).toEqual(previous.map(item => item.id));
+    }
+  });
+
+  it("keeps result arrays independent, even after a query with no text", () => {
+    const first = filterCityAtlasStreets(mixed, "");
+    const originalIds = first.map(item => item.id);
+    first.pop();
+    expect(filterCityAtlasStreets(mixed, "").map(item => item.id)).toEqual(originalIds);
+  });
+
+  it("indexes new atlas snapshots separately and excludes nonstreet entries", () => {
+    const source = filterCityAtlasStreets(mixed, "Avenida");
+    const newStreet: CityAtlasItem = {
+      id: "new-street", name: "Avenida Nova", category: "referencia",
+      coordinateKind: "street-midpoint", sourceLabel: "Atlas local",
+    };
+    const expanded = [...mixed, newStreet];
+    expect(filterCityAtlasStreets(expanded, "Avenida").map(item => item.id))
+      .toEqual([...source.map(item => item.id), "new-street"]);
+    expect(filterCityAtlasStreets(mixed, "Avenida").map(item => item.id))
+      .toEqual(source.map(item => item.id));
   });
 });
