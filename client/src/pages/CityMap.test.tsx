@@ -116,6 +116,34 @@ it("keeps map categories in a compact horizontal rail on mobile", () => {
   expect(categories.className).toContain("snap-x");
 });
 
+it("reveals deep-linked mobile categories and keyboard focus without scrolling the document", () => {
+  mapSearch.value = "?camada=meio-ambiente";
+  const documentScroll = vi.spyOn(window, "scrollBy").mockImplementation(() => {});
+  const originalScrollBy = HTMLElement.prototype.scrollBy;
+  const railScroll = vi.fn();
+  HTMLElement.prototype.scrollBy = railScroll;
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    const label = this.tagName === "BUTTON" ? this.textContent || "" : "";
+    const left = label === "Meio ambiente" ? 480 : label === "Educação" ? 390 : 0;
+    return { x: left, y: 0, left, top: 0, right: left + (left ? 140 : 320),
+      bottom: 50, width: left ? 140 : 320, height: 50, toJSON() {} };
+  });
+  try {
+    const view = render(<CityMap />);
+    expect(railScroll).toHaveBeenCalledWith({ left: 308, behavior: "auto" });
+    expect(documentScroll).not.toHaveBeenCalled();
+    railScroll.mockClear();
+    view.rerender(<CityMap />);
+    expect(railScroll).not.toHaveBeenCalled();
+    fireEvent.focus(within(screen.getByRole("group", { name: "Categorias do mapa" }))
+      .getByRole("button", { name: "Educação" }));
+    expect(railScroll).toHaveBeenCalledWith({ left: 218, behavior: "auto" });
+    expect(documentScroll).not.toHaveBeenCalled();
+  } finally {
+    HTMLElement.prototype.scrollBy = originalScrollBy;
+  }
+});
+
 it("keeps quick filters compatible when switching categories and street mode", () => {
   render(<CityMap />);
   const search = screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement;

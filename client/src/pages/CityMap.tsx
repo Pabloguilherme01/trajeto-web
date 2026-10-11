@@ -13,6 +13,7 @@ import type { StationMapItem } from "@/components/StationMap";
 import CityMapSurface from "@/components/CityMapSurface";
 import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import { useFilterRail } from "@/hooks/useFilterRail";
 import { CITY_MAP_QUICK_FILTERS, isQuickFilterValue, quickFilterCategory, quickFilterMatchesCategory } from "@/lib/quickFilterPresets";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
 import {
@@ -55,25 +56,10 @@ export default function CityMap() {
   const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
   const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
   const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
-  const categoryRailRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const rail = categoryRailRef.current;
-    const selected = rail?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
-    if (!rail || !selected) return;
-    // Do not scroll the whole page: reveal only the selected chip inside the
-    // horizontal rail, including for links to deep layers on a 320px phone.
-    const viewport = rail.getBoundingClientRect();
-    const item = selected.getBoundingClientRect();
-    const inset = 8;
-    const offset = item.left < viewport.left + inset
-      ? item.left - viewport.left - inset
-      : item.right > viewport.right - inset
-        ? item.right - viewport.right + inset
-        : 0;
-    if (offset && typeof rail.scrollBy === "function") {
-      rail.scrollBy({ left: offset, behavior: "auto" });
-    }
-  }, [activeLayer]);
+  // Share the same no-page-scroll rail behavior as station Premium modes:
+  // reveal deep-linked selections and keyboard-focused categories on mobile.
+  const { railRef: categoryRailRef, onFocusCapture: onCategoryFocusCapture } =
+    useFilterRail(activeLayer, CITY_MAP_TABS);
   const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
   const lastSuccessfulAnpFetchAt = useRef(0);
@@ -375,6 +361,7 @@ export default function CityMap() {
       </p>
       <div
         ref={categoryRailRef}
+        onFocusCapture={onCategoryFocusCapture}
         role="group"
         className="my-3 -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-label="Categorias do mapa"
