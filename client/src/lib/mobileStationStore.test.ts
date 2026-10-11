@@ -32,3 +32,60 @@ describe("armazenamento de postos", () => {
     }
   });
 });
+
+describe("cache snapshot parsing without stale results", () => {
+  const key = "trajeto-mobile-station-cache";
+
+  it("parses once per unchanged snapshot and returns independent arrays", () => {
+    cacheStations("postos", [station]);
+    const raw = localStorage.getItem(key);
+    const parse = vi.spyOn(JSON, "parse");
+    const first = getCachedStations("postos")!;
+    const readsAfterFirst = parse.mock.calls.filter(([text]) => text === raw).length;
+    expect(first.stations).toEqual([station]);
+    first.stations.pop();
+    for (let i = 0; i < 30; i++) {
+      expect(getCachedStations("postos")?.stations).toEqual([station]);
+    }
+    expect(parse.mock.calls.filter(([text]) => text === raw).length).toBe(readsAfterFirst);
+  });
+
+  it("sees same-tab writes, other-tab writes and clear immediately", () => {
+    cacheStations("postos", [station]);
+    expect(getCachedStations("postos")?.stations.map(s => s.placeId)).toEqual(["test"]);
+    cacheStations("postos", [{ ...station, placeId: "updated" }]);
+    expect(getCachedStations("postos")?.stations.map(s => s.placeId)).toEqual(["updated"]);
+
+    // Another tab can rewrite storage without touching the local module cache.
+    localStorage.setItem(key, JSON.stringify([{
+      query: "postos", savedAt: new Date().toISOString(),
+      stations: [{ ...station, placeId: "cross-tab" }],
+    }]));
+    expect(getCachedStations("postos")?.stations.map(s => s.placeId)).toEqual(["cross-tab"]);
+    localStorage.clear();
+    expect(getCachedStations("postos")).toBeNull();
+  });
+
+  it("rechecks retention on every read, even when the JSON is unchanged", () => {
+    cacheStations("postos", [station]);
+    expect(getCachedStations("postos")?.stations).toHaveLength(1);
+    const future = Date.now() + 25 * 3_600_000;
+    vi.spyOn(Date, "now").mockReturnValue(future);
+    expect(getCachedStations("postos")).toBeNull();
+  });
+
+  it("discards prior cache after storage errors and malformed replacement", () => {
+    cacheStations("postos", [station]);
+    expect(getCachedStations("postos")?.stations).toHaveLength(1);
+    localStorage.setItem(key, "{not-json");
+    expect(getCachedStations("postos")).toBeNull();
+    localStorage.setItem(key, JSON.stringify([{
+      query: "postos", savedAt: new Date().toISOString(), stations: [station],
+    }]));
+    expect(getCachedStations("postos")?.stations).toHaveLength(1);
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new DOMException("Storage blocked", "SecurityError");
+    });
+    expect(getCachedStations("postos")).toBeNull();
+  });
+});
