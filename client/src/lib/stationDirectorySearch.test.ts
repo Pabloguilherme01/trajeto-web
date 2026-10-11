@@ -42,14 +42,46 @@ describe("indexed station directory filters", () => {
       indexed++;
       return fields(record);
     });
-    expect(indexed).toBe(records.length);
-    for (const q of ["Centro", "Posto", "Jardim 100", "1800", ""]) search(q);
+    // Opening the directory or using only facet/fuel filters must not
+    // normalize all 1,800 records when no one has entered search text.
+    expect(indexed).toBe(0);
+    const full = search("  ");
+    expect(full).toEqual(records);
+    expect(full).not.toBe(records);
+    full.pop();
+    expect(search("")).toHaveLength(records.length);
+    expect(indexed).toBe(0);
+
+    // First real query initializes each row exactly once, including after
+    // clearing and reentering the search box.
+    for (const q of ["Centro", "Posto", "Jardim 100", "1800", "", "Centro"]) search(q);
     expect(indexed).toBe(records.length);
     const updated = records.map(record =>
       record.label === "Posto 0" ? { ...record, label: "Novo estabelecimento" } : record);
     expect(buildIndexedStationDirectorySearch(updated, fields)("novo").map(item => item.label))
       .toEqual(["Novo estabelecimento"]);
     expect(search("novo")).toEqual([]);
+  });
+
+
+  it("indexes on a secondary station URL query while keeping empty searches free", () => {
+    const records = [
+      { label: "Posto São José", district: "Jardim Brasília" },
+      { label: "Posto Avenida JK", district: "Centro" },
+    ];
+    let prepared = 0;
+    const search = buildIndexedStationDirectorySearch(records, row => {
+      prepared++;
+      return fields(row);
+    });
+    expect(search("", "  ")).toEqual(records);
+    expect(prepared).toBe(0);
+    expect(search("", "CENTRO")).toEqual([records[1]]);
+    expect(prepared).toBe(2);
+    const first = search("", "Centro");
+    first.pop();
+    expect(search("", "centro")).toEqual([records[1]]);
+    expect(prepared).toBe(2);
   });
 
   it("wires mobile search and both reset actions to one handler", () => {
