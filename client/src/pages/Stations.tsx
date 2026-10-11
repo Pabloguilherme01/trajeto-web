@@ -1,5 +1,5 @@
 import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapIcon, MapPin, Navigation, Search, Share2, ShieldCheck, SlidersHorizontal, Sparkles, Wifi, WifiOff, X } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
@@ -76,6 +76,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [nearbyAutoAttempted, setNearbyAutoAttempted] = useState(false);
   const verifiedFilterAvailable = AGUAS_LINDAS_ANP_VERIFIED_COUNT > 0;
   const [directorySearch, setDirectorySearch] = useState("");
+  // Let mobile text input paint before scanning and sorting the directory.
+  // The field stays responsive; the results catch up without stale caches.
+  const deferredDirectorySearch = useDeferredValue(directorySearch);
+  const directorySearchUpdating = deferredDirectorySearch !== directorySearch;
   const [directorySort, setDirectorySort] = useState<"name" | "distance" | "brand" | "price">("name");
   const [directoryVisibleCount, setDirectoryVisibleCount] = useState(24);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("all");
@@ -204,7 +208,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       coordinatesOnly: mappedOnly,
     };
     const textMatches = directoryTextSearch(
-      directorySearch,
+      deferredDirectorySearch,
       staticRuntime && !broadAguasLindasQuery ? query : "",
     );
     // No advanced facet or fuel filter: the indexed search already returned
@@ -218,7 +222,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       return Boolean(facet && matchesStationDirectoryFacet(facet, facetFilters) &&
         (!directoryFuelMatches || directoryFuelMatches.has(item)));
     });
-  }, [directoryTextSearch, directorySearch, query, staticRuntime, broadAguasLindasQuery,
+  }, [directoryTextSearch, deferredDirectorySearch, query, staticRuntime, broadAguasLindasQuery,
     directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter,
     addressOnly, verifiedOnly, mappedOnly]);
 
@@ -898,7 +902,12 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
 
             </details>
-            <StationDirectoryFilterModes mode={directoryMode} onSelect={applyDirectoryPreset} />
+            <StationDirectoryFilterModes
+              mode={directoryMode}
+              onSelect={applyDirectoryPreset}
+              resultCount={directoryCardsFiltered.length}
+              updating={directorySearchUpdating}
+            />
             <div className="mt-4 flex flex-wrap items-end justify-between gap-2">
               <div>
                 <h3 className="text-sm font-black text-foreground">Refinar resultados</h3>
@@ -1001,7 +1010,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <p className="mt-1 text-sm text-muted-foreground">Tente outro nome, bairro ou combustível.</p>
               <button type="button" onClick={resetDirectoryFilters} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground">Ver todos os postos</button>
             </div>}
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <div aria-busy={directorySearchUpdating} className="mt-4 grid gap-3 lg:grid-cols-2">
               {visibleDirectoryCards.map(({ item, index, saved: isSaved, point, distance }) => (
                 <StationDirectoryCard
                   key={item.key}

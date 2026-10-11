@@ -24,6 +24,19 @@ describe("premium station filter modes", () => {
     expect(onSelect).toHaveBeenCalledWith("address");
   });
 
+  it("shows a readable result count and never exposes stale counts while filtering", () => {
+    const { rerender } = render(
+      <StationDirectoryFilterModes mode="route" resultCount={28} onSelect={vi.fn()} />
+    );
+    expect(screen.getByText("28 postos")).toBeTruthy();
+    rerender(<StationDirectoryFilterModes mode="route" resultCount={28} updating onSelect={vi.fn()} />);
+    expect(screen.queryByText("28 postos")).toBeNull();
+    expect(screen.getByText("Atualizando resultados…")).toBeTruthy();
+    rerender(<StationDirectoryFilterModes mode="route" resultCount={1} onSelect={vi.fn()} />);
+    expect(screen.getByText("1 posto")).toBeTruthy();
+    expect(screen.queryByText("Atualizando resultados…")).toBeNull();
+  });
+
   it("reflects advanced custom combinations without claiming a preset is selected", () => {
     const onSelect = vi.fn();
     const { rerender } = render(<StationDirectoryFilterModes mode="custom" onSelect={onSelect} />);

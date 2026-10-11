@@ -25,6 +25,16 @@ test("Android/iOS: station Premium modes remain touchable at 320px", async ({ pa
   await expect(anp).toHaveAttribute("aria-pressed", "true");
   await expect(route).toHaveAttribute("aria-pressed", "false");
 
+  // The result count follows the actual deferred directory search on
+  // Chromium Android and WebKit iOS; typing must never freeze the field.
+  const directorySearch = page.getByRole("searchbox", { name: "Buscar no diretório de postos" });
+  await directorySearch.fill("zzzx-nenhum-posto-2026");
+  await expect(directorySearch).toHaveValue("zzzx-nenhum-posto-2026");
+  const modesPanel = rail.locator("..");
+  await expect(modesPanel.getByText("0 postos", { exact: true })).toBeVisible();
+  await directorySearch.fill("");
+  await expect(modesPanel.getByText(/^[1-9][0-9]* postos$/)).toBeVisible();
+
   const heights = await rail.getByRole("button").evaluateAll(
     buttons => buttons.map(button => button.getBoundingClientRect().height),
   );
