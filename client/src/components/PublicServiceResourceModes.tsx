@@ -36,6 +36,7 @@ export default function PublicServiceResourceModes({
             <button
               key={value}
               type="button"
+              aria-label={label}
               aria-pressed={selected}
               onClick={() => onChange(value)}
               className={
