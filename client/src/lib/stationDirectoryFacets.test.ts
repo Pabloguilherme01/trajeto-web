@@ -87,6 +87,34 @@ describe("station directory facet filters", () => {
     expect(JSON.stringify(cards)).toBe(original);
   });
 
+  it("uses ANP values shown on the card when official and local facets disagree", () => {
+    const disagreement: Card[] = [
+      {
+        local: { neighborhood: "Bairro Local", brand: "Marca Local", address: "Rua A" },
+        anp: { bairro: "Jardim Brasília", distribuidora: "Ipiranga", endereco: "Rua A" },
+      },
+      {
+        local: { neighborhood: "Setor São José", brand: "Shell" },
+        anp: null,
+      },
+      {
+        local: { neighborhood: "Setor Central", brand: "ALE" },
+        anp: { bairro: "", distribuidora: "", endereco: null },
+      },
+    ];
+    const index = buildStationDirectoryFacets(disagreement);
+    expect(index.byCard.get(disagreement[0])).toMatchObject({
+      neighborhood: "jardim brasilia", brand: "ipiranga",
+    });
+    expect(index.neighborhoods.map(item => item.label)).toEqual(["Jardim Brasília", "Setor Central", "Setor São José"]);
+    expect(index.brands.map(item => item.label)).toEqual(["ALE", "Ipiranga", "Shell"]);
+    expect(matches(disagreement, { brand: "ipiranga", neighborhood: "jardim brasilia" })).toEqual([disagreement[0]]);
+    expect(matches(disagreement, { brand: "marca local" })).toEqual([]);
+    expect(matches(disagreement, { neighborhood: "bairro local" })).toEqual([]);
+    expect(matches(disagreement, { brand: "shell" })).toEqual([disagreement[1]]);
+    expect(matches(disagreement, { brand: "ale", neighborhood: "setor central" })).toEqual([disagreement[2]]);
+  });
+
   it("wires all advanced filters to the same directory and reset action", () => {
     const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
     for (const term of ['aria-label="Filtrar diretório por bairro"',
