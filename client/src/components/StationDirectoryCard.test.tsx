@@ -25,7 +25,7 @@ describe("StationDirectoryCard practical actions", () => {
     expect(cards).toHaveLength(24);
     expect(observe).not.toHaveBeenCalled();
     for (const card of cards) {
-      expect(card.getAttribute("style")).not.toMatch(/opacity|transform/);
+      expect(card.getAttribute("style") ?? "").not.toMatch(/opacity|transform/);
       expect(card.className).toContain("[content-visibility:auto]");
       expect(card.className).toContain("motion-reduce:transition-none");
     }
