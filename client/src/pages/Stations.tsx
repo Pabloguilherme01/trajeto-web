@@ -5,6 +5,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
 import { sortStationDirectoryRows } from "@/lib/stationDirectorySort";
+import { prepareVisibleStationDirectoryCards } from "@/lib/stationDirectoryVisibleCards";
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
@@ -207,6 +208,17 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
     return sortStationDirectoryRows(matches, directorySort, userCoords, fuelFilter, pricesByCnpj);
   }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery, directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
+
+  const savedDirectoryPlaceIds = useMemo(
+    () => new Set(saved.map(station => station.placeId)),
+    [saved],
+  );
+  const visibleDirectoryCards = useMemo(
+    () => prepareVisibleStationDirectoryCards(
+      directoryCardsFiltered, directoryVisibleCount, userCoords, savedDirectoryPlaceIds,
+    ),
+    [directoryCardsFiltered, directoryVisibleCount, userCoords, savedDirectoryPlaceIds],
+  );
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const point = stationCoordinatePoint(anp?.latitude ?? local?.anp?.latitude, anp?.longitude ?? local?.anp?.longitude);
@@ -1009,22 +1021,17 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <button type="button" onClick={resetDirectoryFilters} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground">Ver todos os postos</button>
             </div>}
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsFiltered
-                .slice(0, directoryVisibleCount).map((item, index) => (
+              {visibleDirectoryCards.map(({ item, index, saved: isSaved, point, distance }) => (
                 <StationDirectoryCard
                   key={item.key}
-                  index={index + 1}
+                  index={index}
                   local={item.local}
                   anp={item.anp}
-                  saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
+                  saved={isSaved}
                   prices={pricesByCnpj.get(item.key) ?? []}
                   catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
-                  distanceKm={(() => {
-                    if (!userCoords) return null;
-                    const point = stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
-                    return point ? distanceKm(userCoords, point) : null;
-                  })()}
-                  onToggleSaved={stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude) ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
+                  distanceKm={distance}
+                  onToggleSaved={point ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
             </div>
