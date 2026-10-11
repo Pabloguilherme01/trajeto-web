@@ -83,6 +83,17 @@ test("Android/iOS: service modes preserve URL, semantics and mobile grid", async
   const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
   expect(await search.evaluate(input => parseFloat(getComputedStyle(input).fontSize)))
     .toBeGreaterThanOrEqual(16);
+  // Search input paints immediately; counts must eventually match the
+  // deferred query, not announce stale results during rapid typing.
+  await search.fill("zzzx-servico-inexistente-2026");
+  await expect(search).toHaveValue("zzzx-servico-inexistente-2026");
+  await expect(page.getByText("0 serviços encontrados", { exact: true })).toBeVisible();
+  await search.fill("anatel");
+  await expect(page.getByText(/^[1-9][0-9]* serviços encontrados/)).toBeVisible();
+  await online.click();
+  await expect(online).toHaveAttribute("aria-pressed", "true");
+  await expect(search).toHaveValue("anatel");
+  await expect(page).toHaveURL(/recurso=online/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth))
     .toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
