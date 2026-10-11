@@ -149,6 +149,7 @@ it("reuses the last normalized query after changing only resource/favorite filte
   const snapshot = [measured, service("escola-cache", "Escola do Bairro", "educacao")];
   const first = searchPublicServicesIn(snapshot, "CRAS", "assistencia");
   expect(first.map(s => s.id)).toEqual(["cras-cache"]);
+  first.pop();
   const before = categoryReads;
   const repeated = searchPublicServicesIn(snapshot, "  cras  ", "assistencia");
   expect(repeated.map(s => s.id)).toEqual(["cras-cache"]);
