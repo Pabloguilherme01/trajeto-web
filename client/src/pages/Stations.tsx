@@ -43,6 +43,17 @@ function isBroadAguasLindasQuery(value: string) {
     normalized.includes("postos de aguas lindas");
 }
 
+// Stable filter definitions avoid re-normalizing chip labels or trying to
+// reposition the selected chip on unrelated station/map render updates.
+const STATION_CORRIDOR_QUICK_FILTERS = [
+  { label: "Águas Lindas", value: "Águas Lindas de Goiás, GO" },
+  { label: "BR-070", value: "BR-070" },
+  { label: "Jardim Brasília", value: "Jardim Brasília" },
+  { label: "Parque da Barragem", value: "Parque da Barragem" },
+  { label: "Centro", value: "Centro, Águas Lindas de Goiás" },
+  { label: "Rodoviária", value: "Rodoviária" },
+];
+
 function getInitialQuery() {
   if (typeof window === "undefined") return corridorPresets[0]?.query || "postos";
   return new URLSearchParams(window.location.search).get("q") || corridorPresets[0]?.query || "postos";
@@ -763,14 +774,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </form>
             <QuickFilterChips
               label="Bairros e eixos rápidos"
-              options={[
-                { label: "Águas Lindas", value: "Águas Lindas de Goiás, GO" },
-                { label: "BR-070", value: "BR-070" },
-                { label: "Jardim Brasília", value: "Jardim Brasília" },
-                { label: "Parque da Barragem", value: "Parque da Barragem" },
-                { label: "Centro", value: "Centro, Águas Lindas de Goiás" },
-                { label: "Rodoviária", value: "Rodoviária" },
-              ]}
+              options={STATION_CORRIDOR_QUICK_FILTERS}
               value={input}
               onPick={value => void applyStationSearch(value)}
               className="mt-3"
