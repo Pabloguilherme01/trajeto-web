@@ -45,7 +45,7 @@ export default function StationDirectoryFilterModes({
             selected={mode === option.id}
             onSelect={() => onSelect(option.id)}
           />
-        ))}}
+        ))}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
         Combine um modo com sua busca, combustível e ordem. Para cruzar vários critérios, use os filtros detalhados abaixo.
