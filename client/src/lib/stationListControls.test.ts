@@ -52,3 +52,44 @@ describe("station list controls", () => {
     expect(sameStationIdentity({ address: "Rua A, Jardim Brasília" }, { address: "Rua B, Jardim Brasília" })).toBe(false);
   });
 });
+
+
+describe("station filtering parity with the previous implementation", () => {
+  it("keeps stable ordering and exact results for all brands, hours and sort modes", () => {
+    const rows = Array.from({ length: 800 }, (_, index) => ({
+      name: ["Posto Shell", "Auto Posto Ipiranga", "Petrobras", "Posto ALE", "Posto Local"][index % 5] +
+        (index % 7 === 0 ? " São José" : "") + " " + index,
+      isOpen: [true, false, null][index % 3] as boolean | null,
+      distanceMeters: index % 13 === 0 ? null : (index * 37) % 163,
+      id: index,
+    }));
+    const original = (brandFilter: string, hoursFilter: "all" | "open" | "closed" | "unknown",
+      sortBy: "distance" | "relevance" | "brand" | "hours") => rows
+      .filter(station => (brandFilter === "all" || inferredBrand(station.name) === brandFilter) &&
+        (hoursFilter === "all" || (hoursFilter === "open" && station.isOpen === true) ||
+          (hoursFilter === "closed" && station.isOpen === false) ||
+          (hoursFilter === "unknown" && station.isOpen === null)))
+      .map((station, index) => ({ station, index }))
+      .sort((a, b) => {
+        if (sortBy === "relevance") return a.index - b.index;
+        if (sortBy === "brand") return inferredBrand(a.station.name).localeCompare(inferredBrand(b.station.name), "pt-BR") ||
+          a.station.name.localeCompare(b.station.name, "pt-BR");
+        if (sortBy === "hours") return Number(b.station.isOpen === true) - Number(a.station.isOpen === true) ||
+          Number(a.station.isOpen === false) - Number(b.station.isOpen === false) ||
+          a.station.name.localeCompare(b.station.name, "pt-BR");
+        return (a.station.distanceMeters ?? Number.MAX_SAFE_INTEGER) -
+          (b.station.distanceMeters ?? Number.MAX_SAFE_INTEGER);
+      }).map(({ station }) => station);
+    for (const brand of ["all", "Shell", "Ipiranga", "Petrobras", "ALE", "Outras / não declarada", "inexistente"]) {
+      for (const hours of ["all", "open", "closed", "unknown"] as const) {
+        for (const sort of ["distance", "relevance", "brand", "hours"] as const) {
+          const actual = filterAndSortStations(rows, brand, hours, sort);
+          expect(actual.map(item => item.id)).toEqual(original(brand, hours, sort).map(item => item.id));
+          expect(actual.every(item => rows[item.id] === item)).toBe(true);
+        }
+      }
+    }
+    expect(rows[0].id).toBe(0);
+    expect(rows[799].id).toBe(799);
+  });
+});
