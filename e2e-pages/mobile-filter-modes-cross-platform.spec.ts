@@ -273,3 +273,28 @@ test("Android/iOS: advanced station coordinate filter stays reachable in its own
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: planner destination catalog mounts limited cards and remains responsive at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
+  const region = page.getByRole("region", { name: "Lista de destinos disponíveis" });
+  await expect(region).toBeVisible();
+  await expect(region.getByRole("button")).toHaveCount(24);
+  const showMore = page.getByRole("button", { name: /Mostrar mais destinos/ });
+  await showMore.click();
+  await expect(region.getByRole("button")).toHaveCount(48);
+  const search = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  expect(await search.evaluate(input => parseFloat(getComputedStyle(input).fontSize))).toBeGreaterThanOrEqual(16);
+  await search.fill("zzzx-destino-inexistente-2026");
+  await expect(search).toHaveValue("zzzx-destino-inexistente-2026");
+  await expect(region.getByText("Nenhum destino corresponde ao filtro.")).toBeVisible();
+  await expect(region.getByRole("button")).toHaveCount(0);
+  await search.fill("HEAL");
+  await expect(region.getByRole("button").first()).toBeVisible();
+  await expect(region.getByRole("button")).toHaveCount(1);
+  await expect(search).toHaveValue("HEAL");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
