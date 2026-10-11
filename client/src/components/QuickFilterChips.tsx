@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 
 export type QuickFilterOption = { label: string; value: string };
@@ -20,6 +20,12 @@ export default function QuickFilterChips({
 }) {
   const railRef = useRef<HTMLDivElement>(null);
   const normalizedValue = normalizeCatalogText(value);
+  // Chip definitions remain stable while the user types: normalize them once
+  // instead of on every render of the surrounding map/planner.
+  const normalizedOptions = useMemo(() => options.map(option => ({
+    ...option,
+    normalizedValue: normalizeCatalogText(option.value),
+  })), [options]);
   useEffect(() => {
     const rail = railRef.current;
     const selected = rail?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
@@ -45,8 +51,8 @@ export default function QuickFilterChips({
       aria-label={label}
       className={"mobile-scroll-x flex max-w-full gap-2 overflow-x-auto pb-1 " + className}
     >
-      {options.map(option => {
-        const active = Boolean(normalizedValue) && normalizedValue === normalizeCatalogText(option.value);
+      {normalizedOptions.map(option => {
+        const active = Boolean(normalizedValue) && normalizedValue === option.normalizedValue;
         return (
           <button
             key={option.label + "|" + option.value}

@@ -73,3 +73,18 @@ it("brings a deep-linked active filter into the horizontal rail without page scr
     HTMLElement.prototype.scrollBy = originalScrollBy;
   }
 });
+
+it("updates the active chip when a new filter-list snapshot replaces the previous options", () => {
+  const onPick = vi.fn();
+  const { rerender } = render(
+    <QuickFilterChips options={[{ label: "UBS", value: "ubs" }]} value="ubs" onPick={onPick} />
+  );
+  expect(screen.getByRole("button", { name: "UBS" }).getAttribute("aria-pressed")).toBe("true");
+  rerender(
+    <QuickFilterChips options={[{ label: "Hospitais", value: "hospital" }]} value="hospital" onPick={onPick} />
+  );
+  expect(screen.queryByRole("button", { name: "UBS" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Hospitais" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Hospitais" }));
+  expect(onPick).toHaveBeenCalledWith("hospital");
+});

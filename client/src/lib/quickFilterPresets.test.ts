@@ -40,3 +40,26 @@ it("provides practical public-health, education and assistance quick filters", (
     expect(isQuickFilterValue(value, ROUTE_QUICK_FILTERS)).toBe(true);
   }
 });
+
+it("keeps first-match semantics for duplicate normalized quick-filter values", () => {
+  const options = [
+    { label: "Hospital", value: "hospital", category: "saude" as const },
+    { label: "Outra grafia", value: "HOSPITAL", category: "servicos" as const },
+    { label: "UBS", value: "ubs", category: "saude" as const },
+  ];
+  expect(quickFilterCategory(" HOSPITAL ", options)).toBe("saude");
+  expect(quickFilterMatchesCategory("hospital", "saude", options)).toBe(true);
+  expect(quickFilterMatchesCategory("hospital", "servicos", options)).toBe(false);
+  expect(isQuickFilterValue("hospital", options)).toBe(true);
+  expect(isQuickFilterValue("", options)).toBe(false);
+  expect(quickFilterMatchesCategory("unrecognized", "servicos", options)).toBe(true);
+});
+
+it("keeps custom filter lists independent when options are replaced", () => {
+  const previous = [{ label: "Postos", value: "posto", category: "combustivel" as const }];
+  const updated = [{ label: "UPA", value: "upa", category: "saude" as const }];
+  expect(quickFilterCategory("posto", previous)).toBe("combustivel");
+  expect(quickFilterCategory("posto", updated)).toBeUndefined();
+  expect(quickFilterCategory("upa", updated)).toBe("saude");
+  expect(quickFilterCategory("posto", previous)).toBe("combustivel");
+});
