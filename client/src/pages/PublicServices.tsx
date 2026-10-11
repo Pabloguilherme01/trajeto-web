@@ -42,6 +42,7 @@ import {
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useFilterRail } from "@/hooks/useFilterRail";
 import { cityMapLayerUrl, publicServiceMapLayer } from "@/lib/cityMapLayers";
 import { readPublicServiceListFilters, publicServiceListUrl, type PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
 import { phoneHref } from "@/lib/contactActions";
@@ -92,6 +93,10 @@ export default function PublicServices() {
   const [resource, setResource] = useState<PublicServiceResourceFilter>(() => initialFilters.resource);
   const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [readyRouteGroup, setReadyRouteGroup] = useState<string>("todos");
+  // Keep the selected route category and keyboard focus visible inside the
+  // horizontal rail without scrolling the entire page on narrow devices.
+  const { railRef: readyRouteRailRef, onFocusCapture: onReadyRouteFocusCapture } =
+    useFilterRail(readyRouteGroup, READY_ROUTE_GROUPS);
   const [readyRouteQuery, setReadyRouteQuery] = useState("");
   const [readyRoutePage, setReadyRoutePage] = useState<{ key: string; limit: number } | null>(null);
   const [readyRouteOfflineOnly, setReadyRouteOfflineOnly] = useState(false);
@@ -1094,6 +1099,8 @@ export default function PublicServices() {
                   </p>
                 </div>
                 <div
+                  ref={readyRouteRailRef}
+                  onFocusCapture={onReadyRouteFocusCapture}
                   className="mobile-scroll-x mt-3 flex gap-2 overflow-x-auto pb-1"
                   role="group"
                   aria-label="Filtrar rotas prontas"
