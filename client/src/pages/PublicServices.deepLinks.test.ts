@@ -80,7 +80,10 @@ describe("PublicServices deep links", () => {
   });
 
   it("keeps ready-route counts dynamic and includes the full local destination catalog", () => {
-    expect(source).toContain("ALL_LOCAL_ROUTE_DESTINATIONS.find");
+    // Ready routes must still come from the complete local destination list;
+    // the indexed implementation replaces repeated Array.find scans.
+    expect(source).toContain("ALL_LOCAL_ROUTE_DESTINATIONS");
+    expect(source).toContain("selectExistingRoutesById(");
     expect(source).toContain("{READY_SERVICE_ROUTES.length} destinos públicos");
     expect(source).not.toContain("23 destinos públicos");
     expect(source).toContain("policia-civil-2");
