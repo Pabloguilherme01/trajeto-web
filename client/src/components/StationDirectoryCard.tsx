@@ -151,12 +151,11 @@ export function StationDirectoryCard({
   };
 
   return (
+    // Native cards avoid an in-view animation observer for each result, while
+    // retaining CSS hover feedback and honoring reduced-motion preferences.
     <article
       id={"posto-" + (cnpj ? encodeURIComponent(cnpj) : "mapa-" + index)}
       tabIndex={-1}
-      // Native cards avoid 24+ individual in-view observers and animation
-      // controls in the paginated mobile directory. Keep a Premium hover
-      // finish while respecting reduced motion, touch and low-end devices.
       className="task-surface group relative scroll-mt-24 overflow-hidden rounded-[1.45rem] border border-white/8 bg-[linear-gradient(145deg,rgba(24,35,43,.96),rgba(11,16,20,.98))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.20)] transition-[border-color,box-shadow] duration-200 hover:border-accent/20 hover:shadow-[0_26px_75px_rgba(0,0,0,.28)] motion-reduce:transition-none [content-visibility:auto] [contain-intrinsic-size:320px]"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 size-28 rounded-full bg-accent/[.06] blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
