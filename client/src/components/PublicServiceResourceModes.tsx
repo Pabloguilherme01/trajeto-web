@@ -42,7 +42,7 @@ export default function PublicServiceResourceModes({
             selected={resource === value}
             onSelect={() => onChange(value)}
           />
-        ))}}
+        ))}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
         Combine o modo com a categoria e a busca. A seleção mostra apenas os serviços com esse recurso disponível no cadastro.
