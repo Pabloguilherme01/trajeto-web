@@ -9,6 +9,13 @@ type SearchScope = "concise" | "complete" | "withCategory";
 // should not build a normalized text index for every other public service.
 // Keep a weak, per-snapshot cache for each of the three search intentions.
 const indexes = new WeakMap<readonly PublicService[], Map<SearchScope, WeakMap<PublicService, SearchIndex>>>();
+// Keep just the last query per immutable catalog snapshot. Changing favorites,
+ // resource chips or their display order should not rescan the same text.
+const lastMatches = new WeakMap<readonly PublicService[], {
+  search: string;
+  category: PublicServiceCategory | "todos";
+  matches: readonly PublicService[];
+}>();
 const LINKING_WORDS = new Set(["de", "da", "do", "das", "dos", "e", "para"]);
 
 function indexedService(items: readonly PublicService[], service: PublicService, scope: SearchScope): SearchIndex {
@@ -52,9 +59,18 @@ export function searchPublicServicesIn(
     .filter(term => !LINKING_WORDS.has(term))
     .join(" ");
 
+  const cached = lastMatches.get(items);
+  if (cached?.search === search && cached.category === category) {
+    // Caller-side filtering, pagination and sorting must never mutate a
+    // previously cached result.
+    return cached.matches.slice();
+  }
+
   if (!search) {
-    // Return independent arrays just as the original filter/map did.
-    return items.filter(service => category === "todos" || service.category === category);
+    // Browsing categories still skips text indexing entirely.
+    const matches = items.filter(service => category === "todos" || service.category === category);
+    lastMatches.set(items, { search, category, matches });
+    return matches;
   }
 
   const terms = search.replace(/[ºª]/g, "").split(" ").filter(Boolean);
@@ -62,10 +78,12 @@ export function searchPublicServicesIn(
   const includeCategoryIntent = terms.length <= 2;
   const scope: SearchScope = conciseIntent ? "concise"
     : includeCategoryIntent ? "withCategory" : "complete";
-  return items.filter(service => {
+  const matches = items.filter(service => {
     if (category !== "todos" && service.category !== category) return false;
     if (search === "cras" && !service.id.startsWith("cras-")) return false;
     if (search === "cpf" && service.id !== "receita-federal-pav") return false;
     return matchesCatalogTerms(terms, indexedService(items, service, scope));
   });
+  lastMatches.set(items, { search, category, matches });
+  return matches;
 }
