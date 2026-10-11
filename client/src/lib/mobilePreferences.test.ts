@@ -62,6 +62,16 @@ describe("mobilePreferences search privacy", () => {
       JSON.stringify(["Minha localização", "-15.76123, -48.28123", "Hospital"])
     );
     expect(getRecentSearches()).toEqual(["Hospital"]);
+    expect(JSON.parse(localStorage.getItem("trajeto-recent-searches") || "[]")).toEqual(["Hospital"]);
+  });
+
+  it("persists sanitization when private values occupy only the trailing positions", () => {
+    localStorage.setItem("trajeto-recent-searches", JSON.stringify([
+      "Hospital", "Farmácia", "Minha localização", "-15.76123, -48.28123",
+    ]));
+    expect(getRecentSearches()).toEqual(["Hospital", "Farmácia"]);
+    expect(JSON.parse(localStorage.getItem("trajeto-recent-searches") || "[]"))
+      .toEqual(["Hospital", "Farmácia"]);
   });
 });
 

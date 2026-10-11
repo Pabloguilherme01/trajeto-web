@@ -85,7 +85,7 @@ export function getRecentSearches(): string[] {
       .filter(item => !isPreciseLocationText(item))
       .map(item => privateOriginForHistory(item))
       .slice(0, 5);
-    if (next.some((item, index) => item !== value[index])) {
+    if (next.length !== value.length || next.some((item, index) => item !== value[index])) {
       localStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
     }
     return next;

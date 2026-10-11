@@ -14,7 +14,8 @@ import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
-import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { rememberIntent, rememberSearch } from "@/lib/mobilePreferences";
+import { useRecentStationSearches } from "@/hooks/useRecentStationSearches";
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
@@ -364,7 +365,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     : stationBase;
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
-  const recentSearches = getRecentSearches();
+  const recentSearches = useRecentStationSearches();
   const activeLocalFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly);
 
   const searchedAt = stationPages.data?.pages[0]?.queriedAt
