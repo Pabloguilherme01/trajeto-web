@@ -135,8 +135,11 @@ it("preserves the user's horizontal scroll across equivalent mobile filter snaps
   HTMLElement.prototype.getBoundingClientRect = function () {
     const rect = { left: 0, right: 320, width: 320, top: 0, bottom: 44, height: 44 };
     if (this.tagName === "BUTTON" && (this.textContent === "Postos" || this.textContent === "Abastecer")) {
-      return { ...rect, left: 390, right: 470 } as DOMRect;
+      return { ...rect, left: 390, right: 470, width: 80 } as DOMRect;
     }
+    // A short first chip fits well within the rail: it should not scroll.
+    if (this.tagName === "BUTTON" && this.textContent === "Saúde")
+      return { ...rect, right: 104, width: 104 } as DOMRect;
     return rect as DOMRect;
   };
   try {
