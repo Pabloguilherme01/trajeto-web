@@ -1,4 +1,5 @@
 import React from "react";
+import PremiumFilterModeOption from "@/components/PremiumFilterModeOption";
 import { BadgeCheck, Layers3, MapPin, Route } from "lucide-react";
 import type { StationDirectoryMode, StationDirectoryPreset } from "@/lib/stationDirectoryModes";
 
@@ -34,33 +35,17 @@ export default function StationDirectoryFilterModes({
         aria-label="Modos de filtro dos postos"
         className="mobile-scroll-x mt-3 flex max-w-full min-w-0 gap-2 overflow-x-auto pb-1"
       >
-        {modes.map(option => {
-          const selected = mode === option.id;
-          const Icon = option.icon;
-          return (
-            <button
-              key={option.id}
-              type="button"
-              aria-pressed={selected}
-              onClick={() => onSelect(option.id)}
-              className={
-                "flex min-h-[4.25rem] min-w-[9.5rem] flex-1 shrink-0 items-center gap-2.5 rounded-2xl border px-3 py-2 text-left outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0 " +
-                (selected
-                  ? "border-primary/50 bg-primary/15 text-foreground shadow-sm"
-                  : "border-border/15 bg-background/80 text-foreground hover:border-primary/35")
-              }
-            >
-              <span aria-hidden="true" className={"grid size-9 shrink-0 place-items-center rounded-xl " +
-                (selected ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground")}>
-                <Icon className="size-[1.1rem]" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-black leading-tight">{option.title}</span>
-                <span className="mt-1 block text-[11px] leading-tight text-muted-foreground">{option.detail}</span>
-              </span>
-            </button>
-          );
-        })}
+        {modes.map(option => (
+          <PremiumFilterModeOption
+            key={option.id}
+            layout="rail"
+            label={option.title}
+            detail={option.detail}
+            icon={option.icon}
+            selected={mode === option.id}
+            onSelect={() => onSelect(option.id)}
+          />
+        ))}}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
         Combine um modo com sua busca, combustível e ordem. Para cruzar vários critérios, use os filtros detalhados abaixo.
