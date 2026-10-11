@@ -46,18 +46,30 @@ describe("shared station facet criteria", () => {
     }
   });
 
-  it("creates filter criteria outside the directory's per-card callback", () => {
+  it("shares criteria across cards and avoids refiltering when sort or location changes", () => {
     const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
-    const start = source.indexOf("const directoryCardsFiltered = useMemo(");
-    const end = source.indexOf("const savedDirectoryPlaceIds = useMemo(", start);
-    expect(start).toBeGreaterThan(-1);
-    expect(end).toBeGreaterThan(start);
-    const section = source.slice(start, end);
-    expect(section).toMatch(/const facetFilters = \{[\s\S]*?coordinatesOnly: mappedOnly,[\s\S]*?\};/);
-    expect(section.indexOf("const facetFilters = {"))
-      .toBeLessThan(section.indexOf(".filter(item => {"));
-    expect(section).toContain("matchesStationDirectoryFacet(facet, facetFilters)");
-    expect(section).toContain("directoryFuelMatches.has(item)");
-    expect(section).toContain("sortStationDirectoryRows(matches,");
+    const matchStart = source.indexOf("const directoryCardsMatched = useMemo(");
+    const sortStart = source.indexOf("const directoryCardsFiltered = useMemo(", matchStart);
+    const end = source.indexOf("const savedDirectoryPlaceIds = useMemo(", sortStart);
+    expect(matchStart).toBeGreaterThan(-1);
+    expect(sortStart).toBeGreaterThan(matchStart);
+    expect(end).toBeGreaterThan(sortStart);
+    const matching = source.slice(matchStart, sortStart);
+    const sorting = source.slice(sortStart, end);
+    expect(matching).toMatch(/const facetFilters = \{[\s\S]*?coordinatesOnly: mappedOnly,[\s\S]*?\};/);
+    expect(matching.indexOf("const facetFilters = {"))
+      .toBeLessThan(matching.indexOf(".filter(item => {"));
+    expect(matching).toContain("matchesStationDirectoryFacet(facet, facetFilters)");
+    expect(matching).toContain("directoryFuelMatches.has(item)");
+    expect(matching).not.toContain("sortStationDirectoryRows(");
+    // The filter memo must not depend on sort mode, geolocation or prices
+    // directly. Fuel matching already encapsulates any snapshot changes.
+    const matchingDeps = matching.slice(matching.lastIndexOf("}, ["));
+    expect(matchingDeps).not.toContain("directorySort");
+    expect(matchingDeps).not.toContain("userCoords");
+    expect(matchingDeps).not.toContain("pricesByCnpj");
+    expect(sorting).toContain("sortStationDirectoryRows(");
+    expect(sorting).toContain("directoryCardsMatched, directorySort, userCoords, fuelFilter, pricesByCnpj");
+    expect(sorting).toContain("[directoryCardsMatched, directorySort, userCoords, fuelFilter, pricesByCnpj]");
   });
 });
