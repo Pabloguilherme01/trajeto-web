@@ -218,6 +218,14 @@ test("Android/iOS: ready-route categories follow focus and selection inside the 
   const all = rail.getByRole("button", { name: /^Todas as rotas prontas/ });
   await expect(all).toHaveAttribute("aria-pressed", "true");
   const search = page.getByRole("searchbox", { name: "Buscar rota pronta" });
+  // iPhone Safari must not zoom the entire page when this field takes focus.
+  expect(await search.evaluate(input => parseFloat(getComputedStyle(input).fontSize))).toBeGreaterThanOrEqual(16);
+  const routeStatus = page.locator("#ready-routes").getByRole("status");
+  await search.fill("zzzx-rotas-inexistentes-2026");
+  await expect(search).toHaveValue("zzzx-rotas-inexistentes-2026");
+  await expect(routeStatus).toContainText("0 destinos neste filtro · 0 exibidos");
+  await search.fill("upa");
+  await expect(routeStatus).toContainText(/^[1-9][0-9]* destinos neste filtro/);
   await search.fill("HEAL");
   const last = rail.getByRole("button", { name: /^Filtrar rotas:/ }).last();
   await rail.scrollIntoViewIfNeeded();
