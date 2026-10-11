@@ -9,6 +9,7 @@ type Card = {
   local?: {
     neighborhood?: string | null;
     brand?: string | null;
+    mapData?: { observedBrand?: string | null } | null;
     address?: string | null;
     dataQuality?: string | null;
     dataOrigin?: string | null;
@@ -119,6 +120,19 @@ describe("station directory facet filters", () => {
     expect(matches(disagreement, { neighborhood: "bairro local" })).toEqual([]);
     expect(matches(disagreement, { brand: "shell" })).toEqual([disagreement[1]]);
     expect(matches(disagreement, { brand: "ale", neighborhood: "setor central" })).toEqual([disagreement[2]]);
+  });
+
+  it("matches the distributor fallback actually displayed on each station card", () => {
+    const fallback: Card[] = [
+      { local: { neighborhood: "Bairro A", brand: null, mapData: { observedBrand: "Marca do Mapa" } }, anp: null },
+      { local: { neighborhood: "Bairro B", brand: null, mapData: { observedBrand: null } }, anp: null },
+      { local: null, anp: { bairro: "Bairro C", distribuidora: "Ipiranga" } },
+    ];
+    const index = buildStationDirectoryFacets(fallback);
+    expect(index.brands.map(item => item.label)).toEqual(["Bandeira não consolidada", "Ipiranga", "Marca do Mapa"]);
+    expect(matches(fallback, { brand: "marca do mapa" })).toEqual([fallback[0]]);
+    expect(matches(fallback, { brand: "bandeira nao consolidada" })).toEqual([fallback[1]]);
+    expect(matches(fallback, { brand: "ipiranga" })).toEqual([fallback[2]]);
   });
 
   it("wires all advanced filters to the same directory and reset action", () => {
