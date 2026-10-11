@@ -41,7 +41,7 @@ export default function QuickFilterChips({
         ? item.right - viewport.right + inset
         : 0;
     if (offset) rail.scrollBy({ left: offset, behavior: "auto" });
-  }, [normalizedValue, options]);
+  }, [normalizedValue, normalizedOptions]);
 
   if (!options.length) return null;
   return (

@@ -88,3 +88,37 @@ it("updates the active chip when a new filter-list snapshot replaces the previou
   fireEvent.click(screen.getByRole("button", { name: "Hospitais" }));
   expect(onPick).toHaveBeenCalledWith("hospital");
 });
+
+it("does not repeatedly scroll the active chip during unrelated page rerenders", () => {
+  const options = [
+    { label: "Saúde", value: "upa" },
+    { label: "Postos", value: "posto" },
+  ];
+  const originalRect = HTMLElement.prototype.getBoundingClientRect;
+  const originalScrollBy = HTMLElement.prototype.scrollBy;
+  const scroll = vi.fn();
+  HTMLElement.prototype.scrollBy = scroll;
+  HTMLElement.prototype.getBoundingClientRect = function () {
+    const rect = { left: 0, right: 320, width: 320, top: 0, bottom: 40, height: 40 };
+    if (this.tagName === "BUTTON" && this.textContent === "Postos")
+      return { ...rect, left: 390, right: 470 } as DOMRect;
+    return rect as DOMRect;
+  };
+  try {
+    const { rerender } = render(
+      <QuickFilterChips options={options} value="posto" onPick={vi.fn()} />
+    );
+    expect(scroll).toHaveBeenCalledTimes(1);
+    rerender(<QuickFilterChips options={options} value="posto" className="mt-3" onPick={vi.fn()} />);
+    rerender(<QuickFilterChips options={options} value="posto" className="mt-5" onPick={vi.fn()} />);
+    expect(scroll).toHaveBeenCalledTimes(1);
+    rerender(<QuickFilterChips options={options} value="upa" onPick={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Saúde" }).getAttribute("aria-pressed")).toBe("true");
+    const afterActualSelectionChange = scroll.mock.calls.length;
+    rerender(<QuickFilterChips options={options} value="posto" onPick={vi.fn()} />);
+    expect(scroll).toHaveBeenCalledTimes(afterActualSelectionChange + 1);
+  } finally {
+    HTMLElement.prototype.getBoundingClientRect = originalRect;
+    HTMLElement.prototype.scrollBy = originalScrollBy;
+  }
+});
