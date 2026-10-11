@@ -517,7 +517,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       element.focus({ preventScroll: true });
     }, 120);
     return () => window.clearTimeout(timer);
-  }, [directoryCards.length, directorySearch, location]);
+  }, [directoryCards.length, location]);
 
   useEffect(() => {
     setLocalVisibleCount(12);
