@@ -21,7 +21,7 @@ export default function PublicServiceResourceModes({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Modo de atendimento</p>
-          <h3 className="mt-1 text-sm font-black text-foreground">Como você quer resolver?</h3>
+          <h2 className="mt-1 text-sm font-black text-foreground">Como você quer resolver?</h2>
         </div>
         {resource !== "todos" && (
           <span className="rounded-full border border-accent/20 bg-accent/[.08] px-2.5 py-1 text-xs font-bold text-accent">
