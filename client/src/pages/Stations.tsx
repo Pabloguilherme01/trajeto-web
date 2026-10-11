@@ -345,7 +345,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   // Refresh the label when the offline map snapshot changes, not per keypress.
   const offlineMapAge = useMemo(
     () => getOfflineMapAgeLabel(getOfflineMapStations().savedAt),
-    [offlineMap],
+    [offlineMap, mapStations],
   );
   const cachedSnapshot = getCachedStations(query);
   const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
