@@ -46,6 +46,14 @@ describe("shared station facet criteria", () => {
     }
   });
 
+  it("shares the mobile filter rail with advanced station filters for keyboard accessibility", () => {
+    const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
+    expect(source).toContain('import { useFilterRail } from "@/hooks/useFilterRail";');
+    expect(source).toContain("useFilterRail(`${Number(verifiedOnly)}:${Number(addressOnly)}:${Number(mappedOnly)}`");
+    expect(source).toContain("ref={extraFiltersRailRef} onFocusCapture={onExtraFilterFocus}");
+    expect(source).toContain('aria-label="Filtros adicionais dos postos"');
+  });
+
   it("shares criteria across cards and avoids refiltering when sort or location changes", () => {
     const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
     const matchStart = source.indexOf("const directoryCardsMatched = useMemo(");

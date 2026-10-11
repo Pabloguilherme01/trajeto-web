@@ -2,6 +2,7 @@ import { BadgeInfo, ChevronRight, CircleCheck, Fuel, Heart, Loader2, Map as MapI
 import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useFilterRail } from "@/hooks/useFilterRail";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
 import { sortStationDirectoryRows } from "@/lib/stationDirectorySort";
@@ -87,6 +88,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [addressOnly, setAddressOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [mappedOnly, setMappedOnly] = useState(false);
+  // Keep the focused or active advanced filter visible inside its own rail
+  // without moving the entire page on iOS/Android narrow viewports.
+  const { railRef: extraFiltersRailRef, onFocusCapture: onExtraFilterFocus } =
+    useFilterRail(`${Number(verifiedOnly)}:${Number(addressOnly)}:${Number(mappedOnly)}`, "station-extra-filters");
   // Read potentially large cached snapshots only on mount, not on every
   // keystroke, filter change or map gesture that re-renders this screen.
   const [initialOfflineAnp] = useState(getOfflineAnpSnapshot);
@@ -981,7 +986,8 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                   </select>
                 </label>
               </div>
-              <div className="mobile-scroll-x mt-2 flex max-w-full gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtros adicionais dos postos">
+              <div ref={extraFiltersRailRef} onFocusCapture={onExtraFilterFocus}
+                className="mobile-scroll-x mt-2 flex max-w-full gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtros adicionais dos postos">
                 <button type="button" aria-pressed={verifiedOnly} onClick={() => setVerifiedOnly(value => !value)}
                   className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-bold " +
                     (verifiedOnly ? "border-primary bg-primary/10 text-primary" : "border-border/15 text-foreground/80")}>

@@ -239,3 +239,29 @@ test("Android/iOS: ready-route categories follow focus and selection inside the 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: advanced station coordinate filter stays reachable in its own rail", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
+  const rail = page.getByRole("group", { name: "Filtros adicionais dos postos" });
+  const coordinateFilter = rail.getByRole("button", { name: "Com coordenadas" });
+  await rail.scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => window.scrollY);
+  await coordinateFilter.evaluate(button => (button as HTMLElement).focus({ preventScroll: true }));
+  const fullyVisible = () => coordinateFilter.evaluate(button => {
+    const area = button.closest('[aria-label="Filtros adicionais dos postos"]')!.getBoundingClientRect();
+    const rect = button.getBoundingClientRect();
+    return rect.left >= area.left - 2 && rect.right <= area.right + 2;
+  });
+  await expect.poll(fullyVisible).toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBe(before);
+  await coordinateFilter.click();
+  await expect(coordinateFilter).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("group", { name: "Modos de filtro dos postos" })
+    .getByRole("button", { name: /^Com rota/ })).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(fullyVisible).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
