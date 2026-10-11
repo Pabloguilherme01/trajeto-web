@@ -1,5 +1,5 @@
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
-import { prepareCityAtlasSearch } from "./cityAtlasSearch";
+
 import { setLoadedBusinessCatalog, hasBusinessName } from "./businessCatalogState";
 import { loadCatalogChunks } from "./catalogChunks";
 import { resolveBusinessPointFromCatalog } from "./businessPointIndex";
@@ -46,11 +46,10 @@ export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
 }
 
 export function loadBusinessCatalog(): Promise<CityAtlasItem[]> {
-  if (!pending) pending = loadCatalogChunks(Object.values(parts), chunk => {
-    const items = normalizeBusinessRows(chunk);
-    prepareCityAtlasSearch(items);
-    return items;
-  }, item => item.id).then(items => {
+  // The user can browse companies by category/map without performing an
+  // eager full-text pass over every imported record. cityAtlasSearchText()
+  // creates indexes only for records touched by an actual text search.
+  if (!pending) pending = loadCatalogChunks(Object.values(parts), normalizeBusinessRows, item => item.id).then(items => {
     catalog = items;
     setLoadedBusinessCatalog(catalog);
     return catalog;
