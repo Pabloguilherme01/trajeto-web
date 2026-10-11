@@ -70,7 +70,7 @@ export function searchPublicServicesIn(
     // Browsing categories still skips text indexing entirely.
     const matches = items.filter(service => category === "todos" || service.category === category);
     lastMatches.set(items, { search, category, matches });
-    return matches;
+    return matches.slice();
   }
 
   const terms = search.replace(/[ºª]/g, "").split(" ").filter(Boolean);
@@ -85,5 +85,5 @@ export function searchPublicServicesIn(
     return matchesCatalogTerms(terms, indexedService(items, service, scope));
   });
   lastMatches.set(items, { search, category, matches });
-  return matches;
+  return matches.slice();
 }
