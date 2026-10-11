@@ -8,6 +8,7 @@ type Station = {
   local: {
     displayName: string;
     brand: string | null;
+    mapData?: { observedBrand?: string | null };
     anp?: { latitude: number | null; longitude: number | null };
   } | null;
   anp: {
@@ -86,6 +87,20 @@ describe("station directory precomputed sorting", () => {
       }
     }
     expect(items).toEqual(initial);
+  });
+
+  it("sorts mapped-only brands by the distributor displayed on their cards", () => {
+    const observed: Station = {
+      key: "observed", local: {
+        displayName: "Posto observado", brand: null, mapData: { observedBrand: "Ipiranga" },
+      }, anp: null,
+    };
+    const declared: Station = {
+      key: "declared", local: { displayName: "Posto declarado", brand: "Petrobras" }, anp: null,
+    };
+    expect(sortStationDirectoryRows(
+      [declared, observed], "brand", null, "all", new Map(),
+    ).map(item => item.key)).toEqual(["observed", "declared"]);
   });
 
   it("does not invent missing prices or coordinates and preserves input object identity", () => {
