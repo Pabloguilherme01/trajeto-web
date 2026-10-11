@@ -70,20 +70,26 @@ export type StationCache = {
 let stationCacheSnapshot: { raw: string | null; entries: readonly StationCache[] } | null = null;
 
 function readStationCacheRecords(): readonly StationCache[] {
+  let raw: string | null;
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (stationCacheSnapshot && stationCacheSnapshot.raw === raw) {
-      return stationCacheSnapshot.entries;
-    }
-    const decoded: unknown = raw ? JSON.parse(raw) : null;
-    const entries = Array.isArray(decoded) ? decoded.filter(isStationCache) : [];
-    stationCacheSnapshot = { raw, entries };
-    return entries;
+    raw = localStorage.getItem(CACHE_KEY);
   } catch {
     // Storage access may fail (e.g. privacy mode); never reuse older results.
     stationCacheSnapshot = null;
     return [];
   }
+  if (stationCacheSnapshot && stationCacheSnapshot.raw === raw) {
+    return stationCacheSnapshot.entries;
+  }
+  let entries: StationCache[] = [];
+  try {
+    const decoded: unknown = raw ? JSON.parse(raw) : null;
+    entries = Array.isArray(decoded) ? decoded.filter(isStationCache) : [];
+  } catch {
+    // Even a malformed snapshot should only be parsed once until it changes.
+  }
+  stationCacheSnapshot = { raw, entries };
+  return entries;
 }
 
 export function getCachedStations(query: string, lat?: number, lng?: number): StationCache | null {
