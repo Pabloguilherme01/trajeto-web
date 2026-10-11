@@ -11,6 +11,7 @@ import { deduplicateStationMapItems } from "@/lib/stationMapDedupe";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { createStationDirectoryFuelMatcher } from "@/lib/stationDirectoryFuelMatcher";
 import { distanceKm } from "@/lib/offlineRouteMath";
+import { sortStationsByDistance } from "@/lib/nearbyStationSort";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
 import { getCachedStations, cacheStations, listMobileStationFavorites, toggleMobileStationFavorite, type MobileStation } from "@/lib/mobileStationStore";
@@ -357,11 +358,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const cachedSnapshot = getCachedStations(query);
   const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
   const stations = userCoords && nearby
-    ? [...stationBase].sort((a, b) => {
-        const aDistance = distanceKm(userCoords, a);
-        const bDistance = distanceKm(userCoords, b);
-        return aDistance - bDistance;
-      })
+    ? sortStationsByDistance(stationBase, userCoords)
     : stationBase;
   const visibleStations = onlyOpen ? stations.filter(station => station.isOpen === true) : stations;
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
