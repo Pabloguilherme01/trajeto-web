@@ -5,6 +5,7 @@ import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 
+import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue, useRef, useCallback } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
