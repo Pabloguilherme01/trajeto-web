@@ -10,6 +10,18 @@ const layerIndex = new WeakMap<CityAtlasItem[], Map<CityAtlasLayer, CityAtlasIte
 // separately and never build a text index for non-street records on street-only searches.
 const streetIndex = new WeakMap<CityAtlasItem[], CityAtlasItem[]>();
 
+// Keep only the latest text filter per immutable candidate list. When a
+// keystroke only narrows the query, matching records must be a subset of the
+// last result: do not rescan the entire 21k-company catalog.
+type FilterSnapshot = { terms: string[]; matches: CityAtlasItem[] };
+const lastFilter = new WeakMap<CityAtlasItem[], FilterSnapshot>();
+
+function refinesTerms(previous: readonly string[], next: readonly string[]) {
+  return previous.length > 0 && previous.every(term =>
+    next.some(candidate => candidate.startsWith(term))
+  );
+}
+
 export function cityAtlasSearchText(item: CityAtlasItem) {
   let text = searchIndex.get(item);
   if (text === undefined) {
@@ -42,12 +54,26 @@ function atlasByLayer(items: CityAtlasItem[], layer: CityAtlasLayer) {
 
 function matchAtlasText(candidates: CityAtlasItem[], query: string) {
   const terms = normalizeCatalogText(query).split(" ").filter(Boolean);
-  // Never expose a mutable cached array to pagination or consumers.
-  if (!terms.length) return candidates.slice();
-  return candidates.filter(item => {
+  // Empty searches return a fresh complete list and invalidate the previous
+  // narrowed snapshot. Neither callers nor pagination may mutate our cache.
+  if (!terms.length) {
+    lastFilter.delete(candidates);
+    return candidates.slice();
+  }
+  const previous = lastFilter.get(candidates);
+  if (previous && terms.length === previous.terms.length &&
+    terms.every((term, i) => term === previous.terms[i])) {
+    return previous.matches.slice();
+  }
+  const source = previous && refinesTerms(previous.terms, terms)
+    ? previous.matches
+    : candidates;
+  const matches = source.filter(item => {
     const text = cityAtlasSearchText(item);
     return terms.every(term => text.includes(term));
   });
+  lastFilter.set(candidates, { terms, matches });
+  return matches.slice();
 }
 
 export function filterCityAtlas(
