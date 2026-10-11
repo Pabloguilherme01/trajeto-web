@@ -25,7 +25,6 @@ import {
   MessageCircle,
   Route,
   Sparkles,
-  Phone,
   Share2,
   ShieldAlert,
   Siren,
