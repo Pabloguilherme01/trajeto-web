@@ -161,8 +161,10 @@ it("preserves the user's horizontal scroll across equivalent mobile filter snaps
     />);
     expect(railScroll).toHaveBeenCalledTimes(2);
     rerender(<QuickFilterChips options={options()} value="upa" onPick={vi.fn()} />);
+    // Revealing the first chip may also adjust for the 8px edge inset.
+    const afterFirstSelection = railScroll.mock.calls.length;
     rerender(<QuickFilterChips options={options()} value="posto" onPick={vi.fn()} />);
-    expect(railScroll).toHaveBeenCalledTimes(3);
+    expect(railScroll).toHaveBeenCalledTimes(afterFirstSelection + 1);
     expect(screen.getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("true");
   } finally {
     HTMLElement.prototype.getBoundingClientRect = originalRect;
