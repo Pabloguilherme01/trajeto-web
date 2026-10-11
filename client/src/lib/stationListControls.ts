@@ -10,6 +10,20 @@ export function stationCoordinatePoint(lat?: number | null, lng?: number | null)
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
   return { lat, lng };
 }
+type StationCoordinateSource = {
+  latitude?: number | null;
+  longitude?: number | null;
+} | null | undefined;
+
+/** Prefer a complete valid ANP pair, otherwise a complete valid local pair. */
+export function stationCoordinateWithFallback(
+  official: StationCoordinateSource,
+  local: StationCoordinateSource,
+) {
+  return stationCoordinatePoint(official?.latitude, official?.longitude)
+    ?? stationCoordinatePoint(local?.latitude, local?.longitude);
+}
+
 export type StationHoursFilter = "all" | "open" | "closed" | "unknown";
 export type StationSort = "distance" | "relevance" | "brand" | "hours";
 

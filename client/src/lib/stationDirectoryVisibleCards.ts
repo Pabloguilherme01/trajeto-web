@@ -1,5 +1,5 @@
 import { distanceKm } from "./offlineRouteMath";
-import { stationCoordinatePoint } from "./stationListControls";
+import { stationCoordinateWithFallback } from "./stationListControls";
 
 type StationCardSource = {
   key: string;
@@ -19,10 +19,7 @@ export function prepareVisibleStationDirectoryCards<T extends StationCardSource>
   savedPlaceIds: ReadonlySet<string>,
 ) {
   return filtered.slice(0, visibleCount).map((item, position) => {
-    const point = stationCoordinatePoint(
-      item.anp?.latitude ?? item.local?.anp?.latitude,
-      item.anp?.longitude ?? item.local?.anp?.longitude,
-    );
+    const point = stationCoordinateWithFallback(item.anp, item.local?.anp);
     return {
       item,
       index: position + 1,

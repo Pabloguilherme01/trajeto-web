@@ -1,5 +1,5 @@
 import { distanceKm } from "./offlineRouteMath";
-import { fuelFilterPriceKey, stationCoordinatePoint, type StationFuelFilter } from "./stationListControls";
+import { fuelFilterPriceKey, stationCoordinateWithFallback, type StationFuelFilter } from "./stationListControls";
 
 type StationDirectorySortable = {
   key: string;
@@ -37,10 +37,7 @@ export function sortStationDirectoryRows<T extends StationDirectorySortable>(
     const label = row.local?.displayName || row.anp?.razaoSocial || "";
     let metric = Number.POSITIVE_INFINITY;
     if (effectiveSort === "distance" && userCoords) {
-      const point = stationCoordinatePoint(
-        row.anp?.latitude ?? row.local?.anp?.latitude,
-        row.anp?.longitude ?? row.local?.anp?.longitude,
-      );
+      const point = stationCoordinateWithFallback(row.anp, row.local?.anp);
       if (point) metric = distanceKm(userCoords, point);
     } else if (productKey) {
       metric = pricesByCnpj.get(row.key)?.find(price => price.productKey === productKey)?.salePrice

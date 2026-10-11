@@ -19,7 +19,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { inferredBrand, normalizeStationCnpj, stationCoordinatePoint, type StationFuelFilter } from "@/lib/stationListControls";
+import { inferredBrand, normalizeStationCnpj, stationCoordinatePoint, stationCoordinateWithFallback, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
@@ -223,7 +223,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   );
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
-    const point = stationCoordinatePoint(anp?.latitude ?? local?.anp?.latitude, anp?.longitude ?? local?.anp?.longitude);
+    const point = stationCoordinateWithFallback(anp, local?.anp);
     if (!point) {
       toast.message("Este cadastro ainda não possui coordenada consolidada para o atalho local.");
       return;
@@ -298,7 +298,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     });
 
     const directory: StationMapItem[] = directoryCards.map(item => {
-      const point = stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
+      const point = stationCoordinateWithFallback(item.anp, item.local?.anp);
       return {
         id: "directory-" + item.key,
         name: item.local?.displayName || item.anp?.razaoSocial || "Posto",
@@ -349,7 +349,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     () => directoryCards.reduce(
       (stats, item) => {
         if (item.anp) stats.crossed += 1;
-        if (stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude)) stats.routable += 1;
+        if (stationCoordinateWithFallback(item.anp, item.local?.anp)) stats.routable += 1;
         return stats;
       },
       { crossed: 0, routable: 0 }
