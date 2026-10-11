@@ -12,6 +12,7 @@ import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, Ex
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useFilterRail } from "@/hooks/useFilterRail";
 import { trpc } from "@/lib/trpc";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import { localDataEvent } from "@/lib/localData";
@@ -46,6 +47,23 @@ type PlannedRoute = Omit<ServerPlannedRoute, "route"> & {
 const PLANNER_QUICK_PLACES = LOCAL_ROUTE_PRESETS.filter(item =>
   ["centro", "rodoviaria", "prefeitura", "upa", "heal", "aguas-lindas-shopping", "posto-ponteio"].includes(item.id)
 ).map(item => ({ label: item.label, value: item.destination }));
+
+// Stable definitions shared by the rail, focus management, and filters.
+// Do not rebuild the options array on every keystroke or category selection.
+const PLANNER_DESTINATION_FILTERS: ReadonlyArray<{
+  value: RouteDestinationCategoryFilter;
+  label: string;
+}> = [
+  { value: "todos", label: "Todos" },
+  { value: "alimentacao", label: "Comer" },
+  { value: "saude", label: "Saúde" },
+  { value: "educacao", label: "Educação" },
+  { value: "servicos", label: "Serviços" },
+  { value: "transporte", label: "Transporte" },
+  { value: "compras", label: "Compras" },
+  { value: "combustivel", label: "Combustível" },
+  { value: "centro", label: "Centro" },
+];
 
 const destinationCategoryLabel: Record<RouteDestinationCategory, string> = {
   saude: "Saúde",
@@ -114,6 +132,8 @@ export default function Planner() {
   const destinationSearchUpdating = destinationFilter !== deferredDestinationFilter;
   const [destinationPage, setDestinationPage] = useState<{ key: string; limit: number } | null>(null);
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
+  const { railRef: destinationCategoryRailRef, onFocusCapture: onDestinationCategoryFocus } =
+    useFilterRail(destinationCategory, PLANNER_DESTINATION_FILTERS);
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
   const [favoriteDestinations, setFavoriteDestinations] = useState(() =>
     listUnifiedDestinationFavorites().filter(item => item.kind !== "station")
@@ -814,19 +834,15 @@ export default function Planner() {
                 </button>
                 {showAllDestinations && (
                   <div id="all-destinations-panel" className="premium-card mt-2 rounded-2xl border border-border/10 bg-card p-3">
-                    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                      {([
-                        ["todos", "Todos"],
-                        ["alimentacao", "Comer"],
-                        ["saude", "Saúde"],
-                        ["educacao", "Educação"],
-                        ["servicos", "Serviços"],
-                        ["transporte", "Transporte"],
-                        ["compras", "Compras"],
-                        ["combustivel", "Combustível"],
-                        ["centro", "Centro"],
-                      ] as const).map(([value, label]) => (
-                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value} className={"min-h-10 shrink-0 rounded-full border px-3 text-xs font-black " + (destinationCategory === value ? "border-primary/35 bg-primary/10 text-primary" : "border-border/10 bg-muted/[.02] text-muted-foreground")}>{label}</button>
+                    <div ref={destinationCategoryRailRef} onFocusCapture={onDestinationCategoryFocus}
+                      className="mobile-scroll-x flex max-w-full gap-2 overflow-x-auto pb-1"
+                      role="group" aria-label="Categorias dos destinos"
+                    >
+                      {PLANNER_DESTINATION_FILTERS.map(({ value, label }) => (
+                        <button key={value} type="button" onClick={() => setDestinationCategory(value)} aria-pressed={destinationCategory === value}
+                          className={"min-h-11 shrink-0 rounded-full border px-3 text-xs font-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring " +
+                            (destinationCategory === value ? "border-primary/35 bg-primary/10 text-primary" : "border-border/10 bg-muted/[.02] text-muted-foreground")}
+                        >{label}</button>
                       ))}
                     </div>
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
