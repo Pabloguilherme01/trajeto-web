@@ -215,3 +215,20 @@ it("does not start the offline route engine when the user only opens a filtered 
   expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0);
   expect(screen.queryByRole("button", { name: "Verificando destinos offline" })).toBeNull();
 });
+
+it("clears an advanced category directly without losing the search or Premium resource mode", async () => {
+  window.history.replaceState({}, "", "/servicos?q=anatel&categoria=telecom&recurso=online");
+  render(<PublicServices />);
+  expect(screen.getByText("Categoria ativa: Internet e telefone")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", {
+    name: "Remover filtro da categoria Internet e telefone",
+  }));
+  await waitFor(() => {
+    const params = new URLSearchParams(window.location.search);
+    expect(params.get("categoria")).toBeNull();
+    expect(params.get("q")).toBe("anatel");
+    expect(params.get("recurso")).toBe("online");
+  });
+  expect(screen.getByRole("button", { name: "Resolver online" }).getAttribute("aria-pressed"))
+    .toBe("true");
+});
