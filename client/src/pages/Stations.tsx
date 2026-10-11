@@ -7,6 +7,7 @@ import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch
 import { sortStationDirectoryRows } from "@/lib/stationDirectorySort";
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
+import { createStationDirectoryFuelMatcher } from "@/lib/stationDirectoryFuelMatcher";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
@@ -156,16 +157,16 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   // Options, ANP status and coordinate flags change only when this snapshot does.
   const directoryFacets = useMemo(() => buildStationDirectoryFacets(directoryCards), [directoryCards]);
 
-  // The selected fuel filter is independent of the search text. Prepare its
-  // matching cards once when the fuel or price snapshot changes.
-  const directoryFuelMatches = useMemo(() => {
-    if (fuelFilter === "all") return null;
-    return new Set(directoryCards.filter(item => stationSupportsFuel(
-      pricesByCnpj.get(item.key)?.map(price => price.productKey) ?? [],
-      item.anp?.products?.map(product => product.produto || "") ?? [],
-      fuelFilter,
-    )));
-  }, [directoryCards, pricesByCnpj, fuelFilter]);
+  // Keep each finite fuel selection indexed for the current immutable
+  // ANP/price snapshot. Switching filters reuses its previous matching set.
+  const matchDirectoryFuel = useMemo(
+    () => createStationDirectoryFuelMatcher(directoryCards, pricesByCnpj),
+    [directoryCards, pricesByCnpj],
+  );
+  const directoryFuelMatches = useMemo(
+    () => matchDirectoryFuel(fuelFilter),
+    [matchDirectoryFuel, fuelFilter],
+  );
 
   // Build text tokens only when the ANP/local snapshot changes, not on each
   // letter typed in the mobile search box or fuel/sort selection.
