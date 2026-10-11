@@ -52,13 +52,24 @@ export function buildStationDirectoryFacets<T extends StationFacetSource>(cards:
   const byCard = new Map<T, StationDirectoryFacet>();
   const neighborhoodLabels = new Map<string, string>();
   const brandLabels = new Map<string, string>();
+  // ANP records often repeat the same neighborhood or distributor.
+  // Cache only within this immutable directory snapshot, so refreshed
+  // official data always starts with fresh labels.
+  const normalizedLabels = new Map<string, string>();
+  const normalizeLabel = (label: string) => {
+    const cached = normalizedLabels.get(label);
+    if (cached !== undefined) return cached;
+    const normalized = normalizeCatalogText(label);
+    normalizedLabels.set(label, normalized);
+    return normalized;
+  };
   for (const card of cards) {
     // Facets use the same ANP-first value shown in each directory card.
     // Local values remain the fallback for entries without ANP details.
     const neighborhoodLabel = (card.anp?.bairro || card.local?.neighborhood || "").trim();
     const brandLabel = (card.anp?.distribuidora || card.local?.brand || card.local?.mapData?.observedBrand || "Bandeira não consolidada").trim();
-    const neighborhood = normalizeCatalogText(neighborhoodLabel);
-    const brand = normalizeCatalogText(brandLabel);
+    const neighborhood = normalizeLabel(neighborhoodLabel);
+    const brand = normalizeLabel(brandLabel);
     if (neighborhood && !neighborhoodLabels.has(neighborhood)) neighborhoodLabels.set(neighborhood, neighborhoodLabel);
     if (brand && !brandLabels.has(brand)) brandLabels.set(brand, brandLabel);
     const point = stationCoordinatePoint(
