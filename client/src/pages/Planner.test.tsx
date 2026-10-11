@@ -53,6 +53,30 @@ function selectAvailableDestination() {
   fireEvent.click(within(screen.getByRole("region", { name: "Lista de destinos disponíveis" })).getAllByRole("button")[0]);
 }
 
+it("renders planner destination cards progressively and searches every destination", async () => {
+  state.search = "destinos=1";
+  render(<Planner />);
+  const region = screen.getByRole("region", { name: "Lista de destinos disponíveis" });
+  expect((region.closest("details") as HTMLDetailsElement).open).toBe(true);
+  const cards = () => within(region).queryAllByRole("button");
+  expect(cards()).toHaveLength(24);
+  const showMore = screen.getByRole("button", { name: /Mostrar mais destinos/ });
+  fireEvent.click(showMore);
+  expect(cards()).toHaveLength(48);
+  const search = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" }) as HTMLInputElement;
+  fireEvent.change(search, { target: { value: "zzzx-destino-inexistente-2026" } });
+  expect(search.value).toBe("zzzx-destino-inexistente-2026");
+  await waitFor(() => expect(cards()).toHaveLength(0));
+  expect(screen.getByText("Nenhum destino corresponde ao filtro.")).toBeTruthy();
+  fireEvent.change(search, { target: { value: "HEAL" } });
+  await waitFor(() => expect(cards().length).toBeGreaterThan(0));
+  expect(cards().length).toBeLessThanOrEqual(24);
+  expect(search.value).toBe("HEAL");
+  expect(screen.queryByRole("button", { name: /Mostrar mais destinos/ })).toBeNull();
+  expect(state.navigate).not.toHaveBeenCalled();
+  expect(state.publicRoute).not.toHaveBeenCalled();
+}, 15000);
+
 it("keeps Enter in the available-destination filter from calculating the current trip", () => {
   render(<Planner />);
   fireEvent.click(screen.getByRole("button", { name: /Destinos disponíveis/ }));
