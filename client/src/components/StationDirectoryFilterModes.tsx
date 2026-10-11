@@ -14,9 +14,13 @@ const modes = [
 export default function StationDirectoryFilterModes({
   mode,
   onSelect,
+  resultCount,
+  updating = false,
 }: {
   mode: StationDirectoryMode;
   onSelect: (mode: StationDirectoryPreset) => void;
+  resultCount?: number;
+  updating?: boolean;
 }) {
   const { railRef, onFocusCapture } = useFilterRail(mode, modes);
   return (
@@ -26,11 +30,18 @@ export default function StationDirectoryFilterModes({
           <p className="text-xs font-black uppercase tracking-[.14em] text-primary">Modos rápidos</p>
           <h3 className="mt-1 text-sm font-bold text-foreground">Como prefere explorar os postos?</h3>
         </div>
-        {mode === "custom" && (
-          <span role="status" className="rounded-full border border-accent/20 bg-accent/[.06] px-2.5 py-1 text-xs font-bold text-accent">
-            Personalizado
-          </span>
-        )}
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {mode === "custom" && (
+            <span role="status" className="rounded-full border border-accent/20 bg-accent/[.06] px-2.5 py-1 text-xs font-bold text-accent">
+              Personalizado
+            </span>
+          )}
+          {resultCount !== undefined && (
+            <span aria-live="off" className="rounded-full border border-border/25 bg-background/70 px-2.5 py-1 text-xs font-bold tabular-nums text-foreground">
+              {updating ? "Atualizando resultados…" : `${resultCount} ${resultCount === 1 ? "posto" : "postos"}`}
+            </span>
+          )}
+        </div>
       </div>
       <div
         ref={railRef}
