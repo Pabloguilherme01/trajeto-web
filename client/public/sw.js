@@ -302,10 +302,11 @@ async function offlineStatus() {
     const saved = await Promise.all(assets.map(asset => cache.match(asset, { ignoreVary: true })));
     const data = await caches.open(DATA_CACHE);
     const snapshots = await Promise.all(LOCAL_SNAPSHOTS.map(asset => data.match(asset, { ignoreVary: true })));
-    const coreAssets = collectManifestAssets(manifest, false);
-    const businessAssets = assets.filter(asset => !STATIC_SHELL.includes(asset) && !coreAssets.includes(asset));
-    const businessSaved = await Promise.all(businessAssets.map(asset => cache.match(asset, { ignoreVary: true })));
-    return { ready: saved.every(Boolean) && snapshots.every(isCachedJsonSnapshot), businessesReady: businessSaved.every(Boolean), version: VERSION };
+    // The first cache.match pass already inspected every asset. Reuse those
+    // results instead of performing the same storage reads a second time.
+    const coreAssets = new Set([...STATIC_SHELL, ...collectManifestAssets(manifest, false)]);
+    const businessesReady = assets.every((asset, i) => coreAssets.has(asset) || Boolean(saved[i]));
+    return { ready: saved.every(Boolean) && snapshots.every(isCachedJsonSnapshot), businessesReady, version: VERSION };
   } catch {
     return { ready: false };
   }
@@ -326,8 +327,14 @@ async function restoreOfflinePackage(onProgress = () => {}) {
     }
     const assets = [...new Set([...STATIC_SHELL, ...collectManifestAssets(await manifest.json())])];
     const missing = [];
-    for (const asset of assets) {
-      if (!await cache.match(asset, { ignoreVary: true })) missing.push({ cache, asset });
+    // Inspect independent CacheStorage entries in bounded parallel batches.
+    // Preserve manifest order, progress totals and the later download limit.
+    for (let offset = 0; offset < assets.length; offset += 8) {
+      const batch = assets.slice(offset, offset + 8);
+      const present = await Promise.all(batch.map(asset => cache.match(asset, { ignoreVary: true })));
+      for (let i = 0; i < batch.length; i++) {
+        if (!present[i]) missing.push({ cache, asset: batch[i] });
+      }
     }
     const data = await caches.open(DATA_CACHE);
     for (const asset of LOCAL_SNAPSHOTS) {
