@@ -24,7 +24,7 @@ export function buildIndexedStationDirectorySearch<T>(
   const canNarrowFrom = (previous: readonly string[], next: readonly string[]) =>
     previous.length > 0 && previous.every(term =>
       next.some(candidate => candidate === term ||
-        (term.length > 3 && !/^\\d+$/.test(term) && candidate.includes(term)))
+        (term.length > 3 && !/^[0-9]+$/.test(term) && candidate.includes(term)))
     );
   let previous: { terms: string[]; matches: typeof entries } | null = null;
 
