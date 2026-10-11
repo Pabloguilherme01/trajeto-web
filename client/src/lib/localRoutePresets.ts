@@ -214,11 +214,30 @@ export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetId
   }
   return { id, label: street.name, destination: `${street.name} · referência no mapa, Águas Lindas de Goiás - GO`, lat: street.lat!, lng: street.lng!, category: "centro" as const };
 });
+/**
+ * Ready-route reference index, built only when resolving the first route.
+ * Preserve ambiguity: any duplicate normalized destination must stay null,
+ * even if the two records happen to share the same coordinates.
+ */
+let readyRoutePointIndex: Map<string, { lat: number; lng: number } | null> | null = null;
+
+function readyRoutePointsByDestination() {
+  if (readyRoutePointIndex) return readyRoutePointIndex;
+  const index = new Map<string, { lat: number; lng: number } | null>();
+  for (const point of [...READY_ROUTE_STREET_POINTS, ...READY_ROUTE_STATIONS]) {
+    const key = normalizeCatalogText(point.destination);
+    index.set(key, index.has(key) ? null : { lat: point.lat, lng: point.lng });
+  }
+  readyRoutePointIndex = index;
+  return index;
+}
+
 /** An explicitly selected, sourced reference; bare homonymous street names stay ambiguous. */
 export function resolveReadyRouteStreetPoint(value: string) {
-  const query = normalizeCatalogText(value);
-  const matches = [...READY_ROUTE_STREET_POINTS, ...READY_ROUTE_STATIONS].filter(point => normalizeCatalogText(point.destination) === query);
-  return matches.length === 1 ? { lat: matches[0].lat, lng: matches[0].lng } : null;
+  const point = readyRoutePointsByDestination().get(normalizeCatalogText(value));
+  // Return a fresh value, as the original linear resolver did, so callers
+  // cannot accidentally mutate the cached reference for subsequent routes.
+  return point ? { ...point } : null;
 }
 export const READY_ROUTE_STATIONS = Array.from(new Map(anpSnapshot.data.filter(station => {
   if (station.latitude == null || station.longitude == null) return false;
