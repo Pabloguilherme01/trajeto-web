@@ -56,6 +56,7 @@ describe("indexed station directory filters", () => {
     const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
     expect(source).toContain('aria-label="Buscar no diretório de postos"');
     expect(source).toContain("value={directorySearch}");
+    expect(source).not.toContain("[directoryCards.length, directorySearch, location]");
     expect(source.match(/onClick=\{resetDirectoryFilters\}/g)).toHaveLength(2);
     for (const setter of ["setNeighborhoodFilter", "setBrandFilter", "setAddressOnly",
       "setVerifiedOnly", "setMappedOnly", "setFuelFilter", "setDirectorySearch"]) {
