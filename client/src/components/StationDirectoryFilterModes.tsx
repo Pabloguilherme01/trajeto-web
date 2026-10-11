@@ -1,3 +1,4 @@
+import React from "react";
 import { BadgeCheck, Layers3, MapPin, Route } from "lucide-react";
 import type { StationDirectoryMode, StationDirectoryPreset } from "@/lib/stationDirectoryModes";
 
