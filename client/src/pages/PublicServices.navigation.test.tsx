@@ -139,6 +139,27 @@ it("recovers a search hidden by category without losing the term", async () => {
   expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0);
 });
 
+it("keeps ready-route typing immediate, counts current, and category modes independent", async () => {
+  window.history.replaceState({}, "", "/servicos");
+  render(<PublicServices />);
+  const input = screen.getByRole("searchbox", { name: "Buscar rota pronta" }) as HTMLInputElement;
+  fireEvent.change(input, { target: { value: "zzzx-rotas-inexistentes-2026" } });
+  expect(input.value).toBe("zzzx-rotas-inexistentes-2026");
+  await waitFor(() => expect(screen.getByText("0 destinos neste filtro · 0 exibidos")).toBeTruthy());
+  expect(document.querySelectorAll("#ready-routes article")).toHaveLength(0);
+  fireEvent.change(input, { target: { value: "baixar empresa" } });
+  await waitFor(() => expect(screen.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeTruthy());
+  const health = screen.getByRole("button", { name: /^Filtrar rotas: Saúde/ });
+  fireEvent.click(health);
+  expect(health.getAttribute("aria-pressed")).toBe("true");
+  expect(input.value).toBe("baixar empresa");
+  await waitFor(() => expect(screen.getByText("0 destinos neste filtro · 0 exibidos")).toBeTruthy());
+  const all = screen.getByRole("button", { name: /^Todas as rotas prontas/ });
+  fireEvent.click(all);
+  await waitFor(() => expect(screen.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeTruthy());
+  expect(input.value).toBe("baixar empresa");
+}, 15000);
+
 it("restores ready routes after an empty search", () => {
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);
