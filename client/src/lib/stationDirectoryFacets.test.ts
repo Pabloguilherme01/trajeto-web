@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   buildStationDirectoryFacets, matchesStationDirectoryFacet,
@@ -133,6 +133,42 @@ describe("station directory facet filters", () => {
     expect(matches(fallback, { brand: "marca do mapa" })).toEqual([fallback[0]]);
     expect(matches(fallback, { brand: "bandeira nao consolidada" })).toEqual([fallback[1]]);
     expect(matches(fallback, { brand: "ipiranga" })).toEqual([fallback[2]]);
+  });
+
+  it("normalizes each repeated barrio and brand only once per fresh catalog", () => {
+    const repeated: Card[] = Array.from({ length: 480 }, (_, index) => ({
+      local: {
+        neighborhood: index % 2 ? "Jardim São José" : "Centro",
+        brand: "Ipiranga",
+        address: "BR-070",
+      },
+      anp: null,
+    }));
+    const original = JSON.stringify(repeated);
+    const normalize = vi.spyOn(String.prototype, "normalize");
+    try {
+      const first = buildStationDirectoryFacets(repeated);
+      expect(normalize).toHaveBeenCalledTimes(3);
+      expect(first.byCard.size).toBe(480);
+      expect(first.neighborhoods.map(item => item.value)).toEqual(["centro", "jardim sao jose"]);
+      expect(first.brands.map(item => item.value)).toEqual(["ipiranga"]);
+      expect(repeated.filter(item => matchesStationDirectoryFacet(first.byCard.get(item)!, {
+        ...all, neighborhood: "jardim sao jose", brand: "ipiranga",
+      }))).toHaveLength(240);
+      expect(JSON.stringify(repeated)).toBe(original);
+
+      // A changed ANP/local snapshot gets its own cache, including new labels.
+      const updated = repeated.map((item, index) => index === 0
+        ? { ...item, local: { ...item.local!, brand: "Shell" } } : item);
+      normalize.mockClear();
+      const second = buildStationDirectoryFacets(updated);
+      expect(normalize).toHaveBeenCalledTimes(4);
+      expect(second.brands.map(item => item.value)).toEqual(["ipiranga", "shell"]);
+      expect(first.brands.map(item => item.value)).toEqual(["ipiranga"]);
+      expect(second.byCard.get(updated[0])?.brand).toBe("shell");
+    } finally {
+      normalize.mockRestore();
+    }
   });
 
   it("wires all advanced filters to the same directory and reset action", () => {
