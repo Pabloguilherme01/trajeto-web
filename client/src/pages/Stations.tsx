@@ -4,6 +4,7 @@ import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
+import { sortStationDirectoryRows } from "@/lib/stationDirectorySort";
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
@@ -201,29 +202,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       }) && (!directoryFuelMatches || directoryFuelMatches.has(item)));
     });
 
-    return matches.sort((a, b) => {
-      const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
-      if (directorySort === "distance" && userCoords) {
-        const getCoords = (item: typeof directoryCards[number]) =>
-          stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
-        const aCoords = getCoords(a);
-        const bCoords = getCoords(b);
-        const aDistance = aCoords ? distanceKm(userCoords, aCoords) : Number.POSITIVE_INFINITY;
-        const bDistance = bCoords ? distanceKm(userCoords, bCoords) : Number.POSITIVE_INFINITY;
-        return aDistance - bDistance || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      if (directorySort === "price") {
-        const productKey = fuelFilterPriceKey(fuelFilter);
-        const aPrice = pricesByCnpj.get(a.key)?.find(price => price.productKey === productKey)?.salePrice ?? Number.POSITIVE_INFINITY;
-        const bPrice = pricesByCnpj.get(b.key)?.find(price => price.productKey === productKey)?.salePrice ?? Number.POSITIVE_INFINITY;
-        return aPrice - bPrice || stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      if (directorySort === "brand") {
-        return (a.anp?.distribuidora || a.local?.brand || "Sem bandeira").localeCompare(b.anp?.distribuidora || b.local?.brand || "Sem bandeira", "pt-BR") ||
-          stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-      }
-      return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
-    });
+    return sortStationDirectoryRows(matches, directorySort, userCoords, fuelFilter, pricesByCnpj);
   }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery, directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
