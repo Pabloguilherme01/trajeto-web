@@ -15,14 +15,14 @@ describe("premium modes in the public services directory", () => {
     expect(modes).toHaveLength(4);
     expect(modes[0].getAttribute("aria-pressed")).toBe("true");
     expect(modes.slice(1).every(button => button.getAttribute("aria-pressed") === "false")).toBe(true);
-    const contact = within(group).getByRole("button", { name: /Ligar ou WhatsApp/ });
+    const contact = within(group).getByRole("button", { name: "Ligar ou WhatsApp" });
     fireEvent.click(contact);
     expect(onChange).toHaveBeenCalledWith("contato");
     rerender(<PublicServiceResourceModes resource="contato" onChange={onChange} />);
-    expect(within(group).getByRole("button", { name: /Ligar ou WhatsApp/ }).getAttribute("aria-pressed")).toBe("true");
-    expect(within(group).getByRole("button", { name: /Ver tudo/ }).getAttribute("aria-pressed")).toBe("false");
-    fireEvent.click(within(group).getByRole("button", { name: /Ir até o local/ }));
-    fireEvent.click(within(group).getByRole("button", { name: /Resolver online/ }));
+    expect(within(group).getByRole("button", { name: "Ligar ou WhatsApp" }).getAttribute("aria-pressed")).toBe("true");
+    expect(within(group).getByRole("button", { name: "Ver tudo" }).getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(within(group).getByRole("button", { name: "Ir até o local" }));
+    fireEvent.click(within(group).getByRole("button", { name: "Resolver online" }));
     expect(onChange.mock.calls.map(call => call[0])).toEqual(["contato", "rota", "online"]);
   });
 
@@ -32,7 +32,7 @@ describe("premium modes in the public services directory", () => {
     expect(group.className).toContain("grid-cols-2");
     expect(within(group).getAllByRole("button").every(button => button.className.includes("min-h-[4.5rem]")))
       .toBe(true);
-    expect(within(group).getByRole("button", { name: /Ir até o local/ }).getAttribute("aria-pressed"))
+    expect(within(group).getByRole("button", { name: "Ir até o local" }).getAttribute("aria-pressed"))
       .toBe("true");
   });
 });
