@@ -35,6 +35,17 @@ test("Android/iOS: station Premium modes remain touchable at 320px", async ({ pa
   await directorySearch.fill("");
   await expect(modesPanel.getByText(/^[1-9][0-9]* postos$/)).toBeVisible();
 
+  // Native cards stay immediately readable after fast filter transitions,
+  // without JS-controlled entrance animations on low-end mobile devices.
+  const firstCard = page.locator('article[id^="posto-"]').first();
+  await expect(firstCard).toBeVisible();
+  await firstCard.scrollIntoViewIfNeeded();
+  expect(await firstCard.evaluate(card =>
+    getComputedStyle(card).opacity
+  )).toBe("1");
+  await expect(firstCard.getByRole("link", { name: "Ir até aqui" })).toBeVisible();
+  await expect(firstCard.getByText("Mais opções do posto")).toBeVisible();
+
   const heights = await rail.getByRole("button").evaluateAll(
     buttons => buttons.map(button => button.getBoundingClientRect().height),
   );
