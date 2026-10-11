@@ -123,6 +123,25 @@ it("offers neighborhood and area references with an explicit approximate-locatio
 });
 
 
+it("caches named mapped references without leaking mutable points or widening ambiguous matches", async () => {
+  const { READY_ROUTE_STREET_POINTS, READY_ROUTE_STATIONS, resolveReadyRouteStreetPoint } =
+    await import("./localRoutePresets");
+  const street = READY_ROUTE_STREET_POINTS[0];
+  const original = resolveReadyRouteStreetPoint(street.destination);
+  expect(original).toEqual({ lat: street.lat, lng: street.lng });
+  expect(resolveReadyRouteStreetPoint(street.destination)).toEqual(original);
+  expect(resolveReadyRouteStreetPoint(street.label)).toBeNull();
+  // Returned points are defensive copies: navigation calculations must never
+  // change a saved reference for a subsequent user request.
+  original!.lat = 0;
+  expect(resolveReadyRouteStreetPoint(street.destination)).toEqual({ lat: street.lat, lng: street.lng });
+  const station = READY_ROUTE_STATIONS[0];
+  if (station) {
+    expect(resolveReadyRouteStreetPoint(station.destination)).toEqual({ lat: station.lat, lng: station.lng });
+  }
+  expect(resolveReadyRouteStreetPoint("Rua desconhecida, casa 123")).toBeNull();
+});
+
 it("resolves only explicit mapped references and preserves ambiguous bare streets", async () => {
   const { READY_ROUTE_STREET_POINTS, resolveReadyRouteStreetPoint } = await import("./localRoutePresets");
   const jk = READY_ROUTE_STREET_POINTS.find(point => point.label === "Avenida JK")!;
