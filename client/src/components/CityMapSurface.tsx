@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from "react";
+import React, { memo, type ReactNode } from "react";
 import { MapPin } from "lucide-react";
 import { OfflineStationMap, type StationMapItem } from "@/components/StationMap";
 import TileStationMap from "@/components/TileStationMap";
