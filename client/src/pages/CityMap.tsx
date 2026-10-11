@@ -4,13 +4,12 @@ import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from 
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
-import React from "react";
-import { useEffect, useMemo, useState, useDeferredValue, useRef } from "react";
+
+import { useEffect, useMemo, useState, useDeferredValue, useRef, useCallback } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
-import { OfflineStationMap } from "@/components/StationMap";
-import MapExplorerFrame from "@/components/MapExplorerFrame";
-import TileStationMap from "@/components/TileStationMap";
+import type { StationMapItem } from "@/components/StationMap";
+import CityMapSurface from "@/components/CityMapSurface";
 import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import { CITY_MAP_QUICK_FILTERS, isQuickFilterValue, quickFilterCategory, quickFilterMatchesCategory } from "@/lib/quickFilterPresets";
@@ -294,22 +293,10 @@ export default function CityMap() {
     });
     window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
   };
-  const emptyFallback = (
-    <div className="grid min-h-[320px] place-items-center rounded-2xl bg-muted p-6 text-center">
-      <div>
-        <MapPin className="mx-auto size-8 text-primary" />
-        <p className="mt-3 font-black">Destinos disponíveis neste aparelho</p>
-        <p className="mt-2 max-w-sm text-sm text-foreground/70">
-          {destinations.length + atlasDestinations.length > 0
-            ? "Esta camada tem destinos sem coordenadas verificadas. Consulte as fichas abaixo e confirme o endereço antes de sair."
-            : online
-              ? "Não há posições cadastradas para esta busca. Tente outro nome ou camada."
-              : "O mapa de ruas precisa de conexão. Use a lista abaixo para preparar sua viagem offline."}
-        </p>
-      </div>
-    </div>
+  const planFromMap = useCallback(
+    (item: StationMapItem) => navigate(buildDestinationPlannerUrl(plannerDestinationFromMapItem(item))),
+    [navigate]
   );
-  const fallback = markers.length ? <OfflineStationMap stations={markers} showDestinationPicker={false} itemLabel="destino" onPlanDestination={item => plan(plannerDestinationFromMapItem(item))} /> : emptyFallback;
   return (
     <main className="visual-shell mx-auto min-h-screen w-full max-w-6xl px-4 pb-32 pt-7 text-foreground sm:px-6">
       <p className="text-xs font-black uppercase tracking-[.16em] text-primary">
@@ -411,26 +398,12 @@ export default function CityMap() {
           Ver resultados
         </button>
       </div>
-      <section
-        id="city-map-surface"
-        tabIndex={-1}
-        aria-label="Mapa da cidade"
-        className="premium-card scroll-mt-4 overflow-hidden rounded-3xl border border-border/15 outline-none"
-      >
-        <MapExplorerFrame label="Mapa da cidade">
-        {online && markers.length ? (
-          <TileStationMap
-            stations={markers}
-            showDestinationPicker={false}
-            selectionLabel="Escolher destino no mapa"
-            onPlanDestination={item => plan(plannerDestinationFromMapItem(item))}
-            fallback={fallback}
-          />
-        ) : (
-          fallback
-        )}
-        </MapExplorerFrame>
-      </section>
+      <CityMapSurface
+        markers={markers}
+        online={online}
+        resultCount={destinations.length + atlasDestinations.length}
+        onPlanDestination={planFromMap}
+      />
       <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
         <span className="min-w-0">Abrir destinos com</span>
         <select
