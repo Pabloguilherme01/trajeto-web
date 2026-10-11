@@ -86,3 +86,60 @@ describe("indexed street-only filters", () => {
       .toEqual(source.map(item => item.id));
   });
 });
+
+
+describe("incremental atlas search on low-end mobile", () => {
+  it("matches full-catalog results across typing, deletion, accents, categories and reversed terms", () => {
+    const transitions = [
+      "a", "av", "ave", "aven", "avenida", "avenida br", "avenida bras",
+      "avenida brasilia", "avenida brasília", "avenida", "avenid",
+      "sa", "saude", "saúde", "saúde pública", "pública saúde",
+      "posto", "posto esp", "posto especial", "posto", "inexistente",
+      "inexistente 123", "", "brasilia", "MANSOES", "mansões odisseia",
+      "zz", "zzzz", "a", "  ", "avenida", "avenida",
+    ];
+    for (const layer of ["todos", "saude", "compras", "referencia"] as const) {
+      for (const query of transitions) {
+        expect(filterCityAtlas(entries, query, layer).map(item => item.id))
+          .toEqual(previousFilter(entries, query, layer).map(item => item.id));
+      }
+    }
+  });
+
+  it("does not expose cached results to callers mutating pagination lists", () => {
+    const original = previousFilter(entries, "avenida", "todos");
+    const first = filterCityAtlas(entries, "avenida", "todos");
+    first.splice(0, 10);
+    const second = filterCityAtlas(entries, "avenida", "todos");
+    expect(second).toEqual(original);
+    second.length = 0;
+    expect(filterCityAtlas(entries, "avenida brasilia", "todos"))
+      .toEqual(previousFilter(entries, "avenida brasilia", "todos"));
+  });
+
+  it("never lets an earlier narrow search drop results after deleting characters", () => {
+    expect(filterCityAtlas(entries, "Avenida Brasília 1029", "todos"))
+      .toEqual(previousFilter(entries, "Avenida Brasília 1029", "todos"));
+    expect(filterCityAtlas(entries, "avenida", "todos"))
+      .toEqual(previousFilter(entries, "avenida", "todos"));
+    expect(filterCityAtlas(entries, "referencia", "todos"))
+      .toEqual(previousFilter(entries, "referencia", "todos"));
+  });
+
+  it("isolates street-only candidates and newly downloaded catalog snapshots", () => {
+    const streetList = entries.map((item, i) => i % 5 === 0
+      ? { ...item, coordinateKind: "street-midpoint" as const }
+      : item
+    );
+    for (const query of ["ave", "avenida", "avenida brasilia", "avenida", ""]) {
+      const expected = previousFilter(streetList, query, "todos")
+        .filter(item => item.coordinateKind === "street-midpoint");
+      expect(filterCityAtlasStreets(streetList, query)).toEqual(expected);
+    }
+    const updated = [{ ...entries[0], id: "new-street-reference" }, ...entries];
+    expect(filterCityAtlas(updated, "avenida", "todos"))
+      .toEqual(previousFilter(updated, "avenida", "todos"));
+    expect(filterCityAtlas(entries, "avenida", "todos"))
+      .toEqual(previousFilter(entries, "avenida", "todos"));
+  });
+});
