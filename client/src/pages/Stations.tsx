@@ -73,7 +73,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [initialOfflineAnp] = useState(getOfflineAnpSnapshot);
   const [staticAnpRows, setStaticAnpRows] = useState<AnpFuelRow[]>(initialOfflineAnp.rows);
   const [staticAnpRetrievedAt, setStaticAnpRetrievedAt] = useState<string | null>(initialOfflineAnp.retrievedAt);
-  const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(() => getOfflineMapStations().stations);
+  const [initialOfflineMap] = useState(getOfflineMapStations);
+  const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations);
+  const [offlineMapSavedAt, setOfflineMapSavedAt] = useState(initialOfflineMap.savedAt);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
 
@@ -341,11 +343,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     ),
     [directoryCards]
   );
-  // Reading offline map metadata can touch synchronous browser storage.
-  // Refresh the label when the offline map snapshot changes, not per keypress.
+  // The snapshot date is updated only by cache writes/hydration, not by
+  // keystrokes or filter changes that merely re-render this screen.
   const offlineMapAge = useMemo(
-    () => getOfflineMapAgeLabel(getOfflineMapStations().savedAt),
-    [offlineMap, mapStations],
+    () => getOfflineMapAgeLabel(offlineMapSavedAt),
+    [offlineMapSavedAt],
   );
   const cachedSnapshot = getCachedStations(query);
   const stationBase = showSavedOnly ? saved : liveStations.length > 0 ? liveStations : cachedSnapshot?.stations ?? [];
@@ -386,7 +388,10 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         setStaticAnpRows(anpSnapshot.rows);
         setStaticAnpRetrievedAt(anpSnapshot.retrievedAt);
       }
-      if (mapSnapshot.stations.length && offlineMap.length === 0) setOfflineMap(mapSnapshot.stations);
+      if (mapSnapshot.stations.length && offlineMap.length === 0) {
+        setOfflineMap(mapSnapshot.stations);
+        setOfflineMapSavedAt(mapSnapshot.savedAt);
+      }
     });
     return () => { cancelled = true; };
   }, []);
@@ -432,7 +437,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
 
   useEffect(() => {
     const mapped = mapStations.filter((station): station is StationMapItem & { id: string; lat: number; lng: number } => typeof station.id === "string" && typeof station.lat === "number" && Number.isFinite(station.lat) && typeof station.lng === "number" && Number.isFinite(station.lng));
-    if (mapped.length) cacheOfflineMapStations(mapped);
+    if (mapped.length && cacheOfflineMapStations(mapped)) {
+      setOfflineMapSavedAt(getOfflineMapStations().savedAt);
+    }
   }, [mapStations]);
 
 
@@ -573,7 +580,11 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       )
       .map((station, index) => ({ ...station, id: station.id ?? station.placeId ?? "map-" + index }));
     const saved = cacheOfflineMapStations(normalized);
-    if (saved) setOfflineMap(getOfflineMapStations().stations);
+    if (saved) {
+      const snapshot = getOfflineMapStations();
+      setOfflineMap(snapshot.stations);
+      setOfflineMapSavedAt(snapshot.savedAt);
+    }
     toast.message(saved ? `Pontos salvos neste aparelho · ${normalized.length} pontos` : "Não foi possível gravar os pontos locais.");
   };
 
