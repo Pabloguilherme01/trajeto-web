@@ -67,7 +67,7 @@ it("reuses stable map category lists without changing order or excluding distinc
 
 it("ranks only requested business categories while preserving previous stable order", async () => {
   const items = await loadBusinessCatalog();
-  const hasTradeName = (value: string) => /\\p{L}/u.test(value);
+  const hasTradeName = (value: string) => /\p{L}/u.test(value);
   for (const category of ["saude", "educacao", "alimentacao", "compras", "servicos", "transporte"] as const) {
     const expected = items.filter(item => item.category === category)
       .sort((a, b) => Number(hasTradeName(b.business?.tradeName ?? ""))
