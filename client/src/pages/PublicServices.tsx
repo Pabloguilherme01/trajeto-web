@@ -73,6 +73,7 @@ import OrganicMapsModeSelect from "@/components/OrganicMapsModeSelect";
 
 import { categoryIcons, SERVICE_SUMMARY, SERVICE_BATCH_SIZE, SERVICE_CATEGORY_COUNTS, NEED_GROUPS, READY_SERVICE_ROUTES, READY_ROUTE_SERVICE_BY_ROUTE_ID, READY_ROUTE_GROUPS, READY_ROUTE_GROUP_IDS, READY_ROUTE_GROUP_COUNTS } from "@/lib/publicServicesPresentation";
 import PublicServiceCard from "@/components/PublicServiceCard";
+import PublicServiceResourceModes from "@/components/PublicServiceResourceModes";
 
 export default function PublicServices() {
   const [, setLocation] = useLocation();
@@ -639,6 +640,13 @@ export default function PublicServices() {
           <div role="group" aria-label="Categorias mais usadas" className="mb-2 grid grid-cols-2 gap-2 min-[420px]:grid-cols-3">
             {PUBLIC_SERVICE_CATEGORIES.filter(item => ["todos", "saude", "documentos", "trabalho", "assistencia", "agua-energia"].includes(item.id)).map(item => <button key={item.id} type="button" aria-label={"Filtrar por " + item.shortLabel} aria-pressed={category === item.id} onClick={() => applyCategory(item.id)} className={"min-h-11 min-w-0 rounded-xl px-2 py-2 text-xs font-bold break-words " + (category === item.id ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}>{item.shortLabel}</button>)}
           </div>
+          <PublicServiceResourceModes
+            resource={resource}
+            onChange={next => {
+              setResource(next);
+              applyFilters(query, category, false, savedOnly, next);
+            }}
+          />
           <details ref={filterRef} className="service-filter-disclosure">
             <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-sm font-bold">
               <span className="min-w-0 flex-1">
@@ -682,48 +690,7 @@ export default function PublicServices() {
               </button>
             ))}
           </div>
-          <div className="mt-4">
-            <p className="text-xs font-black uppercase tracking-[.12em] text-muted-foreground">
-              Como você quer resolver?
-            </p>
-            <div
-              role="group"
-              aria-label="Recursos disponíveis"
-              className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4"
-            >
-              {(
-                [
-                  {
-                    value: "todos",
-                    label: "Ver tudo",
-                    icon: SlidersHorizontal,
-                  },
-                  { value: "contato", label: "Ligar ou WhatsApp", icon: Phone },
-                  { value: "rota", label: "Ir até o local", icon: Route },
-                  { value: "online", label: "Resolver online", icon: Globe2 },
-                ] as const
-              ).map(({ value, label, icon: Icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={resource === value}
-                  onClick={() => {
-                    setResource(value);
-                    applyFilters(query, category, false, savedOnly, value);
-                  }}
-                  className={
-                    "flex min-h-11 min-w-0 items-center gap-2 rounded-2xl border px-2 py-2 text-left text-xs font-bold transition " +
-                    (resource === value
-                      ? "border-primary/35 bg-primary/10 text-primary"
-                      : "border-border/10 bg-background text-foreground/80 hover:border-accent/30")
-                  }
-                >
-                  <Icon className="size-4 shrink-0" />
-                  <span className="min-w-0">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+
           </details>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
