@@ -9,6 +9,7 @@ type Card = {
   local?: {
     neighborhood?: string | null;
     brand?: string | null;
+    mapData?: { observedBrand?: string | null } | null;
     address?: string | null;
     dataQuality?: string | null;
     dataOrigin?: string | null;
@@ -78,13 +79,60 @@ describe("station directory facet filters", () => {
   it("does not change loaded records and refreshes options when catalog snapshots change", () => {
     const original = JSON.stringify(cards);
     const before = buildStationDirectoryFacets(cards);
+    // When an ANP record exists, its displayed distributor has priority.
+    // Refresh the winning field along with the local fallback.
     const updated: Card[] = cards.map((item, index) => index === 0 ?
-      { ...item, local: { ...item.local, brand: "ALE" } } : item);
+      {
+        ...item,
+        local: { ...item.local, brand: "ALE" },
+        anp: item.anp ? { ...item.anp, distribuidora: "ALE" } : null,
+      } : item);
     const after = buildStationDirectoryFacets(updated);
     expect(before.byCard.get(cards[0])?.brand).toBe("shell");
     expect(after.byCard.get(updated[0])?.brand).toBe("ale");
     expect(before.brands.some(item => item.value === "ale")).toBe(false);
     expect(JSON.stringify(cards)).toBe(original);
+  });
+
+  it("uses ANP values shown on the card when official and local facets disagree", () => {
+    const disagreement: Card[] = [
+      {
+        local: { neighborhood: "Bairro Local", brand: "Marca Local", address: "Rua A" },
+        anp: { bairro: "Jardim Brasília", distribuidora: "Ipiranga", endereco: "Rua A" },
+      },
+      {
+        local: { neighborhood: "Setor São José", brand: "Shell" },
+        anp: null,
+      },
+      {
+        local: { neighborhood: "Setor Central", brand: "ALE" },
+        anp: { bairro: "", distribuidora: "", endereco: null },
+      },
+    ];
+    const index = buildStationDirectoryFacets(disagreement);
+    expect(index.byCard.get(disagreement[0])).toMatchObject({
+      neighborhood: "jardim brasilia", brand: "ipiranga",
+    });
+    expect(index.neighborhoods.map(item => item.label)).toEqual(["Jardim Brasília", "Setor Central", "Setor São José"]);
+    expect(index.brands.map(item => item.label)).toEqual(["ALE", "Ipiranga", "Shell"]);
+    expect(matches(disagreement, { brand: "ipiranga", neighborhood: "jardim brasilia" })).toEqual([disagreement[0]]);
+    expect(matches(disagreement, { brand: "marca local" })).toEqual([]);
+    expect(matches(disagreement, { neighborhood: "bairro local" })).toEqual([]);
+    expect(matches(disagreement, { brand: "shell" })).toEqual([disagreement[1]]);
+    expect(matches(disagreement, { brand: "ale", neighborhood: "setor central" })).toEqual([disagreement[2]]);
+  });
+
+  it("matches the distributor fallback actually displayed on each station card", () => {
+    const fallback: Card[] = [
+      { local: { neighborhood: "Bairro A", brand: null, mapData: { observedBrand: "Marca do Mapa" } }, anp: null },
+      { local: { neighborhood: "Bairro B", brand: null, mapData: { observedBrand: null } }, anp: null },
+      { local: null, anp: { bairro: "Bairro C", distribuidora: "Ipiranga" } },
+    ];
+    const index = buildStationDirectoryFacets(fallback);
+    expect(index.brands.map(item => item.label)).toEqual(["Bandeira não consolidada", "Ipiranga", "Marca do Mapa"]);
+    expect(matches(fallback, { brand: "marca do mapa" })).toEqual([fallback[0]]);
+    expect(matches(fallback, { brand: "bandeira nao consolidada" })).toEqual([fallback[1]]);
+    expect(matches(fallback, { brand: "ipiranga" })).toEqual([fallback[2]]);
   });
 
   it("wires all advanced filters to the same directory and reset action", () => {
