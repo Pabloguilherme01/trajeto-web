@@ -34,6 +34,7 @@ import {
 } from "@shared/anpRevendedores";
 import { cachedGroupAnpFuelRows } from "@/lib/anpGroupCache";
 import { filterAnpMapStations } from "@/lib/anpMapSearch";
+import { shouldFetchAnpMapSnapshot } from "@/lib/anpMapRefresh";
 import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { appUrl } from "@/lib/appUrl";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
@@ -75,6 +76,7 @@ export default function CityMap() {
   }, [activeLayer]);
   const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
+  const lastSuccessfulAnpFetchAt = useRef(0);
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
     cityMapNeedsAnp(initialLayer) ? getOfflineAnpSnapshot().rows : []
   );
@@ -161,6 +163,9 @@ export default function CityMap() {
     // Restore the cached local directory when switching back from streets
     // or a non-fuel layer. No network or storage access is needed otherwise.
     if (!anpRows.length) setAnpRows(getOfflineAnpSnapshot().rows);
+    // Switching map tabs should not refetch and decode the same full ANP
+    // snapshot repeatedly. Failed or cancelled requests remain retryable.
+    if (!shouldFetchAnpMapSnapshot(lastSuccessfulAnpFetchAt.current, Date.now())) return;
     const controller = new AbortController();
     void fetch(appUrl("/data/aguas-lindas-anp.json"), {
       signal: controller.signal,
@@ -178,7 +183,11 @@ export default function CityMap() {
               : null
           )
           .filter((row): row is AnpFuelRow => Boolean(row));
-        if (rows.length) { setAnpRows(rows); cacheOfflineAnpSnapshot(rows, payload.retrievedAt); }
+        if (rows.length) {
+          lastSuccessfulAnpFetchAt.current = Date.now();
+          setAnpRows(rows);
+          cacheOfflineAnpSnapshot(rows, payload.retrievedAt);
+        }
       })
       .catch(() => {});
     return () => controller.abort();
