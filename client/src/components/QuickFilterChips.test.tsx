@@ -122,3 +122,47 @@ it("does not repeatedly scroll the active chip during unrelated page rerenders",
     HTMLElement.prototype.scrollBy = originalScrollBy;
   }
 });
+
+it("preserves the user's horizontal scroll across equivalent mobile filter snapshots", () => {
+  const originalRect = HTMLElement.prototype.getBoundingClientRect;
+  const originalScroll = HTMLElement.prototype.scrollBy;
+  const railScroll = vi.fn();
+  const options = () => [
+    { label: "Saúde", value: "upa" },
+    { label: "Postos", value: "posto" },
+  ];
+  HTMLElement.prototype.scrollBy = railScroll;
+  HTMLElement.prototype.getBoundingClientRect = function () {
+    const rect = { left: 0, right: 320, width: 320, top: 0, bottom: 44, height: 44 };
+    if (this.tagName === "BUTTON" && (this.textContent === "Postos" || this.textContent === "Abastecer")) {
+      return { ...rect, left: 390, right: 470 } as DOMRect;
+    }
+    return rect as DOMRect;
+  };
+  try {
+    const { rerender } = render(
+      <QuickFilterChips options={options()} value="posto" onPick={vi.fn()} />
+    );
+    expect(railScroll).toHaveBeenCalledTimes(1);
+
+    // A parent may create new arrays while updating counters or another
+    // filter. Keep the user's manual horizontal position in that case.
+    rerender(<QuickFilterChips options={options()} value="posto" onPick={vi.fn()} />);
+    rerender(<QuickFilterChips options={options()} value="posto" className="mt-3" onPick={vi.fn()} />);
+    expect(railScroll).toHaveBeenCalledTimes(1);
+
+    // An actual replacement of the selected button still reveals it.
+    rerender(<QuickFilterChips
+      options={[{ label: "Saúde", value: "upa" }, { label: "Abastecer", value: "posto" }]}
+      value="posto" onPick={vi.fn()}
+    />);
+    expect(railScroll).toHaveBeenCalledTimes(2);
+    rerender(<QuickFilterChips options={options()} value="upa" onPick={vi.fn()} />);
+    rerender(<QuickFilterChips options={options()} value="posto" onPick={vi.fn()} />);
+    expect(railScroll).toHaveBeenCalledTimes(3);
+    expect(screen.getByRole("button", { name: "Postos" }).getAttribute("aria-pressed")).toBe("true");
+  } finally {
+    HTMLElement.prototype.getBoundingClientRect = originalRect;
+    HTMLElement.prototype.scrollBy = originalScroll;
+  }
+});
