@@ -98,6 +98,10 @@ export default function PublicServices() {
   const { railRef: readyRouteRailRef, onFocusCapture: onReadyRouteFocusCapture } =
     useFilterRail(readyRouteGroup, READY_ROUTE_GROUPS);
   const [readyRouteQuery, setReadyRouteQuery] = useState("");
+  // Keep the route search input responsive while indexed destinations are
+  // searched and paginated. Group/offline modes remain immediate.
+  const deferredReadyRouteQuery = useDeferredValue(readyRouteQuery);
+  const readyRouteSearchUpdating = readyRouteQuery !== deferredReadyRouteQuery;
   const [readyRoutePage, setReadyRoutePage] = useState<{ key: string; limit: number } | null>(null);
   const [readyRouteOfflineOnly, setReadyRouteOfflineOnly] = useState(false);
   const [navigationMode, setNavigationMode] = useState<
@@ -246,15 +250,15 @@ export default function PublicServices() {
     const availabilityRoutes = readyRouteOfflineOnly
       ? groupedRoutes.filter(route => offlineReadyRouteIds.has(route.id))
       : groupedRoutes;
-    if (!readyRouteQuery.trim()) return availabilityRoutes;
+    if (!deferredReadyRouteQuery.trim()) return availabilityRoutes;
     return filterPublicServiceRoutes(
       availabilityRoutes,
-      readyRouteQuery,
+      deferredReadyRouteQuery,
       READY_ROUTE_SERVICE_BY_ROUTE_ID
     );
-  }, [readyRouteGroup, readyRouteQuery, readyRouteOfflineOnly, offlineReadyRouteIds]);
+  }, [readyRouteGroup, deferredReadyRouteQuery, readyRouteOfflineOnly, offlineReadyRouteIds]);
 
-  const readyRoutePageKey = JSON.stringify([readyRouteGroup, readyRouteQuery.trim(), readyRouteOfflineOnly]);
+  const readyRoutePageKey = JSON.stringify([readyRouteGroup, deferredReadyRouteQuery.trim(), readyRouteOfflineOnly]);
   const readyRouteLimit = readyRoutePage?.key === readyRoutePageKey ? readyRoutePage.limit : 12;
   const displayedReadyRoutes = visibleReadyRoutes.slice(0, readyRouteLimit);
 
@@ -1081,7 +1085,7 @@ export default function PublicServices() {
                       onChange={event => setReadyRouteQuery(event.target.value)}
                       placeholder="Buscar UPA, biblioteca, escola..."
                       aria-label="Buscar rota pronta"
-                      className="min-h-11 w-full min-w-0 rounded-xl border border-border/20 bg-background pl-9 pr-10 text-sm font-semibold text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/10"
+                      className="min-h-11 w-full min-w-0 rounded-xl border border-border/20 bg-background pl-9 pr-10 text-base font-semibold text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/45 focus:ring-2 focus:ring-primary/10 sm:text-sm"
                     />
                     {readyRouteQuery && (
                       <button
@@ -1094,8 +1098,8 @@ export default function PublicServices() {
                       </button>
                     )}
                   </label>
-                  <p className="mt-1.5 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite">
-                    {visibleReadyRoutes.length} destinos neste filtro · {displayedReadyRoutes.length} exibidos
+                  <p className="mt-1.5 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite" aria-busy={readyRouteSearchUpdating}>
+                    {readyRouteSearchUpdating ? "Atualizando rotas…" : <>{visibleReadyRoutes.length} destinos neste filtro · {displayedReadyRoutes.length} exibidos</>}
                   </p>
                 </div>
                 <div
@@ -1167,7 +1171,7 @@ export default function PublicServices() {
                     );
                   })}
                 </div>
-                <div className="mobile-scroll-x mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
+                <div aria-busy={readyRouteSearchUpdating} className="mobile-scroll-x mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
                   {displayedReadyRoutes.map(route => (
                     <article
                       key={route.id}
@@ -1235,7 +1239,7 @@ export default function PublicServices() {
                       </div>
                     </article>
                   ))}
-                  {visibleReadyRoutes.length === 0 && (
+                  {!readyRouteSearchUpdating && visibleReadyRoutes.length === 0 && (
                     <div className="w-[min(86vw,19rem)] shrink-0 rounded-2xl border border-dashed border-border/30 bg-muted/[.025] p-4 text-sm text-muted-foreground sm:col-span-2 sm:w-auto lg:col-span-5">
                       {readyRouteOfflineOnly && !offlineRoutesChecked
                         ? "Verificando quais destinos estão preparados offline neste aparelho…"
@@ -1254,7 +1258,7 @@ export default function PublicServices() {
                     </div>
                   )}
                 </div>
-                {visibleReadyRoutes.length > displayedReadyRoutes.length && <button type="button" onClick={() => setReadyRoutePage({ key: readyRoutePageKey, limit: readyRouteLimit + 12 })} className="mt-3 min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm font-bold">
+                {!readyRouteSearchUpdating && visibleReadyRoutes.length > displayedReadyRoutes.length && <button type="button" onClick={() => setReadyRoutePage({ key: readyRoutePageKey, limit: readyRouteLimit + 12 })} className="mt-3 min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm font-bold">
                   Mostrar mais rotas ({displayedReadyRoutes.length} de {visibleReadyRoutes.length})
                 </button>}
                 <div className="mt-3 rounded-2xl border border-border/12 bg-muted/[.025] p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
