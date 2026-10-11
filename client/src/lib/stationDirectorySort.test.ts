@@ -89,6 +89,36 @@ describe("station directory precomputed sorting", () => {
     expect(items).toEqual(initial);
   });
 
+  it("preserves pt-BR accents, punctuation, letter case and stable ties", () => {
+    const labels = [
+      "Águas Lindas", "Aguas Lindas", "São José", "Sao Jose",
+      "Zé Auto", "Ze Auto", "Éden", "Eden", "Auto-Posto",
+      "Auto Posto", "posto", "Posto", "Posto 2", "Posto 10",
+      "Ônix", "Onix", "ALE", "alé", "Óleo", "Oleo",
+    ];
+    const brands = ["ÁLÉ", "Ale", "São", "Sao", "Shell", null] as const;
+    const samples: Station[] = labels.map((name, index) => ({
+      key: "accent-" + index,
+      local: {
+        displayName: name,
+        brand: brands[index % brands.length],
+        anp: { latitude: -15.78, longitude: -48.28 },
+      },
+      anp: null,
+    }));
+    // Tie cases include equal coordinates and absent prices.
+    const emptyPrices = new Map<string, Price[]>();
+    for (const mode of ["name", "brand", "price", "distance"] as const) {
+      const coords = { lat: -15.78, lng: -48.28 };
+      expect(sortStationDirectoryRows(samples, mode, coords, "gasolina-comum", emptyPrices)
+        .map(item => item.key)).toEqual(
+        previousSort(samples, mode, coords, "gasolina-comum", emptyPrices)
+          .map(item => item.key),
+      );
+    }
+    expect(samples.map(item => item.local?.displayName)).toEqual(labels);
+  });
+
   it("sorts mapped-only brands by the distributor displayed on their cards", () => {
     const observed: Station = {
       key: "observed", local: {
