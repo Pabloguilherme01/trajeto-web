@@ -18,9 +18,5 @@ describe("station corridor quick-filter options", () => {
     expect(source).not.toContain("options={[");
   });
 
-  it("keeps chip normalization and scroll dependent on actual choices, not parent renders", () => {
-    const chips = readFileSync(new URL("../components/QuickFilterChips.tsx", import.meta.url), "utf8");
-    expect(chips).toContain("useMemo(() => options.map(");
-    expect(chips).toContain("}, [normalizedValue, normalizedOptions]);");
-  });
+  // Rerender/scroll behavior is exercised in QuickFilterChips.test.tsx.
 });

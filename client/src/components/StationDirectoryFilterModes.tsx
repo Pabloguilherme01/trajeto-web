@@ -1,4 +1,5 @@
 import React from "react";
+import { useFilterRail } from "@/hooks/useFilterRail";
 import PremiumFilterModeOption from "@/components/PremiumFilterModeOption";
 import { BadgeCheck, Layers3, MapPin, Route } from "lucide-react";
 import type { StationDirectoryMode, StationDirectoryPreset } from "@/lib/stationDirectoryModes";
@@ -17,6 +18,7 @@ export default function StationDirectoryFilterModes({
   mode: StationDirectoryMode;
   onSelect: (mode: StationDirectoryPreset) => void;
 }) {
+  const { railRef, onFocusCapture } = useFilterRail(mode, modes);
   return (
     <div className="mt-4 min-w-0 rounded-[1.4rem] border border-primary/15 bg-primary/[.035] p-3 sm:p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -31,6 +33,8 @@ export default function StationDirectoryFilterModes({
         )}
       </div>
       <div
+        ref={railRef}
+        onFocusCapture={onFocusCapture}
         role="group"
         aria-label="Modos de filtro dos postos"
         className="mobile-scroll-x mt-3 flex max-w-full min-w-0 gap-2 overflow-x-auto pb-1"

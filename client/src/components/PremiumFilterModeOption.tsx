@@ -29,10 +29,10 @@ export default function PremiumFilterModeOption({
       aria-pressed={selected}
       onClick={onSelect}
       className={
-        "flex min-w-0 items-center rounded-2xl border text-left outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring " +
+        "flex items-center rounded-2xl border text-left outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring " +
         (inRail
           ? "min-h-[4.25rem] min-w-[9.5rem] flex-1 shrink-0 gap-2.5 px-3 py-2 sm:min-w-0 "
-          : "min-h-[4.5rem] gap-2 px-2.5 py-2 sm:px-3 ") +
+          : "min-w-0 min-h-[4.5rem] gap-2 px-2.5 py-2 sm:px-3 ") +
         (selected
           ? "border-primary/45 bg-primary/15 text-foreground shadow-sm"
           : "border-border/15 bg-background/80 text-foreground hover:border-primary/30")

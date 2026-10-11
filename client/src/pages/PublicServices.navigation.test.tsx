@@ -65,6 +65,8 @@ it("retains expanded results when an unrecognized service link is normalized to 
   expect(cards()).toHaveLength(36);
 }, 15000);
 
+// This exhausts pagination for every group; its timeout is a QA budget,
+// not the interaction-speed guard (covered by mobile-performance.spec.ts).
 it("reports the same destination count that each ready-route group displays", () => {
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);
@@ -76,7 +78,7 @@ it("reports the same destination count that each ready-route group displays", ()
     while (screen.queryByRole("button", { name: /Mostrar mais rotas/ })) fireEvent.click(screen.getByRole("button", { name: /Mostrar mais rotas/ }));
     expect(document.querySelectorAll("#ready-routes article")).toHaveLength(expectedCount);
   }
-}, 15000);
+}, 30000);
 it("recovers a search hidden by category without losing the term", async () => {
   window.history.replaceState({}, "", "/servicos?q=anatel&categoria=saude");
   render(<PublicServices />);
