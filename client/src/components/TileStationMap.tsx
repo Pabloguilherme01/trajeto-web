@@ -340,9 +340,10 @@ export default function TileStationMap({
   const markerClusterPixels = useMemo(() => {
     const result = new Map<string, { x: number; y: number }>();
     for (const station of drawable) {
-      const base = drawableWorld.get(stationMapKey(station));
+      const key = stationMapKey(station);
+      const base = drawableWorld.get(key);
       if (!base) continue;
-      result.set(stationMapKey(station), {
+      result.set(key, {
         x: base.x * clusterScale,
         y: base.y * clusterScale,
       });
@@ -350,17 +351,18 @@ export default function TileStationMap({
     return result;
   }, [drawable, drawableWorld, clusterScale]);
   const selected = (selectedId ? drawableByKey.get(selectedId) : null) ?? drawable[0] ?? null;
+  const selectedKey = selected ? stationMapKey(selected) : null;
   const markerGroups = useMemo(
     () =>
       mapMarkerGroups(
         drawable,
         item => markerClusterPixels.get(stationMapKey(item)) ?? { x: -100000, y: -100000 },
         item =>
-          stationMapKey(item) === (selected ? stationMapKey(selected) : null) ||
-          ["origin", "destination"].includes(item.id ?? ""),
+          stationMapKey(item) === selectedKey ||
+          item.id === "origin" || item.id === "destination",
         width <= 480 ? 96 : 64
       ),
-    [drawable, markerClusterPixels, selectedId, clusterZoom, width <= 480]
+    [drawable, markerClusterPixels, selectedKey, clusterZoom, width <= 480]
   );
   const markerPositions = useMemo(() => {
     const result = new Map<string, { left: number; top: number }>();
