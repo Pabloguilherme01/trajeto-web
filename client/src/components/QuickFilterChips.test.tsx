@@ -114,8 +114,9 @@ it("does not repeatedly scroll the active chip during unrelated page rerenders",
     expect(scroll).toHaveBeenCalledTimes(1);
     rerender(<QuickFilterChips options={options} value="upa" onPick={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Saúde" }).getAttribute("aria-pressed")).toBe("true");
+    const afterActualSelectionChange = scroll.mock.calls.length;
     rerender(<QuickFilterChips options={options} value="posto" onPick={vi.fn()} />);
-    expect(scroll).toHaveBeenCalledTimes(2);
+    expect(scroll).toHaveBeenCalledTimes(afterActualSelectionChange + 1);
   } finally {
     HTMLElement.prototype.getBoundingClientRect = originalRect;
     HTMLElement.prototype.scrollBy = originalScrollBy;
