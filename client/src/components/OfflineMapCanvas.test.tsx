@@ -471,3 +471,26 @@ it("keeps place labels off the dense map until a place is selected, even when zo
   view.rerender(<Canvas markers={markers} selectedMarkerId="clinic" zoom={3} onZoom={() => {}} />);
   expect(marker.querySelector('[title="Unidade de saúde"]')).toBeTruthy();
 });
+
+
+it("keeps every road geometry while bounding SVG nodes by road style", async () => {
+  const roads = Array.from({ length: 1000 }, (_, index) => ({
+    ...pack.roads[0], id: index + 1, kind: index % 2 ? "primary" : "residential",
+    points: [[-15.75, -48.29], [-15.755, -48.28], [-15.76, -48.27]],
+  }));
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ...pack, roads }))));
+  await setup();
+  await screen.findByText(/Ruas locais disponíveis/);
+  const layers = screen.getByRole("img").querySelectorAll("[data-offline-road-layer]");
+  expect(layers).toHaveLength(2);
+  const paints = [...layers].flatMap(layer => [...layer.querySelectorAll("path")]);
+  expect(paints).toHaveLength(4);
+  // Each casing and fill keeps all 500 independent street segments.
+  for (const path of paints) {
+    expect(path.getAttribute("d")?.match(/M/g)).toHaveLength(500);
+    expect(path.getAttribute("d")?.match(/L/g)).toHaveLength(1000);
+    expect(path.getAttribute("vector-effect")).toBe("non-scaling-stroke");
+  }
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" }));
+  expect(screen.getByRole("img").textContent).toContain("BR-070");
+});
