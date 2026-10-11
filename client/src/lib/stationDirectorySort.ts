@@ -6,6 +6,7 @@ type StationDirectorySortable = {
   local?: {
     displayName?: string | null;
     brand?: string | null;
+    mapData?: { observedBrand?: string | null } | null;
     anp?: { latitude?: number | null; longitude?: number | null } | null;
   } | null;
   anp?: {
@@ -46,7 +47,7 @@ export function sortStationDirectoryRows<T extends StationDirectorySortable>(
         ?? Number.POSITIVE_INFINITY;
     }
     const brand = effectiveSort === "brand"
-      ? row.anp?.distribuidora || row.local?.brand || "Sem bandeira"
+      ? row.anp?.distribuidora || row.local?.brand || row.local?.mapData?.observedBrand || "Sem bandeira"
       : "";
     return { row, label, metric, brand };
   });
