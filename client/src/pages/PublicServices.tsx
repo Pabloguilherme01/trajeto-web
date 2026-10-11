@@ -39,7 +39,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { cityMapLayerUrl, publicServiceMapLayer } from "@/lib/cityMapLayers";
@@ -83,6 +83,10 @@ export default function PublicServices() {
   const filterRef = useRef<HTMLDetailsElement>(null);
   const initialFilters = useMemo(() => readPublicServiceListFilters(params), [params]);
   const [query, setQuery] = useState(() => initialFilters.query);
+  // Keep text entry responsive while the complete service catalog is filtered.
+  // Category and resource mode changes still apply immediately.
+  const deferredQuery = useDeferredValue(query);
+  const searchUpdating = query !== deferredQuery;
   const [category, setCategory] = useState<PublicServiceCategory | "todos">(() => initialFilters.category);
   const online = useOnlineStatus();
   const [resource, setResource] = useState<PublicServiceResourceFilter>(() => initialFilters.resource);
@@ -110,7 +114,7 @@ export default function PublicServices() {
   const batching = !selectedService;
   // Only an actual selected service changes the result set. An unknown deep-link
   // flag must not reset a paginated directory while URLs are reconciled.
-  const servicePageKey = JSON.stringify([query.trim(), category, resource, savedOnly, selectedService?.id ?? null]);
+  const servicePageKey = JSON.stringify([deferredQuery.trim(), category, resource, savedOnly, selectedService?.id ?? null]);
   const serviceLimit = servicePage?.key === servicePageKey ? servicePage.limit : SERVICE_BATCH_SIZE;
   const favoriteIds = useMemo(() => new Set(favorites), [favorites]);
   const favoriteCount = useMemo(
@@ -250,8 +254,8 @@ export default function PublicServices() {
   const displayedReadyRoutes = visibleReadyRoutes.slice(0, readyRouteLimit);
 
   const results = useMemo(() => filterPublicServiceResults({
-    query, category, selectedService, savedOnly, favoriteIds, resource,
-  }), [query, category, selectedService, savedOnly, favoriteIds, resource]);
+    query: deferredQuery, category, selectedService, savedOnly, favoriteIds, resource,
+  }), [deferredQuery, category, selectedService, savedOnly, favoriteIds, resource]);
 
   // Every filter searches the complete catalog; mounting cards stays bounded.
   // Key pagination to the criteria so no delayed effect can undo Show more.
@@ -1297,16 +1301,18 @@ export default function PublicServices() {
         <p
           role="status"
           aria-live="polite"
+          aria-busy={searchUpdating}
           className="mt-4 text-sm text-foreground/70"
         >
-          {results.length} serviços encontrados
+          {searchUpdating ? "Atualizando resultados…" : <>{results.length} serviços encontrados
           {batching && displayedServices.length < results.length && (
             <span> · {displayedServices.length} exibidos</span>
-          )}
+          )}</>}
         </p>
         <section
           id="service-results"
           tabIndex={-1}
+          aria-busy={searchUpdating}
           className={
             "mt-3 grid gap-3 " +
             (selectedService ? "max-w-2xl" : "sm:grid-cols-2 lg:grid-cols-3")
@@ -1322,7 +1328,7 @@ export default function PublicServices() {
           ))}
         </section>
 
-        {batching && displayedServices.length < results.length && (
+        {batching && !searchUpdating && displayedServices.length < results.length && (
           <button
             type="button"
             aria-controls="service-results"
@@ -1334,7 +1340,7 @@ export default function PublicServices() {
           </button>
         )}
 
-        {!results.length && (
+        {!searchUpdating && !results.length && (
           <section className="premium-card mt-5 rounded-3xl border border-border/8 bg-card p-6 text-center">
             <p className="text-sm font-black">
               {savedOnly && !favoriteCount
