@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, stationSupportsFuel } from "./stationListControls";
+import { filterAndSortStations, fuelFilterPriceKey, inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, stationCoordinateWithFallback, stationSupportsFuel } from "./stationListControls";
 
 describe("station list controls", () => {
   const stations = [
@@ -39,6 +39,19 @@ describe("station list controls", () => {
     expect(stationCoordinatePoint(undefined, undefined)).toBeNull();
     expect(stationCoordinatePoint(0, 0)).toBeNull();
     expect(stationCoordinatePoint(-15.6811689, -48.2680336)).toEqual({ lat: -15.6811689, lng: -48.2680336 });
+  });
+
+  it("accepts complete valid official or local coordinate pairs without mixing sources", () => {
+    const local = { latitude: -15.79, longitude: -48.28 };
+    const official = { latitude: -15.78, longitude: -48.29 };
+    expect(stationCoordinateWithFallback(official, local)).toEqual({ lat: -15.78, lng: -48.29 });
+    expect(stationCoordinateWithFallback({ latitude: 0, longitude: 0 }, local)).toEqual({ lat: -15.79, lng: -48.28 });
+    expect(stationCoordinateWithFallback({ latitude: -15.78, longitude: null }, local)).toEqual({ lat: -15.79, lng: -48.28 });
+    expect(stationCoordinateWithFallback({ latitude: 95, longitude: -48.29 }, local)).toEqual({ lat: -15.79, lng: -48.28 });
+    expect(stationCoordinateWithFallback(null, local)).toEqual({ lat: -15.79, lng: -48.28 });
+    expect(stationCoordinateWithFallback({ latitude: 0, longitude: 0 }, null)).toBeNull();
+    expect(stationCoordinateWithFallback(null, null)).toBeNull();
+    expect(stationCoordinateWithFallback({ latitude: 95, longitude: 0 }, { latitude: -15.8, longitude: null })).toBeNull();
   });
 
   it("identifica a mesma unidade por CNPJ, endereço ou coordenadas sem fundir vizinhos", () => {
