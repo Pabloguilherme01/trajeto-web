@@ -65,12 +65,38 @@ export type StationCache = {
   stations: MobileStation[];
 };
 
+// Storage is shared with other tabs. Reuse parsed records only while the
+// serialized snapshot is byte-for-byte unchanged; no stale values or TTLs.
+let stationCacheSnapshot: { raw: string | null; entries: readonly StationCache[] } | null = null;
+
+function readStationCacheRecords(): readonly StationCache[] {
+  let raw: string | null;
+  try {
+    raw = localStorage.getItem(CACHE_KEY);
+  } catch {
+    // Storage access may fail (e.g. privacy mode); never reuse older results.
+    stationCacheSnapshot = null;
+    return [];
+  }
+  if (stationCacheSnapshot && stationCacheSnapshot.raw === raw) {
+    return stationCacheSnapshot.entries;
+  }
+  let entries: StationCache[] = [];
+  try {
+    const decoded: unknown = raw ? JSON.parse(raw) : null;
+    entries = Array.isArray(decoded) ? decoded.filter(isStationCache) : [];
+  } catch {
+    // Even a malformed snapshot should only be parsed once until it changes.
+  }
+  stationCacheSnapshot = { raw, entries };
+  return entries;
+}
+
 export function getCachedStations(query: string, lat?: number, lng?: number): StationCache | null {
-  const all = readJson<unknown>(CACHE_KEY, []);
-  if (!Array.isArray(all)) return null;
+  const all = readStationCacheRecords();
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
   const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
-  const match = all.filter(isStationCache).find(item =>
+  const match = all.find(item =>
     item.query.trim().toLocaleLowerCase("pt-BR") === normalized &&
     (locationKey === "" ? item.lat == null && item.lng == null : item.lat != null && item.lng != null && `${item.lat.toFixed(4)},${item.lng.toFixed(4)}` === locationKey)
   );
@@ -83,8 +109,7 @@ export function getCachedStations(query: string, lat?: number, lng?: number): St
 export function cacheStations(query: string, stations: MobileStation[], lat?: number, lng?: number) {
   const validStations = stations.filter(isMobileStation);
   if (validStations.length === 0) return;
-  const all = readJson<unknown>(CACHE_KEY, []);
-  const current = Array.isArray(all) ? all.filter(isStationCache) : [];
+  const current = readStationCacheRecords();
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
   const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
   const next = [
