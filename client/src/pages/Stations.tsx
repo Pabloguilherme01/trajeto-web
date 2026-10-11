@@ -179,18 +179,22 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   ), [directoryCards]);
 
   const directoryCardsFiltered = useMemo(() => {
+    // All cards in this pass share the same criteria. Avoid allocating one
+    // identical filter object per record on every search or chip change.
+    const facetFilters = {
+      neighborhood: neighborhoodFilter,
+      brand: brandFilter,
+      addressOnly,
+      anpOnly: verifiedOnly,
+      coordinatesOnly: mappedOnly,
+    };
     const matches = directoryTextSearch(
       directorySearch,
       staticRuntime && !broadAguasLindasQuery ? query : "",
     ).filter(item => {
       const facet = directoryFacets.byCard.get(item);
-      return Boolean(facet && matchesStationDirectoryFacet(facet, {
-        neighborhood: neighborhoodFilter,
-        brand: brandFilter,
-        addressOnly,
-        anpOnly: verifiedOnly,
-        coordinatesOnly: mappedOnly,
-      }) && (!directoryFuelMatches || directoryFuelMatches.has(item)));
+      return Boolean(facet && matchesStationDirectoryFacet(facet, facetFilters) &&
+        (!directoryFuelMatches || directoryFuelMatches.has(item)));
     });
 
     return sortStationDirectoryRows(matches, directorySort, userCoords, fuelFilter, pricesByCnpj);
