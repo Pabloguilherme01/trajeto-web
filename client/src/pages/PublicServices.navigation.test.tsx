@@ -83,6 +83,42 @@ it("retains expanded results when an unrecognized service link is normalized to 
 
 // This exhausts pagination for every group; its timeout is a QA budget,
 // not the interaction-speed guard (covered by mobile-performance.spec.ts).
+it("reveals focused and selected ready-route categories inside the rail without page scrolling", () => {
+  window.history.replaceState({}, "", "/servicos");
+  const previousScrollBy = HTMLElement.prototype.scrollBy;
+  const railScroll = vi.fn();
+  const pageScroll = vi.fn();
+  HTMLElement.prototype.scrollBy = railScroll;
+  vi.stubGlobal("scrollBy", pageScroll);
+  let lastButton: HTMLElement | null = null;
+  const bounds = (left: number, right: number) => ({
+    x: left, y: 0, left, right, width: right - left, height: 48,
+    top: 0, bottom: 48, toJSON() {},
+  }) as DOMRect;
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    if (this === lastButton) return bounds(520, 680);
+    if (this.getAttribute("aria-label") === "Filtrar rotas prontas") return bounds(0, 320);
+    return bounds(0, 100);
+  });
+  try {
+    render(<PublicServices />);
+    const rail = screen.getByRole("group", { name: "Filtrar rotas prontas" });
+    const groups = within(rail).getAllByRole("button", { name: /^Filtrar rotas:/ });
+    lastButton = groups[groups.length - 1];
+    railScroll.mockClear();
+    fireEvent.focus(lastButton);
+    expect(railScroll).toHaveBeenCalledWith({ left: 368, behavior: "auto" });
+    expect(pageScroll).not.toHaveBeenCalled();
+    railScroll.mockClear();
+    fireEvent.click(lastButton);
+    expect(lastButton.getAttribute("aria-pressed")).toBe("true");
+    expect(railScroll).toHaveBeenCalledWith({ left: 368, behavior: "auto" });
+    expect(pageScroll).not.toHaveBeenCalled();
+  } finally {
+    HTMLElement.prototype.scrollBy = previousScrollBy;
+  }
+}, 15000);
+
 it("reports the same destination count that each ready-route group displays", () => {
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);

@@ -208,3 +208,34 @@ test("Android/iOS: map category deep links and keyboard focus stay inside the fi
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: ready-route categories follow focus and selection inside the mobile rail", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("servicos", { waitUntil: "domcontentloaded" });
+  const rail = page.getByRole("group", { name: "Filtrar rotas prontas" });
+  const all = rail.getByRole("button", { name: /^Todas as rotas prontas/ });
+  await expect(all).toHaveAttribute("aria-pressed", "true");
+  const search = page.getByRole("searchbox", { name: "Buscar rota pronta" });
+  await search.fill("HEAL");
+  const last = rail.getByRole("button", { name: /^Filtrar rotas:/ }).last();
+  await rail.scrollIntoViewIfNeeded();
+  const beforePageScroll = await page.evaluate(() => window.scrollY);
+  await last.evaluate(element => (element as HTMLElement).focus({ preventScroll: true }));
+  const withinRail = () => last.evaluate(element => {
+    const parent = element.closest('[aria-label="Filtrar rotas prontas"]')!;
+    const area = parent.getBoundingClientRect();
+    const button = element.getBoundingClientRect();
+    return button.left >= area.left - 2 && button.right <= area.right + 2;
+  });
+  await expect.poll(withinRail).toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBe(beforePageScroll);
+  await last.click();
+  await expect(last).toHaveAttribute("aria-pressed", "true");
+  await expect(all).toHaveAttribute("aria-pressed", "false");
+  await expect(search).toHaveValue("HEAL");
+  await expect.poll(withinRail).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
