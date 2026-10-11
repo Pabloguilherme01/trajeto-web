@@ -23,7 +23,11 @@ function MapDestinationPicker({ items, value, label, onSelect }: {
     item, category: mapPlaceSegment(item).label,
     search: createCatalogSearchIndex([item.name, item.address]),
   })) : [], [items, open]);
-  const categories = useMemo(() => [...new Set(indexedItems.map(row => row.category))].sort(), [indexedItems]);
+  const categories = useMemo(() => {
+    const labels = new Set<string>();
+    for (const row of indexedItems) labels.add(row.category);
+    return [...labels].sort();
+  }, [indexedItems]);
   const quickQueries = useMemo(
     () => availableMapPickerQuickFilters(indexedItems, COMMON_DESTINATION_QUICK_FILTERS),
     [indexedItems]
@@ -33,7 +37,14 @@ function MapDestinationPicker({ items, value, label, onSelect }: {
   const selected = useMemo(() => items.find(item => item.id === value), [items, value]);
   const matches = useMemo(() => {
     const terms = normalizeCatalogText(query).replace(/[ºª]/g, "").split(" ").filter(Boolean);
-    return indexedItems.filter(row => (category === "Todos" || row.category === category) && matchesCatalogTerms(terms, row.search)).map(row => row.item);
+    // A single result pass avoids building an intermediate array of index
+    // entries for every keystroke in large catalogues.
+    const found: Place[] = [];
+    for (const row of indexedItems) {
+      if ((category === "Todos" || row.category === category) &&
+        matchesCatalogTerms(terms, row.search)) found.push(row.item);
+    }
+    return found;
   }, [indexedItems, query, category]);
   const visible = matches.slice(0, limit);
   const choose = (id: string) => { onSelect(id); setOpen(false); };
