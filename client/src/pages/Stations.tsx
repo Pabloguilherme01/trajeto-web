@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
 import { sortStationDirectoryRows } from "@/lib/stationDirectorySort";
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
+import { deduplicateStationMapItems } from "@/lib/stationMapDedupe";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { distanceKm } from "@/lib/offlineRouteMath";
@@ -16,7 +17,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
+import { inferredBrand, normalizeStationCnpj, stationCoordinatePoint, stationSupportsFuel, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
@@ -254,7 +255,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [stationPages.data]);
 
   const mapStations = useMemo<StationMapItem[]>(() => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
     const official: StationMapItem[] = anpStations.flatMap(station => {
       const point = stationCoordinatePoint(station.latitude, station.longitude);
       return point ? [{
@@ -314,24 +314,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         source: "Google" as const,
       }));
 
-    const seen = new Set<string>();
-    const merged: StationMapItem[] = [];
-    for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
-      const key = station.cnpj
-        ? "cnpj:" + normalizeStationCnpj(station.cnpj)
-        : station.placeId
-          ? "place:" + station.placeId
-          : "address:" + normalize(station.address || station.name);
-      if (seen.has(key)) continue;
-      const duplicate = merged.some(existing => sameStationIdentity(
-        { cnpj: existing.cnpj, address: existing.address, lat: existing.lat, lng: existing.lng },
-        { cnpj: station.cnpj, address: station.address, lat: station.lat, lng: station.lng },
-      ));
-      if (duplicate) continue;
-      seen.add(key);
-      merged.push(station);
-    }
-    return merged;
+    return deduplicateStationMapItems([
+      ...official, ...local, ...directory, ...live, ...offlineMap,
+    ]);
   }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
   const anpWithCoordinates = anpStations.filter(station => Boolean(stationCoordinatePoint(station.latitude, station.longitude))).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
