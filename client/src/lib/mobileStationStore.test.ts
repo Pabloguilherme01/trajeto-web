@@ -78,7 +78,13 @@ describe("cache snapshot parsing without stale results", () => {
     cacheStations("postos", [station]);
     expect(getCachedStations("postos")?.stations).toHaveLength(1);
     localStorage.setItem(key, "{not-json");
+    const parse = vi.spyOn(JSON, "parse");
     expect(getCachedStations("postos")).toBeNull();
+    const invalidReads = parse.mock.calls.filter(([raw]) => raw === "{not-json").length;
+    expect(invalidReads).toBe(1);
+    expect(getCachedStations("postos")).toBeNull();
+    expect(parse.mock.calls.filter(([raw]) => raw === "{not-json").length)
+      .toBe(invalidReads);
     localStorage.setItem(key, JSON.stringify([{
       query: "postos", savedAt: new Date().toISOString(), stations: [station],
     }]));
