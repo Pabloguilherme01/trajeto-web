@@ -53,6 +53,41 @@ function selectAvailableDestination() {
   fireEvent.click(within(screen.getByRole("region", { name: "Lista de destinos disponíveis" })).getAllByRole("button")[0]);
 }
 
+it("keeps focused and selected destination categories visible without moving the page", () => {
+  state.search = "destinos=1";
+  const originalScrollBy = HTMLElement.prototype.scrollBy;
+  const railScroll = vi.fn();
+  const pageScroll = vi.fn();
+  HTMLElement.prototype.scrollBy = railScroll;
+  vi.stubGlobal("scrollBy", pageScroll);
+  const bounds = (left: number, right: number) =>
+    ({ x: left, y: 0, top: 0, bottom: 44, left, right, width: right - left, height: 44, toJSON() {} }) as DOMRect;
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    if (this.tagName === "BUTTON" && this.textContent === "Centro") return bounds(510, 650);
+    if (this.getAttribute("aria-label") === "Categorias dos destinos") return bounds(0, 320);
+    return bounds(0, 100);
+  });
+  try {
+    render(<Planner />);
+    const rail = screen.getByRole("group", { name: "Categorias dos destinos" });
+    const selected = within(rail).getByRole("button", { name: "Todos" });
+    expect(selected.getAttribute("aria-pressed")).toBe("true");
+    const last = within(rail).getByRole("button", { name: "Centro" });
+    fireEvent.focus(last);
+    expect(railScroll).toHaveBeenCalledWith({ left: 338, behavior: "auto" });
+    expect(pageScroll).not.toHaveBeenCalled();
+    railScroll.mockClear();
+    fireEvent.click(last);
+    expect(last.getAttribute("aria-pressed")).toBe("true");
+    expect(selected.getAttribute("aria-pressed")).toBe("false");
+    expect(railScroll).toHaveBeenCalledWith({ left: 338, behavior: "auto" });
+    expect(pageScroll).not.toHaveBeenCalled();
+    expect(screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" })).toBeTruthy();
+  } finally {
+    HTMLElement.prototype.scrollBy = originalScrollBy;
+  }
+}, 15000);
+
 it("renders planner destination cards progressively and searches every destination", async () => {
   state.search = "destinos=1";
   render(<Planner />);
