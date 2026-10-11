@@ -36,6 +36,13 @@ export function buildIndexedStationDirectorySearch<T>(
       previous = null;
       return records.slice();
     }
+    // Non-text filter changes can invoke this search again with the exact same
+    // normalized terms. Reuse the last match list without rescanning tokens.
+    // Return a fresh array so pagination and consumers cannot mutate the cache.
+    if (previous && previous.terms.length === terms.length &&
+        previous.terms.every((term, index) => term === terms[index])) {
+      return previous.matches.map(entry => entry.record);
+    }
     const candidates = previous && canNarrowFrom(previous.terms, terms)
       ? previous.matches : entries;
     const matches = candidates.filter(entry => matchesCatalogTerms(terms, entry.index));
