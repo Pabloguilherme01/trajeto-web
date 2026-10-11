@@ -13,7 +13,7 @@ describe("station directory render cost", () => {
   });
 
   it("reads offline map metadata only after a map snapshot update", () => {
-    expect(source).toMatch(/const offlineMapAge = useMemo\([\s\S]*?getOfflineMapAgeLabel\(getOfflineMapStations\(\)\.savedAt\)[\s\S]*?\[offlineMap\],\s*\)/);
+    expect(source).toMatch(/const offlineMapAge = useMemo\([\s\S]*?getOfflineMapAgeLabel\(getOfflineMapStations\(\)\.savedAt\)[\s\S]*?\[offlineMap, mapStations\],\s*\)/);
     expect(source).toContain("const [offlineMap, setOfflineMap] = useState<StationMapItem[]>");
     expect(source).toContain("setOfflineMap(mapSnapshot.stations)");
     expect(source).not.toContain(
