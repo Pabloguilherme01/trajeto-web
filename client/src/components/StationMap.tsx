@@ -11,6 +11,7 @@ import { cacheOfflineMapStations } from "@/lib/stationMapOffline";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import TileStationMap from "@/components/TileStationMap";
 import { stationMapKey } from "@/lib/stationMapKey";
+import { restoreStationCoordinates } from "@/lib/stationCoordinateRestore";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 export type StationMapItem = {
@@ -147,11 +148,11 @@ export function StationMap({ stations, heightClassName = "min-h-[320px] h-[min(6
   const [ready, setReady] = useState(false);
   const [mapUnavailable, setMapUnavailable] = useState(false);
   const offline = !useOnlineStatus();
-  const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
+  const [resolvedStations, setResolvedStations] = useState<StationMapItem[]>(() => restoreStationCoordinates(stations, readCachedCoordinate));
   const [resolvingCount, setResolvingCount] = useState(0);
 
   useEffect(() => {
-    setResolvedStations(stations.map(station => { const cached = readCachedCoordinate(station); return hasCoordinates(station) ? station : cached ? { ...station, ...cached } : station; }));
+    setResolvedStations(restoreStationCoordinates(stations, readCachedCoordinate));
   }, [stations]);
 
   useEffect(() => {
