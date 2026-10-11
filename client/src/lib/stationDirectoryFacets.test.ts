@@ -135,6 +135,27 @@ describe("station directory facet filters", () => {
     expect(matches(fallback, { brand: "ipiranga" })).toEqual([fallback[2]]);
   });
 
+  it("includes locally located stations in Com rota when official 0,0 is invalid", () => {
+    const records: Card[] = [
+      {
+        anp: { latitude: 0, longitude: 0, distribuidora: "Ipiranga" },
+        local: { anp: { latitude: -15.79, longitude: -48.28 }, brand: "Shell" },
+      },
+      {
+        anp: { latitude: -15.80, longitude: -48.29 },
+        local: { anp: { latitude: -15.79, longitude: -48.28 } },
+      },
+      {
+        anp: { latitude: 0, longitude: 0 },
+        local: { anp: { latitude: null, longitude: null } },
+      },
+    ];
+    expect(matches(records, { coordinatesOnly: true })).toEqual([records[0], records[1]]);
+    expect(matches(records, { coordinatesOnly: true, brand: "ipiranga" })).toEqual([records[0]]);
+    expect(matches(records, { coordinatesOnly: true, anpOnly: true })).toEqual([records[0], records[1]]);
+    expect(matches(records, { coordinatesOnly: false })).toEqual(records);
+  });
+
   it("wires all advanced filters to the same directory and reset action", () => {
     const source = readFileSync(new URL("../pages/Stations.tsx", import.meta.url), "utf8");
     for (const term of ['aria-label="Filtrar diretório por bairro"',
