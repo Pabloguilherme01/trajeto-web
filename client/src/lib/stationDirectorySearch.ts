@@ -17,17 +17,30 @@ export function buildIndexedStationDirectorySearch<T>(
   const termsFor = (query: string) =>
     normalizeCatalogText(query).replace(/[ºª]/g, "").split(" ").filter(Boolean);
 
+  // Only the last query is retained. Avoid a growing cache as the user types.
+  // A longer substring can only narrow an earlier substring match. Whole
+  // tokens (<=3 characters or numeric CNPJs) cannot safely be extended:
+  // "pos" as an exact token excludes "posto", for example.
+  const canNarrowFrom = (previous: readonly string[], next: readonly string[]) =>
+    previous.length > 0 && previous.every(term =>
+      next.some(candidate => candidate === term ||
+        (term.length > 3 && !/^[0-9]+$/.test(term) && candidate.includes(term)))
+    );
+  let previous: { terms: string[]; matches: typeof entries } | null = null;
+
   return (query: string, secondaryQuery = ""): T[] => {
-    const terms = termsFor(query);
-    const secondaryTerms = termsFor(secondaryQuery);
-    if (!terms.length && !secondaryTerms.length) return records.slice();
-    const results: T[] = [];
-    for (const entry of entries) {
-      if (matchesCatalogTerms(terms, entry.index) &&
-          matchesCatalogTerms(secondaryTerms, entry.index)) {
-        results.push(entry.record);
-      }
+    // Both text boxes are AND filters; combining their tokens preserves the
+    // two independent matchesCatalogTerms calls from the previous version.
+    const terms = [...termsFor(query), ...termsFor(secondaryQuery)];
+    if (!terms.length) {
+      previous = null;
+      return records.slice();
     }
-    return results;
+    const candidates = previous && canNarrowFrom(previous.terms, terms)
+      ? previous.matches : entries;
+    const matches = candidates.filter(entry => matchesCatalogTerms(terms, entry.index));
+    previous = { terms, matches };
+    // Never expose a cached mutable array to UI pagination or callers.
+    return matches.map(entry => entry.record);
   };
 }
