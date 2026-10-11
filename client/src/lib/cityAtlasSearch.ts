@@ -61,6 +61,10 @@ function matchAtlasText(candidates: CityAtlasItem[], query: string) {
     return candidates.slice();
   }
   const previous = lastFilter.get(candidates);
+  if (previous && terms.length === previous.terms.length &&
+    terms.every((term, i) => term === previous.terms[i])) {
+    return previous.matches.slice();
+  }
   const source = previous && refinesTerms(previous.terms, terms)
     ? previous.matches
     : candidates;
