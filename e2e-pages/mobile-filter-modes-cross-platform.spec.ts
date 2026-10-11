@@ -77,3 +77,39 @@ test("Android/iOS: service modes preserve URL, semantics and mobile grid", async
     .toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: advanced category stays visible and clears without resetting other filters", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+
+  await page.goto("servicos?q=anatel&categoria=telecom&recurso=online", {
+    waitUntil: "domcontentloaded",
+  });
+  const shortcuts = page.getByRole("group", { name: "Categorias mais usadas" });
+  await expect(shortcuts).toBeVisible();
+  await expect(shortcuts.getByRole("button")).toHaveCount(6);
+  await expect(page.getByText("Categoria ativa: Internet e telefone")).toBeVisible();
+
+  await page.getByRole("button", {
+    name: "Remover filtro da categoria Internet e telefone",
+  }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get("categoria")).toBeNull();
+  expect(new URL(page.url()).searchParams.get("q")).toBe("anatel");
+  expect(new URL(page.url()).searchParams.get("recurso")).toBe("online");
+
+  const health = shortcuts.getByRole("button", { name: "Filtrar por Saúde" });
+  await health.click();
+  await expect(health).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => new URL(page.url()).searchParams.get("categoria")).toBe("saude");
+  await expect(shortcuts.getByRole("button", { name: "Filtrar por Tudo" }))
+    .toHaveAttribute("aria-pressed", "false");
+
+  const heights = await shortcuts.getByRole("button").evaluateAll(
+    buttons => buttons.map(button => button.getBoundingClientRect().height),
+  );
+  expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
