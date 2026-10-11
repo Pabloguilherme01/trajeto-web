@@ -180,9 +180,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     ],
   ), [directoryCards]);
 
-  const directoryCardsFiltered = useMemo(() => {
-    // All cards in this pass share the same criteria. Avoid allocating one
-    // identical filter object per record on every search or chip change.
+  // The searchable/filterable set depends on text, facets and fuel. Sorting
+  // it must not rescan every entry when only the ordering or origin changes.
+  const directoryCardsMatched = useMemo(() => {
     const facetFilters = {
       neighborhood: neighborhoodFilter,
       brand: brandFilter,
@@ -190,7 +190,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       anpOnly: verifiedOnly,
       coordinatesOnly: mappedOnly,
     };
-    const matches = directoryTextSearch(
+    return directoryTextSearch(
       directorySearch,
       staticRuntime && !broadAguasLindasQuery ? query : "",
     ).filter(item => {
@@ -198,9 +198,16 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       return Boolean(facet && matchesStationDirectoryFacet(facet, facetFilters) &&
         (!directoryFuelMatches || directoryFuelMatches.has(item)));
     });
+  }, [directoryTextSearch, directorySearch, query, staticRuntime, broadAguasLindasQuery,
+    directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter,
+    addressOnly, verifiedOnly, mappedOnly]);
 
-    return sortStationDirectoryRows(matches, directorySort, userCoords, fuelFilter, pricesByCnpj);
-  }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery, directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
+  const directoryCardsFiltered = useMemo(
+    () => sortStationDirectoryRows(
+      directoryCardsMatched, directorySort, userCoords, fuelFilter, pricesByCnpj,
+    ),
+    [directoryCardsMatched, directorySort, userCoords, fuelFilter, pricesByCnpj],
+  );
 
   const savedDirectoryPlaceIds = useMemo(
     () => new Set(saved.map(station => station.placeId)),
