@@ -9,6 +9,8 @@ import { prepareVisibleStationDirectoryCards } from "@/lib/stationDirectoryVisib
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { deduplicateStationMapItems } from "@/lib/stationMapDedupe";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
+import { criteriaForStationDirectoryPreset, getStationDirectoryMode, type StationDirectoryPreset } from "@/lib/stationDirectoryModes";
+import StationDirectoryFilterModes from "@/components/StationDirectoryFilterModes";
 import { createStationDirectoryFuelMatcher } from "@/lib/stationDirectoryFuelMatcher";
 import { distanceKm } from "@/lib/offlineRouteMath";
 import { sortStationsByDistance } from "@/lib/nearbyStationSort";
@@ -378,6 +380,27 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const compared = visibleStations.filter(station => compareIds.includes(station.placeId));
   const recentSearches = useRecentStationSearches();
   const activeLocalFilterCount = Number(neighborhoodFilter !== "all") + Number(brandFilter !== "all") + Number(addressOnly) + Number(verifiedOnly) + Number(mappedOnly);
+  const activeDirectoryRefinementCount = activeLocalFilterCount + Number(fuelFilter !== "all");
+  const directoryMode = getStationDirectoryMode({
+    neighborhood: neighborhoodFilter,
+    brand: brandFilter,
+    addressOnly,
+    anpOnly: verifiedOnly,
+    coordinatesOnly: mappedOnly,
+  });
+  const applyDirectoryPreset = (preset: StationDirectoryPreset) => {
+    const criteria = criteriaForStationDirectoryPreset(preset);
+    setNeighborhoodFilter(criteria.neighborhood);
+    setBrandFilter(criteria.brand);
+    setAddressOnly(criteria.addressOnly);
+    setVerifiedOnly(criteria.anpOnly);
+    setMappedOnly(criteria.coordinatesOnly);
+    setDirectoryVisibleCount(24);
+  };
+  const clearDirectoryRefinements = () => {
+    applyDirectoryPreset("all");
+    setFuelFilter("all");
+  };
 
   const searchedAt = stationPages.data?.pages[0]?.queriedAt
     ? new Date(stationPages.data.pages[0].queriedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
@@ -871,6 +894,21 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
 
             </details>
+            <StationDirectoryFilterModes mode={directoryMode} onSelect={applyDirectoryPreset} />
+            <div className="mt-4 flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-black text-foreground">Refinar resultados</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Busque, combine combustível e bairro ou ajuste a ordem sem perder a seleção.
+                </p>
+              </div>
+              {activeDirectoryRefinementCount > 0 && (
+                <button type="button" onClick={clearDirectoryRefinements}
+                  className="min-h-11 rounded-xl border border-primary/20 bg-primary/[.06] px-3 text-xs font-black text-primary focus-visible:outline-2 focus-visible:outline-ring">
+                  Limpar {activeDirectoryRefinementCount} {activeDirectoryRefinementCount === 1 ? "refinamento" : "refinamentos"}
+                </button>
+              )}
+            </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,14rem)_minmax(0,14rem)_auto]">
               <div className="relative min-w-0 sm:col-span-2 lg:col-span-1" role="search">
                 <input
