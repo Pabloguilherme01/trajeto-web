@@ -157,3 +157,32 @@ test("Android/iOS: map reuses overlapping street tiles and preserves offline con
     .toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
+
+test("Android/iOS: map category deep links and keyboard focus stay inside the filter rail", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("mapa?camada=meio-ambiente", { waitUntil: "domcontentloaded" });
+  const rail = page.getByRole("group", { name: "Categorias do mapa" });
+  const active = rail.getByRole("button", { name: "Meio ambiente" });
+  await expect(active).toHaveAttribute("aria-pressed", "true");
+  const inside = async (button: typeof active) => {
+    return button.evaluate(element => {
+      const parent = element.closest('[aria-label="Categorias do mapa"]')!;
+      const p = parent.getBoundingClientRect();
+      const c = element.getBoundingClientRect();
+      return c.left >= p.left - 2 && c.right <= p.right + 2;
+    });
+  };
+  await expect.poll(() => inside(active)).toBe(true);
+  const beforeScroll = await page.evaluate(() => window.scrollY);
+  const education = rail.getByRole("button", { name: "Educação" });
+  await education.evaluate(element => (element as HTMLElement).focus({ preventScroll: true }));
+  await expect.poll(() => inside(education)).toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBe(beforeScroll);
+  await education.click();
+  await expect(education).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/camada=educacao/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
