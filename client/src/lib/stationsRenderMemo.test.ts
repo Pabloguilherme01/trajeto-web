@@ -12,10 +12,14 @@ describe("station directory render cost", () => {
     expect(source).toContain("const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates)");
   });
 
-  it("reads offline map metadata only after a map snapshot update", () => {
-    expect(source).toMatch(/const offlineMapAge = useMemo\([\s\S]*?getOfflineMapAgeLabel\(getOfflineMapStations\(\)\.savedAt\)[\s\S]*?\[offlineMap, mapStations\],\s*\)/);
-    expect(source).toContain("const [offlineMap, setOfflineMap] = useState<StationMapItem[]>");
-    expect(source).toContain("setOfflineMap(mapSnapshot.stations)");
+  it("reads the offline snapshot once and updates its date only after cache changes", () => {
+    expect(source).toContain("const [initialOfflineMap] = useState(getOfflineMapStations)");
+    expect(source).toContain("const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(initialOfflineMap.stations)");
+    expect(source).toContain("const [offlineMapSavedAt, setOfflineMapSavedAt] = useState(initialOfflineMap.savedAt)");
+    expect(source).toMatch(/const offlineMapAge = useMemo\([\s\S]*?getOfflineMapAgeLabel\(offlineMapSavedAt\)[\s\S]*?\[offlineMapSavedAt\],\s*\)/);
+    expect(source).toContain("setOfflineMapSavedAt(mapSnapshot.savedAt)");
+    expect(source).toContain("setOfflineMapSavedAt(getOfflineMapStations().savedAt)");
+    expect(source).toContain("setOfflineMapSavedAt(snapshot.savedAt)");
     expect(source).not.toContain(
       "const offlineMapAge = getOfflineMapAgeLabel(getOfflineMapStations().savedAt)",
     );
@@ -28,7 +32,7 @@ describe("station directory render cost", () => {
       "createStationDirectoryFuelMatcher(",
       "buildIndexedStationDirectorySearch(",
       "const mapStations = useMemo<StationMapItem[]>",
-      "getOfflineMapStations().stations",
+      "const [initialOfflineMap] = useState(getOfflineMapStations)",
       "getOfflineMapAgeLabel(",
     ]) expect(source).toContain(essential);
   });
