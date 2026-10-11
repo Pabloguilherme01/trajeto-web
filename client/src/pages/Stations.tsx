@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
-import { matchesCatalogText } from "@/lib/catalogSearch";
+import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
 import { distanceKm } from "@/lib/offlineRouteMath";
 import { appUrl } from "@/lib/appUrl";
 import { buildGoogleMapsDirectionsUrl, buildGoogleMapsSearchUrl, buildOrganicMapsSearchUrl, getPreferredNavigationProvider, openExternalUrl, openNavigation, setPreferredNavigationProvider, shareText, vibration } from "@/lib/mobileTools";
@@ -71,6 +71,24 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   const [offlineMap, setOfflineMap] = useState<StationMapItem[]>(() => getOfflineMapStations().stations);
   const [priceSnapshot, setPriceSnapshot] = useState<AnpPriceSnapshot | null>(null);
   const [fuelFilter, setFuelFilter] = useState<StationFuelFilter>("all");
+
+  // Both "Ver todos" actions restore every directory criterion, including
+  // hidden state from previous visits, so empty results never become sticky.
+  const resetDirectoryFilters = () => {
+    setDirectorySearch("");
+    setFuelFilter("all");
+    setNeighborhoodFilter("all");
+    setBrandFilter("all");
+    setAddressOnly(false);
+    setVerifiedOnly(false);
+    setMappedOnly(false);
+    setOnlyOpen(false);
+    setDirectorySort(userCoords ? "distance" : "name");
+    setDirectoryVisibleCount(24);
+    setQuery("postos");
+    setInput("Águas Lindas de Goiás, GO");
+    setLocation(appUrl("/postos") + "?q=postos");
+  };
 
   useEffect(() => { if (mapFirst) setShowMap(true); }, [mapFirst]);
 
@@ -165,33 +183,37 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     return cards;
   }, [aguasLindasCatalog, anpStations, anpByCnpj]);
 
-  const directoryCardsFiltered = useMemo(() => {
-    const normalized = directorySearch.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const matches = directoryCards.filter(item => {
-      const text = [
-        item.local?.displayName,
-        item.local?.legalName,
-        item.local?.cnpj,
-        item.local?.neighborhood,
-        item.local?.address,
-        item.local?.brand,
-        item.local?.aliases?.join(" "),
-        item.anp?.razaoSocial,
-        item.anp?.cnpj,
-        item.anp?.bairro,
-        item.anp?.endereco,
-        item.anp?.distribuidora,
-      ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const matchesFuel = stationSupportsFuel(
-        pricesByCnpj.get(item.key)?.map(price => price.productKey) ?? [],
-        item.anp?.products?.map(product => product.produto || "") ?? [],
-        fuelFilter,
-      );
-      return (!normalized || matchesCatalogText(directorySearch, [text])) &&
-        (!staticRuntime || broadAguasLindasQuery || matchesCatalogText(query, [text])) && matchesFuel;
-    });
+  // Build text tokens only when the ANP/local snapshot changes, not on each
+  // letter typed in the mobile search box or fuel/sort selection.
+  const directoryTextSearch = useMemo(() => buildIndexedStationDirectorySearch(
+    directoryCards,
+    item => [
+      item.local?.displayName,
+      item.local?.legalName,
+      item.local?.cnpj,
+      item.local?.neighborhood,
+      item.local?.address,
+      item.local?.brand,
+      item.local?.aliases?.join(" "),
+      item.anp?.razaoSocial,
+      item.anp?.cnpj,
+      item.anp?.bairro,
+      item.anp?.endereco,
+      item.anp?.distribuidora,
+    ],
+  ), [directoryCards]);
 
-    return [...matches].sort((a, b) => {
+  const directoryCardsFiltered = useMemo(() => {
+    const matches = directoryTextSearch(
+      directorySearch,
+      staticRuntime && !broadAguasLindasQuery ? query : "",
+    ).filter(item => stationSupportsFuel(
+      pricesByCnpj.get(item.key)?.map(price => price.productKey) ?? [],
+      item.anp?.products?.map(product => product.produto || "") ?? [],
+      fuelFilter,
+    ));
+
+    return matches.sort((a, b) => {
       const stationLabel = (item: typeof directoryCards[number]) => item.local?.displayName || item.anp?.razaoSocial || "";
       if (directorySort === "distance" && userCoords) {
         const getCoords = (item: typeof directoryCards[number]) =>
@@ -214,7 +236,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       }
       return stationLabel(a).localeCompare(stationLabel(b), "pt-BR");
     });
-  }, [directoryCards, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery]);
+  }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery]);
 
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const point = stationCoordinatePoint(anp?.latitude ?? local?.anp?.latitude, anp?.longitude ?? local?.anp?.longitude);
@@ -495,7 +517,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       element.focus({ preventScroll: true });
     }, 120);
     return () => window.clearTimeout(timer);
-  }, [directoryCards.length, directorySearch, location]);
+  }, [directoryCards.length, location]);
 
   useEffect(() => {
     setLocalVisibleCount(12);
@@ -928,7 +950,23 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             </div>
 
             </details>
-            <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,14rem)_minmax(0,14rem)_auto]">
+              <div className="relative min-w-0 sm:col-span-2 lg:col-span-1" role="search">
+                <input
+                  type="search"
+                  aria-label="Buscar no diretório de postos"
+                  placeholder="Nome, bairro, rua, bandeira ou CNPJ"
+                  value={directorySearch}
+                  onChange={event => setDirectorySearch(event.target.value)}
+                  className="min-h-11 min-w-0 w-full rounded-2xl border border-border/15 bg-background px-3 pr-10 text-base text-foreground placeholder:text-muted-foreground"
+                />
+                {directorySearch && (
+                  <button type="button" aria-label="Limpar busca no diretório" onClick={() => setDirectorySearch("")}
+                    className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/30">
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
               <select aria-label="Filtrar por combustível" value={fuelFilter} onChange={event => setFuelFilter(event.target.value as StationFuelFilter)} className="min-h-11 min-w-0 w-full rounded-2xl border border-border/10 bg-background px-3 text-base font-black text-muted-foreground">
                 <option value="all">Combustível: todos</option>
                 <option value="gasolina-comum">Gasolina comum</option>
@@ -944,7 +982,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
                 <option value="brand">Ordenar: bandeira</option>
                 <option value="distance" disabled={!userCoords}>Ordenar: mais perto</option>
               </select>
-              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setDirectorySort(userCoords ? "distance" : "name"); setQuery("postos"); setInput("Águas Lindas de Goiás, GO"); setLocation(appUrl("/postos") + "?q=postos"); }} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-primary">{userCoords ? "Mais perto" : "Ver todos"}</button>
+              <button type="button" onClick={resetDirectoryFilters} className="min-h-11 rounded-2xl border border-primary/15 bg-primary/[.04] px-3 text-xs font-black text-primary">{userCoords ? "Mais perto" : "Ver todos"}</button>
             </div>
             {!hasIndividualPrices && <p className="mt-2 text-xs leading-relaxed text-warning">Preço individual ANP indisponível nesta coleta · ordenação por preço desativada.</p>}
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground" role="status" aria-live="polite">
@@ -955,7 +993,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
             {!directoryCardsFiltered.length && <div className="mt-4 rounded-2xl border border-border/15 bg-muted/[.03] p-4" role="status">
               <p className="font-bold">Nenhum posto encontrado com esses filtros.</p>
               <p className="mt-1 text-sm text-muted-foreground">Tente outro nome, bairro ou combustível.</p>
-              <button type="button" onClick={() => { setDirectorySearch(""); setFuelFilter("all"); setInput("Águas Lindas de Goiás, GO"); setQuery("postos"); setLocation(appUrl("/postos") + "?q=postos"); }} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground">Ver todos os postos</button>
+              <button type="button" onClick={resetDirectoryFilters} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground">Ver todos os postos</button>
             </div>}
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {directoryCardsFiltered
