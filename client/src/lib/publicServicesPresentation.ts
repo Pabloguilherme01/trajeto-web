@@ -47,6 +47,7 @@ import {
   type PublicServiceCategory,
 } from "@/lib/publicServices";
 import { ALL_LOCAL_ROUTE_DESTINATIONS } from "@/lib/localRoutePresets";
+import { selectExistingRoutesById } from "@/lib/readyServiceRouteLookup";
 export const categoryIcons = {
   saude: HeartPulse,
   seguranca: ShieldAlert,
@@ -306,10 +307,6 @@ const READY_ROUTE_EXCLUDED_SERVICE_IDS = new Set([
 
 const READY_ROUTE_STANDALONE_IDS = ["rodoviaria", "praca-da-biblia"] as const;
 
-const readyRouteDestinationIds = new Set(
-  ALL_LOCAL_ROUTE_DESTINATIONS.map(route => route.id)
-);
-
 export const READY_ROUTE_SERVICE_BY_ROUTE_ID = new Map(
   PUBLIC_SERVICES.filter(
     service =>
@@ -329,12 +326,13 @@ const READY_ROUTE_IDS = Array.from(
     ...READY_ROUTE_STANDALONE_IDS,
     ...READY_ROUTE_SERVICE_BY_ROUTE_ID.keys(),
   ])
-).filter(id => readyRouteDestinationIds.has(id));
+);
 
-export const READY_SERVICE_ROUTES = READY_ROUTE_IDS.map(id =>
-  ALL_LOCAL_ROUTE_DESTINATIONS.find(route => route.id === id)
-).filter((route): route is (typeof ALL_LOCAL_ROUTE_DESTINATIONS)[number] =>
-  Boolean(route)
+// One indexed pass replaces per-ID full-directory scans, and the output still
+// skips absent destinations in the same order as the previous implementation.
+export const READY_SERVICE_ROUTES = selectExistingRoutesById(
+  ALL_LOCAL_ROUTE_DESTINATIONS,
+  READY_ROUTE_IDS
 );
 
 export const servicePreparationHint = (
