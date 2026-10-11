@@ -175,6 +175,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       item.local?.displayName,
       item.local?.legalName,
       item.local?.cnpj,
+      // Directory keys already contain digits-only CNPJ when known. Search
+      // both formatted and unformatted forms without changing official data.
+      item.key,
       item.local?.neighborhood,
       item.local?.address,
       item.local?.brand,
