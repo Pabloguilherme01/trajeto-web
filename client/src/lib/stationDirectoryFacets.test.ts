@@ -78,8 +78,14 @@ describe("station directory facet filters", () => {
   it("does not change loaded records and refreshes options when catalog snapshots change", () => {
     const original = JSON.stringify(cards);
     const before = buildStationDirectoryFacets(cards);
+    // When an ANP record exists, its displayed distributor has priority.
+    // Refresh the winning field along with the local fallback.
     const updated: Card[] = cards.map((item, index) => index === 0 ?
-      { ...item, local: { ...item.local, brand: "ALE" } } : item);
+      {
+        ...item,
+        local: { ...item.local, brand: "ALE" },
+        anp: item.anp ? { ...item.anp, distribuidora: "ALE" } : null,
+      } : item);
     const after = buildStationDirectoryFacets(updated);
     expect(before.byCard.get(cards[0])?.brand).toBe("shell");
     expect(after.byCard.get(updated[0])?.brand).toBe("ale");
