@@ -133,3 +133,51 @@ it("preserves every category and intention when switching scope and catalog snap
     .toEqual(["escola"]);
   expect(searchPublicServicesIn(records, "tecnologia", "educacao")).toEqual([]);
 });
+
+
+it("reuses the last normalized query after changing only resource/favorite filters", () => {
+  let categoryReads = 0;
+  const measured = Object.defineProperty(
+    service("cras-cache", "CRAS Regional", "assistencia", "Apoio e Cadastro Único", ["cras"]),
+    "category",
+    {
+      configurable: true,
+      enumerable: true,
+      get: () => { categoryReads++; return "assistencia"; },
+    },
+  ) as PublicService;
+  const snapshot = [measured, service("escola-cache", "Escola do Bairro", "educacao")];
+  const first = searchPublicServicesIn(snapshot, "CRAS", "assistencia");
+  expect(first.map(s => s.id)).toEqual(["cras-cache"]);
+  first.pop();
+  const before = categoryReads;
+  const repeated = searchPublicServicesIn(snapshot, "  cras  ", "assistencia");
+  expect(repeated.map(s => s.id)).toEqual(["cras-cache"]);
+  expect(repeated).not.toBe(first);
+  expect(categoryReads).toBe(before);
+  repeated.splice(0, 1);
+  expect(searchPublicServicesIn(snapshot, "cras", "assistencia").map(s => s.id))
+    .toEqual(["cras-cache"]);
+  expect(searchPublicServicesIn(snapshot, "escola", "educacao").map(s => s.id))
+    .toEqual(["escola-cache"]);
+  expect(searchPublicServicesIn(snapshot, "cras", "assistencia").map(s => s.id))
+    .toEqual(["cras-cache"]);
+});
+
+it("keeps one bounded search entry per catalog snapshot and preserves category browsing", () => {
+  const first = searchPublicServicesIn(records, "de e da", "educacao");
+  first.pop();
+  expect(searchPublicServicesIn(records, "", "educacao").map(s => s.id)).toEqual(["escola"]);
+  const changed = records.map(s => s.id === "escola"
+    ? { ...s, name: "Nova escola de tecnologia", keywords: ["tecnologia"] }
+    : s);
+  expect(searchPublicServicesIn(changed, "tecnologia", "educacao").map(s => s.id))
+    .toEqual(["escola"]);
+  expect(searchPublicServicesIn(records, "tecnologia", "educacao")).toEqual([]);
+  for (const category of ["todos", "cidadania", "educacao", "assistencia"] as const) {
+    for (const query of ["", "CRAS", "cpf", "cnpj", "matricula escolar"]) {
+      expect(searchPublicServicesIn(records, query, category).map(s => s.id))
+        .toEqual(previousSearch(records, query, category).map(s => s.id));
+    }
+  }
+});
