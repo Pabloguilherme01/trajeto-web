@@ -33,9 +33,10 @@ import {
   type AnpFuelRow,
 } from "@shared/anpRevendedores";
 import { cachedGroupAnpFuelRows } from "@/lib/anpGroupCache";
+import { filterAnpMapStations } from "@/lib/anpMapSearch";
 import { cacheOfflineAnpSnapshot, getOfflineAnpSnapshot } from "@/lib/stationMapOffline";
 import { appUrl } from "@/lib/appUrl";
-import { matchesCatalogText, normalizeCatalogText } from "@/lib/catalogSearch";
+import { normalizeCatalogText } from "@/lib/catalogSearch";
 import { buildDestinationPlannerUrl, plannerDestinationFromMapItem } from "@/lib/tripLinks";
 import { getPreferredNavigationProvider, setPreferredNavigationProvider, type NavigationProvider } from "@/lib/mobileTools";
 
@@ -267,27 +268,7 @@ export default function CityMap() {
     });
     const stations =
       !onlyStreets && (category === "todos" || category === "combustivel")
-        ? groupedAnpStations.flatMap(station => {
-            const lat = station.latitude,
-              lng = station.longitude;
-            return typeof lat === "number" &&
-              typeof lng === "number" &&
-              matchesCatalogText(deferredQuery, [
-                station.razaoSocial ?? "Posto",
-                station.endereco ?? undefined,
-              ])
-              ? [
-                  {
-                    id: station.cnpj,
-                    name: station.razaoSocial ?? "Posto",
-                    source: "ANP" as const,
-                    address: [station.endereco, station.bairro, station.municipio, station.uf].filter(Boolean).join(", ") || station.razaoSocial || "Posto",
-                    lat,
-                    lng,
-                  },
-                ]
-              : [];
-          })
+        ? filterAnpMapStations(groupedAnpStations, deferredQuery)
         : [];
     const selection = selectCityMapItems<CityMapCandidate>([publicPoints, atlasDestinations, stations]);
     return { total: selection.total, points: selection.items.map(item => ({
