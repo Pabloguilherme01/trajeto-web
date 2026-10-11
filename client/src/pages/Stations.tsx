@@ -5,7 +5,9 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { trpc } from "@/lib/trpc";
 import { buildIndexedStationDirectorySearch } from "@/lib/stationDirectorySearch";
 import { sortStationDirectoryRows } from "@/lib/stationDirectorySort";
+import { prepareVisibleStationDirectoryCards } from "@/lib/stationDirectoryVisibleCards";
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
+import { deduplicateStationMapItems } from "@/lib/stationMapDedupe";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
 import { createStationDirectoryFuelMatcher } from "@/lib/stationDirectoryFuelMatcher";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
@@ -17,7 +19,7 @@ import { getRecentSearches, rememberIntent, rememberSearch } from "@/lib/mobileP
 import { corridorPresets } from "@/lib/corridorPresets";
 import { isGitHubPagesRuntime } from "@/lib/runtimeCapabilities";
 import { AGUAS_LINDAS_ACTIVE_CNAE_REFERENCE, AGUAS_LINDAS_ANP_CATALOG_REFERENCE, AGUAS_LINDAS_ANP_VERIFIED_COUNT, AGUAS_LINDAS_MAP_ONLY_DISCOVERIES, AGUAS_LINDAS_PRICE_REFERENCE, AGUAS_LINDAS_STATION_STATS, AGUAS_LINDAS_STATIONS_COUNT, AGUAS_LINDAS_STATIONS_LAST_SYNC, AGUAS_LINDAS_STATIONS_SOURCE, AGUAS_LINDAS_STATIONS_UPDATED_AT, getStationDataQualityLabel, searchAguasLindasStations, stationMapsSearchUrl } from "@/lib/aguasLindasStations";
-import { inferredBrand, normalizeStationCnpj, sameStationIdentity, stationCoordinatePoint, type StationFuelFilter } from "@/lib/stationListControls";
+import { inferredBrand, normalizeStationCnpj, stationCoordinatePoint, type StationFuelFilter } from "@/lib/stationListControls";
 import { StationMap, type StationMapItem } from "@/components/StationMap";
 import { StationDirectoryCard } from "@/components/StationDirectoryCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
@@ -209,6 +211,17 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     return sortStationDirectoryRows(matches, directorySort, userCoords, fuelFilter, pricesByCnpj);
   }, [directoryTextSearch, directorySearch, directorySort, userCoords, fuelFilter, pricesByCnpj, query, staticRuntime, broadAguasLindasQuery, directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter, addressOnly, verifiedOnly, mappedOnly]);
 
+  const savedDirectoryPlaceIds = useMemo(
+    () => new Set(saved.map(station => station.placeId)),
+    [saved],
+  );
+  const visibleDirectoryCards = useMemo(
+    () => prepareVisibleStationDirectoryCards(
+      directoryCardsFiltered, directoryVisibleCount, userCoords, savedDirectoryPlaceIds,
+    ),
+    [directoryCardsFiltered, directoryVisibleCount, userCoords, savedDirectoryPlaceIds],
+  );
+
   const toggleDirectorySaved = (local: typeof aguasLindasCatalog[number] | null, anp: typeof anpStations[number] | null) => {
     const point = stationCoordinatePoint(anp?.latitude ?? local?.anp?.latitude, anp?.longitude ?? local?.anp?.longitude);
     if (!point) {
@@ -258,7 +271,6 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
   }, [stationPages.data]);
 
   const mapStations = useMemo<StationMapItem[]>(() => {
-    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ");
     const official: StationMapItem[] = anpStations.flatMap(station => {
       const point = stationCoordinatePoint(station.latitude, station.longitude);
       return point ? [{
@@ -318,24 +330,9 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
         source: "Google" as const,
       }));
 
-    const seen = new Set<string>();
-    const merged: StationMapItem[] = [];
-    for (const station of [...official, ...local, ...directory, ...live, ...offlineMap]) {
-      const key = station.cnpj
-        ? "cnpj:" + normalizeStationCnpj(station.cnpj)
-        : station.placeId
-          ? "place:" + station.placeId
-          : "address:" + normalize(station.address || station.name);
-      if (seen.has(key)) continue;
-      const duplicate = merged.some(existing => sameStationIdentity(
-        { cnpj: existing.cnpj, address: existing.address, lat: existing.lat, lng: existing.lng },
-        { cnpj: station.cnpj, address: station.address, lat: station.lat, lng: station.lng },
-      ));
-      if (duplicate) continue;
-      seen.add(key);
-      merged.push(station);
-    }
-    return merged;
+    return deduplicateStationMapItems([
+      ...official, ...local, ...directory, ...live, ...offlineMap,
+    ]);
   }, [anpStations, aguasLindasCatalog, directoryCards, liveStations, offlineMap]);
   const anpWithCoordinates = anpStations.filter(station => Boolean(stationCoordinatePoint(station.latitude, station.longitude))).length;
   const anpWithoutCoordinates = Math.max(0, anpStations.length - anpWithCoordinates);
@@ -1010,22 +1007,17 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               <button type="button" onClick={resetDirectoryFilters} className="mt-3 min-h-11 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground">Ver todos os postos</button>
             </div>}
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {directoryCardsFiltered
-                .slice(0, directoryVisibleCount).map((item, index) => (
+              {visibleDirectoryCards.map(({ item, index, saved: isSaved, point, distance }) => (
                 <StationDirectoryCard
                   key={item.key}
-                  index={index + 1}
+                  index={index}
                   local={item.local}
                   anp={item.anp}
-                  saved={saved.some(savedStation => savedStation.placeId === "aguas-lindas:" + item.key)}
+                  saved={isSaved}
                   prices={pricesByCnpj.get(item.key) ?? []}
                   catalogStatus={stationCatalogStatusLabel(item.anp && item.local?.mapData ? "anp-map-reconciled" : item.anp ? "anp-confirmed" : item.local?.mapData ? "map-reference" : "unreconciled")}
-                  distanceKm={(() => {
-                    if (!userCoords) return null;
-                    const point = stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude);
-                    return point ? distanceKm(userCoords, point) : null;
-                  })()}
-                  onToggleSaved={stationCoordinatePoint(item.anp?.latitude ?? item.local?.anp?.latitude, item.anp?.longitude ?? item.local?.anp?.longitude) ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
+                  distanceKm={distance}
+                  onToggleSaved={point ? () => toggleDirectorySaved(item.local, item.anp) : undefined}
                 />
               ))}
             </div>
