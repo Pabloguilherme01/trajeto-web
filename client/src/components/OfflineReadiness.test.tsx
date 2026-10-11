@@ -70,7 +70,7 @@ describe("offline preparation feedback", () => {
       expect(await screen.findByText("Pronto para usar sem internet neste aparelho.")).toBeTruthy();
       expect(state.check).toHaveBeenCalledTimes(1);
     } finally {
-      delete (navigator as Navigator & { serviceWorker?: EventTarget }).serviceWorker;
+      delete (navigator as unknown as { serviceWorker?: EventTarget }).serviceWorker;
     }
   });
 
