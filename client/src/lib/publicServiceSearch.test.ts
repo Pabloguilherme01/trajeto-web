@@ -62,3 +62,30 @@ it("returns independent lists for category browsing and keeps indexes per immuta
   expect(searchPublicServicesIn(snapshot, "matricula", "educacao").map(s => s.id)).toEqual(["escola", "new-entry"]);
   expect(searchPublicServicesIn(records, "matricula", "educacao").map(s => s.id)).toEqual(["escola"]);
 });
+
+it("keeps all search scopes independent when changing from acronyms to longer needs", () => {
+  const queries = [
+    "cras", "cpf", "cidades", "matricula escolar", "informações de cras e cpf",
+    "segunda via documento escolar", "São José", "CRAS Norte", "educacao", "xyz",
+  ];
+  for (const query of queries) {
+    expect(searchPublicServicesIn(records, query).map(s => s.id))
+      .toEqual(previousSearch(records, query).map(s => s.id));
+  }
+  // Revisiting an earlier query must not accidentally reuse an index built
+  // for a different search scope (concise, with-category or full details).
+  for (const query of queries.slice().reverse()) {
+    expect(searchPublicServicesIn(records, query).map(s => s.id))
+      .toEqual(previousSearch(records, query).map(s => s.id));
+  }
+});
+
+it("does not reuse a previous catalog snapshot after official records change", () => {
+  const fresh = records.map(s => s.id === "escola"
+    ? { ...s, description: "Laboratório de robótica municipal", keywords: ["robotica"] }
+    : s);
+  expect(searchPublicServicesIn(fresh, "robotica").map(s => s.id)).toEqual(["escola"]);
+  expect(searchPublicServicesIn(records, "robotica")).toEqual([]);
+  expect(searchPublicServicesIn(fresh, "matricula").map(s => s.id))
+    .toEqual(previousSearch(fresh, "matricula").map(s => s.id));
+});
