@@ -378,6 +378,17 @@ export default function OfflineMapCanvas({
         bounds.minY <= maxWorldY
       );
   }, [roads, roadGrid, size.width, size.height, camera.x, camera.y, camera.scale, pan.x, pan.y]);
+  // Roads of the same priority share their SVG paint. Keep every subpath,
+  // but avoid thousands of React/SVG nodes during filtering and gestures.
+  const roadLayers = useMemo(() => {
+    const layers = new Map<number, string[]>();
+    for (const road of visible) {
+      const paths = layers.get(road.priority);
+      if (paths) paths.push(road.path);
+      else layers.set(road.priority, [road.path]);
+    }
+    return [...layers].map(([priority, paths]) => ({ priority, path: paths.join(" ") }));
+  }, [visible]);
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
@@ -507,12 +518,12 @@ export default function OfflineMapCanvas({
         >
           <title>Ruas locais salvas e pontos da viagem</title>
           <g data-offline-world-layer transform={mapTransform}>
-            {visible.map(road => {
+            {roadLayers.map(road => {
               const priority = road.priority;
               const major = priority >= 2;
               const width = major ? 3 + priority * 0.65 : (zoom >= 2 ? 2.25 : 1.5);
               return (
-                <g key={road.id}>
+                <g key={road.priority} data-offline-road-layer={road.priority}>
                   <path
                     d={road.path}
                     fill="none"
