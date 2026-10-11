@@ -64,3 +64,22 @@ it("reuses stable map category lists without changing order or excluding distinc
   const validItems = items.slice(0, 3);
   expect(businessesForMapLayer(validItems, "todos")).toBe(validItems); // No needless full copy.
 });
+
+it("ranks only requested business categories while preserving previous stable order", async () => {
+  const items = await loadBusinessCatalog();
+  const hasTradeName = (value: string) => /\\p{L}/u.test(value);
+  for (const category of ["saude", "educacao", "alimentacao", "compras", "servicos", "transporte"] as const) {
+    const expected = items.filter(item => item.category === category)
+      .sort((a, b) => Number(hasTradeName(b.business?.tradeName ?? ""))
+        - Number(hasTradeName(a.business?.tradeName ?? "")))
+      .map(item => item.id);
+    const first = searchBusinesses(items, category);
+    expect(first.map(item => item.id)).toEqual(expected);
+    expect(searchBusinesses(items, category)).toBe(first);
+  }
+  // Cached map layer grouping must still preserve file order, irrespective of
+  // the separate ranking used by named-category search.
+  const raw = items.filter(item => item.category === "compras" && Boolean(item.destination ?? item.address));
+  expect(businessesForMapLayer(items, "compras").map(item => item.id))
+    .toEqual(raw.map(item => item.id));
+});
