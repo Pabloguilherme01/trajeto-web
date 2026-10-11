@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, HardDrive, RefreshCw, WifiOff } from "lucide-react";
 import { formatStorageBytes, getOfflineStorageStatus, requestOfflineStoragePersistence, type OfflineStorageStatus } from "@/lib/offlineStorageStatus";
 import {
@@ -33,7 +33,11 @@ export default function OfflineReadiness() {
   const [feedback, setFeedback] = useState("");
   const [storageStatus, setStorageStatus] = useState<OfflineStorageStatus | null>(null);
   const [requestingPersistence, setRequestingPersistence] = useState(false);
+  // A controllerchange during preparation must not start an overlapping
+  // readiness check that can overwrite a successful restore result.
+  const preparingRef = useRef(false);
   const check = async () => {
+    if (preparingRef.current) return;
     setChecking(true);
     try {
       const status = await getOfflinePackageStatus();
@@ -48,6 +52,7 @@ export default function OfflineReadiness() {
     }
   };
   const prepare = async () => {
+    preparingRef.current = true;
     setPreparing(true);
     setProgress(null);
     setFeedback("");
@@ -60,6 +65,7 @@ export default function OfflineReadiness() {
     } catch {
       setFeedback(preparationMessages.connection);
     } finally {
+      preparingRef.current = false;
       setPreparing(false);
       setProgress(null);
     }
