@@ -6,7 +6,7 @@ import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } fro
 
 /** The atlas has additional layers that the ready-route presets do not. */
 export type CityMapCategory = RouteDestinationCategoryFilter | "seguranca" | "meio-ambiente";
-export type CityMapLayer = CityMapCategory | "ruas";
+export type CityMapLayer = CityMapCategory | "ruas" | "bairros";
 
 export const CITY_MAP_CATEGORIES: ReadonlyArray<{ value: CityMapCategory; label: string }> =
   ROUTE_DESTINATION_CATEGORIES.flatMap<{ value: CityMapCategory; label: string }>(item =>
@@ -19,7 +19,7 @@ export const CITY_MAP_CATEGORIES: ReadonlyArray<{ value: CityMapCategory; label:
 
 const allowedLayers = new Set<CityMapLayer>([
   ...CITY_MAP_CATEGORIES.map(item => item.value),
-  "ruas",
+  "ruas", "bairros",
 ]);
 
 /** Only known public map layers may be supplied by URLs. */
@@ -28,13 +28,13 @@ export function readCityMapLayer(value: string | null): CityMapLayer {
 }
 
 export function cityMapAtlasLayer(layer: CityMapLayer): "todos" | CityAtlasLayer {
-  if (layer === "ruas" || layer === "todos") return "todos";
+  if (layer === "ruas" || layer === "bairros" || layer === "todos") return "todos";
   if (layer === "centro") return "referencia";
   return layer;
 }
 
 export function isReadyRouteLayer(layer: CityMapLayer): layer is RouteDestinationCategoryFilter {
-  return layer !== "ruas" && layer !== "seguranca" && layer !== "meio-ambiente";
+  return layer !== "ruas" && layer !== "bairros" && layer !== "seguranca" && layer !== "meio-ambiente";
 }
 
 export type CityMapCoordinateMode = "all" | "coordinates" | "missing";
@@ -97,6 +97,6 @@ export function cityMapNeedsAnp(layer: CityMapLayer): boolean {
  * datasets, so they should never download the 21k-record business catalog.
  */
 export function cityMapNeedsBusinessCatalog(layer: CityMapLayer): boolean {
-  return layer !== "ruas" && layer !== "seguranca" &&
+  return layer !== "ruas" && layer !== "bairros" && layer !== "seguranca" &&
     layer !== "combustivel" && layer !== "centro";
 }
