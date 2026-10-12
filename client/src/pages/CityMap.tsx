@@ -58,6 +58,8 @@ const CITY_MAP_TABS: ReadonlyArray<{ value: CityMapLayer; label: string }> = [
 export default function CityMap() {
   const [, navigate] = useLocation();
   const rawSearch = useSearch();
+  const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
+  const [exploreCompanies, setExploreCompanies] = useState(false);
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
   const [referenceLayer, setReferenceLayer] = useState<"ruas" | "bairros" | null>(() =>
     initialLayer === "ruas" || initialLayer === "bairros" ? initialLayer : null
@@ -72,7 +74,9 @@ export default function CityMap() {
   // reveal deep-linked selections and keyboard-focused categories on mobile.
   const { railRef: categoryRailRef, onFocusCapture: onCategoryFocusCapture } =
     useFilterRail(activeLayer, CITY_MAP_TABS);
-  const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
+  const supportsCompanies = cityMapNeedsBusinessCatalog(activeLayer);
+  const needsBusinessCatalog = supportsCompanies && (activeLayer !== "todos" ||
+    query.trim().length >= 2 || selectedArea !== "" || exploreCompanies);
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
   const lastSuccessfulAnpFetchAt = useRef(0);
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
@@ -190,7 +194,6 @@ export default function CityMap() {
       .catch(() => {});
     return () => controller.abort();
   }, [needsAnp]);
-  const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
   useEffect(() => {
     const params = new URLSearchParams(rawSearch);
     const selected = readCityMapLayer(params.get("camada"));
@@ -216,6 +219,7 @@ export default function CityMap() {
     syncMapUrl(updatedQuery, next);
   };
   const resetMapFilters = () => {
+    setExploreCompanies(false);
     setQuery("");
     setCategory("todos");
     setReferenceLayer(null);
@@ -335,7 +339,8 @@ export default function CityMap() {
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
         Busque um destino e veja sua rota no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{referenceLayer === "ruas" ? "Camada de ruas · sem carregar o catálogo de empresas" : referenceLayer === "bairros" ? "Bairros e setores do cadastro municipal · sem catálogo de empresas" : !needsBusinessCatalog ? "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{referenceLayer === "ruas" ? "Camada de ruas · sem carregar o catálogo de empresas" : referenceLayer === "bairros" ? "Bairros e setores do cadastro municipal · sem catálogo de empresas" : !needsBusinessCatalog ? supportsCompanies ? "Destinos locais primeiro. Busque com duas letras, escolha uma categoria ou explore as empresas." : "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      {supportsCompanies && !needsBusinessCatalog && <button type="button" onClick={() => setExploreCompanies(true)} className="mt-2 min-h-11 rounded-xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">Explorar empresas</button>}
       {needsBusinessCatalog && businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <p className="mt-2 text-xs leading-relaxed text-foreground/65">Atlas municipal: versão declarada em {atlasSnapshot?.updatedAt ?? "data indisponível"}. As fontes e datas de cada registro podem ser diferentes.</p>
       <section className="mt-5" aria-labelledby="city-search-label">
@@ -360,7 +365,7 @@ export default function CityMap() {
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p id="city-search-help" className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/60">Busca em serviços, empresas e vias cadastradas.</p>
-          {(query.trim() || activeLayer !== "todos" || coordinateMode !== "all" || selectedArea !== "") && (
+          {(query.trim() || activeLayer !== "todos" || coordinateMode !== "all" || selectedArea !== "" || exploreCompanies) && (
             <button
               type="button"
               onClick={resetMapFilters}

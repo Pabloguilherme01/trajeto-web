@@ -10,11 +10,7 @@ import type { PublicTravelMode } from "./publicRouting";
 export type PlannerDestinationResource = "all" | "coordinates" | "missing" | "streets" | "areas" | "prepared";
 const resolvePoint = createDestinationPointResolver(BUNDLED_CITY_ATLAS);
 
-/** Lists and their previews share a single query; selecting a mode reuses them. */
-export function preparePlannerDestinationResources(query = "", category: RouteDestinationCategoryFilter = "todos", options: {
-  area?: string; savedRoutes?: readonly OfflineRoute[]; origin?: string; mode?: PublicTravelMode;
-} = {}) {
-  const { area = "", savedRoutes = [], origin = "", mode = "driving" } = options;
+function prepareCatalog(query: string, category: RouteDestinationCategoryFilter, area: string) {
   const base = getLocalRoutePresets(query, category);
   const all = area ? base.filter(item => mentionsDestinationArea(area, item.label, item.detail, item.destination)) : base;
   // A single traversal computes both availability modes without rescanning the catalog.
@@ -23,7 +19,7 @@ export function preparePlannerDestinationResources(query = "", category: RouteDe
   for (const item of all) {
     (resolvePoint(item.destination) ? coordinates : missing).push(item);
   }
-  const results = {
+  return {
     all,
     coordinates,
     missing,
@@ -31,7 +27,21 @@ export function preparePlannerDestinationResources(query = "", category: RouteDe
       !area || mentionsDestinationArea(area, item.label, item.detail, item.destination)),
     areas: filterLocalRoutePresets(getPlannerAreaReferences(), query, category).filter(item =>
       !area || mentionsDestinationArea(area, item.label, item.destination)),
-    prepared: filterPreparedDestinations(all, savedRoutes, origin, mode),
   };
+}
+
+// One bounded entry for versioned public lists. Trip data is never retained here.
+let lastCatalog: { key: string; results: ReturnType<typeof prepareCatalog> } | undefined;
+
+/** Changing origin/mode only updates routes actually prepared on this device. */
+export function preparePlannerDestinationResources(query = "", category: RouteDestinationCategoryFilter = "todos", options: {
+  area?: string; savedRoutes?: readonly OfflineRoute[]; origin?: string; mode?: PublicTravelMode;
+} = {}) {
+  const { area = "", savedRoutes = [], origin = "", mode = "driving" } = options;
+  const key = JSON.stringify([query, category, area]);
+  if (lastCatalog?.key !== key) lastCatalog = { key, results: prepareCatalog(query, category, area) };
+  const catalog = lastCatalog.results;
+  const results = { ...catalog, prepared: filterPreparedDestinations(catalog.all, savedRoutes, origin, mode) };
+  const { all, coordinates, missing } = results;
   return { results, counts: { all: all.length, coordinates: coordinates.length, missing: missing.length, streets: results.streets.length, areas: results.areas.length, prepared: results.prepared.length } };
 }
