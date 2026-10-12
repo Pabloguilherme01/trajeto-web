@@ -439,7 +439,7 @@ export default function CityMap() {
           missing: allDestinations.length + allAtlasDestinations.length - positionedDestinations.length - positionedAtlasDestinations.length }}
         updating={query !== deferredQuery || (needsBusinessCatalog && businesses.loading)}
         onChange={mode => {
-          if (mode === "streets" || mode === "prepared") return;
+          if (mode === "streets" || mode === "areas" || mode === "prepared") return;
           setCoordinateMode(mode);
           syncMapUrl(query, activeLayer, mode);
         }} />
