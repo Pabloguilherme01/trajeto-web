@@ -18,7 +18,7 @@ jobs:
           gh api -X PATCH 'repos/Pabloguilherme01/trajeto-web/code-scanning/alerts/18' \
             -f state='dismissed' \
             -f dismissed_reason='false positive' \
-            -f dismissed_comment='Reviewed the sink in client/src/lib/mobileStationStore.ts: toggleMobileStationFavorite persists publicly published gas-station coordinates for offline navigation, not the device location. The actual device search centre was separately moved to session-only memory with legacy persisted centres purged in PR #501. Keeping public POI coordinates offline is intended functionality; this specific source-to-sink data flow is a false positive. CodeQL remains enabled for all other findings.' \
+            -f dismissed_comment='Public gas-station POI coordinates are saved for offline favorites, not device/user location. PR #501 retains search-center coordinates only in session memory and purges legacy saved centers. All other CodeQL findings remain enabled.' \
             --jq '{number, state, dismissed_reason, dismissed_comment}'
       - name: Identify existing public-station coordinate alert
         env:
