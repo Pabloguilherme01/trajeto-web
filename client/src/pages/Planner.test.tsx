@@ -621,3 +621,18 @@ it("keeps the private location handoff in memory when changing preferences", () 
   }
   expect(state.search).not.toContain("-15.76123");
 });
+
+it("combines municipal sector refinements with local prepared-route mode without claiming an estimate is navigable", async () => {
+  state.search = "destinos=1";
+  render(<Planner />);
+  const selector = screen.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" }) as HTMLSelectElement;
+  fireEvent.change(selector, { target: { value: "bairro-jardim-brasilia" } });
+  expect(selector.value).toBe("bairro-jardim-brasilia");
+  expect(screen.getByText(/Região mencionada no registro: Jardim Brasília/)).toBeTruthy();
+  const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
+  fireEvent.click(modes.getByRole("button", { name: "Rota offline salva" }));
+  expect(screen.getByText(/Informe a origem para encontrar rotas/)).toBeTruthy();
+  expect(modes.getByRole("button", { name: "Rota offline salva" }).getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Ver todas as regiões" }));
+  expect(selector.value).toBe("");
+});
