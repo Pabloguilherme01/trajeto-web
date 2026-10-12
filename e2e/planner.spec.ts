@@ -92,7 +92,8 @@ test("planejar: última rota privada reabre só o destino e não dispara cálcul
   });
 
   await page.goto("/planejar", { waitUntil: "domcontentloaded" });
-  await page.locator("summary").filter({ hasText: "Destinos e atalhos" }).click();
+  // The catalog now has a single toggle; Last trip is reachable without opening it.
+  await expect(page.getByRole("button", { name: /Destinos disponíveis/ })).toHaveAttribute("aria-expanded", "false");
   await page.getByRole("button", { name: "Última rota", exact: true }).click();
 
   await expect(page).toHaveURL(/\/planejar\?destino=Hospital$/);
