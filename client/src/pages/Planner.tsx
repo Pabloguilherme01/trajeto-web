@@ -9,6 +9,7 @@ import RoutePublicServiceCard from "@/components/RoutePublicServiceCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
 import DestinationAreaSelect from "@/components/DestinationAreaSelect";
+import ActiveRefinementChips from "@/components/ActiveRefinementChips";
 import { destinationAreaLabel, readDestinationArea } from "@/lib/destinationAreas";
 import { preparePlannerDestinationResources, type PlannerDestinationResource } from "@/lib/plannerDestinationResources";
 import { DestinationActions } from "@/components/DestinationActions";
@@ -68,6 +69,15 @@ const PLANNER_DESTINATION_FILTERS: ReadonlyArray<{
   { value: "combustivel", label: "Combustível" },
   { value: "centro", label: "Centro" },
 ];
+
+const destinationResourceLabels: Record<PlannerDestinationResource, string> = {
+  all: "Todos os destinos",
+  coordinates: "Com coordenadas",
+  missing: "Sem coordenadas",
+  streets: "Ruas e avenidas",
+  areas: "Bairros e setores",
+  prepared: "Rota offline salva",
+};
 
 const destinationCategoryLabel: Record<RouteDestinationCategory, string> = {
   saude: "Saúde",
@@ -138,6 +148,13 @@ export default function Planner() {
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [destinationResource, setDestinationResource] = useState<PlannerDestinationResource>("all");
   const [destinationArea, setDestinationArea] = useState("");
+  const clearDestinationRefinements = () => {
+    setDestinationFilter("");
+    setDestinationCategory("todos");
+    setDestinationResource("all");
+    setDestinationArea("");
+    setDestinationPage(null);
+  };
   const { railRef: destinationCategoryRailRef, onFocusCapture: onDestinationCategoryFocus } =
     useFilterRail(destinationCategory, PLANNER_DESTINATION_FILTERS);
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -851,10 +868,10 @@ export default function Planner() {
                 <span>{locating ? "Aguarde a localização…" : planRoute.isPending || publicRoutePending ? "Calculando rota…" : primaryActionLabel}</span>
                 {planRoute.isPending || publicRoutePending ? <Loader2 className="size-5 animate-spin" /> : <Navigation className="size-5" />}
               </button>
-              <details open={showAllDestinations} className="mobile-disclosure mt-3"><summary>Destinos e atalhos <ChevronDown className="size-4" /></summary>
+              <section className="mt-3" aria-label="Destinos e atalhos">
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-accent/15 bg-accent/[.04] px-3 text-left">
-                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-accent">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-foreground/75">{destinationCount} lugares locais, mais ruas e avenidas no modo de referências</span></span>
+                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-accent">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-foreground/75">{destinationCount} lugares locais; veja também ruas, bairros e rotas offline salvas</span></span>
                   <ChevronDown className={"size-4 text-accent transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
@@ -879,6 +896,17 @@ export default function Planner() {
                       ))}
                     </div>
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
+                    <ActiveRefinementChips label="Filtros ativos dos destinos" onClearAll={clearDestinationRefinements} items={[
+                      ...(destinationFilter.trim() ? [{ id: "query", label: "Busca: " + destinationFilter.trim(),
+                        onRemove: () => setDestinationFilter("") }] : []),
+                      ...(destinationCategory !== "todos" ? [{ id: "category",
+                        label: "Categoria: " + (PLANNER_DESTINATION_FILTERS.find(item => item.value === destinationCategory)?.label ?? destinationCategory),
+                        onRemove: () => setDestinationCategory("todos") }] : []),
+                      ...(destinationResource !== "all" ? [{ id: "resource", label: "Tipo: " + destinationResourceLabels[destinationResource],
+                        onRemove: () => setDestinationResource("all") }] : []),
+                      ...(destinationArea ? [{ id: "area", label: "Bairro: " + destinationAreaLabel(destinationArea),
+                        onRemove: () => setDestinationArea("") }] : []),
+                    ]} />
                     {destinationArea && <p className="mt-2 text-xs leading-relaxed text-foreground/65">Região mencionada no registro: {destinationAreaLabel(destinationArea)}. Não é um cálculo por limite geográfico.</p>}
                     <p className="mt-2 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite" aria-busy={destinationSearchUpdating}>
                       {destinationSearchUpdating ? "Atualizando destinos…" : `${availableDestinations.length} destinos encontrados · ${displayedDestinations.length} exibidos`}
@@ -912,6 +940,12 @@ export default function Planner() {
                       {!destinationSearchUpdating && availableDestinations.length === 0 && <div className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">
                         <p>Nenhum destino corresponde ao filtro.</p>
                         <p className="mt-1">Tente outra categoria ou região.</p>
+                        {(destinationFilter.trim() || destinationCategory !== "todos" || destinationResource !== "all" || destinationArea) && (
+                          <button type="button" onClick={clearDestinationRefinements}
+                            className="mt-2 min-h-11 rounded-xl bg-primary px-3 font-bold text-primary-foreground">
+                            Ver todos os destinos
+                          </button>
+                        )}
                         {destinationArea && <button type="button" onClick={() => setDestinationArea("")}
                           className="mt-2 min-h-11 rounded-xl border border-border/25 px-3 font-bold text-primary">Ver todas as regiões</button>}
                       </div>}
@@ -935,7 +969,7 @@ export default function Planner() {
                 <button type="button" onClick={clear} disabled={!origin && !destination} className="min-h-11 shrink-0 rounded-full border border-border/10 bg-muted/[.03] px-3 text-xs font-bold text-muted-foreground disabled:opacity-30">Limpar</button>
               </div>
 
-              </details>
+              </section>
               <details className="mobile-disclosure mt-3"><summary>Navegar com outro aplicativo <ChevronDown className="size-4" /></summary>
               {destination.trim().length >= 3 && online && activeExperienceMode !== "offline" && (
                 <div className={"mt-2 grid gap-2 " + (mode === "driving" ? "grid-cols-3" : "grid-cols-1")}>
