@@ -1,7 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
+  it("shares public missing-coordinate refinement without leaking GPS and ignores unknown values", () => {
+    expect(readCityMapCoordinateMode(null)).toBe("all");
+    expect(readCityMapCoordinateMode("1")).toBe("coordinates");
+    expect(readCityMapCoordinateMode("0")).toBe("missing");
+    expect(readCityMapCoordinateMode("-1")).toBe("all");
+    const url = cityMapLayerUrl("CRAS", "servicos", "missing");
+    expect(url).toContain("coordenadas=0");
+    expect(url).toContain("camada=servicos");
+    expect(url).toContain("q=CRAS");
+    expect(url).not.toMatch(/lat=|lng=|origem=/);
+    expect(cityMapLayerUrl("CRAS", "servicos", "all")).not.toContain("coordenadas");
+    expect(cityMapLayerUrl("CRAS", "servicos", true)).toContain("coordenadas=1");
+  });
   it("keeps coordinate availability as a shareable public filter without adding GPS", () => {
     const filtered = cityMapLayerUrl("CRAS", "servicos", true);
     expect(filtered).toContain("coordenadas=1");
