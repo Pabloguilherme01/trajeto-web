@@ -36,6 +36,48 @@ describe("armazenamento de postos", () => {
 describe("cache snapshot parsing without stale results", () => {
   const key = "trajeto-mobile-station-cache";
 
+  it("prepares lookup keys and valid station lists once per serialized snapshot", () => {
+    const entries = Array.from({ length: 5 }, (_, index) => ({
+      query: `Bairro ${index}`, savedAt: new Date().toISOString(),
+      stations: Array.from({ length: 30 }, (_, position) => ({
+        ...station, placeId: `${index}-${position}`,
+      })),
+    }));
+    localStorage.setItem(key, JSON.stringify(entries));
+    const normalize = vi.spyOn(String.prototype, "toLocaleLowerCase");
+    const parseDate = vi.spyOn(Date, "parse");
+    const first = getCachedStations("bairro 4")!;
+    expect(first.stations).toHaveLength(30);
+    first.stations.pop();
+    const entryNormalizations = () => normalize.mock.contexts.filter(value =>
+      String(value).startsWith("Bairro "),
+    ).length;
+    const initialNormalizations = entryNormalizations();
+    const initialDates = parseDate.mock.calls.length;
+    for (let read = 0; read < 20; read++) {
+      expect(getCachedStations("bairro 4")?.stations).toHaveLength(30);
+      expect(getCachedStations("bairro 0")?.stations[0].placeId).toBe("0-0");
+    }
+    expect(entryNormalizations()).toBe(initialNormalizations);
+    expect(parseDate.mock.calls.length).toBe(initialDates);
+    localStorage.setItem(key, JSON.stringify([{
+      ...entries[4], stations: [{ ...station, placeId: "fresh" }],
+    }]));
+    expect(getCachedStations("bairro 4")?.stations[0].placeId).toBe("fresh");
+    expect(getCachedStations("bairro 0")).toBeNull();
+  });
+
+  it("keeps the first duplicate lookup and rounded location scopes independent", () => {
+    localStorage.setItem(key, JSON.stringify([
+      { query: " Postos ", savedAt: new Date().toISOString(), stations: [station] },
+      { query: "POSTOS", savedAt: new Date().toISOString(), stations: [{ ...station, placeId: "duplicate" }] },
+      { query: "postos", lat: -15.70001, lng: -48.20001, savedAt: new Date().toISOString(), stations: [{ ...station, placeId: "located" }] },
+    ]));
+    expect(getCachedStations("POSTOS")?.stations[0].placeId).toBe("test");
+    expect(getCachedStations("postos", -15.7, -48.2)?.stations[0].placeId).toBe("located");
+    expect(getCachedStations("postos", -15.8, -48.3)).toBeNull();
+  });
+
   it("parses once per unchanged snapshot and returns independent arrays", () => {
     cacheStations("postos", [station]);
     const raw = localStorage.getItem(key);
