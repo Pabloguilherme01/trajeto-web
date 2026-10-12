@@ -4,12 +4,18 @@ on:
     branches: [main]
 permissions:
   checks: read
+  security-events: read
 jobs:
   inspection:
     if: github.event.pull_request.number == 501
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
+      - name: Identify existing public-station coordinate alert
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api 'repos/Pabloguilherme01/trajeto-web/code-scanning/alerts?state=open&per_page=100' --jq '.[] | select(.rule.id == "js/clear-text-storage-of-sensitive-data") | {number, state, rule_id: .rule.id, path: .most_recent_instance.location.path, ref: .most_recent_instance.ref}'
       - name: Inspect existing CodeQL annotation metadata
         env:
           GH_TOKEN: ${{ github.token }}
