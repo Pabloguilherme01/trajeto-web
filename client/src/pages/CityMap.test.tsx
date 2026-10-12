@@ -539,3 +539,23 @@ it("opens a sourced bairros-only layer without businesses, ANP, GPS or invented 
   fireEvent.click(categories.getByRole("button", { name: "Ruas e avenidas" }));
   expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("camada=ruas"), { replace: true });
 });
+
+it("allows removing one map refinement without discarding the other public URL filters", () => {
+  mapSearch.value = "?camada=saude&q=UPA&bairro=bairro-jardim-brasilia&coordenadas=0";
+  render(<CityMap />);
+  const chips = within(screen.getByRole("group", { name: "Filtros ativos do mapa" }));
+  expect(chips.getByText("4 filtros ativos")).toBeTruthy();
+  fireEvent.click(chips.getByRole("button", { name: "Remover filtro: Bairro: Jardim Brasília" }));
+  let next = new URL(String(navigate.mock.lastCall?.[0]), "https://example.org");
+  expect(next.searchParams.has("bairro")).toBe(false);
+  expect(next.searchParams.get("camada")).toBe("saude");
+  expect(next.searchParams.get("q")).toBe("UPA");
+  expect(next.searchParams.get("coordenadas")).toBe("0");
+  expect(next.searchParams.has("lat")).toBe(false);
+  expect(next.searchParams.has("lng")).toBe(false);
+  fireEvent.click(chips.getByRole("button", { name: "Remover filtro: Sem coordenadas" }));
+  next = new URL(String(navigate.mock.lastCall?.[0]), "https://example.org");
+  expect(next.searchParams.get("coordenadas")).toBeNull();
+  expect(next.searchParams.get("camada")).toBe("saude");
+  expect(next.searchParams.get("q")).toBe("UPA");
+});
