@@ -8,6 +8,7 @@ type Props = {
   selected: boolean;
   onSelect: () => void;
   ariaLabel?: string;
+  availability?: string;
   layout: "rail" | "grid";
 };
 
@@ -19,6 +20,7 @@ export default function PremiumFilterModeOption({
   selected,
   onSelect,
   ariaLabel,
+  availability,
   layout,
 }: Props) {
   const inRail = layout === "rail";
@@ -53,6 +55,11 @@ export default function PremiumFilterModeOption({
         <span className="mt-1 block break-words text-[11px] leading-tight text-muted-foreground">
           {detail}
         </span>
+        {availability !== undefined && (
+          <span className="mt-1.5 inline-flex rounded-full bg-muted/50 px-2 py-0.5 text-[11px] font-bold leading-tight tabular-nums text-foreground">
+            {availability}
+          </span>
+        )}
       </span>
     </button>
   );

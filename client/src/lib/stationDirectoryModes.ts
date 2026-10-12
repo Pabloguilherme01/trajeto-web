@@ -1,7 +1,26 @@
-import type { StationDirectoryFacetFilters } from "./stationDirectoryFacets";
+import type { StationDirectoryFacet, StationDirectoryFacetFilters } from "./stationDirectoryFacets";
 
 export type StationDirectoryPreset = "all" | "anp" | "route" | "address";
 export type StationDirectoryMode = StationDirectoryPreset | "custom";
+export type StationDirectoryModeCounts = Record<StationDirectoryPreset, number>;
+
+/** Count the outcome of each preset in one pass over the existing text/fuel matches. */
+export function countStationDirectoryModes<T>(
+  searched: readonly T[],
+  facets: ReadonlyMap<T, StationDirectoryFacet>,
+  fuelMatches: ReadonlySet<T> | null,
+): StationDirectoryModeCounts {
+  const counts = { all: 0, anp: 0, route: 0, address: 0 };
+  for (const card of searched) {
+    if (fuelMatches && !fuelMatches.has(card)) continue;
+    const facet = facets.get(card);
+    counts.all++;
+    if (facet?.hasAnp) counts.anp++;
+    if (facet?.hasCoordinates) counts.route++;
+    if (facet?.hasAddress) counts.address++;
+  }
+  return counts;
+}
 
 /**
  * Quick modes affect only evidence/coverage facets. Text, fuel and ordering

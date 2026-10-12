@@ -4,6 +4,42 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: mode previews match selection and keep search at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("postos?q=postos", { waitUntil: "domcontentloaded" });
+  const rail = page.getByRole("group", { name: "Modos de filtro dos postos" });
+  const anp = rail.getByRole("button", { name: /^Dados ANP\b/ });
+  const all = rail.getByRole("button", { name: /^Todos\b/ });
+  const anpCount = anp.getByText(/^\d+ postos?$/);
+  await expect(anpCount).toBeVisible();
+  await anp.click();
+  await expect(anp).toHaveAttribute("aria-pressed", "true");
+  const panel = rail.locator("..");
+  // The ANP snapshot may arrive during the interaction. Compare current
+  // badge and header values rather than freezing a pre-hydration count.
+  const sameCount = async () =>
+    await anpCount.innerText() === await panel.locator('[aria-live="off"]').innerText();
+  await expect.poll(sameCount).toBe(true);
+  const fuel = page.getByRole("combobox", { name: "Filtrar por combustível" });
+  await fuel.selectOption("gasolina-comum");
+  await expect.poll(sameCount).toBe(true);
+  const search = page.getByRole("searchbox", { name: "Buscar no diretório de postos" });
+  await search.fill("zzzx-sem-postos-2026");
+  await expect(search).toHaveValue("zzzx-sem-postos-2026");
+  await expect(all.getByText("0 postos", { exact: true })).toBeVisible();
+  await expect(anp.getByText("0 postos", { exact: true })).toBeVisible();
+  await all.click();
+  await expect(all).toHaveAttribute("aria-pressed", "true");
+  await expect(search).toHaveValue("zzzx-sem-postos-2026");
+  await expect(fuel).toHaveValue("gasolina-comum");
+  await search.fill("");
+  await expect(all.getByText(/^[1-9][0-9]* postos?$/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: station Premium modes remain touchable at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];
@@ -31,9 +67,9 @@ test("Android/iOS: station Premium modes remain touchable at 320px", async ({ pa
   await directorySearch.fill("zzzx-nenhum-posto-2026");
   await expect(directorySearch).toHaveValue("zzzx-nenhum-posto-2026");
   const modesPanel = rail.locator("..");
-  await expect(modesPanel.getByText("0 postos", { exact: true })).toBeVisible();
+  await expect(modesPanel.locator('[aria-live="off"]')).toHaveText("0 postos");
   await directorySearch.fill("");
-  await expect(modesPanel.getByText(/^[1-9][0-9]* postos$/)).toBeVisible();
+  await expect(modesPanel.locator('[aria-live="off"]')).toHaveText(/^[1-9][0-9]* postos$/);
 
   // Native cards stay immediately readable after fast filter transitions,
   // without JS-controlled entrance animations on low-end mobile devices.

@@ -7,6 +7,25 @@ import StationDirectoryFilterModes from "./StationDirectoryFilterModes";
 afterEach(cleanup);
 
 describe("premium station filter modes", () => {
+  it("previews zero and positive availability while keeping all modes selectable", () => {
+    const onSelect = vi.fn();
+    const { rerender } = render(<StationDirectoryFilterModes mode="all" onSelect={onSelect}
+      modeCounts={{ all: 41, anp: 33, route: 0, address: 1 }} />);
+    const anp = screen.getByRole("button", { name: /^Dados ANP/ });
+    const route = screen.getByRole("button", { name: /^Com rota/ });
+    expect(within(anp).getByText("33 postos")).toBeTruthy();
+    expect(within(route).getByText("0 postos")).toBeTruthy();
+    expect(within(screen.getByRole("button", { name: /^Endereço/ })).getByText("1 posto")).toBeTruthy();
+    expect(route.hasAttribute("disabled")).toBe(false);
+    fireEvent.click(route);
+    expect(onSelect).toHaveBeenCalledWith("route");
+    rerender(<StationDirectoryFilterModes mode="all" onSelect={onSelect} updating
+      modeCounts={{ all: 41, anp: 33, route: 0, address: 1 }} />);
+    expect(screen.queryByText("33 postos")).toBeNull();
+    expect(within(anp).getByText("Atualizando")).toBeTruthy();
+    expect(screen.getByText(/bairro e bandeira/)).toBeTruthy();
+  });
+
   it("exposes four one-tap accessible mobile modes with an active pressed state", () => {
     const onSelect = vi.fn();
     render(<StationDirectoryFilterModes mode="all" onSelect={onSelect} />);

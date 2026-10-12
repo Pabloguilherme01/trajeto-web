@@ -72,9 +72,20 @@ describe("shared station facet criteria", () => {
     // Default view should not walk the indexed results a second time.
     expect(matching).toContain('neighborhoodFilter === "all" && brandFilter === "all"');
     expect(matching).toContain("!addressOnly && !verifiedOnly && !mappedOnly && !directoryFuelMatches");
-    expect(matching).toContain("return textMatches;");
-    expect(matching.indexOf("return textMatches;"))
-      .toBeLessThan(matching.indexOf("textMatches.filter(item => {"));
+    expect(matching).toContain("return directoryCardsSearched;");
+    expect(matching.indexOf("return directoryCardsSearched;"))
+      .toBeLessThan(matching.indexOf("directoryCardsSearched.filter(item => {"));
+    // Search is now shared by previews and detailed facets. Neither a mode
+    // switch nor a sort/geolocation change should rescan the text index.
+    const searchStart = source.indexOf("const directoryCardsSearched = useMemo(");
+    const countsStart = source.indexOf("const directoryModeCounts = useMemo(", searchStart);
+    expect(searchStart).toBeGreaterThan(-1);
+    expect(countsStart).toBeGreaterThan(searchStart);
+    expect(countsStart).toBeLessThan(matchStart);
+    const searched = source.slice(searchStart, countsStart);
+    for (const unrelated of ["directorySort", "userCoords", "neighborhoodFilter", "brandFilter", "mappedOnly"]) {
+      expect(searched).not.toContain(unrelated);
+    }
     expect(matching).not.toContain("sortStationDirectoryRows(");
     // The filter memo must not depend on sort mode, geolocation or prices
     // directly. Fuel matching already encapsulates any snapshot changes.
