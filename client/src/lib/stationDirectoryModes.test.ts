@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { criteriaForStationDirectoryPreset, getStationDirectoryMode } from "./stationDirectoryModes";
+import { countStationDirectoryModes, criteriaForStationDirectoryPreset, getStationDirectoryMode } from "./stationDirectoryModes";
+import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "./stationDirectoryFacets";
 import type { StationDirectoryFacetFilters } from "./stationDirectoryFacets";
 
 const initial: StationDirectoryFacetFilters = {
@@ -9,6 +10,27 @@ const initial: StationDirectoryFacetFilters = {
 const presets = ["all", "anp", "route", "address"] as const;
 
 describe("station directory quick modes", () => {
+  it("previews every preset against text/fuel matches using the existing facet rules", () => {
+    const cards = [
+      { anp: { bairro: "Centro", endereco: "BR-070", latitude: -15.7, longitude: -48.2 } },
+      { local: { address: "Rua 1", neighborhood: "Jardim", brand: "Shell" } },
+      { local: { neighborhood: "Centro" } },
+    ];
+    const facets = buildStationDirectoryFacets(cards).byCard;
+    for (const searched of [cards, cards.slice(0, 2), []]) {
+      for (const fuel of [null, new Set([cards[0]]), new Set<typeof cards[number]>()]) {
+        const counts = countStationDirectoryModes(searched, facets, fuel);
+        for (const mode of presets) {
+          const expected = searched.filter(card => (!fuel || fuel.has(card)) &&
+            matchesStationDirectoryFacet(facets.get(card)!, criteriaForStationDirectoryPreset(mode)));
+          expect(counts[mode]).toBe(expected.length);
+        }
+      }
+    }
+    expect(countStationDirectoryModes(cards, facets, null)).toEqual({ all: 3, anp: 1, route: 1, address: 2 });
+    expect(countStationDirectoryModes(cards.slice(1), facets, null)).toEqual({ all: 2, anp: 0, route: 0, address: 1 });
+  });
+
   it("gives every preset its own exclusive criteria and a round-trip active mode", () => {
     for (const preset of presets) {
       const filters = criteriaForStationDirectoryPreset(preset);

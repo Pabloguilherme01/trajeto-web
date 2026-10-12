@@ -10,7 +10,7 @@ import { prepareVisibleStationDirectoryCards } from "@/lib/stationDirectoryVisib
 import { mergeStationDirectoryRows } from "@/lib/stationDirectoryMerge";
 import { deduplicateStationMapItems } from "@/lib/stationMapDedupe";
 import { buildStationDirectoryFacets, matchesStationDirectoryFacet } from "@/lib/stationDirectoryFacets";
-import { criteriaForStationDirectoryPreset, getStationDirectoryMode, type StationDirectoryPreset } from "@/lib/stationDirectoryModes";
+import { countStationDirectoryModes, criteriaForStationDirectoryPreset, getStationDirectoryMode, type StationDirectoryPreset } from "@/lib/stationDirectoryModes";
 import StationDirectoryFilterModes from "@/components/StationDirectoryFilterModes";
 import { createStationDirectoryFuelMatcher } from "@/lib/stationDirectoryFuelMatcher";
 import { distanceKm } from "@/lib/offlineRouteMath";
@@ -202,6 +202,15 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
     ],
   ), [directoryCards]);
 
+  // A mode switch reuses text matches; previews never build a second index.
+  const directoryCardsSearched = useMemo(() => directoryTextSearch(
+    deferredDirectorySearch,
+    staticRuntime && !broadAguasLindasQuery ? query : "",
+  ), [directoryTextSearch, deferredDirectorySearch, query, staticRuntime, broadAguasLindasQuery]);
+  const directoryModeCounts = useMemo(() => countStationDirectoryModes(
+    directoryCardsSearched, directoryFacets.byCard, directoryFuelMatches,
+  ), [directoryCardsSearched, directoryFacets, directoryFuelMatches]);
+
   // The searchable/filterable set depends on text, facets and fuel. Sorting
   // it must not rescan every entry when only the ordering or origin changes.
   const directoryCardsMatched = useMemo(() => {
@@ -212,22 +221,18 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
       anpOnly: verifiedOnly,
       coordinatesOnly: mappedOnly,
     };
-    const textMatches = directoryTextSearch(
-      deferredDirectorySearch,
-      staticRuntime && !broadAguasLindasQuery ? query : "",
-    );
     // No advanced facet or fuel filter: the indexed search already returned
     // the complete matching set. Avoid a redundant map lookup per card.
     if (neighborhoodFilter === "all" && brandFilter === "all" &&
         !addressOnly && !verifiedOnly && !mappedOnly && !directoryFuelMatches) {
-      return textMatches;
+      return directoryCardsSearched;
     }
-    return textMatches.filter(item => {
+    return directoryCardsSearched.filter(item => {
       const facet = directoryFacets.byCard.get(item);
       return Boolean(facet && matchesStationDirectoryFacet(facet, facetFilters) &&
         (!directoryFuelMatches || directoryFuelMatches.has(item)));
     });
-  }, [directoryTextSearch, deferredDirectorySearch, query, staticRuntime, broadAguasLindasQuery,
+  }, [directoryCardsSearched,
     directoryFacets, directoryFuelMatches, neighborhoodFilter, brandFilter,
     addressOnly, verifiedOnly, mappedOnly]);
 
@@ -911,6 +916,7 @@ export default function Stations({ mapFirst = false }: { mapFirst?: boolean }) {
               mode={directoryMode}
               onSelect={applyDirectoryPreset}
               resultCount={directoryCardsFiltered.length}
+              modeCounts={directoryModeCounts}
               updating={directorySearchUpdating}
             />
             <div className="mt-4 flex flex-wrap items-end justify-between gap-2">

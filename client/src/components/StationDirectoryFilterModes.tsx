@@ -2,7 +2,7 @@ import React from "react";
 import { useFilterRail } from "@/hooks/useFilterRail";
 import PremiumFilterModeOption from "@/components/PremiumFilterModeOption";
 import { BadgeCheck, Layers3, MapPin, Route } from "lucide-react";
-import type { StationDirectoryMode, StationDirectoryPreset } from "@/lib/stationDirectoryModes";
+import type { StationDirectoryMode, StationDirectoryPreset, StationDirectoryModeCounts } from "@/lib/stationDirectoryModes";
 
 const modes = [
   { id: "all", title: "Todos", detail: "Visão completa", icon: Layers3 },
@@ -15,11 +15,13 @@ export default function StationDirectoryFilterModes({
   mode,
   onSelect,
   resultCount,
+  modeCounts,
   updating = false,
 }: {
   mode: StationDirectoryMode;
   onSelect: (mode: StationDirectoryPreset) => void;
   resultCount?: number;
+  modeCounts?: StationDirectoryModeCounts;
   updating?: boolean;
 }) {
   const { railRef, onFocusCapture } = useFilterRail(mode, modes);
@@ -56,6 +58,10 @@ export default function StationDirectoryFilterModes({
             layout="rail"
             label={option.title}
             detail={option.detail}
+            availability={modeCounts
+              ? updating ? "Atualizando"
+                : `${modeCounts[option.id]} ${modeCounts[option.id] === 1 ? "posto" : "postos"}`
+              : undefined}
             icon={option.icon}
             selected={mode === option.id}
             onSelect={() => onSelect(option.id)}
@@ -63,7 +69,8 @@ export default function StationDirectoryFilterModes({
         ))}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Combine um modo com sua busca, combustível e ordem. Para cruzar vários critérios, use os filtros detalhados abaixo.
+        As quantidades consideram sua busca e combustível. Trocar o modo redefine os filtros detalhados, incluindo bairro e bandeira.
+        Para combinar critérios, use os filtros detalhados abaixo.
       </p>
     </div>
   );
