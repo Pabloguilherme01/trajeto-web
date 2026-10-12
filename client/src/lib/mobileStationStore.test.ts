@@ -5,6 +5,25 @@ const station: MobileStation = { placeId: "test", name: "Posto", address: "Água
 beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
 describe("armazenamento de postos", () => {
+  it("never persists the device search centre, keeping location-scoped results in memory", () => {
+    cacheStations("private-nearby", [station], -15.70001, -48.20001);
+    expect(localStorage.getItem("trajeto-mobile-station-cache")).toBeNull();
+    expect(getCachedStations("private-nearby", -15.7, -48.2)?.stations).toEqual([station]);
+    expect(getCachedStations("private-nearby", -15.8, -48.3)).toBeNull();
+  });
+  it("purges legacy persisted search origins without losing generic offline records", () => {
+    const savedAt = new Date().toISOString();
+    localStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([
+      { query: "legacy-private", lat: -15.7, lng: -48.2, savedAt, stations: [station] },
+      { query: "generic-public", savedAt, stations: [station] },
+    ]));
+    expect(getCachedStations("legacy-private", -15.7, -48.2)).toBeNull();
+    expect(getCachedStations("generic-public")?.stations).toEqual([station]);
+    const remaining = JSON.parse(localStorage.getItem("trajeto-mobile-station-cache") || "[]");
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]).not.toHaveProperty("lat");
+    expect(remaining[0]).not.toHaveProperty("lng");
+  });
   it("keeps valid cache usable alongside malformed records", () => {
     localStorage.setItem("trajeto-mobile-station-cache", JSON.stringify([{ query: 10 }, { query: "postos", lat: "bad", lng: 2, savedAt: new Date().toISOString(), stations: [] }]));
     expect(getCachedStations("postos", -15.7, -48.2)).toBeNull();
@@ -71,9 +90,9 @@ describe("cache snapshot parsing without stale results", () => {
     localStorage.setItem(key, JSON.stringify([
       { query: " Postos ", savedAt: new Date().toISOString(), stations: [station] },
       { query: "POSTOS", savedAt: new Date().toISOString(), stations: [{ ...station, placeId: "duplicate" }] },
-      { query: "postos", lat: -15.70001, lng: -48.20001, savedAt: new Date().toISOString(), stations: [{ ...station, placeId: "located" }] },
     ]));
     expect(getCachedStations("POSTOS")?.stations[0].placeId).toBe("test");
+    cacheStations("postos", [{ ...station, placeId: "located" }], -15.70001, -48.20001);
     expect(getCachedStations("postos", -15.7, -48.2)?.stations[0].placeId).toBe("located");
     expect(getCachedStations("postos", -15.8, -48.3)).toBeNull();
   });
