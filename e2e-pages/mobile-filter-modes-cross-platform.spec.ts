@@ -4,6 +4,30 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: sourced bairros stay separate from streets and accessible in planner at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("mapa?camada=bairros&q=Jardim+Brasilia", { waitUntil: "domcontentloaded" });
+  const layers = page.getByRole("group", { name: "Categorias do mapa" });
+  const selected = layers.getByRole("button", { name: "Bairros e setores" });
+  await expect(selected).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/não há ponto de chegada, quadra ou entrada/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Usar nome como referência no planejador" }).first()).toBeVisible();
+  await page.reload();
+  await expect(selected).toHaveAttribute("aria-pressed", "true");
+  await layers.getByRole("button", { name: "Ruas e avenidas" }).click();
+  await expect(page).toHaveURL(/camada=ruas/);
+  await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
+  const areaMode = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: "Bairros e setores" });
+  await areaMode.click();
+  await expect(areaMode).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" }).fill("Jardim Brasília");
+  await expect(page.getByRole("region", { name: "Lista de destinos disponíveis" }).getByText("Jardim Brasília")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: map can show unpositioned records, retain refinements and safely clear them at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];
