@@ -28,6 +28,34 @@ afterEach(() => {
   mapSearch.value = "";
   catalogEnabled.values = [];
 });
+it("separates unnamed CNPJ records from the default map and its route actions", () => {
+  catalog.items = [{ id: "business-12345678000190", name: "CNPJ 12.345.678/0001-90", category: "compras", detail: "Cadastro sem nome", destination: "Rua 1", sourceLabel: "Arquivo", lat: -15.7, lng: -48.2,
+    business: { cnpj: "12.345.678/0001-90", legalName: "12345678000190", tradeName: "", sector: "Comércio", cnae: "", opened: "", statusDate: "", size: "", mei: "", simples: "", nature: "" } }];
+  mapSearch.value = "?q=12.345.678/0001-90";
+  render(<CityMap />);
+  expect(screen.queryByText("CNPJ 12.345.678/0001-90", { exact: true })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Consultar CNPJ" }));
+  expect(screen.getByText("CNPJ 12.345.678/0001-90", { exact: true })).toBeTruthy();
+  expect(screen.queryByRole("link", { name: "Ir até aqui" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Planejar ponto confirmado" })).toBeNull();
+  expect(screen.queryByText(/Coordenadas:/)).toBeNull();
+  expect(screen.getByRole("button", { name: "Copiar CNPJ 12.345.678/0001-90" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Só registros sem nome" }));
+  expect(String(navigate.mock.calls.at(-1)?.[0])).toContain("empresas=sem-nome");
+});
+it("returns to the public map when a company-only view switches to a non-company layer", () => {
+  render(<CityMap />);
+  fireEvent.click(screen.getByRole("button", { name: "Empresas com nome" }));
+  fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Postos" }));
+  expect(screen.getByRole("button", { name: "Mapa completo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Posto Ponteio", { exact: true })).toBeTruthy();
+});
+it("normalizes incompatible company deep links back to the public layer", () => {
+  mapSearch.value = "?camada=combustivel&empresas=nome";
+  render(<CityMap />);
+  expect(screen.getByRole("button", { name: "Mapa completo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Posto Ponteio", { exact: true })).toBeTruthy();
+});
 it("opens the general map without loading businesses until an explicit intent", () => {
   render(<CityMap />);
   expect(catalogEnabled.values).not.toContain(true);

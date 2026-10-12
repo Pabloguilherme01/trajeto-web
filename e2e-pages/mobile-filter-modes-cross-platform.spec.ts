@@ -4,6 +4,36 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: named companies and CNPJ consultation preserve query and return to the map at 320px", async ({ page, context }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("mapa?q=42.115.689/0001-40&empresas=nome", { waitUntil: "domcontentloaded" });
+  const identity = page.getByRole("group", { name: "Identificação das empresas" });
+  const amag = page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) });
+  await expect(identity.getByRole("button", { name: "Empresas com nome", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(amag).toBeVisible({ timeout: 60000 });
+  await page.reload();
+  await expect(identity.getByRole("button", { name: "Empresas com nome", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(amag).toBeVisible({ timeout: 60000 });
+  await context.setOffline(true);
+  await identity.getByRole("button", { name: "Consultar CNPJ", exact: true }).click();
+  await expect(page).toHaveURL(/empresas=cnpj/);
+  await expect(amag).toBeVisible();
+  await expect(page.getByRole("region", { name: "Mapa da cidade", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Só registros sem nome", exact: true }).click();
+  await expect(page).toHaveURL(/empresas=sem-nome/);
+  await expect(amag).toHaveCount(0);
+  await identity.getByRole("button", { name: "Empresas com nome", exact: true }).click();
+  await expect(amag).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("42.115.689/0001-40");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  await context.setOffline(false);
+  await page.goto("mapa?camada=ruas&empresas=cnpj&q=Avenida%20Bras%C3%ADlia", { waitUntil: "domcontentloaded" });
+  await page.reload();
+  await expect(identity.getByRole("button", { name: "Mapa completo", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("article").filter({ has: page.getByText("Avenida Brasília", { exact: true }) }).first()).toBeVisible();
+});
+
 test("Android/iOS: sourced bairros stay separate from streets and accessible in planner at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];

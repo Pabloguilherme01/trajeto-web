@@ -42,6 +42,7 @@ import { localDataEvent } from "@/lib/localData";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { searchBusinesses } from "@/lib/businessSearch";
+import { hasBusinessName } from "@/lib/businessCatalogState";
 import { getUniversalSearchResults } from "@/lib/universalSearch";
 
 const quickActions = [
@@ -529,7 +530,7 @@ export default function SearchPage() {
                 {companies.loading && <p role="status" className="mt-2 text-sm">Carregando empresas sem interromper a busca…</p>}
                 {companies.error && <button type="button" onClick={companies.retry} className="mt-2 min-h-11 rounded-xl border border-border px-3 text-sm">Tentar carregar empresas novamente</button>}
                 <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
-                  {businessResults.slice(0, resultLimit).map(item => <ResultCard key={item.id} icon={item.category === "alimentacao" ? Utensils : Store} title={item.name} detail={item.business?.sector + " · " + (item.address ?? "Endereço não informado")} source={"CNPJ " + item.business?.cnpj} onClick={() => setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(item.business?.cnpj ?? item.name))} />)}
+                  {businessResults.slice(0, resultLimit).map(item => <ResultCard key={item.id} icon={item.category === "alimentacao" ? Utensils : Store} title={item.name} detail={item.business?.sector + " · " + (item.address ?? "Endereço não informado")} source={"CNPJ " + item.business?.cnpj} onClick={() => setLocation(appUrl("/mapa") + "?q=" + encodeURIComponent(item.business?.cnpj ?? item.name) + (hasBusinessName(item.name) ? "" : "&empresas=cnpj"))} />)}
                 </div>
                 {!companies.loading && !companies.error && !businessResults.length && <p className="mt-2 text-sm text-muted-foreground">Nenhuma empresa correspondente no arquivo. Os demais resultados continuam disponíveis.</p>}
               </section>

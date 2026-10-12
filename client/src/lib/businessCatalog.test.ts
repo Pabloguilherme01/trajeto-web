@@ -28,6 +28,25 @@ it("rejects malformed rows and coordinates instead of inventing locations", () =
   expect(normalizeBusinessRows({ schema: 2, strings: [], rows: [] })).toEqual([]);
 });
 
+it.each([["12.345.678/0001-90", "12345678000190"], ["", ""]])("keeps only-CNPJ records consultable without turning them into map points (%s)", (name, legalName) => {
+  const strings = ["12.345.678/0001-90", name, legalName, "", "Comércio", "47", "Loja", "Rua 1", "Quadra", "2020-01-01", "2026-10-02", "ME", "Não", "Sim", "Empresário"];
+  const items = normalizeBusinessRows({ schema: 1, strings, rows: [[0,1,2,3,4,5,6,7,-15.7,-48.2,8,9,10,11,12,13,14]] });
+  expect(items).toHaveLength(1);
+  const [item] = items;
+  expect(item.business?.cnpj).toBe(strings[0]);
+  expect(item.name).toBe("CNPJ " + strings[0]);
+  expect(item.lat).toBeUndefined();
+  expect(item.lng).toBeUndefined();
+});
+
+it("puts a readable legal name before the registry prefix without changing the original legal name", () => {
+  const strings = ["12.345.678/0001-90", "12.345.678 LOJA TESTE", "12.345.678 LOJA TESTE", "", "Comércio", "47", "Loja", "Rua 1", "Quadra", "2020-01-01", "2026-10-02", "ME", "Não", "Sim", "Empresário"];
+  const [item] = normalizeBusinessRows({ schema: 1, strings, rows: [[0,1,2,3,4,5,6,7,-15.7,-48.2,8,9,10,11,12,13,14]] });
+  expect(item.name).toBe("LOJA TESTE");
+  expect(item.business?.legalName).toBe("12.345.678 LOJA TESTE");
+  expect(item.lat).toBe(-15.7);
+});
+
 it("routes a company origin by CNPJ without rounding its public catalog coordinates", async () => {
   const route = await calculateOfflineRoute("42.115.689/0001-40", "HEAL", "driving");
   expect(route.origin).toEqual({ lat: -15.782635, lng: -48.294036 });

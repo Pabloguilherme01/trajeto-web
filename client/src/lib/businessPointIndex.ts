@@ -61,6 +61,6 @@ export function resolveBusinessPointFromCatalog(items: CityAtlasItem[], value: s
   const byName = hasBusinessName(query) ? nameIndex(items).get(query) : undefined;
   if (byCnpj === null || byName === null || (byCnpj && byName && byCnpj !== byName)) return null;
   const item = byCnpj ?? byName;
-  if (!item || typeof item.lat !== "number" || typeof item.lng !== "number") return null;
+  if (!item || !hasBusinessName(item.name) || typeof item.lat !== "number" || typeof item.lng !== "number") return null;
   return { lat: item.lat, lng: item.lng };
 }
