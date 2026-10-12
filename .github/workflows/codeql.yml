@@ -67,3 +67,49 @@ jobs:
             }
           }
           NODE
+
+  diagnose_main_baseline:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 500
+    name: Compare CodeQL baseline without publishing results
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout baseline main
+        uses: actions/checkout@v7
+        with:
+          ref: 592a250f507027861879f5986efe3a4b912ed7a5
+      - name: Initialize CodeQL baseline
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - name: Autobuild baseline
+        uses: github/codeql-action/autobuild@v4
+      - name: Analyze baseline without upload
+        uses: github/codeql-action/analyze@v4
+        with:
+          upload: never
+          output: baseline-results
+      - name: Print baseline high finding identifiers
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const dir = path.resolve(process.env.GITHUB_WORKSPACE, 'baseline-results');
+          if (!fs.existsSync(dir)) { console.log('Baseline SARIF missing'); process.exitCode = 1; }
+          else for (const file of fs.readdirSync(dir).filter(p => p.endsWith('.sarif'))) {
+            const data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+            for (const run of data.runs || []) {
+              const rules = [...(run.tool?.driver?.rules || []), ...(run.tool?.extensions || []).flatMap(e => e.rules || [])];
+              const byId = new Map(rules.map(r => [r.id, r]));
+              console.log('BASELINE SARIF count', (run.results || []).length);
+              for (const result of run.results || []) {
+                const rule = byId.get(result.ruleId) || rules[result.ruleIndex] || {};
+                const score = Number(rule.properties?.['security-severity'] ?? NaN);
+                if (!Number.isFinite(score) || score < 7) continue;
+                const loc = result.locations?.[0]?.physicalLocation || {};
+                console.log('BASELINE high:', JSON.stringify({rule: result.ruleId, score, file: loc.artifactLocation?.uri, line: loc.region?.startLine}));
+              }
+            }
+          }
+          NODE
