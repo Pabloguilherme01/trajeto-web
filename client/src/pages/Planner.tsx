@@ -910,7 +910,8 @@ export default function Planner() {
                         </button>
                       ))}
                       {!destinationSearchUpdating && availableDestinations.length === 0 && <div className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">
-                        <p>Nenhum destino corresponde aos filtros. Tente outra categoria ou região.</p>
+                        <p>Nenhum destino corresponde ao filtro.</p>
+                        <p className="mt-1">Tente outra categoria ou região.</p>
                         {destinationArea && <button type="button" onClick={() => setDestinationArea("")}
                           className="mt-2 min-h-11 rounded-xl border border-border/25 px-3 font-bold text-primary">Ver todas as regiões</button>}
                       </div>}
