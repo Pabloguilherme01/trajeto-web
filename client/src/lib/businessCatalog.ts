@@ -1,6 +1,6 @@
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 
-import { setLoadedBusinessCatalog, hasBusinessName } from "./businessCatalogState";
+import { setLoadedBusinessCatalog, readableBusinessName } from "./businessCatalogState";
 import { loadCatalogChunks } from "./catalogChunks";
 import { resolveBusinessPointFromCatalog } from "./businessPointIndex";
 
@@ -50,12 +50,10 @@ export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
         typeof nature !== "string" ||
         !/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(cnpj) || !name.trim()) continue;
 
-    const hasPoint = typeof lat === "number" && Number.isFinite(lat) && lat > -16.1 && lat < -15.3 &&
+    const identifiedName = readableBusinessName(tradeName) || readableBusinessName(name) || readableBusinessName(legalName);
+    const hasPoint = Boolean(identifiedName) && typeof lat === "number" && Number.isFinite(lat) && lat > -16.1 && lat < -15.3 &&
       typeof lng === "number" && Number.isFinite(lng) && lng > -48.7 && lng < -47.9;
-    const displayName = hasBusinessName(tradeName) ? tradeName.trim()
-      : hasBusinessName(name) ? name.trim()
-      : hasBusinessName(legalName) ? legalName.trim()
-      : "Empresa sem nome informado";
+    const displayName = identifiedName || "CNPJ " + cnpj;
     result.push({
       id: "business-" + cnpj.replace(/\D/g, ""), name: displayName,
       category: categoryForSector(sector), address, destination: address,

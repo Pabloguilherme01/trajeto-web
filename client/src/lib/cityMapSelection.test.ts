@@ -1,6 +1,12 @@
 import { expect, it } from "vitest";
 import { selectCityMapItems } from "./cityMapSelection";
 
+it("excludes numeric-only CNPJ and unnamed company placeholders from markers", () => {
+  const named = { id: "business-named", name: "Loja Teste", lat: -15.7, lng: -48.2 };
+  const hidden = ["12.345.678/0001-90", "CNPJ 12.345.678/0001-90", "Empresa sem nome informado"].map((name, i) => ({ ...named, id: "business-" + i, name }));
+  expect(selectCityMapItems([[named, ...hidden]]).items).toEqual([named]);
+});
+
 it("samples the full catalog before creating markers and retains public landmarks", () => {
   const landmark = { id: "upa", name: "UPA", lat: -15.77, lng: -48.28 };
   const companies = Array.from({ length: 21486 }, (_, index) => ({ id: "business-" + index, name: "Empresa " + index, lat: -15.77, lng: -48.28 }));

@@ -29,6 +29,11 @@ it("resolves formatted and numeric CNPJ repeatedly without changing the catalog"
   expect(items).toEqual([record]);
 });
 
+it("does not resolve an unnamed legacy business as a planner endpoint", () => {
+  const item = company("12.345.678/0001-90", "CNPJ 12.345.678/0001-90", -15.7, -48.2);
+  expect(resolveBusinessPointFromCatalog([item], item.business!.cnpj)).toBeNull();
+});
+
 it("does not convert shared names, addresses or records without coordinates into points", () => {
   const items = [
     company("12.345.678/0001-90", "Mercado Central", -15.7, -48.2),

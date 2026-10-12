@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
+  it("shares identity-only and CNPJ registry filters while preserving public refinements", () => {
+    const url = new URL(cityMapLayerUrl("Loja", "compras", "all", "bairro-jardim-brasilia", "unnamed"), "https://example.test");
+    expect(url.searchParams.get("empresas")).toBe("sem-nome");
+    expect(url.searchParams.get("q")).toBe("Loja");
+    expect(url.searchParams.get("camada")).toBe("compras");
+    expect(url.searchParams.get("bairro")).toBe("bairro-jardim-brasilia");
+    expect(cityMapLayerUrl("", "todos", "all", "", "named")).toContain("empresas=nome");
+    expect(cityMapLayerUrl("", "todos", "all", "", "cnpj")).toContain("empresas=cnpj");
+  });
   it("retains valid municipal bairro filters in shareable URLs but ignores unknown IDs", () => {
     const url = new URL(cityMapLayerUrl("CRAS", "servicos", "coordinates", "bairro-jardim-brasilia"), "https://example.org");
     expect(url.searchParams.get("bairro")).toBe("bairro-jardim-brasilia");

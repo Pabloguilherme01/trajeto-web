@@ -1,4 +1,5 @@
 import { normalizeCatalogText } from "./catalogSearch";
+import { hasBusinessName } from "./businessCatalogState";
 import type { CityAtlasItem } from "./cityAtlas";
 
 export type CityMapCandidate = Pick<CityAtlasItem, "id" | "name" | "lat" | "lng" | "address" | "destination" | "coordinateKind" | "coordinateLabel"> & {
@@ -10,6 +11,7 @@ export type CityMapCandidate = Pick<CityAtlasItem, "id" | "name" | "lat" | "lng"
 export function selectCityMapItems<T extends CityMapCandidate>(groups: readonly (readonly T[])[]) {
   const unique = new Map<string, T>();
   for (const group of groups) for (const item of group) {
+    if (item.id.startsWith("business-") && !hasBusinessName(item.name)) continue;
     if (!Number.isFinite(item.lat) || !Number.isFinite(item.lng) || Math.abs(item.lat!) > 90 || Math.abs(item.lng!) > 180 || (item.lat === 0 && item.lng === 0)) continue;
     // Companies sharing an approximate street position are distinct CNPJs.
     const key = item.id.startsWith("business-") ? item.id : item.name.toLocaleLowerCase("pt-BR") + "|" + item.lat + "|" + item.lng;

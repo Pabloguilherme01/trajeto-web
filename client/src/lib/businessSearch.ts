@@ -100,6 +100,18 @@ const mapLayerIndexes = new WeakMap<CityAtlasItem[], {
   all: CityAtlasItem[];
   byLayer: Map<CityAtlasLayer, CityAtlasItem[]>;
 }>();
+
+const identityPartitions = new WeakMap<CityAtlasItem[], { named: CityAtlasItem[]; unnamed: CityAtlasItem[] }>();
+/** One partition per immutable result list; switching identity filters reuses it. */
+export function partitionBusinessCatalog(items: CityAtlasItem[]) {
+  let partition = identityPartitions.get(items);
+  if (!partition) {
+    partition = { named: [], unnamed: [] };
+    for (const item of items) (hasBusinessName(item.name) ? partition.named : partition.unnamed).push(item);
+    identityPartitions.set(items, partition);
+  }
+  return partition;
+}
 export function businessesForMapLayer(items: CityAtlasItem[], layer: "todos" | CityAtlasLayer): CityAtlasItem[] {
   let index = mapLayerIndexes.get(items);
   if (!index) {

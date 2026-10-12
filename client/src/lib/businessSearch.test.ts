@@ -1,6 +1,15 @@
 import { expect, it } from "vitest";
 import { loadBusinessCatalog } from "./businessCatalog";
-import { businessesForMapLayer, searchBusinesses } from "./businessSearch";
+import { businessesForMapLayer, searchBusinesses, partitionBusinessCatalog } from "./businessSearch";
+
+it("partitions identity results once without removing searchable CNPJ records", async () => {
+  const items = await loadBusinessCatalog();
+  const groups = partitionBusinessCatalog(items);
+  expect(groups.named.length + groups.unnamed.length).toBe(items.length);
+  expect(partitionBusinessCatalog(items)).toBe(groups);
+  expect(searchBusinesses(items, "42.115.689/0001-40")).toHaveLength(1);
+  expect(groups.named.find(item => item.business?.cnpj === "42.115.689/0001-40")?.name).toBe("AMAG");
+});
 
 it("opens the full imported food and shopping categories rather than only curated places", async () => {
   const items = await loadBusinessCatalog();
