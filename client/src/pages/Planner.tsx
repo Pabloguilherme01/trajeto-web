@@ -8,6 +8,8 @@ import OfflineReadiness from "@/components/OfflineReadiness";
 import RoutePublicServiceCard from "@/components/RoutePublicServiceCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
+import DestinationAreaSelect from "@/components/DestinationAreaSelect";
+import { destinationAreaLabel, readDestinationArea } from "@/lib/destinationAreas";
 import { preparePlannerDestinationResources, type PlannerDestinationResource } from "@/lib/plannerDestinationResources";
 import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
@@ -135,6 +137,7 @@ export default function Planner() {
   const [destinationPage, setDestinationPage] = useState<{ key: string; limit: number } | null>(null);
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
   const [destinationResource, setDestinationResource] = useState<PlannerDestinationResource>("all");
+  const [destinationArea, setDestinationArea] = useState("");
   const { railRef: destinationCategoryRailRef, onFocusCapture: onDestinationCategoryFocus } =
     useFilterRail(destinationCategory, PLANNER_DESTINATION_FILTERS);
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -662,14 +665,16 @@ export default function Planner() {
 
   const destinationCount = useMemo(() => getLocalRoutePresets().length, []);
   const destinationResources = useMemo(
-    () => showAllDestinations ? preparePlannerDestinationResources(deferredDestinationFilter, destinationCategory) : null,
-    [showAllDestinations, deferredDestinationFilter, destinationCategory]
+    () => showAllDestinations ? preparePlannerDestinationResources(deferredDestinationFilter, destinationCategory, {
+      area: destinationArea, savedRoutes: originPrivate ? [] : savedRoutes, origin: originPrivate ? "" : origin, mode,
+    }) : null,
+    [showAllDestinations, deferredDestinationFilter, destinationCategory, destinationArea, savedRoutes, origin, originPrivate, mode]
   );
   const availableDestinations = destinationResources?.results[destinationResource] ?? [];
   // Filtering always covers the complete catalog. Only render the first page
   // of cards until the user requests more; reset the visible window whenever
   // the search text or selected category changes.
-  const destinationPageKey = JSON.stringify([deferredDestinationFilter.trim(), destinationCategory, destinationResource]);
+  const destinationPageKey = JSON.stringify([deferredDestinationFilter.trim(), destinationCategory, destinationResource, destinationArea, originPrivate ? "" : origin, mode]);
   const destinationLimit = destinationPage?.key === destinationPageKey ? destinationPage.limit : 24;
   const displayedDestinations = availableDestinations.slice(0, destinationLimit);
 
@@ -840,6 +845,12 @@ export default function Planner() {
                   <div id="all-destinations-panel" className="premium-card mt-2 rounded-2xl border border-border/10 bg-card p-3">
                     {destinationResources && <DestinationResourceModes value={destinationResource} counts={destinationResources.counts}
                       onChange={setDestinationResource} streets updating={destinationSearchUpdating} />}
+                    <DestinationAreaSelect value={destinationArea} onChange={area => setDestinationArea(readDestinationArea(area))} />
+                    {destinationResource === "prepared" && <p className="mt-2 text-xs leading-relaxed text-foreground/70" role="status">
+                      {originPrivate ? "Rotas com origem GPS privada não entram neste filtro." : origin.trim().length < 3
+                        ? "Informe a origem para encontrar rotas já salvas neste aparelho para esse percurso e modo de transporte."
+                        : "Mostrando apenas cópias com geometria de ruas salvas neste aparelho para a origem e modo escolhidos. Os dados podem estar desatualizados."}
+                    </p>}
                     <div ref={destinationCategoryRailRef} onFocusCapture={onDestinationCategoryFocus}
                       className="mobile-scroll-x flex max-w-full gap-2 overflow-x-auto pb-1"
                       role="group" aria-label="Categorias dos destinos"
@@ -852,6 +863,7 @@ export default function Planner() {
                       ))}
                     </div>
                     <input value={destinationFilter} onChange={event => setDestinationFilter(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} aria-label="Filtrar todos os destinos disponíveis" placeholder="Filtrar destino, bairro ou serviço" className="mt-2 min-h-11 w-full rounded-xl border border-border/10 bg-background px-3 text-base text-foreground outline-none placeholder:text-muted-foreground" autoComplete="off" enterKeyHint="search" />
+                    {destinationArea && <p className="mt-2 text-xs leading-relaxed text-foreground/65">Região mencionada no registro: {destinationAreaLabel(destinationArea)}. Não é um cálculo por limite geográfico.</p>}
                     <p className="mt-2 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite" aria-busy={destinationSearchUpdating}>
                       {destinationSearchUpdating ? "Atualizando destinos…" : `${availableDestinations.length} destinos encontrados · ${displayedDestinations.length} exibidos`}
                     </p>
@@ -865,12 +877,16 @@ export default function Planner() {
                               <span className="rounded-full border border-border/15 bg-muted/[.04] px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-[.07em] text-primary">{destinationCategoryLabel[item.category]}</span>
                             </span>
                             <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</span>
-                            {item.sourceLabel && <span className="mt-1 block text-[11px] leading-relaxed text-muted-foreground">Fonte: {item.sourceLabel}</span>}
+                            <span className="mt-1 block text-[11px] leading-relaxed text-muted-foreground">Fonte: {item.sourceLabel ?? "Cadastro local; fonte individual não informada"}{item.verifiedAt ? " · Conferido em " + item.verifiedAt : ""}</span>
                           </span>
                           <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-primary">Escolher</span>
                         </button>
                       ))}
-                      {!destinationSearchUpdating && availableDestinations.length === 0 && <p className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">Nenhum destino corresponde ao filtro.</p>}
+                      {!destinationSearchUpdating && availableDestinations.length === 0 && <div className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">
+                        <p>Nenhum destino corresponde aos filtros. Tente outra categoria ou região.</p>
+                        {destinationArea && <button type="button" onClick={() => setDestinationArea("")}
+                          className="mt-2 min-h-11 rounded-xl border border-border/25 px-3 font-bold text-primary">Ver todas as regiões</button>}
+                      </div>}
                     </div>
                     {!destinationSearchUpdating && availableDestinations.length > displayedDestinations.length && (
                       <button
