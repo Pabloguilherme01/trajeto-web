@@ -21,10 +21,12 @@ it("shows accessible previews and preserves zero-result modes while updating", (
   expect(within(group).getAllByText("Atualizando")).toHaveLength(6);
   expect(within(group).getByRole("button", { name: "Rota offline salva" })).toBeTruthy();
   const areas = within(group).getByRole("button", { name: "Bairros e setores" });
-  expect(within(areas).getByText("68 destinos")).toBeTruthy();
+  expect(within(areas).getByText("Atualizando")).toBeTruthy();
   fireEvent.click(areas);
   expect(onChange).toHaveBeenCalledWith("areas");
   expect(within(group).queryByText("10 destinos")).toBeNull();
+  rerender(<DestinationResourceModes {...props} />);
+  expect(within(areas).getByText("68 destinos")).toBeTruthy();
 });
 
 it("keeps the map's three availability modes apart from the planner's street catalog", () => {
