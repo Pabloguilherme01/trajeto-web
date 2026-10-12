@@ -38,7 +38,7 @@ test("Android/iOS: municipal bairros remain scoped in map URL and planner offlin
   expect(new URL(page.url()).searchParams.get("camada")).toBe("servicos");
   expect(new URL(page.url()).searchParams.has("lat")).toBe(false);
   await page.getByRole("button", { name: "Limpar todos os filtros do mapa" }).click();
-  await expect(page).toHaveURL(/\\/mapa\\/?$/);
+  await expect(page).toHaveURL(new RegExp("/mapa/?$"));
   await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
   await page.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" }).selectOption("bairro-jardim-brasilia");
   const saved = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: "Rota offline salva" });
