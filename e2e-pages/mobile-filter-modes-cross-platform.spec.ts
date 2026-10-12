@@ -4,6 +4,30 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: compact planner catalog opens once and empty filters recover without erasing the trip", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("planejar?origem=Casa&destino=Trabalho", { waitUntil: "domcontentloaded" });
+  const toggle = page.getByRole("button", { name: /Destinos disponíveis/ });
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const region = page.getByRole("region", { name: "Lista de destinos disponíveis" });
+  const search = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  await search.fill("zzzx-inexistente-2026");
+  await expect(region.getByText("Nenhum destino corresponde ao filtro.")).toBeVisible();
+  await region.getByRole("button", { name: "Ver todos os destinos" }).click();
+  await expect(search).toHaveValue("");
+  await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Casa");
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Trabalho");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: sourced bairros stay separate from streets and accessible in planner at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];
