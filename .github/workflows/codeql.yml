@@ -39,3 +39,31 @@ jobs:
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{matrix.language}}"
+
+      # Temporary PR-local diagnostics: IDs/locations only, no source or secrets.
+      - name: Identify the CodeQL alert rule and location for PR 500
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 500
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const directory = path.resolve(process.env.GITHUB_WORKSPACE, '..', 'results');
+          const files = fs.existsSync(directory) ? fs.readdirSync(directory).filter(name => name.endsWith('.sarif')) : [];
+          if (!files.length) { console.log('No SARIF result files located at', directory); process.exit(0); }
+          for (const name of files) {
+            const sarif = JSON.parse(fs.readFileSync(path.join(directory, name), 'utf8'));
+            for (const run of sarif.runs || []) {
+              const rules = [...(run.tool?.driver?.rules || []), ...(run.tool?.extensions || []).flatMap(e => e.rules || [])];
+              const byId = new Map(rules.map(rule => [rule.id, rule]));
+              console.log('SARIF summary:', name, 'result count', (run.results || []).length);
+              for (const result of run.results || []) {
+                const rule = byId.get(result.ruleId) || rules[result.ruleIndex] || {};
+                const score = Number(rule.properties?.['security-severity'] ?? NaN);
+                if (score < 7 || !Number.isFinite(score)) continue;
+                const location = result.locations?.[0]?.physicalLocation || {};
+                console.log('CodeQL high finding:', JSON.stringify({rule: result.ruleId, severity: score, file: location.artifactLocation?.uri, line: location.region?.startLine}));
+              }
+            }
+          }
+          NODE
