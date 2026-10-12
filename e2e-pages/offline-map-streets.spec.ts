@@ -122,12 +122,14 @@ test("Pages: imported companies reload offline and plan all modes from their act
   await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();
   await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible({ timeout: 65000 });
   await page.goto("mapa");
+  await page.getByRole("button", { name: "Explorar empresas", exact: true }).click();
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
   await waitForMapPackage(page);
   await context.setOffline(true);
   await page.reload();
+  await page.getByRole("button", { name: "Explorar empresas", exact: true }).click();
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
   await page.getByRole("textbox", { name: "Buscar destino no mapa" }).fill("42.115.689/0001-40");
   const card = page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) });

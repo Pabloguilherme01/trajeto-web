@@ -2,6 +2,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
+import { DESTINATION_AREAS } from "@/lib/destinationAreas";
 const navigate = vi.hoisted(() => vi.fn());
 const catalog = vi.hoisted(() => ({ items: [] as any[], loading: false, error: false, retry: vi.fn() }));
 const mapSearch = vi.hoisted(() => ({ value: "" }));
@@ -26,6 +27,74 @@ afterEach(() => {
   catalog.items = [];
   mapSearch.value = "";
   catalogEnabled.values = [];
+});
+it("separates unnamed CNPJ records from the default map and its route actions", () => {
+  catalog.items = [{ id: "business-12345678000190", name: "CNPJ 12.345.678/0001-90", category: "compras", detail: "Cadastro sem nome", destination: "Rua 1", sourceLabel: "Arquivo", lat: -15.7, lng: -48.2,
+    business: { cnpj: "12.345.678/0001-90", legalName: "12345678000190", tradeName: "", sector: "Comércio", cnae: "", opened: "", statusDate: "", size: "", mei: "", simples: "", nature: "" } }];
+  mapSearch.value = "?q=12.345.678/0001-90";
+  render(<CityMap />);
+  expect(screen.queryByText("CNPJ 12.345.678/0001-90", { exact: true })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Consultar CNPJ" }));
+  expect(screen.getByText("CNPJ 12.345.678/0001-90", { exact: true })).toBeTruthy();
+  expect(screen.queryByRole("link", { name: "Ir até aqui" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Planejar ponto confirmado" })).toBeNull();
+  expect(screen.queryByText(/Coordenadas:/)).toBeNull();
+  expect(screen.getByRole("button", { name: "Copiar CNPJ 12.345.678/0001-90" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Só registros sem nome" }));
+  expect(String(navigate.mock.calls.at(-1)?.[0])).toContain("empresas=sem-nome");
+});
+it("returns to the public map when a company-only view switches to a non-company layer", () => {
+  render(<CityMap />);
+  fireEvent.click(screen.getByRole("button", { name: "Empresas com nome" }));
+  fireEvent.click(within(screen.getByRole("group", { name: "Categorias do mapa" })).getByRole("button", { name: "Postos" }));
+  expect(screen.getByRole("button", { name: "Mapa completo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Posto Ponteio", { exact: true })).toBeTruthy();
+});
+it("normalizes incompatible company deep links back to the public layer", () => {
+  mapSearch.value = "?camada=combustivel&empresas=nome";
+  render(<CityMap />);
+  expect(screen.getByRole("button", { name: "Mapa completo" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Posto Ponteio", { exact: true })).toBeTruthy();
+});
+it("opens the general map without loading businesses until an explicit intent", () => {
+  render(<CityMap />);
+  expect(catalogEnabled.values).not.toContain(true);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "a" } });
+  expect(catalogEnabled.values).not.toContain(true);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "farmácia" } });
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+});
+
+it("keeps the complete company catalog reachable without typing a search", () => {
+  render(<CityMap />);
+  fireEvent.click(screen.getByRole("button", { name: "Explorar empresas" }));
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
+  expect(catalogEnabled.values.at(-1)).toBe(false);
+});
+it("explains the category, position and source of a map card", () => {
+  mapSearch.value = "?q=CRAS";
+  render(<CityMap />);
+  const card = screen.getByRole("group", { name: "Referência de CRAS II · Santa Lúcia" });
+  expect(within(card).getByText("Serviços", { exact: true })).toBeTruthy();
+  expect(within(card).getByText("Endereço sem coordenadas", { exact: true })).toBeTruthy();
+  expect(within(card).getByRole("link", { name: "Fonte de CRAS II · Santa Lúcia: Prefeitura de Águas Lindas" }).getAttribute("href")).toMatch(/^https:\/\//);
+});
+
+it("recovers results hidden by coordinates without clearing query, category or area", () => {
+  const area = DESTINATION_AREAS.find(item => item.name === "Jardim Brasília")!.id;
+  mapSearch.value = "?q=CRAS&camada=servicos&coordenadas=1&bairro=" + area;
+  render(<CityMap />);
+  expect(screen.queryByText("CRAS I", { exact: true })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Incluir destinos sem coordenadas" }));
+  expect(screen.getByText("CRAS I", { exact: true })).toBeTruthy();
+  expect((screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement).value).toBe("CRAS");
+  expect(screen.getByRole("button", { name: "Serviços" }).getAttribute("aria-pressed")).toBe("true");
+  const params = new URL(String(navigate.mock.calls.at(-1)?.[0]), "https://example.test").searchParams;
+  expect(params.get("q")).toBe("CRAS");
+  expect(params.get("camada")).toBe("servicos");
+  expect(params.get("bairro")).toBe(area);
+  expect(params.has("coordenadas")).toBe(false);
 });
 it("mounts initial stops in batches and still searches the full catalog", () => {
   render(<CityMap />);
@@ -93,7 +162,7 @@ it("filters bundled streets offline and clears a street search", () => {
   fireEvent.click(screen.getByRole("button", { name: "Ruas e avenidas" }));
   fireEvent.change(screen.getByRole("textbox"), { target: { value: "Avenida Brasília" } });
   expect(screen.getAllByText("Avenida Brasília", { selector: "article p" }).length).toBeGreaterThan(1);
-  expect(screen.getByText(/Centro aproximado da via: -15.73723, -48.28041/)).toBeTruthy();
+  expect(screen.getByText(/Coordenadas: -15.73723, -48.28041/)).toBeTruthy();
   expect(screen.queryByText(/Nenhum destino encontrado/)).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Limpar busca do mapa" }));
   expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");

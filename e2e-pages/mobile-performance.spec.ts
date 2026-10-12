@@ -1,5 +1,28 @@
 import { expect, test } from "@playwright/test";
 
+test.describe("light map opening", () => {
+  test.use({ serviceWorkers: "block" });
+  test("loads business chunks only after search intent and finds the full catalog", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 320, height: 740 });
+    const requests: string[] = [];
+    page.on("request", request => {
+      if (/\/part-\d+-[^/]+\.js(?:\?|$)/.test(request.url())) requests.push(request.url());
+    });
+    await page.goto("./mapa");
+    await expect(page.getByRole("button", { name: "Explorar empresas", exact: true })).toBeVisible();
+    expect(requests).toEqual([]);
+    const search = page.getByRole("textbox", { name: "Buscar destino no mapa" });
+    await search.fill("a");
+    expect(requests).toEqual([]);
+    await search.fill("42.115.689/0001-40");
+    await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) })).toHaveCount(1);
+    expect(requests.length).toBeGreaterThan(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  });
+});
+
 test("catalog search responds on a narrow viewport with throttled CPU", async ({ page }) => {
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 320, height: 740 });
@@ -7,6 +30,7 @@ test("catalog search responds on a narrow viewport with throttled CPU", async ({
   await cpu.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   try {
     await page.goto("./mapa");
+    await page.getByRole("button", { name: "Explorar empresas", exact: true }).click();
     await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible({ timeout: 60_000 });
     const search = page.getByRole("textbox", { name: "Buscar destino no mapa" });
     const start = Date.now();

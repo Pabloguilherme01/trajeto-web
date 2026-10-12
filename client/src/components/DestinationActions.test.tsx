@@ -18,6 +18,12 @@ const destination = {
 };
 
 describe("DestinationActions", () => {
+  it("keeps unnamed legacy company favorites in the registry instead of exposing route actions", () => {
+    render(<DestinationActions destination={{ ...destination, id: "business-12345678000190", name: "CNPJ 12.345.678/0001-90" }} />);
+    expect(screen.queryByRole("link", { name: "Ir até aqui" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Abrir app de mapa" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Consultar cadastro CNPJ" }).getAttribute("href")).toContain("empresas=cnpj");
+  });
   afterEach(() => cleanup());
 
   beforeEach(() => {

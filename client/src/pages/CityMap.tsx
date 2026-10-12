@@ -1,9 +1,10 @@
-import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
+import { businessesForMapLayer, searchBusinesses, partitionBusinessCatalog } from "@/lib/businessSearch";
+import { hasBusinessName, type BusinessCatalogMode } from "@/lib/businessCatalogState";
 import { filterCityAtlasStreets, filterCityAtlasAreas } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode, type CityMapCoordinateMode, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode, readCityMapBusinessMode, type CityMapCoordinateMode, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue, useRef, useCallback } from "react";
@@ -16,6 +17,8 @@ import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
 import DestinationAreaSelect from "@/components/DestinationAreaSelect";
 import ActiveRefinementChips from "@/components/ActiveRefinementChips";
+import DestinationReferenceInfo from "@/components/DestinationReferenceInfo";
+import BusinessRegistryActions from "@/components/BusinessRegistryActions";
 import { destinationAreaLabel, mentionsDestinationArea, readDestinationArea } from "@/lib/destinationAreas";
 import { createDestinationPointResolver } from "@/lib/destinationCoordinates";
 import { isAguasLindasRoutePoint } from "@/lib/mapGeometry";
@@ -58,7 +61,11 @@ const CITY_MAP_TABS: ReadonlyArray<{ value: CityMapLayer; label: string }> = [
 export default function CityMap() {
   const [, navigate] = useLocation();
   const rawSearch = useSearch();
+  const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
+  const [exploreCompanies, setExploreCompanies] = useState(false);
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
+  const [businessMode, setBusinessMode] = useState(() => readCityMapBusinessMode(new URLSearchParams(rawSearch).get("empresas"), initialLayer));
+  const registryMode = businessMode === "cnpj" || businessMode === "unnamed";
   const [referenceLayer, setReferenceLayer] = useState<"ruas" | "bairros" | null>(() =>
     initialLayer === "ruas" || initialLayer === "bairros" ? initialLayer : null
   );
@@ -72,13 +79,15 @@ export default function CityMap() {
   // reveal deep-linked selections and keyboard-focused categories on mobile.
   const { railRef: categoryRailRef, onFocusCapture: onCategoryFocusCapture } =
     useFilterRail(activeLayer, CITY_MAP_TABS);
-  const needsBusinessCatalog = cityMapNeedsBusinessCatalog(activeLayer);
+  const supportsCompanies = cityMapNeedsBusinessCatalog(activeLayer);
+  const needsBusinessCatalog = supportsCompanies && (activeLayer !== "todos" ||
+    query.trim().length >= 2 || selectedArea !== "" || exploreCompanies || businessMode !== "all");
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
   const lastSuccessfulAnpFetchAt = useRef(0);
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
-    cityMapNeedsAnp(initialLayer) ? getOfflineAnpSnapshot().rows : []
+    businessMode === "all" && cityMapNeedsAnp(initialLayer) ? getOfflineAnpSnapshot().rows : []
   );
-  const needsAnp = referenceLayer === null && cityMapNeedsAnp(category);
+  const needsAnp = businessMode === "all" && referenceLayer === null && cityMapNeedsAnp(category);
   const groupedAnpStations = useMemo(
     () => needsAnp ? cachedGroupAnpFuelRows(anpRows) : [],
     [needsAnp, anpRows]
@@ -92,6 +101,7 @@ export default function CityMap() {
   );
 
   useEffect(() => {
+    if (registryMode) return;
     let active = true;
     void loadCityAtlasSnapshot().then(snapshot => {
       if (active && snapshot) setAtlasSnapshot(snapshot);
@@ -99,8 +109,9 @@ export default function CityMap() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [registryMode]);
   useEffect(() => {
+    if (registryMode) return;
     // The install stays light, but opening the city map should make its heavy
     // offline fallback available for the next reload.
     const controller = new AbortController();
@@ -155,7 +166,7 @@ export default function CityMap() {
       if (timerId !== null) window.clearTimeout(timerId);
       serviceWorker?.removeEventListener("controllerchange", onControllerChange);
     };
-  }, []);
+  }, [registryMode]);
   useEffect(() => {
     if (!needsAnp) return;
     // Restore the cached local directory when switching back from streets
@@ -190,7 +201,6 @@ export default function CityMap() {
       .catch(() => {});
     return () => controller.abort();
   }, [needsAnp]);
-  const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
   useEffect(() => {
     const params = new URLSearchParams(rawSearch);
     const selected = readCityMapLayer(params.get("camada"));
@@ -199,12 +209,14 @@ export default function CityMap() {
     setCategory(selected === "ruas" || selected === "bairros" ? "todos" : selected);
     setCoordinateMode(readCityMapCoordinateMode(params.get("coordenadas")));
     setSelectedArea(readDestinationArea(params.get("bairro")));
+    setBusinessMode(readCityMapBusinessMode(params.get("empresas"), selected));
   }, [rawSearch]);
   const deferredQuery = useDeferredValue(query);
-  const syncMapUrl = (nextQuery: string, layer: CityMapLayer, mode: CityMapCoordinateMode = coordinateMode, area = selectedArea) => {
+  const syncMapUrl = (nextQuery: string, layer: CityMapLayer, mode: CityMapCoordinateMode = coordinateMode, area = selectedArea, identity = businessMode) => {
     const previous = new URLSearchParams(rawSearch);
-    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")), readCityMapCoordinateMode(previous.get("coordenadas")), readDestinationArea(previous.get("bairro")));
-    const next = cityMapLayerUrl(nextQuery, layer, mode, area);
+    const previousLayer = readCityMapLayer(previous.get("camada"));
+    const current = cityMapLayerUrl(previous.get("q") ?? "", previousLayer, readCityMapCoordinateMode(previous.get("coordenadas")), readDestinationArea(previous.get("bairro")), readCityMapBusinessMode(previous.get("empresas"), previousLayer));
+    const next = cityMapLayerUrl(nextQuery, layer, mode, area, identity);
     if (next !== current) navigate(next, { replace: true });
   };
   const applyCategory = (next: CityMapCategory) => {
@@ -213,28 +225,45 @@ export default function CityMap() {
     setReferenceLayer(null);
     setCategory(next);
     setQuery(updatedQuery);
-    syncMapUrl(updatedQuery, next);
+    const identity = cityMapNeedsBusinessCatalog(next) ? businessMode : "all";
+    setBusinessMode(identity);
+    syncMapUrl(updatedQuery, next, coordinateMode, selectedArea, identity);
   };
   const resetMapFilters = () => {
+    setBusinessMode("all");
+    setVisibleCount(24);
+    setDestinationLimit(18);
+    setExploreCompanies(false);
     setQuery("");
     setCategory("todos");
     setReferenceLayer(null);
     setCoordinateMode("all");
     setSelectedArea("");
-    syncMapUrl("", "todos", "all", "");
+    syncMapUrl("", "todos", "all", "", "all");
   };
   const showReferenceLayer = (layer: "ruas" | "bairros") => {
+    setBusinessMode("all");
     const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) ? "" : query;
     setCategory("todos");
     setReferenceLayer(layer);
     setQuery(updatedQuery);
-    syncMapUrl(updatedQuery, layer);
+    syncMapUrl(updatedQuery, layer, coordinateMode, selectedArea, "all");
+  };
+  const selectBusinessMode = (next: BusinessCatalogMode) => {
+    const layer = next !== "all" && !supportsCompanies ? "todos" : activeLayer;
+    if (layer !== activeLayer) { setReferenceLayer(null); setCategory("todos"); }
+    const mode = next === "cnpj" || next === "unnamed" ? "all" : coordinateMode;
+    setBusinessMode(next);
+    setCoordinateMode(mode);
+    setVisibleCount(24);
+    setDestinationLimit(18);
+    syncMapUrl(query, layer, mode, selectedArea, next);
   };
   const online = useOnlineStatus();
   const resolveDestinationPoint = useMemo(() => createDestinationPointResolver(atlasSnapshot), [atlasSnapshot]);
   const categoryDestinations = useMemo(
-    () => isReadyRouteLayer(activeLayer) ? getLocalRoutePresets(deferredQuery, activeLayer) : [],
-    [deferredQuery, activeLayer]
+    () => businessMode === "all" && isReadyRouteLayer(activeLayer) ? getLocalRoutePresets(deferredQuery, activeLayer) : [],
+    [deferredQuery, activeLayer, businessMode]
   );
   const allDestinations = useMemo(
     () => selectedArea ? categoryDestinations.filter(item => mentionsDestinationArea(selectedArea, item.label, item.detail, item.destination)) : categoryDestinations,
@@ -246,14 +275,22 @@ export default function CityMap() {
   const [destinationLimit, setDestinationLimit] = useState(18);
   useEffect(() => { setDestinationLimit(18); }, [query, category, referenceLayer, coordinateMode, selectedArea]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
-  const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
+  const baseAtlas = useMemo(() => businessMode === "all" ? buildCityAtlas(atlasSnapshot) : [], [atlasSnapshot, businessMode]);
   useEffect(() => { setVisibleCount(24); }, [query, category, referenceLayer, coordinateMode, selectedArea]);
   const atlasLayer = cityMapAtlasLayer(activeLayer);
+  const companyMatches = useMemo(() => {
+    const matches = !needsBusinessCatalog ? [] : deferredQuery.trim()
+      ? searchBusinesses(businesses.items, deferredQuery).filter(item =>
+          (atlasLayer === "todos" || item.category === atlasLayer) && Boolean(item.destination ?? item.address ?? ""))
+      : businessesForMapLayer(businesses.items, atlasLayer);
+    return selectedArea ? matches.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : matches;
+  }, [businesses.items, needsBusinessCatalog, deferredQuery, atlasLayer, selectedArea]);
+  const companyIdentities = useMemo(() => partitionBusinessCatalog(companyMatches), [companyMatches]);
   const allAtlasDestinations = useMemo(() => {
     const routeKeys = new Set(
       categoryDestinations.map(item => normalizeCatalogText(item.destination))
     );
-    const publicAtlas = (referenceLayer === "ruas"
+    const publicAtlas = businessMode !== "all" ? [] : (referenceLayer === "ruas"
       ? filterCityAtlasStreets(baseAtlas, deferredQuery)
       : referenceLayer === "bairros"
         ? filterCityAtlasAreas(baseAtlas, deferredQuery)
@@ -263,20 +300,17 @@ export default function CityMap() {
       const key = cachedDestinationKey(item);
       return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
     });
-    const companies = !needsBusinessCatalog ? [] : deferredQuery.trim()
-      ? searchBusinesses(businesses.items, deferredQuery).filter(item =>
-          (atlasLayer === "todos" || item.category === atlasLayer) && Boolean(item.destination ?? item.address ?? "")
-        )
-      : businessesForMapLayer(businesses.items, atlasLayer);
-    const combined = [...publicAtlas, ...companies];
-    return selectedArea ? combined.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : combined;
-  }, [baseAtlas, businesses.items, atlasLayer, categoryDestinations, deferredQuery, referenceLayer, needsBusinessCatalog, selectedArea]);
-  const positionedAtlasDestinations = useMemo(() => allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations]);
-  const atlasDestinations = coordinateMode === "coordinates" ? positionedAtlasDestinations : coordinateMode === "missing"
+    const companies = businessMode === "cnpj" ? companyMatches : businessMode === "unnamed" ? companyIdentities.unnamed : companyIdentities.named;
+    const publicInArea = selectedArea ? publicAtlas.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : publicAtlas;
+    return [...publicInArea, ...companies];
+  }, [baseAtlas, atlasLayer, categoryDestinations, deferredQuery, referenceLayer, selectedArea, businessMode, companyMatches, companyIdentities]);
+  const positionedAtlasDestinations = useMemo(() => registryMode ? [] : allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations, registryMode]);
+  const atlasDestinations = registryMode ? allAtlasDestinations : coordinateMode === "coordinates" ? positionedAtlasDestinations : coordinateMode === "missing"
     ? allAtlasDestinations.filter(item => !isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })) : allAtlasDestinations;
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
   const markerSelection = useMemo(() => {
+    if (registryMode) return { total: 0, points: [] };
     const publicPoints = destinations.flatMap(item => {
       const point = resolveDestinationPoint(item.destination);
       return point
@@ -292,7 +326,7 @@ export default function CityMap() {
         : [];
     });
     const stations =
-      coordinateMode !== "missing" && referenceLayer === null && (category === "todos" || category === "combustivel")
+      businessMode === "all" && coordinateMode !== "missing" && referenceLayer === null && (category === "todos" || category === "combustivel")
         ? filterAnpMapStations(groupedAnpStations, deferredQuery).filter(item =>
             !selectedArea || mentionsDestinationArea(selectedArea, item.name, item.address))
         : [];
@@ -304,7 +338,7 @@ export default function CityMap() {
       coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
       lat: item.lat!, lng: item.lng!,
     })) };
-  }, [destinations, atlasDestinations, category, coordinateMode, deferredQuery, groupedAnpStations, referenceLayer, resolveDestinationPoint, selectedArea]);
+  }, [destinations, atlasDestinations, category, coordinateMode, deferredQuery, groupedAnpStations, referenceLayer, resolveDestinationPoint, selectedArea, registryMode, businessMode]);
   const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
@@ -330,12 +364,13 @@ export default function CityMap() {
         Explore Águas Lindas
       </p>
       <h1 className="mt-2 text-3xl font-black tracking-[-.04em] sm:text-4xl">
-        A cidade no seu caminho
+        {registryMode ? "Consultar empresas por CNPJ" : "A cidade no seu caminho"}
       </h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
-        Busque um destino e veja sua rota no planejador.
+        {registryMode ? "Consulte o cadastro sem colocar empresas sem nome no mapa." : "Busque um destino e veja sua rota no planejador."}
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{referenceLayer === "ruas" ? "Camada de ruas · sem carregar o catálogo de empresas" : referenceLayer === "bairros" ? "Bairros e setores do cadastro municipal · sem catálogo de empresas" : !needsBusinessCatalog ? "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{referenceLayer === "ruas" ? "Camada de ruas · sem carregar o catálogo de empresas" : referenceLayer === "bairros" ? "Bairros e setores do cadastro municipal · sem catálogo de empresas" : !needsBusinessCatalog ? supportsCompanies ? "Destinos locais primeiro. Busque com duas letras, escolha uma categoria ou explore as empresas." : "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      {supportsCompanies && !needsBusinessCatalog && <button type="button" onClick={() => setExploreCompanies(true)} className="mt-2 min-h-11 rounded-xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">Explorar empresas</button>}
       {needsBusinessCatalog && businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <p className="mt-2 text-xs leading-relaxed text-foreground/65">Atlas municipal: versão declarada em {atlasSnapshot?.updatedAt ?? "data indisponível"}. As fontes e datas de cada registro podem ser diferentes.</p>
       <section className="mt-5" aria-labelledby="city-search-label">
@@ -360,7 +395,7 @@ export default function CityMap() {
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p id="city-search-help" className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/60">Busca em serviços, empresas e vias cadastradas.</p>
-          {(query.trim() || activeLayer !== "todos" || coordinateMode !== "all" || selectedArea !== "") && (
+          {(query.trim() || activeLayer !== "todos" || coordinateMode !== "all" || selectedArea !== "" || exploreCompanies || businessMode !== "all") && (
             <button
               type="button"
               onClick={resetMapFilters}
@@ -372,6 +407,19 @@ export default function CityMap() {
           )}
         </div>
       </section>
+      <div role="group" aria-label="Identificação das empresas" className="my-3 grid grid-cols-3 gap-2">
+        {([{ value: "all", label: "Mapa completo" }, { value: "named", label: "Empresas com nome" }, { value: "cnpj", label: "Consultar CNPJ" }] as const).map(option => (
+          <button key={option.value} type="button" aria-pressed={option.value === "cnpj" ? registryMode : businessMode === option.value}
+            onClick={() => selectBusinessMode(option.value)} className={"min-h-11 min-w-0 rounded-xl border px-2 py-2 text-xs font-bold focus-visible:outline-2 focus-visible:outline-ring " + ((option.value === "cnpj" ? registryMode : businessMode === option.value) ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-card text-foreground")}>
+            {option.label}
+          </button>
+        ))}
+      </div>
+      {registryMode && <div className="mb-3 rounded-xl border border-border bg-card p-3 text-xs leading-relaxed">
+        <p>Consulta cadastral por CNPJ. Registros sem nome ficam nesta lista e não aparecem como pontos no mapa.</p>
+        <button type="button" aria-pressed={businessMode === "unnamed"} onClick={() => selectBusinessMode(businessMode === "unnamed" ? "cnpj" : "unnamed")}
+          className="mt-2 min-h-11 rounded-xl border border-primary/25 px-3 font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">Só registros sem nome</button>
+      </div>}
       <QuickFilterChips
         label="Filtros rápidos do mapa"
         options={CITY_MAP_QUICK_FILTERS}
@@ -384,12 +432,14 @@ export default function CityMap() {
           setReferenceLayer(null);
           setQuery(updatedQuery);
           setCategory(next);
-          syncMapUrl(updatedQuery, next);
+          const identity = cityMapNeedsBusinessCatalog(next) ? businessMode : "all";
+          setBusinessMode(identity);
+          syncMapUrl(updatedQuery, next, coordinateMode, selectedArea, identity);
         }}
         className="mt-3"
       />
       <p className="mt-2 text-xs text-foreground/60" role="status" aria-live="polite" aria-busy={query !== deferredQuery}>
-        {query !== deferredQuery ? "Atualizando resultados…" : query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
+        {query !== deferredQuery ? "Atualizando resultados…" : registryMode ? `${atlasDestinations.length} cadastro(s) na consulta CNPJ` : query ? `${destinations.length + atlasDestinations.length} destino(s) na lista · ${markers.length} posição(ões) no mapa para “${query}”` : `${destinations.length + atlasDestinations.length} destinos na lista · ${markers.length} posições no mapa`}
       </p>
       <div
         ref={categoryRailRef}
@@ -444,7 +494,7 @@ export default function CityMap() {
         setSelectedArea(valid);
         syncMapUrl(query, activeLayer, coordinateMode, valid);
       }} />
-      <details className="my-3" open={coordinateMode !== "all" || undefined}>
+      {!registryMode && <details className="my-3" open={coordinateMode !== "all" || undefined}>
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-xl border border-border/15 bg-card px-3 text-sm font-bold">
           <span>Refinar destinos</span>
           <span className="ml-auto text-xs text-primary">{coordinateMode === "coordinates" ? "Com coordenadas" : coordinateMode === "missing" ? "Sem coordenadas" : "Todos"}</span>
@@ -460,8 +510,8 @@ export default function CityMap() {
           setCoordinateMode(mode);
           syncMapUrl(query, activeLayer, mode);
         }} />
-      </details>
-      {coordinateMode === "missing" && <p role="status" className="mb-3 text-xs leading-relaxed text-foreground/70">
+      </details>}
+      {!registryMode && coordinateMode === "missing" && <p role="status" className="mb-3 text-xs leading-relaxed text-foreground/70">
         Destinos sem coordenadas continuam consultáveis por nome, mas não geram marcadores ou rotas locais garantidas. Confirme o endereço antes de sair.
       </p>}
       <div className="mb-2 flex justify-end">
@@ -474,13 +524,13 @@ export default function CityMap() {
           Ver resultados
         </button>
       </div>
-      <CityMapSurface
+      {!registryMode && <CityMapSurface
         markers={markers}
         online={online}
         resultCount={destinations.length + atlasDestinations.length}
         onPlanDestination={planFromMap}
-      />
-      <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
+      />}
+      {!registryMode && <><label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-border/10 bg-card px-3 py-2 text-xs font-black text-foreground">
         <span className="min-w-0">Abrir destinos com</span>
         <select
           aria-label="Aplicativo de mapa preferido"
@@ -522,7 +572,7 @@ export default function CityMap() {
         <ShieldCheck className="size-4 shrink-0" />O mapa não solicita sua
         localização. Somente destinos com coordenadas cadastradas aparecem como
         marcadores; os demais continuam na lista.
-      </p>
+      </p></>}
       <section
         id="city-destinations"
         tabIndex={-1}
@@ -531,12 +581,12 @@ export default function CityMap() {
       >
         <div className="flex items-center justify-between gap-3">
           <h2 id="city-destinations-title" className="text-lg font-black">
-            Escolha sua próxima parada
+            {registryMode ? "Resultados da consulta CNPJ" : "Escolha sua próxima parada"}
           </h2>
           <button
             type="button"
             aria-controls="city-map-surface"
-            onClick={() => jumpTo("city-map-surface")}
+            onClick={() => registryMode ? selectBusinessMode("named") : jumpTo("city-map-surface")}
             className="min-h-10 shrink-0 rounded-xl border border-border/15 px-3 text-xs font-black text-foreground/80"
           >
             Voltar ao mapa
@@ -553,7 +603,9 @@ export default function CityMap() {
                 <div className="min-w-0">
                   <p className="break-words text-sm font-black">{item.label}</p>
                   <p className="mt-1 text-xs leading-relaxed text-foreground/65">{item.detail}</p>
-                  {item.sourceLabel && <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Fonte: {item.sourceLabel}</p>}
+                  <DestinationReferenceInfo name={item.label} category={item.category}
+                    {...(resolveDestinationPoint(item.destination) ?? {})}
+                    sourceLabel={item.sourceLabel} sourceUrl={item.sourceUrl} />
                 </div>
               </div>
               <div className="mt-3">
@@ -576,12 +628,20 @@ export default function CityMap() {
           ) : (
             <div className="mt-3 rounded-2xl border border-border/15 bg-card p-4">
               <p role="status" className="text-sm font-semibold text-foreground">
-                Nenhum destino encontrado. Tente outro nome ou categoria.
+                {businessMode === "unnamed" ? "Nenhum registro sem nome para estes filtros." : "Nenhum destino encontrado. Tente outro nome ou categoria."}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-foreground/65">
                 Você pode voltar à visão geral ou procurar outro lugar sem perder sua posição no mapa.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
+                {coordinateMode !== "all" && allDestinations.length + allAtlasDestinations.length > 0 && (
+                  <button type="button" onClick={() => {
+                    setCoordinateMode("all");
+                    syncMapUrl(query, activeLayer, "all");
+                  }} className="min-h-11 rounded-xl border border-primary/25 bg-primary/[.06] px-4 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">
+                    {coordinateMode === "coordinates" ? "Incluir destinos sem coordenadas" : "Incluir destinos com coordenadas"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={resetMapFilters}
@@ -613,7 +673,7 @@ export default function CityMap() {
             <div>
               <p className="text-xs font-black uppercase tracking-[.15em] text-accent">Atlas da cidade</p>
               <h2 id="city-atlas-destinations" className="mt-1 text-lg font-black">
-                Mais lugares de Águas Lindas
+                {registryMode ? "Cadastros encontrados" : businessMode === "named" ? "Empresas identificadas" : "Mais lugares de Águas Lindas"}
               </h2>
             </div>
             <span className="rounded-full border border-border/10 px-2.5 py-1 text-xs font-black text-foreground/55">
@@ -646,23 +706,15 @@ export default function CityMap() {
                       <p className="break-words text-sm font-black">{item.name}</p>
                       <p className="mt-1 text-xs leading-relaxed text-foreground/60">{item.detail}</p>
                       {item.business && <details className="mt-2 break-words text-xs text-foreground/60"><summary className="min-h-8 cursor-pointer font-bold">Dados da empresa</summary><p>Razão social: {item.business.legalName}</p><p>CNAE: {item.business.cnae} · Porte: {item.business.size}</p><p>Abertura: {item.business.opened} · Situação informada em: {item.business.statusDate}</p><p>MEI: {item.business.mei} · Simples: {item.business.simples}</p><p>{item.business.nature}</p></details>}
-                      {item.coordinateLabel && typeof item.lat !== "number" && <p className="mt-1 text-xs text-warning">{item.coordinateLabel} · confirme o endereço antes de viajar</p>}
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{item.address}</p>}
-                      {item.verifiedAt && <p className="mt-1 text-[11px] text-muted-foreground">Registro verificado em: {item.verifiedAt}</p>}
-                      <p className="mt-2 break-words text-xs leading-relaxed text-foreground/60">
-                        {item.sourceUrl ? (
-                          <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{item.sourceLabel}</a>
-                        ) : item.sourceLabel}
-                      </p>
-                      {typeof item.lat === "number" && typeof item.lng === "number" && (
-                        <p className="mt-1 break-words text-xs text-foreground/60">
-                          {item.coordinateLabel || (item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas")}: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
-                        </p>
-                      )}
+                      <DestinationReferenceInfo {...item} coordinateKind={item.business && !hasBusinessName(item.name) ? undefined : item.coordinateKind} lat={item.business && !hasBusinessName(item.name) ? undefined : item.lat} lng={item.business && !hasBusinessName(item.name) ? undefined : item.lng} />
                     </div>
                   </div>
                   <div className="mt-3">
-                    {item.id.startsWith("atlas-bairro-") ? (
+                    {item.business && registryMode ? (
+                      <BusinessRegistryActions cnpj={item.business.cnpj}
+                        mapUrl={hasBusinessName(item.name) ? cityMapLayerUrl(item.business.cnpj, activeLayer, "all", selectedArea, "named") : undefined} />
+                    ) : item.id.startsWith("atlas-bairro-") ? (
                       <Link href={buildDestinationPlannerUrl(target ?? item.name)}
                         className="flex min-h-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-bold text-primary">
                         Usar nome como referência no planejador

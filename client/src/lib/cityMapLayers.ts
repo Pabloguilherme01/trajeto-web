@@ -1,5 +1,6 @@
 import { appUrl } from "./appUrl";
 import { readDestinationArea } from "./destinationAreas";
+import { readBusinessCatalogMode, type BusinessCatalogMode } from "./businessCatalogState";
 import type { CityAtlasLayer } from "./cityAtlas";
 import type { PublicServiceCategory } from "./publicServices";
 import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "./routeDestinationCategories";
@@ -27,6 +28,10 @@ export function readCityMapLayer(value: string | null): CityMapLayer {
   return value && allowedLayers.has(value as CityMapLayer) ? value as CityMapLayer : "todos";
 }
 
+export function readCityMapBusinessMode(value: string | null, layer: CityMapLayer): BusinessCatalogMode {
+  return cityMapNeedsBusinessCatalog(layer) ? readBusinessCatalogMode(value) : "all";
+}
+
 export function cityMapAtlasLayer(layer: CityMapLayer): "todos" | CityAtlasLayer {
   if (layer === "ruas" || layer === "bairros" || layer === "todos") return "todos";
   if (layer === "centro") return "referencia";
@@ -45,7 +50,7 @@ export function readCityMapCoordinateMode(value: string | null): CityMapCoordina
 }
 
 /** Shareable, Pages-aware filtered map URL. Never accepts or emits personal GPS. */
-export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesOnly: boolean | CityMapCoordinateMode = false, area = ""): string {
+export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesOnly: boolean | CityMapCoordinateMode = false, area = "", businesses: BusinessCatalogMode = "all"): string {
   const params = new URLSearchParams();
   if (query.trim()) params.set("q", query.trim());
   if (layer !== "todos") params.set("camada", layer);
@@ -53,6 +58,7 @@ export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesO
   if (coordinatesOnly === "missing") params.set("coordenadas", "0");
   const validArea = readDestinationArea(area);
   if (validArea) params.set("bairro", validArea);
+  if (businesses !== "all" && cityMapNeedsBusinessCatalog(layer)) params.set("empresas", businesses === "named" ? "nome" : businesses === "unnamed" ? "sem-nome" : "cnpj");
   const suffix = params.toString();
   return appUrl("/mapa") + (suffix ? "?" + suffix : "");
 }

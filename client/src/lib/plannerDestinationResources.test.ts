@@ -4,6 +4,29 @@ import { preparePlannerDestinationResources } from "./plannerDestinationResource
 import { isAguasLindasRoutePoint } from "./mapGeometry";
 import { isAmbiguousAtlasStreet } from "./cityAtlas";
 
+it("reuses catalog lists when only origin, travel mode or saved routes change", () => {
+  const first = preparePlannerDestinationResources("avenida", "todos", { origin: "UPA", mode: "driving" });
+  const second = preparePlannerDestinationResources("avenida", "todos", { origin: "Prefeitura", mode: "walking", savedRoutes: [] });
+  for (const key of ["all", "coordinates", "missing", "streets", "areas"] as const) {
+    expect(second.results[key]).toBe(first.results[key]);
+    expect(second.counts[key]).toBe(first.counts[key]);
+  }
+  const changed = preparePlannerDestinationResources("CRAS", "todos");
+  expect(changed.results.all).not.toEqual(first.results.all);
+});
+
+it("updates prepared availability for saved geometry and mode without reusing stale trip results", () => {
+  const destination = ALL_LOCAL_ROUTE_DESTINATIONS.find(item => item.label === "UPA")!.destination;
+  const first = preparePlannerDestinationResources("UPA", "saude", { origin: "Prefeitura", savedRoutes: [] });
+  const savedRoutes = [{ id: "prepared-upa", origin: "Prefeitura", destination, savedAt: "2026-10-12T10:00:00Z",
+    payload: { route: { mode: "driving", source: "offline-road", polyline: "encoded", distanceMeters: 5000, durationSeconds: 500 }, stops: [], anpReferences: [] } }];
+  const prepared = preparePlannerDestinationResources("UPA", "saude", { origin: "Prefeitura", savedRoutes, mode: "driving" });
+  expect(prepared.results.all).toBe(first.results.all);
+  expect(first.counts.prepared).toBe(0);
+  expect(prepared.results.prepared.map(item => item.destination)).toEqual([destination]);
+  expect(preparePlannerDestinationResources("UPA", "saude", { origin: "Prefeitura", savedRoutes, mode: "walking" }).counts.prepared).toBe(0);
+});
+
 it("offers sourced, distinct street references without changing the default destination list", () => {
   expect(getPlannerStreetReferences().length).toBeGreaterThanOrEqual(390);
   expect(new Set(getPlannerStreetReferences().map(item => item.destination)).size).toBe(getPlannerStreetReferences().length);

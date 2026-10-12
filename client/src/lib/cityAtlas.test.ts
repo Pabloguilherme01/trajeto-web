@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import * as catalogSearch from "./catalogSearch";
+import { ALL_LOCAL_ROUTE_DESTINATIONS } from "./localRoutePresets";
 import {
   buildCityAtlas,
   cityAtlasCounts,
@@ -9,6 +10,14 @@ import {
   resolveCityAtlasPoint,
   type CityAtlasSnapshot,
 } from "./cityAtlas";
+
+it("preserves the official source of service references in the base atlas", () => {
+  const service = ALL_LOCAL_ROUTE_DESTINATIONS.find(item => item.label === "CRAS II · Santa Lúcia")!;
+  expect(service.sourceUrl).toMatch(/^https:\/\//);
+  const reference = buildCityAtlas(null).find(item => item.id === "catalog-" + service.id)!;
+  expect(reference.sourceLabel).toBe(service.sourceLabel);
+  expect(reference.sourceUrl).toBe(service.sourceUrl);
+});
 
 it("uses prepared indexes on the first query without renormalizing records", () => {
   const items = buildCityAtlas(snapshot());

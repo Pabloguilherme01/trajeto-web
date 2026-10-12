@@ -222,7 +222,8 @@ const BASE_ITEMS: CityAtlasItem[] = ALL_LOCAL_ROUTE_DESTINATIONS.map(item => ({
   category: categoryForRoute(item),
   address: item.destination,
   destination: item.destination,
-  sourceLabel: "Catálogo local consolidado do Trajeto",
+  sourceLabel: item.sourceLabel ?? "Catálogo local consolidado do Trajeto",
+  sourceUrl: item.sourceUrl,
   keywords: [item.category],
 }));
 
