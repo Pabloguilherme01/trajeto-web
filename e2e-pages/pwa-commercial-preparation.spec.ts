@@ -20,5 +20,6 @@ test("Pages: fresh installation defers businesses until explicit complete prepar
   await expect(page.getByText("Catálogo de empresas disponível offline neste aparelho.")).toBeVisible();
   await context.setOffline(true);
   await page.goto("mapa");
+  await page.getByRole("button", { name: "Explorar empresas", exact: true }).click();
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
 });

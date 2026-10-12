@@ -28,6 +28,22 @@ afterEach(() => {
   mapSearch.value = "";
   catalogEnabled.values = [];
 });
+it("opens the general map without loading businesses until an explicit intent", () => {
+  render(<CityMap />);
+  expect(catalogEnabled.values).not.toContain(true);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "a" } });
+  expect(catalogEnabled.values).not.toContain(true);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "farmácia" } });
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+});
+
+it("keeps the complete company catalog reachable without typing a search", () => {
+  render(<CityMap />);
+  fireEvent.click(screen.getByRole("button", { name: "Explorar empresas" }));
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
+  expect(catalogEnabled.values.at(-1)).toBe(false);
+});
 it("explains the category, position and source of a map card", () => {
   mapSearch.value = "?q=CRAS";
   render(<CityMap />);
