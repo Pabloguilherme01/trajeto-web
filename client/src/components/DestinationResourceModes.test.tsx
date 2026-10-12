@@ -7,7 +7,7 @@ afterEach(cleanup);
 
 it("shows accessible previews and preserves zero-result modes while updating", () => {
   const onChange = vi.fn();
-  const props = { value: "all" as const, counts: { all: 10, coordinates: 1, missing: 9, streets: 0 }, onChange, streets: true };
+  const props = { value: "all" as const, counts: { all: 10, coordinates: 1, missing: 9, streets: 0, prepared: 0 }, onChange, streets: true };
   const { rerender } = render(<DestinationResourceModes {...props} />);
   const group = screen.getByRole("group", { name: "Recursos dos destinos" });
   const streets = within(group).getByRole("button", { name: "Ruas e avenidas" });
@@ -18,7 +18,8 @@ it("shows accessible previews and preserves zero-result modes while updating", (
   const coordinates = within(group).getByRole("button", { name: "Com coordenadas" });
   expect(within(coordinates).getByText("1 destino").id).toBe(coordinates.getAttribute("aria-describedby"));
   rerender(<DestinationResourceModes {...props} updating />);
-  expect(within(group).getAllByText("Atualizando")).toHaveLength(4);
+  expect(within(group).getAllByText("Atualizando")).toHaveLength(5);
+  expect(within(group).getByRole("button", { name: "Rota offline salva" })).toBeTruthy();
   expect(within(group).queryByText("10 destinos")).toBeNull();
 });
 
