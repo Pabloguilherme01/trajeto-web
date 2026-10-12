@@ -31,7 +31,7 @@ export default function DestinationReferenceInfo(item: Props) {
         <span className="rounded-lg border border-border px-2 py-1">{position}</span>
       </div>
       {item.sourceLabel && <p className="break-words">Fonte: {item.sourceUrl
-        ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={"Fonte de " + item.name} className="underline underline-offset-2">{item.sourceLabel}</a>
+        ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={"Fonte de " + item.name + ": " + item.sourceLabel} className="underline underline-offset-2">{item.sourceLabel}</a>
         : item.sourceLabel}</p>}
       {item.verifiedAt && <p>Registro verificado em: <time dateTime={item.verifiedAt}>{item.verifiedAt}</time></p>}
       {positioned && <p className="break-words">

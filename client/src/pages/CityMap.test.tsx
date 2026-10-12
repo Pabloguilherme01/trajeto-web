@@ -34,7 +34,7 @@ it("explains the category, position and source of a map card", () => {
   const card = screen.getByRole("group", { name: "Referência de CRAS II · Santa Lúcia" });
   expect(within(card).getByText("Serviços", { exact: true })).toBeTruthy();
   expect(within(card).getByText("Endereço sem coordenadas", { exact: true })).toBeTruthy();
-  expect(within(card).getByRole("link", { name: "Fonte de CRAS II · Santa Lúcia" }).getAttribute("href")).toMatch(/^https:\/\//);
+  expect(within(card).getByRole("link", { name: "Fonte de CRAS II · Santa Lúcia: Prefeitura de Águas Lindas" }).getAttribute("href")).toMatch(/^https:\/\//);
 });
 
 it("recovers results hidden by coordinates without clearing query, category or area", () => {

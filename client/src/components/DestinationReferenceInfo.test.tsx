@@ -10,6 +10,7 @@ it("distinguishes approximate street points from verified record dates", () => {
     coordinateKind="street-midpoint" sourceLabel="OpenStreetMap" sourceUrl="https://www.openstreetmap.org/copyright"
     verifiedAt="2026-10-02" coordinateVerifiedAt="2026-09-30" />);
   expect(screen.getByText("Centro aproximado da via", { exact: true })).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Fonte de Rua 1: OpenStreetMap" })).toBeTruthy();
   expect(screen.getByText(/Centro aproximado da via: -15.73723, -48.28041/)).toBeTruthy();
   expect(screen.getByText("2026-10-02").getAttribute("datetime")).toBe("2026-10-02");
   expect(screen.getByText("2026-09-30").getAttribute("datetime")).toBe("2026-09-30");
