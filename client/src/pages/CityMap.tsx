@@ -15,6 +15,7 @@ import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
 import DestinationAreaSelect from "@/components/DestinationAreaSelect";
+import DestinationReferenceInfo from "@/components/DestinationReferenceInfo";
 import { mentionsDestinationArea, readDestinationArea } from "@/lib/destinationAreas";
 import { createDestinationPointResolver } from "@/lib/destinationCoordinates";
 import { isAguasLindasRoutePoint } from "@/lib/mapGeometry";
@@ -536,7 +537,9 @@ export default function CityMap() {
                 <div className="min-w-0">
                   <p className="break-words text-sm font-black">{item.label}</p>
                   <p className="mt-1 text-xs leading-relaxed text-foreground/65">{item.detail}</p>
-                  {item.sourceLabel && <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Fonte: {item.sourceLabel}</p>}
+                  <DestinationReferenceInfo name={item.label} category={item.category}
+                    {...(resolveDestinationPoint(item.destination) ?? {})}
+                    sourceLabel={item.sourceLabel} sourceUrl={item.sourceUrl} />
                 </div>
               </div>
               <div className="mt-3">
@@ -565,6 +568,14 @@ export default function CityMap() {
                 Você pode voltar à visão geral ou procurar outro lugar sem perder sua posição no mapa.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
+                {coordinateMode !== "all" && allDestinations.length + allAtlasDestinations.length > 0 && (
+                  <button type="button" onClick={() => {
+                    setCoordinateMode("all");
+                    syncMapUrl(query, activeLayer, "all");
+                  }} className="min-h-11 rounded-xl border border-primary/25 bg-primary/[.06] px-4 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">
+                    {coordinateMode === "coordinates" ? "Incluir destinos sem coordenadas" : "Incluir destinos com coordenadas"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={resetMapFilters}
@@ -629,19 +640,8 @@ export default function CityMap() {
                       <p className="break-words text-sm font-black">{item.name}</p>
                       <p className="mt-1 text-xs leading-relaxed text-foreground/60">{item.detail}</p>
                       {item.business && <details className="mt-2 break-words text-xs text-foreground/60"><summary className="min-h-8 cursor-pointer font-bold">Dados da empresa</summary><p>Razão social: {item.business.legalName}</p><p>CNAE: {item.business.cnae} · Porte: {item.business.size}</p><p>Abertura: {item.business.opened} · Situação informada em: {item.business.statusDate}</p><p>MEI: {item.business.mei} · Simples: {item.business.simples}</p><p>{item.business.nature}</p></details>}
-                      {item.coordinateLabel && typeof item.lat !== "number" && <p className="mt-1 text-xs text-warning">{item.coordinateLabel} · confirme o endereço antes de viajar</p>}
                       {item.address && <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{item.address}</p>}
-                      {item.verifiedAt && <p className="mt-1 text-[11px] text-muted-foreground">Registro verificado em: {item.verifiedAt}</p>}
-                      <p className="mt-2 break-words text-xs leading-relaxed text-foreground/60">
-                        {item.sourceUrl ? (
-                          <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{item.sourceLabel}</a>
-                        ) : item.sourceLabel}
-                      </p>
-                      {typeof item.lat === "number" && typeof item.lng === "number" && (
-                        <p className="mt-1 break-words text-xs text-foreground/60">
-                          {item.coordinateLabel || (item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas")}: {item.lat.toFixed(5)}, {item.lng.toFixed(5)}
-                        </p>
-                      )}
+                      <DestinationReferenceInfo {...item} />
                     </div>
                   </div>
                   <div className="mt-3">

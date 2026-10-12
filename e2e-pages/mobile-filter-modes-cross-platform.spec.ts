@@ -116,6 +116,14 @@ test("Android/iOS: map coordinate filter preserves query and category after relo
   await page.getByRole("button", { name: "Limpar todos os filtros do mapa" }).click();
   await expect(page).toHaveURL(/\/mapa\/?$/);
   await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("");
+  await page.goto("mapa?q=CRAS&camada=servicos&bairro=bairro-jardim-brasilia&coordenadas=1", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Incluir destinos sem coordenadas" }).click();
+  await expect(page.getByText("CRAS I", { exact: true })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Referência de CRAS I", exact: true })).toContainText("Endereço sem coordenadas");
+  expect(new URL(page.url()).searchParams.get("q")).toBe("CRAS");
+  expect(new URL(page.url()).searchParams.get("camada")).toBe("servicos");
+  expect(new URL(page.url()).searchParams.get("bairro")).toBe("bairro-jardim-brasilia");
+  expect(new URL(page.url()).searchParams.has("coordenadas")).toBe(false);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   expect(errors).toEqual([]);
 });
