@@ -23,7 +23,7 @@ it("combines resource modes with text and category with count previews equal to 
   for (const query of ["", "avenida brasilia", "rua 1", "CRAS", "zzzx-inexistente"]) {
     for (const category of ["todos", "centro", "saude"] as const) {
       const prepared = preparePlannerDestinationResources(query, category);
-      for (const mode of ["all", "coordinates", "missing", "streets"] as const) {
+      for (const mode of ["all", "coordinates", "missing", "streets", "prepared"] as const) {
         expect(prepared.counts[mode]).toBe(prepared.results[mode].length);
       }
       expect(prepared.results.coordinates.every(item => prepared.results.all.includes(item))).toBe(true);
@@ -33,4 +33,15 @@ it("combines resource modes with text and category with count previews equal to 
       if (category === "saude") expect(prepared.results.streets).toEqual([]);
     }
   }
+});
+
+
+it("combines municipality-sourced bairro names with category and resource modes without inventing coordinates", () => {
+  const selected = preparePlannerDestinationResources("", "todos", { area: "bairro-jardim-brasilia" });
+  expect(selected.results.all.length).toBeGreaterThan(0);
+  expect(selected.results.all.every(item => /jardim brasília/i.test(item.label + " " + item.detail + " " + item.destination))).toBe(true);
+  expect(selected.counts.coordinates + selected.counts.missing).toBe(selected.counts.all);
+  const nonexistent = preparePlannerDestinationResources("nome inexistente", "saude", { area: "bairro-jardim-brasilia" });
+  expect(nonexistent.counts.all).toBe(0);
+  expect(nonexistent.counts.prepared).toBe(0);
 });

@@ -435,3 +435,20 @@ it("separates unpositioned company records and restores the missing-location dee
   fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
   expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/mapa$/), { replace: true });
 });
+
+it("restores municipal bairro filtering from public URL without assigning artificial map points", () => {
+  mapSearch.value = "?camada=servicos&bairro=bairro-jardim-brasilia";
+  render(<CityMap />);
+  const area = screen.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" }) as HTMLSelectElement;
+  expect(area.value).toBe("bairro-jardim-brasilia");
+  expect(screen.getByText(/Atlas municipal: versão declarada em 2026-10-02/)).toBeTruthy();
+  fireEvent.change(area, { target: { value: "bairro-jardim-querencia" } });
+  const url = new URL(String(navigate.mock.lastCall?.[0]), "https://example.org");
+  expect(url.searchParams.get("bairro")).toBe("bairro-jardim-querencia");
+  expect(url.searchParams.get("camada")).toBe("servicos");
+  expect(url.searchParams.has("lat")).toBe(false);
+  expect(url.searchParams.has("lng")).toBe(false);
+  fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
+  expect(area.value).toBe("");
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(new RegExp("/mapa$")), { replace: true });
+});

@@ -20,6 +20,7 @@ export type LocalRoutePreset = {
   category: RouteDestinationCategory;
   sourceLabel?: string;
   sourceUrl?: string;
+  verifiedAt?: string;
 };
 
 const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
@@ -141,6 +142,7 @@ const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service 
   id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name,
   category: service.category === "saude" ? "saude" : service.category === "educacao" ? "educacao" : service.category === "transito" ? "transporte" : "servicos",
   sourceLabel: service.sourceLabel, sourceUrl: service.sourceUrl,
+  verifiedAt: service.sourceCheckedAt ?? service.verifiedAt,
 }));
 function normalizeDestinationKey(value: string) {
   return value
@@ -241,7 +243,7 @@ export function getPlannerStreetReferences(): Array<LocalRoutePreset & { lat: nu
     seen.add(key);
     references.push({
       id: item.id, label: item.name, detail: item.detail, destination,
-      category: "centro", ...point, sourceLabel: source.label, sourceUrl: source.url,
+      category: "centro", ...point, sourceLabel: source.label, sourceUrl: source.url, verifiedAt: item.verifiedAt,
     });
   }
   return plannerStreetReferences = references;

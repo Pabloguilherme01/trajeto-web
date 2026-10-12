@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
+  it("retains valid municipal bairro filters in shareable URLs but ignores unknown IDs", () => {
+    const url = new URL(cityMapLayerUrl("CRAS", "servicos", "coordinates", "bairro-jardim-brasilia"), "https://example.org");
+    expect(url.searchParams.get("bairro")).toBe("bairro-jardim-brasilia");
+    expect(url.searchParams.get("coordenadas")).toBe("1");
+    expect(url.searchParams.get("q")).toBe("CRAS");
+    expect(url.searchParams.has("lat")).toBe(false);
+    expect(url.searchParams.has("lng")).toBe(false);
+    expect(cityMapLayerUrl("CRAS", "servicos", "all", "user-gps")).not.toContain("bairro=");
+  });
   it("shares public missing-coordinate refinement without leaking GPS and ignores unknown values", () => {
     expect(readCityMapCoordinateMode(null)).toBe("all");
     expect(readCityMapCoordinateMode("1")).toBe("coordinates");
