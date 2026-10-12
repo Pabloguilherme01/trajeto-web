@@ -4,6 +4,28 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: map can show unpositioned records, retain refinements and safely clear them at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("mapa?camada=compras&q=mercado", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: /^Refinar destinos/ }).click();
+  const modes = page.getByRole("group", { name: "Recursos dos destinos" });
+  const missing = modes.getByRole("button", { name: "Sem coordenadas", exact: true });
+  await missing.click();
+  await expect(missing).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/coordenadas=0/);
+  expect(new URL(page.url()).searchParams.get("camada")).toBe("compras");
+  expect(new URL(page.url()).searchParams.get("q")).toBe("mercado");
+  await expect(page.getByText(/não geram marcadores ou rotas locais garantidas/)).toBeVisible();
+  await page.reload();
+  await expect(missing).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Limpar todos os filtros do mapa" }).click();
+  await expect(page).toHaveURL(/\/mapa\/?$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: planner street references remain searchable offline and preserve the selected street name", async ({ page, context }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];

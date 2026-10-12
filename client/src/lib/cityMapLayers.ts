@@ -36,12 +36,20 @@ export function isReadyRouteLayer(layer: CityMapLayer): layer is RouteDestinatio
   return layer !== "ruas" && layer !== "seguranca" && layer !== "meio-ambiente";
 }
 
+export type CityMapCoordinateMode = "all" | "coordinates" | "missing";
+
+/** Interpret only known public catalog refinements; never treat GPS as a URL filter. */
+export function readCityMapCoordinateMode(value: string | null): CityMapCoordinateMode {
+  return value === "1" ? "coordinates" : value === "0" ? "missing" : "all";
+}
+
 /** Shareable, Pages-aware filtered map URL. Never accepts or emits personal GPS. */
-export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesOnly = false): string {
+export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesOnly: boolean | CityMapCoordinateMode = false): string {
   const params = new URLSearchParams();
   if (query.trim()) params.set("q", query.trim());
   if (layer !== "todos") params.set("camada", layer);
-  if (coordinatesOnly) params.set("coordenadas", "1");
+  if (coordinatesOnly === true || coordinatesOnly === "coordinates") params.set("coordenadas", "1");
+  if (coordinatesOnly === "missing") params.set("coordenadas", "0");
   const suffix = params.toString();
   return appUrl("/mapa") + (suffix ? "?" + suffix : "");
 }

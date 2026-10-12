@@ -3,7 +3,7 @@ import { filterCityAtlasStreets } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode, type CityMapCoordinateMode, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue, useRef, useCallback } from "react";
@@ -57,7 +57,7 @@ export default function CityMap() {
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
   const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
   const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
-  const [coordinatesOnly, setCoordinatesOnly] = useState(() => new URLSearchParams(rawSearch).get("coordenadas") === "1");
+  const [coordinateMode, setCoordinateMode] = useState<CityMapCoordinateMode>(() => readCityMapCoordinateMode(new URLSearchParams(rawSearch).get("coordenadas")));
   const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
   // Share the same no-page-scroll rail behavior as station Premium modes:
   // reveal deep-linked selections and keyboard-focused categories on mobile.
@@ -188,13 +188,13 @@ export default function CityMap() {
     setQuery(params.get("q") ?? "");
     setOnlyStreets(selected === "ruas");
     setCategory(selected === "ruas" ? "todos" : selected);
-    setCoordinatesOnly(params.get("coordenadas") === "1");
+    setCoordinateMode(readCityMapCoordinateMode(params.get("coordenadas")));
   }, [rawSearch]);
   const deferredQuery = useDeferredValue(query);
-  const syncMapUrl = (nextQuery: string, layer: CityMapLayer, positioned = coordinatesOnly) => {
+  const syncMapUrl = (nextQuery: string, layer: CityMapLayer, mode: CityMapCoordinateMode = coordinateMode) => {
     const previous = new URLSearchParams(rawSearch);
-    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")), previous.get("coordenadas") === "1");
-    const next = cityMapLayerUrl(nextQuery, layer, positioned);
+    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")), readCityMapCoordinateMode(previous.get("coordenadas")));
+    const next = cityMapLayerUrl(nextQuery, layer, mode);
     if (next !== current) navigate(next, { replace: true });
   };
   const applyCategory = (next: CityMapCategory) => {
@@ -209,8 +209,8 @@ export default function CityMap() {
     setQuery("");
     setCategory("todos");
     setOnlyStreets(false);
-    setCoordinatesOnly(false);
-    syncMapUrl("", "todos", false);
+    setCoordinateMode("all");
+    syncMapUrl("", "todos", "all");
   };
   const showOnlyStreets = () => {
     const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) ? "" : query;
@@ -226,12 +226,13 @@ export default function CityMap() {
     [deferredQuery, activeLayer]
   );
   const positionedDestinations = useMemo(() => allDestinations.filter(item => Boolean(resolveDestinationPoint(item.destination))), [allDestinations, resolveDestinationPoint]);
-  const destinations = coordinatesOnly ? positionedDestinations : allDestinations;
+  const destinations = coordinateMode === "coordinates" ? positionedDestinations : coordinateMode === "missing"
+    ? allDestinations.filter(item => !resolveDestinationPoint(item.destination)) : allDestinations;
   const [destinationLimit, setDestinationLimit] = useState(18);
-  useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets, coordinatesOnly]);
+  useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets, coordinateMode]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
   const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
-  useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets, coordinatesOnly]);
+  useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets, coordinateMode]);
   const atlasLayer = cityMapAtlasLayer(activeLayer);
   const allAtlasDestinations = useMemo(() => {
     const routeKeys = new Set(
@@ -253,7 +254,8 @@ export default function CityMap() {
     return [...publicAtlas, ...companies];
   }, [baseAtlas, businesses.items, atlasLayer, allDestinations, deferredQuery, onlyStreets, needsBusinessCatalog]);
   const positionedAtlasDestinations = useMemo(() => allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations]);
-  const atlasDestinations = coordinatesOnly ? positionedAtlasDestinations : allAtlasDestinations;
+  const atlasDestinations = coordinateMode === "coordinates" ? positionedAtlasDestinations : coordinateMode === "missing"
+    ? allAtlasDestinations.filter(item => !isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })) : allAtlasDestinations;
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
   const markerSelection = useMemo(() => {
@@ -272,7 +274,7 @@ export default function CityMap() {
         : [];
     });
     const stations =
-      !onlyStreets && (category === "todos" || category === "combustivel")
+      coordinateMode !== "missing" && !onlyStreets && (category === "todos" || category === "combustivel")
         ? filterAnpMapStations(groupedAnpStations, deferredQuery)
         : [];
     const selection = selectCityMapItems<CityMapCandidate>([publicPoints, atlasDestinations, stations]);
@@ -283,7 +285,7 @@ export default function CityMap() {
       coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
       lat: item.lat!, lng: item.lng!,
     })) };
-  }, [destinations, atlasDestinations, category, deferredQuery, groupedAnpStations, onlyStreets, resolveDestinationPoint]);
+  }, [destinations, atlasDestinations, category, coordinateMode, deferredQuery, groupedAnpStations, onlyStreets, resolveDestinationPoint]);
   const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
@@ -338,7 +340,7 @@ export default function CityMap() {
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p id="city-search-help" className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/60">Busca em serviços, empresas e vias cadastradas.</p>
-          {(query.trim() || activeLayer !== "todos" || coordinatesOnly) && (
+          {(query.trim() || activeLayer !== "todos" || coordinateMode !== "all") && (
             <button
               type="button"
               onClick={resetMapFilters}
@@ -395,21 +397,26 @@ export default function CityMap() {
           </button>
         ))}
       </div>
-      <details className="my-3" open={coordinatesOnly || undefined}>
+      <details className="my-3" open={coordinateMode !== "all" || undefined}>
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-xl border border-border/15 bg-card px-3 text-sm font-bold">
           <span>Refinar destinos</span>
-          <span className="ml-auto text-xs text-primary">{coordinatesOnly ? "Com coordenadas" : "Todos"}</span>
+          <span className="ml-auto text-xs text-primary">{coordinateMode === "coordinates" ? "Com coordenadas" : coordinateMode === "missing" ? "Sem coordenadas" : "Todos"}</span>
           <ChevronDown aria-hidden="true" className="size-4 shrink-0" />
         </summary>
-        <DestinationResourceModes value={coordinatesOnly ? "coordinates" : "all"}
-        counts={{ all: allDestinations.length + allAtlasDestinations.length, coordinates: positionedDestinations.length + positionedAtlasDestinations.length }}
+        <DestinationResourceModes value={coordinateMode}
+        counts={{ all: allDestinations.length + allAtlasDestinations.length,
+          coordinates: positionedDestinations.length + positionedAtlasDestinations.length,
+          missing: allDestinations.length + allAtlasDestinations.length - positionedDestinations.length - positionedAtlasDestinations.length }}
         updating={query !== deferredQuery || (needsBusinessCatalog && businesses.loading)}
         onChange={mode => {
-          const positioned = mode === "coordinates";
-          setCoordinatesOnly(positioned);
-          syncMapUrl(query, activeLayer, positioned);
+          if (mode === "streets") return;
+          setCoordinateMode(mode);
+          syncMapUrl(query, activeLayer, mode);
         }} />
       </details>
+      {coordinateMode === "missing" && <p role="status" className="mb-3 text-xs leading-relaxed text-foreground/70">
+        Destinos sem coordenadas continuam consultáveis por nome, mas não geram marcadores ou rotas locais garantidas. Confirme o endereço antes de sair.
+      </p>}
       <div className="mb-2 flex justify-end">
         <button
           type="button"

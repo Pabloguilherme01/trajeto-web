@@ -23,10 +23,13 @@ it("combines resource modes with text and category with count previews equal to 
   for (const query of ["", "avenida brasilia", "rua 1", "CRAS", "zzzx-inexistente"]) {
     for (const category of ["todos", "centro", "saude"] as const) {
       const prepared = preparePlannerDestinationResources(query, category);
-      for (const mode of ["all", "coordinates", "streets"] as const) {
+      for (const mode of ["all", "coordinates", "missing", "streets"] as const) {
         expect(prepared.counts[mode]).toBe(prepared.results[mode].length);
       }
       expect(prepared.results.coordinates.every(item => prepared.results.all.includes(item))).toBe(true);
+      expect(prepared.results.missing.every(item => prepared.results.all.includes(item))).toBe(true);
+      expect(prepared.counts.coordinates + prepared.counts.missing).toBe(prepared.counts.all);
+      expect(prepared.results.coordinates.every(item => !prepared.results.missing.includes(item))).toBe(true);
       if (category === "saude") expect(prepared.results.streets).toEqual([]);
     }
   }

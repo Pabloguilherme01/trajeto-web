@@ -1,17 +1,18 @@
 import React from "react";
-import { Layers3, MapPin, Signpost } from "lucide-react";
+import { Layers3, MapPin, MapPinOff, Signpost } from "lucide-react";
 import PremiumFilterModeOption from "./PremiumFilterModeOption";
 import type { PlannerDestinationResource } from "@/lib/plannerDestinationResources";
 
 const modes = [
   { value: "all", label: "Todos os destinos", detail: "Catálogo de lugares", icon: Layers3 },
   { value: "coordinates", label: "Com coordenadas", detail: "Posição cadastrada", icon: MapPin },
+  { value: "missing", label: "Sem coordenadas", detail: "Consulte pelo endereço", icon: MapPinOff },
   { value: "streets", label: "Ruas e avenidas", detail: "Referências aproximadas", icon: Signpost },
 ] as const;
 
 export default function DestinationResourceModes({ value, counts, onChange, streets = false, updating = false }: {
   value: PlannerDestinationResource;
-  counts: { all: number; coordinates: number; streets?: number };
+  counts: { all: number; coordinates: number; missing: number; streets?: number };
   onChange: (mode: PlannerDestinationResource) => void;
   streets?: boolean;
   updating?: boolean;
@@ -27,7 +28,7 @@ export default function DestinationResourceModes({ value, counts, onChange, stre
         ))}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Combine o modo com a busca e a categoria. Coordenadas indicam posição cadastrada; rotas por ruas offline precisam de preparação.
+        Combine o modo com a busca e a categoria. Destinos sem coordenadas não têm marcador e podem exigir pesquisa externa. Rotas por ruas offline precisam de preparação.
         {streets && " Ruas e avenidas ficam na categoria Cidade/Centro: o ponto central do trecho não identifica uma casa ou entrada."}
         {!streets && " As quantidades correspondem à lista de destinos; postos ANP também podem aparecer no mapa."}
       </p>
