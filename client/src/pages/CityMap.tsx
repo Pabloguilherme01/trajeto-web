@@ -15,7 +15,8 @@ import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
 import DestinationAreaSelect from "@/components/DestinationAreaSelect";
-import { mentionsDestinationArea, readDestinationArea } from "@/lib/destinationAreas";
+import ActiveRefinementChips from "@/components/ActiveRefinementChips";
+import { destinationAreaLabel, mentionsDestinationArea, readDestinationArea } from "@/lib/destinationAreas";
 import { createDestinationPointResolver } from "@/lib/destinationCoordinates";
 import { isAguasLindasRoutePoint } from "@/lib/mapGeometry";
 import { useFilterRail } from "@/hooks/useFilterRail";
@@ -422,6 +423,22 @@ export default function CityMap() {
           verificados para estes bairros; use o endereço completo para calcular um trajeto.
         </p>
       )}
+      <ActiveRefinementChips label="Filtros ativos do mapa" items={[
+        ...(query.trim() ? [{ id: "query", label: "Busca: " + query.trim(), onRemove: () => {
+          setQuery(""); syncMapUrl("", activeLayer);
+        } }] : []),
+        ...(activeLayer !== "todos" ? [{ id: "layer",
+          label: "Camada: " + (CITY_MAP_TABS.find(item => item.value === activeLayer)?.label ?? activeLayer),
+          onRemove: () => { setReferenceLayer(null); setCategory("todos"); syncMapUrl(query, "todos"); },
+        }] : []),
+        ...(selectedArea ? [{ id: "area", label: "Bairro: " + destinationAreaLabel(selectedArea),
+          onRemove: () => { setSelectedArea(""); syncMapUrl(query, activeLayer, coordinateMode, ""); },
+        }] : []),
+        ...(coordinateMode !== "all" ? [{ id: "coordinates",
+          label: coordinateMode === "coordinates" ? "Com coordenadas" : "Sem coordenadas",
+          onRemove: () => { setCoordinateMode("all"); syncMapUrl(query, activeLayer, "all"); },
+        }] : []),
+      ]} />
       <DestinationAreaSelect value={selectedArea} onChange={area => {
         const valid = readDestinationArea(area);
         setSelectedArea(valid);
