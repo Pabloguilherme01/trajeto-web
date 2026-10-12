@@ -4,6 +4,53 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: planner street references remain searchable offline and preserve the selected street name", async ({ page, context }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
+  const modes = page.getByRole("group", { name: "Recursos dos destinos" });
+  const streets = modes.getByRole("button", { name: "Ruas e avenidas", exact: true });
+  await expect(streets.getByText(/^39\d destinos$/)).toBeVisible();
+  await streets.click();
+  await expect(streets).toHaveAttribute("aria-pressed", "true");
+  const list = page.getByRole("region", { name: "Lista de destinos disponíveis" });
+  await expect(list.getByRole("button")).toHaveCount(24);
+  await context.setOffline(true);
+  const search = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  await search.fill("Avenida Brasília");
+  const choice = list.getByRole("button").filter({ has: page.getByText("Avenida Brasília", { exact: true }) }).first();
+  await expect(choice).toBeVisible();
+  await expect(choice).toContainText("referência aproximada");
+  await choice.click();
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue(/Avenida Brasília · referência no mapa \(-15\./);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
+test("Android/iOS: map coordinate filter preserves query and category after reload and clears in one action", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("mapa?camada=saude&q=UPA", { waitUntil: "domcontentloaded" });
+  await page.locator("summary").filter({ hasText: /^Refinar destinos/ }).click();
+  const modes = page.getByRole("group", { name: "Recursos dos destinos" });
+  const positioned = modes.getByRole("button", { name: "Com coordenadas", exact: true });
+  await positioned.click();
+  await expect(positioned).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/coordenadas=1/);
+  expect(new URL(page.url()).searchParams.get("q")).toBe("UPA");
+  expect(new URL(page.url()).searchParams.get("camada")).toBe("saude");
+  await page.reload();
+  await expect(positioned).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("UPA");
+  await page.getByRole("button", { name: "Limpar todos os filtros do mapa" }).click();
+  await expect(page).toHaveURL(/\/mapa\/?$/);
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: service mode previews match results, preserve refinements and deep links at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];

@@ -1,0 +1,36 @@
+import React from "react";
+import { Layers3, MapPin, Signpost } from "lucide-react";
+import PremiumFilterModeOption from "./PremiumFilterModeOption";
+import type { PlannerDestinationResource } from "@/lib/plannerDestinationResources";
+
+const modes = [
+  { value: "all", label: "Todos os destinos", detail: "Catálogo de lugares", icon: Layers3 },
+  { value: "coordinates", label: "Com coordenadas", detail: "Posição cadastrada", icon: MapPin },
+  { value: "streets", label: "Ruas e avenidas", detail: "Referências aproximadas", icon: Signpost },
+] as const;
+
+export default function DestinationResourceModes({ value, counts, onChange, streets = false, updating = false }: {
+  value: PlannerDestinationResource;
+  counts: { all: number; coordinates: number; streets?: number };
+  onChange: (mode: PlannerDestinationResource) => void;
+  streets?: boolean;
+  updating?: boolean;
+}) {
+  return (
+    <div className="my-3 min-w-0 rounded-2xl border border-primary/15 bg-primary/[.035] p-3">
+      <p className="text-xs font-black uppercase tracking-[.12em] text-primary">Escolha o tipo de destino</p>
+      <div role="group" aria-label="Recursos dos destinos" className="mt-2 grid min-w-0 grid-cols-2 gap-2">
+        {modes.filter(mode => streets || mode.value !== "streets").map(mode => (
+          <PremiumFilterModeOption key={mode.value} layout="grid" label={mode.label} ariaLabel={mode.label}
+            detail={mode.detail} icon={mode.icon} selected={value === mode.value} onSelect={() => onChange(mode.value)}
+            availability={updating ? "Atualizando" : `${counts[mode.value] ?? 0} ${(counts[mode.value] ?? 0) === 1 ? "destino" : "destinos"}`} />
+        ))}
+      </div>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Combine o modo com a busca e a categoria. Coordenadas indicam posição cadastrada; rotas por ruas offline precisam de preparação.
+        {streets && " Ruas e avenidas ficam na categoria Cidade/Centro: o ponto central do trecho não identifica uma casa ou entrada."}
+        {!streets && " As quantidades correspondem à lista de destinos; postos ANP também podem aparecer no mapa."}
+      </p>
+    </div>
+  );
+}

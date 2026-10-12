@@ -8,11 +8,14 @@ import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelated
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue, useRef, useCallback } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
+import { ChevronDown, Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import type { StationMapItem } from "@/components/StationMap";
 import CityMapSurface from "@/components/CityMapSurface";
 import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import DestinationResourceModes from "@/components/DestinationResourceModes";
+import { createDestinationPointResolver } from "@/lib/destinationCoordinates";
+import { isAguasLindasRoutePoint } from "@/lib/mapGeometry";
 import { useFilterRail } from "@/hooks/useFilterRail";
 import { CITY_MAP_QUICK_FILTERS, isQuickFilterValue, quickFilterCategory, quickFilterMatchesCategory } from "@/lib/quickFilterPresets";
 import { routePresetDestination, type UnifiedDestination } from "@/lib/unifiedDestination";
@@ -26,7 +29,6 @@ import {
 } from "@/lib/cityAtlas";
 import {
   LOCAL_GEOCODE_POINTS,
-  resolveLocalGeocodePoint,
 } from "@/lib/localGeocoding";
 import { getLocalRoutePresets } from "@/lib/localRoutePresets";
 import {
@@ -55,6 +57,7 @@ export default function CityMap() {
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
   const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
   const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
+  const [coordinatesOnly, setCoordinatesOnly] = useState(() => new URLSearchParams(rawSearch).get("coordenadas") === "1");
   const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
   // Share the same no-page-scroll rail behavior as station Premium modes:
   // reveal deep-linked selections and keyboard-focused categories on mobile.
@@ -185,12 +188,13 @@ export default function CityMap() {
     setQuery(params.get("q") ?? "");
     setOnlyStreets(selected === "ruas");
     setCategory(selected === "ruas" ? "todos" : selected);
+    setCoordinatesOnly(params.get("coordenadas") === "1");
   }, [rawSearch]);
   const deferredQuery = useDeferredValue(query);
-  const syncMapUrl = (nextQuery: string, layer: CityMapLayer) => {
+  const syncMapUrl = (nextQuery: string, layer: CityMapLayer, positioned = coordinatesOnly) => {
     const previous = new URLSearchParams(rawSearch);
-    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")));
-    const next = cityMapLayerUrl(nextQuery, layer);
+    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")), previous.get("coordenadas") === "1");
+    const next = cityMapLayerUrl(nextQuery, layer, positioned);
     if (next !== current) navigate(next, { replace: true });
   };
   const applyCategory = (next: CityMapCategory) => {
@@ -205,7 +209,8 @@ export default function CityMap() {
     setQuery("");
     setCategory("todos");
     setOnlyStreets(false);
-    syncMapUrl("", "todos");
+    setCoordinatesOnly(false);
+    syncMapUrl("", "todos", false);
   };
   const showOnlyStreets = () => {
     const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) ? "" : query;
@@ -215,19 +220,22 @@ export default function CityMap() {
     syncMapUrl(updatedQuery, "ruas");
   };
   const online = useOnlineStatus();
-  const destinations = useMemo(
+  const resolveDestinationPoint = useMemo(() => createDestinationPointResolver(atlasSnapshot), [atlasSnapshot]);
+  const allDestinations = useMemo(
     () => isReadyRouteLayer(activeLayer) ? getLocalRoutePresets(deferredQuery, activeLayer) : [],
     [deferredQuery, activeLayer]
   );
+  const positionedDestinations = useMemo(() => allDestinations.filter(item => Boolean(resolveDestinationPoint(item.destination))), [allDestinations, resolveDestinationPoint]);
+  const destinations = coordinatesOnly ? positionedDestinations : allDestinations;
   const [destinationLimit, setDestinationLimit] = useState(18);
-  useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets]);
+  useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets, coordinatesOnly]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
   const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
-  useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets]);
+  useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets, coordinatesOnly]);
   const atlasLayer = cityMapAtlasLayer(activeLayer);
-  const atlasDestinations = useMemo(() => {
+  const allAtlasDestinations = useMemo(() => {
     const routeKeys = new Set(
-      destinations.map(item => normalizeCatalogText(item.destination))
+      allDestinations.map(item => normalizeCatalogText(item.destination))
     );
     const publicAtlas = (onlyStreets
       ? filterCityAtlasStreets(baseAtlas, deferredQuery)
@@ -243,12 +251,14 @@ export default function CityMap() {
         )
       : businessesForMapLayer(businesses.items, atlasLayer);
     return [...publicAtlas, ...companies];
-  }, [baseAtlas, businesses.items, atlasLayer, destinations, deferredQuery, onlyStreets, needsBusinessCatalog]);
+  }, [baseAtlas, businesses.items, atlasLayer, allDestinations, deferredQuery, onlyStreets, needsBusinessCatalog]);
+  const positionedAtlasDestinations = useMemo(() => allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations]);
+  const atlasDestinations = coordinatesOnly ? positionedAtlasDestinations : allAtlasDestinations;
   const visibleAtlasDestinations =
     atlasDestinations.slice(0, visibleCount);
   const markerSelection = useMemo(() => {
     const publicPoints = destinations.flatMap(item => {
-      const point = resolveLocalGeocodePoint(item.destination);
+      const point = resolveDestinationPoint(item.destination);
       return point
         ? [
             {
@@ -273,7 +283,7 @@ export default function CityMap() {
       coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
       lat: item.lat!, lng: item.lng!,
     })) };
-  }, [destinations, atlasDestinations, category, deferredQuery, groupedAnpStations, onlyStreets]);
+  }, [destinations, atlasDestinations, category, deferredQuery, groupedAnpStations, onlyStreets, resolveDestinationPoint]);
   const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
@@ -328,7 +338,7 @@ export default function CityMap() {
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p id="city-search-help" className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/60">Busca em serviços, empresas e vias cadastradas.</p>
-          {(query.trim() || activeLayer !== "todos") && (
+          {(query.trim() || activeLayer !== "todos" || coordinatesOnly) && (
             <button
               type="button"
               onClick={resetMapFilters}
@@ -385,6 +395,21 @@ export default function CityMap() {
           </button>
         ))}
       </div>
+      <details className="my-3" open={coordinatesOnly || undefined}>
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-xl border border-border/15 bg-card px-3 text-sm font-bold">
+          <span>Refinar destinos</span>
+          <span className="ml-auto text-xs text-primary">{coordinatesOnly ? "Com coordenadas" : "Todos"}</span>
+          <ChevronDown aria-hidden="true" className="size-4 shrink-0" />
+        </summary>
+        <DestinationResourceModes value={coordinatesOnly ? "coordinates" : "all"}
+        counts={{ all: allDestinations.length + allAtlasDestinations.length, coordinates: positionedDestinations.length + positionedAtlasDestinations.length }}
+        updating={query !== deferredQuery || (needsBusinessCatalog && businesses.loading)}
+        onChange={mode => {
+          const positioned = mode === "coordinates";
+          setCoordinatesOnly(positioned);
+          syncMapUrl(query, activeLayer, positioned);
+        }} />
+      </details>
       <div className="mb-2 flex justify-end">
         <button
           type="button"
@@ -474,6 +499,7 @@ export default function CityMap() {
                 <div className="min-w-0">
                   <p className="break-words text-sm font-black">{item.label}</p>
                   <p className="mt-1 text-xs leading-relaxed text-foreground/65">{item.detail}</p>
+                  {item.sourceLabel && <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Fonte: {item.sourceLabel}</p>}
                 </div>
               </div>
               <div className="mt-3">

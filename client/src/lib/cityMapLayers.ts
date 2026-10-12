@@ -37,10 +37,11 @@ export function isReadyRouteLayer(layer: CityMapLayer): layer is RouteDestinatio
 }
 
 /** Shareable, Pages-aware filtered map URL. Never accepts or emits personal GPS. */
-export function cityMapLayerUrl(query: string, layer: CityMapLayer): string {
+export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesOnly = false): string {
   const params = new URLSearchParams();
   if (query.trim()) params.set("q", query.trim());
   if (layer !== "todos") params.set("camada", layer);
+  if (coordinatesOnly) params.set("coordenadas", "1");
   const suffix = params.toString();
   return appUrl("/mapa") + (suffix ? "?" + suffix : "");
 }

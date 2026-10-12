@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, publicServiceMapLayer, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer } from "./cityMapLayers";
 
 describe("city map layers shared by the atlas and navigation", () => {
+  it("keeps coordinate availability as a shareable public filter without adding GPS", () => {
+    const filtered = cityMapLayerUrl("CRAS", "servicos", true);
+    expect(filtered).toContain("coordenadas=1");
+    expect(filtered).toContain("q=CRAS");
+    expect(filtered).toContain("camada=servicos");
+    expect(cityMapLayerUrl("CRAS", "servicos", false)).not.toContain("coordenadas");
+  });
   it("exposes the sourced security and environment layers without changing preset categories", () => {
     expect(CITY_MAP_CATEGORIES.some(item => item.value === "seguranca")).toBe(true);
     expect(CITY_MAP_CATEGORIES.some(item => item.value === "meio-ambiente")).toBe(true);

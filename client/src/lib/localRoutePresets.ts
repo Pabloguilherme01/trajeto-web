@@ -18,6 +18,8 @@ export type LocalRoutePreset = {
   detail: string;
   destination: string;
   category: RouteDestinationCategory;
+  sourceLabel?: string;
+  sourceUrl?: string;
 };
 
 const CITY_ROUTE_PRESETS: LocalRoutePreset[] = [
@@ -136,7 +138,9 @@ const representedServices = new Set([
   "coralina", "cepi-juscelino", "pm-go-aguas-lindas",
 ]);
 const SUPPORT_DESTINATIONS: LocalRoutePreset[] = PUBLIC_SERVICES.filter(service => service.mapQuery && !representedServices.has(service.id)).map(service => ({
-  id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name, category: service.category === "educacao" ? "educacao" : "servicos",
+  id: service.id, label: service.name, detail: service.description, destination: service.mapQuery ?? service.address ?? service.name,
+  category: service.category === "saude" ? "saude" : service.category === "educacao" ? "educacao" : service.category === "transito" ? "transporte" : "servicos",
+  sourceLabel: service.sourceLabel, sourceUrl: service.sourceUrl,
 }));
 function normalizeDestinationKey(value: string) {
   return value
@@ -219,6 +223,30 @@ export const READY_ROUTE_STREET_POINTS = [...streetEndpointIds, ...extraStreetId
  * Preserve ambiguity: any duplicate normalized destination must stay null,
  * even if the two records happen to share the same coordinates.
  */
+// Explicit choices retain both the street name and its public midpoint.
+// Homonymous street names alone remain ambiguous in the routing resolver.
+let plannerStreetReferences: Array<LocalRoutePreset & { lat: number; lng: number }> | undefined;
+export function getPlannerStreetReferences(): Array<LocalRoutePreset & { lat: number; lng: number }> {
+  if (plannerStreetReferences) return plannerStreetReferences;
+  const sources = new Map(cityAtlasData.sources.map(source => [source.id, source]));
+  const seen = new Set<string>();
+  const references: Array<LocalRoutePreset & { lat: number; lng: number }> = [];
+  for (const item of cityAtlasData.items) {
+    const source = sources.get(item.sourceId);
+    const point = { lat: Number(item.lat), lng: Number(item.lng) };
+    if (item.coordinateKind !== "street-midpoint" || !source || !isAguasLindasRoutePoint(point)) continue;
+    const destination = `${item.name} · referência no mapa (${item.lat}, ${item.lng}), Águas Lindas de Goiás - GO`;
+    const key = normalizeCatalogText(destination);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    references.push({
+      id: item.id, label: item.name, detail: item.detail, destination,
+      category: "centro", ...point, sourceLabel: source.label, sourceUrl: source.url,
+    });
+  }
+  return plannerStreetReferences = references;
+}
+
 let readyRoutePointIndex: Map<string, { lat: number; lng: number } | null> | null = null;
 
 function readyRoutePointsByDestination() {
@@ -233,8 +261,16 @@ function readyRoutePointsByDestination() {
 }
 
 /** An explicitly selected, sourced reference; bare homonymous street names stay ambiguous. */
+let plannerStreetPointIndex: Map<string, { lat: number; lng: number }> | undefined;
 export function resolveReadyRouteStreetPoint(value: string) {
-  const point = readyRoutePointsByDestination().get(normalizeCatalogText(value));
+  const key = normalizeCatalogText(value);
+  let point = readyRoutePointsByDestination().get(key);
+  // Do not build 399 extra choices when an unrelated page or ordinary
+  // destination is resolved. Only an explicit named reference needs them.
+  if (!point && /refer[eê]ncia no mapa\s*\(/i.test(value)) {
+    plannerStreetPointIndex ??= new Map(getPlannerStreetReferences().map(item => [normalizeCatalogText(item.destination), { lat: item.lat, lng: item.lng }]));
+    point = plannerStreetPointIndex.get(key);
+  }
   // Return a fresh value, as the original linear resolver did, so callers
   // cannot accidentally mutate the cached reference for subsequent routes.
   return point ? { ...point } : null;
