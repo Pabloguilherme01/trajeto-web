@@ -4,6 +4,50 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: service mode previews match results, preserve refinements and deep links at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("servicos?q=cras&categoria=assistencia", { waitUntil: "domcontentloaded" });
+  const group = page.getByRole("group", { name: "Recursos disponíveis" });
+  const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
+  const all = group.getByRole("button", { name: "Ver tudo", exact: true });
+  const expectPreview = async (label: string) => {
+    const button = group.getByRole("button", { name: label, exact: true });
+    await expect(button.getByText(/^\d+ serviços?$/)).toBeVisible();
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(async () => {
+      const count = (await button.getByText(/^\d+ serviços?$/).innerText()).split(" ")[0];
+      return page.getByText(new RegExp(`^${count} serviços encontrados`)).count();
+    }).toBe(1);
+    await expect(search).toHaveValue("cras");
+    expect(new URL(page.url()).searchParams.get("categoria")).toBe("assistencia");
+  };
+  for (const label of ["Ligar ou WhatsApp", "Ir até o local", "Resolver online", "Ver tudo"]) {
+    await expectPreview(label);
+  }
+  // Saving changes preview membership only when the saved-only filter is active.
+  await page.getByRole("button", { name: /^Salvar serviço:/ }).first().click();
+  await page.locator("#service-filters summary").click();
+  await page.getByRole("button", { name: /^Serviços salvos/ }).click();
+  await expect(all.getByText("1 serviço", { exact: true })).toBeVisible();
+  for (const label of ["Resolver online", "Ligar ou WhatsApp", "Ver tudo"]) {
+    await expectPreview(label);
+    expect(new URL(page.url()).searchParams.get("salvos")).toBe("1");
+  }
+  await search.fill("zzzx-servico-inexistente-2026");
+  await expect(group.getByText("0 serviços", { exact: true })).toHaveCount(4);
+  await group.getByRole("button", { name: "Ir até o local" }).click();
+  await expect(search).toHaveValue("zzzx-servico-inexistente-2026");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  // The selected record remains visible even if unrelated filters exclude it.
+  await page.goto("servicos?servico=ligue-180&q=zzzx&categoria=educacao&recurso=rota&salvos=1", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#service-ligue-180")).toBeVisible();
+  await expect(group.getByText(/^\d+ serviços?$/)).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: mode previews match selection and keep search at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];
