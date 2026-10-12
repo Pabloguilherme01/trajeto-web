@@ -1,5 +1,5 @@
 import { businessesForMapLayer, searchBusinesses } from "@/lib/businessSearch";
-import { filterCityAtlasStreets } from "@/lib/cityAtlasSearch";
+import { filterCityAtlasStreets, filterCityAtlasAreas } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -50,6 +50,7 @@ import { getPreferredNavigationProvider, setPreferredNavigationProvider, type Na
 const CITY_MAP_TABS: ReadonlyArray<{ value: CityMapLayer; label: string }> = [
   ...CITY_MAP_CATEGORIES.slice(0, 1),
   { value: "ruas", label: "Ruas e avenidas" },
+  { value: "bairros", label: "Bairros e setores" },
   ...CITY_MAP_CATEGORIES.slice(1),
 ];
 
@@ -57,11 +58,15 @@ export default function CityMap() {
   const [, navigate] = useLocation();
   const rawSearch = useSearch();
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
-  const [onlyStreets, setOnlyStreets] = useState(() => initialLayer === "ruas");
-  const [category, setCategory] = useState<CityMapCategory>(() => initialLayer === "ruas" ? "todos" : initialLayer);
+  const [referenceLayer, setReferenceLayer] = useState<"ruas" | "bairros" | null>(() =>
+    initialLayer === "ruas" || initialLayer === "bairros" ? initialLayer : null
+  );
+  const [category, setCategory] = useState<CityMapCategory>(() =>
+    initialLayer === "ruas" || initialLayer === "bairros" ? "todos" : initialLayer
+  );
   const [coordinateMode, setCoordinateMode] = useState<CityMapCoordinateMode>(() => readCityMapCoordinateMode(new URLSearchParams(rawSearch).get("coordenadas")));
   const [selectedArea, setSelectedArea] = useState(() => readDestinationArea(new URLSearchParams(rawSearch).get("bairro")));
-  const activeLayer: CityMapLayer = onlyStreets ? "ruas" : category;
+  const activeLayer: CityMapLayer = referenceLayer ?? category;
   // Share the same no-page-scroll rail behavior as station Premium modes:
   // reveal deep-linked selections and keyboard-focused categories on mobile.
   const { railRef: categoryRailRef, onFocusCapture: onCategoryFocusCapture } =
@@ -72,7 +77,7 @@ export default function CityMap() {
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>
     cityMapNeedsAnp(initialLayer) ? getOfflineAnpSnapshot().rows : []
   );
-  const needsAnp = !onlyStreets && cityMapNeedsAnp(category);
+  const needsAnp = referenceLayer === null && cityMapNeedsAnp(category);
   const groupedAnpStations = useMemo(
     () => needsAnp ? cachedGroupAnpFuelRows(anpRows) : [],
     [needsAnp, anpRows]
@@ -189,8 +194,8 @@ export default function CityMap() {
     const params = new URLSearchParams(rawSearch);
     const selected = readCityMapLayer(params.get("camada"));
     setQuery(params.get("q") ?? "");
-    setOnlyStreets(selected === "ruas");
-    setCategory(selected === "ruas" ? "todos" : selected);
+    setReferenceLayer(selected === "ruas" || selected === "bairros" ? selected : null);
+    setCategory(selected === "ruas" || selected === "bairros" ? "todos" : selected);
     setCoordinateMode(readCityMapCoordinateMode(params.get("coordenadas")));
     setSelectedArea(readDestinationArea(params.get("bairro")));
   }, [rawSearch]);
@@ -204,7 +209,7 @@ export default function CityMap() {
   const applyCategory = (next: CityMapCategory) => {
     const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) &&
       !quickFilterMatchesCategory(query, next) ? "" : query;
-    setOnlyStreets(false);
+    setReferenceLayer(null);
     setCategory(next);
     setQuery(updatedQuery);
     syncMapUrl(updatedQuery, next);
@@ -212,17 +217,17 @@ export default function CityMap() {
   const resetMapFilters = () => {
     setQuery("");
     setCategory("todos");
-    setOnlyStreets(false);
+    setReferenceLayer(null);
     setCoordinateMode("all");
     setSelectedArea("");
     syncMapUrl("", "todos", "all", "");
   };
-  const showOnlyStreets = () => {
+  const showReferenceLayer = (layer: "ruas" | "bairros") => {
     const updatedQuery = isQuickFilterValue(query, CITY_MAP_QUICK_FILTERS) ? "" : query;
     setCategory("todos");
-    setOnlyStreets(true);
+    setReferenceLayer(layer);
     setQuery(updatedQuery);
-    syncMapUrl(updatedQuery, "ruas");
+    syncMapUrl(updatedQuery, layer);
   };
   const online = useOnlineStatus();
   const resolveDestinationPoint = useMemo(() => createDestinationPointResolver(atlasSnapshot), [atlasSnapshot]);
@@ -238,18 +243,20 @@ export default function CityMap() {
   const destinations = coordinateMode === "coordinates" ? positionedDestinations : coordinateMode === "missing"
     ? allDestinations.filter(item => !resolveDestinationPoint(item.destination)) : allDestinations;
   const [destinationLimit, setDestinationLimit] = useState(18);
-  useEffect(() => { setDestinationLimit(18); }, [query, category, onlyStreets, coordinateMode, selectedArea]);
+  useEffect(() => { setDestinationLimit(18); }, [query, category, referenceLayer, coordinateMode, selectedArea]);
   const displayedDestinations = destinations.slice(0, destinationLimit);
   const baseAtlas = useMemo(() => buildCityAtlas(atlasSnapshot), [atlasSnapshot]);
-  useEffect(() => { setVisibleCount(24); }, [query, category, onlyStreets, coordinateMode, selectedArea]);
+  useEffect(() => { setVisibleCount(24); }, [query, category, referenceLayer, coordinateMode, selectedArea]);
   const atlasLayer = cityMapAtlasLayer(activeLayer);
   const allAtlasDestinations = useMemo(() => {
     const routeKeys = new Set(
       categoryDestinations.map(item => normalizeCatalogText(item.destination))
     );
-    const publicAtlas = (onlyStreets
+    const publicAtlas = (referenceLayer === "ruas"
       ? filterCityAtlasStreets(baseAtlas, deferredQuery)
-      : filterCityAtlas(baseAtlas, deferredQuery, atlasLayer)).filter(item => {
+      : referenceLayer === "bairros"
+        ? filterCityAtlasAreas(baseAtlas, deferredQuery)
+        : filterCityAtlas(baseAtlas, deferredQuery, atlasLayer)).filter(item => {
       // Street mode is already restricted by the cross-category street index.
       const target = item.destination ?? item.address ?? "";
       const key = cachedDestinationKey(item);
@@ -262,7 +269,7 @@ export default function CityMap() {
       : businessesForMapLayer(businesses.items, atlasLayer);
     const combined = [...publicAtlas, ...companies];
     return selectedArea ? combined.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : combined;
-  }, [baseAtlas, businesses.items, atlasLayer, categoryDestinations, deferredQuery, onlyStreets, needsBusinessCatalog, selectedArea]);
+  }, [baseAtlas, businesses.items, atlasLayer, categoryDestinations, deferredQuery, referenceLayer, needsBusinessCatalog, selectedArea]);
   const positionedAtlasDestinations = useMemo(() => allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations]);
   const atlasDestinations = coordinateMode === "coordinates" ? positionedAtlasDestinations : coordinateMode === "missing"
     ? allAtlasDestinations.filter(item => !isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })) : allAtlasDestinations;
@@ -284,7 +291,7 @@ export default function CityMap() {
         : [];
     });
     const stations =
-      coordinateMode !== "missing" && !onlyStreets && (category === "todos" || category === "combustivel")
+      coordinateMode !== "missing" && referenceLayer === null && (category === "todos" || category === "combustivel")
         ? filterAnpMapStations(groupedAnpStations, deferredQuery).filter(item =>
             !selectedArea || mentionsDestinationArea(selectedArea, item.name, item.address))
         : [];
@@ -296,7 +303,7 @@ export default function CityMap() {
       coordinateKind: item.coordinateKind, coordinateLabel: item.coordinateLabel,
       lat: item.lat!, lng: item.lng!,
     })) };
-  }, [destinations, atlasDestinations, category, coordinateMode, deferredQuery, groupedAnpStations, onlyStreets, resolveDestinationPoint, selectedArea]);
+  }, [destinations, atlasDestinations, category, coordinateMode, deferredQuery, groupedAnpStations, referenceLayer, resolveDestinationPoint, selectedArea]);
   const markers = markerSelection.points;
   const plan = (destination: string) =>
     navigate(buildDestinationPlannerUrl(destination));
@@ -327,7 +334,7 @@ export default function CityMap() {
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
         Busque um destino e veja sua rota no planejador.
       </p>
-      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{onlyStreets ? "Camada de ruas · sem carregar o catálogo de empresas" : !needsBusinessCatalog ? "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
+      <p aria-live="polite" className="mt-3 break-words text-xs leading-relaxed text-foreground/60">{referenceLayer === "ruas" ? "Camada de ruas · sem carregar o catálogo de empresas" : referenceLayer === "bairros" ? "Bairros e setores do cadastro municipal · sem catálogo de empresas" : !needsBusinessCatalog ? "Esta camada usa dados locais · sem carregar o catálogo de empresas" : businesses.loading ? "Carregando catálogo de empresas…" : businesses.error ? "Não foi possível carregar as empresas. Os outros destinos continuam disponíveis." : businesses.items.length.toLocaleString("pt-BR") + " empresas do arquivo · catálogo local"}</p>
       {needsBusinessCatalog && businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 rounded-xl border border-border/15 px-3 text-xs">Tentar carregar empresas novamente</button>}
       <p className="mt-2 text-xs leading-relaxed text-foreground/65">Atlas municipal: versão declarada em {atlasSnapshot?.updatedAt ?? "data indisponível"}. As fontes e datas de cada registro podem ser diferentes.</p>
       <section className="mt-5" aria-labelledby="city-search-label">
@@ -371,9 +378,9 @@ export default function CityMap() {
         onPick={value => {
           const next = quickFilterCategory(value) ?? "todos";
           // A second tap removes the quick search without losing its category.
-          const updatedQuery = !onlyStreets && category === next &&
+          const updatedQuery = referenceLayer === null && category === next &&
             normalizeCatalogText(query) === normalizeCatalogText(value) ? "" : value;
-          setOnlyStreets(false);
+          setReferenceLayer(null);
           setQuery(updatedQuery);
           setCategory(next);
           syncMapUrl(updatedQuery, next);
@@ -395,11 +402,11 @@ export default function CityMap() {
             key={value}
             type="button"
             aria-pressed={activeLayer === value}
-            onClick={() => value === "ruas" ? showOnlyStreets() : applyCategory(value)}
+            onClick={() => value === "ruas" || value === "bairros" ? showReferenceLayer(value) : applyCategory(value)}
             className={
               "min-h-11 shrink-0 snap-start rounded-full border px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-ring " +
               (activeLayer === value
-                ? value === "ruas"
+                ? value === "ruas" || value === "bairros"
                   ? "border-warning bg-warning text-primary-foreground"
                   : "border-primary bg-primary text-primary-foreground"
                 : "border-border/15 bg-muted/5 text-foreground/80")
@@ -409,6 +416,12 @@ export default function CityMap() {
           </button>
         ))}
       </div>
+      {referenceLayer === "bairros" && (
+        <p className="mt-2 text-xs leading-relaxed text-foreground/70" role="status">
+          Estas são referências por nome citadas em documento municipal. Não há ponto de chegada, quadra ou entrada
+          verificados para estes bairros; use o endereço completo para calcular um trajeto.
+        </p>
+      )}
       <DestinationAreaSelect value={selectedArea} onChange={area => {
         const valid = readDestinationArea(area);
         setSelectedArea(valid);
@@ -426,7 +439,7 @@ export default function CityMap() {
           missing: allDestinations.length + allAtlasDestinations.length - positionedDestinations.length - positionedAtlasDestinations.length }}
         updating={query !== deferredQuery || (needsBusinessCatalog && businesses.loading)}
         onChange={mode => {
-          if (mode === "streets" || mode === "prepared") return;
+          if (mode === "streets" || mode === "areas" || mode === "prepared") return;
           setCoordinateMode(mode);
           syncMapUrl(query, activeLayer, mode);
         }} />
@@ -632,7 +645,12 @@ export default function CityMap() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <DestinationActions destination={unified} compact />
+                    {item.id.startsWith("atlas-bairro-") ? (
+                      <Link href={buildDestinationPlannerUrl(target ?? item.name)}
+                        className="flex min-h-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-bold text-primary">
+                        Usar nome como referência no planejador
+                      </Link>
+                    ) : <DestinationActions destination={unified} compact />}
                   </div>
                 </article>
               );

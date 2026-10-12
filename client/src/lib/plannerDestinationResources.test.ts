@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { ALL_LOCAL_ROUTE_DESTINATIONS, getPlannerStreetReferences, resolveReadyRouteStreetPoint } from "./localRoutePresets";
+import { ALL_LOCAL_ROUTE_DESTINATIONS, getPlannerStreetReferences, getPlannerAreaReferences, resolveReadyRouteStreetPoint } from "./localRoutePresets";
 import { preparePlannerDestinationResources } from "./plannerDestinationResources";
 import { isAguasLindasRoutePoint } from "./mapGeometry";
 import { isAmbiguousAtlasStreet } from "./cityAtlas";
@@ -23,7 +23,7 @@ it("combines resource modes with text and category with count previews equal to 
   for (const query of ["", "avenida brasilia", "rua 1", "CRAS", "zzzx-inexistente"]) {
     for (const category of ["todos", "centro", "saude"] as const) {
       const prepared = preparePlannerDestinationResources(query, category);
-      for (const mode of ["all", "coordinates", "missing", "streets", "prepared"] as const) {
+      for (const mode of ["all", "coordinates", "missing", "streets", "areas", "prepared"] as const) {
         expect(prepared.counts[mode]).toBe(prepared.results[mode].length);
       }
       expect(prepared.results.coordinates.every(item => prepared.results.all.includes(item))).toBe(true);
@@ -44,4 +44,22 @@ it("combines municipality-sourced bairro names with category and resource modes 
   const nonexistent = preparePlannerDestinationResources("nome inexistente", "saude", { area: "bairro-jardim-brasilia" });
   expect(nonexistent.counts.all).toBe(0);
   expect(nonexistent.counts.prepared).toBe(0);
+});
+
+it("offers sourced municipal bairros as textual references without converting them into map points", () => {
+  const references = getPlannerAreaReferences();
+  expect(references.length).toBe(68);
+  expect(new Set(references.map(item => item.id)).size).toBe(references.length);
+  expect(references.every(item => item.sourceUrl?.startsWith("https://") &&
+    item.sourceLabel?.includes("Prefeitura") && item.detail.includes("sem ponto"))).toBe(true);
+  const listed = preparePlannerDestinationResources("", "centro");
+  expect(listed.results.areas).toHaveLength(68);
+  expect(listed.counts.areas).toBe(68);
+  expect(listed.results.areas.find(item => item.label === "Jardim Brasília")?.destination).toContain("Jardim Brasília");
+  expect(preparePlannerDestinationResources("jardim brasilia", "centro").results.areas)
+    .toHaveLength(1);
+  expect(preparePlannerDestinationResources("jardim brasilia", "saude").results.areas).toHaveLength(0);
+  expect(preparePlannerDestinationResources("", "centro", { area: "bairro-jardim-brasilia" }).results.areas)
+    .toHaveLength(1);
+  expect(listed.results.areas.every(item => !resolveReadyRouteStreetPoint(item.destination))).toBe(true);
 });

@@ -249,6 +249,31 @@ export function getPlannerStreetReferences(): Array<LocalRoutePreset & { lat: nu
   return plannerStreetReferences = references;
 }
 
+/**
+ * Municipality-named bairros/setores are searchable textual references, not
+ * geocoded points. Keep this separate from the 399 mapped street midpoints.
+ */
+let plannerAreaReferences: LocalRoutePreset[] | undefined;
+export function getPlannerAreaReferences(): LocalRoutePreset[] {
+  if (plannerAreaReferences) return plannerAreaReferences;
+  const sourceById = new Map(cityAtlasData.sources.map(source => [source.id, source]));
+  return plannerAreaReferences = cityAtlasData.items.flatMap(item => {
+    if (!item.id.startsWith("bairro-") || item.sourceId !== "prefeitura-pmgirs") return [];
+    const source = sourceById.get(item.sourceId);
+    if (!source) return [];
+    return [{
+      id: item.id,
+      label: item.name,
+      detail: "Bairro ou setor citado em documento municipal · referência pelo nome, sem ponto de chegada verificado",
+      destination: item.destination || item.address || item.name + ", Águas Lindas de Goiás - GO",
+      category: "centro" as const,
+      sourceLabel: source.label,
+      sourceUrl: source.url,
+      verifiedAt: item.verifiedAt,
+    }];
+  });
+}
+
 let readyRoutePointIndex: Map<string, { lat: number; lng: number } | null> | null = null;
 
 function readyRoutePointsByDestination() {

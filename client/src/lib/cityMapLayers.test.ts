@@ -48,6 +48,12 @@ describe("city map layers shared by the atlas and navigation", () => {
 
   it("restores only supported layers and ignores untrusted or obsolete values", () => {
     expect(readCityMapLayer("ruas")).toBe("ruas");
+    expect(readCityMapLayer("bairros")).toBe("bairros");
+    expect(cityMapLayerUrl("jardim brasilia", "bairros")).toContain("camada=bairros");
+    expect(cityMapAtlasLayer("bairros")).toBe("todos");
+    expect(isReadyRouteLayer("bairros")).toBe(false);
+    expect(cityMapNeedsAnp("bairros")).toBe(false);
+    expect(cityMapNeedsBusinessCatalog("bairros")).toBe(false);
     expect(readCityMapLayer("seguranca")).toBe("seguranca");
     expect(readCityMapLayer("meio-ambiente")).toBe("meio-ambiente");
     expect(readCityMapLayer("centro")).toBe("centro");

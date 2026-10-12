@@ -9,6 +9,7 @@ const layerIndex = new WeakMap<CityAtlasItem[], Map<CityAtlasLayer, CityAtlasIte
 // Streets can span source categories; cache this cross-category selection
 // separately and never build a text index for non-street records on street-only searches.
 const streetIndex = new WeakMap<CityAtlasItem[], CityAtlasItem[]>();
+const municipalAreaIndex = new WeakMap<CityAtlasItem[], CityAtlasItem[]>();
 
 // Keep only the latest text filter per immutable candidate list. When a
 // keystroke only narrows the query, matching records must be a subset of the
@@ -92,4 +93,18 @@ export function filterCityAtlasStreets(items: CityAtlasItem[], query: string) {
     streetIndex.set(items, streets);
   }
   return matchAtlasText(streets, query);
+}
+
+/**
+ * Only municipal area records; unlike the broad Referências layer, excludes
+ * streets and unrelated centers. Index lazily by immutable snapshot identity.
+ */
+export function filterCityAtlasAreas(items: CityAtlasItem[], query: string) {
+  let areas = municipalAreaIndex.get(items);
+  if (!areas) {
+    areas = items.filter(item => item.id.startsWith("atlas-bairro-") &&
+      item.category === "referencia" && item.sourceUrl !== undefined);
+    municipalAreaIndex.set(items, areas);
+  }
+  return matchAtlasText(areas, query);
 }

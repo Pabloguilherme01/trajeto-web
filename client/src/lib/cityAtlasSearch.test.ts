@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterCityAtlas, filterCityAtlasStreets } from "./cityAtlasSearch";
+import { filterCityAtlas, filterCityAtlasStreets, filterCityAtlasAreas } from "./cityAtlasSearch";
 import { normalizeCatalogText } from "./catalogSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 
@@ -141,5 +141,27 @@ describe("incremental atlas search on low-end mobile", () => {
       .toEqual(previousFilter(updated, "avenida", "todos"));
     expect(filterCityAtlas(entries, "avenida", "todos"))
       .toEqual(previousFilter(entries, "avenida", "todos"));
+  });
+});
+
+describe("municipal bairro reference index", () => {
+  const mixed: CityAtlasItem[] = [
+    { id: "atlas-bairro-jardim-brasilia", name: "Jardim Brasília", category: "referencia", sourceLabel: "Prefeitura", sourceUrl: "https://example.org/prefeitura" },
+    { id: "atlas-bairro-jardim-perola", name: "Jardim Pérola", category: "referencia", sourceLabel: "Prefeitura", sourceUrl: "https://example.org/prefeitura" },
+    { id: "atlas-offline-road-1", name: "Jardim Brasília", category: "referencia", coordinateKind: "street-midpoint", sourceLabel: "OSM", sourceUrl: "https://example.org/osm" },
+    { id: "catalog-local", name: "Jardim Brasília", category: "referencia", sourceLabel: "Atalho local" },
+  ];
+  it("keeps only sourced nominal bairro records distinct from streets or centers", () => {
+    expect(filterCityAtlasAreas(mixed, "").map(item => item.id))
+      .toEqual(["atlas-bairro-jardim-brasilia", "atlas-bairro-jardim-perola"]);
+    expect(filterCityAtlasAreas(mixed, "jardim brasilia").map(item => item.id))
+      .toEqual(["atlas-bairro-jardim-brasilia"]);
+    expect(filterCityAtlasAreas(mixed, "inexistente")).toEqual([]);
+  });
+  it("does not expose cached selections for mutation or mix different snapshots", () => {
+    const snapshot = filterCityAtlasAreas(mixed, "");
+    snapshot.pop();
+    expect(filterCityAtlasAreas(mixed, "")).toHaveLength(2);
+    expect(filterCityAtlasAreas([mixed[1]], "")).toHaveLength(1);
   });
 });

@@ -1,13 +1,13 @@
 import { BUNDLED_CITY_ATLAS } from "./cityAtlas";
 import { createDestinationPointResolver } from "./destinationCoordinates";
-import { getLocalRoutePresets, getPlannerStreetReferences, type RouteDestinationCategoryFilter } from "./localRoutePresets";
+import { getLocalRoutePresets, getPlannerAreaReferences, getPlannerStreetReferences, type RouteDestinationCategoryFilter } from "./localRoutePresets";
 import { filterLocalRoutePresets } from "./localRouteSearch";
 import { mentionsDestinationArea } from "./destinationAreas";
 import { filterPreparedDestinations } from "./preparedDestinationRoutes";
 import type { OfflineRoute } from "./offlineStore";
 import type { PublicTravelMode } from "./publicRouting";
 
-export type PlannerDestinationResource = "all" | "coordinates" | "missing" | "streets" | "prepared";
+export type PlannerDestinationResource = "all" | "coordinates" | "missing" | "streets" | "areas" | "prepared";
 const resolvePoint = createDestinationPointResolver(BUNDLED_CITY_ATLAS);
 
 /** Lists and their previews share a single query; selecting a mode reuses them. */
@@ -29,7 +29,9 @@ export function preparePlannerDestinationResources(query = "", category: RouteDe
     missing,
     streets: filterLocalRoutePresets(getPlannerStreetReferences(), query, category).filter(item =>
       !area || mentionsDestinationArea(area, item.label, item.detail, item.destination)),
+    areas: filterLocalRoutePresets(getPlannerAreaReferences(), query, category).filter(item =>
+      !area || mentionsDestinationArea(area, item.label, item.destination)),
     prepared: filterPreparedDestinations(all, savedRoutes, origin, mode),
   };
-  return { results, counts: { all: all.length, coordinates: coordinates.length, missing: missing.length, streets: results.streets.length, prepared: results.prepared.length } };
+  return { results, counts: { all: all.length, coordinates: coordinates.length, missing: missing.length, streets: results.streets.length, areas: results.areas.length, prepared: results.prepared.length } };
 }

@@ -452,3 +452,21 @@ it("restores municipal bairro filtering from public URL without assigning artifi
   expect(area.value).toBe("");
   expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(new RegExp("/mapa$")), { replace: true });
 });
+
+it("opens a sourced bairros-only layer without businesses, ANP, GPS or invented points", () => {
+  mapSearch.value = "?camada=bairros";
+  const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline network"));
+  render(<CityMap />);
+  const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
+  expect(categories.getByRole("button", { name: "Bairros e setores" }).getAttribute("aria-pressed")).toBe("true");
+  expect(catalogEnabled.values.every(flag => flag === false)).toBe(true);
+  expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(false);
+  expect(screen.getByText("Jardim Brasília", { selector: "article p" })).toBeTruthy();
+  expect(screen.getByText(/não há ponto de chegada, quadra ou entrada/i)).toBeTruthy();
+  expect(screen.getAllByRole("link", { name: "Usar nome como referência no planejador" }).length).toBeGreaterThan(0);
+  const url = new URL(String(screen.getAllByRole("link", { name: "Usar nome como referência no planejador" })[0].getAttribute("href")), "https://example.org");
+  expect(url.searchParams.has("lat")).toBe(false);
+  expect(url.searchParams.has("lng")).toBe(false);
+  fireEvent.click(categories.getByRole("button", { name: "Ruas e avenidas" }));
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("camada=ruas"), { replace: true });
+});
