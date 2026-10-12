@@ -940,16 +940,22 @@ export default function Planner() {
                       {!destinationSearchUpdating && availableDestinations.length === 0 && <div className="rounded-xl bg-muted/[.025] p-4 text-xs text-muted-foreground">
                         <p>Nenhum destino corresponde ao filtro.</p>
                         <p className="mt-1">Tente outra categoria ou região.</p>
-                        {(destinationFilter.trim() || destinationCategory !== "todos" || destinationResource !== "all" || destinationArea) && (
-                          <button type="button" onClick={clearDestinationRefinements}
-                            className="mt-2 min-h-11 rounded-xl bg-primary px-3 font-bold text-primary-foreground">
-                            Ver todos os destinos
-                          </button>
-                        )}
-                        {destinationArea && <button type="button" onClick={() => setDestinationArea("")}
-                          className="mt-2 min-h-11 rounded-xl border border-border/25 px-3 font-bold text-primary">Ver todas as regiões</button>}
+
                       </div>}
                     </div>
+                    {!destinationSearchUpdating && availableDestinations.length === 0 &&
+                      (destinationFilter.trim() || destinationCategory !== "todos" || destinationResource !== "all" || destinationArea) && (
+                        <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Ações para recuperar destinos">
+                          <button type="button" onClick={clearDestinationRefinements}
+                            className="min-h-11 rounded-xl bg-primary px-3 text-xs font-bold text-primary-foreground">
+                            Ver todos os destinos
+                          </button>
+                          {destinationArea && <button type="button" onClick={() => setDestinationArea("")}
+                            className="min-h-11 rounded-xl border border-border/25 px-3 text-xs font-bold text-primary">
+                            Ver todas as regiões
+                          </button>}
+                        </div>
+                      )}
                     {!destinationSearchUpdating && availableDestinations.length > displayedDestinations.length && (
                       <button
                         type="button"
