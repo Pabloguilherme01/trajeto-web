@@ -26,6 +26,29 @@ test("Android/iOS: map can show unpositioned records, retain refinements and saf
   expect(errors).toEqual([]);
 });
 
+test("Android/iOS: municipal bairros remain scoped in map URL and planner offline mode stays honest at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("mapa?camada=servicos&bairro=bairro-jardim-brasilia", { waitUntil: "domcontentloaded" });
+  const area = page.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" });
+  await expect(area).toHaveValue("bairro-jardim-brasilia");
+  await area.selectOption("bairro-jardim-querencia");
+  await expect(page).toHaveURL(/bairro=bairro-jardim-querencia/);
+  expect(new URL(page.url()).searchParams.get("camada")).toBe("servicos");
+  expect(new URL(page.url()).searchParams.has("lat")).toBe(false);
+  await page.getByRole("button", { name: "Limpar todos os filtros do mapa" }).click();
+  await expect(page).toHaveURL(/\\/mapa\\/?$/);
+  await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
+  await page.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" }).selectOption("bairro-jardim-brasilia");
+  const saved = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: "Rota offline salva" });
+  await saved.click();
+  await expect(saved).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/Informe a origem para encontrar rotas/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: planner street references remain searchable offline and preserve the selected street name", async ({ page, context }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];
