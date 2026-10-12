@@ -2,6 +2,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import CityMap from "./CityMap";
+import { DESTINATION_AREAS } from "@/lib/destinationAreas";
 const navigate = vi.hoisted(() => vi.fn());
 const catalog = vi.hoisted(() => ({ items: [] as any[], loading: false, error: false, retry: vi.fn() }));
 const mapSearch = vi.hoisted(() => ({ value: "" }));
@@ -26,6 +27,30 @@ afterEach(() => {
   catalog.items = [];
   mapSearch.value = "";
   catalogEnabled.values = [];
+});
+it("explains the category, position and source of a map card", () => {
+  mapSearch.value = "?q=CRAS";
+  render(<CityMap />);
+  const card = screen.getByRole("group", { name: "Referência de CRAS II · Santa Lúcia" });
+  expect(within(card).getByText("Serviços", { exact: true })).toBeTruthy();
+  expect(within(card).getByText("Endereço sem coordenadas", { exact: true })).toBeTruthy();
+  expect(within(card).getByRole("link", { name: "Fonte de CRAS II · Santa Lúcia" }).getAttribute("href")).toMatch(/^https:\/\//);
+});
+
+it("recovers results hidden by coordinates without clearing query, category or area", () => {
+  const area = DESTINATION_AREAS.find(item => item.name === "Jardim Brasília")!.id;
+  mapSearch.value = "?q=CRAS&camada=servicos&coordenadas=1&bairro=" + area;
+  render(<CityMap />);
+  expect(screen.queryByText("CRAS I", { exact: true })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Incluir destinos sem coordenadas" }));
+  expect(screen.getByText("CRAS I", { exact: true })).toBeTruthy();
+  expect((screen.getByRole("textbox", { name: "Buscar destino no mapa" }) as HTMLInputElement).value).toBe("CRAS");
+  expect(screen.getByRole("button", { name: "Serviços" }).getAttribute("aria-pressed")).toBe("true");
+  const params = new URL(String(navigate.mock.calls.at(-1)?.[0]), "https://example.test").searchParams;
+  expect(params.get("q")).toBe("CRAS");
+  expect(params.get("camada")).toBe("servicos");
+  expect(params.get("bairro")).toBe(area);
+  expect(params.has("coordenadas")).toBe(false);
 });
 it("mounts initial stops in batches and still searches the full catalog", () => {
   render(<CityMap />);
