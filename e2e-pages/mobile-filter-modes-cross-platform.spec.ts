@@ -18,7 +18,8 @@ test("Android/iOS: compact planner catalog opens once and empty filters recover 
   const search = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
   await search.fill("zzzx-inexistente-2026");
   await expect(region.getByText("Nenhum destino corresponde ao filtro.")).toBeVisible();
-  await region.getByRole("button", { name: "Ver todos os destinos" }).click();
+  await expect(region.getByRole("button")).toHaveCount(0);
+  await page.getByRole("group", { name: "Ações para recuperar destinos" }).getByRole("button", { name: "Ver todos os destinos" }).click();
   await expect(search).toHaveValue("");
   await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Casa");
   await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Trabalho");
