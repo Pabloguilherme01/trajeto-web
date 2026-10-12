@@ -450,5 +450,5 @@ it("restores municipal bairro filtering from public URL without assigning artifi
   expect(url.searchParams.has("lng")).toBe(false);
   fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
   expect(area.value).toBe("");
-  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\\/mapa$/), { replace: true });
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(new RegExp("/mapa$")), { replace: true });
 });
